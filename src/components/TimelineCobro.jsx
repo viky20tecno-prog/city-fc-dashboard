@@ -5,7 +5,7 @@ const steps = [
     day: '25-28',
     label: 'Preventivo',
     icon: Bell,
-    color: 'bg-blue-500',
+    color: 'bg-[#4A9EFF]',
     msg: '"Tu cuota del próximo mes se acerca"',
     desc: 'Aviso amigable a todos los jugadores',
   },
@@ -13,7 +13,7 @@ const steps = [
     day: '1',
     label: 'Cobro Activo',
     icon: DollarSign,
-    color: 'bg-emerald-500',
+    color: 'bg-[#00D084]',
     msg: '"Tu cuota de [mes] ya está activa: $65.000"',
     desc: 'Se activa el cobro oficial',
   },
@@ -21,7 +21,7 @@ const steps = [
     day: '4',
     label: 'Recordatorio',
     icon: Clock,
-    color: 'bg-amber-500',
+    color: 'bg-[#F5A623]',
     msg: '"Quedan 3 días para pagar"',
     desc: 'Solo a quienes no han pagado',
   },
@@ -29,7 +29,7 @@ const steps = [
     day: '7',
     label: 'Vencimiento',
     icon: AlertTriangle,
-    color: 'bg-orange-500',
+    color: 'bg-[#F5A623]',
     msg: '"⚠️ HOY vence el plazo!"',
     desc: 'Último aviso antes de mora',
   },
@@ -37,7 +37,7 @@ const steps = [
     day: '8+',
     label: 'Mora',
     icon: XCircle,
-    color: 'bg-red-500',
+    color: 'bg-[#FF5E5E]',
     msg: '"Tu cuota está vencida"',
     desc: 'Se marca mora + alerta al presidente',
   },
@@ -47,11 +47,10 @@ export default function TimelineCobro() {
   const today = new Date().getDate();
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-6">Ciclo de Cobro Automático</h2>
+    <div className="bg-[#161B22] rounded-2xl border border-[#30363D] p-6">
+      <h2 className="text-lg font-semibold text-[#E6EDF3] mb-6">Ciclo de Cobro Automático</h2>
       <div className="relative">
-        {/* Connecting line */}
-        <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-gray-200"></div>
+        <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-[#30363D]"></div>
         
         <div className="space-y-6">
           {steps.map((step, i) => {
@@ -64,18 +63,18 @@ export default function TimelineCobro() {
               (step.day === '8+' && today >= 8 && today <= 24);
 
             return (
-              <div key={i} className={`relative flex items-start gap-4 ${isActive ? 'opacity-100' : 'opacity-60'}`}>
-                <div className={`relative z-10 w-12 h-12 rounded-xl ${step.color} flex items-center justify-center flex-shrink-0 ${isActive ? 'ring-4 ring-offset-2 ring-emerald-200' : ''}`}>
+              <div key={i} className={`relative flex items-start gap-4 ${isActive ? 'opacity-100' : 'opacity-50'}`}>
+                <div className={`relative z-10 w-12 h-12 rounded-xl ${step.color} flex items-center justify-center flex-shrink-0 ${isActive ? 'ring-4 ring-offset-2 ring-offset-[#161B22] ring-[#00D084]/30' : ''}`}>
                   <Icon className="w-5 h-5 text-white" />
                 </div>
                 <div className="pt-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-gray-900">Día {step.day}</span>
-                    <span className="text-sm text-gray-500">— {step.label}</span>
-                    {isActive && <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">HOY</span>}
+                    <span className="font-semibold text-[#E6EDF3]">Día {step.day}</span>
+                    <span className="text-sm text-[#8B949E]">— {step.label}</span>
+                    {isActive && <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[rgba(0,208,132,0.12)] text-[#00D084]">HOY</span>}
                   </div>
-                  <p className="text-sm text-gray-400 mt-0.5">{step.desc}</p>
-                  <p className="text-sm italic text-gray-500 mt-1 bg-gray-50 rounded-lg px-3 py-1.5 inline-block">{step.msg}</p>
+                  <p className="text-sm text-[#8B949E] mt-0.5">{step.desc}</p>
+                  <p className="text-sm italic text-[#8B949E] mt-1 bg-[#1E2530] rounded-lg px-3 py-1.5 inline-block border border-[#30363D]">{step.msg}</p>
                 </div>
               </div>
             );

@@ -17,6 +17,16 @@ export const SHEETS = {
 
 export const CUOTA_MENSUAL = 65000;
 
+// URL del Google Apps Script desplegado (manejar escrituras a Sheets)
+// Diego debe desplegar el script y pegar la URL aquí
+export const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL || '';
+
+export const ESTADOS_JUGADOR = {
+  PRUEBA: 'PRUEBA',
+  ACTIVO: 'ACTIVO',
+  INACTIVO: 'INACTIVO',
+};
+
 export const ESTADOS_PAGO = {
   PENDIENTE: 'PENDIENTE',
   ABONO_PARCIAL: 'ABONO PARCIAL',
@@ -26,9 +36,12 @@ export const ESTADOS_PAGO = {
 };
 
 export const ESTADO_COLORS = {
-  PAGADO: { bg: 'bg-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-  PENDIENTE: { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
-  'ABONO PARCIAL': { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' },
-  'POR VALIDAR': { bg: 'bg-purple-100', text: 'text-purple-700', dot: 'bg-purple-500' },
-  MORA: { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' },
+  PAGADO: { bg: 'bg-[rgba(0,208,132,0.12)]', text: 'text-[#00D084]', dot: 'bg-[#00D084]' },
+  PENDIENTE: { bg: 'bg-[rgba(245,166,35,0.12)]', text: 'text-[#F5A623]', dot: 'bg-[#F5A623]' },
+  'ABONO PARCIAL': { bg: 'bg-[rgba(74,158,255,0.12)]', text: 'text-[#4A9EFF]', dot: 'bg-[#4A9EFF]' },
+  'POR VALIDAR': { bg: 'bg-[rgba(192,120,255,0.12)]', text: 'text-[#C678FF]', dot: 'bg-[#C678FF]' },
+  MORA: { bg: 'bg-[rgba(255,94,94,0.12)]', text: 'text-[#FF5E5E]', dot: 'bg-[#FF5E5E]' },
+  PRUEBA: { bg: 'bg-[rgba(245,166,35,0.12)]', text: 'text-[#F5A623]', dot: 'bg-[#F5A623]' },
+  ACTIVO: { bg: 'bg-[rgba(0,208,132,0.12)]', text: 'text-[#00D084]', dot: 'bg-[#00D084]' },
+  INACTIVO: { bg: 'bg-[rgba(74,158,255,0.12)]', text: 'text-[#8B949E]', dot: 'bg-[#8B949E]' },
 };

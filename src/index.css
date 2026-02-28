@@ -1,1 +1,25 @@
 @import "tailwindcss";
+
+:root {
+  --bg-primary: #0D1117;
+  --bg-secondary: #161B22;
+  --bg-tertiary: #1E2530;
+  --border: #30363D;
+  --green: #00D084;
+  --blue: #4A9EFF;
+  --gold: #F5A623;
+  --red: #FF5E5E;
+  --purple: #C678FF;
+  --text-primary: #E6EDF3;
+  --text-muted: #8B949E;
+  --green-dim: rgba(0,208,132,0.12);
+  --blue-dim: rgba(74,158,255,0.12);
+  --gold-dim: rgba(245,166,35,0.12);
+  --red-dim: rgba(255,94,94,0.12);
+  --purple-dim: rgba(192,120,255,0.12);
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}

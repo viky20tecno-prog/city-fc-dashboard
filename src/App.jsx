@@ -52,7 +52,7 @@ export default function App() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <img
-                src="./assets/10894351.png"
+                src="/10894351.png"
                 alt="Logo"
                 className="w-9 h-9 rounded-xl object-contain"
               />

@@ -51,9 +51,11 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">⚽</span>
-              </div>
+              <img
+                src="/src/assets/10894351.png"
+                alt="Logo"
+                className="w-9 h-9 rounded-xl object-contain"
+              />
               <div>
                 <h1 className="text-lg font-bold text-gray-900">City FC</h1>
                 <p className="text-xs text-gray-400">Agente Contable</p>

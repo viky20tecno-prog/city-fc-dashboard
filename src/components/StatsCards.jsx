@@ -12,14 +12,14 @@ function StatCard({ icon: Icon, label, value, subtext, color }) {
   const c = colors[color] || colors.blue;
 
   return (
-    <div className="bg-[#161B22] rounded-2xl border border-[#30363D] p-6 hover:border-[#00D084]/30 transition-colors">
-      <div className="flex items-center justify-between">
-        <div>
+    <div className="bg-[#161B22] rounded-2xl border border-[#30363D] p-6 hover:border-[#00D084]/30 transition-colors overflow-hidden">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-[#8B949E]">{label}</p>
-          <p className="text-3xl font-bold text-[#E6EDF3] mt-1">{value}</p>
-          {subtext && <p className="text-sm text-[#8B949E] mt-1">{subtext}</p>}
+          <p className="text-2xl font-bold text-[#E6EDF3] mt-1 truncate">{value}</p>
+          {subtext && <p className="text-sm text-[#8B949E] mt-1 truncate">{subtext}</p>}
         </div>
-        <div className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center`}>
+        <div className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center flex-shrink-0`}>
           <Icon className={`w-6 h-6 ${c.icon}`} />
         </div>
       </div>

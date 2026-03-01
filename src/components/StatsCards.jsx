@@ -1,6 +1,6 @@
 import { Users, CheckCircle, AlertTriangle, XCircle, DollarSign, Clock } from 'lucide-react';
 
-function StatCard({ icon: Icon, label, value, subtext, color }) {
+function StatCard({ icon: Icon, label, value, subtext, color, wide }) {
   const colors = {
     green: { bg: 'bg-[rgba(0,208,132,0.12)]', icon: 'text-[#00D084]' },
     yellow: { bg: 'bg-[rgba(245,166,35,0.12)]', icon: 'text-[#F5A623]' },
@@ -12,7 +12,7 @@ function StatCard({ icon: Icon, label, value, subtext, color }) {
   const c = colors[color] || colors.blue;
 
   return (
-    <div className="bg-[#161B22] rounded-2xl border border-[#30363D] p-6 hover:border-[#00D084]/30 transition-colors overflow-hidden">
+    <div className={`bg-[#161B22] rounded-2xl border border-[#30363D] p-6 hover:border-[#00D084]/30 transition-colors overflow-hidden ${wide ? 'xl:col-span-2' : ''}`}>
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-[#8B949E]">{label}</p>
@@ -42,13 +42,13 @@ export default function StatsCards({ pagos, jugadores, morosos }) {
   const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
       <StatCard icon={Users} label="Jugadores" value={jugadores.length} subtext="Activos" color="blue" />
       <StatCard icon={CheckCircle} label="Al Día" value={pagados.length} subtext={`${jugadores.length ? Math.round((pagados.length / jugadores.length) * 100) : 0}%`} color="green" />
       <StatCard icon={Clock} label="Pendientes" value={pendientes.length} subtext="Por cobrar" color="yellow" />
       <StatCard icon={XCircle} label="En Mora" value={morosos.length} subtext={`${morosos.length} jugadores`} color="red" />
       <StatCard icon={AlertTriangle} label="Abonos" value={abonos.length} subtext="Parciales" color="purple" />
-      <StatCard icon={DollarSign} label="Recaudado" value={formatCOP(recaudado)} subtext={`de ${formatCOP(totalEsperado)}`} color="green" />
+      <StatCard icon={DollarSign} label="Recaudado" value={formatCOP(recaudado)} subtext={`de ${formatCOP(totalEsperado)}`} color="green" wide />
     </div>
   );
 }

@@ -1,19 +1,31 @@
 import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-export default function RecaudacionChart({ pagos }) {
+const MESES_ORDEN = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+export default function RecaudacionChart({ mensualidades }) {
   const data = useMemo(() => {
     const meses = {};
-    pagos.forEach(p => {
-      const mes = p.mes || 'Sin mes';
-      if (!meses[mes]) meses[mes] = { mes, pagado: 0, pendiente: 0, mora: 0 };
-      const monto = parseInt(p.monto) || 0;
-      if (p.estado === 'PAGADO') meses[mes].pagado += monto;
-      else if (p.estado === 'MORA') meses[mes].mora += monto;
-      else meses[mes].pendiente += monto;
+    MESES_ORDEN.forEach(m => {
+      meses[m] = { mes: m.substring(0, 3), pagado: 0, pendiente: 0 };
     });
-    return Object.values(meses);
-  }, [pagos]);
+
+    mensualidades.forEach(m => {
+      const mes = m.mes || '';
+      const mesCap = mes.charAt(0).toUpperCase() + mes.slice(1).toLowerCase();
+      if (!meses[mesCap]) return;
+      
+      const pagado = parseFloat(m.valor_pagado) || 0;
+      const pendiente = parseFloat(m.saldo_pendiente) || 0;
+      
+      meses[mesCap].pagado += pagado;
+      meses[mesCap].pendiente += pendiente;
+    });
+
+    // Solo mostrar hasta el mes actual + 1
+    const mesActual = new Date().getMonth(); // 0-indexed
+    return Object.values(meses).slice(0, mesActual + 2);
+  }, [mensualidades]);
 
   const formatCOP = (v) => `$${(v / 1000).toFixed(0)}k`;
 
@@ -43,7 +55,6 @@ export default function RecaudacionChart({ pagos }) {
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="pagado" name="Pagado" fill="#00D084" radius={[6, 6, 0, 0]} />
             <Bar dataKey="pendiente" name="Pendiente" fill="#F5A623" radius={[6, 6, 0, 0]} />
-            <Bar dataKey="mora" name="Mora" fill="#FF5E5E" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

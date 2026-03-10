@@ -4,9 +4,8 @@ import { fetchAllData } from '../services/sheets';
 export function useSheetData() {
   const [data, setData] = useState({
     jugadores: [],
-    pagos: [],
+    mensualidades: [],
     morosos: [],
-    dashboard: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

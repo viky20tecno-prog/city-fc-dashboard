@@ -16,7 +16,7 @@ const tabs = [
 ];
 
 export default function Dashboard() {
-  const { jugadores, pagos, morosos, loading, error, lastUpdated, refresh } = useSheetData();
+  const { jugadores, mensualidades, morosos, loading, error, lastUpdated, refresh } = useSheetData();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [refreshing, setRefreshing] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -33,8 +33,6 @@ export default function Dashboard() {
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
   };
-
-  const jugadoresPrueba = jugadores.filter(j => (j.estado || '').toUpperCase() === 'PRUEBA');
 
   if (error) {
     return (
@@ -105,18 +103,6 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Alerta jugadores en prueba */}
-      {jugadoresPrueba.length > 0 && (
-        <div className="bg-[rgba(245,166,35,0.08)] border-b border-[#30363D]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2">
-            <p className="text-sm text-[#F5A623]">
-              🆕 <strong>{jugadoresPrueba.length} jugador{jugadoresPrueba.length > 1 ? 'es' : ''} en PRUEBA</strong> — 
-              Ve a <button onClick={() => setActiveTab('jugadores')} className="underline font-medium hover:text-[#F5A623]/80">Jugadores</button> para activarlos.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Tab Nav */}
       <nav className="bg-[#161B22] border-b border-[#30363D]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -135,11 +121,6 @@ export default function Dashboard() {
                 >
                   <Icon className="w-4 h-4" />
                   {tab.label}
-                  {tab.id === 'jugadores' && jugadoresPrueba.length > 0 && (
-                    <span className="ml-1 px-1.5 py-0.5 bg-[#F5A623] text-[#0D1117] text-xs rounded-full font-bold">
-                      {jugadoresPrueba.length}
-                    </span>
-                  )}
                 </button>
               );
             })}
@@ -160,10 +141,10 @@ export default function Dashboard() {
           <div className="space-y-6">
             {activeTab === 'dashboard' && (
               <>
-                <StatsCards pagos={pagos} jugadores={jugadores} morosos={morosos} />
+                <StatsCards mensualidades={mensualidades} jugadores={jugadores} morosos={morosos} />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2">
-                    <RecaudacionChart pagos={pagos} />
+                    <RecaudacionChart mensualidades={mensualidades} />
                   </div>
                   <MorososList morosos={morosos} />
                 </div>
@@ -171,7 +152,7 @@ export default function Dashboard() {
             )}
             
             {activeTab === 'jugadores' && (
-              <JugadoresTable jugadores={jugadores} pagos={pagos} onRefresh={handleRefresh} />
+              <JugadoresTable jugadores={jugadores} mensualidades={mensualidades} onRefresh={handleRefresh} />
             )}
             
             {activeTab === 'cobro' && (

@@ -20,28 +20,44 @@ async function fetchSheet(sheetName) {
   });
 }
 
-export async function fetchJugadores() {
-  return fetchSheet(SHEETS.JUGADORES);
-}
-
-export async function fetchPagos() {
-  return fetchSheet(SHEETS.PAGOS);
-}
-
-export async function fetchMorosos() {
-  return fetchSheet(SHEETS.MOROSOS);
-}
-
-export async function fetchDashboard() {
-  return fetchSheet(SHEETS.DASHBOARD);
-}
-
 export async function fetchAllData() {
-  const [jugadores, pagos, morosos, dashboard] = await Promise.all([
-    fetchJugadores(),
-    fetchPagos(),
-    fetchMorosos(),
-    fetchDashboard(),
+  const [jugadores, mensualidades] = await Promise.all([
+    fetchSheet(SHEETS.JUGADORES),
+    fetchSheet(SHEETS.ESTADO_MENSUALIDADES),
   ]);
-  return { jugadores, pagos, morosos, dashboard };
+
+  // Calcular morosos: jugadores con al menos 1 mes en MORA o PENDIENTE vencido
+  const mesActual = new Date().getMonth() + 1;
+  
+  // Agrupar mensualidades por jugador
+  const porJugador = {};
+  mensualidades.forEach(m => {
+    const id = m.cedula || m.jugador_id;
+    if (!porJugador[id]) porJugador[id] = [];
+    porJugador[id].push(m);
+  });
+
+  // Morosos: jugadores con meses anteriores al actual que NO están AL_DIA
+  const morosos = [];
+  Object.entries(porJugador).forEach(([cedula, meses]) => {
+    const mesesVencidos = meses.filter(m => {
+      const numMes = parseInt(m.numero_mes) || 0;
+      const estado = (m.estado || '').toUpperCase();
+      return numMes < mesActual && numMes > 0 && estado !== 'AL_DIA';
+    });
+    
+    if (mesesVencidos.length > 0) {
+      const saldoTotal = mesesVencidos.reduce((sum, m) => sum + (parseFloat(m.saldo_pendiente) || 0), 0);
+      const jugador = jugadores.find(j => j.cedula === cedula);
+      morosos.push({
+        cedula,
+        nombre: jugador ? `${jugador['nombre(s)'] || jugador.nombre || ''} ${jugador['apellido(s)'] || jugador.apellidos || ''}`.trim() : (meses[0].nombre || cedula),
+        celular: jugador?.celular || '',
+        meses_mora: mesesVencidos.length,
+        saldo_total: saldoTotal,
+      });
+    }
+  });
+
+  return { jugadores, mensualidades, morosos };
 }

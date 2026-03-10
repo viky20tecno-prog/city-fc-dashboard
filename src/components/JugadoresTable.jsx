@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Search, ChevronUp, ChevronDown, UserCheck, Loader2 } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown } from 'lucide-react';
 import { ESTADO_COLORS } from '../config';
-import { activarJugador } from '../services/writeSheets';
 
 function EstadoBadge({ estado }) {
   const colors = ESTADO_COLORS[estado] || { bg: 'bg-[#1E2530]', text: 'text-[#8B949E]', dot: 'bg-[#8B949E]' };
@@ -13,43 +12,47 @@ function EstadoBadge({ estado }) {
   );
 }
 
-export default function JugadoresTable({ jugadores, pagos, onRefresh }) {
+export default function JugadoresTable({ jugadores, mensualidades, onRefresh }) {
   const [search, setSearch] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('TODOS');
   const [sortField, setSortField] = useState('nombre');
   const [sortDir, setSortDir] = useState('asc');
-  const [activando, setActivando] = useState(null);
+
+  const mesActual = new Date().getMonth() + 1;
 
   const jugadoresConPago = useMemo(() => {
     return jugadores.map(j => {
-      const pagosJugador = pagos.filter(p => p.cedula === j.cedula);
-      const ultimoPago = pagosJugador[pagosJugador.length - 1];
-      const estadoJugador = (j.estado || '').toUpperCase();
+      const mensJugador = mensualidades.filter(m => (m.cedula || m.jugador_id) === j.cedula);
+      const mesActualData = mensJugador.find(m => parseInt(m.numero_mes) === mesActual);
+      const estadoPago = mesActualData?.estado || 'SIN_DATOS';
+      const saldoPendiente = mensJugador.reduce((sum, m) => sum + (parseFloat(m.saldo_pendiente) || 0), 0);
+      const totalPagado = mensJugador.reduce((sum, m) => sum + (parseFloat(m.valor_pagado) || 0), 0);
+      const nombre = `${j['nombre(s)'] || j.nombre || ''} ${j['apellido(s)'] || j.apellidos || ''}`.trim();
+      
       return {
         ...j,
-        estadoJugador,
-        estadoPago: estadoJugador === 'PRUEBA' ? 'PRUEBA' : (ultimoPago?.estado || 'PENDIENTE'),
-        ultimoMonto: ultimoPago?.monto || '0',
-        ultimaFecha: ultimoPago?.fecha_pago || '-',
-        montoAcumulado: ultimoPago?.monto_acumulado || '0',
+        nombreCompleto: nombre,
+        estadoPago,
+        saldoPendiente,
+        totalPagado,
+        activo: (j.activo || '').toUpperCase() === 'SI',
       };
     });
-  }, [jugadores, pagos]);
+  }, [jugadores, mensualidades, mesActual]);
 
   const filtered = useMemo(() => {
     return jugadoresConPago
       .filter(j => {
         const matchSearch = search === '' || 
-          j.nombre?.toLowerCase().includes(search.toLowerCase()) ||
-          j.apellidos?.toLowerCase().includes(search.toLowerCase()) ||
+          j.nombreCompleto?.toLowerCase().includes(search.toLowerCase()) ||
           j.cedula?.includes(search);
         const matchEstado = filtroEstado === 'TODOS' || j.estadoPago === filtroEstado;
         return matchSearch && matchEstado;
       })
       .sort((a, b) => {
-        const aVal = a[sortField] || '';
-        const bVal = b[sortField] || '';
-        const cmp = aVal.localeCompare(bVal, 'es', { numeric: true });
+        const aVal = a[sortField] || a.nombreCompleto || '';
+        const bVal = b[sortField] || b.nombreCompleto || '';
+        const cmp = aVal.toString().localeCompare(bVal.toString(), 'es', { numeric: true });
         return sortDir === 'asc' ? cmp : -cmp;
       });
   }, [jugadoresConPago, search, filtroEstado, sortField, sortDir]);
@@ -64,25 +67,9 @@ export default function JugadoresTable({ jugadores, pagos, onRefresh }) {
     return sortDir === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />;
   };
 
-  const estados = ['TODOS', 'PAGADO', 'PENDIENTE', 'ABONO PARCIAL', 'MORA', 'POR VALIDAR', 'PRUEBA'];
+  const estados = ['TODOS', 'AL_DIA', 'PENDIENTE', 'PARCIAL', 'MORA'];
 
-  const handleActivar = async (cedula) => {
-    if (!confirm('¿Activar este jugador? Pasará de PRUEBA a ACTIVO y se le notificará por WhatsApp.')) return;
-    setActivando(cedula);
-    try {
-      const result = await activarJugador(cedula);
-      if (result.success) {
-        alert('✅ Jugador activado. Se enviará mensaje de bienvenida por WhatsApp.');
-        if (onRefresh) onRefresh();
-      } else {
-        alert('❌ Error: ' + (result.error || 'No se pudo activar'));
-      }
-    } catch (err) {
-      alert('❌ Error de conexión: ' + err.message);
-    } finally {
-      setActivando(null);
-    }
-  };
+  const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
 
   return (
     <div className="bg-[#161B22] rounded-2xl border border-[#30363D]">
@@ -118,21 +105,21 @@ export default function JugadoresTable({ jugadores, pagos, onRefresh }) {
           <thead>
             <tr className="border-b border-[#30363D]">
               {[
-                { key: 'nombre', label: 'Nombre' },
+                { key: 'nombreCompleto', label: 'Nombre' },
                 { key: 'cedula', label: 'Cédula' },
                 { key: 'celular', label: 'Celular' },
-                { key: 'estadoPago', label: 'Estado' },
-                { key: 'ultimaFecha', label: 'Último Pago' },
-                { key: 'acciones', label: 'Acciones' },
+                { key: 'estadoPago', label: 'Estado Mes' },
+                { key: 'totalPagado', label: 'Pagado' },
+                { key: 'saldoPendiente', label: 'Saldo Pend.' },
               ].map(col => (
                 <th
                   key={col.key}
-                  onClick={() => col.key !== 'acciones' && toggleSort(col.key)}
+                  onClick={() => toggleSort(col.key)}
                   className="text-left px-6 py-3 text-xs font-medium text-[#8B949E] uppercase tracking-wider cursor-pointer hover:text-[#E6EDF3] select-none"
                 >
                   <span className="inline-flex items-center gap-1">
                     {col.label}
-                    {col.key !== 'acciones' && <SortIcon field={col.key} />}
+                    <SortIcon field={col.key} />
                   </span>
                 </th>
               ))}
@@ -142,29 +129,14 @@ export default function JugadoresTable({ jugadores, pagos, onRefresh }) {
             {filtered.map((j, i) => (
               <tr key={j.cedula || i} className="hover:bg-[#1E2530]/50 transition-colors">
                 <td className="px-6 py-4">
-                  <div className="font-medium text-[#E6EDF3]">{j.nombre} {j.apellidos}</div>
-                  <div className="text-xs text-[#8B949E]">{j.email}</div>
+                  <div className="font-medium text-[#E6EDF3]">{j.nombreCompleto}</div>
+                  <div className="text-xs text-[#8B949E]">{j.activo ? '🟢 Activo' : '🔴 Inactivo'}</div>
                 </td>
                 <td className="px-6 py-4 text-sm text-[#8B949E] font-mono">{j.cedula}</td>
                 <td className="px-6 py-4 text-sm text-[#8B949E]">{j.celular}</td>
                 <td className="px-6 py-4"><EstadoBadge estado={j.estadoPago} /></td>
-                <td className="px-6 py-4 text-sm text-[#8B949E]">{j.ultimaFecha}</td>
-                <td className="px-6 py-4">
-                  {j.estadoJugador === 'PRUEBA' && (
-                    <button
-                      onClick={() => handleActivar(j.cedula)}
-                      disabled={activando === j.cedula}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#00D084] text-[#0D1117] rounded-lg text-xs font-medium hover:bg-[#00D084]/80 transition-colors disabled:opacity-50"
-                    >
-                      {activando === j.cedula ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <UserCheck className="w-3 h-3" />
-                      )}
-                      Activar
-                    </button>
-                  )}
-                </td>
+                <td className="px-6 py-4 text-sm text-[#00D084] font-medium">{formatCOP(j.totalPagado)}</td>
+                <td className="px-6 py-4 text-sm text-[#F5A623] font-medium">{formatCOP(j.saldoPendiente)}</td>
               </tr>
             ))}
           </tbody>

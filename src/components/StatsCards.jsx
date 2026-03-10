@@ -27,27 +27,32 @@ function StatCard({ icon: Icon, label, value, subtext, color, wide }) {
   );
 }
 
-export default function StatsCards({ pagos, jugadores, morosos }) {
-  const mesActual = new Date().toLocaleString('es-CO', { month: 'long' }).toLowerCase();
+export default function StatsCards({ mensualidades, jugadores, morosos }) {
+  const mesActual = new Date().getMonth() + 1;
   
-  const pagosDelMes = pagos.filter(p => p.mes?.toLowerCase() === mesActual || p.mes?.toLowerCase() === 'febrero');
-  const pagados = pagosDelMes.filter(p => p.estado === 'PAGADO');
-  const pendientes = pagosDelMes.filter(p => p.estado === 'PENDIENTE');
-  const enMora = pagosDelMes.filter(p => p.estado === 'MORA');
-  const abonos = pagosDelMes.filter(p => p.estado === 'ABONO PARCIAL');
+  // Filtrar solo mensualidades del mes actual
+  const pagosDelMes = mensualidades.filter(m => parseInt(m.numero_mes) === mesActual);
   
-  const recaudado = pagados.reduce((sum, p) => sum + (parseInt(p.monto) || 0), 0);
-  const totalEsperado = jugadores.length * 65000;
+  const alDia = pagosDelMes.filter(m => m.estado === 'AL_DIA');
+  const pendientes = pagosDelMes.filter(m => m.estado === 'PENDIENTE');
+  const parciales = pagosDelMes.filter(m => m.estado === 'PARCIAL');
+  
+  // Jugadores activos
+  const activos = jugadores.filter(j => (j.activo || '').toUpperCase() === 'SI');
+  
+  // Recaudado: suma de valor_pagado de TODOS los meses del año
+  const recaudado = mensualidades.reduce((sum, m) => sum + (parseFloat(m.valor_pagado) || 0), 0);
+  const totalEsperado = mensualidades.reduce((sum, m) => sum + (parseFloat(m.valor_oficial) || 0), 0);
 
   const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
-      <StatCard icon={Users} label="Jugadores" value={jugadores.length} subtext="Activos" color="blue" />
-      <StatCard icon={CheckCircle} label="Al Día" value={pagados.length} subtext={`${jugadores.length ? Math.round((pagados.length / jugadores.length) * 100) : 0}%`} color="green" />
+      <StatCard icon={Users} label="Jugadores" value={activos.length} subtext="Activos" color="blue" />
+      <StatCard icon={CheckCircle} label="Al Día" value={alDia.length} subtext={`${pagosDelMes.length ? Math.round((alDia.length / pagosDelMes.length) * 100) : 0}%`} color="green" />
       <StatCard icon={Clock} label="Pendientes" value={pendientes.length} subtext="Por cobrar" color="yellow" />
       <StatCard icon={XCircle} label="En Mora" value={morosos.length} subtext={`${morosos.length} jugadores`} color="red" />
-      <StatCard icon={AlertTriangle} label="Abonos" value={abonos.length} subtext="Parciales" color="purple" />
+      <StatCard icon={AlertTriangle} label="Parciales" value={parciales.length} subtext="Abonos" color="purple" />
       <StatCard icon={DollarSign} label="Recaudado" value={formatCOP(recaudado)} subtext={`de ${formatCOP(totalEsperado)}`} color="green" wide />
     </div>
   );

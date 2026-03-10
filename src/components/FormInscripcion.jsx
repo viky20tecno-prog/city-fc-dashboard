@@ -3,29 +3,49 @@ import { UserPlus, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { APPS_SCRIPT_URL } from '../config';
 
 const CAMPOS = [
-  { key: 'tipo_id', label: 'Tipo de documento', type: 'select', required: true, options: ['Cédula de Ciudadanía', 'Tarjeta de Identidad', 'Cédula de Extranjería', 'Pasaporte'] },
-  { key: 'cedula', label: 'Número de documento', type: 'text', placeholder: 'Ej: 1234567890', required: true },
-  { key: 'nombre', label: 'Nombre', type: 'text', placeholder: 'Ej: Santiago', required: true },
-  { key: 'apellidos', label: 'Apellidos', type: 'text', placeholder: 'Ej: García Salazar', required: true },
-  { key: 'celular', label: 'Celular (WhatsApp)', type: 'tel', placeholder: 'Ej: 3001234567', required: true },
-  { key: 'fecha_nacimiento', label: 'Fecha de nacimiento', type: 'date', required: true },
-  { key: 'municipio', label: 'Municipio', type: 'text', placeholder: 'Ej: Medellín', required: true },
-  { key: 'tipo_sangre', label: 'Tipo de sangre', type: 'select', required: true, options: ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'] },
-  { key: 'eps', label: 'EPS', type: 'text', placeholder: 'Ej: Sura, Nueva EPS, Sanitas...', required: true },
-  { key: 'estatura', label: 'Estatura (cm)', type: 'number', placeholder: 'Ej: 175', required: false },
-  { key: 'peso', label: 'Peso (kg)', type: 'number', placeholder: 'Ej: 72', required: false },
-  { key: 'direccion', label: 'Dirección', type: 'text', placeholder: 'Ej: Cra 45 #67-89', required: false },
-  { key: 'barrio', label: 'Barrio', type: 'text', placeholder: 'Ej: Laureles', required: false },
-  { key: 'email', label: 'Email', type: 'email', placeholder: 'Ej: correo@ejemplo.com', required: false },
-  { key: 'familiar_emergencia', label: 'Familiar de emergencia', type: 'text', placeholder: 'Nombre completo del familiar', required: true },
-  { key: 'celular_familiar', label: 'Celular del familiar', type: 'tel', placeholder: 'Ej: 3009876543', required: true },
-  { key: 'instagram', label: 'Instagram (opcional)', type: 'text', placeholder: 'Ej: @tucuenta', required: false },
+  // Datos personales
+  { key: 'tipo_id', label: 'Tipo de documento', type: 'select', required: true, section: 'personal', options: ['Cédula de Ciudadanía', 'Tarjeta de Identidad', 'Cédula de Extranjería', 'Pasaporte', 'NIT'] },
+  { key: 'cedula', label: 'Número de documento', type: 'text', placeholder: 'Ej: 1234567890', required: true, section: 'personal' },
+  { key: 'nombre', label: 'Nombre(s)', type: 'text', placeholder: 'Ej: Santiago', required: true, section: 'personal' },
+  { key: 'apellidos', label: 'Apellido(s)', type: 'text', placeholder: 'Ej: García Salazar', required: true, section: 'personal' },
+
+  // Contacto
+  { key: 'celular', label: 'Celular (WhatsApp)', type: 'tel', placeholder: 'Ej: 3001234567', required: true, section: 'contacto' },
+  { key: 'correo_electronico', label: 'Correo electrónico', type: 'email', placeholder: 'Ej: correo@ejemplo.com', required: true, section: 'contacto' },
+  { key: 'instagram', label: 'Instagram (opcional)', type: 'text', placeholder: 'Ej: @tucuenta', required: false, section: 'contacto' },
+
+  // Información médica y personal
+  { key: 'lugar_de_nacimiento', label: 'Lugar de nacimiento', type: 'text', placeholder: 'Ej: Bogotá', required: true, section: 'medica' },
+  { key: 'fecha_nacimiento', label: 'Fecha de nacimiento', type: 'date', required: true, section: 'medica' },
+  { key: 'tipo_sangre', label: 'Tipo de sangre', type: 'select', required: true, section: 'medica', options: ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'] },
+  { key: 'eps', label: 'EPS', type: 'text', placeholder: 'Ej: Sura, Nueva EPS, Sanitas...', required: true, section: 'medica' },
+  { key: 'estatura', label: 'Estatura (cm)', type: 'number', placeholder: 'Ej: 175', required: false, section: 'medica' },
+  { key: 'peso', label: 'Peso (kg)', type: 'number', placeholder: 'Ej: 72', required: false, section: 'medica' },
+
+  // Lugar de residencia
+  { key: 'direccion', label: 'Dirección', type: 'text', placeholder: 'Ej: Cra 45 #67-89', required: false, section: 'residencia' },
+  { key: 'municipio', label: 'Municipio', type: 'text', placeholder: 'Ej: Medellín', required: true, section: 'residencia' },
+  { key: 'barrio', label: 'Barrio', type: 'text', placeholder: 'Ej: Laureles', required: false, section: 'residencia' },
+
+  // Emergencia
+  { key: 'familiar_emergencia', label: 'Contacto en caso de emergencia', type: 'text', placeholder: 'Nombre completo', required: true, section: 'emergencia' },
+  { key: 'celular_contacto', label: 'Celular del contacto', type: 'tel', placeholder: 'Ej: 3009876543', required: true, section: 'emergencia' },
+];
+
+const SECCIONES = [
+  { id: 'personal', label: 'Datos personales', color: '#00D084' },
+  { id: 'contacto', label: 'Contacto', color: '#4A9EFF' },
+  { id: 'medica', label: 'Información médica y personal', color: '#F5A623' },
+  { id: 'residencia', label: 'Lugar de residencia', color: '#C678FF' },
+  { id: 'emergencia', label: 'Emergencia', color: '#FF5E5E' },
 ];
 
 export default function FormInscripcion() {
   const [form, setForm] = useState({});
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  // Honeypot — campo invisible para bots
+  const [honeypot, setHoneypot] = useState('');
 
   const handleChange = (key, value) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -36,6 +56,13 @@ export default function FormInscripcion() {
     setStatus('loading');
     setErrorMsg('');
 
+    // Honeypot check — si tiene valor, es un bot
+    if (honeypot) {
+      // Simular éxito para no alertar al bot
+      setTimeout(() => setStatus('success'), 1500);
+      return;
+    }
+
     // Validar campos obligatorios
     const faltantes = CAMPOS.filter(c => c.required && !form[c.key]?.toString().trim());
     if (faltantes.length > 0) {
@@ -44,9 +71,9 @@ export default function FormInscripcion() {
       return;
     }
 
-    if (!/^\d{7,10}$/.test(form.cedula.trim())) {
+    if (!/^\d{7,15}$/.test(form.cedula.trim())) {
       setStatus('error');
-      setErrorMsg('El número de documento debe tener entre 7 y 10 dígitos.');
+      setErrorMsg('El número de documento debe tener entre 7 y 15 dígitos.');
       return;
     }
 
@@ -56,9 +83,9 @@ export default function FormInscripcion() {
       return;
     }
 
-    if (form.celular_familiar && !/^\d{10}$/.test(form.celular_familiar.trim())) {
+    if (form.celular_contacto && !/^\d{10}$/.test(form.celular_contacto.trim())) {
       setStatus('error');
-      setErrorMsg('El celular del familiar debe tener 10 dígitos.');
+      setErrorMsg('El celular del contacto debe tener 10 dígitos.');
       return;
     }
 
@@ -69,7 +96,8 @@ export default function FormInscripcion() {
         body: JSON.stringify({
           action: 'inscribir',
           ...form,
-          estado: 'PRUEBA',
+          activo: 'SI',
+          tipo_descuento: 'NA',
           fecha_inscripcion: new Date().toISOString().split('T')[0],
         }),
       });
@@ -102,12 +130,12 @@ export default function FormInscripcion() {
           <div className="bg-[rgba(0,208,132,0.08)] rounded-2xl p-4 mt-6 text-left border border-[#00D084]/20">
             <p className="text-sm text-[#00D084] font-medium mb-2">🎯 ¿Qué sigue?</p>
             <ul className="text-sm text-[#E6EDF3] space-y-1">
-              <li>✅ Tienes <strong>2 entrenamientos de cortesía</strong></li>
-              <li>⚽ Asiste a los entrenos y conoce al equipo</li>
-              <li>💪 Si decides quedarte, el presidente te activará y arranca tu mensualidad</li>
+              <li>✅ Tu registro ha sido procesado correctamente</li>
+              <li>📱 Recibirás un mensaje de bienvenida por WhatsApp</li>
+              <li>⚽ ¡Ya eres parte del equipo!</li>
             </ul>
           </div>
-          <p className="text-xs text-[#8B949E] mt-6">Te contactaremos por WhatsApp con los detalles</p>
+          <p className="text-xs text-[#8B949E] mt-6">Te contactaremos por WhatsApp con los detalles de tu primer pago</p>
         </div>
       </div>
     );
@@ -127,49 +155,30 @@ export default function FormInscripcion() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Sección: Datos personales */}
-          <div className="border-b border-[#30363D] pb-2 mb-2">
-            <p className="text-xs font-semibold text-[#00D084] uppercase tracking-wider">Datos personales</p>
+          {/* Honeypot — invisible para humanos */}
+          <div style={{ position: 'absolute', left: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }} aria-hidden="true" tabIndex={-1}>
+            <label htmlFor="website_url">No llenar este campo</label>
+            <input
+              type="text"
+              id="website_url"
+              name="website_url"
+              value={honeypot}
+              onChange={e => setHoneypot(e.target.value)}
+              autoComplete="off"
+            />
           </div>
 
-          {CAMPOS.slice(0, 4).map(campo => (
-            <FormField key={campo.key} campo={campo} form={form} onChange={handleChange} />
-          ))}
-
-          {/* Sección: Contacto */}
-          <div className="border-b border-[#30363D] pb-2 mb-2 pt-4">
-            <p className="text-xs font-semibold text-[#4A9EFF] uppercase tracking-wider">Contacto</p>
-          </div>
-
-          {CAMPOS.slice(4, 5).map(campo => (
-            <FormField key={campo.key} campo={campo} form={form} onChange={handleChange} />
-          ))}
-
-          {/* Sección: Información médica */}
-          <div className="border-b border-[#30363D] pb-2 mb-2 pt-4">
-            <p className="text-xs font-semibold text-[#F5A623] uppercase tracking-wider">Información médica y personal</p>
-          </div>
-
-          {CAMPOS.slice(5, 11).map(campo => (
-            <FormField key={campo.key} campo={campo} form={form} onChange={handleChange} />
-          ))}
-
-          {/* Sección: Ubicación */}
-          <div className="border-b border-[#30363D] pb-2 mb-2 pt-4">
-            <p className="text-xs font-semibold text-[#C678FF] uppercase tracking-wider">Ubicación</p>
-          </div>
-
-          {CAMPOS.slice(11, 13).map(campo => (
-            <FormField key={campo.key} campo={campo} form={form} onChange={handleChange} />
-          ))}
-
-          {/* Sección: Contacto adicional */}
-          <div className="border-b border-[#30363D] pb-2 mb-2 pt-4">
-            <p className="text-xs font-semibold text-[#FF5E5E] uppercase tracking-wider">Emergencia y redes</p>
-          </div>
-
-          {CAMPOS.slice(13).map(campo => (
-            <FormField key={campo.key} campo={campo} form={form} onChange={handleChange} />
+          {SECCIONES.map(seccion => (
+            <div key={seccion.id}>
+              <div className="border-b border-[#30363D] pb-2 mb-2 pt-4 first:pt-0">
+                <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: seccion.color }}>
+                  {seccion.label}
+                </p>
+              </div>
+              {CAMPOS.filter(c => c.section === seccion.id).map(campo => (
+                <FormField key={campo.key} campo={campo} form={form} onChange={handleChange} />
+              ))}
+            </div>
           ))}
 
           {/* Error */}
@@ -202,7 +211,7 @@ export default function FormInscripcion() {
 
         {/* Footer */}
         <p className="text-center text-xs text-[#8B949E] mt-6">
-          Al inscribirte recibes 2 entrenamientos de cortesía 🎉
+          Al inscribirte serás parte oficial del club ⚽
         </p>
       </div>
     </div>
@@ -212,7 +221,7 @@ export default function FormInscripcion() {
 function FormField({ campo, form, onChange }) {
   if (campo.type === 'select') {
     return (
-      <div>
+      <div className="mt-3">
         <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
           {campo.label} {campo.required && <span className="text-[#FF5E5E]">*</span>}
         </label>
@@ -232,7 +241,7 @@ function FormField({ campo, form, onChange }) {
   }
 
   return (
-    <div>
+    <div className="mt-3">
       <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
         {campo.label} {campo.required && <span className="text-[#FF5E5E]">*</span>}
       </label>

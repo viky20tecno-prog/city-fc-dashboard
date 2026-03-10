@@ -35,7 +35,7 @@ const CAMPOS = [
 const SECCIONES = [
   { id: 'personal', label: 'Datos personales', color: '#00D084' },
   { id: 'contacto', label: 'Contacto', color: '#4A9EFF' },
-  { id: 'medica', label: 'Información médica y personal', color: '#F5A623' },
+  { id: 'medica', label: 'Datos adicionales', color: '#F5A623' },
   { id: 'residencia', label: 'Lugar de residencia', color: '#C678FF' },
   { id: 'emergencia', label: 'Emergencia', color: '#FF5E5E' },
 ];

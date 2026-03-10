@@ -36,6 +36,7 @@ export default function StatsCards({ mensualidades, jugadores, morosos }) {
   const alDia = pagosDelMes.filter(m => m.estado === 'AL_DIA');
   const pendientes = pagosDelMes.filter(m => m.estado === 'PENDIENTE');
   const parciales = pagosDelMes.filter(m => m.estado === 'PARCIAL');
+  const enMora = pagosDelMes.filter(m => m.estado === 'MORA');
   
   // Jugadores activos
   const activos = jugadores.filter(j => (j.activo || '').toUpperCase() === 'SI');
@@ -51,7 +52,7 @@ export default function StatsCards({ mensualidades, jugadores, morosos }) {
       <StatCard icon={Users} label="Jugadores" value={activos.length} subtext="Activos" color="blue" />
       <StatCard icon={CheckCircle} label="Al Día" value={alDia.length} subtext={`${pagosDelMes.length ? Math.round((alDia.length / pagosDelMes.length) * 100) : 0}%`} color="green" />
       <StatCard icon={Clock} label="Pendientes" value={pendientes.length} subtext="Por cobrar" color="yellow" />
-      <StatCard icon={XCircle} label="En Mora" value={morosos.length} subtext={`${morosos.length} jugadores`} color="red" />
+      <StatCard icon={XCircle} label="En Mora" value={enMora.length + morosos.length} subtext={`${enMora.length + morosos.length} jugadores`} color="red" />
       <StatCard icon={AlertTriangle} label="Parciales" value={parciales.length} subtext="Abonos" color="purple" />
       <StatCard icon={DollarSign} label="Recaudado" value={formatCOP(recaudado)} subtext={`de ${formatCOP(totalEsperado)}`} color="green" wide />
     </div>

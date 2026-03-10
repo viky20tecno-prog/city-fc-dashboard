@@ -37,13 +37,17 @@ export async function fetchAllData() {
     porJugador[id].push(m);
   });
 
-  // Morosos: jugadores con meses anteriores al actual que NO están AL_DIA
+  // Morosos: jugadores con meses vencidos O con estado MORA en cualquier mes
   const morosos = [];
   Object.entries(porJugador).forEach(([cedula, meses]) => {
     const mesesVencidos = meses.filter(m => {
       const numMes = parseInt(m.numero_mes) || 0;
       const estado = (m.estado || '').toUpperCase();
-      return numMes < mesActual && numMes > 0 && estado !== 'AL_DIA';
+      // Meses anteriores no pagados O cualquier mes en MORA
+      return numMes > 0 && (
+        (numMes < mesActual && estado !== 'AL_DIA') ||
+        estado === 'MORA'
+      );
     });
     
     if (mesesVencidos.length > 0) {

@@ -28,8 +28,8 @@ const CAMPOS = [
   { key: 'barrio', label: 'Barrio', type: 'text', placeholder: 'Ej: Laureles', required: false, section: 'residencia' },
 
   // Emergencia
-  { key: 'familiar_emergencia', label: 'Contacto en caso de emergencia', type: 'text', placeholder: 'Nombre completo', required: true, section: 'emergencia' },
-  { key: 'celular_contacto', label: 'Celular del contacto', type: 'tel', placeholder: 'Ej: 3009876543', required: true, section: 'emergencia' },
+  { key: 'familiar_emergencia', label: 'Contacto en caso de emergencia (familiar)', type: 'text', placeholder: 'Nombre de un familiar o acudiente', required: true, section: 'emergencia' },
+  { key: 'celular_contacto', label: 'Celular del contacto de emergencia', type: 'tel', placeholder: 'Número diferente al tuyo', required: true, section: 'emergencia' },
 ];
 
 const SECCIONES = [
@@ -86,6 +86,12 @@ export default function FormInscripcion() {
     if (form.celular_contacto && !/^\d{10}$/.test(form.celular_contacto.trim())) {
       setStatus('error');
       setErrorMsg('El celular del contacto debe tener 10 dígitos.');
+      return;
+    }
+
+    if (form.celular_contacto && form.celular && form.celular_contacto.trim() === form.celular.trim()) {
+      setStatus('error');
+      setErrorMsg('El celular de emergencia debe ser diferente al tuyo. Ingresa el número de un familiar o persona de confianza.');
       return;
     }
 

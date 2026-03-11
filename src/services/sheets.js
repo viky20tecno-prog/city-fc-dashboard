@@ -21,12 +21,14 @@ async function fetchSheet(sheetName) {
 }
 
 export async function fetchAllData() {
-  const [jugadores, mensualidades] = await Promise.all([
+  const [jugadores, mensualidades, uniformes, torneos, registroPagos] = await Promise.all([
     fetchSheet(SHEETS.JUGADORES),
     fetchSheet(SHEETS.ESTADO_MENSUALIDADES),
+    fetchSheet(SHEETS.ESTADO_UNIFORMES).catch(() => []),
+    fetchSheet(SHEETS.ESTADO_TORNEOS).catch(() => []),
+    fetchSheet(SHEETS.REGISTRO_PAGOS).catch(() => []),
   ]);
 
-  // Calcular morosos: jugadores con al menos 1 mes en MORA o PENDIENTE vencido
   const mesActual = new Date().getMonth() + 1;
   
   // Agrupar mensualidades por jugador
@@ -37,13 +39,12 @@ export async function fetchAllData() {
     porJugador[id].push(m);
   });
 
-  // Morosos: jugadores con meses vencidos O con estado MORA en cualquier mes
+  // Morosos
   const morosos = [];
   Object.entries(porJugador).forEach(([cedula, meses]) => {
     const mesesVencidos = meses.filter(m => {
       const numMes = parseInt(m.numero_mes) || 0;
       const estado = (m.estado || '').toUpperCase();
-      // Meses anteriores no pagados O cualquier mes en MORA
       return numMes > 0 && (
         (numMes < mesActual && estado !== 'AL_DIA') ||
         estado === 'MORA'
@@ -63,5 +64,5 @@ export async function fetchAllData() {
     }
   });
 
-  return { jugadores, mensualidades, morosos };
+  return { jugadores, mensualidades, uniformes, torneos, registroPagos, morosos };
 }

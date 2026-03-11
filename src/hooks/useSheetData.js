@@ -5,6 +5,9 @@ export function useSheetData() {
   const [data, setData] = useState({
     jugadores: [],
     mensualidades: [],
+    uniformes: [],
+    torneos: [],
+    registroPagos: [],
     morosos: [],
   });
   const [loading, setLoading] = useState(true);

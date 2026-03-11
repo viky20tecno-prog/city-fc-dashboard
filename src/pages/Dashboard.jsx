@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check } from 'lucide-react';
+import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, DollarSign } from 'lucide-react';
 import { useSheetData } from '../hooks/useSheetData';
 import StatsCards from '../components/StatsCards';
 import JugadoresTable from '../components/JugadoresTable';
@@ -7,6 +7,7 @@ import RecaudacionChart from '../components/RecaudacionChart';
 import MorososList from '../components/MorososList';
 import TimelineCobro from '../components/TimelineCobro';
 import WhatsAppMockup from '../components/WhatsAppMockup';
+import PagoManualModal from '../components/PagoManualModal';
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -16,10 +17,11 @@ const tabs = [
 ];
 
 export default function Dashboard() {
-  const { jugadores, mensualidades, morosos, loading, error, lastUpdated, refresh } = useSheetData();
+  const { jugadores, mensualidades, uniformes, torneos, registroPagos, morosos, loading, error, lastUpdated, refresh } = useSheetData();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [refreshing, setRefreshing] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [showPagoManual, setShowPagoManual] = useState(false);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -67,6 +69,14 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowPagoManual(true)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#F5A623]/30 bg-[rgba(245,166,35,0.12)] text-sm text-[#F5A623] hover:bg-[rgba(245,166,35,0.2)] transition-colors"
+              >
+                <DollarSign className="w-4 h-4" />
+                <span className="hidden sm:inline">Pago Manual</span>
+              </button>
+
               <button
                 onClick={handleCopyLink}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#00D084]/30 bg-[rgba(0,208,132,0.12)] text-sm text-[#00D084] hover:bg-[rgba(0,208,132,0.2)] transition-colors"
@@ -152,7 +162,7 @@ export default function Dashboard() {
             )}
             
             {activeTab === 'jugadores' && (
-              <JugadoresTable jugadores={jugadores} mensualidades={mensualidades} onRefresh={handleRefresh} />
+              <JugadoresTable jugadores={jugadores} mensualidades={mensualidades} uniformes={uniformes} torneos={torneos} registroPagos={registroPagos} onRefresh={handleRefresh} />
             )}
             
             {activeTab === 'cobro' && (
@@ -165,6 +175,15 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+
+      {/* Modal Pago Manual */}
+      {showPagoManual && (
+        <PagoManualModal
+          jugadores={jugadores}
+          onClose={() => setShowPagoManual(false)}
+          onSuccess={handleRefresh}
+        />
+      )}
 
       {/* Footer */}
       <footer className="border-t border-[#30363D] mt-8">

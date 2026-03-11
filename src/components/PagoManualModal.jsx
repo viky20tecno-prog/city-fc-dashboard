@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { X, DollarSign, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, DollarSign, Loader2, CheckCircle, AlertCircle, ArrowLeft, Shield } from 'lucide-react';
 import { APPS_SCRIPT_URL } from '../config';
 
 const CONCEPTOS = ['Mensualidad', 'Uniforme', 'Torneo', 'Otro'];
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Nequi', 'Daviplata', 'Consignación'];
+
+const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseInt(n) || 0);
 
 export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
   const [form, setForm] = useState({
@@ -15,7 +17,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
     observacion: '',
     torneo: '',
   });
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState('idle'); // idle | confirmar | loading | success | error
   const [errorMsg, setErrorMsg] = useState('');
   const [jugadorSeleccionado, setJugadorSeleccionado] = useState(null);
   const [busqueda, setBusqueda] = useState('');
@@ -38,9 +40,13 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
     setForm(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const nombreJugador = jugadorSeleccionado
+    ? `${jugadorSeleccionado['nombre(s)'] || jugadorSeleccionado.nombre || ''} ${jugadorSeleccionado['apellido(s)'] || jugadorSeleccionado.apellidos || ''}`.trim()
+    : '';
+
+  // Validar y mostrar confirmación
+  const handleRevisar = (e) => {
     e.preventDefault();
-    setStatus('loading');
     setErrorMsg('');
 
     if (!jugadorSeleccionado) {
@@ -48,23 +54,35 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
       setErrorMsg('Selecciona un jugador de la lista');
       return;
     }
-
     if (!form.monto || parseInt(form.monto) <= 0) {
       setStatus('error');
       setErrorMsg('Ingresa un monto válido');
       return;
     }
+    if (form.concepto === 'Torneo' && !form.torneo.trim()) {
+      setStatus('error');
+      setErrorMsg('Ingresa el nombre del torneo');
+      return;
+    }
+
+    setStatus('confirmar');
+  };
+
+  // Enviar pago confirmado
+  const handleConfirmar = async () => {
+    setStatus('loading');
+    setErrorMsg('');
 
     try {
       const payload = {
         action: 'pago_manual',
         cedula: form.cedula,
         celular: jugadorSeleccionado.celular,
-        nombre: `${jugadorSeleccionado['nombre(s)'] || jugadorSeleccionado.nombre || ''} ${jugadorSeleccionado['apellido(s)'] || jugadorSeleccionado.apellidos || ''}`.trim(),
+        nombre: nombreJugador,
         concepto: form.concepto,
         monto: parseInt(form.monto),
         metodo_pago: form.metodo_pago,
-        referencia: form.referencia || 'MANUAL-' + Date.now(),
+        referencia: form.referencia || (form.metodo_pago === 'Efectivo' ? 'EFECTIVO-' + Date.now() : 'MANUAL-' + Date.now()),
         observacion: form.observacion,
         torneo: form.torneo,
         fecha: new Date().toISOString().split('T')[0],
@@ -82,7 +100,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
         setTimeout(() => {
           if (onSuccess) onSuccess();
           onClose();
-        }, 2000);
+        }, 2500);
       } else {
         setStatus('error');
         setErrorMsg('Error al registrar el pago');
@@ -93,6 +111,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
     }
   };
 
+  // ==================== PANTALLA ÉXITO ====================
   if (status === 'success') {
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -100,13 +119,104 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
           <div className="w-16 h-16 rounded-full bg-[rgba(0,208,132,0.12)] flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-8 h-8 text-[#00D084]" />
           </div>
-          <h2 className="text-xl font-bold text-[#E6EDF3] mb-2">Pago registrado</h2>
-          <p className="text-[#8B949E]">{form.concepto} · {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(form.monto)}</p>
+          <h2 className="text-xl font-bold text-[#E6EDF3] mb-2">¡Pago registrado!</h2>
+          <p className="text-[#8B949E]">{nombreJugador}</p>
+          <p className="text-[#E6EDF3] font-medium mt-1">{form.concepto} · {formatCOP(form.monto)}</p>
+          <p className="text-xs text-[#8B949E] mt-3">El dashboard se actualizará automáticamente</p>
         </div>
       </div>
     );
   }
 
+  // ==================== PANTALLA CONFIRMACIÓN ====================
+  if (status === 'confirmar' || status === 'loading') {
+    return (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-[#161B22] rounded-2xl border border-[#30363D] w-full max-w-md">
+          {/* Header */}
+          <div className="flex items-center gap-3 p-6 border-b border-[#30363D]">
+            <div className="w-10 h-10 rounded-xl bg-[rgba(245,166,35,0.12)] flex items-center justify-center">
+              <Shield className="w-5 h-5 text-[#F5A623]" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-[#E6EDF3]">Confirmar pago</h2>
+              <p className="text-xs text-[#8B949E]">Revisa los datos antes de registrar</p>
+            </div>
+          </div>
+
+          {/* Resumen */}
+          <div className="p-6 space-y-3">
+            <div className="bg-[#1E2530] rounded-xl p-4 space-y-3">
+              <div className="flex justify-between">
+                <span className="text-sm text-[#8B949E]">Jugador</span>
+                <span className="text-sm font-medium text-[#E6EDF3]">{nombreJugador}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-[#8B949E]">Cédula</span>
+                <span className="text-sm font-mono text-[#E6EDF3]">{form.cedula}</span>
+              </div>
+              <div className="border-t border-[#30363D] my-2"></div>
+              <div className="flex justify-between">
+                <span className="text-sm text-[#8B949E]">Concepto</span>
+                <span className="text-sm font-medium text-[#E6EDF3]">{form.concepto}{form.torneo ? ` — ${form.torneo}` : ''}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-[#8B949E]">Monto</span>
+                <span className="text-lg font-bold text-[#00D084]">{formatCOP(form.monto)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-[#8B949E]">Método</span>
+                <span className="text-sm text-[#E6EDF3]">{form.metodo_pago}</span>
+              </div>
+              {form.referencia && form.metodo_pago !== 'Efectivo' && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-[#8B949E]">Referencia</span>
+                  <span className="text-sm font-mono text-[#E6EDF3]">{form.referencia}</span>
+                </div>
+              )}
+              {form.observacion && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-[#8B949E]">Observación</span>
+                  <span className="text-sm text-[#E6EDF3] text-right max-w-[200px]">{form.observacion}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Botones */}
+          <div className="p-6 pt-0 flex gap-3">
+            <button
+              onClick={() => setStatus('idle')}
+              disabled={status === 'loading'}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#30363D] text-sm font-medium text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#8B949E] transition-colors disabled:opacity-50"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Editar
+            </button>
+            <button
+              onClick={handleConfirmar}
+              disabled={status === 'loading'}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#0D1117] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all disabled:opacity-50"
+            >
+              {status === 'loading' ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Registrando...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Confirmar Pago
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==================== FORMULARIO ====================
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
       <div className="bg-[#161B22] rounded-2xl border border-[#30363D] w-full max-w-lg my-8">
@@ -127,7 +237,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleRevisar} className="p-6 space-y-4">
           {/* Buscar jugador */}
           <div>
             <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
@@ -265,23 +375,13 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
             </div>
           )}
 
-          {/* Submit */}
+          {/* Submit → va a confirmación */}
           <button
             type="submit"
-            disabled={status === 'loading'}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#0D1117] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#0D1117] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all"
           >
-            {status === 'loading' ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Registrando...
-              </>
-            ) : (
-              <>
-                <DollarSign className="w-4 h-4" />
-                Registrar Pago
-              </>
-            )}
+            <Shield className="w-4 h-4" />
+            Revisar y Confirmar
           </button>
         </form>
       </div>

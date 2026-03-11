@@ -5,6 +5,20 @@ import { APPS_SCRIPT_URL } from '../config';
 const CONCEPTOS = ['Mensualidad', 'Uniforme', 'Torneo', 'Otro'];
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Nequi', 'Daviplata', 'Consignación'];
 
+const UNIFORMES = [
+  { label: 'Campeones General', valor: 90000 },
+  { label: 'Campeones Solo EVG/SAB', valor: 60000 },
+  { label: 'Arqueros Campeones EVG/SAB', valor: 120000 },
+  { label: 'Arqueros General', valor: 160000 },
+];
+
+const TORNEOS = [
+  { label: 'Punto y Coma', valor: 80000 },
+  { label: 'JBC (Fútbol 7)', valor: 50000 },
+  { label: 'INDESA 2026 I', valor: 120000 },
+  { label: 'INDER Envigado', valor: 100000 },
+];
+
 const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseInt(n) || 0);
 
 export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
@@ -16,6 +30,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
     referencia: '',
     observacion: '',
     torneo: '',
+    uniforme: '',
   });
   const [status, setStatus] = useState('idle'); // idle | confirmar | loading | success | error
   const [errorMsg, setErrorMsg] = useState('');
@@ -61,7 +76,12 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
     }
     if (form.concepto === 'Torneo' && !form.torneo.trim()) {
       setStatus('error');
-      setErrorMsg('Ingresa el nombre del torneo');
+      setErrorMsg('Selecciona un torneo');
+      return;
+    }
+    if (form.concepto === 'Uniforme' && !form.uniforme.trim()) {
+      setStatus('error');
+      setErrorMsg('Selecciona un tipo de uniforme');
       return;
     }
 
@@ -85,6 +105,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
         referencia: form.referencia || (form.metodo_pago === 'Efectivo' ? 'EFECTIVO-' + Date.now() : 'MANUAL-' + Date.now()),
         observacion: form.observacion,
         torneo: form.torneo,
+        uniforme: form.uniforme,
         fecha: new Date().toISOString().split('T')[0],
       };
 
@@ -158,7 +179,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
               <div className="border-t border-[#30363D] my-2"></div>
               <div className="flex justify-between">
                 <span className="text-sm text-[#8B949E]">Concepto</span>
-                <span className="text-sm font-medium text-[#E6EDF3]">{form.concepto}{form.torneo ? ` — ${form.torneo}` : ''}</span>
+                <span className="text-sm font-medium text-[#E6EDF3]">{form.concepto}{form.torneo ? ` — ${form.torneo}` : ''}{form.uniforme ? ` — ${form.uniforme}` : ''}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-[#8B949E]">Monto</span>
@@ -282,7 +303,11 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
             </label>
             <select
               value={form.concepto}
-              onChange={e => handleChange('concepto', e.target.value)}
+              onChange={e => {
+                handleChange('concepto', e.target.value);
+                if (e.target.value === 'Mensualidad') handleChange('monto', '65000');
+                else if (e.target.value === 'Otro') handleChange('monto', '');
+              }}
               className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]"
             >
               {CONCEPTOS.map(c => <option key={c} value={c}>{c}</option>)}
@@ -293,15 +318,41 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
           {form.concepto === 'Torneo' && (
             <div>
               <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
-                Nombre del torneo <span className="text-[#FF5E5E]">*</span>
+                Torneo <span className="text-[#FF5E5E]">*</span>
               </label>
-              <input
-                type="text"
-                placeholder="Ej: Copa Ciudad 2026"
+              <select
                 value={form.torneo}
-                onChange={e => handleChange('torneo', e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]"
-              />
+                onChange={e => {
+                  const t = TORNEOS.find(t => t.label === e.target.value);
+                  handleChange('torneo', e.target.value);
+                  if (t) handleChange('monto', t.valor.toString());
+                }}
+                className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]"
+              >
+                <option value="">Seleccionar torneo...</option>
+                {TORNEOS.map(t => <option key={t.label} value={t.label}>{t.label} — {formatCOP(t.valor)}</option>)}
+              </select>
+            </div>
+          )}
+
+          {/* Uniforme (condicional) */}
+          {form.concepto === 'Uniforme' && (
+            <div>
+              <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
+                Tipo de uniforme <span className="text-[#FF5E5E]">*</span>
+              </label>
+              <select
+                value={form.uniforme}
+                onChange={e => {
+                  const u = UNIFORMES.find(u => u.label === e.target.value);
+                  handleChange('uniforme', e.target.value);
+                  if (u) handleChange('monto', u.valor.toString());
+                }}
+                className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]"
+              >
+                <option value="">Seleccionar uniforme...</option>
+                {UNIFORMES.map(u => <option key={u.label} value={u.label}>{u.label} — {formatCOP(u.valor)}</option>)}
+              </select>
             </div>
           )}
 

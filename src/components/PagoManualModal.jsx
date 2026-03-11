@@ -203,10 +203,11 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8B949E] text-sm">$</span>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="65000"
                 value={form.monto}
-                onChange={e => handleChange('monto', e.target.value)}
+                onChange={e => { const v = e.target.value.replace(/[^0-9]/g, ''); handleChange('monto', v); }}
                 className="w-full pl-8 pr-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]"
               />
             </div>
@@ -226,19 +227,21 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
             </select>
           </div>
 
-          {/* Referencia */}
-          <div>
-            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
-              Referencia o número de recibo
-            </label>
-            <input
-              type="text"
-              placeholder="Ej: REC-001 (opcional)"
-              value={form.referencia}
-              onChange={e => handleChange('referencia', e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]"
-            />
-          </div>
+          {/* Referencia — solo si NO es efectivo */}
+          {form.metodo_pago !== 'Efectivo' && (
+            <div>
+              <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
+                Referencia o número de recibo
+              </label>
+              <input
+                type="text"
+                placeholder="Ej: REC-001 (opcional)"
+                value={form.referencia}
+                onChange={e => handleChange('referencia', e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]"
+              />
+            </div>
+          )}
 
           {/* Observación */}
           <div>

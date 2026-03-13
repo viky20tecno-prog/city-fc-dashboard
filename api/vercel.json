@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.js"
+    }
+  ],
+  "env": {
+    "GOOGLE_SHEETS_ID": "@google_sheets_id",
+    "GOOGLE_SERVICE_ACCOUNT_KEY": "@google_service_account_key"
+  }
+}

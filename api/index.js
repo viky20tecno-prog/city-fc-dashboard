@@ -16,15 +16,29 @@ app.use(express.json());
 
 // Health check (sin validación club_id)
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
-// Auth middleware (aplica a las rutas de API)
+// Auth middleware (valida club_id para todas las rutas /api/*)
 app.use('/api', (req, res, next) => {
-  const club_id = req.query.club_id || req.body.club_id;
-  if (!club_id && req.path !== '/health') {
-    return res.status(400).json({ error: 'club_id requerido' });
+  // /api/health no requiere club_id
+  if (req.path === '/health') {
+    return next();
   }
+  
+  const club_id = req.query.club_id || req.body.club_id;
+  if (!club_id) {
+    return res.status(400).json({ 
+      success: false,
+      error: 'club_id requerido',
+      example: '?club_id=city-fc'
+    });
+  }
+  
   req.club_id = club_id;
   next();
 });
@@ -36,11 +50,21 @@ app.use('/api/payments', paymentsRouter);
 app.use('/api/config', configRouter);
 app.use('/api/reports', reportsRouter);
 
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('❌ Error:', err);
+  res.status(err.status || 500).json({
+    success: false,
+    error: err.message || 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
+});
+
 // Para desarrollo local
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => {
-    console.log(`API running on port ${PORT}`);
+    console.log(`✅ API running on http://localhost:${PORT}`);
   });
 }
 

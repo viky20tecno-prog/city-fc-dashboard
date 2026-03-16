@@ -1,107 +1,239 @@
 const { google } = require('googleapis');
+const fs = require('fs');
+const path = require('path');
 
-// Config
-const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID || '1LuqQipb1_MD7WoVy0064mZ1vwWgWCg9ikBRUN_-F0-A';
+class SheetsClient {
+  constructor() {
+    this.spreadsheetId = process.env.GOOGLE_SHEETS_ID;
+    this.auth = null;
+    this.sheets = null;
+    this.initializeAuth();
+  }
 
-// Auth con service account
-let sheets;
+  initializeAuth() {
+    try {
+      let keyData;
 
-function initSheets() {
-  if (sheets) return sheets;
-  
-  const auth = new google.auth.GoogleAuth({
-    keyFile: process.env.GOOGLE_SERVICE_ACCOUNT_KEY || './service-account.json',
-    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-  });
+      // Producción: leer desde variable de entorno (base64)
+      if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY && !process.env.GOOGLE_SERVICE_ACCOUNT_KEY.includes('-----BEGIN')) {
+        const decoded = Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_KEY, 'base64').toString('utf-8');
+        keyData = JSON.parse(decoded);
+      }
+      // Desarrollo: leer archivo local
+      else if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY && process.env.GOOGLE_SERVICE_ACCOUNT_KEY.includes('-----BEGIN')) {
+        // Es el JSON directo
+        keyData = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+      }
+      // Fallback: buscar archivo local
+      else if (fs.existsSync(path.join(__dirname, '../service-account.json'))) {
+        keyData = JSON.parse(fs.readFileSync(path.join(__dirname, '../service-account.json'), 'utf-8'));
+      }
+      else {
+        throw new Error('No se encontró Google Service Account key');
+      }
 
-  sheets = google.sheets({ version: 'v4', auth });
-  return sheets;
-}
+      this.auth = new google.auth.GoogleAuth({
+        credentials: keyData,
+        scopes: [
+          'https://www.googleapis.com/auth/spreadsheets.readonly',
+          'https://www.googleapis.com/auth/spreadsheets'
+        ],
+      });
 
-/**
- * Lee rango de hoja, retorna array de objetos
- * @param {string} sheetName - nombre de la hoja (ej: JUGADORES)
- * @param {string} club_id - filtro opcional
- */
-async function getSheetData(sheetName, club_id = null) {
-  const sheets_api = initSheets();
-  
-  try {
-    const response = await sheets_api.spreadsheets.values.get({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `${sheetName}!A:Z`,
-    });
+      this.sheets = google.sheets({ version: 'v4', auth: this.auth });
+      console.log('✅ Google Sheets client initialized');
+    } catch (error) {
+      console.error('❌ Error initializing Google Sheets:', error.message);
+      throw error;
+    }
+  }
 
-    const rows = response.data.values || [];
-    if (rows.length === 0) return [];
+  /**
+   * Obtener rango específico de un sheet
+   * @param {string} sheetName - Nombre de la hoja (ej: "JUGADORES")
+   * @param {string} range - Rango A1 (ej: "A1:Z100")
+   * @returns {Promise<Array>} Array de filas
+   */
+  async getRange(sheetName, range = 'A:Z') {
+    try {
+      const response = await this.sheets.spreadsheets.values.get({
+        spreadsheetId: this.spreadsheetId,
+        range: `${sheetName}!${range}`,
+      });
+      return response.data.values || [];
+    } catch (error) {
+      console.error(`Error reading ${sheetName}:`, error.message);
+      throw error;
+    }
+  }
 
-    const headers = rows[0];
-    const data = rows.slice(1).map(row => {
+  /**
+   * Obtener todas las filas de un sheet
+   * @param {string} sheetName - Nombre de la hoja
+   * @returns {Promise<Array>} Array de filas con headers
+   */
+  async getAllRows(sheetName) {
+    const rows = await this.getRange(sheetName);
+    return this.parseRows(rows);
+  }
+
+  /**
+   * Buscar una fila por columna y valor
+   * @param {string} sheetName - Nombre de la hoja
+   * @param {string} filterColumn - Nombre de la columna a buscar
+   * @param {string} filterValue - Valor a buscar
+   * @returns {Promise<Object|null>} Objeto fila o null si no existe
+   */
+  async searchRow(sheetName, filterColumn, filterValue) {
+    try {
+      const rows = await this.getAllRows(sheetName);
+      const result = rows.find(row => row[filterColumn] === String(filterValue));
+      return result || null;
+    } catch (error) {
+      console.error(`Error searching ${sheetName}:`, error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Buscar múltiples filas por filtro
+   * @param {string} sheetName - Nombre de la hoja
+   * @param {string} filterColumn - Columna a buscar
+   * @param {string} filterValue - Valor a buscar
+   * @returns {Promise<Array>} Array de filas que coinciden
+   */
+  async searchRows(sheetName, filterColumn, filterValue) {
+    try {
+      const rows = await this.getAllRows(sheetName);
+      return rows.filter(row => row[filterColumn] === String(filterValue));
+    } catch (error) {
+      console.error(`Error searching rows in ${sheetName}:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Buscar filas por múltiples filtros (AND)
+   * @param {string} sheetName - Nombre de la hoja
+   * @param {Object} filters - { columna: valor, ... }
+   * @returns {Promise<Array>} Array de filas que cumplen todos los filtros
+   */
+  async searchRowsMultiple(sheetName, filters) {
+    try {
+      const rows = await this.getAllRows(sheetName);
+      return rows.filter(row => {
+        return Object.entries(filters).every(([col, val]) => {
+          return row[col] === String(val);
+        });
+      });
+    } catch (error) {
+      console.error(`Error searching rows in ${sheetName}:`, error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Actualizar una fila por número de fila (1-indexed)
+   * @param {string} sheetName - Nombre de la hoja
+   * @param {number} rowNumber - Número de fila (1-indexed)
+   * @param {Array} values - Array de valores a actualizar
+   * @returns {Promise<Object>} Response de Google Sheets
+   */
+  async updateRow(sheetName, rowNumber, values) {
+    try {
+      const response = await this.sheets.spreadsheets.values.update({
+        spreadsheetId: this.spreadsheetId,
+        range: `${sheetName}!A${rowNumber}`,
+        valueInputOption: 'USER_ENTERED',
+        resource: {
+          values: [values],
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating row in ${sheetName}:`, error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Agregar una fila nueva al final del sheet
+   * @param {string} sheetName - Nombre de la hoja
+   * @param {Array} values - Array de valores
+   * @returns {Promise<Object>} Response de Google Sheets
+   */
+  async appendRow(sheetName, values) {
+    try {
+      const response = await this.sheets.spreadsheets.values.append({
+        spreadsheetId: this.spreadsheetId,
+        range: `${sheetName}!A:Z`,
+        valueInputOption: 'USER_ENTERED',
+        resource: {
+          values: [values],
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error appending row to ${sheetName}:`, error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Convertir filas raw a objetos con headers
+   * @param {Array} rows - Array de arrays (raw data)
+   * @returns {Array} Array de objetos
+   */
+  parseRows(rows) {
+    if (!rows || rows.length === 0) return [];
+    
+    const [headers, ...dataRows] = rows;
+    return dataRows.map(row => {
       const obj = {};
       headers.forEach((header, idx) => {
-        obj[header] = row[idx] || null;
+        obj[header] = row[idx] || '';
       });
       return obj;
     });
+  }
 
-    // Filtrar por club_id si aplica
-    if (club_id) {
-      return data.filter(row => row.club_id === club_id);
+  /**
+   * Obtener headers de un sheet
+   * @param {string} sheetName - Nombre de la hoja
+   * @returns {Promise<Array>} Array de nombres de columnas
+   */
+  async getHeaders(sheetName) {
+    try {
+      const rows = await this.getRange(sheetName, 'A1:Z1');
+      return rows[0] || [];
+    } catch (error) {
+      console.error(`Error getting headers from ${sheetName}:`, error.message);
+      return [];
     }
+  }
 
-    return data;
-  } catch (err) {
-    console.error(`Error reading ${sheetName}:`, err.message);
-    throw err;
+  /**
+   * Filtrar filas por múltiples criterios complejos
+   * @param {string} sheetName - Nombre de la hoja
+   * @param {Object} filters - { columna: valor|[valores], ... }
+   * @returns {Promise<Array>} Filas filtradas
+   */
+  async filterRows(sheetName, filters) {
+    try {
+      const rows = await this.getAllRows(sheetName);
+      return rows.filter(row => {
+        return Object.entries(filters).every(([col, val]) => {
+          if (Array.isArray(val)) {
+            return val.includes(String(row[col]));
+          }
+          return row[col] === String(val);
+        });
+      });
+    } catch (error) {
+      console.error(`Error filtering rows in ${sheetName}:`, error.message);
+      return [];
+    }
   }
 }
 
-/**
- * Agrega fila a hoja
- */
-async function appendSheetData(sheetName, values) {
-  const sheets_api = initSheets();
-  
-  try {
-    const response = await sheets_api.spreadsheets.values.append({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `${sheetName}!A1`,
-      valueInputOption: 'USER_ENTERED',
-      resource: {
-        values: [values],
-      },
-    });
-    return response.data;
-  } catch (err) {
-    console.error(`Error appending to ${sheetName}:`, err.message);
-    throw err;
-  }
-}
-
-/**
- * Actualiza celda específica
- */
-async function updateSheetData(sheetName, range, values) {
-  const sheets_api = initSheets();
-  
-  try {
-    const response = await sheets_api.spreadsheets.values.update({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `${sheetName}!${range}`,
-      valueInputOption: 'USER_ENTERED',
-      resource: {
-        values: [values],
-      },
-    });
-    return response.data;
-  } catch (err) {
-    console.error(`Error updating ${sheetName}:`, err.message);
-    throw err;
-  }
-}
-
-module.exports = {
-  getSheetData,
-  appendSheetData,
-  updateSheetData,
-};
+module.exports = SheetsClient;

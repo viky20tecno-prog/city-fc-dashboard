@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchAllData } from '../services/api';
 
 export function useSheetData() {
+  // ✅ USANDO CITY FC API (v2.vercel.app) EN LUGAR DE GOOGLE SHEETS
   const [data, setData] = useState({
     jugadores: [],
     mensualidades: [],

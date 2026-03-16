@@ -18,20 +18,32 @@ router.get('/', async (req, res) => {
     // Filtrar activos (activo = 'SI')
     const activePlayers = players.filter(p => p.activo === 'SI');
     
+    // Debug: logear primer registro para verificar columnas
+    if (activePlayers.length > 0) {
+      console.log('🔍 Player object keys:', Object.keys(activePlayers[0]));
+      console.log('🔍 First player:', activePlayers[0]);
+    }
+    
     // Mapear a formato API
-    const mapped = activePlayers.map(p => ({
-      cedula: p.cedula,
-      nombre_completo: `${p.nombre} ${p.apellido}`,
-      nombre: p.nombre,
-      apellido: p.apellido,
-      celular: p.celular,
-      email: p.email,
-      fecha_nacimiento: p.fecha_nacimiento,
-      municipio: p.municipio,
-      tipo_descuento: p.tipo_descuento || 'NA',
-      mensualidad_2026: p.mensualidad_2026,
-      activo: p.activo,
-    }));
+    const mapped = activePlayers.map(p => {
+      // Intentar múltiples variantes de nombre/apellido
+      const nombre = p.nombre || p.Nombre || p['nombre(s)'] || p['Nombre(s)'] || '';
+      const apellido = p.apellido || p.Apellido || p['apellido(s)'] || p['Apellido(s)'] || '';
+      
+      return {
+        cedula: p.cedula,
+        nombre_completo: `${nombre} ${apellido}`.trim(),
+        nombre: nombre,
+        apellido: apellido,
+        celular: p.celular,
+        email: p.email,
+        fecha_nacimiento: p.fecha_nacimiento,
+        municipio: p.municipio,
+        tipo_descuento: p.tipo_descuento || 'NA',
+        mensualidad_2026: p.mensualidad_2026,
+        activo: p.activo,
+      };
+    });
     
     res.json({
       success: true,
@@ -78,14 +90,18 @@ router.get('/:cedula', async (req, res) => {
     // Obtener estado de torneos
     const tournaments = await sheetsClient.searchRows('ESTADO_TORNEOS', 'cedula', cedula);
     
+    // Obtener nombre/apellido con variantes
+    const nombre = player.nombre || player.Nombre || player['nombre(s)'] || player['Nombre(s)'] || '';
+    const apellido = player.apellido || player.Apellido || player['apellido(s)'] || player['Apellido(s)'] || '';
+    
     res.json({
       success: true,
       club_id,
       player: {
         cedula: player.cedula,
-        nombre_completo: `${player.nombre} ${player.apellido}`,
-        nombre: player.nombre,
-        apellido: player.apellido,
+        nombre_completo: `${nombre} ${apellido}`.trim(),
+        nombre: nombre,
+        apellido: apellido,
         celular: player.celular,
         email: player.email,
         fecha_nacimiento: player.fecha_nacimiento,

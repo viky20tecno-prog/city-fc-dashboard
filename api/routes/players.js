@@ -26,9 +26,9 @@ router.get('/', async (req, res) => {
     
     // Mapear a formato API
     const mapped = activePlayers.map(p => {
-      // Intentar múltiples variantes de nombre/apellido
-      const nombre = p.nombre || p.Nombre || p['nombre(s)'] || p['Nombre(s)'] || '';
-      const apellido = p.apellido || p.Apellido || p['apellido(s)'] || p['Apellido(s)'] || '';
+      // Intentar múltiples variantes de nombre/apellido (con paréntesis en el sheet)
+      const nombre = p['nombre(s)'] || p.nombre || p.Nombre || p['Nombre(s)'] || '';
+      const apellido = p['apellido(s)'] || p.apellido || p.Apellido || p['Apellido(s)'] || '';
       
       return {
         cedula: p.cedula,
@@ -90,9 +90,9 @@ router.get('/:cedula', async (req, res) => {
     // Obtener estado de torneos
     const tournaments = await sheetsClient.searchRows('ESTADO_TORNEOS', 'cedula', cedula);
     
-    // Obtener nombre/apellido con variantes
-    const nombre = player.nombre || player.Nombre || player['nombre(s)'] || player['Nombre(s)'] || '';
-    const apellido = player.apellido || player.Apellido || player['apellido(s)'] || player['Apellido(s)'] || '';
+    // Obtener nombre/apellido con variantes (con paréntesis en el sheet)
+    const nombre = player['nombre(s)'] || player.nombre || player.Nombre || player['Nombre(s)'] || '';
+    const apellido = player['apellido(s)'] || player.apellido || player.Apellido || player['Apellido(s)'] || '';
     
     res.json({
       success: true,

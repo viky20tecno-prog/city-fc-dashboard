@@ -35,9 +35,8 @@ class SheetsClient {
       this.auth = new google.auth.GoogleAuth({
         credentials: keyData,
         scopes: [
-          'https://www.googleapis.com/auth/spreadsheets.readonly',
-          'https://www.googleapis.com/auth/spreadsheets'
-        ],
+         'https://www.googleapis.com/auth/spreadsheets'
+      ],
       });
 
       this.sheets = google.sheets({ version: 'v4', auth: this.auth });

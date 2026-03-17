@@ -96,27 +96,33 @@ export default function FormInscripcion() {
     }
 
     try {
-      const payload = JSON.stringify({
-        action: 'inscribir',
-        ...form,
-        activo: 'SI',
-        tipo_descuento: 'NA',
-        fecha_inscripcion: new Date().toISOString().split('T')[0],
-      });
+      // Crear un formulario y enviarlo via POST directo al Apps Script
+      const formData = new FormData();
+      formData.append('action', 'inscribir');
+      
+      // Agregar todos los campos del formulario
+      for (const [key, value] of Object.entries(form)) {
+        formData.append(key, value || '');
+      }
+      formData.append('activo', 'SI');
+      formData.append('tipo_descuento', 'NA');
+      formData.append('fecha_inscripcion', new Date().toISOString().split('T')[0]);
 
       const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: payload,
+        body: formData,
       });
 
-      // Con no-cors, asumimos éxito si no hubo error de red
-      setStatus('success');
+      if (res.ok || res.status === 302 || res.type === 'opaque') {
+        // Apps Script devuelve 302 en éxito (redirect) o respuesta opaca
+        setStatus('success');
+      } else {
+        throw new Error(`HTTP ${res.status}`);
+      }
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Error completo:', err);
       setStatus('error');
-      setErrorMsg('Error de conexión. Verifica tu internet e intenta de nuevo.');
+      setErrorMsg('Error al registrar. Intenta de nuevo.');
     }
   };
 

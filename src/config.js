@@ -12,8 +12,8 @@ export const SHEETS = {
 
 export const CUOTA_MENSUAL = 65000;
 
-// URL del Google Apps Script
-export const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL || '';
+// URL del Google Apps Script — ACTUALIZADA 2026-03-17
+export const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbyAayLwl-hI_5pwsEnCz4BMkt0LDTHIJQoKlKHFRl7jN6K8UrzIaLGyKbw3iP_kg0h-/exec';
 
 export const ESTADO_COLORS = {
   AL_DIA: { bg: 'bg-[rgba(0,208,132,0.12)]', text: 'text-[#00D084]', dot: 'bg-[#00D084]' },

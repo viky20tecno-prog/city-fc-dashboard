@@ -107,34 +107,14 @@ export default function FormInscripcion() {
       const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'application/json' },
         body: payload,
       });
 
-      // Apps Script con mode: no-cors devuelve opaque response (status 0)
-      // No podemos leer la respuesta, pero si no hubo error de red, asumimos éxito
-      // Para validación real, hacemos un GET de verificación
-      if (res.type === 'opaque' || res.ok) {
-        // Verificar si realmente se guardó haciendo GET
-        try {
-          const checkUrl = APPS_SCRIPT_URL + '?action=verificar&cedula=' + encodeURIComponent(form.cedula);
-          const checkRes = await fetch(checkUrl);
-          const checkData = await checkRes.json();
-          if (checkData.existe) {
-            setStatus('success');
-          } else {
-            // Puede ser que aún no se procesó, dar éxito de todas formas
-            setStatus('success');
-          }
-        } catch {
-          // Si el GET falla, asumir éxito porque el POST no dio error de red
-          setStatus('success');
-        }
-      } else {
-        setStatus('error');
-        setErrorMsg('Error al registrar. Intenta de nuevo.');
-      }
+      // Con no-cors, asumimos éxito si no hubo error de red
+      setStatus('success');
     } catch (err) {
+      console.error('Error:', err);
       setStatus('error');
       setErrorMsg('Error de conexión. Verifica tu internet e intenta de nuevo.');
     }

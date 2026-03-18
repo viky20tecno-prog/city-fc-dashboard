@@ -4,7 +4,9 @@ const BASE_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/valu
 
 async function fetchSheet(sheetName) {
   // Especificar rango A:Z para traer todas las columnas y filas
-  const url = `${BASE_URL}/${encodeURIComponent(sheetName)}!A:Z?key=${API_KEY}&majorDimension=ROWS`;
+  // Agregar timestamp para evitar caché de Google Sheets API
+  const timestamp = new Date().getTime();
+  const url = `${BASE_URL}/${encodeURIComponent(sheetName)}!A:Z?key=${API_KEY}&majorDimension=ROWS&_t=${timestamp}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Error fetching ${sheetName}: ${res.status}`);
   const data = await res.json();

@@ -3,6 +3,7 @@ const SheetsClient = require('../services/sheets');
 
 const router = express.Router();
 const sheetsClient = new SheetsClient();
+const CLUB_ID = 'city-fc';
 
 /**
  * GET /api/uniforms
@@ -33,7 +34,8 @@ router.get('/', async (req, res) => {
 router.get('/numeros', async (req, res) => {
   try {
     const pedidos = await sheetsClient.getAllRows('PEDIDO_UNIFORMES');
-    const numerosUsados = pedidos.map(p => p.NUMERO).filter(Boolean);
+    // ✅ La columna en el sheet se llama numero_estampar
+    const numerosUsados = pedidos.map(p => p.numero_estampar).filter(Boolean);
     res.json({
       success: true,
       numeros: numerosUsados,
@@ -75,7 +77,7 @@ router.post('/', async (req, res) => {
     }
 
     // Validar que el jugador no tenga ya un pedido
-    const pedidoExistente = await sheetsClient.searchRow('PEDIDO_UNIFORMES', 'CEDULA', cedula);
+    const pedidoExistente = await sheetsClient.searchRow('PEDIDO_UNIFORMES', 'cedula', cedula);
     if (pedidoExistente) {
       return res.status(409).json({
         success: false,
@@ -86,7 +88,7 @@ router.post('/', async (req, res) => {
 
     // Validar que el número no esté repetido
     const pedidos = await sheetsClient.getAllRows('PEDIDO_UNIFORMES');
-    const numeroRepetido = pedidos.some(p => p.NUMERO === String(numero));
+    const numeroRepetido = pedidos.some(p => p.numero_estampar === String(numero));
     if (numeroRepetido) {
       return res.status(409).json({
         success: false,
@@ -95,17 +97,19 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Guardar en PEDIDO_UNIFORMES
+    // ✅ Orden correcto según columnas del Sheet:
+    // club_id | cedula | nombre | tipo | talla | nombre_estampar | numero_estampar | fecha | estado
     const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
     await sheetsClient.appendRow('PEDIDO_UNIFORMES', [
-      cedula,
-      nombre,
-      tipo,
-      nombre_estampar || '',
-      talla,
-      numero,
-      fecha,
-      'PENDIENTE',
+      CLUB_ID,               // club_id
+      cedula,                // cedula
+      nombre,                // nombre
+      tipo,                  // tipo
+      talla,                 // talla
+      nombre_estampar || '', // nombre_estampar
+      numero,                // numero_estampar
+      fecha,                 // fecha
+      'PENDIENTE',           // estado
     ]);
 
     res.json({

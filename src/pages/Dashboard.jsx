@@ -12,7 +12,7 @@ import PagoManualModal from '../components/PagoManualModal';
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'jugadores', label: 'Jugadores', icon: Users },
-  { id: 'uniformes', label: 'Uniformes', icon: Shirt },
+  { id: 'uniformes', label: 'Pedidos Uniformes', icon: Shirt },
   { id: 'cobro', label: 'Ciclo de Cobro', icon: Clock },
   { id: 'whatsapp', label: 'WhatsApp Bot', icon: MessageSquare },
 ];
@@ -233,20 +233,28 @@ function UniformesTabInline({ jugadores }) {
     setMessage({ type: '', text: '' });
 
     try {
-      const res = await fetch('/api/uniforme', {
+      const dataToSend = {
+        cedula: form.cedula,
+        tipo: form.tipo_uniforme,
+        talla: form.talla,
+        nombre_estampar: form.nombre_estampar,
+        numero_estampar: form.numero
+      };
+
+      const res = await fetch('/api/pedido-uniforme', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(dataToSend)
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage({ type: 'error', text: data.error || 'Error registrando uniforme' });
+        setMessage({ type: 'error', text: data.error || 'Error registrando pedido' });
         return;
       }
 
-      setMessage({ type: 'success', text: `Uniforme registrado: ${data.uniforme.nombre_estampar} #${data.uniforme.numero}` });
+      setMessage({ type: 'success', text: `Pedido registrado: ${data.pedido.nombre_estampar} #${data.pedido.numero_estampar}` });
       setForm({ cedula: '', tipo_uniforme: 'General', numero: '', nombre_estampar: '', talla: 'M' });
       setTimeout(() => setMostrarModal(false), 2000);
     } catch (err) {
@@ -261,20 +269,20 @@ function UniformesTabInline({ jugadores }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-[#E6EDF3]">Gestión de Uniformes</h2>
+        <h2 className="text-2xl font-bold text-[#E6EDF3]">Pedidos de Uniformes</h2>
         <button
           onClick={() => setMostrarModal(true)}
           className="flex items-center gap-2 px-4 py-2 bg-[#00D084] text-[#0D1117] rounded-lg font-medium hover:bg-[#00D084]/80 transition"
         >
           <Plus className="w-4 h-4" />
-          Nuevo Uniforme
+          Nuevo Pedido
         </button>
       </div>
 
       {mostrarModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-[#161B22] rounded-xl border border-[#30363D] p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-[#E6EDF3] mb-4">Registrar Uniforme</h3>
+            <h3 className="text-xl font-bold text-[#E6EDF3] mb-4">Hacer Pedido de Uniforme</h3>
 
             {message.text && (
               <div className={`flex items-start gap-2 p-3 rounded-lg mb-4 ${message.type === 'error' ? 'bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/20' : 'bg-[rgba(0,208,132,0.12)] border border-[#00D084]/20'}`}>
@@ -417,7 +425,7 @@ function UniformesTabInline({ jugadores }) {
 
       <div className="bg-[#161B22] rounded-xl border border-[#30363D] p-6 text-center">
         <p className="text-[#8B949E]">
-          Haz click en "Nuevo Uniforme" para registrar uniformes de los jugadores
+          Haz click en "Nuevo Pedido" para hacer pedidos de uniformes. Los pedidos se guardan en PEDIDOS_UNIFORMES y puedes exportarlos/imprimirlos directamente.
         </p>
       </div>
     </div>

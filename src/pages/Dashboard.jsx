@@ -193,7 +193,7 @@ export default function Dashboard() {
       {/* Footer */}
       <footer className="border-t border-[#30363D] mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-center text-xs text-[#8B949E]">
-          Powered by AI · Automatización inteligente de cobros para clubes deportivos · v2.1
+          Powered by AI · Automatización inteligente de cobros para clubes deportivos · v2.2
         </div>
       </footer>
     </div>

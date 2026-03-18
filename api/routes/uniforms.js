@@ -10,7 +10,7 @@ const sheetsClient = new SheetsClient();
  */
 router.get('/', async (req, res) => {
   try {
-    const pedidos = await sheetsClient.getAllRows('PEDIDOS_UNIFORMES');
+    const pedidos = await sheetsClient.getAllRows('PEDIDO_UNIFORMES');
     res.json({
       success: true,
       total: pedidos.length,
@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
  */
 router.get('/numeros', async (req, res) => {
   try {
-    const pedidos = await sheetsClient.getAllRows('PEDIDOS_UNIFORMES');
+    const pedidos = await sheetsClient.getAllRows('PEDIDO_UNIFORMES');
     const numerosUsados = pedidos.map(p => p.NUMERO).filter(Boolean);
     res.json({
       success: true,
@@ -75,7 +75,7 @@ router.post('/', async (req, res) => {
     }
 
     // Validar que el jugador no tenga ya un pedido
-    const pedidoExistente = await sheetsClient.searchRow('PEDIDOS_UNIFORMES', 'CEDULA', cedula);
+    const pedidoExistente = await sheetsClient.searchRow('PEDIDO_UNIFORMES', 'CEDULA', cedula);
     if (pedidoExistente) {
       return res.status(409).json({
         success: false,
@@ -85,7 +85,7 @@ router.post('/', async (req, res) => {
     }
 
     // Validar que el número no esté repetido
-    const pedidos = await sheetsClient.getAllRows('PEDIDOS_UNIFORMES');
+    const pedidos = await sheetsClient.getAllRows('PEDIDO_UNIFORMES');
     const numeroRepetido = pedidos.some(p => p.NUMERO === String(numero));
     if (numeroRepetido) {
       return res.status(409).json({
@@ -95,9 +95,9 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Guardar en PEDIDOS_UNIFORMES
+    // Guardar en PEDIDO_UNIFORMES
     const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
-    await sheetsClient.appendRow('PEDIDOS_UNIFORMES', [
+    await sheetsClient.appendRow('PEDIDO_UNIFORMES', [
       cedula,
       nombre,
       tipo,

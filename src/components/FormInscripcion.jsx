@@ -96,29 +96,24 @@ export default function FormInscripcion() {
     }
 
     try {
-      // Crear un formulario y enviarlo via POST directo al Apps Script
-      const formData = new FormData();
-      formData.append('action', 'inscribir');
-      
-      // Agregar todos los campos del formulario
-      for (const [key, value] of Object.entries(form)) {
-        formData.append(key, value || '');
-      }
-      formData.append('activo', 'SI');
-      formData.append('tipo_descuento', 'NA');
-      formData.append('fecha_inscripcion', new Date().toISOString().split('T')[0]);
-
-      const res = await fetch(APPS_SCRIPT_URL, {
+      // Enviar datos como JSON al endpoint de Vercel
+      const res = await fetch('/api/inscripcion', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
       });
 
-      if (res.ok || res.status === 302 || res.type === 'opaque') {
-        // Apps Script devuelve 302 en éxito (redirect) o respuesta opaca
-        setStatus('success');
-      } else {
-        throw new Error(`HTTP ${res.status}`);
+      const respData = await res.json();
+
+      if (!res.ok) {
+        setStatus('error');
+        setErrorMsg(respData.error || 'Error al registrar. Intenta de nuevo.');
+        return;
       }
+
+      setStatus('success');
     } catch (err) {
       console.error('Error completo:', err);
       setStatus('error');

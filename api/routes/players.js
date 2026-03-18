@@ -26,7 +26,6 @@ router.get('/', async (req, res) => {
     
     // Mapear a formato API
     const mapped = activePlayers.map(p => {
-      // Intentar múltiples variantes de nombre/apellido (con paréntesis en el sheet)
       const nombre = p['nombre(s)'] || p.nombre || p.Nombre || p['Nombre(s)'] || '';
       const apellido = p['apellido(s)'] || p.apellido || p.Apellido || p['Apellido(s)'] || '';
       
@@ -90,7 +89,7 @@ router.get('/:cedula', async (req, res) => {
     // Obtener estado de torneos
     const tournaments = await sheetsClient.searchRows('ESTADO_TORNEOS', 'cedula', cedula);
     
-    // Obtener nombre/apellido con variantes (con paréntesis en el sheet)
+    // Obtener nombre/apellido con variantes
     const nombre = player['nombre(s)'] || player.nombre || player.Nombre || player['Nombre(s)'] || '';
     const apellido = player['apellido(s)'] || player.apellido || player.Apellido || player['Apellido(s)'] || '';
     
@@ -122,7 +121,8 @@ router.get('/:cedula', async (req, res) => {
         invoices: invoices.length,
         uniforms: uniforms.length,
         tournaments: tournaments.length,
-        total_debt: this.calculateTotalDebt(invoices, uniforms, tournaments),
+        // ✅ FIX: era this.calculateTotalDebt (this no existe aquí, es función suelta)
+        total_debt: calculateTotalDebt(invoices, uniforms, tournaments),
       },
       invoices: invoices.map(inv => ({
         anio: inv.anio,

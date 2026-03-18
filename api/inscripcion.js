@@ -68,8 +68,7 @@ function validarDatos(data) {
 // Crear fila para JUGADORES
 function crearFilaJugador(data) {
   return [
-    'city-fc', // club_id
-    data.cedula.trim(),
+    data.cedula.trim(), // cedula (PRIMERA columna si no tienes club_id como col A)
     data.nombre.trim(),
     data.apellidos.trim(),
     data.tipo_id || 'Cédula de Ciudadanía',
@@ -90,7 +89,8 @@ function crearFilaJugador(data) {
     'SI', // activo
     'NA', // tipo_descuento
     CUOTA_DEFAULT, // mensualidad_2026
-    new Date().toISOString().split('T')[0] // fecha_inscripcion
+    new Date().toISOString().split('T')[0], // fecha_inscripcion
+    'city-fc' // club_id (ÚLTIMA columna)
   ];
 }
 

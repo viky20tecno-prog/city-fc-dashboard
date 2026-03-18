@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, DollarSign } from 'lucide-react';
+import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, DollarSign, Shirt } from 'lucide-react';
 import { useSheetData } from '../hooks/useSheetData';
 import StatsCards from '../components/StatsCards';
 import JugadoresTable from '../components/JugadoresTable';
@@ -8,10 +8,12 @@ import MorososList from '../components/MorososList';
 import TimelineCobro from '../components/TimelineCobro';
 import WhatsAppMockup from '../components/WhatsAppMockup';
 import PagoManualModal from '../components/PagoManualModal';
+import UniformesTab from '../components/UniformesTab';
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'jugadores', label: 'Jugadores', icon: Users },
+  { id: 'uniformes', label: 'Uniformes', icon: Shirt },
   { id: 'cobro', label: 'Ciclo de Cobro', icon: Clock },
   { id: 'whatsapp', label: 'WhatsApp Bot', icon: MessageSquare },
 ];
@@ -163,6 +165,10 @@ export default function Dashboard() {
             
             {activeTab === 'jugadores' && (
               <JugadoresTable jugadores={jugadores} mensualidades={mensualidades} uniformes={uniformes} torneos={torneos} registroPagos={registroPagos} onRefresh={handleRefresh} />
+            )}
+            
+            {activeTab === 'uniformes' && (
+              <UniformesTab jugadores={jugadores} />
             )}
             
             {activeTab === 'cobro' && (

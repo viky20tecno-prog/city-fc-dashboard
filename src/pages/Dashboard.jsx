@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, DollarSign } from 'lucide-react';
+import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, DollarSign, Shirt } from 'lucide-react';
 import { useSheetData } from '../hooks/useSheetData';
 import StatsCards from '../components/StatsCards';
 import JugadoresTable from '../components/JugadoresTable';
@@ -8,10 +8,12 @@ import MorososList from '../components/MorososList';
 import TimelineCobro from '../components/TimelineCobro';
 import WhatsAppMockup from '../components/WhatsAppMockup';
 import PagoManualModal from '../components/PagoManualModal';
+import Uniformes from '../components/Uniformes';
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'jugadores', label: 'Jugadores', icon: Users },
+  { id: 'uniformes', label: 'Uniformes', icon: Shirt },
   { id: 'cobro', label: 'Ciclo de Cobro', icon: Clock },
   { id: 'whatsapp', label: 'WhatsApp Bot', icon: MessageSquare },
 ];
@@ -137,60 +139,3 @@ export default function Dashboard() {
           </div>
         </div>
       </nav>
-
-      {/* Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <RefreshCw className="w-8 h-8 text-[#00D084] animate-spin mx-auto mb-3" />
-              <p className="text-[#8B949E]">Cargando datos del Sheet...</p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {activeTab === 'dashboard' && (
-              <>
-                <StatsCards mensualidades={mensualidades} jugadores={jugadores} morosos={morosos} />
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                    <RecaudacionChart mensualidades={mensualidades} />
-                  </div>
-                  <MorososList morosos={morosos} />
-                </div>
-              </>
-            )}
-            
-            {activeTab === 'jugadores' && (
-              <JugadoresTable jugadores={jugadores} mensualidades={mensualidades} uniformes={uniformes} torneos={torneos} registroPagos={registroPagos} onRefresh={handleRefresh} />
-            )}
-            
-            {activeTab === 'cobro' && (
-              <TimelineCobro />
-            )}
-            
-            {activeTab === 'whatsapp' && (
-              <WhatsAppMockup />
-            )}
-          </div>
-        )}
-      </main>
-
-      {/* Modal Pago Manual */}
-      {showPagoManual && (
-        <PagoManualModal
-          jugadores={jugadores}
-          onClose={() => setShowPagoManual(false)}
-          onSuccess={handleRefresh}
-        />
-      )}
-
-      {/* Footer */}
-      <footer className="border-t border-[#30363D] mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-center text-xs text-[#8B949E]">
-          Powered by AI · Automatización inteligente de cobros para clubes deportivos
-        </div>
-      </footer>
-    </div>
-  );
-}

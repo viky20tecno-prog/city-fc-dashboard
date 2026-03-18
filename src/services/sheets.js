@@ -3,7 +3,8 @@ import { SHEET_ID, API_KEY, SHEETS } from '../config';
 const BASE_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values`;
 
 async function fetchSheet(sheetName) {
-  const url = `${BASE_URL}/${encodeURIComponent(sheetName)}?key=${API_KEY}&majorDimension=ROWS`;
+  // Especificar rango A:Z para traer todas las columnas y filas
+  const url = `${BASE_URL}/${encodeURIComponent(sheetName)}!A:Z?key=${API_KEY}&majorDimension=ROWS`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Error fetching ${sheetName}: ${res.status}`);
   const data = await res.json();

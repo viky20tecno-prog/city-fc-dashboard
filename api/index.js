@@ -1,12 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-
 const playersRouter = require('./routes/players');
 const invoicesRouter = require('./routes/invoices');
 const paymentsRouter = require('./routes/payments');
 const configRouter = require('./routes/config');
 const reportsRouter = require('./routes/reports');
+const uniformsRouter = require('./routes/uniforms'); // ← NUEVO
 
 const app = express();
 
@@ -25,7 +25,6 @@ app.get('/api/health', (req, res) => {
 
 // Auth middleware (valida club_id para todas las rutas /api/*)
 app.use('/api', (req, res, next) => {
-  // /api/health no requiere club_id
   if (req.path === '/health') {
     return next();
   }
@@ -49,6 +48,7 @@ app.use('/api/invoices', invoicesRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/config', configRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/uniforms', uniformsRouter); // ← NUEVO
 
 // Error handler
 app.use((err, req, res, next) => {

@@ -7,9 +7,12 @@ class SheetsClient {
     this.spreadsheetId = process.env.GOOGLE_SHEETS_ID;
     this.auth = null;
     this.sheets = null;
-    this.initializeAuth();
-  }
-
+    try {
+      this.initializeAuth();
+    } catch (error) {
+      console.error('🔥 INIT ERROR:', error);
+    }
+  
   initializeAuth() {
     try {
       let keyData;

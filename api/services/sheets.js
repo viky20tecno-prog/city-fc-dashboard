@@ -21,8 +21,9 @@ class SheetsClient {
       }
       // Desarrollo: leer archivo local
       else if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY && process.env.GOOGLE_SERVICE_ACCOUNT_KEY.includes('-----BEGIN')) {
-        // Es el JSON directo
-        keyData = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+      // Es el JSON directo
+      keyData = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY.replace(/\\n/g, '\n'));
+      }
       }
       // Fallback: buscar archivo local
       else if (fs.existsSync(path.join(__dirname, '../service-account.json'))) {

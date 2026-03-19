@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Shirt, CheckCircle, AlertCircle, Search, Loader } from 'lucide-react';
 
-// ✅ FIX 1: Usar VITE_API_BASE_URL (no VITE_API_URL que no existe)
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app';
-const CLUB_ID = 'city-fc';
+const API_BASE = import.meta.env.VITE_API_URL || '';
+const CLUB_ID = import.meta.env.VITE_CLUB_ID || 'city-fc';
 
 export default function Uniformes() {
   const [step, setStep] = useState(1);
@@ -29,7 +28,6 @@ export default function Uniformes() {
 
   const cargarNumerosYPedidos = async () => {
     try {
-      // ✅ FIX 3: Agregar club_id a los endpoints de uniformes
       const [numRes, pedRes] = await Promise.all([
         fetch(`${API_BASE}/api/uniforms/numeros?club_id=${CLUB_ID}`),
         fetch(`${API_BASE}/api/uniforms?club_id=${CLUB_ID}`),
@@ -49,7 +47,6 @@ export default function Uniformes() {
     setError('');
     setJugadorEncontrado(null);
     try {
-      // ✅ FIX 2: Agregar club_id al buscar jugador
       const res = await fetch(`${API_BASE}/api/players/${form.cedula}?club_id=${CLUB_ID}`);
       const data = await res.json();
       if (data.success) {
@@ -78,7 +75,6 @@ export default function Uniformes() {
     }
     setEnviando(true);
     try {
-      // ✅ FIX 3: Agregar club_id al POST de uniformes
       const res = await fetch(`${API_BASE}/api/uniforms?club_id=${CLUB_ID}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

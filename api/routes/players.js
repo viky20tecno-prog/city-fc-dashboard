@@ -10,56 +10,26 @@ const sheetsClient = new SheetsClient();
  */
 router.get('/', async (req, res) => {
   try {
-    const club_id = req.club_id || 'city-fc';
-    
-    // Obtener todos los jugadores
-    const players = await sheetsClient.getAllRows('JUGADORES');
-    
-    // Filtrar activos (activo = 'SI')
-    const activePlayers = players.filter(p => p.activo === 'SI');
-    
-    // Debug: logear primer registro para verificar columnas
-    if (activePlayers.length > 0) {
-      console.log('🔍 Player object keys:', Object.keys(activePlayers[0]));
-      console.log('🔍 First player:', activePlayers[0]);
-    }
-    
-    // Mapear a formato API
-    const mapped = activePlayers.map(p => {
-      const nombre = p['nombre(s)'] || p.nombre || p.Nombre || p['Nombre(s)'] || '';
-      const apellido = p['apellido(s)'] || p.apellido || p.Apellido || p['Apellido(s)'] || '';
-      
-      return {
-        cedula: p.cedula,
-        nombre_completo: `${nombre} ${apellido}`.trim(),
-        nombre: nombre,
-        apellido: apellido,
-        celular: p.celular,
-        email: p.email,
-        fecha_nacimiento: p.fecha_nacimiento,
-        municipio: p.municipio,
-        tipo_descuento: p.tipo_descuento || 'NA',
-        mensualidad_2026: p.mensualidad_2026,
-        activo: p.activo,
-      };
-    });
-    
+    console.log('🔥 /players endpoint hit');
+    console.log('club_id:', req.club_id);
+
+    const sheetsClient = new SheetsClient();
+
+    const data = await sheetsClient.getAllRows('JUGADORES');
+
     res.json({
       success: true,
-      club_id,
-      total: mapped.length,
-      data: mapped,
+      data
     });
+
   } catch (error) {
-    console.error('Error in GET /players:', error);
+    console.error('❌ PLAYERS ERROR:', error);
     res.status(500).json({
       success: false,
-      error: 'Error fetching players',
-      message: error.message,
+      error: error.message
     });
   }
 });
-
 /**
  * GET /api/players/:cedula?club_id=city-fc
  * Detalle de un jugador específico

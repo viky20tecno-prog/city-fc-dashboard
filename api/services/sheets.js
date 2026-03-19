@@ -3,16 +3,17 @@ const fs = require('fs');
 const path = require('path');
 
 class SheetsClient {
-  constructor() {
-    this.spreadsheetId = process.env.GOOGLE_SHEETS_ID;
-    this.auth = null;
-    this.sheets = null;
-    try {
-      this.initializeAuth();
-    } catch (error) {
-      console.error('🔥 INIT ERROR:', error);
-    }
+ constructor() {
+  this.spreadsheetId = process.env.GOOGLE_SHEETS_ID;
+  this.auth = null;
+  this.sheets = null;
+
+  try {
+    this.initializeAuth();
+  } catch (error) {
+    console.error('🔥 INIT ERROR:', error);
   }
+}
   initializeAuth() {
     try {
       let keyData;

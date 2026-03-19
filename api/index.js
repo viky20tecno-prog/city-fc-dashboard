@@ -6,7 +6,8 @@ const invoicesRouter = require('./routes/invoices');
 const paymentsRouter = require('./routes/payments');
 const configRouter = require('./routes/config');
 const reportsRouter = require('./routes/reports');
-const uniformsRouter = require('./routes/uniforms'); // ← NUEVO
+const uniformsRouter = require('./routes/uniforms');
+const debugRouter = require('./routes/debug'); // ← DEBUG
 
 const app = express();
 
@@ -31,7 +32,7 @@ app.get('/api/health', (req, res) => {
 
 // Auth middleware (valida club_id para todas las rutas /api/*)
 app.use('/api', (req, res, next) => {
-  if (req.path === '/health') {
+  if (req.path === '/health' || req.path.startsWith('/debug')) {
     return next();
   }
   
@@ -54,7 +55,8 @@ app.use('/api/invoices', invoicesRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/config', configRouter);
 app.use('/api/reports', reportsRouter);
-app.use('/api/uniforms', uniformsRouter); // ← NUEVO
+app.use('/api/uniforms', uniformsRouter);
+app.use('/api/debug', debugRouter); // ← DEBUG
 
 // Error handler
 app.use((err, req, res, next) => {

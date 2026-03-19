@@ -15,43 +15,52 @@ class SheetsClient {
   }
 }
   initializeAuth() {
-    try {
-      let keyData;
+  try {
+    let keyData;
 
-      // Producción: leer desde variable de entorno (base64)
-      if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY && !process.env.GOOGLE_SERVICE_ACCOUNT_KEY.includes('-----BEGIN')) {
-        const decoded = Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_KEY, 'base64').toString('utf-8');
+    if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY) {
+      try {
+        // Intentar como base64
+        const decoded = Buffer.from(
+          process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
+          'base64'
+        ).toString('utf-8');
+
         keyData = JSON.parse(decoded);
+      } catch (error) {
+        // Si falla, usar JSON directo (con fix de \n)
+        keyData = JSON.parse(
+          process.env.GOOGLE_SERVICE_ACCOUNT_KEY.replace(/\\n/g, '\n')
+        );
       }
-      // Desarrollo: leer archivo local
-      else if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY && process.env.GOOGLE_SERVICE_ACCOUNT_KEY.includes('-----BEGIN')) {
-      // Es el JSON directo
-      keyData = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY.replace(/\\n/g, '\n'));
-      }
-      }
-      // Fallback: buscar archivo local
-      else if (fs.existsSync(path.join(__dirname, '../service-account.json'))) {
-        keyData = JSON.parse(fs.readFileSync(path.join(__dirname, '../service-account.json'), 'utf-8'));
-      }
-      else {
-        throw new Error('No se encontró Google Service Account key');
-      }
-
-      this.auth = new google.auth.GoogleAuth({
-        credentials: keyData,
-        scopes: [
-         'https://www.googleapis.com/auth/spreadsheets'
-      ],
-      });
-
-      this.sheets = google.sheets({ version: 'v4', auth: this.auth });
-      console.log('✅ Google Sheets client initialized');
-    } catch (error) {
-      console.error('❌ Error initializing Google Sheets:', error.message);
-      throw error;
+    } else if (fs.existsSync(path.join(__dirname, '../service-account.json'))) {
+      // Fallback local
+      keyData = JSON.parse(
+        fs.readFileSync(
+          path.join(__dirname, '../service-account.json'),
+          'utf-8'
+        )
+      );
+    } else {
+      throw new Error('No se encontró Google Service Account key');
     }
-  }
 
+    this.auth = new google.auth.GoogleAuth({
+      credentials: keyData,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+
+    this.sheets = google.sheets({
+      version: 'v4',
+      auth: this.auth,
+    });
+
+    console.log('✅ Google Sheets client initialized');
+  } catch (error) {
+    console.error('❌ Error initializing Google Sheets:', error.message);
+    throw error;
+  }
+}
   /**
    * Obtener rango específico de un sheet
    * @param {string} sheetName - Nombre de la hoja (ej: "JUGADORES")

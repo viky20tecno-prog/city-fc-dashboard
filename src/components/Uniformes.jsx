@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Shirt, CheckCircle, AlertCircle, Search, Loader } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+// VITE_API_BASE_URL = https://city-fc-api-v2.vercel.app/api (ya incluye /api)
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 const CLUB_ID = import.meta.env.VITE_CLUB_ID || 'city-fc';
 
 export default function Uniformes() {
@@ -28,9 +29,10 @@ export default function Uniformes() {
 
   const cargarNumerosYPedidos = async () => {
     try {
+      // ✅ Sin /api/ extra — API_BASE ya tiene /api al final
       const [numRes, pedRes] = await Promise.all([
-        fetch(`${API_BASE}/api/uniforms/numeros?club_id=${CLUB_ID}`),
-        fetch(`${API_BASE}/api/uniforms?club_id=${CLUB_ID}`),
+        fetch(`${API_BASE}/uniforms/numeros?club_id=${CLUB_ID}`),
+        fetch(`${API_BASE}/uniforms?club_id=${CLUB_ID}`),
       ]);
       const numData = await numRes.json();
       const pedData = await pedRes.json();
@@ -47,7 +49,8 @@ export default function Uniformes() {
     setError('');
     setJugadorEncontrado(null);
     try {
-      const res = await fetch(`${API_BASE}/api/players/${form.cedula}?club_id=${CLUB_ID}`);
+      // ✅ Sin /api/ extra
+      const res = await fetch(`${API_BASE}/players/${form.cedula}?club_id=${CLUB_ID}`);
       const data = await res.json();
       if (data.success) {
         setJugadorEncontrado(data.player);
@@ -75,7 +78,8 @@ export default function Uniformes() {
     }
     setEnviando(true);
     try {
-      const res = await fetch(`${API_BASE}/api/uniforms?club_id=${CLUB_ID}`, {
+      // ✅ Sin /api/ extra
+      const res = await fetch(`${API_BASE}/uniforms?club_id=${CLUB_ID}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, club_id: CLUB_ID }),
@@ -280,7 +284,7 @@ export default function Uniformes() {
         </div>
       </div>
 
-      {/* Tabla de pedidos */}
+      {/* Tabla de pedidos — ✅ columnas en minúscula como en el Sheet */}
       {pedidos.length > 0 && (
         <div className="bg-[#161B22] rounded-2xl border border-[#30363D] p-6">
           <h3 className="text-sm font-bold text-[#E6EDF3] mb-4">Pedidos registrados — {pedidos.length}</h3>
@@ -296,16 +300,16 @@ export default function Uniformes() {
               <tbody>
                 {pedidos.map((p, i) => (
                   <tr key={i} className="border-b border-[#30363D]/50 hover:bg-[#1E2530] transition-colors">
-                    <td className="py-2 px-3 text-[#8B949E]">{p.CEDULA}</td>
-                    <td className="py-2 px-3 text-[#E6EDF3]">{p.NOMBRE}</td>
-                    <td className="py-2 px-3 text-[#E6EDF3]">{p.TIPO}</td>
-                    <td className="py-2 px-3 text-[#E6EDF3]">{p.NOMBRE_ESTAMPAR || '—'}</td>
-                    <td className="py-2 px-3 text-[#E6EDF3]">{p.TALLA}</td>
-                    <td className="py-2 px-3 text-[#E6EDF3] font-bold">{p.NUMERO}</td>
-                    <td className="py-2 px-3 text-[#8B949E] text-xs">{p.FECHA}</td>
+                    <td className="py-2 px-3 text-[#8B949E]">{p.cedula}</td>
+                    <td className="py-2 px-3 text-[#E6EDF3]">{p.nombre}</td>
+                    <td className="py-2 px-3 text-[#E6EDF3]">{p.tipo}</td>
+                    <td className="py-2 px-3 text-[#E6EDF3]">{p.nombre_estampar || '—'}</td>
+                    <td className="py-2 px-3 text-[#E6EDF3]">{p.talla}</td>
+                    <td className="py-2 px-3 text-[#E6EDF3] font-bold">{p.numero_estampar}</td>
+                    <td className="py-2 px-3 text-[#8B949E] text-xs">{p.fecha}</td>
                     <td className="py-2 px-3">
                       <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(245,166,35,0.12)] text-[#F5A623]">
-                        {p.ESTADO}
+                        {p.estado}
                       </span>
                     </td>
                   </tr>

@@ -12,7 +12,7 @@ class SheetsClient {
     } catch (error) {
       console.error('🔥 INIT ERROR:', error);
     }
-  
+  }
   initializeAuth() {
     try {
       let keyData;

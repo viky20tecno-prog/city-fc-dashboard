@@ -22,10 +22,17 @@ router.get('/', async (req, res) => {
       estado_revision: p.estado_revision
     }));
 
-    res.json({ success: true, data: payments });
+    res.json({
+      success: true,
+      data: payments
+    });
 
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error('GET payments error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 
@@ -43,9 +50,7 @@ router.post('/', async (req, res) => {
       banco,
       referencia,
       conceptos = [],
-      url_comprobante = '',
-      observacion = '',
-      meses = []
+      url_comprobante = ''
     } = req.body;
 
     const jugador = await sheetsClient.searchRow('JUGADORES', 'cedula', cedula);
@@ -58,9 +63,10 @@ router.post('/', async (req, res) => {
     }
 
     const id_transaccion = `TXN-${Date.now()}`;
+
     const suma_conceptos = conceptos.reduce((acc, c) => acc + Number(c.valor || 0), 0);
 
-    await sheetsClient.appendRow('REGISTRO_PAGOS', [
+    const row = [
       club_id,
       id_transaccion,
       new Date().toISOString(),
@@ -73,57 +79,26 @@ router.post('/', async (req, res) => {
       referencia || '',
       JSON.stringify(conceptos),
       suma_conceptos,
-      monto >= suma_conceptos ? 'correcto' : 'discrepancia',
+      'OK',
       'PENDIENTE',
-      observacion,
-      url_comprobante
-    ]);
+      '',
+      url_comprobante,
+      cedula
+    ];
 
-    // ===== ACTUALIZAR MENSUALIDADES =====
-    if (conceptos.some(c => c.tipo === 'mensualidad') && meses.length > 0) {
+    await sheetsClient.appendRow('REGISTRO_PAGOS', row);
 
-      const valorPorMes = monto / meses.length;
-      const rows = await sheetsClient.getAllRows('ESTADO_MENSUALIDADES');
-
-      for (const mes of meses) {
-        const index = rows.findIndex(r =>
-          r.cedula == cedula &&
-          Number(r.numero_mes) === mes &&
-          Number(r.anio) === 2026
-        );
-
-        if (index !== -1) {
-          const row = rows[index];
-
-          const pagado = Number(row.valor_pagado || 0) + valorPorMes;
-          const total = Number(row.valor_oficial || 0);
-          const saldo = total - pagado;
-
-          let estado = 'PARCIAL';
-          if (saldo <= 0) estado = 'AL_DIA';
-
-          await sheetsClient.updateRow('ESTADO_MENSUALIDADES', index + 2, [
-            row.club_id,
-            row.cedula,
-            row.nombre,
-            row.anio,
-            row.mes,
-            row.numero_mes,
-            total,
-            pagado,
-            saldo,
-            estado,
-            new Date().toISOString().split('T')[0]
-          ]);
-        }
-      }
-    }
-
-    res.json({ success: true, id_transaccion });
+    res.json({
+      success: true,
+      id_transaccion
+    });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: error.message });
+    console.error('POST payments error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 

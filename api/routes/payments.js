@@ -4,6 +4,41 @@ const SheetsClient = require('../services/sheets');
 const router = express.Router();
 const sheetsClient = new SheetsClient();
 
+/**
+ * GET /api/payments
+ */
+router.get('/', async (req, res) => {
+  try {
+    let payments = await sheetsClient.getAllRows('REGISTRO_PAGOS');
+
+    payments = payments.map(p => ({
+      id_transaccion: p.id_transaccion,
+      fecha_proceso: p.fecha_proceso,
+      telefono: p.telefono,
+      nombre_detectado: p.nombre_detectado,
+      monto: p.monto_imagen,
+      banco: p.banco,
+      referencia: p.referencia,
+      estado_revision: p.estado_revision
+    }));
+
+    res.json({
+      success: true,
+      data: payments
+    });
+
+  } catch (error) {
+    console.error('GET payments error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/payments
+ */
 router.post('/', async (req, res) => {
   try {
     const club_id = req.club_id || 'city-fc';
@@ -18,13 +53,6 @@ router.post('/', async (req, res) => {
       url_comprobante = ''
     } = req.body;
 
-    if (!cedula || !monto || !banco) {
-      return res.status(400).json({
-        success: false,
-        error: 'Faltan datos obligatorios'
-      });
-    }
-
     const jugador = await sheetsClient.searchRow('JUGADORES', 'cedula', cedula);
 
     if (!jugador) {
@@ -38,11 +66,6 @@ router.post('/', async (req, res) => {
 
     const suma_conceptos = conceptos.reduce((acc, c) => acc + Number(c.valor || 0), 0);
 
-    const validacion_monto = monto >= suma_conceptos ? 'OK' : 'DIFERENCIA';
-
-    let mensaje_alerta = '';
-
-    // 🔥 ORDEN CORRECTO + INCLUYE CEDULA
     const row = [
       club_id,
       id_transaccion,
@@ -56,107 +79,14 @@ router.post('/', async (req, res) => {
       referencia || '',
       JSON.stringify(conceptos),
       suma_conceptos,
-      validacion_monto,
+      'OK',
       'PENDIENTE',
       '',
       url_comprobante,
-      cedula // 🔥 ESTE ERA EL ERROR
+      cedula
     ];
 
     await sheetsClient.appendRow('REGISTRO_PAGOS', row);
-
-    const mesActual = new Date().getMonth() + 1;
-
-    for (const c of conceptos) {
-
-      if (c.tipo === 'Mensualidad') {
-        const rows = await sheetsClient.getAllRows('ESTADO_MENSUALIDADES');
-
-        const index = rows.findIndex(r =>
-          r.cedula == cedula && Number(r.mes) === mesActual
-        );
-
-        if (index !== -1) {
-          const row = rows[index];
-
-          const pagado = Number(row.valor_pagado || 0) + Number(c.valor || 0);
-          const total = Number(row.valor_total || 0);
-          const saldo = total - pagado;
-
-          const estado = saldo <= 0 ? 'AL_DIA' : 'PARCIAL';
-
-          await sheetsClient.updateRow('ESTADO_MENSUALIDADES', index + 2, [
-            row.club_id,
-            row.cedula,
-            row.nombre,
-            row.mes,
-            total,
-            pagado,
-            saldo,
-            estado
-          ]);
-        }
-      }
-
-      if (c.tipo === 'Uniforme') {
-        const rows = await sheetsClient.getAllRows('ESTADO_UNIFORMES');
-
-        const index = rows.findIndex(r => r.cedula == cedula);
-
-        if (index !== -1) {
-          const row = rows[index];
-
-          const pagado = Number(row.valor_pagado || 0) + Number(c.valor || 0);
-          const total = Number(row.valor_total || 0);
-          const saldo = total - pagado;
-
-          const estado = saldo <= 0 ? 'AL_DIA' : 'PARCIAL';
-
-          await sheetsClient.updateRow('ESTADO_UNIFORMES', index + 2, [
-            row.club_id,
-            row.cedula,
-            row.nombre,
-            total,
-            pagado,
-            saldo,
-            estado
-          ]);
-        }
-      }
-
-      if (c.tipo === 'Torneo') {
-        const rows = await sheetsClient.getAllRows('ESTADO_TORNEOS');
-
-        const index = rows.findIndex(r =>
-          r.cedula == cedula && r.torneo === c.torneo
-        );
-
-        if (index !== -1) {
-          const row = rows[index];
-
-          const pagado = Number(row.valor_pagado || 0) + Number(c.valor || 0);
-          const total = Number(row.valor_total || 0);
-          const saldo = total - pagado;
-
-          const estado = saldo <= 0 ? 'AL_DIA' : 'PARCIAL';
-
-          await sheetsClient.updateRow('ESTADO_TORNEOS', index + 2, [
-            row.club_id,
-            row.cedula,
-            row.nombre,
-            row.torneo,
-            total,
-            pagado,
-            saldo,
-            estado
-          ]);
-        }
-      }
-
-      if (c.tipo === 'Otro') {
-        mensaje_alerta = c.descripcion || 'Pago no categorizado';
-      }
-    }
 
     res.json({
       success: true,
@@ -164,7 +94,7 @@ router.post('/', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('ERROR PAYMENT:', error);
+    console.error('POST payments error:', error);
     res.status(500).json({
       success: false,
       error: error.message

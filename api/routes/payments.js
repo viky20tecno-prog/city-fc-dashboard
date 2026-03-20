@@ -25,7 +25,6 @@ router.get('/', async (req, res) => {
     res.json({ success: true, data: payments });
 
   } catch (error) {
-    console.error(error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -52,7 +51,10 @@ router.post('/', async (req, res) => {
     const jugador = await sheetsClient.searchRow('JUGADORES', 'cedula', cedula);
 
     if (!jugador) {
-      return res.status(404).json({ success: false, error: 'Jugador no encontrado' });
+      return res.status(404).json({
+        success: false,
+        error: 'Jugador no encontrado'
+      });
     }
 
     const id_transaccion = `TXN-${Date.now()}`;
@@ -77,7 +79,9 @@ router.post('/', async (req, res) => {
       url_comprobante
     ]);
 
+    // ===== ACTUALIZAR MENSUALIDADES =====
     if (conceptos.some(c => c.tipo === 'mensualidad') && meses.length > 0) {
+
       const valorPorMes = monto / meses.length;
       const rows = await sheetsClient.getAllRows('ESTADO_MENSUALIDADES');
 
@@ -97,7 +101,6 @@ router.post('/', async (req, res) => {
 
           let estado = 'PARCIAL';
           if (saldo <= 0) estado = 'AL_DIA';
-          else if (pagado === 0) estado = 'MORA';
 
           await sheetsClient.updateRow('ESTADO_MENSUALIDADES', index + 2, [
             row.club_id,

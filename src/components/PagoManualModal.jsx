@@ -29,15 +29,15 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
   const [form, setForm] = useState({
     cedula: '',
     concepto: 'Mensualidad',
-    monto: '0',
+    monto: '65000',
     metodo_pago: 'Efectivo',
     referencia: '',
     observacion: '',
+    torneo: '',
+    uniforme: '',
   });
 
-  const [jugadorSeleccionado, setJugadorSeleccionado] = useState(null);
-  const [busqueda, setBusqueda] = useState('');
-
+  // 🔥 AUTO CALCULO
   useEffect(() => {
     if (form.concepto === 'Mensualidad') {
       setForm(prev => ({
@@ -47,27 +47,24 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
     }
   }, [mesesSeleccionados]);
 
-  const seleccionarJugador = (j) => {
-    setJugadorSeleccionado(j);
-    setForm(prev => ({ ...prev, cedula: j.cedula }));
-    setBusqueda(j.nombre);
+  const handleChange = (key, value) => {
+    setForm(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleConfirmar = async () => {
 
     const conceptos = [{
       tipo: form.concepto.toLowerCase(),
       descripcion: form.concepto,
-      valor: parseInt(form.monto)
+      valor: parseInt(form.monto),
     }];
 
     const payload = {
       cedula: form.cedula,
       monto: parseInt(form.monto),
+      fecha_comprobante: new Date().toISOString().split('T')[0],
       banco: form.metodo_pago,
       referencia: form.referencia,
-      fecha_comprobante: new Date().toISOString().split('T')[0],
       conceptos,
       observacion: form.observacion,
       meses: mesesSeleccionados
@@ -76,43 +73,37 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
     const res = await fetch(`${API_BASE_URL}/payments?club_id=${CLUB_ID}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     const data = await res.json();
 
     if (data.success) {
-      alert('Pago registrado');
       onSuccess && onSuccess();
       onClose();
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="bg-[#161B22] p-6 rounded-xl w-full max-w-md space-y-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-[#161B22] rounded-2xl border border-[#30363D] w-full max-w-md p-6 space-y-4">
 
-        <input placeholder="Buscar jugador"
-          value={busqueda}
-          onChange={e => setBusqueda(e.target.value)}
-          className="w-full p-2 bg-[#1E2530] text-white rounded"
-        />
+        <h2 className="text-lg text-white font-bold">Registrar Pago</h2>
 
-        {jugadores.map(j => (
-          <div key={j.cedula} onClick={() => seleccionarJugador(j)} className="cursor-pointer text-white">
-            {j.nombre} - {j.cedula}
-          </div>
-        ))}
-
-        <select value={form.concepto} onChange={e => setForm({...form, concepto: e.target.value})}>
+        <select
+          value={form.concepto}
+          onChange={(e) => handleChange('concepto', e.target.value)}
+          className="w-full p-3 bg-[#1E2530] text-white rounded"
+        >
           {CONCEPTOS.map(c => <option key={c}>{c}</option>)}
         </select>
 
         {form.concepto === 'Mensualidad' && (
           <div className="grid grid-cols-3 gap-2">
             {MESES.map(m => (
-              <button type="button"
+              <button
                 key={m.valor}
+                type="button"
                 onClick={() => {
                   setMesesSeleccionados(prev =>
                     prev.includes(m.valor)
@@ -120,25 +111,39 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
                       : [...prev, m.valor]
                   );
                 }}
-                className={mesesSeleccionados.includes(m.valor) ? 'bg-green-500 text-black' : 'bg-gray-700 text-white'}>
+                className={`p-2 rounded text-xs ${
+                  mesesSeleccionados.includes(m.valor)
+                    ? 'bg-[#00D084] text-black'
+                    : 'bg-[#1E2530] text-white'
+                }`}
+              >
                 {m.nombre}
               </button>
             ))}
           </div>
         )}
 
-        <input value={form.monto} readOnly className="w-full p-2 bg-gray-800 text-white"/>
-
-        <textarea value={form.observacion}
-          onChange={e => setForm({...form, observacion: e.target.value})}
-          className="w-full p-2 bg-gray-800 text-white"
+        <input
+          value={form.monto}
+          readOnly
+          className="w-full p-3 bg-[#1E2530] text-white rounded"
         />
 
-        <button type="submit" className="bg-green-500 p-2 w-full">
+        <textarea
+          placeholder="Observación"
+          value={form.observacion}
+          onChange={(e) => handleChange('observacion', e.target.value)}
+          className="w-full p-3 bg-[#1E2530] text-white rounded"
+        />
+
+        <button
+          onClick={handleConfirmar}
+          className="w-full bg-[#00D084] text-black p-3 rounded font-semibold"
+        >
           Registrar
         </button>
 
-      </form>
+      </div>
     </div>
   );
 }

@@ -42,29 +42,6 @@ export default function Uniformes() {
     }
   };
 
-  const buscarJugador = async () => {
-    if (!form.cedula) return;
-    setBuscando(true);
-    setError('');
-    setJugadorEncontrado(null);
-    try {
-      const res = await fetch(`${API_BASE}/players/${form.cedula}?club_id=${CLUB_ID}`);
-      const data = await res.json();
-      if (data.success) {
-        setJugadorEncontrado(data.player);
-        setForm(f => ({ ...f, nombre: data.player.nombre_completo }));
-        setStep(2);
-      } else {
-        setError('Jugador no encontrado. Verificá la cédula.');
-      }
-    } catch (e) {
-      setError('Error de conexión. Intentá de nuevo.');
-    } finally {
-      setBuscando(false);
-    }
-  };
-
-  // Formatear número a 3 dígitos con ceros a la izquierda
   const formatNumero = (val) => {
     const num = val.replace(/\D/g, '').slice(0, 3);
     return num;
@@ -121,7 +98,6 @@ export default function Uniformes() {
       <div className="max-w-xl mx-auto">
         <div className="bg-[#161B22] rounded-2xl border border-[#30363D] p-6">
 
-          {/* Título */}
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-[rgba(0,208,132,0.12)] flex items-center justify-center">
               <Shirt className="w-5 h-5 text-[#00D084]" />
@@ -134,7 +110,6 @@ export default function Uniformes() {
             </div>
           </div>
 
-          {/* Éxito */}
           {exito && (
             <div className="flex items-center gap-3 p-4 rounded-xl bg-[rgba(0,208,132,0.12)] border border-[#00D084]/30 mb-6">
               <CheckCircle className="w-5 h-5 text-[#00D084]" />
@@ -142,7 +117,6 @@ export default function Uniformes() {
             </div>
           )}
 
-          {/* Error */}
           {error && (
             <div className="flex items-center gap-3 p-4 rounded-xl bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/30 mb-6">
               <AlertCircle className="w-5 h-5 text-[#FF5E5E]" />
@@ -150,7 +124,6 @@ export default function Uniformes() {
             </div>
           )}
 
-          {/* PASO 1 */}
           {step === 1 && (
             <div className="space-y-4">
               <div>
@@ -178,11 +151,9 @@ export default function Uniformes() {
             </div>
           )}
 
-          {/* PASO 2 */}
           {step === 2 && jugadorEncontrado && (
             <div className="space-y-4">
 
-              {/* Jugador encontrado */}
               <div className="p-3 rounded-xl bg-[rgba(0,208,132,0.08)] border border-[#00D084]/20 flex items-center gap-3 mb-2">
                 <CheckCircle className="w-4 h-4 text-[#00D084] flex-shrink-0" />
                 <div>
@@ -197,7 +168,6 @@ export default function Uniformes() {
                 </button>
               </div>
 
-              {/* Tipo de jugador + Campeón */}
               <div>
                 <label className="block text-xs text-[#8B949E] mb-1.5">Tipo de jugador *</label>
                 <div className="grid grid-cols-3 gap-3">
@@ -214,7 +184,6 @@ export default function Uniformes() {
                       {t}
                     </button>
                   ))}
-                  {/* Campeón último torneo */}
                   <button
                     onClick={() => setForm(f => ({ ...f, campeon: !f.campeon }))}
                     className={`py-2.5 rounded-xl text-sm font-medium border transition-colors flex items-center justify-center gap-1.5 ${
@@ -235,7 +204,6 @@ export default function Uniformes() {
                 )}
               </div>
 
-              {/* Nombre a estampar */}
               <div>
                 <label className="block text-xs text-[#8B949E] mb-1.5">
                   Nombre a estampar
@@ -250,7 +218,6 @@ export default function Uniformes() {
                 />
               </div>
 
-              {/* Talla y Número */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs text-[#8B949E] mb-1.5">Talla *</label>
@@ -285,7 +252,6 @@ export default function Uniformes() {
                         : 'border-[#30363D] focus:border-[#00D084]'
                     }`}
                   />
-                  {/* Preview del número formateado */}
                   {form.numero && (
                     <p className={`text-xs mt-1 font-mono ${numeroValido ? 'text-[#00D084]' : 'text-[#FF5E5E]'}`}>
                       {numeroValido
@@ -296,7 +262,6 @@ export default function Uniformes() {
                 </div>
               </div>
 
-              {/* Botón */}
               <button
                 onClick={handleSubmit}
                 disabled={!form.tipo || !form.talla || !form.numero || enviando || numerosUsados.includes(form.numero.padStart(3, '0'))}
@@ -334,7 +299,7 @@ export default function Uniformes() {
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.nombre}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.tipo}</td>
                     <td className="py-2 px-3">
-                      {p.campeon === 'true' || p.campeon === true ? (
+                      {p.campeon === 'SI' || p.campeon === 'true' || p.campeon === true ? (
                         <span className="flex items-center gap-1 text-[#F5A623]">
                           <Trophy className="w-3 h-3" /> Sí
                         </span>
@@ -344,7 +309,7 @@ export default function Uniformes() {
                     </td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.nombre_estampar || '—'}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.talla}</td>
-                    <td className="py-2 px-3 text-[#E6EDF3] font-mono font-bold">{p.numero_estampar}</td>
+                    <td className="py-2 px-3 text-[#E6EDF3] font-mono font-bold">{p.numero}</td>
                     <td className="py-2 px-3 text-[#8B949E] text-xs">{p.fecha}</td>
                     <td className="py-2 px-3">
                       <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(245,166,35,0.12)] text-[#F5A623]">

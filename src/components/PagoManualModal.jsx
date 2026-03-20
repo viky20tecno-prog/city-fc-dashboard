@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, DollarSign, Loader2, CheckCircle, AlertCircle, ArrowLeft, Shield } from 'lucide-react';
+import { X, DollarSign, Loader2, CheckCircle, AlertCircle, ArrowLeft, Shield, PlusCircle } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 const CLUB_ID = import.meta.env.VITE_CLUB_ID || 'city-fc';
@@ -23,21 +23,18 @@ const TORNEOS = [
 
 const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseInt(n) || 0);
 
+const FORM_INICIAL = {
+  cedula: '', nombre: '', concepto: 'Mensualidad', monto: '65000',
+  metodo_pago: 'Efectivo', referencia: '', observacion: '', torneo: '', uniforme: '',
+};
+
 export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
-  const [form, setForm] = useState({
-    cedula: '',
-    concepto: 'Mensualidad',
-    monto: '65000',
-    metodo_pago: 'Efectivo',
-    referencia: '',
-    observacion: '',
-    torneo: '',
-    uniforme: '',
-  });
+  const [form, setForm] = useState({ ...FORM_INICIAL });
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const [jugadorSeleccionado, setJugadorSeleccionado] = useState(null);
   const [busqueda, setBusqueda] = useState('');
+  const [ultimoPago, setUltimoPago] = useState(null);
 
   const jugadoresFiltrados = busqueda.length >= 2
     ? jugadores.filter(j => {
@@ -53,9 +50,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
     setBusqueda(nombre);
   };
 
-  const handleChange = (key, value) => {
-    setForm(prev => ({ ...prev, [key]: value }));
-  };
+  const handleChange = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
   const nombreJugador = jugadorSeleccionado
     ? `${jugadorSeleccionado['nombre(s)'] || jugadorSeleccionado.nombre || ''} ${jugadorSeleccionado['apellido(s)'] || jugadorSeleccionado.apellidos || ''}`.trim()
@@ -66,26 +61,11 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
     setErrorMsg('');
     setStatus('idle');
 
-    if (!jugadorSeleccionado) {
-      setStatus('error');
-      setErrorMsg('Selecciona un jugador de la lista');
-      return;
-    }
-    if (!form.monto || parseInt(form.monto) <= 0) {
-      setStatus('error');
-      setErrorMsg('Ingresa un monto válido');
-      return;
-    }
-    if (form.concepto === 'Torneo' && !form.torneo.trim()) {
-      setStatus('error');
-      setErrorMsg('Selecciona un torneo');
-      return;
-    }
-    if (form.concepto === 'Uniforme' && !form.uniforme.trim()) {
-      setStatus('error');
-      setErrorMsg('Selecciona un tipo de uniforme');
-      return;
-    }
+    if (!jugadorSeleccionado) { setStatus('error'); setErrorMsg('Selecciona un jugador de la lista'); return; }
+    if (!form.monto || parseInt(form.monto) <= 0) { setStatus('error'); setErrorMsg('Ingresa un monto válido'); return; }
+    if (form.concepto === 'Torneo' && !form.torneo.trim()) { setStatus('error'); setErrorMsg('Selecciona un torneo'); return; }
+    if (form.concepto === 'Uniforme' && !form.uniforme.trim()) { setStatus('error'); setErrorMsg('Selecciona un tipo de uniforme'); return; }
+    if (form.concepto === 'Otro' && !form.observacion.trim()) { setStatus('error'); setErrorMsg('Ingresa una observación para el concepto Otro'); return; }
 
     setStatus('confirmar');
   };
@@ -95,11 +75,8 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
     setErrorMsg('');
 
     try {
-      // ✅ Mapear concepto al formato que espera payments.js
-      const conceptoLabel = form.concepto === 'Torneo'
-        ? form.torneo
-        : form.concepto === 'Uniforme'
-        ? form.uniforme
+      const conceptoLabel = form.concepto === 'Torneo' ? form.torneo
+        : form.concepto === 'Uniforme' ? form.uniforme
         : form.concepto;
 
       const conceptos = [{
@@ -113,10 +90,8 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
         nombre_detectado: nombreJugador,
         monto: parseInt(form.monto),
         fecha_comprobante: new Date().toISOString().split('T')[0],
-        banco: form.metodo_pago, // ✅ payments.js usa "banco" para método de pago
-        referencia: form.referencia || (form.metodo_pago === 'Efectivo'
-          ? `EFECTIVO-${Date.now()}`
-          : `MANUAL-${Date.now()}`),
+        banco: form.metodo_pago,
+        referencia: form.referencia || (form.metodo_pago === 'Efectivo' ? `EFECTIVO-${Date.now()}` : `MANUAL-${Date.now()}`),
         conceptos,
         observacion: form.observacion,
         url_comprobante: '',
@@ -131,11 +106,9 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
       const data = await res.json();
 
       if (data.success) {
+        setUltimoPago({ nombre: nombreJugador, concepto: form.concepto, monto: form.monto, conceptoLabel });
         setStatus('success');
-        setTimeout(() => {
-          if (onSuccess) onSuccess();
-          onClose();
-        }, 2500);
+        if (onSuccess) onSuccess();
       } else {
         setStatus('error');
         setErrorMsg(data.error || data.message || 'Error al registrar el pago');
@@ -146,8 +119,17 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
     }
   };
 
+  const handleOtroPago = () => {
+    setForm({ ...FORM_INICIAL });
+    setJugadorSeleccionado(null);
+    setBusqueda('');
+    setStatus('idle');
+    setErrorMsg('');
+    setUltimoPago(null);
+  };
+
   // ==================== PANTALLA ÉXITO ====================
-  if (status === 'success') {
+  if (status === 'success' && ultimoPago) {
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-[#161B22] rounded-2xl border border-[#30363D] p-8 max-w-md w-full text-center">
@@ -155,9 +137,29 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
             <CheckCircle className="w-8 h-8 text-[#00D084]" />
           </div>
           <h2 className="text-xl font-bold text-[#E6EDF3] mb-2">¡Pago registrado!</h2>
-          <p className="text-[#8B949E]">{nombreJugador}</p>
-          <p className="text-[#E6EDF3] font-medium mt-1">{form.concepto} · {formatCOP(form.monto)}</p>
-          <p className="text-xs text-[#8B949E] mt-3">El dashboard se actualizará automáticamente</p>
+          <p className="text-[#8B949E]">{ultimoPago.nombre}</p>
+          <p className="text-[#E6EDF3] font-medium mt-1">
+            {ultimoPago.concepto}{ultimoPago.conceptoLabel !== ultimoPago.concepto ? ` — ${ultimoPago.conceptoLabel}` : ''} · {formatCOP(ultimoPago.monto)}
+          </p>
+          <p className="text-xs text-[#8B949E] mt-3 mb-6">El estado del jugador se actualizó automáticamente</p>
+
+          {/* ✅ Pregunta: ¿registrar otro pago? */}
+          <div className="flex gap-3">
+            <button
+              onClick={handleOtroPago}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#00D084]/30 bg-[rgba(0,208,132,0.08)] text-sm font-medium text-[#00D084] hover:bg-[rgba(0,208,132,0.15)] transition-colors"
+            >
+              <PlusCircle className="w-4 h-4" />
+              Otro pago
+            </button>
+            <button
+              onClick={onClose}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#30363D] text-sm font-medium text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#8B949E] transition-colors"
+            >
+              <X className="w-4 h-4" />
+              Cerrar
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -188,7 +190,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
                 <span className="text-sm text-[#8B949E]">Cédula</span>
                 <span className="text-sm font-mono text-[#E6EDF3]">{form.cedula}</span>
               </div>
-              <div className="border-t border-[#30363D] my-2"></div>
+              <div className="border-t border-[#30363D]"></div>
               <div className="flex justify-between">
                 <span className="text-sm text-[#8B949E]">Concepto</span>
                 <span className="text-sm font-medium text-[#E6EDF3]">
@@ -216,34 +218,21 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
                 </div>
               )}
             </div>
-
             {status === 'error' && (
               <div className="flex items-start gap-2 p-3 bg-[rgba(255,94,94,0.12)] rounded-xl text-sm text-[#FF5E5E] border border-[#FF5E5E]/20">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                {errorMsg}
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />{errorMsg}
               </div>
             )}
           </div>
 
           <div className="p-6 pt-0 flex gap-3">
-            <button
-              onClick={() => setStatus('idle')}
-              disabled={status === 'loading'}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#30363D] text-sm font-medium text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#8B949E] transition-colors disabled:opacity-50"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Editar
+            <button onClick={() => setStatus('idle')} disabled={status === 'loading'}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#30363D] text-sm font-medium text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#8B949E] transition-colors disabled:opacity-50">
+              <ArrowLeft className="w-4 h-4" />Editar
             </button>
-            <button
-              onClick={handleConfirmar}
-              disabled={status === 'loading'}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#0D1117] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all disabled:opacity-50"
-            >
-              {status === 'loading' ? (
-                <><Loader2 className="w-4 h-4 animate-spin" />Registrando...</>
-              ) : (
-                <><CheckCircle className="w-4 h-4" />Confirmar Pago</>
-              )}
+            <button onClick={handleConfirmar} disabled={status === 'loading'}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#0D1117] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all disabled:opacity-50">
+              {status === 'loading' ? <><Loader2 className="w-4 h-4 animate-spin" />Registrando...</> : <><CheckCircle className="w-4 h-4" />Confirmar Pago</>}
             </button>
           </div>
         </div>
@@ -271,22 +260,14 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
         </div>
 
         <form onSubmit={handleRevisar} className="p-6 space-y-4">
-          {/* Buscar jugador */}
+          {/* Jugador */}
           <div>
-            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
-              Jugador <span className="text-[#FF5E5E]">*</span>
-            </label>
+            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Jugador <span className="text-[#FF5E5E]">*</span></label>
             <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar por nombre o cédula..."
-                value={busqueda}
+              <input type="text" placeholder="Buscar por nombre o cédula..." value={busqueda}
                 onChange={e => { setBusqueda(e.target.value); setJugadorSeleccionado(null); }}
-                className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]"
-              />
-              {jugadorSeleccionado && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#00D084] text-xs font-medium">✓ Seleccionado</span>
-              )}
+                className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]" />
+              {jugadorSeleccionado && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#00D084] text-xs font-medium">✓ Seleccionado</span>}
             </div>
             {jugadoresFiltrados.length > 0 && !jugadorSeleccionado && (
               <div className="mt-1 bg-[#1E2530] border border-[#30363D] rounded-xl overflow-hidden max-h-48 overflow-y-auto">
@@ -306,9 +287,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
 
           {/* Concepto */}
           <div>
-            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
-              Concepto <span className="text-[#FF5E5E]">*</span>
-            </label>
+            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Concepto <span className="text-[#FF5E5E]">*</span></label>
             <select value={form.concepto}
               onChange={e => {
                 handleChange('concepto', e.target.value);
@@ -322,18 +301,11 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
             </select>
           </div>
 
-          {/* Torneo */}
           {form.concepto === 'Torneo' && (
             <div>
-              <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
-                Torneo <span className="text-[#FF5E5E]">*</span>
-              </label>
+              <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Torneo <span className="text-[#FF5E5E]">*</span></label>
               <select value={form.torneo}
-                onChange={e => {
-                  const t = TORNEOS.find(t => t.label === e.target.value);
-                  handleChange('torneo', e.target.value);
-                  if (t) handleChange('monto', t.valor.toString());
-                }}
+                onChange={e => { const t = TORNEOS.find(t => t.label === e.target.value); handleChange('torneo', e.target.value); if (t) handleChange('monto', t.valor.toString()); }}
                 className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]">
                 <option value="">Seleccionar torneo...</option>
                 {TORNEOS.map(t => <option key={t.label} value={t.label}>{t.label} — {formatCOP(t.valor)}</option>)}
@@ -341,18 +313,11 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
             </div>
           )}
 
-          {/* Uniforme */}
           {form.concepto === 'Uniforme' && (
             <div>
-              <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
-                Tipo de uniforme <span className="text-[#FF5E5E]">*</span>
-              </label>
+              <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Tipo de uniforme <span className="text-[#FF5E5E]">*</span></label>
               <select value={form.uniforme}
-                onChange={e => {
-                  const u = UNIFORMES.find(u => u.label === e.target.value);
-                  handleChange('uniforme', e.target.value);
-                  if (u) handleChange('monto', u.valor.toString());
-                }}
+                onChange={e => { const u = UNIFORMES.find(u => u.label === e.target.value); handleChange('uniforme', e.target.value); if (u) handleChange('monto', u.valor.toString()); }}
                 className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]">
                 <option value="">Seleccionar uniforme...</option>
                 {UNIFORMES.map(u => <option key={u.label} value={u.label}>{u.label} — {formatCOP(u.valor)}</option>)}
@@ -362,60 +327,51 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
 
           {/* Monto */}
           <div>
-            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
-              Monto <span className="text-[#FF5E5E]">*</span>
-            </label>
+            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Monto <span className="text-[#FF5E5E]">*</span></label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8B949E] text-sm">$</span>
               <input type="text" inputMode="numeric" placeholder="65000" value={form.monto}
-                onChange={e => { const v = e.target.value.replace(/[^0-9]/g, ''); handleChange('monto', v); }}
+                onChange={e => handleChange('monto', e.target.value.replace(/[^0-9]/g, ''))}
                 className="w-full pl-8 pr-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]" />
             </div>
           </div>
 
-          {/* Método de pago */}
+          {/* Método */}
           <div>
-            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
-              Método de pago <span className="text-[#FF5E5E]">*</span>
-            </label>
+            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Método de pago <span className="text-[#FF5E5E]">*</span></label>
             <select value={form.metodo_pago} onChange={e => handleChange('metodo_pago', e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]">
               {METODOS_PAGO.map(m => <option key={m} value={m}>{m}</option>)}
             </select>
           </div>
 
-          {/* Referencia */}
           {form.metodo_pago !== 'Efectivo' && (
             <div>
-              <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
-                Referencia o número de recibo
-              </label>
+              <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Referencia o número de recibo</label>
               <input type="text" placeholder="Ej: REC-001 (opcional)" value={form.referencia}
                 onChange={e => handleChange('referencia', e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]" />
             </div>
           )}
 
-          {/* Observación */}
           <div>
-            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Observación</label>
-            <textarea placeholder="Notas adicionales (opcional)" value={form.observacion}
-              onChange={e => handleChange('observacion', e.target.value)} rows={2}
+            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
+              Observación {form.concepto === 'Otro' && <span className="text-[#FF5E5E]">*</span>}
+            </label>
+            <textarea placeholder={form.concepto === 'Otro' ? 'Describe el concepto del pago...' : 'Notas adicionales (opcional)'}
+              value={form.observacion} onChange={e => handleChange('observacion', e.target.value)} rows={2}
               className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084] resize-none" />
           </div>
 
-          {/* Error */}
           {status === 'error' && (
             <div className="flex items-start gap-2 p-3 bg-[rgba(255,94,94,0.12)] rounded-xl text-sm text-[#FF5E5E] border border-[#FF5E5E]/20">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-              {errorMsg}
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />{errorMsg}
             </div>
           )}
 
           <button type="submit"
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#0D1117] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all">
-            <Shield className="w-4 h-4" />
-            Revisar y Confirmar
+            <Shield className="w-4 h-4" />Revisar y Confirmar
           </button>
         </form>
       </div>

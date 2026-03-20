@@ -48,7 +48,7 @@ export default function Uniformes() {
   };
 
   const numeroDisplay = form.numero ? form.numero.padStart(3, '0') : '';
-  const numeroValido = form.numero && !numerosUsados.includes(form.numero.padStart(3, '0'));
+  const numeroValido = form.numero && !numerosUsados.includes((form.numero || '').padStart(3, '0'));
 
   const handleSubmit = async () => {
     setError('');
@@ -264,7 +264,7 @@ export default function Uniformes() {
 
               <button
                 onClick={handleSubmit}
-                disabled={!form.tipo || !form.talla || !form.numero || enviando || numerosUsados.includes(form.numero.padStart(3, '0'))}
+                disabled={!form.tipo || !form.talla || !form.numero || enviando || numerosUsados.includes((form.numero || '').padStart(3, '0'))}
                 className="w-full py-3 rounded-xl bg-[#00D084] text-[#0D1117] text-sm font-bold hover:bg-[#00D084]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {enviando ? (

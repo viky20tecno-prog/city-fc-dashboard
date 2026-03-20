@@ -4,59 +4,6 @@ const SheetsClient = require('../services/sheets');
 const router = express.Router();
 const sheetsClient = new SheetsClient();
 
-/**
- * GET /api/payments
- */
-router.get('/', async (req, res) => {
-  try {
-    const club_id = req.club_id || 'city-fc';
-    const { limit = 50, cedula, estado_revision } = req.query;
-
-    let payments = await sheetsClient.getAllRows('REGISTRO_PAGOS');
-
-    if (cedula) {
-      payments = payments.filter(p => p.cedula === cedula);
-    }
-
-    if (estado_revision) {
-      payments = payments.filter(p => p.estado_revision === estado_revision);
-    }
-
-    payments.sort((a, b) => {
-      const dateA = new Date(a.fecha_proceso || 0);
-      const dateB = new Date(b.fecha_proceso || 0);
-      return dateB - dateA;
-    });
-
-    const limitNum = Math.min(parseInt(limit) || 50, 500);
-    payments = payments.slice(0, limitNum);
-
-    const mapped = payments.map(p => ({
-      id_transaccion: p.id_transaccion,
-      fecha_proceso: p.fecha_proceso,
-      telefono: p.telefono,
-      nombre_detectado: p.nombre_detectado || '',
-      monto: parseFloat(p.monto_imagen) || 0,
-      banco: p.banco,
-      referencia: p.referencia,
-      conceptos: p.conceptos_json ? parseConceptos(p.conceptos_json) : [],
-      estado_revision: p.estado_revision,
-    }));
-
-    res.json({
-      success: true,
-      club_id,
-      data: mapped,
-    });
-
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-/**
- * POST /api/payments
- */
 router.post('/', async (req, res) => {
   try {
     const club_id = req.club_id || 'city-fc';
@@ -95,13 +42,13 @@ router.post('/', async (req, res) => {
 
     let mensaje_alerta = '';
 
-    // 🔥 REGISTRO_PAGOS ORDEN CORRECTO
+    // 🔥 ORDEN CORRECTO + INCLUYE CEDULA
     const row = [
       club_id,
       id_transaccion,
       new Date().toISOString(),
       jugador.celular || '',
-      jugador.nombre || '',
+      jugador.nombre || jugador['nombre(s)'] || '',
       monto,
       fecha_comprobante || '',
       '2026',
@@ -112,12 +59,12 @@ router.post('/', async (req, res) => {
       validacion_monto,
       'PENDIENTE',
       '',
-      url_comprobante
+      url_comprobante,
+      cedula // 🔥 ESTE ERA EL ERROR
     ];
 
     await sheetsClient.appendRow('REGISTRO_PAGOS', row);
 
-    // 🔥 ACTUALIZAR ESTADOS
     const mesActual = new Date().getMonth() + 1;
 
     for (const c of conceptos) {
@@ -217,20 +164,12 @@ router.post('/', async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error('ERROR PAYMENT:', error);
     res.status(500).json({
       success: false,
       error: error.message
     });
   }
 });
-
-function parseConceptos(jsonStr) {
-  try {
-    return typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
-  } catch {
-    return [];
-  }
-}
 
 module.exports = router;

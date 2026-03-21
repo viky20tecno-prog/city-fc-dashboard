@@ -6,34 +6,17 @@ const sheetsClient = new SheetsClient();
 
 /**
  * GET /api/invoices?club_id=city-fc&status=PENDIENTE
- * Lista estado de mensualidades con filtros opcionales
- * Query params:
- *   - status: AL_DIA | PENDIENTE | PARCIAL | MORA (opcional)
- *   - mes: número del mes (opcional, 1-12)
- *   - anio: año (opcional, default 2026)
  */
 router.get('/', async (req, res) => {
   try {
     const club_id = req.club_id || 'city-fc';
     const { status, mes, anio = 2026 } = req.query;
     
-    // Obtener todas las mensualidades
     let invoices = await sheetsClient.getAllRows('ESTADO_MENSUALIDADES');
-    
-    // Filtrar por año (si aplica)
     invoices = invoices.filter(inv => String(inv.anio) === String(anio));
+    if (mes) invoices = invoices.filter(inv => String(inv.numero_mes) === String(mes));
+    if (status) invoices = invoices.filter(inv => inv.estado === status);
     
-    // Filtrar por mes (si aplica)
-    if (mes) {
-      invoices = invoices.filter(inv => String(inv.numero_mes) === String(mes));
-    }
-    
-    // Filtrar por estado (si aplica)
-    if (status) {
-      invoices = invoices.filter(inv => inv.estado === status);
-    }
-    
-    // Mapear a formato API
     const mapped = invoices.map(inv => ({
       cedula: inv.cedula,
       anio: inv.anio,
@@ -46,7 +29,6 @@ router.get('/', async (req, res) => {
       fecha_ultima_actualizacion: inv.fecha_ultima_actualizacion || '',
     }));
     
-    // Calcular estadísticas
     const stats = {
       total_invoices: mapped.length,
       total_oficial: mapped.reduce((sum, inv) => sum + inv.valor_oficial, 0),
@@ -69,45 +51,79 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Error in GET /invoices:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Error fetching invoices',
-      message: error.message,
-    });
+    res.status(500).json({ success: false, error: 'Error fetching invoices', message: error.message });
+  }
+});
+
+/**
+ * GET /api/invoices/uniformes?club_id=city-fc
+ */
+router.get('/uniformes', async (req, res) => {
+  try {
+    const club_id = req.club_id || 'city-fc';
+    const uniformes = await sheetsClient.getAllRows('ESTADO_UNIFORMES');
+    const mapped = uniformes.map(u => ({
+      cedula: u.cedula,
+      nombre: u.nombre || '',
+      anio: u.anio || '',
+      tipo_uniforme: u.tipo_uniforme || '',
+      valor_oficial: parseFloat(u.valor_oficial) || 0,
+      valor_pagado: parseFloat(u.valor_pagado) || 0,
+      saldo_pendiente: parseFloat(u.saldo_pendiente) || 0,
+      estado: u.estado || 'PENDIENTE',
+      fecha_ultima_actualizacion: u.fecha_ultima_actualizacion || '',
+    }));
+    res.json({ success: true, club_id, total: mapped.length, data: mapped });
+  } catch (error) {
+    console.error('Error in GET /invoices/uniformes:', error);
+    res.status(500).json({ success: false, error: 'Error fetching uniformes', message: error.message });
+  }
+});
+
+/**
+ * GET /api/invoices/torneos?club_id=city-fc
+ */
+router.get('/torneos', async (req, res) => {
+  try {
+    const club_id = req.club_id || 'city-fc';
+    const torneos = await sheetsClient.getAllRows('ESTADO_TORNEOS');
+    const mapped = torneos.map(t => ({
+      cedula: t.cedula,
+      nombre: t.nombre || '',
+      anio: t.anio || '',
+      torneo: t.torneo || '',
+      valor_oficial: parseFloat(t.valor_oficial) || 0,
+      valor_pagado: parseFloat(t.valor_pagado) || 0,
+      saldo_pendiente: parseFloat(t.saldo_pendiente) || 0,
+      estado: t.estado || 'PENDIENTE',
+      fecha_ultima_actualizacion: t.fecha_ultima_actualizacion || '',
+    }));
+    res.json({ success: true, club_id, total: mapped.length, data: mapped });
+  } catch (error) {
+    console.error('Error in GET /invoices/torneos:', error);
+    res.status(500).json({ success: false, error: 'Error fetching torneos', message: error.message });
   }
 });
 
 /**
  * GET /api/invoices/player/:cedula?club_id=city-fc
- * Obtener todas las mensualidades de un jugador específico
- * Con desglose completo y estado financiero
  */
 router.get('/player/:cedula', async (req, res) => {
   try {
     const { cedula } = req.params;
     const club_id = req.club_id || 'city-fc';
     
-    // Obtener jugador
     const player = await sheetsClient.searchRow('JUGADORES', 'cedula', cedula);
-    
     if (!player) {
-      return res.status(404).json({
-        success: false,
-        error: 'Player not found',
-        cedula,
-      });
+      return res.status(404).json({ success: false, error: 'Player not found', cedula });
     }
     
-    // Obtener todas las mensualidades del jugador
     const invoices = await sheetsClient.searchRows('ESTADO_MENSUALIDADES', 'cedula', cedula);
     
-    // Agrupar por año
     const invoicesByYear = {};
     invoices.forEach(inv => {
       const year = inv.anio;
-      if (!invoicesByYear[year]) {
-        invoicesByYear[year] = [];
-      }
+      if (!invoicesByYear[year]) invoicesByYear[year] = [];
       invoicesByYear[year].push({
         mes: inv.mes,
         numero_mes: inv.numero_mes,
@@ -119,18 +135,14 @@ router.get('/player/:cedula', async (req, res) => {
       });
     });
     
-    // Ordenar meses dentro de cada año
     Object.keys(invoicesByYear).forEach(year => {
       invoicesByYear[year].sort((a, b) => a.numero_mes - b.numero_mes);
     });
     
-    // Calcular resumen financiero
-    const totalInvoices = invoices.length;
     const totalOficial = invoices.reduce((sum, inv) => sum + (parseFloat(inv.valor_oficial) || 0), 0);
     const totalPagado = invoices.reduce((sum, inv) => sum + (parseFloat(inv.valor_pagado) || 0), 0);
     const totalPendiente = invoices.reduce((sum, inv) => sum + (parseFloat(inv.saldo_pendiente) || 0), 0);
     
-    // Contar estados
     const estadoCount = {
       AL_DIA: invoices.filter(inv => inv.estado === 'AL_DIA').length,
       PENDIENTE: invoices.filter(inv => inv.estado === 'PENDIENTE').length,
@@ -148,7 +160,7 @@ router.get('/player/:cedula', async (req, res) => {
         mensualidad_oficial: parseFloat(player.mensualidad_2026) || 0,
       },
       summary: {
-        total_meses: totalInvoices,
+        total_meses: invoices.length,
         total_oficial: totalOficial,
         total_pagado: totalPagado,
         total_pendiente: totalPendiente,
@@ -160,11 +172,7 @@ router.get('/player/:cedula', async (req, res) => {
     });
   } catch (error) {
     console.error('Error in GET /invoices/player/:cedula:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Error fetching player invoices',
-      message: error.message,
-    });
+    res.status(500).json({ success: false, error: 'Error fetching player invoices', message: error.message });
   }
 });
 

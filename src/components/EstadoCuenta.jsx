@@ -113,31 +113,63 @@ function SeccionTorneos({ datos }) {
 }
 
 function SeccionHistorial({ datos }) {
-  if (!datos || datos.length === 0) return <EmptySection texto="Sin pagos registrados" />;
+  if (!datos || datos.length === 0) return null;
 
   const sorted = [...datos].sort((a, b) => (b.fecha_proceso || '').localeCompare(a.fecha_proceso || ''));
+
+  const estadoColor = (estado) => {
+    if (estado === 'aprobado_manual') return 'text-[#F5A623]';
+    if (estado === 'aprobado_automaticamente') return 'text-[#00D084]';
+    return 'text-[#8B949E]';
+  };
+
+  const estadoLabel = (estado) => {
+    if (estado === 'aprobado_manual') return 'Manual';
+    if (estado === 'aprobado_automaticamente') return 'Automático';
+    return estado;
+  };
+
+  const conceptoLabel = (conceptos_json) => {
+    try {
+      const parsed = JSON.parse(conceptos_json);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(c => c.descripcion || c.tipo).join(', ');
+      }
+    } catch {
+      return conceptos_json || '';
+    }
+    return '';
+  };
 
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
         <FileText className="w-5 h-5 text-[#C678FF]" />
         <h3 className="text-base font-semibold text-[#E6EDF3]">Historial de comprobantes</h3>
+        <span className="text-xs text-[#8B949E] bg-[#1E2530] px-2 py-0.5 rounded-full">{sorted.length}</span>
       </div>
       <div className="space-y-2">
         {sorted.map((p, i) => (
           <div key={i} className="p-3 rounded-xl bg-[#1E2530] border border-[#30363D]">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium text-[#E6EDF3]">{formatCOP(p.monto_imagen)}</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-bold text-[#E6EDF3]">{formatCOP(p.monto)}</span>
               <span className="text-xs text-[#8B949E]">{p.fecha_proceso}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-[#8B949E]">{p.banco} · Ref: {p.referencia}</span>
-              <span className={`text-xs font-medium ${p.estado_revision === 'aprobado_automaticamente' ? 'text-[#00D084]' : 'text-[#F5A623]'}`}>
-                {p.estado_revision}
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-[#8B949E]">{p.banco}</span>
+              <span className={`text-xs font-medium ${estadoColor(p.estado_revision)}`}>
+                {estadoLabel(p.estado_revision)}
               </span>
             </div>
+            {p.referencia && (
+              <p className="text-xs text-[#8B949E]">Ref: {p.referencia}</p>
+            )}
+            {p.concepto && (
+              <p className="text-xs text-[#8B949E] mt-1">{conceptoLabel(p.concepto)}</p>
+            )}
             {p.url_comprobante && (
-              <a href={p.url_comprobante} target="_blank" rel="noopener noreferrer" className="text-xs text-[#4A9EFF] hover:underline mt-1 inline-block">
+              <a href={p.url_comprobante} target="_blank" rel="noopener noreferrer"
+                className="text-xs text-[#4A9EFF] hover:underline mt-1 inline-block">
                 📎 Ver comprobante
               </a>
             )}
@@ -168,7 +200,6 @@ export default function EstadoCuenta({ jugador, mensualidades, uniformes, torneo
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
       <div className="bg-[#161B22] rounded-2xl border border-[#30363D] w-full max-w-2xl my-8">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#30363D]">
           <div>
             <h2 className="text-xl font-bold text-[#E6EDF3]">{nombre}</h2>
@@ -179,7 +210,6 @@ export default function EstadoCuenta({ jugador, mensualidades, uniformes, torneo
           </button>
         </div>
 
-        {/* Secciones */}
         <div className="p-6 space-y-8">
           <SeccionMensualidades datos={misMensualidades} />
           <SeccionUniformes datos={misUniformes} />

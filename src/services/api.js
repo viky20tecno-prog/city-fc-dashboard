@@ -50,12 +50,19 @@ export async function fetchAllData() {
     const uniformes = uniformesRes.data || [];
     const torneos = torneosRes.data || [];
 
+    // 🔥 FIX: morosos ahora incluye nombre correctamente
     const morosos = reportsRes.mensualidades?.morosos_cédulas?.map(m => {
-      const jugador = jugadores.find(j => j.cedula === m.cedula);
+      const jugador = jugadores.find(j => j.cedula == m.cedula);
+
       return {
         cedula: m.cedula,
-        nombre: jugador?.nombre_completo || '',
-        celular: jugador?.celular || '',
+        nombre:
+          jugador?.nombre ||
+          jugador?.nombre_completo ||
+          jugador?.nombres ||
+          jugador?.jugador ||
+          `CC ${m.cedula}`,
+        celular: jugador?.celular || jugador?.telefono || '',
         meses_mora: 1,
         saldo_total: m.saldo_pendiente || 0,
       };

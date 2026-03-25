@@ -1,3 +1,5 @@
+// src/pages/Dashboard.jsx
+
 import { useState } from 'react';
 import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, DollarSign, Shirt } from 'lucide-react';
 import { useSheetData } from '../hooks/useSheetData';
@@ -40,15 +42,14 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center p-4">
-        <div className="bg-[#161B22] rounded-2xl border border-[#30363D] p-8 max-w-md text-center">
-          <div className="w-16 h-16 rounded-full bg-[rgba(255,94,94,0.12)] flex items-center justify-center mx-auto mb-4">
-            <Activity className="w-8 h-8 text-[#FF5E5E]" />
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center p-4">
+        <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8 max-w-md text-center shadow-[0_0_40px_rgba(255,0,0,0.1)]">
+          <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+            <Activity className="w-8 h-8 text-red-400" />
           </div>
-          <h2 className="text-xl font-bold text-[#E6EDF3] mb-2">Error de conexión</h2>
-          <p className="text-[#8B949E] mb-4 text-sm">{error}</p>
-          <p className="text-[#8B949E] text-xs mb-4">Verificá que la API Key esté configurada en <code className="bg-[#1E2530] px-1 rounded">.env</code></p>
-          <button onClick={refresh} className="px-4 py-2 bg-[#00D084] text-[#0D1117] rounded-xl text-sm font-medium hover:bg-[#00D084]/80 transition-colors">
+          <h2 className="text-xl font-bold text-white mb-2">Error de conexión</h2>
+          <p className="text-gray-400 mb-4 text-sm">{error}</p>
+          <button onClick={refresh} className="px-4 py-2 bg-[#00D084] text-black rounded-xl text-sm font-medium hover:opacity-80 transition">
             Reintentar
           </button>
         </div>
@@ -57,66 +58,72 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0D1117]">
-      <header className="bg-[#161B22] border-b border-[#30363D] sticky top-0 z-50">
+    <div className="min-h-screen bg-[#020617] bg-[radial-gradient(circle_at_20%_20%,rgba(0,208,132,0.08),transparent)]">
+
+      {/* HEADER */}
+      <header className="bg-white/5 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
+
             <div className="flex items-center gap-3">
               <img src="/10894351.png" alt="Logo" className="w-9 h-9 rounded-xl object-contain" />
               <div>
-                <h1 className="text-lg font-bold text-[#E6EDF3]">City FC</h1>
-                <p className="text-xs text-[#8B949E]">Agente Contable</p>
+                <h1 className="text-lg font-bold text-white">City FC</h1>
+                <p className="text-xs text-gray-400">Agente Contable</p>
               </div>
             </div>
+
             <div className="flex items-center gap-3">
+
               <button
                 onClick={() => setShowPagoManual(true)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#F5A623]/30 bg-[rgba(245,166,35,0.12)] text-sm text-[#F5A623] hover:bg-[rgba(245,166,35,0.2)] transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-yellow-400/20 bg-yellow-400/10 text-sm text-yellow-400 hover:bg-yellow-400/20 transition"
               >
                 <DollarSign className="w-4 h-4" />
                 <span className="hidden sm:inline">Pago Manual</span>
               </button>
+
               <button
                 onClick={handleCopyLink}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#00D084]/30 bg-[rgba(0,208,132,0.12)] text-sm text-[#00D084] hover:bg-[rgba(0,208,132,0.2)] transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-green-400/20 bg-green-400/10 text-sm text-green-400 hover:bg-green-400/20 transition"
               >
                 {linkCopied ? (
                   <><Check className="w-4 h-4" /><span className="hidden sm:inline">¡Copiado!</span></>
                 ) : (
-                  <><Link2 className="w-4 h-4" /><span className="hidden sm:inline">Link Inscripción</span></>
+                  <><Link2 className="w-4 h-4" /><span className="hidden sm:inline">Link</span></>
                 )}
               </button>
-              {lastUpdated && (
-                <span className="text-xs text-[#8B949E] hidden sm:block">
-                  {lastUpdated.toLocaleTimeString('es-CO')}
-                </span>
-              )}
+
               <button
                 onClick={handleRefresh}
                 disabled={refreshing || loading}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#30363D] text-sm text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#8B949E] transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/10 text-sm text-gray-400 hover:text-white transition"
               >
                 <RefreshCw className={`w-4 h-4 ${refreshing || loading ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">Actualizar</span>
               </button>
+
             </div>
           </div>
         </div>
       </header>
 
-      <nav className="bg-[#161B22] border-b border-[#30363D]">
+      {/* NAV */}
+      <nav className="bg-white/5 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex gap-1 overflow-x-auto py-2">
+          <div className="flex gap-2 overflow-x-auto py-2">
+
             {tabs.map(tab => {
               const Icon = tab.icon;
+              const active = activeTab === tab.id;
+
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-[rgba(0,208,132,0.12)] text-[#00D084]'
-                      : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#1E2530]'
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all ${
+                    active
+                      ? 'bg-green-500/10 text-green-400 shadow-[0_0_20px_rgba(0,208,132,0.2)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -124,23 +131,25 @@ export default function Dashboard() {
                 </button>
               );
             })}
+
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      {/* MAIN */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <RefreshCw className="w-8 h-8 text-[#00D084] animate-spin mx-auto mb-3" />
-              <p className="text-[#8B949E]">Cargando datos del Sheet...</p>
-            </div>
+            <RefreshCw className="w-8 h-8 text-green-400 animate-spin" />
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-8">
+
             {activeTab === 'dashboard' && (
               <>
                 <StatsCards mensualidades={mensualidades} jugadores={jugadores} morosos={morosos} />
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-2">
                     <RecaudacionChart mensualidades={mensualidades} />
@@ -149,18 +158,15 @@ export default function Dashboard() {
                 </div>
               </>
             )}
+
             {activeTab === 'jugadores' && (
               <JugadoresTable jugadores={jugadores} mensualidades={mensualidades} uniformes={uniformes} torneos={torneos} registroPagos={registroPagos} onRefresh={handleRefresh} />
             )}
-            {activeTab === 'uniformes' && (
-              <Uniformes />
-            )}
-            {activeTab === 'cobro' && (
-              <TimelineCobro />
-            )}
-            {activeTab === 'whatsapp' && (
-              <WhatsAppMockup />
-            )}
+
+            {activeTab === 'uniformes' && <Uniformes />}
+            {activeTab === 'cobro' && <TimelineCobro />}
+            {activeTab === 'whatsapp' && <WhatsAppMockup />}
+
           </div>
         )}
       </main>
@@ -173,9 +179,9 @@ export default function Dashboard() {
         />
       )}
 
-      <footer className="border-t border-[#30363D] mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-center text-xs text-[#8B949E]">
-          Powered by AI · Automatización inteligente de cobros para clubes deportivos
+      <footer className="border-t border-white/10 mt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-center text-xs text-gray-500">
+          Powered by AI · Sistema inteligente de cobros
         </div>
       </footer>
     </div>

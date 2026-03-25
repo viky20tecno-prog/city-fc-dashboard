@@ -1,60 +1,189 @@
-import { Users, CheckCircle, AlertTriangle, XCircle, DollarSign, Clock } from 'lucide-react';
+// src/pages/Dashboard.jsx
 
-function StatCard({ icon: Icon, label, value, subtext, color, wide }) {
-  const colors = {
-    green: { bg: 'bg-[rgba(0,208,132,0.12)]', icon: 'text-[#00D084]' },
-    yellow: { bg: 'bg-[rgba(245,166,35,0.12)]', icon: 'text-[#F5A623]' },
-    red: { bg: 'bg-[rgba(255,94,94,0.12)]', icon: 'text-[#FF5E5E]' },
-    blue: { bg: 'bg-[rgba(74,158,255,0.12)]', icon: 'text-[#4A9EFF]' },
-    purple: { bg: 'bg-[rgba(192,120,255,0.12)]', icon: 'text-[#C678FF]' },
+import { useState } from 'react';
+import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, DollarSign, Shirt } from 'lucide-react';
+import { useSheetData } from '../hooks/useSheetData';
+import StatsCards from '../components/StatsCards';
+import JugadoresTable from '../components/JugadoresTable';
+import RecaudacionChart from '../components/RecaudacionChart';
+import MorososList from '../components/MorososList';
+import TimelineCobro from '../components/TimelineCobro';
+import WhatsAppMockup from '../components/WhatsAppMockup';
+import PagoManualModal from '../components/PagoManualModal';
+import Uniformes from '../components/Uniformes';
+
+const tabs = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'jugadores', label: 'Jugadores', icon: Users },
+  { id: 'uniformes', label: 'Uniformes', icon: Shirt },
+  { id: 'cobro', label: 'Ciclo de Cobro', icon: Clock },
+  { id: 'whatsapp', label: 'WhatsApp Bot', icon: MessageSquare },
+];
+
+export default function Dashboard() {
+  const { jugadores, mensualidades, uniformes, torneos, registroPagos, morosos, loading, error, lastUpdated, refresh } = useSheetData();
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [refreshing, setRefreshing] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [showPagoManual, setShowPagoManual] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refresh();
+    setRefreshing(false);
   };
 
-  const c = colors[color] || colors.blue;
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/inscripcion`;
+    navigator.clipboard.writeText(url);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
 
-  return (
-    <div className={`bg-[#161B22] rounded-2xl border border-[#30363D] p-6 hover:border-[#00D084]/30 transition-colors overflow-hidden ${wide ? 'xl:col-span-2' : ''}`}>
-      <div className="flex items-center justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-[#8B949E]">{label}</p>
-          <p className="text-2xl font-bold text-[#E6EDF3] mt-1 truncate">{value}</p>
-          {subtext && <p className="text-sm text-[#8B949E] mt-1 truncate">{subtext}</p>}
-        </div>
-        <div className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center flex-shrink-0`}>
-          <Icon className={`w-6 h-6 ${c.icon}`} />
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center p-4">
+        <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8 max-w-md text-center shadow-[0_0_40px_rgba(255,0,0,0.1)]">
+          <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+            <Activity className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Error de conexión</h2>
+          <p className="text-gray-400 mb-4 text-sm">{error}</p>
+          <button onClick={refresh} className="px-4 py-2 bg-[#00D084] text-black rounded-xl text-sm font-medium hover:opacity-80 transition">
+            Reintentar
+          </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-export default function StatsCards({ mensualidades, jugadores, morosos }) {
-  const mesActual = new Date().getMonth() + 1;
-  
-  // Filtrar solo mensualidades del mes actual
-  const pagosDelMes = mensualidades.filter(m => parseInt(m.numero_mes) === mesActual);
-  
-  const alDia = pagosDelMes.filter(m => m.estado === 'AL_DIA');
-  const pendientes = pagosDelMes.filter(m => m.estado === 'PENDIENTE');
-  const parciales = pagosDelMes.filter(m => m.estado === 'PARCIAL');
-  const enMora = pagosDelMes.filter(m => m.estado === 'MORA');
-  
-  // Jugadores activos
-  const activos = jugadores.filter(j => (j.activo || '').toUpperCase() === 'SI');
-  
-  // Recaudado: suma de valor_pagado de TODOS los meses del año
-  const recaudado = mensualidades.reduce((sum, m) => sum + (parseFloat(m.valor_pagado) || 0), 0);
-  const totalEsperado = mensualidades.reduce((sum, m) => sum + (parseFloat(m.valor_oficial) || 0), 0);
-
-  const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
-      <StatCard icon={Users} label="Jugadores" value={activos.length} subtext="Activos" color="blue" />
-      <StatCard icon={CheckCircle} label="Al Día" value={alDia.length} subtext={`${pagosDelMes.length ? Math.round((alDia.length / pagosDelMes.length) * 100) : 0}%`} color="green" />
-      <StatCard icon={Clock} label="Pendientes" value={pendientes.length} subtext="Por cobrar" color="yellow" />
-      <StatCard icon={XCircle} label="En Mora" value={enMora.length + morosos.length} subtext={`${enMora.length + morosos.length} jugadores`} color="red" />
-      <StatCard icon={AlertTriangle} label="Parciales" value={parciales.length} subtext="Abonos" color="purple" />
-      <StatCard icon={DollarSign} label="Recaudado" value={formatCOP(recaudado)} subtext={`de ${formatCOP(totalEsperado)}`} color="green" wide />
+    <div className="min-h-screen bg-[#020617] bg-[radial-gradient(circle_at_20%_20%,rgba(0,208,132,0.08),transparent)]">
+
+      {/* HEADER */}
+      <header className="bg-white/5 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-16">
+
+            <div className="flex items-center gap-3">
+              <img src="/10894351.png" alt="Logo" className="w-9 h-9 rounded-xl object-contain" />
+              <div>
+                <h1 className="text-lg font-bold text-white">City FC</h1>
+                <p className="text-xs text-gray-400">Agente Contable</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+
+              <button
+                onClick={() => setShowPagoManual(true)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-yellow-400/20 bg-yellow-400/10 text-sm text-yellow-400 hover:bg-yellow-400/20 transition"
+              >
+                <DollarSign className="w-4 h-4" />
+                <span className="hidden sm:inline">Pago Manual</span>
+              </button>
+
+              <button
+                onClick={handleCopyLink}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-green-400/20 bg-green-400/10 text-sm text-green-400 hover:bg-green-400/20 transition"
+              >
+                {linkCopied ? (
+                  <><Check className="w-4 h-4" /><span className="hidden sm:inline">¡Copiado!</span></>
+                ) : (
+                  <><Link2 className="w-4 h-4" /><span className="hidden sm:inline">Link</span></>
+                )}
+              </button>
+
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing || loading}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/10 text-sm text-gray-400 hover:text-white transition"
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing || loading ? 'animate-spin' : ''}`} />
+              </button>
+
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* NAV */}
+      <nav className="bg-white/5 backdrop-blur-xl border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex gap-2 overflow-x-auto py-2">
+
+            {tabs.map(tab => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
+
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all ${
+                    active
+                      ? 'bg-green-500/10 text-green-400 shadow-[0_0_20px_rgba(0,208,132,0.2)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+
+          </div>
+        </div>
+      </nav>
+
+      {/* MAIN */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <RefreshCw className="w-8 h-8 text-green-400 animate-spin" />
+          </div>
+        ) : (
+          <div className="space-y-8">
+
+            {activeTab === 'dashboard' && (
+              <>
+                <StatsCards mensualidades={mensualidades} jugadores={jugadores} morosos={morosos} />
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <RecaudacionChart mensualidades={mensualidades} />
+                  </div>
+                  <MorososList morosos={morosos} />
+                </div>
+              </>
+            )}
+
+            {activeTab === 'jugadores' && (
+              <JugadoresTable jugadores={jugadores} mensualidades={mensualidades} uniformes={uniformes} torneos={torneos} registroPagos={registroPagos} onRefresh={handleRefresh} />
+            )}
+
+            {activeTab === 'uniformes' && <Uniformes />}
+            {activeTab === 'cobro' && <TimelineCobro />}
+            {activeTab === 'whatsapp' && <WhatsAppMockup />}
+
+          </div>
+        )}
+      </main>
+
+      {showPagoManual && (
+        <PagoManualModal
+          jugadores={jugadores}
+          onClose={() => setShowPagoManual(false)}
+          onSuccess={handleRefresh}
+        />
+      )}
+
+      <footer className="border-t border-white/10 mt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-center text-xs text-gray-500">
+          Powered by AI · Sistema inteligente de cobros
+        </div>
+      </footer>
     </div>
   );
 }

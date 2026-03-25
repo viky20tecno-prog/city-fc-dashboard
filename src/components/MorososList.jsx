@@ -13,7 +13,6 @@ export default function MorososList({ morosos }) {
     return (
       <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 overflow-hidden">
 
-        {/* glow */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-green-500/10 blur-2xl" />
         </div>
@@ -31,7 +30,6 @@ export default function MorososList({ morosos }) {
   return (
     <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 overflow-hidden">
 
-      {/* glow fondo */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute inset-0 bg-red-500/10 blur-2xl" />
       </div>
@@ -48,48 +46,57 @@ export default function MorososList({ morosos }) {
 
       <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1 relative">
 
-        {morosos.map((m, i) => (
-          <div
-            key={m.cedula || i}
-            className="group flex items-center justify-between p-4 rounded-xl 
-            bg-red-500/5 border border-white/10 
-            hover:border-red-500/30 hover:bg-red-500/10 
-            transition-all duration-300"
-          >
+        {morosos.map((m, i) => {
 
-            {/* info izquierda */}
-            <div>
-              <p className="font-medium text-white text-sm">
-                {m.nombre}
-              </p>
+          // 🔥 FIX: construcción de nombre sin tocar backend
+          const nombre =
+            m.nombre ||
+            `${m["nombre(s)"] || ''} ${m["apellido(s)"] || ''}`.trim() ||
+            `CC ${m.cedula}`;
 
-              <p className="text-xs text-gray-400 mt-1">
-                CC {m.cedula} · {m.meses_mora} mes{m.meses_mora > 1 ? 'es' : ''} de mora
-              </p>
+          return (
+            <div
+              key={m.cedula || i}
+              className="group flex items-center justify-between p-4 rounded-xl 
+              bg-red-500/5 border border-white/10 
+              hover:border-red-500/30 hover:bg-red-500/10 
+              transition-all duration-300"
+            >
+
+              {/* izquierda */}
+              <div>
+                <p className="font-medium text-white text-sm">
+                  {nombre}
+                </p>
+
+                <p className="text-xs text-gray-400 mt-1">
+                  CC {m.cedula} · {m.meses_mora} mes{m.meses_mora > 1 ? 'es' : ''} de mora
+                </p>
+              </div>
+
+              {/* derecha */}
+              <div className="text-right">
+
+                <p className="font-semibold text-red-400 text-sm">
+                  {formatCOP(m.saldo_total)}
+                </p>
+
+                {m.celular && (
+                  <a
+                    href={`https://wa.me/57${m.celular}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-gray-400 hover:text-green-400 inline-flex items-center gap-1 mt-1 transition"
+                  >
+                    <Phone className="w-3 h-3" />
+                    {m.celular}
+                  </a>
+                )}
+
+              </div>
             </div>
-
-            {/* info derecha */}
-            <div className="text-right">
-
-              <p className="font-semibold text-red-400 text-sm">
-                {formatCOP(m.saldo_total)}
-              </p>
-
-              {m.celular && (
-                <a
-                  href={`https://wa.me/57${m.celular}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-gray-400 hover:text-green-400 inline-flex items-center gap-1 mt-1 transition"
-                >
-                  <Phone className="w-3 h-3" />
-                  {m.celular}
-                </a>
-              )}
-
-            </div>
-          </div>
-        ))}
+          );
+        })}
 
       </div>
     </div>

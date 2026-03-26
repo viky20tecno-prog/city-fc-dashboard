@@ -7,7 +7,6 @@ const CLUB_ID = 'city-fc';
 
 /**
  * GET /api/uniforms
- * Lista todos los pedidos de uniformes
  */
 router.get('/', async (req, res) => {
   try {
@@ -29,12 +28,15 @@ router.get('/', async (req, res) => {
 
 /**
  * GET /api/uniforms/numeros
- * Devuelve los números ya asignados para validar duplicados
  */
 router.get('/numeros', async (req, res) => {
   try {
     const pedidos = await sheetsClient.getAllRows('PEDIDO_UNIFORMES');
-    const numerosUsados = pedidos.map(p => p.numero_estampar).filter(Boolean);
+    // ✅ Leer columna correcta y normalizar a entero para evitar problemas con ceros
+    const numerosUsados = pedidos
+      .map(p => p.numero_estampar || p.numero)
+      .filter(Boolean)
+      .map(n => String(parseInt(n, 10)));
     res.json({
       success: true,
       numeros: numerosUsados,
@@ -51,13 +53,11 @@ router.get('/numeros', async (req, res) => {
 
 /**
  * POST /api/uniforms
- * Registrar pedido de uniforme
  */
 router.post('/', async (req, res) => {
   try {
     const { cedula, nombre, tipo, campeon, nombre_estampar, talla, numero } = req.body;
 
-    // Validar campos obligatorios
     if (!cedula || !nombre || !tipo || !talla || !numero) {
       return res.status(400).json({
         success: false,
@@ -65,7 +65,6 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Validar que el jugador existe
     const jugador = await sheetsClient.searchRow('JUGADORES', 'cedula', cedula);
     if (!jugador) {
       return res.status(404).json({
@@ -75,7 +74,6 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Validar que el jugador no tenga ya un pedido
     const pedidoExistente = await sheetsClient.searchRow('PEDIDO_UNIFORMES', 'cedula', cedula);
     if (pedidoExistente) {
       return res.status(409).json({
@@ -85,9 +83,14 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Validar que el número no esté repetido
+    // ✅ Validar número repetido comparando como enteros
     const pedidos = await sheetsClient.getAllRows('PEDIDO_UNIFORMES');
-    const numeroRepetido = pedidos.some(p => p.numero_estampar === String(numero));
+    const numeroNormalizado = String(parseInt(numero, 10));
+    const numeroRepetido = pedidos.some(p => {
+      const n = p.numero_estampar || p.numero;
+      return n && String(parseInt(n, 10)) === numeroNormalizado;
+    });
+
     if (numeroRepetido) {
       return res.status(409).json({
         success: false,
@@ -96,20 +99,18 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // ✅ Orden según columnas del Sheet:
-    // club_id | cedula | nombre | tipo | campeon | talla | nombre_estampar | numero_estampar | fecha | estado
     const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
     await sheetsClient.appendRow('PEDIDO_UNIFORMES', [
-      CLUB_ID,               // club_id
-      cedula,                // cedula
-      nombre,                // nombre
-      tipo,                  // tipo
-      campeon ? 'SI' : 'NO', // campeon
-      talla,                 // talla
-      nombre_estampar || '', // nombre_estampar
-      numero,                // numero_estampar
-      fecha,                 // fecha
-      'PENDIENTE',           // estado
+      CLUB_ID,
+      cedula,
+      nombre,
+      tipo,
+      campeon ? 'SI' : 'NO',
+      talla,
+      nombre_estampar || '',
+      numero,
+      fecha,
+      'PENDIENTE',
     ]);
 
     res.json({

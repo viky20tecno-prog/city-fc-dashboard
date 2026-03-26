@@ -15,7 +15,6 @@ export default function Uniformes() {
     talla: '',
     numero: '',
   });
-
   const [jugadorEncontrado, setJugadorEncontrado] = useState(null);
   const [numerosUsados, setNumerosUsados] = useState([]);
   const [buscando, setBuscando] = useState(false);
@@ -34,13 +33,10 @@ export default function Uniformes() {
         fetch(`${API_BASE}/uniforms/numeros?club_id=${CLUB_ID}`),
         fetch(`${API_BASE}/uniforms?club_id=${CLUB_ID}`),
       ]);
-
       const numData = await numRes.json();
       const pedData = await pedRes.json();
-
       if (numData.success) setNumerosUsados(numData.numeros);
       if (pedData.success) setPedidos(pedData.data);
-
     } catch (e) {
       console.error('Error cargando datos:', e);
     }
@@ -48,15 +44,12 @@ export default function Uniformes() {
 
   const buscarJugador = async () => {
     if (!form.cedula) return;
-
     setBuscando(true);
     setError('');
     setJugadorEncontrado(null);
-
     try {
       const res = await fetch(`${API_BASE}/players/${form.cedula}?club_id=${CLUB_ID}`);
       const data = await res.json();
-
       if (data.success) {
         setJugadorEncontrado(data.player);
         setForm(f => ({ ...f, nombre: data.player.nombre_completo }));
@@ -64,7 +57,6 @@ export default function Uniformes() {
       } else {
         setError('Jugador no encontrado. Verificá la cédula.');
       }
-
     } catch (e) {
       setError('Error de conexión. Intentá de nuevo.');
     } finally {
@@ -72,10 +64,12 @@ export default function Uniformes() {
     }
   };
 
-  const formatNumero = (val) => val.replace(/\D/g, '').slice(0, 3);
+  const formatNumero = (val) => {
+    return val.replace(/\D/g, '').slice(0, 3);
+  };
 
-  const numeroPadded = form.numero ? form.numero.padStart(3, '0') : '';
-  const numeroRepetido = numeroPadded && numerosUsados.includes(numeroPadded);
+  const numeroDisplay = form.numero ? form.numero.padStart(3, '0') : '';
+  const numeroRepetido = form.numero ? numerosUsados.includes(form.numero.padStart(3, '0')) : false;
   const numeroValido = form.numero && !numeroRepetido;
 
   const handleSubmit = async () => {
@@ -86,7 +80,9 @@ export default function Uniformes() {
       return;
     }
 
-    if (numeroRepetido) {
+    const numeroPadded = form.numero.padStart(3, '0');
+
+    if (numerosUsados.includes(numeroPadded)) {
       setError(`El número ${numeroPadded} ya está asignado. Elegí otro.`);
       return;
     }
@@ -100,6 +96,7 @@ export default function Uniformes() {
         body: JSON.stringify({
           ...form,
           numero: numeroPadded,
+          campeon: form.campeon,
           club_id: CLUB_ID,
         }),
       });
@@ -124,11 +121,9 @@ export default function Uniformes() {
           });
           setJugadorEncontrado(null);
         }, 3000);
-
       } else {
         setError(data.message || 'Error al registrar el pedido.');
       }
-
     } catch (e) {
       setError('Error de conexión. Intentá de nuevo.');
     } finally {
@@ -138,55 +133,75 @@ export default function Uniformes() {
 
   return (
     <div className="space-y-6">
-
       <div className="max-w-xl mx-auto">
         <div className="bg-[#161B22] rounded-2xl border border-[#30363D] p-6">
 
-          <h2 className="text-lg font-bold text-[#E6EDF3] mb-4">
-            Pedido de Uniforme
-          </h2>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-[rgba(0,208,132,0.12)] flex items-center justify-center">
+              <Shirt className="w-5 h-5 text-[#00D084]" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-[#E6EDF3]">Pedido de Uniforme</h2>
+              <p className="text-xs text-[#8B949E]">
+                {step === 1 ? 'Paso 1 — Identificate con tu cédula' : 'Paso 2 — Datos del uniforme'}
+              </p>
+            </div>
+          </div>
 
           {error && (
-            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm mb-4">
-              {error}
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/30 mb-6">
+              <AlertCircle className="w-5 h-5 text-[#FF5E5E]" />
+              <p className="text-sm text-[#FF5E5E]">{error}</p>
             </div>
           )}
 
-          {/* INPUT NUMERO */}
           {step === 2 && (
             <div>
-              <label className="text-xs text-[#8B949E]">Número *</label>
+              <label className="block text-xs text-[#8B949E] mb-1.5">Número *</label>
 
               <input
                 type="text"
+                inputMode="numeric"
                 value={form.numero}
-                onChange={e => setForm(f => ({ ...f, numero: formatNumero(e.target.value) }))}
-                className={`w-full mt-1 px-4 py-2 rounded-xl border ${
-                  numeroRepetido ? 'border-red-500' : 'border-[#30363D]'
-                } bg-[#0D1117] text-white`}
+                onChange={e => {
+                  const value = formatNumero(e.target.value);
+                  const padded = value.padStart(3, '0');
+
+                  if (numerosUsados.includes(padded)) {
+                    setError(`El número ${padded} ya está asignado`);
+                  } else {
+                    setError('');
+                  }
+
+                  setForm(f => ({ ...f, numero: value }));
+                }}
+                className={`w-full bg-[#0D1117] border rounded-xl px-4 py-2.5 text-sm font-mono text-[#E6EDF3] ${
+                  numeroRepetido ? 'border-[#FF5E5E]' : 'border-[#30363D]'
+                }`}
               />
 
               {form.numero && (
-                <p className={`text-xs mt-1 ${numeroRepetido ? 'text-red-400' : 'text-green-400'}`}>
+                <p className={`text-xs mt-1 ${numeroRepetido ? 'text-[#FF5E5E]' : 'text-[#00D084]'}`}>
                   {numeroRepetido
-                    ? `✗ El número ${numeroPadded} ya está en uso`
-                    : `✓ Número disponible`}
+                    ? `✗ #${numeroDisplay} ya asignado`
+                    : `✓ #${numeroDisplay} disponible`}
                 </p>
               )}
             </div>
           )}
 
-          {/* BOTON */}
           <button
             onClick={handleSubmit}
-            disabled={numeroRepetido || enviando}
-            className={`w-full mt-4 py-3 rounded-xl font-bold ${
+            disabled={
+              !form.tipo ||
+              !form.talla ||
+              !form.numero ||
+              enviando ||
               numeroRepetido
-                ? 'bg-gray-600 cursor-not-allowed'
-                : 'bg-green-500 hover:bg-green-600'
-            }`}
+            }
+            className="w-full py-3 rounded-xl bg-[#00D084] text-[#0D1117] text-sm font-bold disabled:opacity-40"
           >
-            {enviando ? 'Guardando...' : 'Registrar pedido'}
+            {enviando ? 'Registrando...' : 'Registrar pedido'}
           </button>
 
         </div>

@@ -35,7 +35,11 @@ export default function Uniformes() {
       ]);
       const numData = await numRes.json();
       const pedData = await pedRes.json();
-      if (numData.success) setNumerosUsados(numData.numeros);
+      if (numData.success) {
+        // Normalizar todos los números usados — quitar ceros a la izquierda para comparar como enteros
+        const normalizados = (numData.numeros || []).map(n => String(parseInt(n, 10)));
+        setNumerosUsados(normalizados);
+      }
       if (pedData.success) setPedidos(pedData.data);
     } catch (e) {
       console.error('Error cargando datos:', e);
@@ -68,8 +72,11 @@ export default function Uniformes() {
     return val.replace(/\D/g, '').slice(0, 3);
   };
 
+  // Normalizar número ingresado como entero para comparar
+  const numeroNormalizado = form.numero ? String(parseInt(form.numero, 10)) : '';
   const numeroDisplay = form.numero ? form.numero.padStart(3, '0') : '';
-  const numeroValido = form.numero ? !numerosUsados.includes(form.numero.padStart(3, '0')) : false;
+  const numeroRepetido = numeroNormalizado ? numerosUsados.includes(numeroNormalizado) : false;
+  const numeroValido = form.numero && !numeroRepetido;
 
   const handleSubmit = async () => {
     setError('');
@@ -77,11 +84,11 @@ export default function Uniformes() {
       setError('Completá todos los campos obligatorios.');
       return;
     }
-    const numeroPadded = form.numero.padStart(3, '0');
-    if (numerosUsados.includes(numeroPadded)) {
-      setError(`El número ${numeroPadded} ya está asignado. Elegí otro.`);
+    if (numeroRepetido) {
+      setError(`El número ${numeroDisplay} ya está asignado. Elegí otro.`);
       return;
     }
+    const numeroPadded = form.numero.padStart(3, '0');
     setEnviando(true);
     try {
       const res = await fetch(`${API_BASE}/uniforms?club_id=${CLUB_ID}`, {
@@ -259,7 +266,9 @@ export default function Uniformes() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-[#8B949E] mb-1.5">Número * <span className="text-[#8B949E] font-normal">(3 dígitos)</span></label>
+                  <label className="block text-xs text-[#8B949E] mb-1.5">
+                    Número * <span className="text-[#8B949E] font-normal">(3 dígitos)</span>
+                  </label>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -268,14 +277,16 @@ export default function Uniformes() {
                     placeholder="001"
                     maxLength={3}
                     className={`w-full bg-[#0D1117] border rounded-xl px-4 py-2.5 text-sm font-mono text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none transition-colors ${
-                      form.numero && numerosUsados.includes(form.numero.padStart(3, '0'))
+                      numeroRepetido
                         ? 'border-[#FF5E5E] focus:border-[#FF5E5E]'
                         : 'border-[#30363D] focus:border-[#00D084]'
                     }`}
                   />
                   {form.numero && (
                     <p className={`text-xs mt-1 font-mono ${numeroValido ? 'text-[#00D084]' : 'text-[#FF5E5E]'}`}>
-                      {numeroValido ? `✓ #${numeroDisplay} disponible` : `✗ #${numeroDisplay} ya asignado`}
+                      {numeroValido
+                        ? `✓ #${numeroDisplay} disponible`
+                        : `✗ #${numeroDisplay} ya asignado`}
                     </p>
                   )}
                 </div>

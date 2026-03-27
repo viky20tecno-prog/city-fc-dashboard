@@ -6,7 +6,7 @@ const sheetsClient = new SheetsClient();
 const CLUB_ID = 'city-fc';
 
 /**
- * GET /api/payments?club_id=city-fc&limit=50
+ * GET /api/payments?club_id=city-fc&cedula=XXX&limit=50
  */
 router.get('/', async (req, res) => {
   try {
@@ -15,32 +15,58 @@ router.get('/', async (req, res) => {
 
     let payments = await sheetsClient.getAllRows('REGISTRO_PAGOS');
 
-    if (cedula) payments = payments.filter(p => p.cedula === cedula);
-    if (estado_revision) payments = payments.filter(p => p.estado_revision === estado_revision);
+    // ✅ Filtrar por cédula buscando el celular del jugador
+    // REGISTRO_PAGOS no tiene columna cedula — tiene telefono (celular)
+    if (cedula) {
+      const jugador = await sheetsClient.searchRow('JUGADORES', 'cedula', String(cedula));
+      if (jugador && jugador.celular) {
+        const celular = String(jugador.celular).trim();
+        payments = payments.filter(p => {
+          const tel = String(p.telefono || '').trim();
+          return tel === celular;
+        });
+      } else {
+        // Si no encontramos el jugador, devolver vacío
+        payments = [];
+      }
+    }
 
-    payments.sort((a, b) => new Date(b.fecha_proceso || 0) - new Date(a.fecha_proceso || 0));
+    if (estado_revision) {
+      payments = payments.filter(p => p.estado_revision === estado_revision);
+    }
+
+    payments.sort((a, b) => (b.fecha_proceso || '').localeCompare(a.fecha_proceso || ''));
 
     const limitNum = Math.min(parseInt(limit) || 50, 500);
     payments = payments.slice(0, limitNum);
 
+    // ✅ Mapear con los nombres exactos de columnas de REGISTRO_PAGOS
     const mapped = payments.map(p => ({
-      id_transaccion: p.id_transaccion,
-      fecha_proceso: p.fecha_proceso,
-      cedula: p.cedula,
+      id_transaccion: p.id_transaccion || '',
+      fecha_proceso: p.fecha_proceso || '',
+      fecha_comprobante: p.fecha_comprobante || '',
+      anio_sistema: p.anio_sistema || '',
+      telefono: p.telefono || '',
       nombre_detectado: p.nombre_detectado || '',
       monto: parseFloat(p.monto_imagen) || 0,
-      fecha_comprobante: p.fecha_comprobante,
-      banco: p.banco,
-      referencia: p.referencia,
+      banco: p.banco || '',
+      referencia: p.referencia || '',
       concepto: p.conceptos_json || '',
       suma_conceptos: parseFloat(p.suma_conceptos) || 0,
-      validacion_monto: p.validacion_monto,
-      estado_revision: p.estado_revision,
+      validacion_monto: p.validacion_monto || '',
+      estado_revision: p.estado_revision || '',
       mensaje_alerta: p.mensaje_alerta || '',
       url_comprobante: p.url_comprobante || '',
     }));
 
-    res.json({ success: true, club_id, total_registros: mapped.length, limit: limitNum, data: mapped });
+    res.json({
+      success: true,
+      club_id,
+      total_registros: mapped.length,
+      limit: limitNum,
+      data: mapped,
+    });
+
   } catch (error) {
     console.error('Error in GET /payments:', error);
     res.status(500).json({ success: false, error: 'Error fetching payments', message: error.message });
@@ -49,7 +75,6 @@ router.get('/', async (req, res) => {
 
 /**
  * POST /api/payments
- * Registra el pago y actualiza la hoja de estado correspondiente
  */
 router.post('/', async (req, res) => {
   try {
@@ -63,7 +88,6 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Missing required fields: cedula, monto, banco' });
     }
 
-    // Verificar que el jugador existe
     const player = await sheetsClient.searchRow('JUGADORES', 'cedula', String(cedula));
     if (!player) {
       return res.status(404).json({ success: false, error: 'Player not found', cedula });
@@ -83,22 +107,22 @@ router.post('/', async (req, res) => {
     // conceptos_json | suma_conceptos | validacion_monto | estado_revision |
     // mensaje_alerta | url_comprobante
     await sheetsClient.appendRow('REGISTRO_PAGOS', [
-      club_id,                                          // club_id
-      id_transaccion,                                   // id_transaccion
-      hoy,                                              // fecha_proceso
-      player.celular || '',                             // telefono
-      nombre_detectado || player['nombre(s)'] || '',    // nombre_detectado
-      String(montoNum),                                 // monto_imagen
-      fecha_comprobante || hoy,                         // fecha_comprobante
-      anioActual,                                       // anio_sistema ← string no número
-      banco,                                            // banco
-      referencia || '',                                 // referencia
-      JSON.stringify(conceptos),                        // conceptos_json
-      String(sumaConceptos),                            // suma_conceptos
-      montoNum >= sumaConceptos ? 'correcto' : 'discrepancia', // validacion_monto
-      'aprobado_manual',                                // estado_revision
-      conceptoTipo === 'otro' ? observacion : '',       // mensaje_alerta
-      url_comprobante,                                  // url_comprobante
+      club_id,
+      id_transaccion,
+      hoy,
+      String(player.celular || ''),
+      nombre_detectado || `${player['nombre(s)'] || ''} ${player['apellido(s)'] || ''}`.trim(),
+      String(montoNum),
+      fecha_comprobante || hoy,
+      anioActual,
+      banco,
+      referencia || '',
+      JSON.stringify(conceptos),
+      String(sumaConceptos),
+      montoNum >= sumaConceptos ? 'correcto' : 'discrepancia',
+      'aprobado_manual',
+      conceptoTipo === 'otro' ? observacion : '',
+      url_comprobante,
     ]);
 
     // ✅ Actualizar hoja de estado según concepto
@@ -124,14 +148,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-/**
- * Actualizar el mes pendiente más antiguo en ESTADO_MENSUALIDADES
- */
+// ✅ Actualizar mes pendiente más antiguo en ESTADO_MENSUALIDADES
 async function actualizarMensualidad(cedula, monto, hoy) {
   try {
     const filas = await sheetsClient.getAllRows('ESTADO_MENSUALIDADES');
-
-    // Buscar el mes pendiente/parcial/mora más antiguo del jugador
     const candidatos = filas
       .map((f, idx) => ({ ...f, _idx: idx }))
       .filter(f => {
@@ -150,34 +170,22 @@ async function actualizarMensualidad(cedula, monto, hoy) {
     const nuevoPagado = pagadoActual + monto;
     const nuevoSaldo = Math.max(0, oficial - nuevoPagado);
     const nuevoEstado = nuevoPagado >= oficial ? 'AL_DIA' : 'PARCIAL';
-
-    // Obtener número de fila real en el sheet (fila 1 = headers, fila 2 = primer dato)
     const rowNumber = target._idx + 2;
+
     await sheetsClient.updateRow('ESTADO_MENSUALIDADES', rowNumber, [
-      target.club_id,
-      target.cedula,
-      target.nombre,
-      target.anio,
-      target.mes,
-      target.numero_mes,
-      target.valor_oficial,
-      String(nuevoPagado),
-      String(nuevoSaldo),
-      nuevoEstado,
-      hoy,
+      target.club_id, target.cedula, target.nombre, target.anio,
+      target.mes, target.numero_mes, target.valor_oficial,
+      String(nuevoPagado), String(nuevoSaldo), nuevoEstado, hoy,
     ]);
   } catch (err) {
     console.error('Error actualizarMensualidad:', err.message);
   }
 }
 
-/**
- * Actualizar ESTADO_UNIFORMES o ESTADO_TORNEOS
- */
+// ✅ Actualizar ESTADO_UNIFORMES o ESTADO_TORNEOS
 async function actualizarConcepto(hoja, cedula, monto, filtroTorneo, hoy) {
   try {
     const filas = await sheetsClient.getAllRows(hoja);
-
     const candidatos = filas
       .map((f, idx) => ({ ...f, _idx: idx }))
       .filter(f => {
@@ -199,7 +207,6 @@ async function actualizarConcepto(hoja, cedula, monto, filtroTorneo, hoy) {
     const nuevoPagado = pagadoActual + monto;
     const nuevoSaldo = Math.max(0, oficial - nuevoPagado);
     const nuevoEstado = nuevoPagado >= oficial ? 'AL_DIA' : 'PARCIAL';
-
     const rowNumber = target._idx + 2;
 
     if (hoja === 'ESTADO_UNIFORMES') {

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Shirt, CheckCircle, AlertCircle, Search, Loader, Trophy } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
-const CLUB_ID = import.meta.env.VITE_CLUB_ID || 'city-fc';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID || 'city-fc';
 
 export default function Uniformes() {
   const [step, setStep] = useState(1);

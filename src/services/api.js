@@ -3,7 +3,7 @@
  * Base URL: https://city-fc-api-v2.vercel.app
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 const CLUB_ID = 'city-fc';
 
 /**

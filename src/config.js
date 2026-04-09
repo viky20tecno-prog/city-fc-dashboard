@@ -1,9 +1,9 @@
 // API REST Config (nuevo)
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 
 // Google Sheets config (deprecado, mantener para compatibilidad)
-export const SHEET_ID = '1LuqQipb1_MD7WoVy0064mZ1vwWgWCg9ikBRUN_-F0-A';
-export const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
+export const SHEET_ID = process.env.NEXT_PUBLIC_SHEET_ID || '1LuqQipb1_MD7WoVy0064mZ1vwWgWCg9ikBRUN_-F0-A';
+export const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 
 export const SHEETS = {
   JUGADORES: 'JUGADORES',
@@ -16,7 +16,7 @@ export const SHEETS = {
 export const CUOTA_MENSUAL = 65000;
 
 // URL del Google Apps Script — ACTUALIZADA 2026-03-17 19:20
-export const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbx6h036JBucCbHxNXnQdLr4K2yeNWaJDnqupVqp3EEci_ys2UyVp7sXZh8OEwstBh6F/exec';
+export const APPS_SCRIPT_URL = process.env.NEXT_PUBLIC_APPS_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbx6h036JBucCbHxNXnQdLr4K2yeNWaJDnqupVqp3EEci_ys2UyVp7sXZh8OEwstBh6F/exec';
 
 export const ESTADO_COLORS = {
   AL_DIA: { bg: 'bg-[rgba(0,208,132,0.12)]', text: 'text-[#00D084]', dot: 'bg-[#00D084]' },

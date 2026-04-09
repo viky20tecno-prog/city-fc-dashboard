@@ -1,33 +1,24 @@
 import { useState } from 'react';
 import { UserPlus, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
-import { APPS_SCRIPT_URL } from '../config';
+import { API_BASE_URL } from '../config';
 
 const CAMPOS = [
-  // Datos personales
   { key: 'tipo_id', label: 'Tipo de documento', type: 'select', required: true, section: 'personal', options: ['Cédula de Ciudadanía', 'Tarjeta de Identidad', 'Cédula de Extranjería', 'Pasaporte', 'NIT'] },
   { key: 'cedula', label: 'Número de documento', type: 'text', placeholder: 'Ej: 1234567890', required: true, section: 'personal' },
   { key: 'nombre', label: 'Nombre(s)', type: 'text', placeholder: 'Ej: Santiago', required: true, section: 'personal' },
   { key: 'apellidos', label: 'Apellido(s)', type: 'text', placeholder: 'Ej: García Salazar', required: true, section: 'personal' },
-
-  // Contacto
   { key: 'celular', label: 'Celular (WhatsApp)', type: 'tel', placeholder: 'Ej: 3001234567', required: true, section: 'contacto' },
   { key: 'correo_electronico', label: 'Correo electrónico', type: 'email', placeholder: 'Ej: correo@ejemplo.com', required: true, section: 'contacto' },
   { key: 'instagram', label: 'Instagram (opcional)', type: 'text', placeholder: 'Ej: @tucuenta', required: false, section: 'contacto' },
-
-  // Información médica y personal
   { key: 'lugar_de_nacimiento', label: 'Lugar de nacimiento', type: 'text', placeholder: 'Ej: Bogotá', required: true, section: 'medica' },
   { key: 'fecha_nacimiento', label: 'Fecha de nacimiento', type: 'date', required: true, section: 'medica' },
   { key: 'tipo_sangre', label: 'Tipo de sangre', type: 'select', required: true, section: 'medica', options: ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'] },
   { key: 'eps', label: 'EPS', type: 'text', placeholder: 'Ej: Sura, Nueva EPS, Sanitas...', required: true, section: 'medica' },
   { key: 'estatura', label: 'Estatura (cm)', type: 'number', placeholder: 'Ej: 175', required: false, section: 'medica' },
   { key: 'peso', label: 'Peso (kg)', type: 'number', placeholder: 'Ej: 72', required: false, section: 'medica' },
-
-  // Lugar de residencia
   { key: 'direccion', label: 'Dirección', type: 'text', placeholder: 'Ej: Cra 45 #67-89', required: false, section: 'residencia' },
   { key: 'municipio', label: 'Municipio', type: 'text', placeholder: 'Ej: Medellín', required: true, section: 'residencia' },
   { key: 'barrio', label: 'Barrio', type: 'text', placeholder: 'Ej: Laureles', required: false, section: 'residencia' },
-
-  // Emergencia
   { key: 'familiar_emergencia', label: 'Contacto en caso de emergencia (familiar)', type: 'text', placeholder: 'Nombre de un familiar o acudiente', required: true, section: 'emergencia' },
   { key: 'celular_contacto', label: 'Celular del contacto de emergencia', type: 'tel', placeholder: 'Número diferente al tuyo', required: true, section: 'emergencia' },
 ];
@@ -44,21 +35,16 @@ export default function FormInscripcion() {
   const [form, setForm] = useState({});
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
-  // Honeypot — campo invisible para bots
   const [honeypot, setHoneypot] = useState('');
 
-  const handleChange = (key, value) => {
-    setForm(prev => ({ ...prev, [key]: value }));
-  };
+  const handleChange = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('loading');
     setErrorMsg('');
 
-    // Honeypot check — si tiene valor, es un bot
     if (honeypot) {
-      // Simular éxito para no alertar al bot
       setTimeout(() => setStatus('success'), 1500);
       return;
     }
@@ -91,29 +77,34 @@ export default function FormInscripcion() {
 
     if (form.celular_contacto && form.celular && form.celular_contacto.trim() === form.celular.trim()) {
       setStatus('error');
-      setErrorMsg('El celular de emergencia debe ser diferente al tuyo. Ingresa el número de un familiar o persona de confianza.');
+      setErrorMsg('El celular de emergencia debe ser diferente al tuyo.');
       return;
     }
 
     try {
-      // Enviar datos como JSON al endpoint de Vercel
-      const res = await fetch('/api/inscripcion', {
+      // ✅ Llama directamente a la API en lugar de Apps Script
+      const res = await fetch(`${API_BASE_URL}/inscripcion`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          activo: 'SI',
+          tipo_descuento: 'NA',
+          fecha_inscripcion: new Date().toISOString().split('T')[0],
+        }),
       });
 
-      const respData = await res.json();
+      const data = await res.json();
 
-      if (!res.ok) {
+      if (data.success) {
+        setStatus('success');
+      } else if (res.status === 409) {
         setStatus('error');
-        setErrorMsg(respData.error || 'Error al registrar. Intenta de nuevo.');
-        return;
+        setErrorMsg('Ya existe un jugador inscrito con ese número de documento.');
+      } else {
+        setStatus('error');
+        setErrorMsg(data.error || data.message || 'Error al registrar. Intenta de nuevo.');
       }
-
-      setStatus('success');
     } catch (err) {
       console.error('Error completo:', err);
       setStatus('error');
@@ -149,7 +140,6 @@ export default function FormInscripcion() {
   return (
     <div className="min-h-screen bg-[#0D1117] flex items-center justify-center p-4 py-8">
       <div className="bg-[#161B22] rounded-3xl border border-[#30363D] p-8 max-w-lg w-full">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00D084] to-[#00D084]/60 flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">⚽</span>
@@ -158,19 +148,10 @@ export default function FormInscripcion() {
           <p className="text-[#8B949E] mt-2">Llena tus datos para inscribirte al club</p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Honeypot — invisible para humanos */}
+          {/* Honeypot */}
           <div style={{ position: 'absolute', left: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }} aria-hidden="true" tabIndex={-1}>
-            <label htmlFor="website_url">No llenar este campo</label>
-            <input
-              type="text"
-              id="website_url"
-              name="website_url"
-              value={honeypot}
-              onChange={e => setHoneypot(e.target.value)}
-              autoComplete="off"
-            />
+            <input type="text" value={honeypot} onChange={e => setHoneypot(e.target.value)} autoComplete="off" />
           </div>
 
           {SECCIONES.map(seccion => (
@@ -186,7 +167,6 @@ export default function FormInscripcion() {
             </div>
           ))}
 
-          {/* Error */}
           {status === 'error' && (
             <div className="flex items-start gap-2 p-3 bg-[rgba(255,94,94,0.12)] rounded-xl text-sm text-[#FF5E5E] border border-[#FF5E5E]/20">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -194,27 +174,16 @@ export default function FormInscripcion() {
             </div>
           )}
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={status === 'loading'}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#0D1117] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6"
-          >
+          <button type="submit" disabled={status === 'loading'}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#0D1117] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6">
             {status === 'loading' ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Registrando...
-              </>
+              <><Loader2 className="w-4 h-4 animate-spin" />Registrando...</>
             ) : (
-              <>
-                <UserPlus className="w-4 h-4" />
-                Inscribirme
-              </>
+              <><UserPlus className="w-4 h-4" />Inscribirme</>
             )}
           </button>
         </form>
 
-        {/* Footer */}
         <p className="text-center text-xs text-[#8B949E] mt-6">
           Al inscribirte serás parte oficial del club ⚽
         </p>
@@ -230,16 +199,10 @@ function FormField({ campo, form, onChange }) {
         <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
           {campo.label} {campo.required && <span className="text-[#FF5E5E]">*</span>}
         </label>
-        <select
-          value={form[campo.key] || ''}
-          onChange={e => onChange(campo.key, e.target.value)}
-          required={campo.required}
-          className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084] transition-colors"
-        >
-          <option value="" className="text-[#8B949E]">Seleccionar...</option>
-          {campo.options.map(opt => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
+        <select value={form[campo.key] || ''} onChange={e => onChange(campo.key, e.target.value)} required={campo.required}
+          className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084] transition-colors">
+          <option value="">Seleccionar...</option>
+          {campo.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
       </div>
     );
@@ -250,14 +213,9 @@ function FormField({ campo, form, onChange }) {
       <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
         {campo.label} {campo.required && <span className="text-[#FF5E5E]">*</span>}
       </label>
-      <input
-        type={campo.type}
-        placeholder={campo.placeholder}
-        value={form[campo.key] || ''}
-        onChange={e => onChange(campo.key, e.target.value)}
-        required={campo.required}
-        className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084] transition-colors"
-      />
+      <input type={campo.type} placeholder={campo.placeholder} value={form[campo.key] || ''}
+        onChange={e => onChange(campo.key, e.target.value)} required={campo.required}
+        className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084] transition-colors" />
     </div>
   );
 }

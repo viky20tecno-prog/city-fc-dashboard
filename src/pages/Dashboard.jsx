@@ -8,11 +8,13 @@ import MorososList from '../components/MorososList';
 import TimelineCobro from '../components/TimelineCobro';
 import WhatsAppMockup from '../components/WhatsAppMockup';
 import PagoManualModal from '../components/PagoManualModal';
+import ArbitrajePagos from './ArbitrajePagos';
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'jugadores', label: 'Jugadores', icon: Users },
   { id: 'uniformes', label: 'Pedidos Uniformes', icon: Shirt },
+  { id: 'arbitraje', label: 'Pago Arbitraje', icon: Activity },
   { id: 'cobro', label: 'Ciclo de Cobro', icon: Clock },
   { id: 'whatsapp', label: 'WhatsApp Bot', icon: MessageSquare },
 ];
@@ -168,6 +170,10 @@ export default function Dashboard() {
             
             {activeTab === 'uniformes' && (
               <UniformesTabInline jugadores={jugadores} />
+            )}
+            
+            {activeTab === 'arbitraje' && (
+              <ArbitrajePagos />
             )}
             
             {activeTab === 'cobro' && (

@@ -1,4 +1,8 @@
-import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle, XCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
+
+const CLUB_ID = import.meta.env.VITE_CLUB_ID || 'city-fc';
 
 const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(n) || 0);
 
@@ -22,11 +26,9 @@ function EstadoBadge({ estado }) {
 
 function SeccionMensualidades({ datos }) {
   if (!datos || datos.length === 0) return <EmptySection texto="Sin datos de mensualidades" />;
-
   const sorted = [...datos].sort((a, b) => (parseInt(a.numero_mes) || 0) - (parseInt(b.numero_mes) || 0));
   const totalPagado = sorted.reduce((s, m) => s + (parseFloat(m.valor_pagado) || 0), 0);
   const totalPendiente = sorted.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
-
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
@@ -50,9 +52,7 @@ function SeccionMensualidades({ datos }) {
               <span className="text-sm font-medium text-[#E6EDF3] w-24">{m.mes}</span>
               <EstadoBadge estado={m.estado} />
             </div>
-            <div className="text-right">
-              <p className="text-sm font-medium text-[#E6EDF3]">{formatCOP(m.valor_pagado)} <span className="text-[#8B949E]">/ {formatCOP(m.valor_oficial)}</span></p>
-            </div>
+            <p className="text-sm font-medium text-[#E6EDF3]">{formatCOP(m.valor_pagado)} <span className="text-[#8B949E]">/ {formatCOP(m.valor_oficial)}</span></p>
           </div>
         ))}
       </div>
@@ -62,7 +62,6 @@ function SeccionMensualidades({ datos }) {
 
 function SeccionUniformes({ datos }) {
   if (!datos || datos.length === 0) return <EmptySection texto="Sin uniformes registrados" />;
-
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
@@ -76,9 +75,7 @@ function SeccionUniformes({ datos }) {
               <span className="text-sm font-medium text-[#E6EDF3]">{u.tipo_uniforme || 'Uniforme'}</span>
               <EstadoBadge estado={u.estado} />
             </div>
-            <div className="text-right">
-              <p className="text-sm font-medium text-[#E6EDF3]">{formatCOP(u.valor_pagado)} <span className="text-[#8B949E]">/ {formatCOP(u.valor_oficial)}</span></p>
-            </div>
+            <p className="text-sm font-medium text-[#E6EDF3]">{formatCOP(u.valor_pagado)} <span className="text-[#8B949E]">/ {formatCOP(u.valor_oficial)}</span></p>
           </div>
         ))}
       </div>
@@ -88,7 +85,6 @@ function SeccionUniformes({ datos }) {
 
 function SeccionTorneos({ datos }) {
   if (!datos || datos.length === 0) return <EmptySection texto="Sin torneos registrados" />;
-
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
@@ -102,9 +98,7 @@ function SeccionTorneos({ datos }) {
               <span className="text-sm font-medium text-[#E6EDF3]">{t.torneo || 'Torneo'}</span>
               <EstadoBadge estado={t.estado} />
             </div>
-            <div className="text-right">
-              <p className="text-sm font-medium text-[#E6EDF3]">{formatCOP(t.valor_pagado)} <span className="text-[#8B949E]">/ {formatCOP(t.valor_oficial)}</span></p>
-            </div>
+            <p className="text-sm font-medium text-[#E6EDF3]">{formatCOP(t.valor_pagado)} <span className="text-[#8B949E]">/ {formatCOP(t.valor_oficial)}</span></p>
           </div>
         ))}
       </div>
@@ -112,63 +106,180 @@ function SeccionTorneos({ datos }) {
   );
 }
 
-function SeccionHistorial({ datos }) {
-  if (!datos || datos.length === 0) return <EmptySection texto="Sin pagos registrados" />;
+// ✅ NUEVA sección con lazy load — carga desde API solo al hacer clic
+function SeccionHistorialLazy({ cedula }) {
+  const [visible, setVisible] = useState(false);
+  const [cargando, setCargando] = useState(false);
+  const [transacciones, setTransacciones] = useState([]);
+  const [cargado, setCargado] = useState(false);
+  const [error, setError] = useState('');
 
-  const sorted = [...datos].sort((a, b) => (b.fecha_proceso || '').localeCompare(a.fecha_proceso || ''));
+  const cargarHistorial = async () => {
+    if (visible && cargado) {
+      setVisible(false);
+      return;
+    }
+    setVisible(true);
+    if (cargado) return;
+
+    setCargando(true);
+    setError('');
+    try {
+      const res = await fetch(`${API_BASE_URL}/payments?club_id=${CLUB_ID}&cedula=${cedula}&limit=50`);
+      const data = await res.json();
+      if (data.success) {
+        const sorted = (data.data || []).sort((a, b) =>
+          (b.fecha_proceso || '').localeCompare(a.fecha_proceso || '')
+        );
+        setTransacciones(sorted);
+        setCargado(true);
+      } else {
+        setError('No se pudo cargar el historial');
+      }
+    } catch {
+      setError('Error de conexión al cargar historial');
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const estadoColor = (estado) => {
+    if (estado?.includes('manual')) return 'text-[#F5A623] bg-[rgba(245,166,35,0.12)]';
+    if (estado?.includes('automatica')) return 'text-[#00D084] bg-[rgba(0,208,132,0.12)]';
+    return 'text-[#8B949E] bg-[#1E2530]';
+  };
+
+  const estadoLabel = (estado) => {
+    if (estado === 'aprobado_manual') return 'Manual';
+    if (estado === 'aprobado_automaticamente') return 'Automático';
+    return estado || '—';
+  };
+
+  const conceptoLabel = (concepto) => {
+    if (!concepto) return '—';
+    try {
+      const parsed = JSON.parse(concepto);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(c => c.descripcion || c.tipo).join(', ');
+      }
+    } catch {
+      return concepto;
+    }
+    return concepto;
+  };
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-3">
-        <FileText className="w-5 h-5 text-[#C678FF]" />
-        <h3 className="text-base font-semibold text-[#E6EDF3]">Historial de comprobantes</h3>
-      </div>
-      <div className="space-y-2">
-        {sorted.map((p, i) => (
-          <div key={i} className="p-3 rounded-xl bg-[#1E2530] border border-[#30363D]">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium text-[#E6EDF3]">{formatCOP(p.monto_imagen)}</span>
-              <span className="text-xs text-[#8B949E]">{p.fecha_proceso}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-[#8B949E]">{p.banco} · Ref: {p.referencia}</span>
-              <span className={`text-xs font-medium ${p.estado_revision === 'aprobado_automaticamente' ? 'text-[#00D084]' : 'text-[#F5A623]'}`}>
-                {p.estado_revision}
-              </span>
-            </div>
-            {p.url_comprobante && (
-              <a href={p.url_comprobante} target="_blank" rel="noopener noreferrer" className="text-xs text-[#4A9EFF] hover:underline mt-1 inline-block">
-                📎 Ver comprobante
-              </a>
-            )}
+      {/* Botón toggle */}
+      <button
+        onClick={cargarHistorial}
+        className="w-full flex items-center justify-between p-4 rounded-xl bg-[rgba(198,120,255,0.08)] border border-[#C678FF]/20 hover:bg-[rgba(198,120,255,0.12)] transition-colors group"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-[rgba(198,120,255,0.12)] flex items-center justify-center">
+            <FileText className="w-4 h-4 text-[#C678FF]" />
           </div>
-        ))}
-      </div>
+          <div className="text-left">
+            <p className="text-sm font-semibold text-[#E6EDF3]">Historial de transacciones</p>
+            <p className="text-xs text-[#8B949E]">
+              {cargado ? `${transacciones.length} registro${transacciones.length !== 1 ? 's' : ''}` : 'Clic para cargar'}
+            </p>
+          </div>
+        </div>
+        {cargando ? (
+          <Loader2 className="w-4 h-4 text-[#C678FF] animate-spin" />
+        ) : visible ? (
+          <EyeOff className="w-4 h-4 text-[#C678FF]" />
+        ) : (
+          <Eye className="w-4 h-4 text-[#C678FF]" />
+        )}
+      </button>
+
+      {/* Contenido */}
+      {visible && (
+        <div className="mt-3 space-y-2">
+          {cargando && (
+            <div className="flex items-center justify-center py-8 gap-2 text-[#8B949E]">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-sm">Cargando historial...</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="p-3 rounded-xl bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/20 text-sm text-[#FF5E5E]">
+              {error}
+            </div>
+          )}
+
+          {!cargando && !error && transacciones.length === 0 && (
+            <div className="text-center py-6 text-[#8B949E] text-sm">
+              Sin transacciones registradas
+            </div>
+          )}
+
+          {!cargando && transacciones.map((p, i) => (
+            <div key={i} className="p-3 rounded-xl bg-[#1E2530] border border-[#30363D]">
+              {/* Fila superior: monto + fecha */}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-bold text-[#E6EDF3]">{formatCOP(p.suma_conceptos || p.monto)}</span>
+                <span className="text-xs text-[#8B949E]">{p.fecha_comprobante || p.fecha_proceso}</span>
+              </div>
+
+              {/* Fila: método + estado */}
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-[#8B949E]">{p.banco || '—'}</span>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${estadoColor(p.estado_revision)}`}>
+                  {estadoLabel(p.estado_revision)}
+                </span>
+              </div>
+
+              {/* Referencia */}
+              {p.referencia && (
+                <p className="text-xs text-[#8B949E]">Ref: {p.referencia}</p>
+              )}
+
+              {/* Concepto */}
+              {p.concepto && (
+                <p className="text-xs text-[#8B949E] mt-1">
+                  {conceptoLabel(p.concepto)}
+                </p>
+              )}
+
+              {/* Nota/mensaje_alerta */}
+              {p.mensaje_alerta && (
+                <p className="text-xs text-[#C678FF] mt-1 italic">📝 {p.mensaje_alerta}</p>
+              )}
+
+              {/* Comprobante */}
+              {p.url_comprobante && (
+                <a href={p.url_comprobante} target="_blank" rel="noopener noreferrer"
+                  className="text-xs text-[#4A9EFF] hover:underline mt-1 inline-block">
+                  📎 Ver comprobante
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 function EmptySection({ texto }) {
-  return (
-    <div className="text-center py-6 text-[#8B949E] text-sm">
-      {texto}
-    </div>
-  );
+  return <div className="text-center py-6 text-[#8B949E] text-sm">{texto}</div>;
 }
 
-export default function EstadoCuenta({ jugador, mensualidades, uniformes, torneos, registroPagos, onClose }) {
+export default function EstadoCuenta({ jugador, mensualidades, uniformes, torneos, onClose }) {
   const cedula = jugador.cedula;
   const nombre = `${jugador['nombre(s)'] || jugador.nombre || ''} ${jugador['apellido(s)'] || jugador.apellidos || ''}`.trim();
 
   const misMensualidades = mensualidades.filter(m => (m.cedula || m.jugador_id) === cedula);
   const misUniformes = uniformes.filter(u => u.cedula === cedula);
   const misTorneos = torneos.filter(t => t.cedula === cedula);
-  const misPagos = registroPagos.filter(p => p.telefono === jugador.celular || p.cedula === cedula);
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
       <div className="bg-[#161B22] rounded-2xl border border-[#30363D] w-full max-w-2xl my-8">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#30363D]">
           <div>
             <h2 className="text-xl font-bold text-[#E6EDF3]">{nombre}</h2>
@@ -179,12 +290,12 @@ export default function EstadoCuenta({ jugador, mensualidades, uniformes, torneo
           </button>
         </div>
 
-        {/* Secciones */}
         <div className="p-6 space-y-8">
           <SeccionMensualidades datos={misMensualidades} />
           <SeccionUniformes datos={misUniformes} />
           <SeccionTorneos datos={misTorneos} />
-          <SeccionHistorial datos={misPagos} />
+          {/* ✅ Historial lazy — se carga desde API solo al hacer clic */}
+          <SeccionHistorialLazy cedula={cedula} />
         </div>
       </div>
     </div>

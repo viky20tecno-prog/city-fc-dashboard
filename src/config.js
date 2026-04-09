@@ -1,4 +1,7 @@
-// Google Sheets config
+// API REST Config (nuevo)
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+
+// Google Sheets config (deprecado, mantener para compatibilidad)
 export const SHEET_ID = '1LuqQipb1_MD7WoVy0064mZ1vwWgWCg9ikBRUN_-F0-A';
 export const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
 

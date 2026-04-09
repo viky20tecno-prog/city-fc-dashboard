@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle, XCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
-const CLUB_ID = import.meta.env.VITE_CLUB_ID || 'city-fc';
+const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID || 'city-fc';
 
 const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(n) || 0);
 

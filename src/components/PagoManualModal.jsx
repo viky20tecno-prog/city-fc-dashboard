@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, DollarSign, Loader2, CheckCircle, AlertCircle, ArrowLeft, Shield, PlusCircle } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
-const CLUB_ID = import.meta.env.VITE_CLUB_ID || 'city-fc';
+const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID || 'city-fc';
 
 const CONCEPTOS = ['Mensualidad', 'Uniforme', 'Torneo', 'Otro'];
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Nequi', 'Daviplata', 'Consignación'];

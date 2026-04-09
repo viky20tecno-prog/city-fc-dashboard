@@ -18,7 +18,7 @@ export default function PedidoUniforme() {
   useState(() => {
     (async () => {
       try {
-        const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+        const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
         const sheetId = '1oyrm3WeCXJbmxMhSWFjhnvpZ2XDr6DK9Dm__rLqO6gA';
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/JUGADORES!A:C?key=${apiKey}&_t=${Date.now()}`;
         const res = await fetch(url);

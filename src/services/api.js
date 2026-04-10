@@ -1,76 +1,26 @@
 /**
- * API Service — Lee desde City FC API
+ * API Service — Lee desde City FC API en lugar de Google Sheets directo
  * Base URL: https://city-fc-api-v2.vercel.app
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
-const CLUB_ID = import.meta.env.VITE_CLUB_ID || 'city-fc';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const CLUB_ID = 'city-fc';
 
+/**
+ * Fetch con manejo de errores
+ */
 async function apiCall(endpoint) {
   const url = `${API_BASE_URL}${endpoint}`;
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`API Error: ${res.status} ${res.statusText}`);
+    if (!res.ok) {
+      throw new Error(`API Error: ${res.status} ${res.statusText}`);
+    }
     return await res.json();
   } catch (error) {
     console.error(`API Call failed: ${endpoint}`, error);
     throw error;
   }
-}
-
-/**
- * ✅ Calcular morosos directamente desde mensualidades
- * Un jugador está en MORA si tiene al menos 1 mes ANTERIOR al actual
- * con estado PENDIENTE, PARCIAL o MORA y saldo_pendiente > 0
- */
-function calcularMorosos(mensualidades, jugadores) {
-  const mesActual = new Date().getMonth() + 1; // 1-12
-
-  // Agrupar mensualidades por cédula
-  const porCedula = {};
-  for (const m of mensualidades) {
-    const ced = String(m.cedula || m.jugador_id || '').trim();
-    if (!ced) continue;
-    if (!porCedula[ced]) porCedula[ced] = [];
-    porCedula[ced].push(m);
-  }
-
-  const morosos = [];
-
-  for (const [cedula, meses] of Object.entries(porCedula)) {
-    // Buscar meses ANTERIORES al actual con saldo pendiente
-    const mesesEnMora = meses.filter(m => {
-      const numMes = parseInt(m.numero_mes) || 0;
-      const estado = String(m.estado || '').toUpperCase();
-      const saldo = parseFloat(m.saldo_pendiente) || 0;
-      return numMes < mesActual &&
-        (estado === 'PENDIENTE' || estado === 'PARCIAL' || estado === 'MORA') &&
-        saldo > 0;
-    });
-
-    if (mesesEnMora.length === 0) continue;
-
-    // Calcular saldo total en mora
-    const saldoTotal = mesesEnMora.reduce((sum, m) => sum + (parseFloat(m.saldo_pendiente) || 0), 0);
-
-    // Buscar datos del jugador
-    const jugador = jugadores.find(j => String(j.cedula).trim() === cedula);
-    const nombre = jugador
-      ? `${jugador['nombre(s)'] || jugador.nombre || ''} ${jugador['apellido(s)'] || jugador.apellidos || ''}`.trim()
-      : `CC ${cedula}`;
-
-    morosos.push({
-      cedula,
-      nombre,
-      celular: jugador?.celular || '',
-      meses_mora: mesesEnMora.length,
-      meses_detalle: mesesEnMora.map(m => m.mes).join(', '),
-      saldo_total: saldoTotal,
-    });
-  }
-
-  // Ordenar por mayor saldo primero
-  return morosos.sort((a, b) => b.saldo_total - a.saldo_total);
 }
 
 /**
@@ -82,12 +32,14 @@ export async function fetchAllData() {
       playersRes,
       invoicesRes,
       paymentsRes,
+      reportsRes,
       uniformesRes,
       torneosRes,
     ] = await Promise.all([
       apiCall(`/players?club_id=${CLUB_ID}`),
       apiCall(`/invoices?club_id=${CLUB_ID}&anio=2026`),
       apiCall(`/payments?club_id=${CLUB_ID}&limit=100`),
+      apiCall(`/reports/summary?club_id=${CLUB_ID}`),
       apiCall(`/invoices/uniformes?club_id=${CLUB_ID}`),
       apiCall(`/invoices/torneos?club_id=${CLUB_ID}`),
     ]);
@@ -98,8 +50,23 @@ export async function fetchAllData() {
     const uniformes = uniformesRes.data || [];
     const torneos = torneosRes.data || [];
 
-    // ✅ Calcular morosos desde mensualidades directamente
-    const morosos = calcularMorosos(mensualidades, jugadores);
+    // 🔥 FIX DEFINITIVO: morosos ahora incluye nombre real
+    const morosos = reportsRes.mensualidades?.morosos_cédulas?.map(m => {
+      const jugador = jugadores.find(j => j.cedula == m.cedula);
+
+      return {
+        cedula: m.cedula,
+
+        // 👇 AQUÍ ESTÁ EL FIX CLAVE
+        nombre: jugador
+          ? `${jugador["nombre(s)"] || ''} ${jugador["apellido(s)"] || ''}`.trim()
+          : `CC ${m.cedula}`,
+
+        celular: jugador?.celular || jugador?.telefono || '',
+        meses_mora: 1,
+        saldo_total: m.saldo_pendiente || 0,
+      };
+    }) || [];
 
     return {
       jugadores,
@@ -108,6 +75,7 @@ export async function fetchAllData() {
       torneos,
       registroPagos,
       morosos,
+      reporteSummary: reportsRes,
     };
   } catch (error) {
     console.error('Error fetching all data from API:', error);
@@ -115,14 +83,23 @@ export async function fetchAllData() {
   }
 }
 
+/**
+ * Obtener detalle de un jugador
+ */
 export async function fetchPlayerDetail(cedula) {
   return apiCall(`/players/${cedula}?club_id=${CLUB_ID}`);
 }
 
+/**
+ * Obtener mensualidades de un jugador
+ */
 export async function fetchPlayerInvoices(cedula) {
   return apiCall(`/invoices/player/${cedula}?club_id=${CLUB_ID}`);
 }
 
+/**
+ * Obtener resumen del club
+ */
 export async function fetchSummary(mes, anio) {
   let url = `/reports/summary?club_id=${CLUB_ID}`;
   if (mes) url += `&mes=${mes}`;
@@ -130,23 +107,36 @@ export async function fetchSummary(mes, anio) {
   return apiCall(url);
 }
 
+/**
+ * Obtener lista de morosos
+ */
 export async function fetchDefaulters(anio = 2026) {
   return apiCall(`/reports/defaulters?club_id=${CLUB_ID}&anio=${anio}`);
 }
 
+/**
+ * Obtener configuración del club
+ */
 export async function fetchConfig() {
   return apiCall(`/config?club_id=${CLUB_ID}`);
 }
 
+/**
+ * Registrar un pago manualmente (POST)
+ */
 export async function registerPayment(paymentData) {
   const url = `${API_BASE_URL}/payments?club_id=${CLUB_ID}`;
   try {
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(paymentData),
     });
-    if (!res.ok) throw new Error(`Payment registration failed: ${res.status}`);
+    if (!res.ok) {
+      throw new Error(`Payment registration failed: ${res.status}`);
+    }
     return await res.json();
   } catch (error) {
     console.error('Error registering payment:', error);

@@ -50,23 +50,32 @@ export async function fetchAllData() {
     const uniformes = uniformesRes.data || [];
     const torneos = torneosRes.data || [];
 
-    // 🔥 FIX DEFINITIVO: morosos ahora incluye nombre real
-    const morosos = reportsRes.mensualidades?.morosos_cédulas?.map(m => {
-      const jugador = jugadores.find(j => j.cedula == m.cedula);
+    // ✅ FIX REAL: calcular morosos dinámicamente según mes actual
+    const mesActual = new Date().getMonth() + 1;
 
-      return {
-        cedula: m.cedula,
+    const morosos = mensualidades
+      .filter(m => {
+        const estado = (m.estado || '').toUpperCase();
+        const numeroMes = parseInt(m.numero_mes || 0);
 
-        // 👇 AQUÍ ESTÁ EL FIX CLAVE
-        nombre: jugador
-          ? `${jugador["nombre(s)"] || ''} ${jugador["apellido(s)"] || ''}`.trim()
-          : `CC ${m.cedula}`,
+        return (
+          numeroMes <= mesActual &&
+          estado !== 'AL_DIA'
+        );
+      })
+      .map(m => {
+        const jugador = jugadores.find(j => j.cedula == m.cedula);
 
-        celular: jugador?.celular || jugador?.telefono || '',
-        meses_mora: 1,
-        saldo_total: m.saldo_pendiente || 0,
-      };
-    }) || [];
+        return {
+          cedula: m.cedula,
+          nombre: jugador
+            ? `${jugador["nombre(s)"] || ''} ${jugador["apellido(s)"] || ''}`.trim()
+            : `CC ${m.cedula}`,
+          celular: jugador?.celular || '',
+          meses_mora: 1,
+          saldo_total: parseFloat(m.saldo_pendiente) || 0,
+        };
+      });
 
     return {
       jugadores,

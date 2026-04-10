@@ -4,11 +4,22 @@ const CLUB_ID = 'city-fc';
 async function apiCall(endpoint) {
   const url = `${API_BASE_URL}${endpoint}`;
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // 👇 esto evita el "Failed to fetch silencioso"
+    const text = await res.text();
+
     if (!res.ok) {
-      throw new Error(`API Error: ${res.status} ${res.statusText}`);
+      console.error('API ERROR RESPONSE:', text);
+      throw new Error(`API Error: ${res.status}`);
     }
-    return await res.json();
+
+    return text ? JSON.parse(text) : {};
   } catch (error) {
     console.error(`API Call failed: ${endpoint}`, error);
     throw error;
@@ -46,10 +57,7 @@ export async function fetchAllData() {
         const estado = (m.estado || '').toUpperCase();
         const numeroMes = parseInt(m.numero_mes || 0);
 
-        return (
-          numeroMes <= mesActual &&
-          estado !== 'AL_DIA'
-        );
+        return numeroMes <= mesActual && estado !== 'AL_DIA';
       })
       .map(m => {
         const jugador = jugadores.find(j => j.cedula == m.cedula);
@@ -113,10 +121,15 @@ export async function registerPayment(paymentData) {
       },
       body: JSON.stringify(paymentData),
     });
+
+    const text = await res.text();
+
     if (!res.ok) {
+      console.error('PAYMENT ERROR:', text);
       throw new Error(`Payment registration failed: ${res.status}`);
     }
-    return await res.json();
+
+    return text ? JSON.parse(text) : {};
   } catch (error) {
     console.error('Error registering payment:', error);
     throw error;

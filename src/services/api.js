@@ -1,14 +1,6 @@
-/**
- * API Service — Lee desde City FC API en lugar de Google Sheets directo
- * Base URL: https://city-fc-api-v2.vercel.app
- */
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 const CLUB_ID = 'city-fc';
 
-/**
- * Fetch con manejo de errores
- */
 async function apiCall(endpoint) {
   const url = `${API_BASE_URL}${endpoint}`;
   try {
@@ -23,9 +15,6 @@ async function apiCall(endpoint) {
   }
 }
 
-/**
- * Obtener todos los datos del club
- */
 export async function fetchAllData() {
   try {
     const [
@@ -50,7 +39,6 @@ export async function fetchAllData() {
     const uniformes = uniformesRes.data || [];
     const torneos = torneosRes.data || [];
 
-    // ✅ FIX REAL: calcular morosos dinámicamente según mes actual
     const mesActual = new Date().getMonth() + 1;
 
     const morosos = mensualidades
@@ -92,23 +80,14 @@ export async function fetchAllData() {
   }
 }
 
-/**
- * Obtener detalle de un jugador
- */
 export async function fetchPlayerDetail(cedula) {
   return apiCall(`/players/${cedula}?club_id=${CLUB_ID}`);
 }
 
-/**
- * Obtener mensualidades de un jugador
- */
 export async function fetchPlayerInvoices(cedula) {
   return apiCall(`/invoices/player/${cedula}?club_id=${CLUB_ID}`);
 }
 
-/**
- * Obtener resumen del club
- */
 export async function fetchSummary(mes, anio) {
   let url = `/reports/summary?club_id=${CLUB_ID}`;
   if (mes) url += `&mes=${mes}`;
@@ -116,23 +95,14 @@ export async function fetchSummary(mes, anio) {
   return apiCall(url);
 }
 
-/**
- * Obtener lista de morosos
- */
 export async function fetchDefaulters(anio = 2026) {
   return apiCall(`/reports/defaulters?club_id=${CLUB_ID}&anio=${anio}`);
 }
 
-/**
- * Obtener configuración del club
- */
 export async function fetchConfig() {
   return apiCall(`/config?club_id=${CLUB_ID}`);
 }
 
-/**
- * Registrar un pago manualmente (POST)
- */
 export async function registerPayment(paymentData) {
   const url = `${API_BASE_URL}/payments?club_id=${CLUB_ID}`;
   try {

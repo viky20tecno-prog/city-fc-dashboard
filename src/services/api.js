@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const API_BASE_URL = 'https://city-fc-api-v2.vercel.app/api';
 const CLUB_ID = 'city-fc';
 
 async function apiCall(endpoint) {

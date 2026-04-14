@@ -70,7 +70,12 @@ export default function MorososList({ morosos }) {
                 </p>
 
                 <p className="text-xs text-gray-400 mt-1">
-                  CC {m.cedula} · {m.meses_mora} mes{m.meses_mora > 1 ? 'es' : ''} de mora
+                  CC {m.cedula} · {
+                    m.meses_en_mora?.length > 0
+                    ? m.meses_en_mora.map(mes => mes.mes).join(', ')
+                    : `${m.meses_mora} mes${m.meses_mora > 1 ? 'es' : ''}`
+                  } de mora
+
                 </p>
               </div>
 

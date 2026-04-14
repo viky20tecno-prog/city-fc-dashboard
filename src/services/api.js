@@ -40,15 +40,17 @@ export async function fetchAllData() {
     const morosos = reportsRes.mensualidades?.morosos_cédulas?.map(m => {
       const jugador = jugadores.find(j => j.cedula == m.cedula);
       return {
-        cedula:      m.cedula,
-        nombre:      jugador
+        cedula:        m.cedula,
+        nombre:        jugador
           ? `${jugador['nombre(s)'] || ''} ${jugador['apellido(s)'] || ''}`.trim()
           : `CC ${m.cedula}`,
-        celular:     jugador?.celular || '',
-        meses_mora: m.meses_en_mora?.length || 1,
-        saldo_total: m.saldo_pendiente || 0,
+        celular:       jugador?.celular || '',
+        meses_mora:    m.meses_en_mora?.length || 1,
+        meses_en_mora: m.meses_en_mora || [],
+        saldo_total:   m.saldo_pendiente || 0,
       };
     }) || [];
+
 
     return { jugadores, mensualidades, uniformes, torneos, registroPagos, morosos, reporteSummary: reportsRes };
   } catch (error) {

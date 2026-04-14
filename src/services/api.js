@@ -1,25 +1,18 @@
-const API_BASE_URL = 'https://city-fc-api-v2.vercel.app/api';
+/**
+ * API Service - Lee desde City FC API
+ * Base URL: https://city-fc-api-v2.vercel.app
+ */
+
+// FIX 1: VITE usa import.meta.env, no process.env.NEXT_PUBLIC_*
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 const CLUB_ID = 'city-fc';
 
 async function apiCall(endpoint) {
   const url = `${API_BASE_URL}${endpoint}`;
   try {
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    // 👇 esto evita el "Failed to fetch silencioso"
-    const text = await res.text();
-
-    if (!res.ok) {
-      console.error('API ERROR RESPONSE:', text);
-      throw new Error(`API Error: ${res.status}`);
-    }
-
-    return text ? JSON.parse(text) : {};
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`API Error: ${res.status} ${res.statusText}`);
+    return await res.json();
   } catch (error) {
     console.error(`API Call failed: ${endpoint}`, error);
     throw error;
@@ -40,48 +33,31 @@ export async function fetchAllData() {
       apiCall(`/invoices?club_id=${CLUB_ID}&anio=2026`),
       apiCall(`/payments?club_id=${CLUB_ID}&limit=100`),
       apiCall(`/reports/summary?club_id=${CLUB_ID}`),
-      apiCall(`/invoices/uniformes?club_id=${CLUB_ID}`),
-      apiCall(`/invoices/torneos?club_id=${CLUB_ID}`),
+      apiCall(`/invoices/uniformes?club_id=${CLUB_ID}`),  // FIX 2: ruta correcta
+      apiCall(`/invoices/torneos?club_id=${CLUB_ID}`),    // FIX 2: ruta correcta
     ]);
 
-    const jugadores = playersRes.data || [];
-    const mensualidades = invoicesRes.data || [];
-    const registroPagos = paymentsRes.data || [];
-    const uniformes = uniformesRes.data || [];
-    const torneos = torneosRes.data || [];
+    const jugadores      = playersRes.data   || [];
+    const mensualidades  = invoicesRes.data  || [];
+    const registroPagos  = paymentsRes.data  || [];
+    const uniformes      = uniformesRes.data || [];
+    const torneos        = torneosRes.data   || [];
 
-    const mesActual = new Date().getMonth() + 1;
+    // FIX 3: morosos_cedulas sin tilde (así lo devuelve el backend)
+    const morosos = reportsRes.mensualidades?.morosos_cedulas?.map(m => {
+      const jugador = jugadores.find(j => j.cedula == m.cedula);
+      return {
+        cedula:      m.cedula,
+        nombre:      jugador
+          ? `${jugador['nombre(s)'] || ''} ${jugador['apellido(s)'] || ''}`.trim()
+          : `CC ${m.cedula}`,
+        celular:     jugador?.celular || '',
+        meses_mora:  1,
+        saldo_total: m.saldo_pendiente || 0,
+      };
+    }) || [];
 
-    const morosos = mensualidades
-      .filter(m => {
-        const estado = (m.estado || '').toUpperCase();
-        const numeroMes = parseInt(m.numero_mes || 0);
-
-        return numeroMes <= mesActual && estado !== 'AL_DIA';
-      })
-      .map(m => {
-        const jugador = jugadores.find(j => j.cedula == m.cedula);
-
-        return {
-          cedula: m.cedula,
-          nombre: jugador
-            ? `${jugador["nombre(s)"] || ''} ${jugador["apellido(s)"] || ''}`.trim()
-            : `CC ${m.cedula}`,
-          celular: jugador?.celular || '',
-          meses_mora: 1,
-          saldo_total: parseFloat(m.saldo_pendiente) || 0,
-        };
-      });
-
-    return {
-      jugadores,
-      mensualidades,
-      uniformes,
-      torneos,
-      registroPagos,
-      morosos,
-      reporteSummary: reportsRes,
-    };
+    return { jugadores, mensualidades, uniformes, torneos, registroPagos, morosos, reporteSummary: reportsRes };
   } catch (error) {
     console.error('Error fetching all data from API:', error);
     throw error;
@@ -98,7 +74,7 @@ export async function fetchPlayerInvoices(cedula) {
 
 export async function fetchSummary(mes, anio) {
   let url = `/reports/summary?club_id=${CLUB_ID}`;
-  if (mes) url += `&mes=${mes}`;
+  if (mes)  url += `&mes=${mes}`;
   if (anio) url += `&anio=${anio}`;
   return apiCall(url);
 }
@@ -116,20 +92,11 @@ export async function registerPayment(paymentData) {
   try {
     const res = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(paymentData),
     });
-
-    const text = await res.text();
-
-    if (!res.ok) {
-      console.error('PAYMENT ERROR:', text);
-      throw new Error(`Payment registration failed: ${res.status}`);
-    }
-
-    return text ? JSON.parse(text) : {};
+    if (!res.ok) throw new Error(`Payment registration failed: ${res.status}`);
+    return await res.json();
   } catch (error) {
     console.error('Error registering payment:', error);
     throw error;

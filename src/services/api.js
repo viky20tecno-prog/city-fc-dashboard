@@ -45,7 +45,7 @@ export async function fetchAllData() {
           ? `${jugador['nombre(s)'] || ''} ${jugador['apellido(s)'] || ''}`.trim()
           : `CC ${m.cedula}`,
         celular:     jugador?.celular || '',
-        meses_mora:  1,
+        meses_mora: m.meses_en_mora?.length || 1,
         saldo_total: m.saldo_pendiente || 0,
       };
     }) || [];

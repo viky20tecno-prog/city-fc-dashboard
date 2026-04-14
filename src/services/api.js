@@ -1,9 +1,3 @@
-/**
- * API Service - Lee desde City FC API
- * Base URL: https://city-fc-api-v2.vercel.app
- */
-
-// FIX 1: VITE usa import.meta.env, no process.env.NEXT_PUBLIC_*
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 const CLUB_ID = 'city-fc';
 
@@ -33,18 +27,17 @@ export async function fetchAllData() {
       apiCall(`/invoices?club_id=${CLUB_ID}&anio=2026`),
       apiCall(`/payments?club_id=${CLUB_ID}&limit=100`),
       apiCall(`/reports/summary?club_id=${CLUB_ID}`),
-      apiCall(`/invoices/uniformes?club_id=${CLUB_ID}`),  // FIX 2: ruta correcta
-      apiCall(`/invoices/torneos?club_id=${CLUB_ID}`),    // FIX 2: ruta correcta
+      apiCall(`/invoices/uniformes?club_id=${CLUB_ID}`),
+      apiCall(`/invoices/torneos?club_id=${CLUB_ID}`),
     ]);
 
-    const jugadores      = playersRes.data   || [];
-    const mensualidades  = invoicesRes.data  || [];
-    const registroPagos  = paymentsRes.data  || [];
-    const uniformes      = uniformesRes.data || [];
-    const torneos        = torneosRes.data   || [];
+    const jugadores     = playersRes.data  || [];
+    const mensualidades = invoicesRes.data || [];
+    const registroPagos = paymentsRes.data || [];
+    const uniformes     = uniformesRes.data || [];
+    const torneos       = torneosRes.data  || [];
 
-    // FIX 3: morosos_cedulas sin tilde (así lo devuelve el backend)
-    const morosos = reportsRes.mensualidades?.morosos_cedulas?.map(m => {
+    const morosos = reportsRes.mensualidades?.morosos_cédulas?.map(m => {
       const jugador = jugadores.find(j => j.cedula == m.cedula);
       return {
         cedula:      m.cedula,

@@ -1,214 +1,236 @@
-import { useState, useEffect } from 'react';
-import { Check, X } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { RefreshCw, CheckCircle, Circle, Loader2, ChevronDown } from 'lucide-react';
+import { API_BASE_URL } from '../config';
+
+const fmt = (n) =>
+  Number(n).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+
+const METODOS = ['EFECTIVO', 'TRANSFERENCIA', 'AGUAS'];
 
 export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
-  const [pagos, setPageos] = useState([]);
+  const [pagos, setPagos] = useState([]);
   const [resumen, setResumen] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingId, setEditingId] = useState(null);
-  const [editMetodo, setEditMetodo] = useState('');
+  const [editando, setEditando] = useState(null);
+  const [metodoPago, setMetodoPago] = useState('');
+  const [guardando, setGuardando] = useState(false);
 
-  useEffect(() => {
-    if (partidoId) {
-      fetchPagos();
-      fetchResumen();
-    } else {
+  const fetchData = useCallback(async () => {
+    if (!partidoId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const [resPagos, resResumen] = await Promise.all([
+        fetch(`${API_BASE_URL}/arbitrage/pagos/${partidoId}?club_id=${clubId}`),
+        fetch(`${API_BASE_URL}/arbitrage/resumen/${partidoId}?club_id=${clubId}`),
+      ]);
+      const dataPagos = await resPagos.json();
+      const dataResumen = await resResumen.json();
+      setPagos(dataPagos.pagos || []);
+      setResumen(dataResumen);
+    } catch (err) {
+      setError('Error al cargar los datos del partido.');
+      console.error(err);
+    } finally {
       setLoading(false);
     }
   }, [clubId, partidoId]);
 
-  const fetchPagos = async () => {
-    try {
-      const response = await fetch(
-        `/api/arbitrage/pagos/${partidoId}?club_id=${clubId}`
-      );
-      if (!response.ok) throw new Error('Error al cargar pagos');
-      const data = await response.json();
-      setPageos(data.pagos || []);
-    } catch (err) {
-      setError(err.message);
-      console.error('Error:', err);
-    }
-  };
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  const fetchResumen = async () => {
+  const handleRegistrarPago = async (cedula) => {
+    if (!metodoPago) return;
+    setGuardando(true);
     try {
-      const response = await fetch(
-        `/api/arbitrage/resumen/${partidoId}?club_id=${clubId}`
-      );
-      if (!response.ok) throw new Error('Error al cargar resumen');
-      const data = await response.json();
-      setResumen(data);
-    } catch (err) {
-      console.error('Error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRegisterPago = async (pagoId, cedula) => {
-    if (!editMetodo) {
-      alert('Método de pago requerido');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/arbitrage/pagos?club_id=${clubId}`, {
+      const res = await fetch(`${API_BASE_URL}/arbitrage/pagos?club_id=${clubId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          partidoId,
-          cedula,
-          metodoPago: editMetodo,
-          estadoPago: true
-        })
+        body: JSON.stringify({ partidoId, cedula, metodoPago, estadoPago: true }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al registrar pago');
-      }
-
-      setEditingId(null);
-      setEditMetodo('');
-      fetchPagos();
-      fetchResumen();
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      setEditando(null);
+      setMetodoPago('');
+      await fetchData();
     } catch (err) {
-      alert(err.message);
-      console.error('Error:', err);
+      alert('Error al registrar el pago: ' + err.message);
+    } finally {
+      setGuardando(false);
     }
   };
 
   if (!partidoId) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Selecciona un partido para ver sus pagos</p>
+      <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-12 text-center">
+        <div className="text-5xl mb-4">👈</div>
+        <h3 className="text-white font-semibold mb-2">Selecciona un partido</h3>
+        <p className="text-gray-400 text-sm">
+          Ve a la pestaña <span className="text-green-400 font-medium">Partidos</span> y haz clic en "Ver pagos".
+        </p>
       </div>
     );
   }
 
-  if (loading) return <div className="text-center text-gray-600">Cargando...</div>;
-  if (error) return <div className="text-red-600">Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400 text-sm">Cargando información del partido...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-900/20 border border-red-800 rounded-xl p-6 text-center">
+        <p className="text-red-400 mb-4">{error}</p>
+        <button onClick={fetchData} className="px-4 py-2 bg-red-800/50 text-red-300 rounded-lg text-sm">
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  const pct = resumen?.porcentajePagado || 0;
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Gestión de Pagos</h2>
+    <div className="space-y-5">
 
+      {/* Resumen financiero */}
       {resumen && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-600 font-medium">Total Partido</p>
-            <p className="text-2xl font-bold text-blue-900">
-              ${resumen.montoTotal.toLocaleString('es-CO')}
-            </p>
+        <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white font-semibold">Resumen del partido</h3>
+            <button
+              onClick={fetchData}
+              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors"
+            >
+              <RefreshCw size={12} />
+              Actualizar
+            </button>
           </div>
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <p className="text-sm text-green-600 font-medium">Recaudado</p>
-            <p className="text-2xl font-bold text-green-900">
-              ${resumen.totalRecaudado.toLocaleString('es-CO')}
-            </p>
-            <p className="text-xs text-green-600 mt-1">{resumen.porcentajePagado}%</p>
+
+          {/* Barra de progreso */}
+          <div className="mb-4">
+            <div className="flex justify-between text-xs text-gray-400 mb-1.5">
+              <span>Progreso de cobro</span>
+              <span className="text-white font-medium">{pct}%</span>
+            </div>
+            <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-green-600 to-green-400 rounded-full transition-all duration-500"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
           </div>
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <p className="text-sm text-yellow-600 font-medium">Pendiente</p>
-            <p className="text-2xl font-bold text-yellow-900">
-              ${resumen.faltante.toLocaleString('es-CO')}
-            </p>
-          </div>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-sm text-red-600 font-medium">Sin Registrar</p>
-            <p className="text-2xl font-bold text-red-900">{resumen.cantidadPendiente}</p>
-            <p className="text-xs text-red-600 mt-1">de {resumen.cantidadTotal}</p>
+
+          {/* Métricas */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: 'Monto total',  value: fmt(resumen.montoTotal),      color: 'text-white' },
+              { label: 'Recaudado',    value: fmt(resumen.totalRecaudado),   color: 'text-green-400' },
+              { label: 'Pendiente',    value: fmt(resumen.faltante),         color: 'text-orange-400' },
+              { label: 'Sin pagar',   value: `${resumen.cantidadPendiente} de ${resumen.cantidadTotal}`, color: 'text-yellow-400' },
+            ].map((m) => (
+              <div key={m.label} className="bg-gray-800/60 rounded-lg p-3">
+                <p className="text-xs text-gray-500 mb-1">{m.label}</p>
+                <p className={`font-bold text-sm ${m.color}`}>{m.value}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      <div className="space-y-3">
-        <h3 className="font-semibold text-gray-900">Checklist de Pagos</h3>
+      {/* Lista de pagos */}
+      <div className="bg-gray-900/60 border border-gray-800 rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-800">
+          <h3 className="text-white font-semibold">Registro de pagos individuales</h3>
+        </div>
+
         {pagos.length === 0 ? (
-          <p className="text-gray-600 text-sm">No hay pagos registrados para este partido</p>
+          <div className="p-8 text-center text-gray-500 text-sm">
+            No hay jugadores asignados a este partido.
+          </div>
         ) : (
-          pagos.map(pago => (
-            <div
-              key={pago.id}
-              className={`p-4 rounded-lg border transition ${
-                pago.estadoPago
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-red-50 border-red-200'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div
-                    className={`flex-shrink-0 w-6 h-6 rounded border flex items-center justify-center ${
-                      pago.estadoPago
-                        ? 'bg-green-600 border-green-600'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    {pago.estadoPago && <Check size={16} className="text-white" />}
+          <div className="divide-y divide-gray-800">
+            {pagos.map((pago) => (
+              <div key={pago.cedula} className="px-5 py-4">
+                <div className="flex items-start justify-between gap-4">
+
+                  {/* Info jugador */}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                      pago.estadoPago ? 'bg-green-900/50' : 'bg-gray-800'
+                    }`}>
+                      {pago.estadoPago
+                        ? <CheckCircle size={16} className="text-green-400" />
+                        : <Circle size={16} className="text-gray-600" />
+                      }
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{pago.nombre}</p>
+                      <p className="text-gray-500 text-xs">{pago.cedula}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-medium text-gray-900">{pago.nombre}</p>
-                    <p className="text-sm text-gray-600">{pago.cedula}</p>
+
+                  {/* Monto y estado */}
+                  <div className="text-right shrink-0">
+                    <p className="text-white font-semibold text-sm">{fmt(pago.valor)}</p>
+                    {pago.estadoPago
+                      ? <span className="text-xs text-green-400">{pago.metodoPago || 'Pagado'}</span>
+                      : <span className="text-xs text-orange-400">Pendiente</span>
+                    }
                   </div>
                 </div>
 
-                <div className="text-right flex-shrink-0">
-                  <p className="font-semibold text-gray-900">
-                    ${pago.valor.toLocaleString('es-CO')}
-                  </p>
-                </div>
-
-                <div className="flex-shrink-0 w-40">
-                  {pago.estadoPago ? (
-                    <div>
-                      <p className="text-sm font-medium text-green-700">{pago.metodoPago}</p>
-                    </div>
-                  ) : editingId === pago.id ? (
-                    <div className="flex gap-2">
-                      <select
-                        value={editMetodo}
-                        onChange={(e) => setEditMetodo(e.target.value)}
-                        className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
-                      >
-                        <option value="">Método...</option>
-                        <option value="EFECTIVO">Efectivo</option>
-                        <option value="TRANSFERENCIA">Transferencia</option>
-                        <option value="AGUAS">Aguas</option>
-                      </select>
+                {/* Acción de pago */}
+                {!pago.estadoPago && (
+                  <div className="mt-3 ml-11">
+                    {editando === pago.cedula ? (
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={metodoPago}
+                          onChange={(e) => setMetodoPago(e.target.value)}
+                          className="flex-1 bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-green-500"
+                        >
+                          <option value="">Método de pago...</option>
+                          {METODOS.map(m => (
+                            <option key={m} value={m}>{m}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => handleRegistrarPago(pago.cedula)}
+                          disabled={!metodoPago || guardando}
+                          className="px-3 py-2 bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white text-sm rounded-lg transition-colors flex items-center gap-1.5"
+                        >
+                          {guardando
+                            ? <Loader2 size={13} className="animate-spin" />
+                            : <CheckCircle size={13} />
+                          }
+                          Confirmar
+                        </button>
+                        <button
+                          onClick={() => { setEditando(null); setMetodoPago(''); }}
+                          className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm rounded-lg transition-colors"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
                       <button
-                        onClick={() => handleRegisterPago(pago.id, pago.cedula)}
-                        className="px-2 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition"
+                        onClick={() => { setEditando(pago.cedula); setMetodoPago(''); }}
+                        className="flex items-center gap-1.5 text-sm text-green-400 hover:text-green-300 transition-colors"
                       >
-                        <Check size={16} />
+                        <ChevronDown size={13} />
+                        Registrar pago
                       </button>
-                      <button
-                        onClick={() => {
-                          setEditingId(null);
-                          setEditMetodo('');
-                        }}
-                        className="px-2 py-1 bg-gray-300 text-white rounded text-sm hover:bg-gray-400 transition"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setEditingId(pago.id);
-                        setEditMetodo('');
-                      }}
-                      className="w-full px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
-                    >
-                      Registrar
-                    </button>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>

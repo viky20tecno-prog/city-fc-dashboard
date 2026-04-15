@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, CheckSquare, Square, Loader2 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
   const [formData, setFormData] = useState({
@@ -8,226 +9,266 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
     hora: '',
     equipoA: '',
     equipoB: '',
-    montoTotal: ''
+    montoTotal: '',
   });
-
   const [jugadores, setJugadores] = useState([]);
   const [selectedJugadores, setSelectedJugadores] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingJugadores, setLoadingJugadores] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
+    const fetchJugadores = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/players?club_id=${clubId}`);
+        if (!res.ok) throw new Error('Error al cargar jugadores');
+        const data = await res.json();
+        setJugadores(data.data || []);
+      } catch (err) {
+        console.error('Error cargando jugadores:', err);
+      } finally {
+        setLoadingJugadores(false);
+      }
+    };
     fetchJugadores();
   }, [clubId]);
 
-  const fetchJugadores = async () => {
-    try {
-      const response = await fetch(`/api/players?club_id=${clubId}`);
-      if (!response.ok) throw new Error('Error al cargar jugadores');
-      const data = await response.json();
-      setJugadores(data || []);
-    } catch (err) {
-      console.error('Error:', err);
-    }
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const toggleJugador = (cedula) => {
     setSelectedJugadores(prev =>
-      prev.includes(cedula)
-        ? prev.filter(c => c !== cedula)
-        : [...prev, cedula]
+      prev.includes(cedula) ? prev.filter(c => c !== cedula) : [...prev, cedula]
     );
   };
+
+  const toggleTodos = () => {
+    if (selectedJugadores.length === jugadores.length) {
+      setSelectedJugadores([]);
+    } else {
+      setSelectedJugadores(jugadores.map(j => j.cedula));
+    }
+  };
+
+  const valorPorJugador = selectedJugadores.length > 0 && formData.montoTotal
+    ? Math.round(Number(formData.montoTotal) / selectedJugadores.length)
+    : 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
 
-    if (!formData.titulo || !formData.fecha || !formData.hora || 
-        !formData.equipoA || !formData.equipoB || !formData.montoTotal ||
-        selectedJugadores.length === 0) {
-      setError('Todos los campos son requeridos y debes seleccionar jugadores');
-      return;
+    if (!formData.titulo || !formData.fecha || !formData.hora ||
+        !formData.equipoA || !formData.equipoB || !formData.montoTotal) {
+      return setError('Completa todos los campos del formulario.');
+    }
+    if (selectedJugadores.length === 0) {
+      return setError('Selecciona al menos un jugador para el pago.');
     }
 
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await fetch(`/api/arbitrage/partidos?club_id=${clubId}`, {
+      const res = await fetch(`${API_BASE_URL}/arbitrage/partidos?club_id=${clubId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
           montoTotal: parseInt(formData.montoTotal),
-          jugadoresCedulas: selectedJugadores
-        })
+          jugadoresCedulas: selectedJugadores,
+        }),
       });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Error al crear el partido');
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al crear partido');
-      }
-
-      const data = await response.json();
       setSuccess(true);
-      
-      setFormData({
-        titulo: '',
-        fecha: '',
-        hora: '',
-        equipoA: '',
-        equipoB: '',
-        montoTotal: ''
-      });
+      setFormData({ titulo: '', fecha: '', hora: '', equipoA: '', equipoB: '', montoTotal: '' });
       setSelectedJugadores([]);
-
-      setTimeout(() => onCreated(), 1500);
+      setTimeout(() => { setSuccess(false); onCreated(); }, 1800);
     } catch (err) {
       setError(err.message);
-      console.error('Error:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  if (success) {
+    return (
+      <div className="bg-gray-900/60 border border-green-800 rounded-xl p-12 text-center">
+        <div className="text-5xl mb-4">✅</div>
+        <h3 className="text-green-400 font-semibold text-lg mb-2">Partido registrado con éxito</h3>
+        <p className="text-gray-400 text-sm">Redirigiendo al listado...</p>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Crear Nuevo Partido</h2>
+    <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6">
+      <h2 className="text-white font-semibold text-lg mb-6">Registrar nuevo partido</h2>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-          {error}
-        </div>
-      )}
+      <form onSubmit={handleSubmit} className="space-y-5">
 
-      {success && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
-          ✅ Partido creado exitosamente. Redirigiendo...
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Título del Partido</label>
-            <input
-              type="text"
-              name="titulo"
-              value={formData.titulo}
-              onChange={handleInputChange}
-              placeholder="ej: Partido Amistoso vs Millonarios"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Monto Total</label>
-            <input
-              type="number"
-              name="montoTotal"
-              value={formData.montoTotal}
-              onChange={handleInputChange}
-              placeholder="ej: 130000"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+        {/* Título */}
+        <div>
+          <label className="block text-sm text-gray-400 mb-1.5">Título del partido</label>
+          <input
+            type="text"
+            name="titulo"
+            value={formData.titulo}
+            onChange={handleInputChange}
+            placeholder="Ej: Torneo Copa Ciudad – Semifinal"
+            className="w-full bg-gray-800 border border-gray-700 focus:border-green-500 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+          />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Fecha y Hora */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+            <label className="block text-sm text-gray-400 mb-1.5">Fecha</label>
             <input
               type="date"
               name="fecha"
               value={formData.fecha}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full bg-gray-800 border border-gray-700 focus:border-green-500 text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Hora</label>
+            <label className="block text-sm text-gray-400 mb-1.5">Hora</label>
             <input
               type="time"
               name="hora"
               value={formData.hora}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full bg-gray-800 border border-gray-700 focus:border-green-500 text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
             />
           </div>
-          <div></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Equipos */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Equipo A</label>
+            <label className="block text-sm text-gray-400 mb-1.5">Equipo A (local)</label>
             <input
               type="text"
               name="equipoA"
               value={formData.equipoA}
               onChange={handleInputChange}
-              placeholder="ej: City FC"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ej: City FC"
+              className="w-full bg-gray-800 border border-gray-700 focus:border-green-500 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Equipo B</label>
+            <label className="block text-sm text-gray-400 mb-1.5">Equipo B (visitante)</label>
             <input
               type="text"
               name="equipoB"
               value={formData.equipoB}
               onChange={handleInputChange}
-              placeholder="ej: Independiente"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ej: Independiente"
+              className="w-full bg-gray-800 border border-gray-700 focus:border-green-500 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
             />
           </div>
         </div>
 
+        {/* Monto */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Selecciona Jugadores ({selectedJugadores.length})
-          </label>
-          <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 max-h-64 overflow-y-auto">
-            {jugadores.length === 0 ? (
-              <p className="text-gray-600 text-sm">No hay jugadores disponibles</p>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {jugadores.map(jugador => (
-                  <label
-                    key={jugador.cedula}
-                    className="flex items-center gap-2 cursor-pointer p-2 hover:bg-white rounded transition"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedJugadores.includes(jugador.cedula)}
-                      onChange={() => toggleJugador(jugador.cedula)}
-                      className="w-4 h-4 text-blue-600 rounded"
-                    />
-                    <span className="text-sm text-gray-900">{jugador.nombre || jugador['nombre(s)']}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
+          <label className="block text-sm text-gray-400 mb-1.5">Monto total árbitros (COP)</label>
+          <input
+            type="number"
+            name="montoTotal"
+            value={formData.montoTotal}
+            onChange={handleInputChange}
+            placeholder="Ej: 150000"
+            min="0"
+            className="w-full bg-gray-800 border border-gray-700 focus:border-green-500 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+          />
         </div>
 
-        <div className="flex gap-3 pt-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            <Plus size={18} />
-            {loading ? 'Creando...' : 'Crear Partido'}
-          </button>
+        {/* Jugadores */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm text-gray-400">
+              Jugadores que pagan ({selectedJugadores.length} seleccionados)
+            </label>
+            {jugadores.length > 0 && (
+              <button
+                type="button"
+                onClick={toggleTodos}
+                className="text-xs text-green-400 hover:text-green-300 transition-colors"
+              >
+                {selectedJugadores.length === jugadores.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
+              </button>
+            )}
+          </div>
+
+          {valorPorJugador > 0 && (
+            <div className="mb-2 px-3 py-2 bg-green-900/20 border border-green-800/50 rounded-lg text-sm text-green-400">
+              Cada jugador paga:{' '}
+              <strong>
+                {valorPorJugador.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })}
+              </strong>
+            </div>
+          )}
+
+          {loadingJugadores ? (
+            <div className="flex items-center gap-2 text-gray-400 text-sm py-4">
+              <Loader2 size={14} className="animate-spin" />
+              Cargando jugadores...
+            </div>
+          ) : jugadores.length === 0 ? (
+            <p className="text-gray-500 text-sm py-4">No hay jugadores activos en el club.</p>
+          ) : (
+            <div className="max-h-52 overflow-y-auto border border-gray-700 rounded-lg divide-y divide-gray-800">
+              {jugadores.map(j => {
+                const nombre = j['nombre(s)'] || j.nombre || '';
+                const selected = selectedJugadores.includes(j.cedula);
+                return (
+                  <button
+                    key={j.cedula}
+                    type="button"
+                    onClick={() => toggleJugador(j.cedula)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                      selected ? 'bg-green-900/20' : 'hover:bg-gray-800'
+                    }`}
+                  >
+                    {selected
+                      ? <CheckSquare size={16} className="text-green-400 shrink-0" />
+                      : <Square size={16} className="text-gray-600 shrink-0" />
+                    }
+                    <div>
+                      <p className="text-sm text-white">{nombre} {j.apellidos || ''}</p>
+                      <p className="text-xs text-gray-500">{j.cedula}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
+
+        {/* Error */}
+        {error && (
+          <div className="flex items-center gap-2 px-4 py-3 bg-red-900/20 border border-red-800 rounded-lg text-red-400 text-sm">
+            <X size={14} className="shrink-0" />
+            {error}
+          </div>
+        )}
+
+        {/* Submit */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+        >
+          {loading
+            ? <><Loader2 size={16} className="animate-spin" /> Registrando...</>
+            : <><Plus size={16} /> Registrar Partido</>
+          }
+        </button>
       </form>
     </div>
   );

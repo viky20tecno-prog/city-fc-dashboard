@@ -1,107 +1,140 @@
 import { useState, useEffect } from 'react';
-import { ChevronRight, Edit2, Trash2 } from 'lucide-react';
+import { Calendar, Clock, Users, Eye, RefreshCw } from 'lucide-react';
+import { API_BASE_URL } from '../config';
+
+const fmt = (n) =>
+  Number(n).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+
+const fmtFecha = (fecha) => {
+  if (!fecha) return '-';
+  const [y, m, d] = fecha.split('-');
+  return `${d}/${m}/${y}`;
+};
 
 export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
   const [partidos, setPartidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchPartidos();
-  }, [clubId]);
-
   const fetchPartidos = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      const response = await fetch(
-        `/api/arbitrage/partidos?club_id=${clubId}`
-      );
-      if (!response.ok) throw new Error('Error al cargar partidos');
-      const data = await response.json();
-      setPartidos(data || []);
+      const res = await fetch(`${API_BASE_URL}/arbitrage/partidos?club_id=${clubId}`);
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      const data = await res.json();
+      setPartidos(data.data || []);
     } catch (err) {
-      setError(err.message);
-      console.error('Error:', err);
+      setError('No se pudieron cargar los partidos. Verifica la conexión.');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <div className="text-center text-gray-600">Cargando...</div>;
-  if (error) return <div className="text-red-600">Error: {error}</div>;
+  useEffect(() => { fetchPartidos(); }, [clubId]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400 text-sm">Cargando partidos...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-900/20 border border-red-800 rounded-xl p-6 text-center">
+        <p className="text-red-400 mb-4">{error}</p>
+        <button
+          onClick={fetchPartidos}
+          className="flex items-center gap-2 mx-auto px-4 py-2 bg-red-800/50 hover:bg-red-700/50 text-red-300 rounded-lg text-sm transition-colors"
+        >
+          <RefreshCw size={14} />
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  if (partidos.length === 0) {
+    return (
+      <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-12 text-center">
+        <div className="text-5xl mb-4">🏟️</div>
+        <h3 className="text-white font-semibold text-lg mb-2">Sin partidos registrados</h3>
+        <p className="text-gray-400 text-sm">
+          Ve a la pestaña <span className="text-green-400 font-medium">Registrar Partido</span> para agregar el primero.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Partidos Registrados</h2>
-        <p className="text-gray-600 text-sm">Total: {partidos.length} partidos</p>
+    <div className="space-y-4">
+      {/* Contador y refresh */}
+      <div className="flex items-center justify-between">
+        <span className="text-gray-400 text-sm">
+          {partidos.length} partido{partidos.length !== 1 ? 's' : ''} registrado{partidos.length !== 1 ? 's' : ''}
+        </span>
+        <button
+          onClick={fetchPartidos}
+          className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-sm transition-colors"
+        >
+          <RefreshCw size={13} />
+          Actualizar
+        </button>
       </div>
 
-      {partidos.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500">No hay partidos registrados aún.</p>
-          <p className="text-gray-400 text-sm">Crea uno en la pestaña "Crear Partido"</p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Título</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Fecha</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Hora</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Equipos</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Monto</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-gray-900">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {partidos.map((partido) => (
-                <tr key={partido.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
-                  <td className="px-4 py-3 text-sm text-gray-900 font-medium">{partido.titulo}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{partido.fecha}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{partido.hora}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    <span className="inline-flex gap-1">
-                      <span className="font-medium">{partido.equipoA}</span>
-                      <span className="text-gray-400">vs</span>
-                      <span className="font-medium">{partido.equipoB}</span>
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm font-semibold text-gray-900">
-                    ${parseInt(partido.montoTotal).toLocaleString('es-CO')}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        onClick={() => onViewPagos(partido.id)}
-                        className="p-1 hover:bg-blue-100 rounded text-blue-600 transition"
-                        title="Ver pagos"
-                      >
-                        <ChevronRight size={18} />
-                      </button>
-                      <button
-                        onClick={() => alert('Editar no disponible aún')}
-                        className="p-1 hover:bg-yellow-100 rounded text-yellow-600 transition"
-                        title="Editar"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button
-                        onClick={() => alert('Eliminar no disponible aún')}
-                        className="p-1 hover:bg-red-100 rounded text-red-600 transition"
-                        title="Eliminar"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* Cards */}
+      <div className="grid gap-3">
+        {partidos.map((partido) => (
+          <div
+            key={partido.id}
+            className="bg-gray-900/60 border border-gray-800 hover:border-gray-700 rounded-xl p-5 transition-all duration-200"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+
+              <div className="flex-1 min-w-0">
+                <h3 className="text-white font-semibold text-base truncate mb-2">
+                  {partido.titulo}
+                </h3>
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-gray-400">
+                  <span className="flex items-center gap-1.5">
+                    <Calendar size={13} className="text-green-500" />
+                    {fmtFecha(partido.fecha)}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Clock size={13} className="text-green-500" />
+                    {partido.hora || '-'}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Users size={13} className="text-green-500" />
+                    {partido.equipoA}
+                    <span className="text-gray-600 mx-1">vs</span>
+                    {partido.equipoB}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="text-right">
+                  <p className="text-xs text-gray-500 mb-0.5">Monto total</p>
+                  <p className="text-green-400 font-bold">{fmt(partido.montoTotal)}</p>
+                </div>
+                <button
+                  onClick={() => onViewPagos(partido.id)}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  <Eye size={14} />
+                  Ver pagos
+                </button>
+              </div>
+
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

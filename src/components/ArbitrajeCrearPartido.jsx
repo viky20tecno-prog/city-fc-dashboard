@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Plus, X, CheckSquare, Square, Loader2 } from 'lucide-react';
+import { Plus, X, CheckSquare, Square, Loader2, Search, Calendar, Clock } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+
+const fmt = (n) =>
+  Number(n).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+
+// Input oscuro para fecha/hora — fuerza el color-scheme dark en el picker nativo
+const darkPickerClass =
+  'w-full bg-gray-800 border border-gray-700 focus:border-green-500 text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors [color-scheme:dark]';
 
 export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
   const [formData, setFormData] = useState({
@@ -9,10 +16,11 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
     hora: '',
     equipoA: '',
     equipoB: '',
-    montoTotal: '',
+    montoPorJugador: '',
   });
   const [jugadores, setJugadores] = useState([]);
   const [selectedJugadores, setSelectedJugadores] = useState([]);
+  const [busqueda, setBusqueda] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingJugadores, setLoadingJugadores] = useState(true);
   const [error, setError] = useState(null);
@@ -45,16 +53,23 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
     );
   };
 
+  // Filtrar jugadores por nombre o cédula
+  const jugadoresFiltrados = jugadores.filter(j => {
+    const nombre = `${j['nombre(s)'] || j.nombre || ''} ${j.apellidos || ''}`.toLowerCase();
+    const q = busqueda.toLowerCase().trim();
+    return !q || nombre.includes(q) || (j.cedula || '').includes(q);
+  });
+
   const toggleTodos = () => {
-    if (selectedJugadores.length === jugadores.length) {
+    if (selectedJugadores.length === jugadoresFiltrados.length && jugadoresFiltrados.length > 0) {
       setSelectedJugadores([]);
     } else {
-      setSelectedJugadores(jugadores.map(j => j.cedula));
+      setSelectedJugadores(jugadoresFiltrados.map(j => j.cedula));
     }
   };
 
-  const valorPorJugador = selectedJugadores.length > 0 && formData.montoTotal
-    ? Math.round(Number(formData.montoTotal) / selectedJugadores.length)
+  const montoTotal = formData.montoPorJugador && selectedJugadores.length > 0
+    ? parseInt(formData.montoPorJugador) * selectedJugadores.length
     : 0;
 
   const handleSubmit = async (e) => {
@@ -63,7 +78,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
     setSuccess(false);
 
     if (!formData.titulo || !formData.fecha || !formData.hora ||
-        !formData.equipoA || !formData.equipoB || !formData.montoTotal) {
+        !formData.equipoA || !formData.equipoB || !formData.montoPorJugador) {
       return setError('Completa todos los campos del formulario.');
     }
     if (selectedJugadores.length === 0) {
@@ -77,7 +92,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          montoTotal: parseInt(formData.montoTotal),
+          montoPorJugador: parseInt(formData.montoPorJugador),
           jugadoresCedulas: selectedJugadores,
         }),
       });
@@ -85,8 +100,9 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
       if (!data.success) throw new Error(data.error || 'Error al crear el partido');
 
       setSuccess(true);
-      setFormData({ titulo: '', fecha: '', hora: '', equipoA: '', equipoB: '', montoTotal: '' });
+      setFormData({ titulo: '', fecha: '', hora: '', equipoA: '', equipoB: '', montoPorJugador: '' });
       setSelectedJugadores([]);
+      setBusqueda('');
       setTimeout(() => { setSuccess(false); onCreated(); }, 1800);
     } catch (err) {
       setError(err.message);
@@ -127,23 +143,33 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
         {/* Fecha y Hora */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Fecha</label>
+            <label className="block text-sm text-gray-400 mb-1.5">
+              <span className="inline-flex items-center gap-1.5">
+                <Calendar size={13} className="text-green-500" />
+                Fecha
+              </span>
+            </label>
             <input
               type="date"
               name="fecha"
               value={formData.fecha}
               onChange={handleInputChange}
-              className="w-full bg-gray-800 border border-gray-700 focus:border-green-500 text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+              className={darkPickerClass}
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Hora</label>
+            <label className="block text-sm text-gray-400 mb-1.5">
+              <span className="inline-flex items-center gap-1.5">
+                <Clock size={13} className="text-green-500" />
+                Hora
+              </span>
+            </label>
             <input
               type="time"
               name="hora"
               value={formData.hora}
               onChange={handleInputChange}
-              className="w-full bg-gray-800 border border-gray-700 focus:border-green-500 text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+              className={darkPickerClass}
             />
           </div>
         </div>
@@ -174,43 +200,66 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
           </div>
         </div>
 
-        {/* Monto */}
+        {/* Monto por jugador */}
         <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Monto total árbitros (COP)</label>
+          <label className="block text-sm text-gray-400 mb-1.5">Monto por jugador (COP)</label>
           <input
             type="number"
-            name="montoTotal"
-            value={formData.montoTotal}
+            name="montoPorJugador"
+            value={formData.montoPorJugador}
             onChange={handleInputChange}
-            placeholder="Ej: 150000"
+            placeholder="Ej: 15000"
             min="0"
             className="w-full bg-gray-800 border border-gray-700 focus:border-green-500 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
           />
+          {montoTotal > 0 && (
+            <p className="mt-1.5 text-xs text-gray-500">
+              Total a recaudar:{' '}
+              <span className="text-green-400 font-semibold">{fmt(montoTotal)}</span>
+              {' '}({selectedJugadores.length} jugadores × {fmt(formData.montoPorJugador)})
+            </p>
+          )}
         </div>
 
         {/* Jugadores */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm text-gray-400">
-              Jugadores que pagan ({selectedJugadores.length} seleccionados)
+              Jugadores ({selectedJugadores.length} seleccionados)
             </label>
-            {jugadores.length > 0 && (
+            {jugadoresFiltrados.length > 0 && (
               <button
                 type="button"
                 onClick={toggleTodos}
                 className="text-xs text-green-400 hover:text-green-300 transition-colors"
               >
-                {selectedJugadores.length === jugadores.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
+                {selectedJugadores.length === jugadoresFiltrados.length
+                  ? 'Deseleccionar todos'
+                  : 'Seleccionar todos'}
               </button>
             )}
           </div>
 
-          {valorPorJugador > 0 && (
-            <div className="mb-2 px-3 py-2 bg-green-900/20 border border-green-800/50 rounded-lg text-sm text-green-400">
-              Cada jugador paga:{' '}
-              <strong>
-                {valorPorJugador.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })}
-              </strong>
+          {/* Buscador */}
+          {!loadingJugadores && jugadores.length > 0 && (
+            <div className="relative mb-2">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                type="text"
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                placeholder="Buscar por nombre..."
+                className="w-full bg-gray-800 border border-gray-700 focus:border-green-500 text-white placeholder-gray-500 rounded-lg pl-9 pr-4 py-2 text-sm outline-none transition-colors"
+              />
+              {busqueda && (
+                <button
+                  type="button"
+                  onClick={() => setBusqueda('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                >
+                  <X size={13} />
+                </button>
+              )}
             </div>
           )}
 
@@ -221,10 +270,14 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
             </div>
           ) : jugadores.length === 0 ? (
             <p className="text-gray-500 text-sm py-4">No hay jugadores activos en el club.</p>
+          ) : jugadoresFiltrados.length === 0 ? (
+            <p className="text-gray-500 text-sm py-3 text-center">
+              Sin resultados para "<span className="text-gray-400">{busqueda}</span>"
+            </p>
           ) : (
             <div className="max-h-52 overflow-y-auto border border-gray-700 rounded-lg divide-y divide-gray-800">
-              {jugadores.map(j => {
-                const nombre = j['nombre(s)'] || j.nombre || '';
+              {jugadoresFiltrados.map(j => {
+                const nombre = `${j['nombre(s)'] || j.nombre || ''} ${j.apellidos || ''}`.trim();
                 const selected = selectedJugadores.includes(j.cedula);
                 return (
                   <button
@@ -240,7 +293,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
                       : <Square size={16} className="text-gray-600 shrink-0" />
                     }
                     <div>
-                      <p className="text-sm text-white">{nombre} {j.apellidos || ''}</p>
+                      <p className="text-sm text-white">{nombre}</p>
                       <p className="text-xs text-gray-500">{j.cedula}</p>
                     </div>
                   </button>

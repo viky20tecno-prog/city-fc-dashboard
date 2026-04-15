@@ -37,7 +37,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       const saldoPendiente = mensJugador.reduce((sum, m) => sum + (parseFloat(m.saldo_pendiente) || 0), 0);
       const totalPagado = mensJugador.reduce((sum, m) => sum + (parseFloat(m.valor_pagado) || 0), 0);
 
-      const nombre = `${j['nombre(s)'] || ''} ${j['apellido(s)'] || ''}`.trim();
+      const nombre = `${j.nombre || j['nombre(s)'] || ''} ${j.apellidos || j['apellido(s)'] || ''}`.trim();
 
       return {
         ...j,
@@ -45,7 +45,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         estadoPago,
         saldoPendiente,
         totalPagado,
-        activo: (j.activo || '').toUpperCase() === 'SI',
+        activo: j.activo === true || (j.activo || '').toString().toUpperCase() === 'SI',
       };
     });
   }, [jugadores, mensualidades, mesActual]);

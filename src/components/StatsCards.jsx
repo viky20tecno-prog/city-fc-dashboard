@@ -39,7 +39,7 @@ function StatCard({ icon: Icon, label, value, subtext, color, wide }) {
 export default function StatsCards({ mensualidades, jugadores, morosos }) {
   const mesActual = new Date().getMonth() + 1;
 
-  const activos = jugadores.filter(j => (j.activo || '').toUpperCase() === 'SI');
+  const activos = jugadores.filter(j => j.activo === true || (j.activo || '').toString().toUpperCase() === 'SI');
 
   // Set de cédulas morosas para lookup rápido
   const morososSet = new Set(morosos.map(m => String(m.cedula)));

@@ -42,7 +42,7 @@ export async function fetchAllData() {
       return {
         cedula:        m.cedula,
         nombre:        jugador
-          ? `${jugador['nombre(s)'] || ''} ${jugador['apellido(s)'] || ''}`.trim()
+          ? `${jugador.nombre || jugador['nombre(s)'] || ''} ${jugador.apellidos || jugador['apellido(s)'] || ''}`.trim()
           : `CC ${m.cedula}`,
         celular:       jugador?.celular || '',
         meses_mora:    m.meses_en_mora?.length || 1,

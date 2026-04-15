@@ -47,6 +47,11 @@ export async function fetchAllData() {
         celular:       jugador?.celular || '',
         meses_mora:    m.meses_en_mora?.length || 1,
         meses_en_mora: m.meses_en_mora || [],
+        meses_detalle: (m.meses_en_mora || [])
+          .sort((a, b) => (a.numero_mes || 0) - (b.numero_mes || 0))
+          .map(x => x.mes)
+          .filter(Boolean)
+          .join(' · '),
         saldo_total:   m.saldo_pendiente || 0,
       };
     }) || [];

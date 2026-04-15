@@ -20,7 +20,14 @@ function exportarPDF(morosos) {
           ${m.meses_mora} mes${m.meses_mora !== 1 ? 'es' : ''}
         </span>
       </td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:12px;color:#dc2626">${m.meses_detalle || '—'}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:12px;color:#dc2626;line-height:1.5">
+        ${m.meses_detalle
+          ? m.meses_detalle.split(' · ').map(mes =>
+              `<span style="display:inline-block;background:#fef2f2;border:1px solid #fecaca;border-radius:4px;padding:1px 6px;margin:1px 2px;font-size:11px;white-space:nowrap">${mes}</span>`
+            ).join('')
+          : '<span style="color:#9ca3af">—</span>'
+        }
+      </td>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:700;color:#dc2626;text-align:right">${formatCOP(m.saldo_total)}</td>
     </tr>
   `).join('');

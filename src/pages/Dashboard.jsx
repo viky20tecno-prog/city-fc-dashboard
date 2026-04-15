@@ -1,7 +1,7 @@
 // src/pages/Dashboard.jsx
 
 import { useState } from 'react';
-import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, DollarSign, Shirt, Plus, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, Copy, DollarSign, Shirt, Plus, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { useSheetData } from '../hooks/useSheetData';
 import StatsCards from '../components/StatsCards';
 import JugadoresTable from '../components/JugadoresTable';
@@ -35,9 +35,14 @@ export default function Dashboard() {
     setRefreshing(false);
   };
 
+  const inscripcionUrl = `${window.location.origin}/inscripcion`;
+
+  const handleOpenInscripcion = () => {
+    window.open(inscripcionUrl, '_blank');
+  };
+
   const handleCopyLink = () => {
-    const url = `${window.location.origin}/inscripcion`;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(inscripcionUrl);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
   };
@@ -85,14 +90,25 @@ export default function Dashboard() {
                 <span className="hidden sm:inline">Pago Manual</span>
               </button>
 
+              {/* Botón principal — abre formulario en nueva pestaña */}
               <button
-                onClick={handleCopyLink}
+                onClick={handleOpenInscripcion}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-green-400/20 bg-green-400/10 text-sm text-green-400 hover:bg-green-400/20 transition"
               >
+                <Link2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Registrarse</span>
+              </button>
+
+              {/* Botón copiar link */}
+              <button
+                onClick={handleCopyLink}
+                title="Copiar link de inscripción"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-white/10 text-sm text-gray-400 hover:text-green-400 hover:border-green-400/20 transition"
+              >
                 {linkCopied ? (
-                  <><Check className="w-4 h-4" /><span className="hidden sm:inline">¡Copiado!</span></>
+                  <><Check className="w-4 h-4 text-green-400" /><span className="hidden sm:inline text-green-400 text-xs">¡Copiado!</span></>
                 ) : (
-                  <><Link2 className="w-4 h-4" /><span className="hidden sm:inline">Link</span></>
+                  <><Copy className="w-4 h-4" /><span className="hidden sm:inline text-xs">Copiar link</span></>
                 )}
               </button>
 

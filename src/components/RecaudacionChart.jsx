@@ -1,116 +1,247 @@
 import { useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Cell, LabelList, Legend,
+} from 'recharts';
 
-const MESES_ORDEN = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+const MESES_ORDEN = [
+  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
+];
+
+const fmtCOP = (v) =>
+  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
+
+const fmtK = (v) => {
+  if (v >= 1000000) return `$${(v / 1000000).toFixed(1)}M`;
+  if (v >= 1000)    return `$${(v / 1000).toFixed(0)}k`;
+  return `$${v}`;
+};
 
 export default function RecaudacionChart({ mensualidades }) {
+  const mesActualIdx = new Date().getMonth(); // 0-based
+
   const data = useMemo(() => {
     const meses = {};
-    MESES_ORDEN.forEach(m => {
-      meses[m] = { mes: m.substring(0, 3), pagado: 0, pendiente: 0 };
+    MESES_ORDEN.forEach((m, i) => {
+      meses[m] = { mes: m.substring(0, 3), mesCompleto: m, idx: i, pagado: 0, pendiente: 0 };
     });
 
     mensualidades.forEach(m => {
-      const mes = m.mes || '';
+      const mes    = m.mes || '';
       const mesCap = mes.charAt(0).toUpperCase() + mes.slice(1).toLowerCase();
       if (!meses[mesCap]) return;
-
-      const pagado = parseFloat(m.valor_pagado) || 0;
-      const pendiente = parseFloat(m.saldo_pendiente) || 0;
-
-      meses[mesCap].pagado += pagado;
-      meses[mesCap].pendiente += pendiente;
+      meses[mesCap].pagado    += parseFloat(m.valor_pagado)    || 0;
+      meses[mesCap].pendiente += parseFloat(m.saldo_pendiente) || 0;
     });
 
-    const mesActual = new Date().getMonth();
-    return Object.values(meses).slice(0, mesActual + 2);
-  }, [mensualidades]);
+    return Object.values(meses)
+      .slice(0, mesActualIdx + 2)
+      .map(m => ({
+        ...m,
+        total:   m.pagado + m.pendiente,
+        pct:     m.pagado + m.pendiente > 0
+          ? Math.round((m.pagado / (m.pagado + m.pendiente)) * 100)
+          : 0,
+        esActual: m.idx === mesActualIdx,
+      }));
+  }, [mensualidades, mesActualIdx]);
 
-  const formatCOP = (v) => `$${(v / 1000).toFixed(0)}k`;
+  // KPIs
+  const totalPagado    = data.reduce((s, d) => s + d.pagado,    0);
+  const totalPendiente = data.reduce((s, d) => s + d.pendiente, 0);
+  const totalGeneral   = totalPagado + totalPendiente;
+  const pctGlobal      = totalGeneral > 0 ? Math.round((totalPagado / totalGeneral) * 100) : 0;
+  const mejorMes       = data.reduce((best, d) => d.pagado > (best?.pagado || 0) ? d : best, null);
 
+  // Tooltip personalizado
   const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload) return null;
+    if (!active || !payload?.length) return null;
+    const d = payload[0]?.payload;
     return (
-      <div className="bg-[#020617]/90 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-        <p className="text-white font-medium text-sm mb-1">{label}</p>
-        {payload.map((p, i) => (
-          <p key={i} style={{ color: p.color }} className="text-xs">
-            {p.name}:{' '}
-            {new Intl.NumberFormat('es-CO', {
-              style: 'currency',
-              currency: 'COP',
-              maximumFractionDigits: 0,
-            }).format(p.value)}
-          </p>
-        ))}
+      <div className="bg-[#0f172a] border border-white/10 rounded-xl p-3.5 shadow-2xl min-w-[160px]">
+        <p className="text-white font-semibold text-sm mb-2">{d?.mesCompleto}</p>
+        <div className="space-y-1.5">
+          <div className="flex justify-between gap-4 text-xs">
+            <span className="text-green-400">Pagado</span>
+            <span className="text-white font-medium">{fmtCOP(d?.pagado || 0)}</span>
+          </div>
+          <div className="flex justify-between gap-4 text-xs">
+            <span className="text-orange-400">Pendiente</span>
+            <span className="text-white font-medium">{fmtCOP(d?.pendiente || 0)}</span>
+          </div>
+          <div className="border-t border-white/10 pt-1.5 mt-1 flex justify-between gap-4 text-xs">
+            <span className="text-gray-400">% cobrado</span>
+            <span className={`font-bold ${d?.pct >= 80 ? 'text-green-400' : d?.pct >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+              {d?.pct}%
+            </span>
+          </div>
+        </div>
       </div>
+    );
+  };
+
+  // Etiqueta encima de barra pagado
+  const PctLabel = ({ x, y, width, value, index }) => {
+    const d = data[index];
+    if (!d || d.pct === 0) return null;
+    return (
+      <text
+        x={x + width / 2}
+        y={y - 5}
+        fill={d.pct >= 80 ? '#4ade80' : d.pct >= 50 ? '#facc15' : '#f87171'}
+        textAnchor="middle"
+        fontSize={10}
+        fontWeight="600"
+      >
+        {d.pct}%
+      </text>
     );
   };
 
   return (
     <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 overflow-hidden">
 
-      {/* glow effect */}
+      {/* Glow */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-cyan-500/10 blur-2xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-cyan-500/10 blur-2xl" />
       </div>
 
-      <h2 className="text-lg font-semibold text-white mb-4 tracking-tight">
-        Recaudación por Mes
-      </h2>
+      {/* Header */}
+      <div className="flex items-start justify-between mb-5 relative">
+        <div>
+          <h2 className="text-lg font-semibold text-white tracking-tight">Recaudación por Mes</h2>
+          <p className="text-xs text-gray-500 mt-0.5">Pagado vs pendiente · {new Date().getFullYear()}</p>
+        </div>
+        {/* Badge % global */}
+        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold border ${
+          pctGlobal >= 80 ? 'bg-green-500/10 border-green-500/30 text-green-400'
+          : pctGlobal >= 50 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400'
+          : 'bg-red-500/10 border-red-500/30 text-red-400'
+        }`}>
+          {pctGlobal}% cobrado
+        </div>
+      </div>
 
-      <div className="h-72 relative">
+      {/* KPIs */}
+      <div className="grid grid-cols-3 gap-3 mb-5 relative">
+        <div className="bg-white/5 border border-white/8 rounded-xl p-3">
+          <p className="text-xs text-gray-500 mb-1">Total recaudado</p>
+          <p className="text-green-400 font-bold text-sm">{fmtK(totalPagado)}</p>
+        </div>
+        <div className="bg-white/5 border border-white/8 rounded-xl p-3">
+          <p className="text-xs text-gray-500 mb-1">Por cobrar</p>
+          <p className="text-orange-400 font-bold text-sm">{fmtK(totalPendiente)}</p>
+        </div>
+        <div className="bg-white/5 border border-white/8 rounded-xl p-3">
+          <p className="text-xs text-gray-500 mb-1">Mejor mes</p>
+          <p className="text-cyan-400 font-bold text-sm truncate">
+            {mejorMes ? `${mejorMes.mes} ${fmtK(mejorMes.pagado)}` : '—'}
+          </p>
+        </div>
+      </div>
+
+      {/* Gráfica */}
+      <div className="h-64 relative">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} barGap={6}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+          <ComposedChart data={data} barGap={4} margin={{ top: 20, right: 4, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="gradPagado" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#00D084" stopOpacity={1} />
+                <stop offset="100%" stopColor="#00D084" stopOpacity={0.4} />
+              </linearGradient>
+              <linearGradient id="gradPendiente" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#F5A623" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="#F5A623" stopOpacity={0.3} />
+              </linearGradient>
+              <linearGradient id="gradPagadoActual" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#34d399" stopOpacity={1} />
+                <stop offset="100%" stopColor="#059669" stopOpacity={0.8} />
+              </linearGradient>
+              {/* Filtro glow para mes actual */}
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="rgba(255,255,255,0.05)"
+              vertical={false}
+            />
 
             <XAxis
               dataKey="mes"
-              tick={{ fontSize: 12, fill: '#9CA3AF' }}
-              axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+              tick={{ fontSize: 11, fill: '#6B7280' }}
+              axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
               tickLine={false}
             />
 
             <YAxis
-              tickFormatter={formatCOP}
-              tick={{ fontSize: 12, fill: '#9CA3AF' }}
+              tickFormatter={fmtK}
+              tick={{ fontSize: 11, fill: '#6B7280' }}
               axisLine={false}
               tickLine={false}
+              width={48}
             />
 
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
 
-            {/* barras */}
-            <Bar
+            {/* Barra pagado */}
+            <Bar dataKey="pagado" name="Pagado" radius={[6, 6, 0, 0]} maxBarSize={32}>
+              {data.map((entry, i) => (
+                <Cell
+                  key={i}
+                  fill={entry.esActual ? 'url(#gradPagadoActual)' : 'url(#gradPagado)'}
+                  filter={entry.esActual ? 'url(#glow)' : undefined}
+                />
+              ))}
+              <LabelList content={<PctLabel />} />
+            </Bar>
+
+            {/* Barra pendiente */}
+            <Bar dataKey="pendiente" name="Pendiente" fill="url(#gradPendiente)" radius={[6, 6, 0, 0]} maxBarSize={32} />
+
+            {/* Línea de tendencia (pagado) */}
+            <Line
+              type="monotone"
               dataKey="pagado"
-              name="Pagado"
-              fill="url(#colorPagado)"
-              radius={[8, 8, 0, 0]}
+              stroke="#00D084"
+              strokeWidth={1.5}
+              strokeDasharray="4 3"
+              dot={false}
+              activeDot={false}
+              strokeOpacity={0.4}
             />
 
-            <Bar
-              dataKey="pendiente"
-              name="Pendiente"
-              fill="url(#colorPendiente)"
-              radius={[8, 8, 0, 0]}
-            />
-
-            {/* gradientes */}
-            <defs>
-              <linearGradient id="colorPagado" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#00D084" stopOpacity={1} />
-                <stop offset="100%" stopColor="#00D084" stopOpacity={0.6} />
-              </linearGradient>
-
-              <linearGradient id="colorPendiente" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#F5A623" stopOpacity={1} />
-                <stop offset="100%" stopColor="#F5A623" stopOpacity={0.6} />
-              </linearGradient>
-            </defs>
-
-          </BarChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
+
+      {/* Leyenda manual */}
+      <div className="flex items-center gap-5 mt-4 relative justify-center">
+        <span className="flex items-center gap-1.5 text-xs text-gray-400">
+          <span className="w-3 h-3 rounded-sm bg-[#00D084] inline-block" />
+          Pagado
+        </span>
+        <span className="flex items-center gap-1.5 text-xs text-gray-400">
+          <span className="w-3 h-3 rounded-sm bg-[#F5A623] inline-block opacity-80" />
+          Pendiente
+        </span>
+        <span className="flex items-center gap-1.5 text-xs text-gray-400">
+          <span className="w-5 border-t-2 border-dashed border-[#00D084] opacity-40 inline-block" />
+          Tendencia
+        </span>
+        <span className="flex items-center gap-1.5 text-xs text-cyan-400">
+          <span className="w-3 h-3 rounded-sm bg-[#34d399] inline-block" style={{ filter: 'blur(1px)' }} />
+          Mes actual
+        </span>
+      </div>
+
     </div>
   );
 }

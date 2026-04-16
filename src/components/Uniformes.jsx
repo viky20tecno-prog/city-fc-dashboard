@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Shirt, CheckCircle, AlertCircle, Search, Loader, Trophy } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Shirt, CheckCircle, AlertCircle, Search, Loader, Trophy, X } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
-const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID || 'city-fc';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const CLUB_ID = 'city-fc';
 
 export default function Uniformes() {
   const [step, setStep] = useState(1);
@@ -16,63 +16,98 @@ export default function Uniformes() {
     numero: '',
   });
   const [jugadorEncontrado, setJugadorEncontrado] = useState(null);
+  const [jugadores, setJugadores] = useState([]);
+  const [busqueda, setBusqueda] = useState('');
+  const [sugerencias, setSugerencias] = useState([]);
+  const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
   const [numerosUsados, setNumerosUsados] = useState([]);
-  const [buscando, setBuscando] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState('');
   const [exito, setExito] = useState(false);
   const [pedidos, setPedidos] = useState([]);
+  const searchRef = useRef(null);
 
   useEffect(() => {
-    cargarNumerosYPedidos();
+    cargarDatos();
   }, []);
 
-  const cargarNumerosYPedidos = async () => {
+  // Cerrar sugerencias al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setMostrarSugerencias(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const cargarDatos = async () => {
     try {
-      const [numRes, pedRes] = await Promise.all([
+      const [playersRes, numRes, pedRes] = await Promise.all([
+        fetch(`${API_BASE}/players?club_id=${CLUB_ID}`),
         fetch(`${API_BASE}/uniforms/numeros?club_id=${CLUB_ID}`),
         fetch(`${API_BASE}/uniforms?club_id=${CLUB_ID}`),
       ]);
+      const playersData = await playersRes.json();
       const numData = await numRes.json();
       const pedData = await pedRes.json();
+
+      if (playersData.success) setJugadores(playersData.data || []);
       if (numData.success) {
-        // Normalizar todos los números usados — quitar ceros a la izquierda para comparar como enteros
         const normalizados = (numData.numeros || []).map(n => String(parseInt(n, 10)));
         setNumerosUsados(normalizados);
       }
-      if (pedData.success) setPedidos(pedData.data);
+      if (pedData.success) setPedidos(pedData.data || []);
     } catch (e) {
       console.error('Error cargando datos:', e);
     }
   };
 
-  const buscarJugador = async () => {
-    if (!form.cedula) return;
-    setBuscando(true);
-    setError('');
-    setJugadorEncontrado(null);
-    try {
-      const res = await fetch(`${API_BASE}/players/${form.cedula}?club_id=${CLUB_ID}`);
-      const data = await res.json();
-      if (data.success) {
-        setJugadorEncontrado(data.player);
-        setForm(f => ({ ...f, nombre: data.player.nombre_completo }));
-        setStep(2);
-      } else {
-        setError('Jugador no encontrado. Verificá la cédula.');
-      }
-    } catch (e) {
-      setError('Error de conexión. Intentá de nuevo.');
-    } finally {
-      setBuscando(false);
+  const handleBusquedaChange = (e) => {
+    const val = e.target.value;
+    setBusqueda(val);
+
+    if (val.trim().length < 2) {
+      setSugerencias([]);
+      setMostrarSugerencias(false);
+      return;
     }
+
+    const lower = val.toLowerCase();
+    const filtered = jugadores.filter(j => {
+      const nombreCompleto = `${j.nombre || ''} ${j.apellidos || ''}`.toLowerCase();
+      const cedula = String(j.cedula || '').toLowerCase();
+      return nombreCompleto.includes(lower) || cedula.includes(lower);
+    }).slice(0, 6);
+
+    setSugerencias(filtered);
+    setMostrarSugerencias(true);
   };
 
-  const formatNumero = (val) => {
-    return val.replace(/\D/g, '').slice(0, 3);
+  const seleccionarJugador = (jugador) => {
+    const nombreCompleto = `${jugador.nombre || ''} ${jugador.apellidos || ''}`.trim();
+    setJugadorEncontrado(jugador);
+    setForm(f => ({ ...f, cedula: jugador.cedula, nombre: nombreCompleto }));
+    setBusqueda(nombreCompleto);
+    setSugerencias([]);
+    setMostrarSugerencias(false);
+    setError('');
+    setStep(2);
   };
 
-  // Normalizar número ingresado como entero para comparar
+  const limpiarBusqueda = () => {
+    setBusqueda('');
+    setSugerencias([]);
+    setMostrarSugerencias(false);
+    setJugadorEncontrado(null);
+    setStep(1);
+    setForm({ cedula: '', nombre: '', tipo: '', campeon: false, nombre_estampar: '', talla: '', numero: '' });
+    setError('');
+  };
+
+  const formatNumero = (val) => val.replace(/\D/g, '').slice(0, 3);
+
   const numeroNormalizado = form.numero ? String(parseInt(form.numero, 10)) : '';
   const numeroDisplay = form.numero ? form.numero.padStart(3, '0') : '';
   const numeroRepetido = numeroNormalizado ? numerosUsados.includes(numeroNormalizado) : false;
@@ -104,20 +139,27 @@ export default function Uniformes() {
       const data = await res.json();
       if (data.success) {
         setExito(true);
-        await cargarNumerosYPedidos();
+        await cargarDatos();
         setTimeout(() => {
           setExito(false);
-          setStep(1);
-          setForm({ cedula: '', nombre: '', tipo: '', campeon: false, nombre_estampar: '', talla: '', numero: '' });
-          setJugadorEncontrado(null);
+          limpiarBusqueda();
         }, 3000);
       } else {
-        setError(data.message || 'Error al registrar el pedido.');
+        setError(data.error || data.message || 'Error al registrar el pedido.');
       }
     } catch (e) {
       setError('Error de conexión. Intentá de nuevo.');
     } finally {
       setEnviando(false);
+    }
+  };
+
+  const formatFecha = (iso) => {
+    if (!iso) return '—';
+    try {
+      return new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+    } catch {
+      return '—';
     }
   };
 
@@ -133,7 +175,7 @@ export default function Uniformes() {
             <div>
               <h2 className="text-lg font-bold text-[#E6EDF3]">Pedido de Uniforme</h2>
               <p className="text-xs text-[#8B949E]">
-                {step === 1 ? 'Paso 1 — Identificate con tu cédula' : 'Paso 2 — Datos del uniforme'}
+                {step === 1 ? 'Paso 1 — Buscá el jugador por nombre o cédula' : 'Paso 2 — Datos del uniforme'}
               </p>
             </div>
           </div>
@@ -152,44 +194,78 @@ export default function Uniformes() {
             </div>
           )}
 
+          {/* Paso 1: Buscador */}
           {step === 1 && (
             <div className="space-y-4">
-              <div>
-                <label className="block text-xs text-[#8B949E] mb-1.5">Cédula *</label>
-                <input
-                  type="text"
-                  value={form.cedula}
-                  onChange={e => setForm(f => ({ ...f, cedula: e.target.value }))}
-                  onKeyDown={e => e.key === 'Enter' && buscarJugador()}
-                  placeholder="Ingresá tu número de cédula"
-                  className="w-full bg-[#0D1117] border border-[#30363D] rounded-xl px-4 py-2.5 text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#00D084] transition-colors"
-                />
-              </div>
-              <button
-                onClick={buscarJugador}
-                disabled={!form.cedula || buscando}
-                className="w-full py-3 rounded-xl bg-[#00D084] text-[#0D1117] text-sm font-bold hover:bg-[#00D084]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {buscando ? (
-                  <><Loader className="w-4 h-4 animate-spin" /> Buscando...</>
-                ) : (
-                  <><Search className="w-4 h-4" /> Buscar jugador</>
+              <div ref={searchRef} className="relative">
+                <label className="block text-xs text-[#8B949E] mb-1.5">Buscar jugador *</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B949E]" />
+                  <input
+                    type="text"
+                    value={busqueda}
+                    onChange={handleBusquedaChange}
+                    onFocus={() => busqueda.trim().length >= 2 && setMostrarSugerencias(true)}
+                    placeholder="Nombre, apellido o cédula..."
+                    className="w-full bg-[#0D1117] border border-[#30363D] rounded-xl pl-10 pr-10 py-2.5 text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#00D084] transition-colors"
+                  />
+                  {busqueda && (
+                    <button
+                      onClick={limpiarBusqueda}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8B949E] hover:text-[#E6EDF3] transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Dropdown de sugerencias */}
+                {mostrarSugerencias && sugerencias.length > 0 && (
+                  <div className="absolute z-20 w-full mt-1 bg-[#1E2530] border border-[#30363D] rounded-xl shadow-xl overflow-hidden">
+                    {sugerencias.map((j) => (
+                      <button
+                        key={j.cedula}
+                        onClick={() => seleccionarJugador(j)}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#2D3748] transition-colors text-left border-b border-[#30363D]/50 last:border-0"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-[rgba(0,208,132,0.12)] flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-bold text-[#00D084]">
+                            {(j.nombre || '?')[0].toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-[#E6EDF3]">{j.nombre} {j.apellidos}</p>
+                          <p className="text-xs text-[#8B949E]">CC {j.cedula}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 )}
-              </button>
+
+                {mostrarSugerencias && sugerencias.length === 0 && busqueda.trim().length >= 2 && (
+                  <div className="absolute z-20 w-full mt-1 bg-[#1E2530] border border-[#30363D] rounded-xl px-4 py-3">
+                    <p className="text-sm text-[#8B949E]">No se encontró ningún jugador</p>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-[#8B949E]">Escribe al menos 2 caracteres para ver sugerencias</p>
             </div>
           )}
 
+          {/* Paso 2: Datos del uniforme */}
           {step === 2 && jugadorEncontrado && (
             <div className="space-y-4">
 
               <div className="p-3 rounded-xl bg-[rgba(0,208,132,0.08)] border border-[#00D084]/20 flex items-center gap-3 mb-2">
                 <CheckCircle className="w-4 h-4 text-[#00D084] flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-[#E6EDF3]">{jugadorEncontrado.nombre_completo}</p>
+                  <p className="text-sm font-medium text-[#E6EDF3]">
+                    {jugadorEncontrado.nombre} {jugadorEncontrado.apellidos}
+                  </p>
                   <p className="text-xs text-[#8B949E]">CC {jugadorEncontrado.cedula}</p>
                 </div>
                 <button
-                  onClick={() => { setStep(1); setJugadorEncontrado(null); setError(''); }}
+                  onClick={limpiarBusqueda}
                   className="ml-auto text-xs text-[#8B949E] hover:text-[#E6EDF3] transition-colors"
                 >
                   Cambiar
@@ -338,8 +414,8 @@ export default function Uniformes() {
                     </td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.nombre_estampar || '—'}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.talla}</td>
-                    <td className="py-2 px-3 text-[#E6EDF3] font-mono font-bold">{p.numero}</td>
-                    <td className="py-2 px-3 text-[#8B949E] text-xs">{p.fecha}</td>
+                    <td className="py-2 px-3 text-[#E6EDF3] font-mono font-bold">{p.numero_estampar}</td>
+                    <td className="py-2 px-3 text-[#8B949E] text-xs">{formatFecha(p.created_at)}</td>
                     <td className="py-2 px-3">
                       <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(245,166,35,0.12)] text-[#F5A623]">
                         {p.estado}

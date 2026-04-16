@@ -11,6 +11,7 @@ export function useSheetData() {
     torneos: [],
     registroPagos: [],
     morosos: [],
+    suspensiones: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

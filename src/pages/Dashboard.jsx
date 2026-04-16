@@ -23,7 +23,7 @@ const tabs = [
 ];
 
 export default function Dashboard() {
-  const { jugadores, mensualidades, uniformes, torneos, registroPagos, morosos, loading, error, lastUpdated, refresh } = useSheetData();
+  const { jugadores, mensualidades, uniformes, torneos, registroPagos, morosos, suspensiones, loading, error, lastUpdated, refresh } = useSheetData();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [refreshing, setRefreshing] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -178,7 +178,7 @@ export default function Dashboard() {
             )}
 
             {activeTab === 'jugadores' && (
-              <JugadoresTable jugadores={jugadores} mensualidades={mensualidades} uniformes={uniformes} torneos={torneos} registroPagos={registroPagos} onRefresh={handleRefresh} />
+              <JugadoresTable jugadores={jugadores} mensualidades={mensualidades} uniformes={uniformes} torneos={torneos} registroPagos={registroPagos} suspensiones={suspensiones} onRefresh={handleRefresh} />
             )}
 
             {activeTab === 'uniformes' && <Uniformes />}

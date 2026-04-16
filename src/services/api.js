@@ -22,6 +22,7 @@ export async function fetchAllData() {
       reportsRes,
       uniformesRes,
       torneosRes,
+      suspensionesRes,
     ] = await Promise.all([
       apiCall(`/players?club_id=${CLUB_ID}`),
       apiCall(`/invoices?club_id=${CLUB_ID}&anio=2026`),
@@ -29,13 +30,15 @@ export async function fetchAllData() {
       apiCall(`/reports/summary?club_id=${CLUB_ID}`),
       apiCall(`/invoices/uniformes?club_id=${CLUB_ID}`),
       apiCall(`/invoices/torneos?club_id=${CLUB_ID}`),
+      apiCall(`/suspensiones?club_id=${CLUB_ID}`),
     ]);
 
-    const jugadores     = playersRes.data  || [];
-    const mensualidades = invoicesRes.data || [];
-    const registroPagos = paymentsRes.data || [];
-    const uniformes     = uniformesRes.data || [];
-    const torneos       = torneosRes.data  || [];
+    const jugadores     = playersRes.data       || [];
+    const mensualidades = invoicesRes.data      || [];
+    const registroPagos = paymentsRes.data      || [];
+    const uniformes     = uniformesRes.data     || [];
+    const torneos       = torneosRes.data       || [];
+    const suspensiones  = suspensionesRes.data  || [];
 
     const morosos = reportsRes.mensualidades?.morosos_cédulas?.map(m => {
       const jugador = jugadores.find(j => j.cedula == m.cedula);
@@ -57,7 +60,7 @@ export async function fetchAllData() {
     }) || [];
 
 
-    return { jugadores, mensualidades, uniformes, torneos, registroPagos, morosos, reporteSummary: reportsRes };
+    return { jugadores, mensualidades, uniformes, torneos, registroPagos, morosos, suspensiones, reporteSummary: reportsRes };
   } catch (error) {
     console.error('Error fetching all data from API:', error);
     throw error;

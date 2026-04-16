@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Search, ChevronUp, ChevronDown, Eye } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, Eye, PauseCircle } from 'lucide-react';
 import { ESTADO_COLORS } from '../config';
 import EstadoCuenta from './EstadoCuenta';
+import SuspensionModal from './SuspensionModal';
 
 function EstadoBadge({ estado }) {
   const colors = ESTADO_COLORS[estado] || {
@@ -18,12 +19,16 @@ function EstadoBadge({ estado }) {
   );
 }
 
-export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, onRefresh }) {
+export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, suspensiones = [], onRefresh }) {
   const [search, setSearch] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('TODOS');
   const [sortField, setSortField] = useState('nombreCompleto');
   const [sortDir, setSortDir] = useState('asc');
   const [jugadorDetalle, setJugadorDetalle] = useState(null);
+  const [jugadorSuspension, setJugadorSuspension] = useState(null);
+
+  const tieneSuspensionActiva = (cedula) =>
+    suspensiones.some(s => s.activa && s.cedula === String(cedula));
 
   const mesActual = new Date().getMonth() + 1;
 
@@ -172,8 +177,13 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   className="hover:bg-white/5 transition-all"
                 >
                   <td className="px-6 py-4">
-                    <div className="font-medium text-white">
+                    <div className="font-medium text-white flex items-center gap-2">
                       {j.nombreCompleto}
+                      {tieneSuspensionActiva(j.cedula) && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
+                          <PauseCircle className="w-3 h-3" /> Suspendido
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs text-gray-400">
                       {j.activo ? '🟢 Activo' : '🔴 Inactivo'}
@@ -201,12 +211,22 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   </td>
 
                   <td className="px-6 py-4">
-                    <button
-                      onClick={() => setJugadorDetalle(j)}
-                      className="p-2 rounded-lg hover:bg-green-500/10 transition"
-                    >
-                      <Eye className="w-4 h-4 text-gray-400 hover:text-green-400" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setJugadorDetalle(j)}
+                        className="p-2 rounded-lg hover:bg-green-500/10 transition"
+                        title="Ver estado de cuenta"
+                      >
+                        <Eye className="w-4 h-4 text-gray-400 hover:text-green-400" />
+                      </button>
+                      <button
+                        onClick={() => setJugadorSuspension(j)}
+                        className={`p-2 rounded-lg transition ${tieneSuspensionActiva(j.cedula) ? 'bg-yellow-400/10 text-yellow-400' : 'hover:bg-yellow-400/10 text-gray-400 hover:text-yellow-400'}`}
+                        title="Gestionar suspensión"
+                      >
+                        <PauseCircle className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -227,7 +247,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
       </div>
 
-      {/* MODAL */}
+      {/* MODAL ESTADO CUENTA */}
       {jugadorDetalle && (
         <EstadoCuenta
           jugador={jugadorDetalle}
@@ -236,6 +256,15 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           torneos={torneos || []}
           registroPagos={registroPagos || []}
           onClose={() => setJugadorDetalle(null)}
+        />
+      )}
+
+      {/* MODAL SUSPENSIÓN */}
+      {jugadorSuspension && (
+        <SuspensionModal
+          jugador={jugadorSuspension}
+          onClose={() => setJugadorSuspension(null)}
+          onSuccess={onRefresh}
         />
       )}
     </>

@@ -31,15 +31,20 @@ function EstadoBadge({ estado }) {
   );
 }
 
-function SuspendidoBadge({ motivo, detalle }) {
+function SuspendidoBadge({ motivo, detalle, cancelada }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
+        cancelada
+          ? 'bg-[#8B949E]/10 text-[#8B949E] border-[#8B949E]/20'
+          : 'bg-yellow-400/10 text-yellow-400 border-yellow-400/20'
+      }`}>
         <PauseCircle className="w-3 h-3" />
         SUSPENDIDO
       </span>
       <span className="text-xs text-[#8B949E]">
         {MOTIVO_LABEL[motivo] || motivo}{detalle ? ` · ${detalle}` : ''}
+        {cancelada && <span className="ml-1 italic">(anulada)</span>}
       </span>
     </div>
   );
@@ -52,12 +57,13 @@ function SeccionMensualidades({ datos, suspensiones = [] }) {
   const totalPendiente = sorted.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
   const totalSuspendidos = sorted.filter(m => {
     const n = parseInt(m.numero_mes);
-    return suspensiones.some(s => s.activa && s.mes_inicio <= n && n <= s.mes_fin);
+    return suspensiones.some(s => s.mes_inicio <= n && n <= s.mes_fin);
   }).length;
 
+  // Incluye suspensiones activas Y canceladas — el jugador no estuvo presente en esos meses
   const getSuspension = (numero_mes) => {
     const n = parseInt(numero_mes);
-    return suspensiones.find(s => s.activa && s.mes_inicio <= n && n <= s.mes_fin) || null;
+    return suspensiones.find(s => s.mes_inicio <= n && n <= s.mes_fin) || null;
   };
 
   return (
@@ -97,7 +103,7 @@ function SeccionMensualidades({ datos, suspensiones = [] }) {
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <span className="text-sm font-medium text-[#E6EDF3] w-16 flex-shrink-0">{m.mes}</span>
                 {suspension
-                  ? <SuspendidoBadge motivo={suspension.motivo} detalle={suspension.detalle} />
+                  ? <SuspendidoBadge motivo={suspension.motivo} detalle={suspension.detalle} cancelada={!suspension.activa} />
                   : <EstadoBadge estado={m.estado} />
                 }
               </div>

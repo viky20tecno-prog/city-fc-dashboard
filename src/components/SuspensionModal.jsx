@@ -137,7 +137,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                         onClick={() => handleCancelar(s.id)}
                         disabled={cancelando === s.id}
                         className="p-1.5 rounded-lg hover:bg-red-500/10 text-[#8B949E] hover:text-red-400 transition-colors disabled:opacity-40"
-                        title="Cancelar suspensión"
+                        title="Anular (solo si fue un error — los meses quedan suspendidos)"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -249,7 +249,8 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
           {/* Historial */}
           {suspensionesHistorico.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-[#8B949E] uppercase tracking-wider mb-3">Historial</h3>
+              <h3 className="text-xs font-semibold text-[#8B949E] uppercase tracking-wider mb-2">Anuladas por error</h3>
+              <p className="text-xs text-[#8B949E] mb-3">Los meses siguen como suspendidos en el estado de cuenta.</p>
               <div className="space-y-2">
                 {suspensionesHistorico.map(s => {
                   const motivo = MOTIVOS.find(m => m.valor === s.motivo);
@@ -257,12 +258,12 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                     ? MESES[s.mes_inicio - 1]
                     : `${MESES[s.mes_inicio - 1]} – ${MESES[s.mes_fin - 1]}`;
                   return (
-                    <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-[#0D1117] border border-[#30363D] opacity-50">
+                    <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-[#0D1117] border border-[#30363D]/50 opacity-60">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-[#8B949E] line-through">{motivo?.label || s.motivo} · {mesesTexto} {s.anio}</p>
+                        <p className="text-sm text-[#8B949E]">{motivo?.label || s.motivo} · {mesesTexto} {s.anio}</p>
                         {s.detalle && <p className="text-xs text-[#8B949E]">{s.detalle}</p>}
                       </div>
-                      <span className="text-xs text-[#8B949E] flex-shrink-0">Cancelada</span>
+                      <span className="text-xs text-[#8B949E] flex-shrink-0 italic">Anulada</span>
                     </div>
                   );
                 })}

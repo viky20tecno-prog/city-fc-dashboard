@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle, XCircle, Eye, EyeOff, Loader2, PauseCircle } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { authFetch } from '../lib/authFetch';
 
 const CLUB_ID = 'city-fc';
 
@@ -184,7 +185,7 @@ function SeccionHistorialLazy({ cedula }) {
     setCargando(true);
     setError('');
     try {
-      const res = await fetch(`${API_BASE_URL}/payments?club_id=${CLUB_ID}&cedula=${cedula}&limit=50`);
+      const res = await authFetch(`${API_BASE_URL}/payments?club_id=${CLUB_ID}&cedula=${cedula}&limit=50`);
       const data = await res.json();
       if (data.success) {
         const sorted = (data.data || []).sort((a, b) =>

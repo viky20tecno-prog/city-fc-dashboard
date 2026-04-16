@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, Users, Eye, RefreshCw } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { authFetch } from '../lib/authFetch';
 
 const fmt = (n) =>
   Number(n).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
@@ -20,7 +21,7 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE_URL}/arbitrage/partidos?club_id=${clubId}`);
+      const res = await authFetch(`${API_BASE_URL}/arbitrage/partidos?club_id=${clubId}`);
       if (!res.ok) throw new Error(`Error ${res.status}`);
       const data = await res.json();
       setPartidos(data.data || []);

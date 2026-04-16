@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Shirt, CheckCircle, AlertCircle, Search, Loader, Trophy, X } from 'lucide-react';
+import { authFetch } from '../lib/authFetch';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 const CLUB_ID = 'city-fc';
@@ -126,7 +127,7 @@ export default function Uniformes() {
     const numeroPadded = form.numero.padStart(3, '0');
     setEnviando(true);
     try {
-      const res = await fetch(`${API_BASE}/uniforms?club_id=${CLUB_ID}`, {
+      const res = await authFetch(`${API_BASE}/uniforms?club_id=${CLUB_ID}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, CheckCircle, Circle, Loader2, Check, Calendar } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { authFetch } from '../lib/authFetch';
 
 const fmt = (n) =>
   Math.round(Number(n)).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
@@ -53,7 +54,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
     if (!metodoPago) return;
     setGuardando(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/arbitrage/pagos?club_id=${clubId}`, {
+      const res = await authFetch(`${API_BASE_URL}/arbitrage/pagos?club_id=${clubId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ partidoId, cedula, metodoPago, estadoPago: true }),

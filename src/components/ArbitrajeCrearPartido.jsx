@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, X, CheckSquare, Square, Loader2, Search, Calendar, Clock } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import { authFetch } from '../lib/authFetch';
 
 const fmt = (n) =>
   Number(n).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
@@ -29,7 +30,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
   useEffect(() => {
     const fetchJugadores = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/players?club_id=${clubId}`);
+        const res = await authFetch(`${API_BASE_URL}/players?club_id=${clubId}`);
         if (!res.ok) throw new Error('Error al cargar jugadores');
         const data = await res.json();
         setJugadores(data.data || []);
@@ -87,7 +88,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/arbitrage/partidos?club_id=${clubId}`, {
+      const res = await authFetch(`${API_BASE_URL}/arbitrage/partidos?club_id=${clubId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

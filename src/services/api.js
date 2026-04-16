@@ -1,10 +1,19 @@
+import { supabase } from '../lib/supabase';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 const CLUB_ID = 'city-fc';
+
+async function getAuthHeaders() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) return {};
+  return { Authorization: `Bearer ${session.access_token}` };
+}
 
 async function apiCall(endpoint) {
   const url = `${API_BASE_URL}${endpoint}`;
   try {
-    const res = await fetch(url);
+    const headers = await getAuthHeaders();
+    const res = await fetch(url, { headers });
     if (!res.ok) throw new Error(`API Error: ${res.status} ${res.statusText}`);
     return await res.json();
   } catch (error) {
@@ -93,9 +102,10 @@ export async function fetchConfig() {
 export async function registerPayment(paymentData) {
   const url = `${API_BASE_URL}/payments?club_id=${CLUB_ID}`;
   try {
+    const authHeaders = await getAuthHeaders();
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify(paymentData),
     });
     if (!res.ok) throw new Error(`Payment registration failed: ${res.status}`);

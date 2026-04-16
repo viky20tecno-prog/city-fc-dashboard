@@ -1,16 +1,23 @@
 import { useState } from 'react';
-import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle, XCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle, XCircle, Eye, EyeOff, Loader2, PauseCircle } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
-const CLUB_ID = process.env.NEXT_PUBLIC_CLUB_ID || 'city-fc';
+const CLUB_ID = 'city-fc';
 
 const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(n) || 0);
 
 const ESTADO_ICON = {
-  AL_DIA: { icon: CheckCircle, color: 'text-[#00D084]', bg: 'bg-[rgba(0,208,132,0.12)]' },
-  PENDIENTE: { icon: Clock, color: 'text-[#F5A623]', bg: 'bg-[rgba(245,166,35,0.12)]' },
-  PARCIAL: { icon: AlertTriangle, color: 'text-[#4A9EFF]', bg: 'bg-[rgba(74,158,255,0.12)]' },
-  MORA: { icon: XCircle, color: 'text-[#FF5E5E]', bg: 'bg-[rgba(255,94,94,0.12)]' },
+  AL_DIA:    { icon: CheckCircle,  color: 'text-[#00D084]', bg: 'bg-[rgba(0,208,132,0.12)]'  },
+  PENDIENTE: { icon: Clock,        color: 'text-[#F5A623]', bg: 'bg-[rgba(245,166,35,0.12)]'  },
+  PARCIAL:   { icon: AlertTriangle,color: 'text-[#4A9EFF]', bg: 'bg-[rgba(74,158,255,0.12)]'  },
+  MORA:      { icon: XCircle,      color: 'text-[#FF5E5E]', bg: 'bg-[rgba(255,94,94,0.12)]'   },
+};
+
+const MOTIVO_LABEL = {
+  LESION:           'Lesión',
+  VIAJE:            'Viaje',
+  RETIRO_TEMPORAL:  'Retiro temporal',
+  OTRO:             'Otro motivo',
 };
 
 function EstadoBadge({ estado }) {
@@ -24,16 +31,46 @@ function EstadoBadge({ estado }) {
   );
 }
 
-function SeccionMensualidades({ datos }) {
+function SuspendidoBadge({ motivo, detalle }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
+        <PauseCircle className="w-3 h-3" />
+        SUSPENDIDO
+      </span>
+      <span className="text-xs text-[#8B949E]">
+        {MOTIVO_LABEL[motivo] || motivo}{detalle ? ` · ${detalle}` : ''}
+      </span>
+    </div>
+  );
+}
+
+function SeccionMensualidades({ datos, suspensiones = [] }) {
   if (!datos || datos.length === 0) return <EmptySection texto="Sin datos de mensualidades" />;
   const sorted = [...datos].sort((a, b) => (parseInt(a.numero_mes) || 0) - (parseInt(b.numero_mes) || 0));
   const totalPagado = sorted.reduce((s, m) => s + (parseFloat(m.valor_pagado) || 0), 0);
   const totalPendiente = sorted.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
+  const totalSuspendidos = sorted.filter(m => {
+    const n = parseInt(m.numero_mes);
+    return suspensiones.some(s => s.activa && s.mes_inicio <= n && n <= s.mes_fin);
+  }).length;
+
+  const getSuspension = (numero_mes) => {
+    const n = parseInt(numero_mes);
+    return suspensiones.find(s => s.activa && s.mes_inicio <= n && n <= s.mes_fin) || null;
+  };
+
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
         <Calendar className="w-5 h-5 text-[#00D084]" />
         <h3 className="text-base font-semibold text-[#E6EDF3]">Mensualidades 2026</h3>
+        {totalSuspendidos > 0 && (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
+            <PauseCircle className="w-3 h-3" />
+            {totalSuspendidos} suspendido{totalSuspendidos > 1 ? 's' : ''}
+          </span>
+        )}
       </div>
       <div className="grid grid-cols-2 gap-2 mb-3">
         <div className="bg-[rgba(0,208,132,0.08)] rounded-xl p-3 border border-[#00D084]/20">
@@ -46,15 +83,31 @@ function SeccionMensualidades({ datos }) {
         </div>
       </div>
       <div className="space-y-2">
-        {sorted.map((m, i) => (
-          <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-[#1E2530] border border-[#30363D]">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-[#E6EDF3] w-24">{m.mes}</span>
-              <EstadoBadge estado={m.estado} />
+        {sorted.map((m, i) => {
+          const suspension = getSuspension(m.numero_mes);
+          return (
+            <div
+              key={i}
+              className={`flex items-center justify-between p-3 rounded-xl border ${
+                suspension
+                  ? 'bg-yellow-400/5 border-yellow-400/20'
+                  : 'bg-[#1E2530] border-[#30363D]'
+              }`}
+            >
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <span className="text-sm font-medium text-[#E6EDF3] w-16 flex-shrink-0">{m.mes}</span>
+                {suspension
+                  ? <SuspendidoBadge motivo={suspension.motivo} detalle={suspension.detalle} />
+                  : <EstadoBadge estado={m.estado} />
+                }
+              </div>
+              <p className="text-sm font-medium text-[#E6EDF3] flex-shrink-0 ml-2">
+                {formatCOP(m.valor_pagado)}
+                <span className="text-[#8B949E]"> / {formatCOP(m.valor_oficial)}</span>
+              </p>
             </div>
-            <p className="text-sm font-medium text-[#E6EDF3]">{formatCOP(m.valor_pagado)} <span className="text-[#8B949E]">/ {formatCOP(m.valor_oficial)}</span></p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -269,13 +322,14 @@ function EmptySection({ texto }) {
   return <div className="text-center py-6 text-[#8B949E] text-sm">{texto}</div>;
 }
 
-export default function EstadoCuenta({ jugador, mensualidades, uniformes, torneos, onClose }) {
+export default function EstadoCuenta({ jugador, mensualidades, uniformes, torneos, suspensiones = [], onClose }) {
   const cedula = jugador.cedula;
   const nombre = `${jugador['nombre(s)'] || jugador.nombre || ''} ${jugador['apellido(s)'] || jugador.apellidos || ''}`.trim();
 
   const misMensualidades = mensualidades.filter(m => (m.cedula || m.jugador_id) === cedula);
   const misUniformes = uniformes.filter(u => u.cedula === cedula);
   const misTorneos = torneos.filter(t => t.cedula === cedula);
+  const misSuspensiones = suspensiones.filter(s => s.cedula === String(cedula));
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
@@ -291,7 +345,7 @@ export default function EstadoCuenta({ jugador, mensualidades, uniformes, torneo
         </div>
 
         <div className="p-6 space-y-8">
-          <SeccionMensualidades datos={misMensualidades} />
+          <SeccionMensualidades datos={misMensualidades} suspensiones={misSuspensiones} />
           <SeccionUniformes datos={misUniformes} />
           <SeccionTorneos datos={misTorneos} />
           {/* ✅ Historial lazy — se carga desde API solo al hacer clic */}

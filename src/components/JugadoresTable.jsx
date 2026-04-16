@@ -255,6 +255,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           uniformes={uniformes || []}
           torneos={torneos || []}
           registroPagos={registroPagos || []}
+          suspensiones={suspensiones}
           onClose={() => setJugadorDetalle(null)}
         />
       )}

@@ -129,8 +129,12 @@ export default function Uniformes() {
 
   const handleSubmit = async () => {
     setError('');
-    if (!form.prenda || !form.talla || !form.numero) {
-      setError('Completá todos los campos obligatorios.');
+    const faltantes = [];
+    if (!form.prenda) faltantes.push('prenda');
+    if (!form.talla) faltantes.push('talla');
+    if (!form.numero) faltantes.push('número');
+    if (faltantes.length > 0) {
+      setError(`Faltá completar: ${faltantes.join(', ')}.`);
       return;
     }
     if (numeroRepetido) {

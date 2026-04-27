@@ -46,9 +46,9 @@ export default function Uniformes() {
   const cargarDatos = async () => {
     try {
       const [playersRes, numRes, pedRes] = await Promise.all([
-        fetch(`${API_BASE}/players?club_id=${CLUB_ID}`),
-        fetch(`${API_BASE}/uniforms/numeros?club_id=${CLUB_ID}`),
-        fetch(`${API_BASE}/uniforms?club_id=${CLUB_ID}`),
+        authFetch(`${API_BASE}/players?club_id=${CLUB_ID}`),
+        authFetch(`${API_BASE}/uniforms/numeros?club_id=${CLUB_ID}`),
+        authFetch(`${API_BASE}/uniforms?club_id=${CLUB_ID}`),
       ]);
       const playersData = await playersRes.json();
       const numData = await numRes.json();

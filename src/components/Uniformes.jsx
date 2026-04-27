@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Shirt, CheckCircle, AlertCircle, Search, Loader, X, Pencil, Save } from 'lucide-react';
+import { Shirt, CheckCircle, AlertCircle, Search, Loader, X, Pencil, Save, Download } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
+import jsPDF from 'jspdf';
 
 const PRENDAS = [
   { valor: 'Uniforme naranja',  precio: 120000 },
@@ -41,6 +42,7 @@ export default function Uniformes() {
   const [pedidos, setPedidos] = useState([]);
   const [tabPedidos, setTabPedidos] = useState('PENDIENTE');
   const [cambiandoEstado, setCambiandoEstado] = useState(null);
+  const [generandoPDF, setGenerandoPDF] = useState(false);
   const [pedidoEditando, setPedidoEditando] = useState(null);
   const [editForm, setEditForm] = useState({ prendas: [], talla: '', numero: '', nombre_estampar: '' });
   const [editError, setEditError] = useState('');
@@ -191,6 +193,181 @@ export default function Uniformes() {
       setError('Error de conexión. Intentá de nuevo.');
     } finally {
       setEnviando(false);
+    }
+  };
+
+  const generarPDF = () => {
+    setGenerandoPDF(true);
+    try {
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const W = doc.internal.pageSize.getWidth();
+      const fmtCOP = (n) => `$${Number(n || 0).toLocaleString('es-CO')}`;
+      const fecha  = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+
+      const pendientes = pedidos.filter(p => p.estado === 'PENDIENTE');
+      const pagados    = pedidos.filter(p => p.estado === 'PAGADO');
+
+      // ── Utilidades de dibujo ────────────────────────────────────────────
+      const drawHeader = () => {
+        doc.setFillColor(6, 12, 24);
+        doc.rect(0, 0, W, 22, 'F');
+        doc.setFillColor(0, 170, 255);
+        doc.rect(0, 22, W, 1.2, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.setTextColor(255, 255, 255);
+        doc.text('CITY FC — Pedido de Uniformes', 14, 14);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(150, 170, 200);
+        doc.text(`Generado: ${fecha}`, W - 14, 14, { align: 'right' });
+      };
+
+      const drawSectionTitle = (title, yPos, color) => {
+        doc.setFillColor(...color);
+        doc.roundedRect(14, yPos, W - 28, 8, 2, 2, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(255, 255, 255);
+        doc.text(title, 18, yPos + 5.5);
+        return yPos + 12;
+      };
+
+      const COL = { cedula: 14, nombre: 38, prendas: 95, talla: 165, numero: 180, estampa: 197, total: 225 };
+      const COL_W = W - 28;
+
+      const drawTableHeader = (yPos) => {
+        doc.setFillColor(15, 31, 54);
+        doc.rect(14, yPos, COL_W, 7, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(115, 115, 115);
+        const headers = [
+          [COL.cedula, 'CÉDULA'],
+          [COL.nombre,  'NOMBRE'],
+          [COL.prendas, 'PRENDAS'],
+          [COL.talla,   'TALLA'],
+          [COL.numero,  'NÚM.'],
+          [COL.estampa, 'ESTAMPA'],
+          [COL.total,   'TOTAL'],
+        ];
+        headers.forEach(([x, label]) => doc.text(label, x, yPos + 4.8));
+        return yPos + 7;
+      };
+
+      const drawRow = (p, yPos, isOdd) => {
+        const rowH = 9;
+        doc.setFillColor(isOdd ? 10 : 15, isOdd ? 22 : 31, isOdd ? 40 : 54);
+        doc.rect(14, yPos, COL_W, rowH, 'F');
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(200, 215, 230);
+
+        const mid = yPos + 6;
+        doc.text(String(p.cedula || ''), COL.cedula, mid);
+        // Nombre truncado
+        const nombre = String(p.nombre || '');
+        doc.text(nombre.length > 22 ? nombre.slice(0, 21) + '…' : nombre, COL.nombre, mid);
+        // Prendas truncadas
+        const prendas = String(p.prendas || p.prenda || '');
+        doc.text(prendas.length > 32 ? prendas.slice(0, 31) + '…' : prendas, COL.prendas, mid);
+        doc.text(String(p.talla || ''), COL.talla, mid);
+        doc.text(String(p.numero_estampar || ''), COL.numero, mid);
+        doc.text(String(p.nombre_estampar || '—'), COL.estampa, mid);
+        // Total en azul
+        doc.setTextColor(0, 170, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text(fmtCOP(p.total), COL.total, mid);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(200, 215, 230);
+
+        return yPos + rowH;
+      };
+
+      const drawTotal = (lista, yPos) => {
+        const total = lista.reduce((s, p) => s + Number(p.total || 0), 0);
+        doc.setFillColor(0, 50, 100);
+        doc.rect(14, yPos, COL_W, 8, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(200, 215, 230);
+        doc.text(`${lista.length} pedido${lista.length !== 1 ? 's' : ''}`, 18, yPos + 5.5);
+        doc.setTextColor(0, 170, 255);
+        doc.text(`Total: ${fmtCOP(total)}`, W - 14, yPos + 5.5, { align: 'right' });
+        return yPos + 11;
+      };
+
+      const checkPage = (doc, y, needed = 15) => {
+        if (y + needed > doc.internal.pageSize.getHeight() - 10) {
+          doc.addPage();
+          drawHeader();
+          return 30;
+        }
+        return y;
+      };
+
+      // ── Página 1 ────────────────────────────────────────────────────────
+      drawHeader();
+      let y = 30;
+
+      // Resumen rápido
+      doc.setFillColor(10, 22, 40);
+      doc.roundedRect(14, y, (COL_W / 2) - 4, 16, 2, 2, 'F');
+      doc.roundedRect(14 + COL_W / 2, y, (COL_W / 2) - 4, 16, 2, 2, 'F');
+
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(115, 115, 115);
+      doc.text('Pendientes de pago', 18, y + 6);
+      doc.text('Pagados · pendientes de entrega', 18 + COL_W / 2, y + 6);
+
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(18);
+      doc.setTextColor(245, 158, 11);
+      doc.text(String(pendientes.length), 18, y + 14);
+      doc.setTextColor(34, 197, 94);
+      doc.text(String(pagados.length), 18 + COL_W / 2, y + 14);
+      y += 22;
+
+      // ── Sección PENDIENTES ───────────────────────────────────────────────
+      if (pendientes.length > 0) {
+        y = checkPage(doc, y, 30);
+        y = drawSectionTitle(`⏳  PENDIENTES DE PAGO (${pendientes.length})`, y, [180, 100, 0]);
+        y = drawTableHeader(y);
+        pendientes.forEach((p, i) => { y = checkPage(doc, y); y = drawRow(p, y, i % 2 === 0); });
+        y = drawTotal(pendientes, y);
+        y += 6;
+      } else {
+        y = checkPage(doc, y, 12);
+        doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.setTextColor(115, 115, 115);
+        doc.text('Sin pedidos pendientes de pago.', 18, y + 6);
+        y += 14;
+      }
+
+      // ── Sección PAGADOS ──────────────────────────────────────────────────
+      y = checkPage(doc, y, 30);
+      if (pagados.length > 0) {
+        y = drawSectionTitle(`✅  PAGADOS · PENDIENTES DE ENTREGA (${pagados.length})`, y, [0, 100, 50]);
+        y = drawTableHeader(y);
+        pagados.forEach((p, i) => { y = checkPage(doc, y); y = drawRow(p, y, i % 2 === 0); });
+        drawTotal(pagados, y);
+      } else {
+        doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.setTextColor(115, 115, 115);
+        doc.text('Sin pedidos pagados pendientes de entrega.', 18, y + 6);
+      }
+
+      // ── Footer ───────────────────────────────────────────────────────────
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFillColor(6, 12, 24);
+        doc.rect(0, doc.internal.pageSize.getHeight() - 8, W, 8, 'F');
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(80, 100, 130);
+        doc.text('City FC — Agente Contable', 14, doc.internal.pageSize.getHeight() - 2.5);
+        doc.text(`Pág. ${i} / ${pageCount}`, W - 14, doc.internal.pageSize.getHeight() - 2.5, { align: 'right' });
+      }
+
+      doc.save(`city-fc-uniformes-${new Date().toISOString().slice(0, 10)}.pdf`);
+    } finally {
+      setGenerandoPDF(false);
     }
   };
 
@@ -555,8 +732,8 @@ export default function Uniformes() {
 
         return (
           <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6">
-            {/* Tabs */}
-            <div className="flex items-center gap-2 mb-5">
+            {/* Tabs + botón PDF */}
+            <div className="flex items-center gap-2 mb-5 flex-wrap">
               {TAB_CFG.map(t => (
                 <button
                   key={t.key}
@@ -573,7 +750,19 @@ export default function Uniformes() {
                   }`}>{t.count}</span>
                 </button>
               ))}
-              <span className="ml-auto text-xs text-[#737373]">{pedidos.length} total</span>
+              <div className="ml-auto flex items-center gap-3">
+                <span className="text-xs text-[#737373]">{pedidos.length} total</span>
+                <button
+                  onClick={generarPDF}
+                  disabled={generandoPDF || (pendientes.length === 0 && pagados.length === 0)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[rgba(0,170,255,0.1)] border border-[#00AAFF]/30 text-[#00AAFF] text-xs font-medium hover:bg-[rgba(0,170,255,0.18)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {generandoPDF
+                    ? <><Loader className="w-3.5 h-3.5 animate-spin" />Generando...</>
+                    : <><Download className="w-3.5 h-3.5" />Descargar PDF</>
+                  }
+                </button>
+              </div>
             </div>
 
             {vistaActual.length === 0 ? (

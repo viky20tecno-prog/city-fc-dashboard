@@ -29,7 +29,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0C0C0C] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
 
         {/* Logo / Header */}
@@ -42,7 +42,7 @@ export default function Login() {
         </div>
 
         {/* Formulario */}
-        <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+        <div className="bg-[#141414] rounded-2xl border border-white/8 p-6">
 
           {error && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/20 mb-4">

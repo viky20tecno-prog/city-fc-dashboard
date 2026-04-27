@@ -49,8 +49,8 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0C0C0C] flex items-center justify-center p-4">
-        <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8 max-w-md text-center shadow-[0_0_40px_rgba(255,0,0,0.1)]">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="bg-[#141414] rounded-2xl border border-white/10 p-8 max-w-md text-center shadow-[0_0_40px_rgba(255,0,0,0.1)]">
           <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
             <Activity className="w-8 h-8 text-red-400" />
           </div>
@@ -65,10 +65,10 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0C0C0C]">
+    <div className="min-h-screen bg-black">
 
       {/* HEADER */}
-      <header className="bg-white/5 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
+      <header className="bg-[#111111] border-b border-white/8 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
 
@@ -126,7 +126,7 @@ export default function Dashboard() {
       </header>
 
       {/* NAV */}
-      <nav className="bg-white/5 backdrop-blur-xl border-b border-white/10">
+      <nav className="bg-[#0D0D0D] border-b border-white/8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex gap-2 overflow-x-auto py-2">
 

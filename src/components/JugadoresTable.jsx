@@ -103,7 +103,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
   return (
     <>
-      <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
+      <div className="bg-[#141414] rounded-2xl border border-white/8 overflow-hidden">
 
         {/* HEADER */}
         <div className="p-6 border-b border-white/10">

@@ -127,7 +127,7 @@ function exportarPDF(morosos) {
 export default function MorososList({ morosos }) {
   if (!morosos || morosos.length === 0) {
     return (
-      <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 overflow-hidden">
+      <div className="relative bg-[#141414] rounded-2xl border border-white/8 p-6 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-orange-500/10 blur-2xl" />
         </div>
@@ -141,7 +141,7 @@ export default function MorososList({ morosos }) {
   }
 
   return (
-    <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 overflow-hidden">
+    <div className="relative bg-[#141414] rounded-2xl border border-white/8 p-6 overflow-hidden">
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute inset-0 bg-red-500/10 blur-2xl" />
       </div>

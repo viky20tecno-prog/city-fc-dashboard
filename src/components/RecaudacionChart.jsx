@@ -100,7 +100,7 @@ export default function RecaudacionChart({ mensualidades }) {
   };
 
   return (
-    <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 overflow-hidden">
+    <div className="relative bg-[#141414] rounded-2xl border border-white/8 p-6 overflow-hidden">
 
       {/* Glow */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -125,15 +125,15 @@ export default function RecaudacionChart({ mensualidades }) {
 
       {/* KPIs */}
       <div className="grid grid-cols-3 gap-3 mb-5 relative">
-        <div className="bg-white/5 border border-white/8 rounded-xl p-3">
+        <div className="bg-[#1A1A1A] border border-white/8 rounded-xl p-3">
           <p className="text-xs text-gray-500 mb-1">Total recaudado</p>
           <p className="text-orange-400 font-bold text-sm">{fmtK(totalPagado)}</p>
         </div>
-        <div className="bg-white/5 border border-white/8 rounded-xl p-3">
+        <div className="bg-[#1A1A1A] border border-white/8 rounded-xl p-3">
           <p className="text-xs text-gray-500 mb-1">Por cobrar</p>
           <p className="text-orange-400 font-bold text-sm">{fmtK(totalPendiente)}</p>
         </div>
-        <div className="bg-white/5 border border-white/8 rounded-xl p-3">
+        <div className="bg-[#1A1A1A] border border-white/8 rounded-xl p-3">
           <p className="text-xs text-gray-500 mb-1">Mejor mes</p>
           <p className="text-yellow-400 font-bold text-sm truncate">
             {mejorMes ? `${mejorMes.mes} ${fmtK(mejorMes.pagado)}` : '—'}

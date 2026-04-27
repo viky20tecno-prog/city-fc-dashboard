@@ -24,11 +24,11 @@ export default function WhatsAppMockup() {
   ];
 
   return (
-    <div className="bg-[#141414] rounded-2xl border border-[#2A2A2A] p-6">
+    <div className="bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6">
       <h2 className="text-lg font-semibold text-[#F5F5F5] mb-4">Así se ve en WhatsApp</h2>
       
       <div className="max-w-sm mx-auto">
-        <div className="bg-[#0C0C0C] rounded-3xl p-2 shadow-xl border border-[#2A2A2A]">
+        <div className="bg-[#0D1117] rounded-3xl p-2 shadow-xl border border-[#2A3655]">
           {/* Status bar */}
           <div className="bg-[#075e54] rounded-t-2xl px-4 py-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold">⚽</div>
@@ -48,7 +48,7 @@ export default function WhatsAppMockup() {
                     : 'bg-[#1F2C34] rounded-tl-none'
                 }`}>
                   {msg.isImage ? (
-                    <div className="bg-[#0C0C0C] rounded-lg p-4 mb-1 flex items-center justify-center">
+                    <div className="bg-[#0D1117] rounded-lg p-4 mb-1 flex items-center justify-center">
                       <span className="text-2xl">🧾</span>
                     </div>
                   ) : null}

@@ -103,10 +103,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
   return (
     <>
-      <div className="bg-[#141414] rounded-2xl border border-white/8 overflow-hidden">
+      <div className="bg-[#161D2F] rounded-2xl border border-[#2A3655] overflow-hidden">
 
         {/* HEADER */}
-        <div className="p-6 border-b border-white/10">
+        <div className="p-6 border-b border-[#2A3655]">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
 
             <h2 className="text-lg font-semibold text-white">
@@ -123,14 +123,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   placeholder="Buscar nombre o cédula..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full sm:w-64 pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30"
+                  className="w-full sm:w-64 pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-[#2A3655] text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30"
                 />
               </div>
 
               <select
                 value={filtroEstado}
                 onChange={e => setFiltroEstado(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-white"
+                className="px-3 py-2 rounded-xl bg-white/5 border border-[#2A3655] text-sm text-white"
               >
                 {estados.map(e => (
                   <option key={e} value={e}>{e}</option>
@@ -146,7 +146,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           <table className="w-full">
 
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-[#2A3655]">
                 {[
                   { key: 'nombreCompleto', label: 'Nombre' },
                   { key: 'cedula', label: 'Cédula' },
@@ -241,7 +241,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         </div>
 
         {/* FOOTER */}
-        <div className="px-6 py-3 border-t border-white/10 text-sm text-gray-400">
+        <div className="px-6 py-3 border-t border-[#2A3655] text-sm text-gray-400">
           {filtered.length} de {jugadores.length} jugadores
         </div>
 

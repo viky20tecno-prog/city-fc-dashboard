@@ -61,7 +61,7 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
 
   if (partidos.length === 0) {
     return (
-      <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-12 text-center">
+      <div className="bg-[#161D2F] border border-[#2A3655] rounded-xl p-12 text-center">
         <div className="text-5xl mb-4">🏟️</div>
         <h3 className="text-white font-semibold text-lg mb-2">Sin partidos registrados</h3>
         <p className="text-gray-400 text-sm">
@@ -80,7 +80,7 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
         </span>
         <button
           onClick={fetchPartidos}
-          className="flex items-center gap-2 px-3 py-1.5 bg-[#1A1A1A] hover:bg-[#252525] text-gray-300 rounded-lg text-sm transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-[#1E2740] hover:bg-[#24305A] text-gray-300 rounded-lg text-sm transition-colors"
         >
           <RefreshCw size={13} />
           Actualizar
@@ -92,7 +92,7 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
         {partidos.map((partido) => (
           <div
             key={partido.id}
-            className="bg-[#141414] border border-[#2A2A2A] hover:border-[#333333] rounded-xl p-5 transition-all duration-200"
+            className="bg-[#161D2F] border border-[#2A3655] hover:border-[#2A3655] rounded-xl p-5 transition-all duration-200"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 

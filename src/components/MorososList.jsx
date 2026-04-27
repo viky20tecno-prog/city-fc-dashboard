@@ -127,7 +127,7 @@ function exportarPDF(morosos) {
 export default function MorososList({ morosos }) {
   if (!morosos || morosos.length === 0) {
     return (
-      <div className="relative bg-[#141414] rounded-2xl border border-white/8 p-6 overflow-hidden">
+      <div className="relative bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-orange-500/10 blur-2xl" />
         </div>
@@ -141,7 +141,7 @@ export default function MorososList({ morosos }) {
   }
 
   return (
-    <div className="relative bg-[#141414] rounded-2xl border border-white/8 p-6 overflow-hidden">
+    <div className="relative bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6 overflow-hidden">
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute inset-0 bg-red-500/10 blur-2xl" />
       </div>
@@ -169,7 +169,7 @@ export default function MorososList({ morosos }) {
         {morosos.map((m, i) => (
           <div key={m.cedula || i}
             className="group flex items-center justify-between p-4 rounded-xl
-              bg-red-500/5 border border-white/10
+              bg-red-500/5 border border-[#2A3655]
               hover:border-red-500/30 hover:bg-red-500/10
               transition-all duration-300">
             <div>
@@ -196,7 +196,7 @@ export default function MorososList({ morosos }) {
       </div>
 
       {/* Total */}
-      <div className="mt-4 pt-3 border-t border-white/10 flex justify-between items-center relative">
+      <div className="mt-4 pt-3 border-t border-[#2A3655] flex justify-between items-center relative">
         <span className="text-xs text-gray-400">Total en mora</span>
         <span className="text-sm font-bold text-red-400">
           {formatCOP(morosos.reduce((sum, m) => sum + (parseInt(m.saldo_total) || 0), 0))}

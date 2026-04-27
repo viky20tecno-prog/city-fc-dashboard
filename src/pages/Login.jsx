@@ -29,7 +29,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0D1117] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
 
         {/* Logo / Header */}
@@ -42,7 +42,7 @@ export default function Login() {
         </div>
 
         {/* Formulario */}
-        <div className="bg-[#141414] rounded-2xl border border-white/8 p-6">
+        <div className="bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6">
 
           {error && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/20 mb-4">
@@ -61,7 +61,7 @@ export default function Login() {
                 placeholder="tu@email.com"
                 required
                 autoComplete="email"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#F97316] transition-colors"
+                className="w-full bg-white/5 border border-[#2A3655] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#F97316] transition-colors"
               />
             </div>
 
@@ -74,7 +74,7 @@ export default function Login() {
                 placeholder="••••••••"
                 required
                 autoComplete="current-password"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#F97316] transition-colors"
+                className="w-full bg-white/5 border border-[#2A3655] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#F97316] transition-colors"
               />
             </div>
 

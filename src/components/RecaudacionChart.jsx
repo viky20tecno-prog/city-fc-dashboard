@@ -59,7 +59,7 @@ export default function RecaudacionChart({ mensualidades }) {
     if (!active || !payload?.length) return null;
     const d = payload[0]?.payload;
     return (
-      <div className="bg-[#141414] border border-white/10 rounded-xl p-3.5 shadow-2xl min-w-[160px]">
+      <div className="bg-[#161D2F] border border-[#2A3655] rounded-xl p-3.5 shadow-2xl min-w-[160px]">
         <p className="text-white font-semibold text-sm mb-2">{d?.mesCompleto}</p>
         <div className="space-y-1.5">
           <div className="flex justify-between gap-4 text-xs">
@@ -70,7 +70,7 @@ export default function RecaudacionChart({ mensualidades }) {
             <span className="text-orange-400">Pendiente</span>
             <span className="text-white font-medium">{fmtCOP(d?.pendiente || 0)}</span>
           </div>
-          <div className="border-t border-white/10 pt-1.5 mt-1 flex justify-between gap-4 text-xs">
+          <div className="border-t border-[#2A3655] pt-1.5 mt-1 flex justify-between gap-4 text-xs">
             <span className="text-gray-400">% cobrado</span>
             <span className={`font-bold ${d?.pct >= 80 ? 'text-green-400' : d?.pct >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
               {d?.pct}%
@@ -100,7 +100,7 @@ export default function RecaudacionChart({ mensualidades }) {
   };
 
   return (
-    <div className="relative bg-[#141414] rounded-2xl border border-white/8 p-6 overflow-hidden">
+    <div className="relative bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6 overflow-hidden">
 
       {/* Glow */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -125,15 +125,15 @@ export default function RecaudacionChart({ mensualidades }) {
 
       {/* KPIs */}
       <div className="grid grid-cols-3 gap-3 mb-5 relative">
-        <div className="bg-[#1A1A1A] border border-white/8 rounded-xl p-3">
+        <div className="bg-[#1E2740] border border-[#2A3655] rounded-xl p-3">
           <p className="text-xs text-gray-500 mb-1">Total recaudado</p>
           <p className="text-orange-400 font-bold text-sm">{fmtK(totalPagado)}</p>
         </div>
-        <div className="bg-[#1A1A1A] border border-white/8 rounded-xl p-3">
+        <div className="bg-[#1E2740] border border-[#2A3655] rounded-xl p-3">
           <p className="text-xs text-gray-500 mb-1">Por cobrar</p>
           <p className="text-orange-400 font-bold text-sm">{fmtK(totalPendiente)}</p>
         </div>
-        <div className="bg-[#1A1A1A] border border-white/8 rounded-xl p-3">
+        <div className="bg-[#1E2740] border border-[#2A3655] rounded-xl p-3">
           <p className="text-xs text-gray-500 mb-1">Mejor mes</p>
           <p className="text-yellow-400 font-bold text-sm truncate">
             {mejorMes ? `${mejorMes.mes} ${fmtK(mejorMes.pagado)}` : '—'}

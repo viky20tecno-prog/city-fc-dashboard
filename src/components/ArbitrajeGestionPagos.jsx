@@ -74,7 +74,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
   // ── Sin partido seleccionado ─────────────────────────────────────────────────
   if (!partidoId) {
     return (
-      <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-12 text-center">
+      <div className="bg-[#161D2F] border border-[#2A3655] rounded-xl p-12 text-center">
         <div className="text-5xl mb-4">👈</div>
         <h3 className="text-white font-semibold mb-2">Selecciona un partido</h3>
         <p className="text-gray-400 text-sm">
@@ -111,7 +111,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
 
       {/* ── Resumen financiero ── */}
       {resumen && (
-        <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-5">
+        <div className="bg-[#161D2F] border border-[#2A3655] rounded-xl p-5">
 
           {/* Título del partido */}
           <div className="flex items-start justify-between gap-3 mb-4">
@@ -149,7 +149,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
               <span>Progreso de cobro</span>
               <span className="text-white font-medium">{pct}%</span>
             </div>
-            <div className="h-2 bg-[#1A1A1A] rounded-full overflow-hidden">
+            <div className="h-2 bg-[#1E2740] rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-orange-600 to-orange-400 rounded-full transition-all duration-500"
                 style={{ width: `${pct}%` }}
@@ -165,7 +165,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
               { label: 'Pendiente',   value: fmt(resumen.faltante),       color: 'text-orange-400' },
               { label: 'Sin pagar',   value: `${resumen.cantidadPendiente} de ${resumen.cantidadTotal}`, color: 'text-yellow-400' },
             ].map((m) => (
-              <div key={m.label} className="bg-[#1A1A1A] rounded-lg p-3">
+              <div key={m.label} className="bg-[#1E2740] rounded-lg p-3">
                 <p className="text-xs text-gray-500 mb-1">{m.label}</p>
                 <p className={`font-bold text-sm ${m.color}`}>{m.value}</p>
               </div>
@@ -175,8 +175,8 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
       )}
 
       {/* ── Lista de pagos ── */}
-      <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#2A2A2A]">
+      <div className="bg-[#161D2F] border border-[#2A3655] rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-[#2A3655]">
           <h3 className="text-white font-semibold">Registro de pagos individuales</h3>
         </div>
 
@@ -194,7 +194,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
 
                   {/* Icono estado */}
                   <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                    pago.estadoPago ? 'bg-orange-900/50' : 'bg-[#1A1A1A]'
+                    pago.estadoPago ? 'bg-orange-900/50' : 'bg-[#1E2740]'
                   }`}>
                     {pago.estadoPago
                       ? <CheckCircle size={16} className="text-orange-400" />
@@ -255,7 +255,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all duration-150 ${
                               selected
                                 ? 'bg-orange-600 border-orange-500 text-white shadow-lg shadow-orange-900/40 scale-105'
-                                : 'bg-[#1A1A1A] border-[#333333] text-gray-300 hover:bg-[#252525] hover:border-gray-600'
+                                : 'bg-[#1E2740] border-[#2A3655] text-gray-300 hover:bg-[#24305A] hover:border-gray-600'
                             }`}
                           >
                             <span>{m.emoji}</span>

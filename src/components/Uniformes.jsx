@@ -409,7 +409,7 @@ export default function Uniformes() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#30363D]">
-                  {['Cédula', 'Nombre', 'Tipo', 'Campeón', 'Estampar', 'Talla', 'Número', 'Fecha', 'Estado'].map(h => (
+                  {['Cédula', 'Nombre', 'Tipo', 'Prenda', 'Estampar', 'Talla', 'Número', 'Fecha', 'Estado'].map(h => (
                     <th key={h} className="text-left py-2 px-3 text-xs text-[#8B949E] font-medium">{h}</th>
                   ))}
                 </tr>
@@ -420,15 +420,7 @@ export default function Uniformes() {
                     <td className="py-2 px-3 text-[#8B949E]">{p.cedula}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.nombre}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.tipo}</td>
-                    <td className="py-2 px-3">
-                      {p.campeon === 'SI' || p.campeon === 'true' || p.campeon === true ? (
-                        <span className="flex items-center gap-1 text-[#F5A623]">
-                          <Trophy className="w-3 h-3" /> Sí
-                        </span>
-                      ) : (
-                        <span className="text-[#8B949E]">—</span>
-                      )}
-                    </td>
+                    <td className="py-2 px-3 text-[#E6EDF3]">{p.prenda || '—'}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.nombre_estampar || '—'}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.talla}</td>
                     <td className="py-2 px-3 text-[#E6EDF3] font-mono font-bold">{p.numero_estampar}</td>

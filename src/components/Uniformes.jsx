@@ -193,6 +193,8 @@ export default function Uniformes() {
   };
 
   const abrirEditar = (pedido) => {
+    // Debug: ver campos disponibles del pedido
+    console.log('[Uniformes] Pedido a editar:', pedido);
     // Parsear el string de prendas de vuelta a array de objetos
     const prendasStr = pedido.prendas || pedido.prenda || '';
     const prendasArray = prendasStr
@@ -250,9 +252,17 @@ export default function Uniformes() {
 
     const totalEdit = editForm.prendas.reduce((s, p) => s + p.precio, 0);
 
+    // Buscar el ID del pedido en varios campos posibles
+    const pedidoId = pedidoEditando.id ?? pedidoEditando._id ?? pedidoEditando.rowId ?? pedidoEditando.row_id;
+    if (!pedidoId) {
+      setEditError('No se encontró el ID del pedido. Revisá la consola del navegador (F12) para ver los campos disponibles.');
+      console.error('[Uniformes] El pedido no tiene campo "id". Campos disponibles:', Object.keys(pedidoEditando));
+      return;
+    }
+
     setGuardandoEdit(true);
     try {
-      const res = await authFetch(`${API_BASE}/uniforms/${pedidoEditando.id}?club_id=${CLUB_ID}`, {
+      const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}?club_id=${CLUB_ID}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -263,15 +273,19 @@ export default function Uniformes() {
           total: totalEdit,
         }),
       });
-      const data = await res.json();
-      if (data.success || res.ok) {
+
+      let data = {};
+      try { data = await res.json(); } catch (_) {}
+
+      if (res.ok || data.success) {
         await cargarDatos();
         cerrarEditar();
       } else {
-        setEditError(data.error || data.message || 'Error al actualizar el pedido.');
+        setEditError(data.error || data.message || `Error ${res.status}: no se pudo actualizar.`);
       }
     } catch (e) {
-      setEditError('Error de conexión. Intentá de nuevo.');
+      console.error('[Uniformes] Error en PUT:', e);
+      setEditError(`Error: ${e.message || 'No se pudo conectar con el servidor.'}`);
     } finally {
       setGuardandoEdit(false);
     }

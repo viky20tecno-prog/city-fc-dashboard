@@ -6,7 +6,7 @@ export default function PedidoUniforme() {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [form, setForm] = useState({
     cedula: '',
-    tipo: 'General',
+    tipo: 'Uniforme naranja',
     talla: 'M',
     nombre_estampar: '',
     numero_estampar: ''
@@ -42,10 +42,17 @@ export default function PedidoUniforme() {
   }, []);
 
   const tiposUniformes = [
-    { valor: 'General', precio: 90000 },
-    { valor: 'Campeones EVG/SAB', precio: 60000 },
-    { valor: 'Arqueros EVG/SAB', precio: 120000 },
-    { valor: 'Arqueros General', precio: 160000 }
+    { valor: 'Uniforme naranja', precio: 120000 },
+    { valor: 'Camiseta naranja', precio: 75000 },
+    { valor: 'Uniforme blanco', precio: 110000 },
+    { valor: 'Camiseta blanca', precio: 65000 },
+    { valor: 'Uniforme Portero', precio: 120000 },
+    { valor: 'Camiseta Portero', precio: 75000 },
+    { valor: 'Peto', precio: 44000 },
+    { valor: 'Pantaloneta', precio: 45000 },
+    { valor: 'Chaqueta', precio: 170000 },
+    { valor: 'Sudadera', precio: 115000 },
+    { valor: 'Medias', precio: 15000 },
   ];
 
   const tallas = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -81,7 +88,7 @@ export default function PedidoUniforme() {
       }
 
       setMessage({ type: 'success', text: `✅ Pedido guardado: ${data.pedido.nombre_estampar} #${data.pedido.numero_estampar}` });
-      setForm({ cedula: '', tipo: 'General', talla: 'M', nombre_estampar: '', numero_estampar: '' });
+      setForm({ cedula: '', tipo: 'Uniforme naranja', talla: 'M', nombre_estampar: '', numero_estampar: '' });
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (err) {
       setMessage({ type: 'error', text: 'Error al conectar con el servidor' });

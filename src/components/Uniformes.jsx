@@ -39,6 +39,8 @@ export default function Uniformes() {
   const [error, setError] = useState('');
   const [exito, setExito] = useState(false);
   const [pedidos, setPedidos] = useState([]);
+  const [tabPedidos, setTabPedidos] = useState('PENDIENTE');
+  const [cambiandoEstado, setCambiandoEstado] = useState(null);
   const [pedidoEditando, setPedidoEditando] = useState(null);
   const [editForm, setEditForm] = useState({ prendas: [], talla: '', numero: '', nombre_estampar: '' });
   const [editError, setEditError] = useState('');
@@ -189,6 +191,25 @@ export default function Uniformes() {
       setError('Error de conexión. Intentá de nuevo.');
     } finally {
       setEnviando(false);
+    }
+  };
+
+  const handleCambiarEstado = async (pedido, nuevoEstado) => {
+    const pedidoId = pedido.id ?? pedido._id ?? pedido.rowId ?? pedido.row_id;
+    if (!pedidoId) return;
+    setCambiandoEstado(pedidoId);
+    try {
+      const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}?club_id=${CLUB_ID}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: nuevoEstado }),
+      });
+      const data = await res.json();
+      if (res.ok || data.success) await cargarDatos();
+    } catch (e) {
+      console.error('[Uniformes] Error cambiando estado:', e);
+    } finally {
+      setCambiandoEstado(null);
     }
   };
 
@@ -515,55 +536,136 @@ export default function Uniformes() {
         </div>
       </div>
 
-      {pedidos.length > 0 && (
-        <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6">
-          <h3 className="text-sm font-bold text-[#F5F5F5] mb-4">Pedidos registrados — {pedidos.length}</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#1A3A5C]">
-                  {['Cédula', 'Nombre', 'Prendas', 'Estampar', 'Talla', 'Número', 'Total', 'Fecha', 'Estado', ''].map(h => (
-                    <th key={h} className="text-left py-2 px-3 text-xs text-[#737373] font-medium">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {pedidos.map((p, i) => (
-                  <tr key={i} className="border-b border-[#1A3A5C]/50 hover:bg-[#0F1F36] transition-colors">
-                    <td className="py-2 px-3 text-[#737373]">{p.cedula}</td>
-                    <td className="py-2 px-3 text-[#F5F5F5]">{p.nombre}</td>
-                    <td className="py-2 px-3 text-[#F5F5F5] max-w-[180px]">
-                      <span className="block truncate" title={p.prendas || p.prenda}>{p.prendas || p.prenda || '—'}</span>
-                    </td>
-                    <td className="py-2 px-3 text-[#F5F5F5]">{p.nombre_estampar || '—'}</td>
-                    <td className="py-2 px-3 text-[#F5F5F5]">{p.talla}</td>
-                    <td className="py-2 px-3 text-[#F5F5F5] font-mono font-bold">{p.numero_estampar}</td>
-                    <td className="py-2 px-3 text-[#00AAFF] font-semibold">
-                      {p.total ? `$${Number(p.total).toLocaleString('es-CO')}` : '—'}
-                    </td>
-                    <td className="py-2 px-3 text-[#737373] text-xs">{formatFecha(p.created_at)}</td>
-                    <td className="py-2 px-3">
-                      <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(245,166,35,0.12)] text-[#F5A623]">
-                        {p.estado}
-                      </span>
-                    </td>
-                    <td className="py-2 px-3">
-                      <button
-                        onClick={() => abrirEditar(p)}
-                        title="Editar pedido"
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#1A3A5C] text-[#737373] hover:text-[#00AAFF] hover:border-[#00AAFF]/40 hover:bg-[#00AAFF]/8 transition-all text-xs"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                        Editar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {pedidos.length > 0 && (() => {
+        const pendientes  = pedidos.filter(p => p.estado === 'PENDIENTE');
+        const pagados     = pedidos.filter(p => p.estado === 'PAGADO');
+        const entregados  = pedidos.filter(p => p.estado === 'ENTREGADO');
+        const vistaActual = tabPedidos === 'PENDIENTE' ? pendientes
+                          : tabPedidos === 'PAGADO'    ? pagados
+                          : entregados;
+
+        const TAB_CFG = [
+          { key: 'PENDIENTE', label: 'Pendientes', count: pendientes.length,
+            activeClass: 'bg-[rgba(245,166,35,0.12)] text-[#F5A623] border-[#F5A623]/30' },
+          { key: 'PAGADO',    label: 'Pagados',    count: pagados.length,
+            activeClass: 'bg-[rgba(34,197,94,0.12)] text-green-400 border-green-400/30' },
+          { key: 'ENTREGADO', label: 'Entregados', count: entregados.length,
+            activeClass: 'bg-[rgba(0,170,255,0.12)] text-[#00AAFF] border-[#00AAFF]/30' },
+        ];
+
+        return (
+          <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6">
+            {/* Tabs */}
+            <div className="flex items-center gap-2 mb-5">
+              {TAB_CFG.map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => setTabPedidos(t.key)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                    tabPedidos === t.key
+                      ? t.activeClass
+                      : 'border-[#1A3A5C] text-[#737373] hover:text-[#F5F5F5]'
+                  }`}
+                >
+                  {t.label}
+                  <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                    tabPedidos === t.key ? 'bg-white/10' : 'bg-[#0F1F36]'
+                  }`}>{t.count}</span>
+                </button>
+              ))}
+              <span className="ml-auto text-xs text-[#737373]">{pedidos.length} total</span>
+            </div>
+
+            {vistaActual.length === 0 ? (
+              <p className="text-center text-sm text-[#737373] py-8">
+                No hay pedidos en este estado
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-[#1A3A5C]">
+                      {['Cédula', 'Nombre', 'Prendas', 'Estampar', 'Talla', 'Número', 'Total', 'Fecha', 'Estado', ''].map(h => (
+                        <th key={h} className="text-left py-2 px-3 text-xs text-[#737373] font-medium">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {vistaActual.map((p, i) => {
+                      const pid = p.id ?? p._id;
+                      const cargando = cambiandoEstado === pid;
+                      return (
+                        <tr key={i} className="border-b border-[#1A3A5C]/50 hover:bg-[#0F1F36] transition-colors">
+                          <td className="py-2 px-3 text-[#737373]">{p.cedula}</td>
+                          <td className="py-2 px-3 text-[#F5F5F5]">{p.nombre}</td>
+                          <td className="py-2 px-3 text-[#F5F5F5] max-w-[180px]">
+                            <span className="block truncate" title={p.prendas || p.prenda}>{p.prendas || p.prenda || '—'}</span>
+                          </td>
+                          <td className="py-2 px-3 text-[#F5F5F5]">{p.nombre_estampar || '—'}</td>
+                          <td className="py-2 px-3 text-[#F5F5F5]">{p.talla}</td>
+                          <td className="py-2 px-3 text-[#F5F5F5] font-mono font-bold">{p.numero_estampar}</td>
+                          <td className="py-2 px-3 text-[#00AAFF] font-semibold">
+                            {p.total ? `$${Number(p.total).toLocaleString('es-CO')}` : '—'}
+                          </td>
+                          <td className="py-2 px-3 text-[#737373] text-xs">{formatFecha(p.created_at)}</td>
+                          <td className="py-2 px-3">
+                            {/* Badge de estado — clicable si hay siguiente estado */}
+                            {p.estado === 'PENDIENTE' && (
+                              <button
+                                onClick={() => handleCambiarEstado(p, 'PAGADO')}
+                                disabled={cargando}
+                                title="Marcar como Pagado"
+                                className="px-2 py-1 rounded-lg text-xs bg-[rgba(245,166,35,0.12)] text-[#F5A623] border border-[#F5A623]/20 hover:bg-[rgba(34,197,94,0.12)] hover:text-green-400 hover:border-green-400/20 transition-all disabled:opacity-50 cursor-pointer"
+                              >
+                                {cargando ? '...' : 'PENDIENTE'}
+                              </button>
+                            )}
+                            {p.estado === 'PAGADO' && (
+                              <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(34,197,94,0.12)] text-green-400 border border-green-400/20">
+                                PAGADO
+                              </span>
+                            )}
+                            {p.estado === 'ENTREGADO' && (
+                              <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(0,170,255,0.12)] text-[#00AAFF] border border-[#00AAFF]/20">
+                                ENTREGADO
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2 px-3">
+                            <div className="flex items-center gap-1.5">
+                              {p.estado === 'PAGADO' && (
+                                <button
+                                  onClick={() => handleCambiarEstado(p, 'ENTREGADO')}
+                                  disabled={cargando}
+                                  title="Marcar como Entregado"
+                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#00AAFF]/30 text-[#00AAFF] hover:bg-[rgba(0,170,255,0.1)] transition-all text-xs disabled:opacity-50"
+                                >
+                                  {cargando ? <Loader className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                                  Entregar
+                                </button>
+                              )}
+                              {p.estado !== 'ENTREGADO' && (
+                                <button
+                                  onClick={() => abrirEditar(p)}
+                                  title="Editar pedido"
+                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#1A3A5C] text-[#737373] hover:text-[#00AAFF] hover:border-[#00AAFF]/40 transition-all text-xs"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                  Editar
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Modal de edición */}
       {pedidoEditando && (

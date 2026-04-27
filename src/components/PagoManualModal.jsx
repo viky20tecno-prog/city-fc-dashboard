@@ -9,10 +9,17 @@ const CONCEPTOS = ['Mensualidad', 'Uniforme', 'Torneo', 'Otro'];
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Nequi', 'Daviplata', 'Consignación'];
 
 const UNIFORMES = [
-  { label: 'Campeones General', valor: 90000 },
-  { label: 'Campeones Solo EVG/SAB', valor: 60000 },
-  { label: 'Arqueros Campeones EVG/SAB', valor: 120000 },
-  { label: 'Arqueros General', valor: 160000 },
+  { label: 'Uniforme naranja',  valor: 120000 },
+  { label: 'Camiseta naranja',  valor: 75000  },
+  { label: 'Uniforme blanco',   valor: 110000 },
+  { label: 'Camiseta blanca',   valor: 65000  },
+  { label: 'Uniforme Portero',  valor: 120000 },
+  { label: 'Camiseta Portero',  valor: 75000  },
+  { label: 'Peto',              valor: 44000  },
+  { label: 'Pantaloneta',       valor: 45000  },
+  { label: 'Chaqueta',          valor: 170000 },
+  { label: 'Sudadera',          valor: 115000 },
+  { label: 'Medias',            valor: 15000  },
 ];
 
 const TORNEOS = [

@@ -49,14 +49,14 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#0C0C0C] flex items-center justify-center p-4">
         <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8 max-w-md text-center shadow-[0_0_40px_rgba(255,0,0,0.1)]">
           <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
             <Activity className="w-8 h-8 text-red-400" />
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Error de conexión</h2>
           <p className="text-gray-400 mb-4 text-sm">{error}</p>
-          <button onClick={refresh} className="px-4 py-2 bg-[#00D084] text-black rounded-xl text-sm font-medium hover:opacity-80 transition">
+          <button onClick={refresh} className="px-4 py-2 bg-[#F97316] text-white rounded-xl text-sm font-medium hover:opacity-80 transition">
             Reintentar
           </button>
         </div>
@@ -65,7 +65,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] bg-[radial-gradient(circle_at_20%_20%,rgba(0,208,132,0.08),transparent)]">
+    <div className="min-h-screen bg-[#0C0C0C] bg-[radial-gradient(circle_at_20%_20%,rgba(249,115,22,0.07),transparent)]">
 
       {/* HEADER */}
       <header className="bg-white/5 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
@@ -93,7 +93,7 @@ export default function Dashboard() {
               {/* Botón principal — abre formulario en nueva pestaña */}
               <button
                 onClick={handleOpenInscripcion}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-green-400/20 bg-green-400/10 text-sm text-green-400 hover:bg-green-400/20 transition"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-orange-400/20 bg-orange-400/10 text-sm text-orange-400 hover:bg-orange-400/20 transition"
               >
                 <Link2 className="w-4 h-4" />
                 <span className="hidden sm:inline">Registrarse</span>
@@ -106,7 +106,7 @@ export default function Dashboard() {
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-white/10 text-sm text-gray-400 hover:text-green-400 hover:border-green-400/20 transition"
               >
                 {linkCopied ? (
-                  <><Check className="w-4 h-4 text-green-400" /><span className="hidden sm:inline text-green-400 text-xs">¡Copiado!</span></>
+                  <><Check className="w-4 h-4 text-orange-400" /><span className="hidden sm:inline text-orange-400 text-xs">¡Copiado!</span></>
                 ) : (
                   <><Copy className="w-4 h-4" /><span className="hidden sm:inline text-xs">Copiar link</span></>
                 )}
@@ -140,7 +140,7 @@ export default function Dashboard() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all ${
                     active
-                      ? 'bg-green-500/10 text-green-400 shadow-[0_0_20px_rgba(0,208,132,0.2)]'
+                      ? 'bg-orange-500/10 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.2)]'
                       : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -159,7 +159,7 @@ export default function Dashboard() {
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <RefreshCw className="w-8 h-8 text-green-400 animate-spin" />
+            <RefreshCw className="w-8 h-8 text-orange-400 animate-spin" />
           </div>
         ) : (
           <div className="space-y-8">

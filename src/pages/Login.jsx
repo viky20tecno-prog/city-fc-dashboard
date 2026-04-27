@@ -29,12 +29,12 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0C0C0C] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
 
         {/* Logo / Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-[rgba(0,208,132,0.12)] border border-[#00D084]/20 flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-[rgba(249,115,22,0.12)] border border-[#F97316]/20 flex items-center justify-center mx-auto mb-4">
             <img src="/10894351.png" alt="Logo" className="w-10 h-10 object-contain rounded-xl" />
           </div>
           <h1 className="text-2xl font-bold text-white">ClubContable</h1>
@@ -61,7 +61,7 @@ export default function Login() {
                 placeholder="tu@email.com"
                 required
                 autoComplete="email"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#00D084] transition-colors"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#F97316] transition-colors"
               />
             </div>
 
@@ -74,14 +74,14 @@ export default function Login() {
                 placeholder="••••••••"
                 required
                 autoComplete="current-password"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#00D084] transition-colors"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#F97316] transition-colors"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#00D084] text-[#0D1117] text-sm font-bold hover:bg-[#00D084]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#F97316] text-white text-sm font-bold hover:bg-[#EA580C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Ingresando...</>

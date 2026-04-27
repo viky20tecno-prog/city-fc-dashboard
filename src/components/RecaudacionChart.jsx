@@ -59,11 +59,11 @@ export default function RecaudacionChart({ mensualidades }) {
     if (!active || !payload?.length) return null;
     const d = payload[0]?.payload;
     return (
-      <div className="bg-[#0f172a] border border-white/10 rounded-xl p-3.5 shadow-2xl min-w-[160px]">
+      <div className="bg-[#141414] border border-white/10 rounded-xl p-3.5 shadow-2xl min-w-[160px]">
         <p className="text-white font-semibold text-sm mb-2">{d?.mesCompleto}</p>
         <div className="space-y-1.5">
           <div className="flex justify-between gap-4 text-xs">
-            <span className="text-green-400">Pagado</span>
+            <span className="text-orange-400">Pagado</span>
             <span className="text-white font-medium">{fmtCOP(d?.pagado || 0)}</span>
           </div>
           <div className="flex justify-between gap-4 text-xs">
@@ -89,7 +89,7 @@ export default function RecaudacionChart({ mensualidades }) {
       <text
         x={x + width / 2}
         y={y - 5}
-        fill={d.pct >= 80 ? '#4ade80' : d.pct >= 50 ? '#facc15' : '#f87171'}
+        fill={d.pct >= 80 ? '#F97316' : d.pct >= 50 ? '#F59E0B' : '#EF4444'}
         textAnchor="middle"
         fontSize={10}
         fontWeight="600"
@@ -104,7 +104,7 @@ export default function RecaudacionChart({ mensualidades }) {
 
       {/* Glow */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-cyan-500/10 blur-2xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-yellow-500/10 blur-2xl" />
       </div>
 
       {/* Header */}
@@ -115,7 +115,7 @@ export default function RecaudacionChart({ mensualidades }) {
         </div>
         {/* Badge % global */}
         <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold border ${
-          pctGlobal >= 80 ? 'bg-green-500/10 border-green-500/30 text-green-400'
+          pctGlobal >= 80 ? 'bg-orange-500/10 border-orange-500/30 text-orange-400'
           : pctGlobal >= 50 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400'
           : 'bg-red-500/10 border-red-500/30 text-red-400'
         }`}>
@@ -127,7 +127,7 @@ export default function RecaudacionChart({ mensualidades }) {
       <div className="grid grid-cols-3 gap-3 mb-5 relative">
         <div className="bg-white/5 border border-white/8 rounded-xl p-3">
           <p className="text-xs text-gray-500 mb-1">Total recaudado</p>
-          <p className="text-green-400 font-bold text-sm">{fmtK(totalPagado)}</p>
+          <p className="text-orange-400 font-bold text-sm">{fmtK(totalPagado)}</p>
         </div>
         <div className="bg-white/5 border border-white/8 rounded-xl p-3">
           <p className="text-xs text-gray-500 mb-1">Por cobrar</p>
@@ -135,7 +135,7 @@ export default function RecaudacionChart({ mensualidades }) {
         </div>
         <div className="bg-white/5 border border-white/8 rounded-xl p-3">
           <p className="text-xs text-gray-500 mb-1">Mejor mes</p>
-          <p className="text-cyan-400 font-bold text-sm truncate">
+          <p className="text-yellow-400 font-bold text-sm truncate">
             {mejorMes ? `${mejorMes.mes} ${fmtK(mejorMes.pagado)}` : '—'}
           </p>
         </div>
@@ -147,16 +147,16 @@ export default function RecaudacionChart({ mensualidades }) {
           <ComposedChart data={data} barGap={4} margin={{ top: 20, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="gradPagado" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#00D084" stopOpacity={1} />
-                <stop offset="100%" stopColor="#00D084" stopOpacity={0.4} />
+                <stop offset="0%"   stopColor="#F97316" stopOpacity={1} />
+                <stop offset="100%" stopColor="#F97316" stopOpacity={0.4} />
               </linearGradient>
               <linearGradient id="gradPendiente" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#F5A623" stopOpacity={0.9} />
-                <stop offset="100%" stopColor="#F5A623" stopOpacity={0.3} />
+                <stop offset="0%"   stopColor="#F59E0B" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="#F59E0B" stopOpacity={0.3} />
               </linearGradient>
               <linearGradient id="gradPagadoActual" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#34d399" stopOpacity={1} />
-                <stop offset="100%" stopColor="#059669" stopOpacity={0.8} />
+                <stop offset="0%"   stopColor="#FB923C" stopOpacity={1} />
+                <stop offset="100%" stopColor="#EA580C" stopOpacity={0.9} />
               </linearGradient>
               {/* Filtro glow para mes actual */}
               <filter id="glow">
@@ -210,7 +210,7 @@ export default function RecaudacionChart({ mensualidades }) {
             <Line
               type="monotone"
               dataKey="pagado"
-              stroke="#00D084"
+              stroke="#F97316"
               strokeWidth={1.5}
               strokeDasharray="4 3"
               dot={false}
@@ -225,19 +225,19 @@ export default function RecaudacionChart({ mensualidades }) {
       {/* Leyenda manual */}
       <div className="flex items-center gap-5 mt-4 relative justify-center">
         <span className="flex items-center gap-1.5 text-xs text-gray-400">
-          <span className="w-3 h-3 rounded-sm bg-[#00D084] inline-block" />
+          <span className="w-3 h-3 rounded-sm bg-[#F97316] inline-block" />
           Pagado
         </span>
         <span className="flex items-center gap-1.5 text-xs text-gray-400">
-          <span className="w-3 h-3 rounded-sm bg-[#F5A623] inline-block opacity-80" />
+          <span className="w-3 h-3 rounded-sm bg-[#F59E0B] inline-block opacity-80" />
           Pendiente
         </span>
         <span className="flex items-center gap-1.5 text-xs text-gray-400">
-          <span className="w-5 border-t-2 border-dashed border-[#00D084] opacity-40 inline-block" />
+          <span className="w-5 border-t-2 border-dashed border-[#F97316] opacity-40 inline-block" />
           Tendencia
         </span>
-        <span className="flex items-center gap-1.5 text-xs text-cyan-400">
-          <span className="w-3 h-3 rounded-sm bg-[#34d399] inline-block" style={{ filter: 'blur(1px)' }} />
+        <span className="flex items-center gap-1.5 text-xs text-yellow-400">
+          <span className="w-3 h-3 rounded-sm bg-[#FB923C] inline-block" style={{ filter: 'blur(1px)' }} />
           Mes actual
         </span>
       </div>

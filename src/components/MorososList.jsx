@@ -129,11 +129,11 @@ export default function MorososList({ morosos }) {
     return (
       <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-green-500/10 blur-2xl" />
+          <div className="absolute inset-0 bg-orange-500/10 blur-2xl" />
         </div>
         <h2 className="text-lg font-semibold text-white mb-4">Morosos</h2>
         <div className="text-center py-10 text-gray-400">
-          <AlertCircle className="w-8 h-8 mx-auto mb-2 text-green-400" />
+          <AlertCircle className="w-8 h-8 mx-auto mb-2 text-orange-400" />
           ¡Sin morosos!
         </div>
       </div>
@@ -157,7 +157,7 @@ export default function MorososList({ morosos }) {
         {/* ✅ Botón exportar PDF */}
         <button
           onClick={() => exportarPDF(morosos)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#00D084]/30 bg-[rgba(0,208,132,0.08)] text-xs font-medium text-[#00D084] hover:bg-[rgba(0,208,132,0.15)] transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#F97316]/30 bg-[rgba(249,115,22,0.08)] text-xs font-medium text-[#F97316] hover:bg-[rgba(249,115,22,0.15)] transition-colors"
         >
           <FileDown className="w-3.5 h-3.5" />
           Exportar PDF
@@ -185,7 +185,7 @@ export default function MorososList({ morosos }) {
               <p className="font-semibold text-red-400 text-sm">{formatCOP(m.saldo_total)}</p>
               {m.celular && (
                 <a href={`https://wa.me/57${m.celular}`} target="_blank" rel="noopener noreferrer"
-                  className="text-xs text-gray-400 hover:text-green-400 inline-flex items-center gap-1 mt-1 transition">
+                  className="text-xs text-gray-400 hover:text-orange-400 inline-flex items-center gap-1 mt-1 transition">
                   <Phone className="w-3 h-3" />
                   {m.celular}
                 </a>

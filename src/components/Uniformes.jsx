@@ -199,170 +199,182 @@ export default function Uniformes() {
   const generarPDF = () => {
     setGenerandoPDF(true);
     try {
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      const W = doc.internal.pageSize.getWidth();
-      const fmtCOP = (n) => `$${Number(n || 0).toLocaleString('es-CO')}`;
-      const fecha  = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+      const doc   = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const W     = doc.internal.pageSize.getWidth();
+      const H     = doc.internal.pageSize.getHeight();
+      const M     = 12; // margen lateral
+      const COL_W = W - M * 2;
+
+      const fmtCOP  = (n) => `$${parseFloat(n || 0).toLocaleString('es-CO')}`;
+      const fecha   = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+      const trunc   = (s, max) => (s.length > max ? s.slice(0, max - 2) + '..' : s);
 
       const pendientes = pedidos.filter(p => p.estado === 'PENDIENTE');
       const pagados    = pedidos.filter(p => p.estado === 'PAGADO');
+      const entregados = pedidos.filter(p => p.estado === 'ENTREGADO');
 
-      // ── Utilidades de dibujo ────────────────────────────────────────────
+      // Leer prendas con todos los fallbacks posibles
+      const getPrendas = (p) =>
+        String(p.prendas || p.prenda || p.tipo_uniforme || p.tipo || '—');
+
+      // Columnas (A4 landscape = 297mm, margen 12 cada lado → 273mm útiles)
+      const C = {
+        cedula:  M,       // 22mm
+        nombre:  M + 22,  // 50mm
+        prendas: M + 72,  // 82mm  ← la más ancha
+        talla:   M + 154, // 14mm
+        numero:  M + 168, // 18mm
+        estampa: M + 186, // 30mm
+        total:   M + 216, // hasta el margen derecho
+      };
+
+      // ── Header ──────────────────────────────────────────────────────────
       const drawHeader = () => {
         doc.setFillColor(6, 12, 24);
-        doc.rect(0, 0, W, 22, 'F');
+        doc.rect(0, 0, W, 20, 'F');
         doc.setFillColor(0, 170, 255);
-        doc.rect(0, 22, W, 1.2, 'F');
+        doc.rect(0, 20, W, 1, 'F');
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(16);
+        doc.setFontSize(15);
         doc.setTextColor(255, 255, 255);
-        doc.text('CITY FC — Pedido de Uniformes', 14, 14);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(150, 170, 200);
-        doc.text(`Generado: ${fecha}`, W - 14, 14, { align: 'right' });
-      };
-
-      const drawSectionTitle = (title, yPos, color) => {
-        doc.setFillColor(...color);
-        doc.roundedRect(14, yPos, W - 28, 8, 2, 2, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(10);
-        doc.setTextColor(255, 255, 255);
-        doc.text(title, 18, yPos + 5.5);
-        return yPos + 12;
-      };
-
-      const COL = { cedula: 14, nombre: 38, prendas: 95, talla: 165, numero: 180, estampa: 197, total: 225 };
-      const COL_W = W - 28;
-
-      const drawTableHeader = (yPos) => {
-        doc.setFillColor(15, 31, 54);
-        doc.rect(14, yPos, COL_W, 7, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(7.5);
-        doc.setTextColor(115, 115, 115);
-        const headers = [
-          [COL.cedula, 'CÉDULA'],
-          [COL.nombre,  'NOMBRE'],
-          [COL.prendas, 'PRENDAS'],
-          [COL.talla,   'TALLA'],
-          [COL.numero,  'NÚM.'],
-          [COL.estampa, 'ESTAMPA'],
-          [COL.total,   'TOTAL'],
-        ];
-        headers.forEach(([x, label]) => doc.text(label, x, yPos + 4.8));
-        return yPos + 7;
-      };
-
-      const drawRow = (p, yPos, isOdd) => {
-        const rowH = 9;
-        doc.setFillColor(isOdd ? 10 : 15, isOdd ? 22 : 31, isOdd ? 40 : 54);
-        doc.rect(14, yPos, COL_W, rowH, 'F');
-
+        doc.text('CITY FC  --  Pedido de Uniformes', M, 13);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
-        doc.setTextColor(200, 215, 230);
+        doc.setTextColor(130, 160, 200);
+        doc.text(`Generado: ${fecha}`, W - M, 13, { align: 'right' });
+      };
 
-        const mid = yPos + 6;
-        doc.text(String(p.cedula || ''), COL.cedula, mid);
-        // Nombre truncado
-        const nombre = String(p.nombre || '');
-        doc.text(nombre.length > 22 ? nombre.slice(0, 21) + '…' : nombre, COL.nombre, mid);
-        // Prendas truncadas
-        const prendas = String(p.prendas || p.prenda || '');
-        doc.text(prendas.length > 32 ? prendas.slice(0, 31) + '…' : prendas, COL.prendas, mid);
-        doc.text(String(p.talla || ''), COL.talla, mid);
-        doc.text(String(p.numero_estampar || ''), COL.numero, mid);
-        doc.text(String(p.nombre_estampar || '—'), COL.estampa, mid);
-        // Total en azul
-        doc.setTextColor(0, 170, 255);
+      // ── Titulo de seccion ────────────────────────────────────────────────
+      const drawSection = (label, count, y, rgb) => {
+        doc.setFillColor(...rgb);
+        doc.rect(M, y, COL_W, 9, 'F');
         doc.setFont('helvetica', 'bold');
-        doc.text(fmtCOP(p.total), COL.total, mid);
+        doc.setFontSize(9.5);
+        doc.setTextColor(255, 255, 255);
+        doc.text(`${label}  (${count})`, M + 3, y + 6.2);
+        return y + 13;
+      };
+
+      // ── Cabecera de tabla ────────────────────────────────────────────────
+      const drawTableHead = (y) => {
+        doc.setFillColor(15, 31, 54);
+        doc.rect(M, y, COL_W, 6.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(100, 130, 160);
+        [
+          [C.cedula,  'CEDULA'],
+          [C.nombre,  'NOMBRE'],
+          [C.prendas, 'PRENDAS'],
+          [C.talla,   'TALLA'],
+          [C.numero,  'NUM.'],
+          [C.estampa, 'ESTAMPA'],
+          [C.total,   'TOTAL'],
+        ].forEach(([x, h]) => doc.text(h, x, y + 4.5));
+        return y + 6.5;
+      };
+
+      // ── Fila de datos ────────────────────────────────────────────────────
+      const drawRow = (p, y, odd) => {
+        const rH = 8.5;
+        doc.setFillColor(odd ? 10 : 16, odd ? 21 : 30, odd ? 38 : 52);
+        doc.rect(M, y, COL_W, rH, 'F');
+
         doc.setFont('helvetica', 'normal');
-        doc.setTextColor(200, 215, 230);
+        doc.setFontSize(7.8);
+        doc.setTextColor(190, 210, 230);
+        const mid = y + 5.8;
 
-        return yPos + rowH;
-      };
+        doc.text(trunc(String(p.cedula || ''), 14),        C.cedula,  mid);
+        doc.text(trunc(String(p.nombre  || '—'), 26),      C.nombre,  mid);
+        doc.text(trunc(getPrendas(p), 44),                 C.prendas, mid);
+        doc.text(String(p.talla          || '—'),          C.talla,   mid);
+        doc.text(String(p.numero_estampar || '—'),         C.numero,  mid);
+        doc.text(trunc(String(p.nombre_estampar || '—'), 16), C.estampa, mid);
 
-      const drawTotal = (lista, yPos) => {
-        const total = lista.reduce((s, p) => s + Number(p.total || 0), 0);
-        doc.setFillColor(0, 50, 100);
-        doc.rect(14, yPos, COL_W, 8, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8.5);
-        doc.setTextColor(200, 215, 230);
-        doc.text(`${lista.length} pedido${lista.length !== 1 ? 's' : ''}`, 18, yPos + 5.5);
         doc.setTextColor(0, 170, 255);
-        doc.text(`Total: ${fmtCOP(total)}`, W - 14, yPos + 5.5, { align: 'right' });
-        return yPos + 11;
+        doc.setFont('helvetica', 'bold');
+        doc.text(fmtCOP(p.total), C.total, mid);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(190, 210, 230);
+
+        return y + rH;
       };
 
-      const checkPage = (doc, y, needed = 15) => {
-        if (y + needed > doc.internal.pageSize.getHeight() - 10) {
-          doc.addPage();
-          drawHeader();
-          return 30;
-        }
+      // ── Pie de tabla ─────────────────────────────────────────────────────
+      const drawFoot = (lista, y) => {
+        const tot = lista.reduce((s, p) => s + parseFloat(p.total || 0), 0);
+        doc.setFillColor(5, 30, 60);
+        doc.rect(M, y, COL_W, 7.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(160, 190, 220);
+        doc.text(`${lista.length} pedido${lista.length !== 1 ? 's' : ''}`, M + 3, y + 5.2);
+        doc.setTextColor(0, 200, 255);
+        doc.text(`Total: ${fmtCOP(tot)}`, W - M, y + 5.2, { align: 'right' });
+        return y + 10;
+      };
+
+      // ── Salto de pagina si no cabe ───────────────────────────────────────
+      const chk = (y, need = 14) => {
+        if (y + need > H - 10) { doc.addPage(); drawHeader(); return 26; }
         return y;
       };
 
-      // ── Página 1 ────────────────────────────────────────────────────────
+      // ── Bloque completo por estado ───────────────────────────────────────
+      const drawBlock = (lista, label, y, rgb, emptyMsg) => {
+        y = chk(y, 30);
+        y = drawSection(label, lista.length, y, rgb);
+        if (lista.length === 0) {
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(8);
+          doc.setTextColor(100, 120, 150);
+          doc.text(emptyMsg, M + 3, y + 5);
+          return y + 12;
+        }
+        y = drawTableHead(y);
+        lista.forEach((p, i) => { y = chk(y); y = drawRow(p, y, i % 2 === 0); });
+        y = drawFoot(lista, y);
+        return y + 5;
+      };
+
+      // ── RESUMEN SUPERIOR ─────────────────────────────────────────────────
       drawHeader();
-      let y = 30;
+      let y = 26;
 
-      // Resumen rápido
-      doc.setFillColor(10, 22, 40);
-      doc.roundedRect(14, y, (COL_W / 2) - 4, 16, 2, 2, 'F');
-      doc.roundedRect(14 + COL_W / 2, y, (COL_W / 2) - 4, 16, 2, 2, 'F');
+      const cardW = (COL_W - 8) / 3;
+      const cards = [
+        { label: 'Pendientes de pago',           count: pendientes.length, rgb: [245, 158, 11] },
+        { label: 'Pagados · pendientes de entrega', count: pagados.length, rgb: [34, 197, 94]  },
+        { label: 'Entregados',                   count: entregados.length, rgb: [0, 170, 255]  },
+      ];
+      cards.forEach((c, i) => {
+        const cx = M + i * (cardW + 4);
+        doc.setFillColor(10, 22, 40);
+        doc.roundedRect(cx, y, cardW, 16, 2, 2, 'F');
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+        doc.setTextColor(110, 130, 160);
+        doc.text(c.label, cx + 3, y + 6);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(17);
+        doc.setTextColor(...c.rgb);
+        doc.text(String(c.count), cx + 3, y + 14);
+      });
+      y += 20;
 
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(115, 115, 115);
-      doc.text('Pendientes de pago', 18, y + 6);
-      doc.text('Pagados · pendientes de entrega', 18 + COL_W / 2, y + 6);
+      // ── LAS TRES SECCIONES ───────────────────────────────────────────────
+      y = drawBlock(pendientes, 'PENDIENTES DE PAGO',             y, [160, 90, 0],   'Sin pedidos pendientes de pago.');
+      y = drawBlock(pagados,    'PAGADOS  -  PENDIENTES DE ENTREGA', y, [0, 110, 55], 'Sin pedidos pagados pendientes de entrega.');
+          drawBlock(entregados, 'ENTREGADOS',                     y, [0, 100, 180],  'Sin pedidos entregados aun.');
 
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(18);
-      doc.setTextColor(245, 158, 11);
-      doc.text(String(pendientes.length), 18, y + 14);
-      doc.setTextColor(34, 197, 94);
-      doc.text(String(pagados.length), 18 + COL_W / 2, y + 14);
-      y += 22;
-
-      // ── Sección PENDIENTES ───────────────────────────────────────────────
-      if (pendientes.length > 0) {
-        y = checkPage(doc, y, 30);
-        y = drawSectionTitle(`⏳  PENDIENTES DE PAGO (${pendientes.length})`, y, [180, 100, 0]);
-        y = drawTableHeader(y);
-        pendientes.forEach((p, i) => { y = checkPage(doc, y); y = drawRow(p, y, i % 2 === 0); });
-        y = drawTotal(pendientes, y);
-        y += 6;
-      } else {
-        y = checkPage(doc, y, 12);
-        doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.setTextColor(115, 115, 115);
-        doc.text('Sin pedidos pendientes de pago.', 18, y + 6);
-        y += 14;
-      }
-
-      // ── Sección PAGADOS ──────────────────────────────────────────────────
-      y = checkPage(doc, y, 30);
-      if (pagados.length > 0) {
-        y = drawSectionTitle(`✅  PAGADOS · PENDIENTES DE ENTREGA (${pagados.length})`, y, [0, 100, 50]);
-        y = drawTableHeader(y);
-        pagados.forEach((p, i) => { y = checkPage(doc, y); y = drawRow(p, y, i % 2 === 0); });
-        drawTotal(pagados, y);
-      } else {
-        doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.setTextColor(115, 115, 115);
-        doc.text('Sin pedidos pagados pendientes de entrega.', 18, y + 6);
-      }
-
-      // ── Footer ───────────────────────────────────────────────────────────
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
+      // ── FOOTER ───────────────────────────────────────────────────────────
+      const pages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pages; i++) {
         doc.setPage(i);
         doc.setFillColor(6, 12, 24);
-        doc.rect(0, doc.internal.pageSize.getHeight() - 8, W, 8, 'F');
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(80, 100, 130);
-        doc.text('City FC — Agente Contable', 14, doc.internal.pageSize.getHeight() - 2.5);
-        doc.text(`Pág. ${i} / ${pageCount}`, W - 14, doc.internal.pageSize.getHeight() - 2.5, { align: 'right' });
+        doc.rect(0, H - 7, W, 7, 'F');
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(70, 95, 130);
+        doc.text('City FC  --  Agente Contable', M, H - 2.2);
+        doc.text(`Pag. ${i} / ${pages}`, W - M, H - 2.2, { align: 'right' });
       }
 
       doc.save(`city-fc-uniformes-${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -754,7 +766,7 @@ export default function Uniformes() {
                 <span className="text-xs text-[#737373]">{pedidos.length} total</span>
                 <button
                   onClick={generarPDF}
-                  disabled={generandoPDF || (pendientes.length === 0 && pagados.length === 0)}
+                  disabled={generandoPDF || pedidos.length === 0}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[rgba(0,170,255,0.1)] border border-[#00AAFF]/30 text-[#00AAFF] text-xs font-medium hover:bg-[rgba(0,170,255,0.18)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {generandoPDF

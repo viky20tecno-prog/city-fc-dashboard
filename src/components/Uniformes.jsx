@@ -419,7 +419,7 @@ export default function Uniformes() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#30363D]">
-                  {['Cédula', 'Nombre', 'Prenda', 'Estampar', 'Talla', 'Número', 'Fecha', 'Estado'].map(h => (
+                  {['Cédula', 'Nombre', 'Prendas', 'Estampar', 'Talla', 'Número', 'Total', 'Fecha', 'Estado'].map(h => (
                     <th key={h} className="text-left py-2 px-3 text-xs text-[#8B949E] font-medium">{h}</th>
                   ))}
                 </tr>
@@ -429,10 +429,13 @@ export default function Uniformes() {
                   <tr key={i} className="border-b border-[#30363D]/50 hover:bg-[#1E2530] transition-colors">
                     <td className="py-2 px-3 text-[#8B949E]">{p.cedula}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.nombre}</td>
-                    <td className="py-2 px-3 text-[#E6EDF3]">{p.prenda || '—'}</td>
+                    <td className="py-2 px-3 text-[#E6EDF3]">{p.prendas || p.prenda || '—'}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.nombre_estampar || '—'}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.talla}</td>
                     <td className="py-2 px-3 text-[#E6EDF3] font-mono font-bold">{p.numero_estampar}</td>
+                    <td className="py-2 px-3 text-[#00D084] font-semibold">
+                      {p.total ? `$${Number(p.total).toLocaleString('es-CO')}` : '—'}
+                    </td>
                     <td className="py-2 px-3 text-[#8B949E] text-xs">{formatFecha(p.created_at)}</td>
                     <td className="py-2 px-3">
                       <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(245,166,35,0.12)] text-[#F5A623]">

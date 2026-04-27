@@ -1,6 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
-import { Shirt, CheckCircle, AlertCircle, Search, Loader, Trophy, X } from 'lucide-react';
+import { Shirt, CheckCircle, AlertCircle, Search, Loader, X } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
+
+const PRENDAS = [
+  { valor: 'Uniforme naranja',  precio: 120000 },
+  { valor: 'Camiseta naranja',  precio: 75000  },
+  { valor: 'Uniforme blanco',   precio: 110000 },
+  { valor: 'Camiseta blanca',   precio: 65000  },
+  { valor: 'Uniforme Portero',  precio: 120000 },
+  { valor: 'Camiseta Portero',  precio: 75000  },
+  { valor: 'Peto',              precio: 44000  },
+  { valor: 'Pantaloneta',       precio: 45000  },
+  { valor: 'Chaqueta',          precio: 170000 },
+  { valor: 'Sudadera',          precio: 115000 },
+  { valor: 'Medias',            precio: 15000  },
+];
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 const CLUB_ID = 'city-fc';
@@ -11,7 +25,7 @@ export default function Uniformes() {
     cedula: '',
     nombre: '',
     tipo: '',
-    campeon: false,
+    prenda: '',
     nombre_estampar: '',
     talla: '',
     numero: '',
@@ -103,7 +117,7 @@ export default function Uniformes() {
     setMostrarSugerencias(false);
     setJugadorEncontrado(null);
     setStep(1);
-    setForm({ cedula: '', nombre: '', tipo: '', campeon: false, nombre_estampar: '', talla: '', numero: '' });
+    setForm({ cedula: '', nombre: '', tipo: '', prenda: '', nombre_estampar: '', talla: '', numero: '' });
     setError('');
   };
 
@@ -116,7 +130,7 @@ export default function Uniformes() {
 
   const handleSubmit = async () => {
     setError('');
-    if (!form.tipo || !form.talla || !form.numero) {
+    if (!form.tipo || !form.prenda || !form.talla || !form.numero) {
       setError('Completá todos los campos obligatorios.');
       return;
     }
@@ -133,7 +147,6 @@ export default function Uniformes() {
         body: JSON.stringify({
           ...form,
           numero: numeroPadded,
-          campeon: form.campeon,
           club_id: CLUB_ID,
         }),
       });
@@ -275,7 +288,7 @@ export default function Uniformes() {
 
               <div>
                 <label className="block text-xs text-[#8B949E] mb-1.5">Tipo de jugador *</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {['Jugador', 'Portero'].map(t => (
                     <button
                       key={t}
@@ -289,24 +302,27 @@ export default function Uniformes() {
                       {t}
                     </button>
                   ))}
-                  <button
-                    onClick={() => setForm(f => ({ ...f, campeon: !f.campeon }))}
-                    className={`py-2.5 rounded-xl text-sm font-medium border transition-colors flex items-center justify-center gap-1.5 ${
-                      form.campeon
-                        ? 'bg-[rgba(245,166,35,0.15)] border-[#F5A623]/50 text-[#F5A623]'
-                        : 'bg-[#0D1117] border-[#30363D] text-[#8B949E] hover:text-[#E6EDF3]'
-                    }`}
-                  >
-                    <Trophy className="w-3.5 h-3.5" />
-                    Campeón
-                  </button>
                 </div>
-                {form.campeon && (
-                  <div className="mt-2 flex items-center gap-2 p-2.5 rounded-lg bg-[rgba(245,166,35,0.08)] border border-[#F5A623]/20">
-                    <Trophy className="w-3.5 h-3.5 text-[#F5A623] flex-shrink-0" />
-                    <p className="text-xs text-[#F5A623]">Descuento de campeón aplicado al precio del uniforme</p>
-                  </div>
-                )}
+              </div>
+
+              <div>
+                <label className="block text-xs text-[#8B949E] mb-1.5">Prenda *</label>
+                <div className="grid grid-cols-1 gap-2">
+                  {PRENDAS.map(p => (
+                    <button
+                      key={p.valor}
+                      onClick={() => setForm(f => ({ ...f, prenda: p.valor }))}
+                      className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                        form.prenda === p.valor
+                          ? 'bg-[rgba(0,208,132,0.12)] border-[#00D084]/50 text-[#00D084]'
+                          : 'bg-[#0D1117] border-[#30363D] text-[#8B949E] hover:text-[#E6EDF3]'
+                      }`}
+                    >
+                      <span>{p.valor}</span>
+                      <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
@@ -371,7 +387,7 @@ export default function Uniformes() {
 
               <button
                 onClick={handleSubmit}
-                disabled={!form.tipo || !form.talla || !form.numero || enviando || !numeroValido}
+                disabled={!form.tipo || !form.prenda || !form.talla || !form.numero || enviando || !numeroValido}
                 className="w-full py-3 rounded-xl bg-[#00D084] text-[#0D1117] text-sm font-bold hover:bg-[#00D084]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {enviando ? (

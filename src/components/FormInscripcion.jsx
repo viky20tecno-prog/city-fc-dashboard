@@ -24,11 +24,11 @@ const CAMPOS = [
 ];
 
 const SECCIONES = [
-  { id: 'personal', label: 'Datos personales', color: '#00D084' },
-  { id: 'contacto', label: 'Contacto', color: '#4A9EFF' },
-  { id: 'medica', label: 'Datos adicionales', color: '#F5A623' },
-  { id: 'residencia', label: 'Lugar de residencia', color: '#C678FF' },
-  { id: 'emergencia', label: 'Emergencia', color: '#FF5E5E' },
+  { id: 'personal',   label: 'Datos personales',      color: '#00AAFF' },
+  { id: 'contacto',   label: 'Contacto',              color: '#00D4FF' },
+  { id: 'medica',     label: 'Datos adicionales',     color: '#F59E0B' },
+  { id: 'residencia', label: 'Lugar de residencia',   color: '#C678FF' },
+  { id: 'emergencia', label: 'Emergencia',            color: '#EF4444' },
 ];
 
 export default function FormInscripcion() {
@@ -49,7 +49,6 @@ export default function FormInscripcion() {
       return;
     }
 
-    // Validar campos obligatorios
     const faltantes = CAMPOS.filter(c => c.required && !form[c.key]?.toString().trim());
     if (faltantes.length > 0) {
       setStatus('error');
@@ -82,7 +81,6 @@ export default function FormInscripcion() {
     }
 
     try {
-      // ✅ Llama directamente a la API en lugar de Apps Script
       const res = await fetch(`${API_BASE_URL}/inscripcion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -114,38 +112,42 @@ export default function FormInscripcion() {
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen bg-[#060C18] flex items-center justify-center p-4">
-        <div className="bg-[#161B22] rounded-3xl border border-[#30363D] p-8 max-w-md w-full text-center">
-          <div className="w-20 h-20 rounded-full bg-[rgba(0,208,132,0.12)] flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-[#00D084]" />
+      <div className="min-h-screen bg-[#060C18] flex items-center justify-center p-4"
+        style={{ backgroundImage: 'radial-gradient(ellipse at 20% 50%, rgba(0,100,255,0.08) 0%, transparent 55%), radial-gradient(ellipse at 80% 10%, rgba(0,180,255,0.06) 0%, transparent 45%)' }}>
+        <div className="bg-[#0A1628] rounded-3xl border border-[#1A3A5C] p-8 max-w-md w-full text-center shadow-[0_8px_40px_rgba(0,50,150,0.3)]">
+          <div className="w-20 h-20 rounded-full bg-[rgba(0,170,255,0.12)] border border-[#00AAFF]/20 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-10 h-10 text-[#00AAFF]" />
           </div>
-          <h2 className="text-2xl font-bold text-[#E6EDF3] mb-3">¡Inscripción exitosa! ⚽</h2>
-          <p className="text-[#8B949E] mb-2">
-            Bienvenido a <span className="font-semibold text-[#00D084]">City FC</span>
+          <h2 className="text-2xl font-bold text-[#F5F5F5] mb-3">¡Inscripción exitosa!</h2>
+          <p className="text-[#737373] mb-2">
+            Bienvenido a <span className="font-semibold text-[#00AAFF]">City FC</span>
           </p>
-          <div className="bg-[rgba(0,208,132,0.08)] rounded-2xl p-4 mt-6 text-left border border-[#00D084]/20">
-            <p className="text-sm text-[#00D084] font-medium mb-2">🎯 ¿Qué sigue?</p>
-            <ul className="text-sm text-[#E6EDF3] space-y-1">
-              <li>✅ Tu registro ha sido procesado correctamente</li>
-              <li>📱 Recibirás un mensaje de bienvenida por WhatsApp</li>
-              <li>⚽ ¡Ya eres parte del equipo!</li>
+          <div className="bg-[rgba(0,170,255,0.08)] rounded-2xl p-4 mt-6 text-left border border-[#00AAFF]/20">
+            <p className="text-sm text-[#00AAFF] font-medium mb-2">¿Qué sigue?</p>
+            <ul className="text-sm text-[#F5F5F5] space-y-1.5">
+              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#00AAFF] flex-shrink-0" />Tu registro ha sido procesado correctamente</li>
+              <li className="flex items-center gap-2"><span className="w-4 h-4 flex-shrink-0 text-center text-xs">📱</span>Recibirás un mensaje de bienvenida por WhatsApp</li>
+              <li className="flex items-center gap-2"><span className="w-4 h-4 flex-shrink-0 text-center text-xs">⚽</span>¡Ya eres parte del equipo!</li>
             </ul>
           </div>
-          <p className="text-xs text-[#8B949E] mt-6">Te contactaremos por WhatsApp con los detalles de tu primer pago</p>
+          <p className="text-xs text-[#737373] mt-6">Te contactaremos por WhatsApp con los detalles de tu primer pago</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#060C18] flex items-center justify-center p-4 py-8">
-      <div className="bg-[#161B22] rounded-3xl border border-[#30363D] p-8 max-w-lg w-full">
+    <div className="min-h-screen bg-[#060C18] flex items-center justify-center p-4 py-8"
+      style={{ backgroundImage: 'radial-gradient(ellipse at 15% 40%, rgba(0,100,255,0.10) 0%, transparent 55%), radial-gradient(ellipse at 85% 10%, rgba(0,180,255,0.07) 0%, transparent 45%), radial-gradient(ellipse at 50% 90%, rgba(0,60,180,0.06) 0%, transparent 40%)' }}>
+      <div className="bg-[#0A1628] rounded-3xl border border-[#1A3A5C] p-8 max-w-lg w-full shadow-[0_8px_40px_rgba(0,50,150,0.25),0_0_0_1px_rgba(0,170,255,0.06)]">
+
+        {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00D084] to-[#00D084]/60 flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-[rgba(0,170,255,0.12)] border border-[#00AAFF]/20 flex items-center justify-center mx-auto mb-4 shadow-[0_0_24px_rgba(0,170,255,0.2)]">
             <span className="text-3xl">⚽</span>
           </div>
-          <h1 className="text-2xl font-bold text-[#E6EDF3]">Únete a City FC</h1>
-          <p className="text-[#8B949E] mt-2">Llena tus datos para inscribirte al club</p>
+          <h1 className="text-2xl font-bold text-[#F5F5F5]">Únete a City FC</h1>
+          <p className="text-[#737373] mt-2 text-sm">Completa tus datos para inscribirte al club</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -156,26 +158,27 @@ export default function FormInscripcion() {
 
           {SECCIONES.map(seccion => (
             <div key={seccion.id}>
-              <div className="border-b border-[#30363D] pb-2 mb-2 pt-4 first:pt-0">
+              <div className="flex items-center gap-2 border-b border-[#1A3A5C] pb-2 mb-3 pt-4 first:pt-0">
+                <span className="w-1.5 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: seccion.color }} />
                 <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: seccion.color }}>
                   {seccion.label}
                 </p>
               </div>
               {CAMPOS.filter(c => c.section === seccion.id).map(campo => (
-                <FormField key={campo.key} campo={campo} form={form} onChange={handleChange} />
+                <FormField key={campo.key} campo={campo} form={form} onChange={handleChange} sectionColor={seccion.color} />
               ))}
             </div>
           ))}
 
           {status === 'error' && (
-            <div className="flex items-start gap-2 p-3 bg-[rgba(255,94,94,0.12)] rounded-xl text-sm text-[#FF5E5E] border border-[#FF5E5E]/20">
+            <div className="flex items-start gap-2 p-3 bg-[rgba(239,68,68,0.12)] rounded-xl text-sm text-[#EF4444] border border-[#EF4444]/20">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               {errorMsg}
             </div>
           )}
 
           <button type="submit" disabled={status === 'loading'}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#060C18] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6">
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#00AAFF] text-[#060C18] rounded-xl font-bold text-sm hover:bg-[#00AAFF]/85 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6 shadow-[0_4px_20px_rgba(0,170,255,0.3)]">
             {status === 'loading' ? (
               <><Loader2 className="w-4 h-4 animate-spin" />Registrando...</>
             ) : (
@@ -184,7 +187,7 @@ export default function FormInscripcion() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-[#8B949E] mt-6">
+        <p className="text-center text-xs text-[#737373] mt-6">
           Al inscribirte serás parte oficial del club ⚽
         </p>
       </div>
@@ -192,15 +195,17 @@ export default function FormInscripcion() {
   );
 }
 
-function FormField({ campo, form, onChange }) {
+function FormField({ campo, form, onChange, sectionColor }) {
+  const inputClass = "w-full px-4 py-3 rounded-xl bg-[#060C18] border border-[#1A3A5C] text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[#00AAFF] focus:ring-1 focus:ring-[#00AAFF]/30 transition-colors";
+
   if (campo.type === 'select') {
     return (
       <div className="mt-3">
-        <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
-          {campo.label} {campo.required && <span className="text-[#FF5E5E]">*</span>}
+        <label className="block text-sm font-medium text-[#F5F5F5] mb-1">
+          {campo.label} {campo.required && <span className="text-[#EF4444]">*</span>}
         </label>
         <select value={form[campo.key] || ''} onChange={e => onChange(campo.key, e.target.value)} required={campo.required}
-          className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084] transition-colors">
+          className={inputClass}>
           <option value="">Seleccionar...</option>
           {campo.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
@@ -210,12 +215,12 @@ function FormField({ campo, form, onChange }) {
 
   return (
     <div className="mt-3">
-      <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
-        {campo.label} {campo.required && <span className="text-[#FF5E5E]">*</span>}
+      <label className="block text-sm font-medium text-[#F5F5F5] mb-1">
+        {campo.label} {campo.required && <span className="text-[#EF4444]">*</span>}
       </label>
       <input type={campo.type} placeholder={campo.placeholder} value={form[campo.key] || ''}
         onChange={e => onChange(campo.key, e.target.value)} required={campo.required}
-        className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084] transition-colors" />
+        className={inputClass} />
     </div>
   );
 }

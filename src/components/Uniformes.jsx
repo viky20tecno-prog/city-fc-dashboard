@@ -200,11 +200,11 @@ export default function Uniformes() {
   return (
     <div className="space-y-6">
       <div className="max-w-xl mx-auto">
-        <div className="bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6">
+        <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6">
 
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-[rgba(249,115,22,0.12)] flex items-center justify-center">
-              <Shirt className="w-5 h-5 text-[#F97316]" />
+            <div className="w-10 h-10 rounded-xl bg-[rgba(0,170,255,0.12)] flex items-center justify-center">
+              <Shirt className="w-5 h-5 text-[#00AAFF]" />
             </div>
             <div>
               <h2 className="text-lg font-bold text-[#F5F5F5]">Pedido de Uniforme</h2>
@@ -215,9 +215,9 @@ export default function Uniformes() {
           </div>
 
           {exito && (
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-[rgba(249,115,22,0.12)] border border-[#F97316]/30 mb-6">
-              <CheckCircle className="w-5 h-5 text-[#F97316]" />
-              <p className="text-sm text-[#F97316] font-medium">¡Pedido registrado exitosamente!</p>
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-[rgba(0,170,255,0.12)] border border-[#00AAFF]/30 mb-6">
+              <CheckCircle className="w-5 h-5 text-[#00AAFF]" />
+              <p className="text-sm text-[#00AAFF] font-medium">¡Pedido registrado exitosamente!</p>
             </div>
           )}
 
@@ -241,7 +241,7 @@ export default function Uniformes() {
                     onChange={handleBusquedaChange}
                     onFocus={() => busqueda.trim().length >= 2 && setMostrarSugerencias(true)}
                     placeholder="Nombre, apellido o cédula..."
-                    className="w-full bg-[#0D1117] border border-[#2A3655] rounded-xl pl-10 pr-10 py-2.5 text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[#F97316] transition-colors"
+                    className="w-full bg-[#060C18] border border-[#1A3A5C] rounded-xl pl-10 pr-10 py-2.5 text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[#00AAFF] transition-colors"
                   />
                   {busqueda && (
                     <button
@@ -255,15 +255,15 @@ export default function Uniformes() {
 
                 {/* Dropdown de sugerencias */}
                 {mostrarSugerencias && sugerencias.length > 0 && (
-                  <div className="absolute z-20 w-full mt-1 bg-[#1E2740] border border-[#2A3655] rounded-xl shadow-xl overflow-hidden">
+                  <div className="absolute z-20 w-full mt-1 bg-[#0F1F36] border border-[#1A3A5C] rounded-xl shadow-xl overflow-hidden">
                     {sugerencias.map((j) => (
                       <button
                         key={j.cedula}
                         onClick={() => seleccionarJugador(j)}
-                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#2D3748] transition-colors text-left border-b border-[#2A3655]/50 last:border-0"
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#2D3748] transition-colors text-left border-b border-[#1A3A5C]/50 last:border-0"
                       >
-                        <div className="w-8 h-8 rounded-full bg-[rgba(249,115,22,0.12)] flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs font-bold text-[#F97316]">
+                        <div className="w-8 h-8 rounded-full bg-[rgba(0,170,255,0.12)] flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-bold text-[#00AAFF]">
                             {(j.nombre || '?')[0].toUpperCase()}
                           </span>
                         </div>
@@ -277,7 +277,7 @@ export default function Uniformes() {
                 )}
 
                 {mostrarSugerencias && sugerencias.length === 0 && busqueda.trim().length >= 2 && (
-                  <div className="absolute z-20 w-full mt-1 bg-[#1E2740] border border-[#2A3655] rounded-xl px-4 py-3">
+                  <div className="absolute z-20 w-full mt-1 bg-[#0F1F36] border border-[#1A3A5C] rounded-xl px-4 py-3">
                     <p className="text-sm text-[#737373]">No se encontró ningún jugador</p>
                   </div>
                 )}
@@ -290,8 +290,8 @@ export default function Uniformes() {
           {step === 2 && jugadorEncontrado && (
             <div className="space-y-4">
 
-              <div className="p-3 rounded-xl bg-[rgba(249,115,22,0.08)] border border-[#F97316]/20 flex items-center gap-3 mb-2">
-                <CheckCircle className="w-4 h-4 text-[#F97316] flex-shrink-0" />
+              <div className="p-3 rounded-xl bg-[rgba(0,170,255,0.1)] border border-[#00AAFF]/20 flex items-center gap-3 mb-2">
+                <CheckCircle className="w-4 h-4 text-[#00AAFF] flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-[#F5F5F5]">
                     {jugadorEncontrado.nombre} {jugadorEncontrado.apellidos}
@@ -317,8 +317,8 @@ export default function Uniformes() {
                         onClick={() => togglePrenda(p)}
                         className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                           seleccionada
-                            ? 'bg-[rgba(249,115,22,0.12)] border-[#F97316]/50 text-[#F97316]'
-                            : 'bg-[#0D1117] border-[#2A3655] text-[#737373] hover:text-[#F5F5F5]'
+                            ? 'bg-[rgba(0,170,255,0.12)] border-[#00AAFF]/50 text-[#00AAFF]'
+                            : 'bg-[#060C18] border-[#1A3A5C] text-[#737373] hover:text-[#F5F5F5]'
                         }`}
                       >
                         <span>{p.valor}</span>
@@ -328,9 +328,9 @@ export default function Uniformes() {
                   })}
                 </div>
                 {form.prendas.length > 0 && (
-                  <div className="mt-3 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#0D1117] border border-[#F97316]/30">
+                  <div className="mt-3 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#060C18] border border-[#00AAFF]/30">
                     <span className="text-xs text-[#737373]">{form.prendas.length} prenda{form.prendas.length > 1 ? 's' : ''} seleccionada{form.prendas.length > 1 ? 's' : ''}</span>
-                    <span className="text-sm font-bold text-[#F97316]">Total: ${total.toLocaleString('es-CO')}</span>
+                    <span className="text-sm font-bold text-[#00AAFF]">Total: ${total.toLocaleString('es-CO')}</span>
                   </div>
                 )}
               </div>
@@ -345,7 +345,7 @@ export default function Uniformes() {
                   value={form.nombre_estampar}
                   onChange={e => setForm(f => ({ ...f, nombre_estampar: e.target.value.toUpperCase() }))}
                   placeholder="Ej: CAÑÓN, TOÑO, EL DIEZ..."
-                  className="w-full bg-[#0D1117] border border-[#2A3655] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[#F97316] transition-colors"
+                  className="w-full bg-[#060C18] border border-[#1A3A5C] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[#00AAFF] transition-colors"
                 />
               </div>
 
@@ -359,8 +359,8 @@ export default function Uniformes() {
                         onClick={() => setForm(f => ({ ...f, talla: t }))}
                         className={`py-2 rounded-xl text-sm font-medium border transition-colors ${
                           form.talla === t
-                            ? 'bg-[rgba(249,115,22,0.12)] border-[#F97316]/50 text-[#F97316]'
-                            : 'bg-[#0D1117] border-[#2A3655] text-[#737373] hover:text-[#F5F5F5]'
+                            ? 'bg-[rgba(0,170,255,0.12)] border-[#00AAFF]/50 text-[#00AAFF]'
+                            : 'bg-[#060C18] border-[#1A3A5C] text-[#737373] hover:text-[#F5F5F5]'
                         }`}
                       >
                         {t}
@@ -379,14 +379,14 @@ export default function Uniformes() {
                     onChange={e => setForm(f => ({ ...f, numero: formatNumero(e.target.value) }))}
                     placeholder="001"
                     maxLength={3}
-                    className={`w-full bg-[#0D1117] border rounded-xl px-4 py-2.5 text-sm font-mono text-[#F5F5F5] placeholder-[#737373] focus:outline-none transition-colors ${
+                    className={`w-full bg-[#060C18] border rounded-xl px-4 py-2.5 text-sm font-mono text-[#F5F5F5] placeholder-[#737373] focus:outline-none transition-colors ${
                       numeroRepetido
                         ? 'border-[#FF5E5E] focus:border-[#FF5E5E]'
-                        : 'border-[#2A3655] focus:border-[#F97316]'
+                        : 'border-[#1A3A5C] focus:border-[#00AAFF]'
                     }`}
                   />
                   {form.numero && (
-                    <p className={`text-xs mt-1 font-mono ${numeroValido ? 'text-[#F97316]' : 'text-[#FF5E5E]'}`}>
+                    <p className={`text-xs mt-1 font-mono ${numeroValido ? 'text-[#00AAFF]' : 'text-[#FF5E5E]'}`}>
                       {numeroValido
                         ? `✓ #${numeroDisplay} disponible`
                         : `✗ #${numeroDisplay} ya asignado`}
@@ -398,7 +398,7 @@ export default function Uniformes() {
               <button
                 onClick={handleSubmit}
                 disabled={form.prendas.length === 0 || !form.talla || !form.numero || enviando || !numeroValido}
-                className="w-full py-3 rounded-xl bg-[#F97316] text-[#0D1117] text-sm font-bold hover:bg-[#F97316]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-[#00AAFF] text-[#060C18] text-sm font-bold hover:bg-[#00AAFF]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {enviando ? (
                   <><Loader className="w-4 h-4 animate-spin" /> Registrando...</>
@@ -413,12 +413,12 @@ export default function Uniformes() {
       </div>
 
       {pedidos.length > 0 && (
-        <div className="bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6">
+        <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6">
           <h3 className="text-sm font-bold text-[#F5F5F5] mb-4">Pedidos registrados — {pedidos.length}</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#2A3655]">
+                <tr className="border-b border-[#1A3A5C]">
                   {['Cédula', 'Nombre', 'Prendas', 'Estampar', 'Talla', 'Número', 'Total', 'Fecha', 'Estado'].map(h => (
                     <th key={h} className="text-left py-2 px-3 text-xs text-[#737373] font-medium">{h}</th>
                   ))}
@@ -426,14 +426,14 @@ export default function Uniformes() {
               </thead>
               <tbody>
                 {pedidos.map((p, i) => (
-                  <tr key={i} className="border-b border-[#2A3655]/50 hover:bg-[#1E2740] transition-colors">
+                  <tr key={i} className="border-b border-[#1A3A5C]/50 hover:bg-[#0F1F36] transition-colors">
                     <td className="py-2 px-3 text-[#737373]">{p.cedula}</td>
                     <td className="py-2 px-3 text-[#F5F5F5]">{p.nombre}</td>
                     <td className="py-2 px-3 text-[#F5F5F5]">{p.prendas || p.prenda || '—'}</td>
                     <td className="py-2 px-3 text-[#F5F5F5]">{p.nombre_estampar || '—'}</td>
                     <td className="py-2 px-3 text-[#F5F5F5]">{p.talla}</td>
                     <td className="py-2 px-3 text-[#F5F5F5] font-mono font-bold">{p.numero_estampar}</td>
-                    <td className="py-2 px-3 text-[#F97316] font-semibold">
+                    <td className="py-2 px-3 text-[#00AAFF] font-semibold">
                       {p.total ? `$${Number(p.total).toLocaleString('es-CO')}` : '—'}
                     </td>
                     <td className="py-2 px-3 text-[#737373] text-xs">{formatFecha(p.created_at)}</td>

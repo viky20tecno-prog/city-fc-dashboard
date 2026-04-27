@@ -24,11 +24,11 @@ export default function WhatsAppMockup() {
   ];
 
   return (
-    <div className="bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6">
+    <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6">
       <h2 className="text-lg font-semibold text-[#F5F5F5] mb-4">Así se ve en WhatsApp</h2>
       
       <div className="max-w-sm mx-auto">
-        <div className="bg-[#0D1117] rounded-3xl p-2 shadow-xl border border-[#2A3655]">
+        <div className="bg-[#060C18] rounded-3xl p-2 shadow-xl border border-[#1A3A5C]">
           {/* Status bar */}
           <div className="bg-[#075e54] rounded-t-2xl px-4 py-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold">⚽</div>
@@ -48,7 +48,7 @@ export default function WhatsAppMockup() {
                     : 'bg-[#1F2C34] rounded-tl-none'
                 }`}>
                   {msg.isImage ? (
-                    <div className="bg-[#0D1117] rounded-lg p-4 mb-1 flex items-center justify-center">
+                    <div className="bg-[#060C18] rounded-lg p-4 mb-1 flex items-center justify-center">
                       <span className="text-2xl">🧾</span>
                     </div>
                   ) : null}
@@ -62,7 +62,7 @@ export default function WhatsAppMockup() {
           {/* Input bar */}
           <div className="bg-[#1F2C34] rounded-b-2xl px-3 py-2 flex items-center gap-2">
             <div className="flex-1 bg-[#2A3942] rounded-full px-4 py-2 text-xs text-[#737373]">Escribe un mensaje...</div>
-            <div className="w-8 h-8 rounded-full bg-[#F97316] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-[#00AAFF] flex items-center justify-center">
               <span className="text-white text-sm">🎤</span>
             </div>
           </div>

@@ -100,7 +100,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
   const suspensionesHistorico = suspensiones.filter(s => !s.activa);
 
   return (
-    <div className="fixed inset-0 bg-[#0D1117]/60 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-[#060C18]/60 flex items-center justify-center z-50 p-4">
       <div className="bg-[#161B22] rounded-2xl border border-[#30363D] w-full max-w-lg max-h-[90vh] overflow-y-auto">
 
         {/* Header */}
@@ -128,7 +128,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                     ? MESES[s.mes_inicio - 1]
                     : `${MESES[s.mes_inicio - 1]} – ${MESES[s.mes_fin - 1]}`;
                   return (
-                    <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-[#0D1117] border border-[#30363D]">
+                    <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-[#060C18] border border-[#30363D]">
                       <Icon className={`w-4 h-4 flex-shrink-0 ${motivo?.color || 'text-gray-400'}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-[#E6EDF3]">{motivo?.label || s.motivo}</p>
@@ -178,7 +178,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                       key={m.valor}
                       onClick={() => setForm(f => ({ ...f, motivo: m.valor }))}
                       className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
-                        seleccionado ? m.bg + ' ' + m.color : 'bg-[#0D1117] border-[#30363D] text-[#8B949E] hover:text-[#E6EDF3]'
+                        seleccionado ? m.bg + ' ' + m.color : 'bg-[#060C18] border-[#30363D] text-[#8B949E] hover:text-[#E6EDF3]'
                       }`}
                     >
                       <Icon className="w-4 h-4 flex-shrink-0" />
@@ -196,7 +196,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                 <select
                   value={form.mes_inicio}
                   onChange={e => setForm(f => ({ ...f, mes_inicio: parseInt(e.target.value) }))}
-                  className="w-full bg-[#0D1117] border border-[#30363D] rounded-xl px-3 py-2 text-sm text-[#E6EDF3] focus:outline-none focus:border-[#00D084]"
+                  className="w-full bg-[#060C18] border border-[#30363D] rounded-xl px-3 py-2 text-sm text-[#E6EDF3] focus:outline-none focus:border-[#00D084]"
                 >
                   {MESES.map((m, i) => (
                     <option key={i} value={i + 1}>{m}</option>
@@ -208,7 +208,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                 <select
                   value={form.mes_fin}
                   onChange={e => setForm(f => ({ ...f, mes_fin: parseInt(e.target.value) }))}
-                  className="w-full bg-[#0D1117] border border-[#30363D] rounded-xl px-3 py-2 text-sm text-[#E6EDF3] focus:outline-none focus:border-[#00D084]"
+                  className="w-full bg-[#060C18] border border-[#30363D] rounded-xl px-3 py-2 text-sm text-[#E6EDF3] focus:outline-none focus:border-[#00D084]"
                 >
                   {MESES.map((m, i) => (
                     <option key={i} value={i + 1} disabled={i + 1 < form.mes_inicio}>{m}</option>
@@ -221,7 +221,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                   type="number"
                   value={form.anio}
                   onChange={e => setForm(f => ({ ...f, anio: parseInt(e.target.value) }))}
-                  className="w-full bg-[#0D1117] border border-[#30363D] rounded-xl px-3 py-2 text-sm text-[#E6EDF3] focus:outline-none focus:border-[#00D084]"
+                  className="w-full bg-[#060C18] border border-[#30363D] rounded-xl px-3 py-2 text-sm text-[#E6EDF3] focus:outline-none focus:border-[#00D084]"
                 />
               </div>
             </div>
@@ -234,14 +234,14 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                 value={form.detalle}
                 onChange={e => setForm(f => ({ ...f, detalle: e.target.value }))}
                 placeholder="Ej: Fractura tobillo derecho, cirugía prevista..."
-                className="w-full bg-[#0D1117] border border-[#30363D] rounded-xl px-4 py-2.5 text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#00D084] transition-colors"
+                className="w-full bg-[#060C18] border border-[#30363D] rounded-xl px-4 py-2.5 text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#00D084] transition-colors"
               />
             </div>
 
             <button
               onClick={handleSubmit}
               disabled={enviando || !form.motivo}
-              className="w-full py-3 rounded-xl bg-[#00D084] text-[#0D1117] text-sm font-bold hover:bg-[#00D084]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-3 rounded-xl bg-[#00D084] text-[#060C18] text-sm font-bold hover:bg-[#00D084]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {enviando ? 'Registrando...' : 'Registrar suspensión'}
             </button>
@@ -259,7 +259,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                     ? MESES[s.mes_inicio - 1]
                     : `${MESES[s.mes_inicio - 1]} – ${MESES[s.mes_fin - 1]}`;
                   return (
-                    <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-[#0D1117] border border-[#30363D]/50 opacity-60">
+                    <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-[#060C18] border border-[#30363D]/50 opacity-60">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-[#8B949E]">{motivo?.label || s.motivo} · {mesesTexto} {s.anio}</p>
                         {s.detalle && <p className="text-xs text-[#8B949E]">{s.detalle}</p>}

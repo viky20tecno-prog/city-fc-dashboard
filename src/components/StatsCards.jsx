@@ -13,8 +13,10 @@ function StatCard({ icon: Icon, label, value, subtext, color, wide }) {
 
   return (
     <div className={`group relative rounded-2xl p-6 overflow-hidden transition-all duration-300
-      bg-[#161D2F] border border-[#2A3655]
-      hover:border-white/20 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,0,0,0.4)]
+      bg-[#0A1628] border border-[#1A3A5C]
+      shadow-[0_4px_24px_rgba(0,50,150,0.15)]
+      hover:border-[#00AAFF]/40 hover:-translate-y-1
+      hover:shadow-[0_8px_40px_rgba(0,170,255,0.2),0_0_0_1px_rgba(0,170,255,0.15)]
       ${wide ? 'xl:col-span-2' : ''}`}
     >
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition">

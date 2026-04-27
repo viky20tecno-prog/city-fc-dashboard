@@ -38,7 +38,7 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#00AAFF] border-t-transparent rounded-full animate-spin" />
         <p className="text-gray-400 text-sm">Cargando partidos...</p>
       </div>
     );
@@ -61,11 +61,11 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
 
   if (partidos.length === 0) {
     return (
-      <div className="bg-[#161D2F] border border-[#2A3655] rounded-xl p-12 text-center">
+      <div className="bg-[#0A1628] border border-[#1A3A5C] rounded-xl p-12 text-center">
         <div className="text-5xl mb-4">🏟️</div>
         <h3 className="text-white font-semibold text-lg mb-2">Sin partidos registrados</h3>
         <p className="text-gray-400 text-sm">
-          Ve a la pestaña <span className="text-orange-400 font-medium">Registrar Partido</span> para agregar el primero.
+          Ve a la pestaña <span className="text-[#00AAFF] font-medium">Registrar Partido</span> para agregar el primero.
         </p>
       </div>
     );
@@ -80,7 +80,7 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
         </span>
         <button
           onClick={fetchPartidos}
-          className="flex items-center gap-2 px-3 py-1.5 bg-[#1E2740] hover:bg-[#24305A] text-gray-300 rounded-lg text-sm transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-[#0F1F36] hover:bg-[#152945] text-gray-300 rounded-lg text-sm transition-colors"
         >
           <RefreshCw size={13} />
           Actualizar
@@ -92,7 +92,7 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
         {partidos.map((partido) => (
           <div
             key={partido.id}
-            className="bg-[#161D2F] border border-[#2A3655] hover:border-[#2A3655] rounded-xl p-5 transition-all duration-200"
+            className="bg-[#0A1628] border border-[#1A3A5C] hover:border-[#1A3A5C] rounded-xl p-5 transition-all duration-200"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
@@ -121,11 +121,11 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
               <div className="flex items-center gap-3 shrink-0">
                 <div className="text-right">
                   <p className="text-xs text-gray-500 mb-0.5">Monto total</p>
-                  <p className="text-orange-400 font-bold">{fmt(partido.montoTotal)}</p>
+                  <p className="text-[#00AAFF] font-bold">{fmt(partido.montoTotal)}</p>
                 </div>
                 <button
                   onClick={() => onViewPagos(partido.id)}
-                  className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#0078FF] hover:bg-[#00AAFF] text-white rounded-lg text-sm font-medium transition-colors"
                 >
                   <Eye size={14} />
                   Ver pagos

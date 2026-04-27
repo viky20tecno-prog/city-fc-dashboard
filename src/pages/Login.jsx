@@ -29,12 +29,12 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D1117] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#060C18] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
 
         {/* Logo / Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-[rgba(249,115,22,0.12)] border border-[#F97316]/20 flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-[rgba(0,170,255,0.12)] border border-[#00AAFF]/20 flex items-center justify-center mx-auto mb-4">
             <img src="/10894351.png" alt="Logo" className="w-10 h-10 object-contain rounded-xl" />
           </div>
           <h1 className="text-2xl font-bold text-white">ClubContable</h1>
@@ -42,7 +42,7 @@ export default function Login() {
         </div>
 
         {/* Formulario */}
-        <div className="bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6">
+        <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6">
 
           {error && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/20 mb-4">
@@ -61,7 +61,7 @@ export default function Login() {
                 placeholder="tu@email.com"
                 required
                 autoComplete="email"
-                className="w-full bg-white/5 border border-[#2A3655] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#F97316] transition-colors"
+                className="w-full bg-white/5 border border-[#1A3A5C] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#00AAFF] transition-colors"
               />
             </div>
 
@@ -74,14 +74,14 @@ export default function Login() {
                 placeholder="••••••••"
                 required
                 autoComplete="current-password"
-                className="w-full bg-white/5 border border-[#2A3655] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#F97316] transition-colors"
+                className="w-full bg-white/5 border border-[#1A3A5C] rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#00AAFF] transition-colors"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#F97316] text-white text-sm font-bold hover:bg-[#EA580C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#00AAFF] text-white text-sm font-bold hover:bg-[#0066FF] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Ingresando...</>

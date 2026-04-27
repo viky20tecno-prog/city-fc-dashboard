@@ -127,13 +127,13 @@ function exportarPDF(morosos) {
 export default function MorososList({ morosos }) {
   if (!morosos || morosos.length === 0) {
     return (
-      <div className="relative bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6 overflow-hidden">
+      <div className="relative bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-orange-500/10 blur-2xl" />
+          <div className="absolute inset-0 bg-[#00AAFF]/10 blur-2xl" />
         </div>
         <h2 className="text-lg font-semibold text-white mb-4">Morosos</h2>
         <div className="text-center py-10 text-gray-400">
-          <AlertCircle className="w-8 h-8 mx-auto mb-2 text-orange-400" />
+          <AlertCircle className="w-8 h-8 mx-auto mb-2 text-[#00AAFF]" />
           ¡Sin morosos!
         </div>
       </div>
@@ -141,7 +141,7 @@ export default function MorososList({ morosos }) {
   }
 
   return (
-    <div className="relative bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6 overflow-hidden">
+    <div className="relative bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6 overflow-hidden">
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute inset-0 bg-red-500/10 blur-2xl" />
       </div>
@@ -157,7 +157,7 @@ export default function MorososList({ morosos }) {
         {/* ✅ Botón exportar PDF */}
         <button
           onClick={() => exportarPDF(morosos)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#F97316]/30 bg-[rgba(249,115,22,0.08)] text-xs font-medium text-[#F97316] hover:bg-[rgba(249,115,22,0.15)] transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#00AAFF]/30 bg-[rgba(0,170,255,0.1)] text-xs font-medium text-[#00AAFF] hover:bg-[rgba(0,170,255,0.2)] transition-colors"
         >
           <FileDown className="w-3.5 h-3.5" />
           Exportar PDF
@@ -169,7 +169,7 @@ export default function MorososList({ morosos }) {
         {morosos.map((m, i) => (
           <div key={m.cedula || i}
             className="group flex items-center justify-between p-4 rounded-xl
-              bg-red-500/5 border border-[#2A3655]
+              bg-red-500/5 border border-[#1A3A5C]
               hover:border-red-500/30 hover:bg-red-500/10
               transition-all duration-300">
             <div>
@@ -185,7 +185,7 @@ export default function MorososList({ morosos }) {
               <p className="font-semibold text-red-400 text-sm">{formatCOP(m.saldo_total)}</p>
               {m.celular && (
                 <a href={`https://wa.me/57${m.celular}`} target="_blank" rel="noopener noreferrer"
-                  className="text-xs text-gray-400 hover:text-orange-400 inline-flex items-center gap-1 mt-1 transition">
+                  className="text-xs text-gray-400 hover:text-[#00AAFF] inline-flex items-center gap-1 mt-1 transition">
                   <Phone className="w-3 h-3" />
                   {m.celular}
                 </a>
@@ -196,7 +196,7 @@ export default function MorososList({ morosos }) {
       </div>
 
       {/* Total */}
-      <div className="mt-4 pt-3 border-t border-[#2A3655] flex justify-between items-center relative">
+      <div className="mt-4 pt-3 border-t border-[#1A3A5C] flex justify-between items-center relative">
         <span className="text-xs text-gray-400">Total en mora</span>
         <span className="text-sm font-bold text-red-400">
           {formatCOP(morosos.reduce((sum, m) => sum + (parseInt(m.saldo_total) || 0), 0))}

@@ -13,7 +13,7 @@ const steps = [
     day: '1',
     label: 'Cobro Activo',
     icon: DollarSign,
-    color: 'bg-[#F97316]',
+    color: 'bg-[#00AAFF]',
     msg: '"Tu cuota de [mes] ya está activa: $65.000"',
     desc: 'Se activa el cobro oficial',
   },
@@ -47,7 +47,7 @@ export default function TimelineCobro() {
   const today = new Date().getDate();
 
   return (
-    <div className="bg-[#161D2F] rounded-2xl border border-[#2A3655] p-6">
+    <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6">
       <h2 className="text-lg font-semibold text-[#F5F5F5] mb-6">Ciclo de Cobro Automático</h2>
       <div className="relative">
         <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-[#2A2A2A]"></div>
@@ -64,17 +64,17 @@ export default function TimelineCobro() {
 
             return (
               <div key={i} className={`relative flex items-start gap-4 ${isActive ? 'opacity-100' : 'opacity-50'}`}>
-                <div className={`relative z-10 w-12 h-12 rounded-xl ${step.color} flex items-center justify-center flex-shrink-0 ${isActive ? 'ring-4 ring-offset-2 ring-offset-[#161D2F] ring-[#F97316]/30' : ''}`}>
+                <div className={`relative z-10 w-12 h-12 rounded-xl ${step.color} flex items-center justify-center flex-shrink-0 ${isActive ? 'ring-4 ring-offset-2 ring-offset-[#0A1628] ring-[#00AAFF]/30' : ''}`}>
                   <Icon className="w-5 h-5 text-white" />
                 </div>
                 <div className="pt-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-[#F5F5F5]">Día {step.day}</span>
                     <span className="text-sm text-[#737373]">— {step.label}</span>
-                    {isActive && <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[rgba(249,115,22,0.12)] text-[#F97316]">HOY</span>}
+                    {isActive && <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[rgba(0,170,255,0.12)] text-[#00AAFF]">HOY</span>}
                   </div>
                   <p className="text-sm text-[#737373] mt-0.5">{step.desc}</p>
-                  <p className="text-sm italic text-[#737373] mt-1 bg-[#1E2740] rounded-lg px-3 py-1.5 inline-block border border-[#2A3655]">{step.msg}</p>
+                  <p className="text-sm italic text-[#737373] mt-1 bg-[#0F1F36] rounded-lg px-3 py-1.5 inline-block border border-[#1A3A5C]">{step.msg}</p>
                 </div>
               </div>
             );

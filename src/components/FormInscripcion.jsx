@@ -114,7 +114,7 @@ export default function FormInscripcion() {
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#060C18] flex items-center justify-center p-4">
         <div className="bg-[#161B22] rounded-3xl border border-[#30363D] p-8 max-w-md w-full text-center">
           <div className="w-20 h-20 rounded-full bg-[rgba(0,208,132,0.12)] flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-10 h-10 text-[#00D084]" />
@@ -138,7 +138,7 @@ export default function FormInscripcion() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0D1117] flex items-center justify-center p-4 py-8">
+    <div className="min-h-screen bg-[#060C18] flex items-center justify-center p-4 py-8">
       <div className="bg-[#161B22] rounded-3xl border border-[#30363D] p-8 max-w-lg w-full">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00D084] to-[#00D084]/60 flex items-center justify-center mx-auto mb-4">
@@ -175,7 +175,7 @@ export default function FormInscripcion() {
           )}
 
           <button type="submit" disabled={status === 'loading'}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#0D1117] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6">
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#060C18] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6">
             {status === 'loading' ? (
               <><Loader2 className="w-4 h-4 animate-spin" />Registrando...</>
             ) : (

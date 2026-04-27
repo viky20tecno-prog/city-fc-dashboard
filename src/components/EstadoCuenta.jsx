@@ -339,7 +339,7 @@ export default function EstadoCuenta({ jugador, mensualidades, uniformes, torneo
   const misSuspensiones = suspensiones.filter(s => s.cedula === String(cedula));
 
   return (
-    <div className="fixed inset-0 bg-[#0D1117]/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 bg-[#060C18]/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
       <div className="bg-[#161B22] rounded-2xl border border-[#30363D] w-full max-w-2xl my-8">
         <div className="flex items-center justify-between p-6 border-b border-[#30363D]">
           <div>

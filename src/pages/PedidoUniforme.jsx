@@ -101,12 +101,12 @@ export default function PedidoUniforme() {
   const jugadorSeleccionado = jugadores.find(j => j.cedula === form.cedula);
 
   return (
-    <div className="min-h-screen bg-[#0D1117]">
+    <div className="min-h-screen bg-[#060C18]">
       {/* Header */}
-      <header className="bg-[#161D2F] border-b border-[#2A3655]">
+      <header className="bg-[#0A1628] border-b border-[#1A3A5C]">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex items-center gap-3 mb-2">
-            <Shirt className="w-8 h-8 text-[#F97316]" />
+            <Shirt className="w-8 h-8 text-[#00AAFF]" />
             <h1 className="text-3xl font-bold text-[#F5F5F5]">Pedido de Uniforme</h1>
           </div>
           <p className="text-[#737373]">Registra nuevos pedidos de uniformes para los jugadores</p>
@@ -115,18 +115,18 @@ export default function PedidoUniforme() {
 
       {/* Content */}
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-        <div className="bg-[#161D2F] rounded-xl border border-[#2A3655] p-8">
+        <div className="bg-[#0A1628] rounded-xl border border-[#1A3A5C] p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             
             {/* Mensaje */}
             {message.text && (
-              <div className={`flex items-start gap-3 p-4 rounded-lg ${message.type === 'error' ? 'bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/20' : 'bg-[rgba(249,115,22,0.12)] border border-[#F97316]/20'}`}>
+              <div className={`flex items-start gap-3 p-4 rounded-lg ${message.type === 'error' ? 'bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/20' : 'bg-[rgba(0,170,255,0.12)] border border-[#00AAFF]/20'}`}>
                 {message.type === 'error' ? (
                   <AlertCircle className="w-5 h-5 text-[#FF5E5E] shrink-0 mt-0.5" />
                 ) : (
-                  <CheckCircle className="w-5 h-5 text-[#F97316] shrink-0 mt-0.5" />
+                  <CheckCircle className="w-5 h-5 text-[#00AAFF] shrink-0 mt-0.5" />
                 )}
-                <span className={`text-sm ${message.type === 'error' ? 'text-[#FF5E5E]' : 'text-[#F97316]'}`}>
+                <span className={`text-sm ${message.type === 'error' ? 'text-[#FF5E5E]' : 'text-[#00AAFF]'}`}>
                   {message.text}
                 </span>
               </div>
@@ -138,14 +138,14 @@ export default function PedidoUniforme() {
                 Seleccionar Jugador *
               </label>
               {jugadoresLoading ? (
-                <div className="p-3 bg-[#1E2740] rounded-lg text-[#737373]">Cargando jugadores...</div>
+                <div className="p-3 bg-[#0F1F36] rounded-lg text-[#737373]">Cargando jugadores...</div>
               ) : (
                 <select
                   name="cedula"
                   value={form.cedula}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 rounded-lg bg-[#1E2740] border border-[#2A3655] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30 focus:border-[#F97316]"
+                  className="w-full px-4 py-3 rounded-lg bg-[#0F1F36] border border-[#1A3A5C] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#00AAFF]/30 focus:border-[#00AAFF]"
                 >
                   <option value="">-- Selecciona un jugador --</option>
                   {jugadores.map(j => (
@@ -156,7 +156,7 @@ export default function PedidoUniforme() {
                 </select>
               )}
               {jugadorSeleccionado && (
-                <p className="text-xs text-[#F97316] mt-2">
+                <p className="text-xs text-[#00AAFF] mt-2">
                   ✓ {jugadorSeleccionado.nombre} {jugadorSeleccionado.apellidos}
                 </p>
               )}
@@ -172,7 +172,7 @@ export default function PedidoUniforme() {
                   name="tipo"
                   value={form.tipo}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg bg-[#1E2740] border border-[#2A3655] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30"
+                  className="w-full px-4 py-3 rounded-lg bg-[#0F1F36] border border-[#1A3A5C] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#00AAFF]/30"
                 >
                   {tiposUniformes.map(t => (
                     <option key={t.valor} value={t.valor}>
@@ -191,7 +191,7 @@ export default function PedidoUniforme() {
                   name="talla"
                   value={form.talla}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg bg-[#1E2740] border border-[#2A3655] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30"
+                  className="w-full px-4 py-3 rounded-lg bg-[#0F1F36] border border-[#1A3A5C] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#00AAFF]/30"
                 >
                   {tallas.map(t => (
                     <option key={t} value={t}>{t}</option>
@@ -214,7 +214,7 @@ export default function PedidoUniforme() {
                   onChange={handleChange}
                   placeholder="Ej: DIEGO"
                   required
-                  className="w-full px-4 py-3 rounded-lg bg-[#1E2740] border border-[#2A3655] text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30"
+                  className="w-full px-4 py-3 rounded-lg bg-[#0F1F36] border border-[#1A3A5C] text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:ring-2 focus:ring-[#00AAFF]/30"
                 />
                 <p className="text-xs text-[#737373] mt-1">{form.nombre_estampar.length}/12</p>
               </div>
@@ -232,13 +232,13 @@ export default function PedidoUniforme() {
                   value={form.numero_estampar}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 rounded-lg bg-[#1E2740] border border-[#2A3655] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30"
+                  className="w-full px-4 py-3 rounded-lg bg-[#0F1F36] border border-[#1A3A5C] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#00AAFF]/30"
                 />
               </div>
             </div>
 
             {/* Resumen */}
-            <div className="bg-[#0D1117] rounded-lg p-4 border border-[#2A3655]">
+            <div className="bg-[#060C18] rounded-lg p-4 border border-[#1A3A5C]">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-[#737373] mb-1">Tipo Seleccionado</p>
@@ -246,7 +246,7 @@ export default function PedidoUniforme() {
                 </div>
                 <div>
                   <p className="text-xs text-[#737373] mb-1">Valor del Uniforme</p>
-                  <p className="font-semibold text-[#F97316]">${precioActual.toLocaleString()} COP</p>
+                  <p className="font-semibold text-[#00AAFF]">${precioActual.toLocaleString()} COP</p>
                 </div>
               </div>
             </div>
@@ -255,7 +255,7 @@ export default function PedidoUniforme() {
             <button
               type="submit"
               disabled={loading || !form.cedula}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#F97316] text-[#0D1117] rounded-lg font-semibold hover:bg-[#F97316]/80 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#00AAFF] text-[#060C18] rounded-lg font-semibold hover:bg-[#00AAFF]/80 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -273,7 +273,7 @@ export default function PedidoUniforme() {
         </div>
 
         {/* Info */}
-        <div className="mt-8 bg-[#161D2F] rounded-xl border border-[#2A3655] p-6">
+        <div className="mt-8 bg-[#0A1628] rounded-xl border border-[#1A3A5C] p-6">
           <h3 className="font-semibold text-[#F5F5F5] mb-3">📋 ¿Cómo funciona?</h3>
           <ul className="space-y-2 text-sm text-[#737373]">
             <li>✅ Selecciona el jugador</li>

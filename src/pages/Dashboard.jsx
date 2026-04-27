@@ -49,14 +49,14 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center p-4">
-        <div className="bg-[#161D2F] rounded-2xl border border-[#2A3655] p-8 max-w-md text-center shadow-[0_0_40px_rgba(255,0,0,0.1)]">
+      <div className="min-h-screen bg-[#060C18] flex items-center justify-center p-4">
+        <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-8 max-w-md text-center shadow-[0_0_40px_rgba(255,0,0,0.1)]">
           <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
             <Activity className="w-8 h-8 text-red-400" />
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Error de conexión</h2>
           <p className="text-gray-400 mb-4 text-sm">{error}</p>
-          <button onClick={refresh} className="px-4 py-2 bg-[#F97316] text-white rounded-xl text-sm font-medium hover:opacity-80 transition">
+          <button onClick={refresh} className="px-4 py-2 bg-[#00AAFF] text-white rounded-xl text-sm font-medium hover:opacity-80 transition">
             Reintentar
           </button>
         </div>
@@ -65,10 +65,10 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0D1117]">
+    <div className="min-h-screen bg-[#060C18]">
 
       {/* HEADER */}
-      <header className="bg-[#131B2E] border-b border-[#2A3655] sticky top-0 z-50">
+      <header className="bg-[#0A1525]/95 border-b border-[#1A3A5C] sticky top-0 z-50 shadow-[0_1px_30px_rgba(0,120,255,0.12)] backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
 
@@ -93,7 +93,7 @@ export default function Dashboard() {
               {/* Botón principal — abre formulario en nueva pestaña */}
               <button
                 onClick={handleOpenInscripcion}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-orange-400/20 bg-orange-400/10 text-sm text-orange-400 hover:bg-orange-400/20 transition"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#00AAFF]/25 bg-[#00AAFF]/10 text-sm text-[#00AAFF] hover:bg-[#00AAFF]/20 transition"
               >
                 <Link2 className="w-4 h-4" />
                 <span className="hidden sm:inline">Registrarse</span>
@@ -103,10 +103,10 @@ export default function Dashboard() {
               <button
                 onClick={handleCopyLink}
                 title="Copiar link de inscripción"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[#2A3655] text-sm text-gray-400 hover:text-green-400 hover:border-green-400/20 transition"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[#1A3A5C] text-sm text-gray-400 hover:text-green-400 hover:border-green-400/20 transition"
               >
                 {linkCopied ? (
-                  <><Check className="w-4 h-4 text-orange-400" /><span className="hidden sm:inline text-orange-400 text-xs">¡Copiado!</span></>
+                  <><Check className="w-4 h-4 text-[#00AAFF]" /><span className="hidden sm:inline text-[#00AAFF] text-xs">¡Copiado!</span></>
                 ) : (
                   <><Copy className="w-4 h-4" /><span className="hidden sm:inline text-xs">Copiar link</span></>
                 )}
@@ -115,7 +115,7 @@ export default function Dashboard() {
               <button
                 onClick={handleRefresh}
                 disabled={refreshing || loading}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#2A3655] text-sm text-gray-400 hover:text-white transition"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#1A3A5C] text-sm text-gray-400 hover:text-white transition"
               >
                 <RefreshCw className={`w-4 h-4 ${refreshing || loading ? 'animate-spin' : ''}`} />
               </button>
@@ -126,7 +126,7 @@ export default function Dashboard() {
       </header>
 
       {/* NAV */}
-      <nav className="bg-[#0D1117] border-b border-[#2A3655]">
+      <nav className="bg-[#060C18]/90 border-b border-[#1A3A5C]/60 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex gap-2 overflow-x-auto py-2">
 
@@ -140,8 +140,8 @@ export default function Dashboard() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all ${
                     active
-                      ? 'bg-orange-500/10 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.2)]'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-[#00AAFF]/10 text-[#00AAFF] border border-[#00AAFF]/20 shadow-[0_0_20px_rgba(0,170,255,0.25),0_0_0_1px_rgba(0,170,255,0.1)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -159,7 +159,7 @@ export default function Dashboard() {
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <RefreshCw className="w-8 h-8 text-orange-400 animate-spin" />
+            <RefreshCw className="w-8 h-8 text-[#00AAFF] animate-spin" />
           </div>
         ) : (
           <div className="space-y-8">
@@ -198,7 +198,7 @@ export default function Dashboard() {
         />
       )}
 
-      <footer className="border-t border-[#2A3655] mt-8">
+      <footer className="border-t border-[#1A3A5C] mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-center text-xs text-gray-500">
           Powered by AI · Sistema inteligente de cobros
         </div>

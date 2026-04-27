@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Shirt, CheckCircle, AlertCircle, Search, Loader, X } from 'lucide-react';
+import { Shirt, CheckCircle, AlertCircle, Search, Loader, X, Pencil, Save } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 
 const PRENDAS = [
@@ -39,6 +39,10 @@ export default function Uniformes() {
   const [error, setError] = useState('');
   const [exito, setExito] = useState(false);
   const [pedidos, setPedidos] = useState([]);
+  const [pedidoEditando, setPedidoEditando] = useState(null);
+  const [editForm, setEditForm] = useState({ prendas: [], talla: '', numero: '', nombre_estampar: '' });
+  const [editError, setEditError] = useState('');
+  const [guardandoEdit, setGuardandoEdit] = useState(false);
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -185,6 +189,91 @@ export default function Uniformes() {
       setError('Error de conexión. Intentá de nuevo.');
     } finally {
       setEnviando(false);
+    }
+  };
+
+  const abrirEditar = (pedido) => {
+    // Parsear el string de prendas de vuelta a array de objetos
+    const prendasStr = pedido.prendas || pedido.prenda || '';
+    const prendasArray = prendasStr
+      ? prendasStr.split(',').map(s => s.trim()).reduce((acc, nombre) => {
+          const encontrada = PRENDAS.find(p => p.valor === nombre);
+          if (encontrada) acc.push(encontrada);
+          return acc;
+        }, [])
+      : [];
+
+    setEditForm({
+      prendas: prendasArray,
+      talla: pedido.talla || '',
+      numero: pedido.numero_estampar ? String(parseInt(pedido.numero_estampar, 10)) : '',
+      nombre_estampar: pedido.nombre_estampar || '',
+    });
+    setEditError('');
+    setPedidoEditando(pedido);
+  };
+
+  const cerrarEditar = () => {
+    setPedidoEditando(null);
+    setEditError('');
+  };
+
+  const toggleEditPrenda = (prenda) => {
+    setEditForm(f => {
+      const existe = f.prendas.find(p => p.valor === prenda.valor);
+      return {
+        ...f,
+        prendas: existe
+          ? f.prendas.filter(p => p.valor !== prenda.valor)
+          : [...f.prendas, prenda],
+      };
+    });
+  };
+
+  const handleGuardarEdit = async () => {
+    setEditError('');
+    if (editForm.prendas.length === 0) { setEditError('Seleccioná al menos una prenda.'); return; }
+    if (!editForm.talla)                { setEditError('Seleccioná una talla.'); return; }
+    if (!editForm.numero)               { setEditError('Ingresá el número de camiseta.'); return; }
+
+    const numeroNorm = String(parseInt(editForm.numero, 10));
+    const numeroPadded = editForm.numero.padStart(3, '0');
+    const numOriginal = pedidoEditando.numero_estampar
+      ? String(parseInt(pedidoEditando.numero_estampar, 10))
+      : '';
+
+    // Solo bloquear si el número cambió Y ya está en uso
+    if (numeroNorm !== numOriginal && numerosUsados.includes(numeroNorm)) {
+      setEditError(`El número ${numeroPadded} ya está asignado a otro jugador.`);
+      return;
+    }
+
+    const totalEdit = editForm.prendas.reduce((s, p) => s + p.precio, 0);
+
+    setGuardandoEdit(true);
+    try {
+      const res = await authFetch(`${API_BASE}/uniforms/${pedidoEditando.id}?club_id=${CLUB_ID}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prendas: editForm.prendas.map(p => p.valor).join(', '),
+          talla: editForm.talla,
+          numero: numeroPadded,
+          nombre_estampar: editForm.nombre_estampar,
+          total: totalEdit,
+        }),
+      });
+      const data = await res.json();
+      if (data.success || res.ok) {
+        await cargarDatos();
+        cerrarEditar();
+      } else {
+        setEditError(data.error || data.message || 'Error al actualizar el pedido.');
+      }
+    } catch (e) {
+      setEditError('Error de conexión. Intentá de nuevo.');
+    } finally {
+      setGuardandoEdit(false);
     }
   };
 
@@ -419,7 +508,7 @@ export default function Uniformes() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#1A3A5C]">
-                  {['Cédula', 'Nombre', 'Prendas', 'Estampar', 'Talla', 'Número', 'Total', 'Fecha', 'Estado'].map(h => (
+                  {['Cédula', 'Nombre', 'Prendas', 'Estampar', 'Talla', 'Número', 'Total', 'Fecha', 'Estado', ''].map(h => (
                     <th key={h} className="text-left py-2 px-3 text-xs text-[#737373] font-medium">{h}</th>
                   ))}
                 </tr>
@@ -429,7 +518,9 @@ export default function Uniformes() {
                   <tr key={i} className="border-b border-[#1A3A5C]/50 hover:bg-[#0F1F36] transition-colors">
                     <td className="py-2 px-3 text-[#737373]">{p.cedula}</td>
                     <td className="py-2 px-3 text-[#F5F5F5]">{p.nombre}</td>
-                    <td className="py-2 px-3 text-[#F5F5F5]">{p.prendas || p.prenda || '—'}</td>
+                    <td className="py-2 px-3 text-[#F5F5F5] max-w-[180px]">
+                      <span className="block truncate" title={p.prendas || p.prenda}>{p.prendas || p.prenda || '—'}</span>
+                    </td>
                     <td className="py-2 px-3 text-[#F5F5F5]">{p.nombre_estampar || '—'}</td>
                     <td className="py-2 px-3 text-[#F5F5F5]">{p.talla}</td>
                     <td className="py-2 px-3 text-[#F5F5F5] font-mono font-bold">{p.numero_estampar}</td>
@@ -442,10 +533,166 @@ export default function Uniformes() {
                         {p.estado}
                       </span>
                     </td>
+                    <td className="py-2 px-3">
+                      <button
+                        onClick={() => abrirEditar(p)}
+                        title="Editar pedido"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#1A3A5C] text-[#737373] hover:text-[#00AAFF] hover:border-[#00AAFF]/40 hover:bg-[#00AAFF]/8 transition-all text-xs"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        Editar
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de edición */}
+      {pedidoEditando && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#0A1628] border border-[#1A3A5C] rounded-2xl w-full max-w-lg shadow-[0_8px_40px_rgba(0,50,150,0.4)] max-h-[90vh] overflow-y-auto">
+
+            {/* Header del modal */}
+            <div className="flex items-center justify-between p-5 border-b border-[#1A3A5C]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[rgba(0,170,255,0.12)] flex items-center justify-center">
+                  <Pencil className="w-4 h-4 text-[#00AAFF]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#F5F5F5]">Editar Pedido</h3>
+                  <p className="text-xs text-[#737373]">{pedidoEditando.nombre} · #{pedidoEditando.numero_estampar}</p>
+                </div>
+              </div>
+              <button onClick={cerrarEditar} className="p-2 rounded-lg text-[#737373] hover:text-[#F5F5F5] hover:bg-[#0F1F36] transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-5">
+
+              {editError && (
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/30">
+                  <AlertCircle className="w-4 h-4 text-[#FF5E5E] flex-shrink-0" />
+                  <p className="text-sm text-[#FF5E5E]">{editError}</p>
+                </div>
+              )}
+
+              {/* Prendas */}
+              <div>
+                <label className="block text-xs text-[#737373] mb-2">
+                  Prendas <span className="text-[#737373] font-normal">(podés agregar o quitar)</span>
+                </label>
+                <div className="grid grid-cols-1 gap-1.5">
+                  {PRENDAS.map(p => {
+                    const sel = editForm.prendas.find(x => x.valor === p.valor);
+                    return (
+                      <button
+                        key={p.valor}
+                        onClick={() => toggleEditPrenda(p)}
+                        className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                          sel
+                            ? 'bg-[rgba(0,170,255,0.12)] border-[#00AAFF]/50 text-[#00AAFF]'
+                            : 'bg-[#060C18] border-[#1A3A5C] text-[#737373] hover:text-[#F5F5F5]'
+                        }`}
+                      >
+                        <span>{p.valor}</span>
+                        <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {editForm.prendas.length > 0 && (
+                  <div className="mt-2 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#060C18] border border-[#00AAFF]/30">
+                    <span className="text-xs text-[#737373]">
+                      {editForm.prendas.length} prenda{editForm.prendas.length > 1 ? 's' : ''}
+                    </span>
+                    <span className="text-sm font-bold text-[#00AAFF]">
+                      Total: ${editForm.prendas.reduce((s, p) => s + p.precio, 0).toLocaleString('es-CO')}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Nombre a estampar */}
+              <div>
+                <label className="block text-xs text-[#737373] mb-1.5">Nombre a estampar</label>
+                <input
+                  type="text"
+                  value={editForm.nombre_estampar}
+                  onChange={e => setEditForm(f => ({ ...f, nombre_estampar: e.target.value.toUpperCase() }))}
+                  placeholder="Ej: CAÑÓN, TOÑO..."
+                  className="w-full bg-[#060C18] border border-[#1A3A5C] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[#00AAFF] transition-colors"
+                />
+              </div>
+
+              {/* Talla y Número */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-[#737373] mb-1.5">Talla *</label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {['S', 'M', 'L', 'XL'].map(t => (
+                      <button
+                        key={t}
+                        onClick={() => setEditForm(f => ({ ...f, talla: t }))}
+                        className={`py-2 rounded-xl text-sm font-medium border transition-colors ${
+                          editForm.talla === t
+                            ? 'bg-[rgba(0,170,255,0.12)] border-[#00AAFF]/50 text-[#00AAFF]'
+                            : 'bg-[#060C18] border-[#1A3A5C] text-[#737373] hover:text-[#F5F5F5]'
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs text-[#737373] mb-1.5">Número *</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={editForm.numero}
+                    onChange={e => setEditForm(f => ({ ...f, numero: e.target.value.replace(/\D/g, '').slice(0, 3) }))}
+                    placeholder="001"
+                    maxLength={3}
+                    className="w-full bg-[#060C18] border border-[#1A3A5C] rounded-xl px-4 py-2.5 text-sm font-mono text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[#00AAFF] transition-colors"
+                  />
+                  {editForm.numero && (() => {
+                    const norm = String(parseInt(editForm.numero, 10));
+                    const origNorm = pedidoEditando.numero_estampar ? String(parseInt(pedidoEditando.numero_estampar, 10)) : '';
+                    const ocupado = norm !== origNorm && numerosUsados.includes(norm);
+                    return (
+                      <p className={`text-xs mt-1 font-mono ${ocupado ? 'text-[#FF5E5E]' : 'text-[#00AAFF]'}`}>
+                        {ocupado ? `✗ #${editForm.numero.padStart(3,'0')} ocupado` : `✓ #${editForm.numero.padStart(3,'0')}`}
+                      </p>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Botones */}
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={cerrarEditar}
+                  className="flex-1 py-2.5 rounded-xl border border-[#1A3A5C] text-[#737373] hover:text-[#F5F5F5] text-sm font-medium transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleGuardarEdit}
+                  disabled={guardandoEdit || editForm.prendas.length === 0}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#00AAFF] text-[#060C18] text-sm font-bold hover:bg-[#0099EE] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {guardandoEdit
+                    ? <><Loader className="w-4 h-4 animate-spin" /> Guardando...</>
+                    : <><Save className="w-4 h-4" /> Guardar cambios</>
+                  }
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

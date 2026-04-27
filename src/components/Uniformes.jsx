@@ -163,6 +163,7 @@ export default function Uniformes() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
+          tipo: 'Jugador',
           prendas: form.prendas.map(p => p.valor).join(', '),
           total,
           numero: numeroPadded,

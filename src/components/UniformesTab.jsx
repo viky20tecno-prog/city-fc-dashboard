@@ -7,17 +7,24 @@ export default function UniformesTab({ jugadores }) {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [form, setForm] = useState({
     cedula: '',
-    tipo_uniforme: 'General',
+    tipo_uniforme: 'Uniforme naranja',
     numero: '',
     nombre_estampar: '',
     talla: 'M'
   });
 
   const tiposUniformes = [
-    { valor: 'General', precio: 90000 },
-    { valor: 'Campeones EVG/SAB', precio: 60000 },
-    { valor: 'Arqueros EVG/SAB', precio: 120000 },
-    { valor: 'Arqueros General', precio: 160000 }
+    { valor: 'Uniforme naranja', precio: 120000 },
+    { valor: 'Camiseta naranja', precio: 75000 },
+    { valor: 'Uniforme blanco', precio: 110000 },
+    { valor: 'Camiseta blanca', precio: 65000 },
+    { valor: 'Uniforme Portero', precio: 120000 },
+    { valor: 'Camiseta Portero', precio: 75000 },
+    { valor: 'Peto', precio: 44000 },
+    { valor: 'Pantaloneta', precio: 45000 },
+    { valor: 'Chaqueta', precio: 170000 },
+    { valor: 'Sudadera', precio: 115000 },
+    { valor: 'Medias', precio: 15000 },
   ];
 
   const tallas = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -47,7 +54,7 @@ export default function UniformesTab({ jugadores }) {
       }
 
       setMessage({ type: 'success', text: `Uniforme registrado: ${data.uniforme.nombre_estampar} #${data.uniforme.numero}` });
-      setForm({ cedula: '', tipo_uniforme: 'General', numero: '', nombre_estampar: '', talla: 'M' });
+      setForm({ cedula: '', tipo_uniforme: 'Uniforme naranja', numero: '', nombre_estampar: '', talla: 'M' });
       setTimeout(() => setMostrarModal(false), 2000);
     } catch (err) {
       setMessage({ type: 'error', text: 'Error al conectar con el servidor' });

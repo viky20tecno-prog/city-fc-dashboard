@@ -65,7 +65,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0C0C0C] bg-[radial-gradient(circle_at_20%_20%,rgba(249,115,22,0.07),transparent)]">
+    <div className="min-h-screen bg-[#0C0C0C]">
 
       {/* HEADER */}
       <header className="bg-white/5 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">

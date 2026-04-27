@@ -29,6 +29,8 @@ export default function Uniformes() {
     nombre_estampar: '',
     talla: '',
     numero: '',
+    es_familiar: false,
+    genero: 'Hombre',
   });
   const [jugadorEncontrado, setJugadorEncontrado] = useState(null);
   const [jugadores, setJugadores] = useState([]);
@@ -124,7 +126,7 @@ export default function Uniformes() {
     setMostrarSugerencias(false);
     setJugadorEncontrado(null);
     setStep(1);
-    setForm({ cedula: '', nombre: '', prendas: [], nombre_estampar: '', talla: '', numero: '' });
+    setForm({ cedula: '', nombre: '', prendas: [], nombre_estampar: '', talla: '', numero: '', es_familiar: false, genero: 'Hombre' });
     setError('');
   };
 
@@ -171,7 +173,7 @@ export default function Uniformes() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          tipo: 'Jugador',
+          tipo: form.es_familiar ? `Familiar - ${form.genero}` : 'Jugador',
           prendas: form.prendas.map(p => p.valor).join(', '),
           total,
           numero: numeroPadded,
@@ -286,7 +288,16 @@ export default function Uniformes() {
         const mid = y + 5.8;
 
         doc.text(trunc(String(p.cedula || ''), 14),        C.cedula,  mid);
-        doc.text(trunc(String(p.nombre  || '—'), 26),      C.nombre,  mid);
+        const esFamiliar = p.tipo && p.tipo !== 'Jugador';
+        const nombrePDF  = trunc(String(p.nombre || '—'), esFamiliar ? 19 : 26);
+        doc.text(nombrePDF, C.nombre, mid);
+        if (esFamiliar) {
+          doc.setTextColor(198, 120, 255);
+          doc.setFontSize(6.5);
+          doc.text(trunc(p.tipo, 14), C.nombre + doc.getTextWidth(nombrePDF) + 1.5, mid);
+          doc.setFontSize(7.8);
+          doc.setTextColor(190, 210, 230);
+        }
         doc.text(trunc(getPrendas(p), 44),                 C.prendas, mid);
         doc.text(String(p.talla          || '—'),          C.talla,   mid);
         doc.text(String(p.numero_estampar || '—'),         C.numero,  mid);
@@ -603,7 +614,8 @@ export default function Uniformes() {
           {step === 2 && jugadorEncontrado && (
             <div className="space-y-4">
 
-              <div className="p-3 rounded-xl bg-[rgba(0,170,255,0.1)] border border-[#00AAFF]/20 flex items-center gap-3 mb-2">
+              {/* Jugador seleccionado */}
+              <div className="p-3 rounded-xl bg-[rgba(0,170,255,0.1)] border border-[#00AAFF]/20 flex items-center gap-3">
                 <CheckCircle className="w-4 h-4 text-[#00AAFF] flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-[#F5F5F5]">
@@ -617,6 +629,63 @@ export default function Uniformes() {
                 >
                   Cambiar
                 </button>
+              </div>
+
+              {/* Toggle familiar */}
+              <div className={`rounded-xl border transition-all ${
+                form.es_familiar
+                  ? 'bg-[rgba(198,120,255,0.1)] border-[#C678FF]/30'
+                  : 'bg-[#060C18] border-[#1A3A5C]'
+              }`}>
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, es_familiar: !f.es_familiar }))}
+                  className="w-full flex items-center justify-between px-4 py-3 text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-base">👨‍👩‍👦</span>
+                    <div>
+                      <p className={`text-sm font-medium ${form.es_familiar ? 'text-[#C678FF]' : 'text-[#737373]'}`}>
+                        Pedido para familiar
+                      </p>
+                      <p className="text-xs text-[#737373]">
+                        {form.es_familiar ? 'Uniforme para un familiar del jugador' : 'Activar si el uniforme es para un familiar'}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Switch visual */}
+                  <div className={`w-10 h-5.5 rounded-full flex items-center transition-all px-0.5 ${
+                    form.es_familiar ? 'bg-[#C678FF]' : 'bg-[#1A3A5C]'
+                  }`} style={{ height: '22px' }}>
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                      form.es_familiar ? 'translate-x-5' : 'translate-x-0'
+                    }`} />
+                  </div>
+                </button>
+
+                {/* Selector de género — solo cuando es_familiar */}
+                {form.es_familiar && (
+                  <div className="px-4 pb-4 pt-1 border-t border-[#C678FF]/20">
+                    <p className="text-xs text-[#737373] mb-2">Género del familiar *</p>
+                    <div className="flex gap-3">
+                      {['Hombre', 'Mujer'].map(g => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => setForm(f => ({ ...f, genero: g }))}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                            form.genero === g
+                              ? 'bg-[rgba(198,120,255,0.15)] border-[#C678FF]/50 text-[#C678FF]'
+                              : 'bg-[#060C18] border-[#1A3A5C] text-[#737373] hover:text-[#F5F5F5]'
+                          }`}
+                        >
+                          <span>{g === 'Hombre' ? '👨' : '👩'}</span>
+                          {g}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -798,7 +867,16 @@ export default function Uniformes() {
                       return (
                         <tr key={i} className="border-b border-[#1A3A5C]/50 hover:bg-[#0F1F36] transition-colors">
                           <td className="py-2 px-3 text-[#737373]">{p.cedula}</td>
-                          <td className="py-2 px-3 text-[#F5F5F5]">{p.nombre}</td>
+                          <td className="py-2 px-3 text-[#F5F5F5]">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {p.nombre}
+                              {p.tipo && p.tipo !== 'Jugador' && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[rgba(198,120,255,0.12)] text-[#C678FF] border border-[#C678FF]/20 whitespace-nowrap">
+                                  {p.tipo}
+                                </span>
+                              )}
+                            </div>
+                          </td>
                           <td className="py-2 px-3 text-[#F5F5F5] max-w-[180px]">
                             <span className="block truncate" title={p.prendas || p.prenda}>{p.prendas || p.prenda || '—'}</span>
                           </td>

@@ -24,7 +24,6 @@ export default function Uniformes() {
   const [form, setForm] = useState({
     cedula: '',
     nombre: '',
-    tipo: '',
     prenda: '',
     nombre_estampar: '',
     talla: '',
@@ -117,7 +116,7 @@ export default function Uniformes() {
     setMostrarSugerencias(false);
     setJugadorEncontrado(null);
     setStep(1);
-    setForm({ cedula: '', nombre: '', tipo: '', prenda: '', nombre_estampar: '', talla: '', numero: '' });
+    setForm({ cedula: '', nombre: '', prenda: '', nombre_estampar: '', talla: '', numero: '' });
     setError('');
   };
 
@@ -130,7 +129,7 @@ export default function Uniformes() {
 
   const handleSubmit = async () => {
     setError('');
-    if (!form.tipo || !form.prenda || !form.talla || !form.numero) {
+    if (!form.prenda || !form.talla || !form.numero) {
       setError('Completá todos los campos obligatorios.');
       return;
     }
@@ -287,25 +286,6 @@ export default function Uniformes() {
               </div>
 
               <div>
-                <label className="block text-xs text-[#8B949E] mb-1.5">Tipo de jugador *</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {['Jugador', 'Portero'].map(t => (
-                    <button
-                      key={t}
-                      onClick={() => setForm(f => ({ ...f, tipo: t }))}
-                      className={`py-2.5 rounded-xl text-sm font-medium border transition-colors ${
-                        form.tipo === t
-                          ? 'bg-[rgba(0,208,132,0.12)] border-[#00D084]/50 text-[#00D084]'
-                          : 'bg-[#0D1117] border-[#30363D] text-[#8B949E] hover:text-[#E6EDF3]'
-                      }`}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
                 <label className="block text-xs text-[#8B949E] mb-1.5">Prenda *</label>
                 <div className="grid grid-cols-1 gap-2">
                   {PRENDAS.map(p => (
@@ -387,7 +367,7 @@ export default function Uniformes() {
 
               <button
                 onClick={handleSubmit}
-                disabled={!form.tipo || !form.prenda || !form.talla || !form.numero || enviando || !numeroValido}
+                disabled={!form.prenda || !form.talla || !form.numero || enviando || !numeroValido}
                 className="w-full py-3 rounded-xl bg-[#00D084] text-[#0D1117] text-sm font-bold hover:bg-[#00D084]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {enviando ? (
@@ -409,7 +389,7 @@ export default function Uniformes() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#30363D]">
-                  {['Cédula', 'Nombre', 'Tipo', 'Prenda', 'Estampar', 'Talla', 'Número', 'Fecha', 'Estado'].map(h => (
+                  {['Cédula', 'Nombre', 'Prenda', 'Estampar', 'Talla', 'Número', 'Fecha', 'Estado'].map(h => (
                     <th key={h} className="text-left py-2 px-3 text-xs text-[#8B949E] font-medium">{h}</th>
                   ))}
                 </tr>
@@ -419,7 +399,6 @@ export default function Uniformes() {
                   <tr key={i} className="border-b border-[#30363D]/50 hover:bg-[#1E2530] transition-colors">
                     <td className="py-2 px-3 text-[#8B949E]">{p.cedula}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.nombre}</td>
-                    <td className="py-2 px-3 text-[#E6EDF3]">{p.tipo}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.prenda || '—'}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.nombre_estampar || '—'}</td>
                     <td className="py-2 px-3 text-[#E6EDF3]">{p.talla}</td>

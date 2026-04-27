@@ -24,7 +24,7 @@ export default function Uniformes() {
   const [form, setForm] = useState({
     cedula: '',
     nombre: '',
-    prenda: '',
+    prendas: [],
     nombre_estampar: '',
     talla: '',
     numero: '',
@@ -116,9 +116,23 @@ export default function Uniformes() {
     setMostrarSugerencias(false);
     setJugadorEncontrado(null);
     setStep(1);
-    setForm({ cedula: '', nombre: '', prenda: '', nombre_estampar: '', talla: '', numero: '' });
+    setForm({ cedula: '', nombre: '', prendas: [], nombre_estampar: '', talla: '', numero: '' });
     setError('');
   };
+
+  const togglePrenda = (prenda) => {
+    setForm(f => {
+      const existe = f.prendas.find(p => p.valor === prenda.valor);
+      return {
+        ...f,
+        prendas: existe
+          ? f.prendas.filter(p => p.valor !== prenda.valor)
+          : [...f.prendas, prenda],
+      };
+    });
+  };
+
+  const total = form.prendas.reduce((sum, p) => sum + p.precio, 0);
 
   const formatNumero = (val) => val.replace(/\D/g, '').slice(0, 3);
 
@@ -130,7 +144,7 @@ export default function Uniformes() {
   const handleSubmit = async () => {
     setError('');
     const faltantes = [];
-    if (!form.prenda) faltantes.push('prenda');
+    if (form.prendas.length === 0) faltantes.push('prenda');
     if (!form.talla) faltantes.push('talla');
     if (!form.numero) faltantes.push('número');
     if (faltantes.length > 0) {
@@ -149,6 +163,8 @@ export default function Uniformes() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
+          prendas: form.prendas.map(p => p.valor).join(', '),
+          total,
           numero: numeroPadded,
           club_id: CLUB_ID,
         }),
@@ -290,23 +306,32 @@ export default function Uniformes() {
               </div>
 
               <div>
-                <label className="block text-xs text-[#8B949E] mb-1.5">Prenda *</label>
+                <label className="block text-xs text-[#8B949E] mb-1.5">Prendas * <span className="font-normal">(podés seleccionar varias)</span></label>
                 <div className="grid grid-cols-1 gap-2">
-                  {PRENDAS.map(p => (
-                    <button
-                      key={p.valor}
-                      onClick={() => setForm(f => ({ ...f, prenda: p.valor }))}
-                      className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
-                        form.prenda === p.valor
-                          ? 'bg-[rgba(0,208,132,0.12)] border-[#00D084]/50 text-[#00D084]'
-                          : 'bg-[#0D1117] border-[#30363D] text-[#8B949E] hover:text-[#E6EDF3]'
-                      }`}
-                    >
-                      <span>{p.valor}</span>
-                      <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
-                    </button>
-                  ))}
+                  {PRENDAS.map(p => {
+                    const seleccionada = form.prendas.find(x => x.valor === p.valor);
+                    return (
+                      <button
+                        key={p.valor}
+                        onClick={() => togglePrenda(p)}
+                        className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                          seleccionada
+                            ? 'bg-[rgba(0,208,132,0.12)] border-[#00D084]/50 text-[#00D084]'
+                            : 'bg-[#0D1117] border-[#30363D] text-[#8B949E] hover:text-[#E6EDF3]'
+                        }`}
+                      >
+                        <span>{p.valor}</span>
+                        <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
+                      </button>
+                    );
+                  })}
                 </div>
+                {form.prendas.length > 0 && (
+                  <div className="mt-3 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#0D1117] border border-[#00D084]/30">
+                    <span className="text-xs text-[#8B949E]">{form.prendas.length} prenda{form.prendas.length > 1 ? 's' : ''} seleccionada{form.prendas.length > 1 ? 's' : ''}</span>
+                    <span className="text-sm font-bold text-[#00D084]">Total: ${total.toLocaleString('es-CO')}</span>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -371,7 +396,7 @@ export default function Uniformes() {
 
               <button
                 onClick={handleSubmit}
-                disabled={!form.prenda || !form.talla || !form.numero || enviando || !numeroValido}
+                disabled={form.prendas.length === 0 || !form.talla || !form.numero || enviando || !numeroValido}
                 className="w-full py-3 rounded-xl bg-[#00D084] text-[#0D1117] text-sm font-bold hover:bg-[#00D084]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {enviando ? (

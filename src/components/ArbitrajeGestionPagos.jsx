@@ -74,11 +74,11 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
   // ── Sin partido seleccionado ─────────────────────────────────────────────────
   if (!partidoId) {
     return (
-      <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-12 text-center">
+      <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-12 text-center">
         <div className="text-5xl mb-4">👈</div>
         <h3 className="text-white font-semibold mb-2">Selecciona un partido</h3>
         <p className="text-gray-400 text-sm">
-          Ve a la pestaña <span className="text-green-400 font-medium">Partidos</span> y haz clic en "Ver pagos".
+          Ve a la pestaña <span className="text-orange-400 font-medium">Partidos</span> y haz clic en "Ver pagos".
         </p>
       </div>
     );
@@ -87,7 +87,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
         <p className="text-gray-400 text-sm">Cargando información del partido...</p>
       </div>
     );
@@ -111,7 +111,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
 
       {/* ── Resumen financiero ── */}
       {resumen && (
-        <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-5">
+        <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-5">
 
           {/* Título del partido */}
           <div className="flex items-start justify-between gap-3 mb-4">
@@ -149,9 +149,9 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
               <span>Progreso de cobro</span>
               <span className="text-white font-medium">{pct}%</span>
             </div>
-            <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-2 bg-[#1A1A1A] rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-green-600 to-green-400 rounded-full transition-all duration-500"
+                className="h-full bg-gradient-to-r from-orange-600 to-orange-400 rounded-full transition-all duration-500"
                 style={{ width: `${pct}%` }}
               />
             </div>
@@ -161,11 +161,11 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: 'Monto total', value: fmt(resumen.montoTotal),    color: 'text-white' },
-              { label: 'Recaudado',   value: fmt(resumen.totalRecaudado), color: 'text-green-400' },
+              { label: 'Recaudado',   value: fmt(resumen.totalRecaudado), color: 'text-orange-400' },
               { label: 'Pendiente',   value: fmt(resumen.faltante),       color: 'text-orange-400' },
               { label: 'Sin pagar',   value: `${resumen.cantidadPendiente} de ${resumen.cantidadTotal}`, color: 'text-yellow-400' },
             ].map((m) => (
-              <div key={m.label} className="bg-gray-800/60 rounded-lg p-3">
+              <div key={m.label} className="bg-[#1A1A1A] rounded-lg p-3">
                 <p className="text-xs text-gray-500 mb-1">{m.label}</p>
                 <p className={`font-bold text-sm ${m.color}`}>{m.value}</p>
               </div>
@@ -175,8 +175,8 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
       )}
 
       {/* ── Lista de pagos ── */}
-      <div className="bg-gray-900/60 border border-gray-800 rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-800">
+      <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-[#2A2A2A]">
           <h3 className="text-white font-semibold">Registro de pagos individuales</h3>
         </div>
 
@@ -194,10 +194,10 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
 
                   {/* Icono estado */}
                   <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                    pago.estadoPago ? 'bg-green-900/50' : 'bg-gray-800'
+                    pago.estadoPago ? 'bg-orange-900/50' : 'bg-[#1A1A1A]'
                   }`}>
                     {pago.estadoPago
-                      ? <CheckCircle size={16} className="text-green-400" />
+                      ? <CheckCircle size={16} className="text-orange-400" />
                       : <Circle size={16} className="text-gray-600" />
                     }
                   </div>
@@ -216,7 +216,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
                   {/* Estado / botón — derecha */}
                   <div className="shrink-0 text-right min-w-[110px]">
                     {pago.estadoPago ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-green-400 font-medium">
+                      <span className="inline-flex items-center gap-1 text-xs text-orange-400 font-medium">
                         <Check size={11} />
                         {pago.metodoPago}
                       </span>
@@ -254,8 +254,8 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
                             onClick={() => setMetodoPago(selected ? '' : m.id)}
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all duration-150 ${
                               selected
-                                ? 'bg-green-600 border-green-500 text-white shadow-lg shadow-green-900/40 scale-105'
-                                : 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 hover:border-gray-600'
+                                ? 'bg-orange-600 border-orange-500 text-white shadow-lg shadow-orange-900/40 scale-105'
+                                : 'bg-[#1A1A1A] border-[#333333] text-gray-300 hover:bg-[#252525] hover:border-gray-600'
                             }`}
                           >
                             <span>{m.emoji}</span>
@@ -271,7 +271,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
                       <button
                         onClick={() => handleRegistrarPago(pago.cedula)}
                         disabled={!metodoPago || guardando}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
                       >
                         {guardando
                           ? <><Loader2 size={14} className="animate-spin" /> Guardando...</>

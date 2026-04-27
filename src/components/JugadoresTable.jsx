@@ -123,7 +123,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   placeholder="Buscar nombre o cédula..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full sm:w-64 pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400/30"
+                  className="w-full sm:w-64 pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30"
                 />
               </div>
 
@@ -202,7 +202,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                     <EstadoBadge estado={j.estadoPago} />
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-green-400 font-semibold">
+                  <td className="px-6 py-4 text-sm text-orange-400 font-semibold">
                     {formatCOP(j.totalPagado)}
                   </td>
 
@@ -214,10 +214,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => setJugadorDetalle(j)}
-                        className="p-2 rounded-lg hover:bg-green-500/10 transition"
+                        className="p-2 rounded-lg hover:bg-orange-500/10 transition"
                         title="Ver estado de cuenta"
                       >
-                        <Eye className="w-4 h-4 text-gray-400 hover:text-green-400" />
+                        <Eye className="w-4 h-4 text-gray-400 hover:text-orange-400" />
                       </button>
                       <button
                         onClick={() => setJugadorSuspension(j)}

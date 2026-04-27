@@ -24,7 +24,7 @@ export default function ArbitrajePagos() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white">
+    <div className="min-h-screen bg-black text-white">
       <div className="max-w-6xl mx-auto px-4 py-6">
 
         {/* Header */}
@@ -36,15 +36,15 @@ export default function ArbitrajePagos() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-gray-900/60 border border-gray-800 rounded-xl p-1">
+        <div className="flex gap-1 mb-6 bg-[#141414] border border-[#2A2A2A] rounded-xl p-1">
           {TABS.map((tab, idx) => (
             <button
               key={idx}
               onClick={() => setActiveTab(idx)}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === idx
-                  ? 'bg-green-600 text-white shadow-lg shadow-green-900/30'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/30'
+                  : 'text-gray-400 hover:text-white hover:bg-[#1A1A1A]'
               }`}
             >
               <span>{tab.icon}</span>

@@ -24,11 +24,11 @@ export default function WhatsAppMockup() {
   ];
 
   return (
-    <div className="bg-[#161B22] rounded-2xl border border-[#30363D] p-6">
-      <h2 className="text-lg font-semibold text-[#E6EDF3] mb-4">Así se ve en WhatsApp</h2>
+    <div className="bg-[#141414] rounded-2xl border border-[#2A2A2A] p-6">
+      <h2 className="text-lg font-semibold text-[#F5F5F5] mb-4">Así se ve en WhatsApp</h2>
       
       <div className="max-w-sm mx-auto">
-        <div className="bg-[#0D1117] rounded-3xl p-2 shadow-xl border border-[#30363D]">
+        <div className="bg-[#0C0C0C] rounded-3xl p-2 shadow-xl border border-[#2A2A2A]">
           {/* Status bar */}
           <div className="bg-[#075e54] rounded-t-2xl px-4 py-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold">⚽</div>
@@ -48,12 +48,12 @@ export default function WhatsAppMockup() {
                     : 'bg-[#1F2C34] rounded-tl-none'
                 }`}>
                   {msg.isImage ? (
-                    <div className="bg-[#0D1117] rounded-lg p-4 mb-1 flex items-center justify-center">
+                    <div className="bg-[#0C0C0C] rounded-lg p-4 mb-1 flex items-center justify-center">
                       <span className="text-2xl">🧾</span>
                     </div>
                   ) : null}
-                  <p className="text-sm text-[#E6EDF3] leading-relaxed">{msg.text}</p>
-                  <p className="text-[10px] text-[#8B949E] text-right mt-1">{msg.time}</p>
+                  <p className="text-sm text-[#F5F5F5] leading-relaxed">{msg.text}</p>
+                  <p className="text-[10px] text-[#737373] text-right mt-1">{msg.time}</p>
                 </div>
               </div>
             ))}
@@ -61,15 +61,15 @@ export default function WhatsAppMockup() {
           
           {/* Input bar */}
           <div className="bg-[#1F2C34] rounded-b-2xl px-3 py-2 flex items-center gap-2">
-            <div className="flex-1 bg-[#2A3942] rounded-full px-4 py-2 text-xs text-[#8B949E]">Escribe un mensaje...</div>
-            <div className="w-8 h-8 rounded-full bg-[#00D084] flex items-center justify-center">
+            <div className="flex-1 bg-[#2A3942] rounded-full px-4 py-2 text-xs text-[#737373]">Escribe un mensaje...</div>
+            <div className="w-8 h-8 rounded-full bg-[#F97316] flex items-center justify-center">
               <span className="text-white text-sm">🎤</span>
             </div>
           </div>
         </div>
       </div>
       
-      <p className="text-center text-xs text-[#8B949E] mt-4">
+      <p className="text-center text-xs text-[#737373] mt-4">
         Todo automático: el bot cobra, recibe el comprobante, valida con IA y confirma al jugador
       </p>
     </div>

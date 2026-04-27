@@ -133,29 +133,29 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
   if (status === 'success' && ultimoPago) {
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-[#161B22] rounded-2xl border border-[#30363D] p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-[rgba(0,208,132,0.12)] flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-[#00D084]" />
+        <div className="bg-[#141414] rounded-2xl border border-[#2A2A2A] p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 rounded-full bg-[rgba(249,115,22,0.12)] flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-8 h-8 text-[#F97316]" />
           </div>
-          <h2 className="text-xl font-bold text-[#E6EDF3] mb-2">¡Pago registrado!</h2>
-          <p className="text-[#8B949E]">{ultimoPago.nombre}</p>
-          <p className="text-[#E6EDF3] font-medium mt-1">
+          <h2 className="text-xl font-bold text-[#F5F5F5] mb-2">¡Pago registrado!</h2>
+          <p className="text-[#737373]">{ultimoPago.nombre}</p>
+          <p className="text-[#F5F5F5] font-medium mt-1">
             {ultimoPago.concepto}{ultimoPago.conceptoLabel !== ultimoPago.concepto ? ` — ${ultimoPago.conceptoLabel}` : ''} · {formatCOP(ultimoPago.monto)}
           </p>
-          <p className="text-xs text-[#8B949E] mt-3 mb-6">El estado del jugador se actualizó automáticamente</p>
+          <p className="text-xs text-[#737373] mt-3 mb-6">El estado del jugador se actualizó automáticamente</p>
 
           {/* ✅ Pregunta: ¿registrar otro pago? */}
           <div className="flex gap-3">
             <button
               onClick={handleOtroPago}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#00D084]/30 bg-[rgba(0,208,132,0.08)] text-sm font-medium text-[#00D084] hover:bg-[rgba(0,208,132,0.15)] transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#F97316]/30 bg-[rgba(249,115,22,0.08)] text-sm font-medium text-[#F97316] hover:bg-[rgba(249,115,22,0.15)] transition-colors"
             >
               <PlusCircle className="w-4 h-4" />
               Otro pago
             </button>
             <button
               onClick={onClose}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#30363D] text-sm font-medium text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#8B949E] transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#2A2A2A] text-sm font-medium text-[#737373] hover:text-[#F5F5F5] hover:border-[#737373] transition-colors"
             >
               <X className="w-4 h-4" />
               Cerrar
@@ -170,52 +170,52 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
   if (status === 'confirmar' || status === 'loading') {
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-[#161B22] rounded-2xl border border-[#30363D] w-full max-w-md">
-          <div className="flex items-center gap-3 p-6 border-b border-[#30363D]">
+        <div className="bg-[#141414] rounded-2xl border border-[#2A2A2A] w-full max-w-md">
+          <div className="flex items-center gap-3 p-6 border-b border-[#2A2A2A]">
             <div className="w-10 h-10 rounded-xl bg-[rgba(245,166,35,0.12)] flex items-center justify-center">
               <Shield className="w-5 h-5 text-[#F5A623]" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[#E6EDF3]">Confirmar pago</h2>
-              <p className="text-xs text-[#8B949E]">Revisa los datos antes de registrar</p>
+              <h2 className="text-lg font-bold text-[#F5F5F5]">Confirmar pago</h2>
+              <p className="text-xs text-[#737373]">Revisa los datos antes de registrar</p>
             </div>
           </div>
 
           <div className="p-6 space-y-3">
-            <div className="bg-[#1E2530] rounded-xl p-4 space-y-3">
+            <div className="bg-[#1A1A1A] rounded-xl p-4 space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-[#8B949E]">Jugador</span>
-                <span className="text-sm font-medium text-[#E6EDF3]">{nombreJugador}</span>
+                <span className="text-sm text-[#737373]">Jugador</span>
+                <span className="text-sm font-medium text-[#F5F5F5]">{nombreJugador}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-[#8B949E]">Cédula</span>
-                <span className="text-sm font-mono text-[#E6EDF3]">{form.cedula}</span>
+                <span className="text-sm text-[#737373]">Cédula</span>
+                <span className="text-sm font-mono text-[#F5F5F5]">{form.cedula}</span>
               </div>
-              <div className="border-t border-[#30363D]"></div>
+              <div className="border-t border-[#2A2A2A]"></div>
               <div className="flex justify-between">
-                <span className="text-sm text-[#8B949E]">Concepto</span>
-                <span className="text-sm font-medium text-[#E6EDF3]">
+                <span className="text-sm text-[#737373]">Concepto</span>
+                <span className="text-sm font-medium text-[#F5F5F5]">
                   {form.concepto}{form.torneo ? ` — ${form.torneo}` : ''}{form.uniforme ? ` — ${form.uniforme}` : ''}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-[#8B949E]">Monto</span>
-                <span className="text-lg font-bold text-[#00D084]">{formatCOP(form.monto)}</span>
+                <span className="text-sm text-[#737373]">Monto</span>
+                <span className="text-lg font-bold text-[#F97316]">{formatCOP(form.monto)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-[#8B949E]">Método</span>
-                <span className="text-sm text-[#E6EDF3]">{form.metodo_pago}</span>
+                <span className="text-sm text-[#737373]">Método</span>
+                <span className="text-sm text-[#F5F5F5]">{form.metodo_pago}</span>
               </div>
               {form.referencia && form.metodo_pago !== 'Efectivo' && (
                 <div className="flex justify-between">
-                  <span className="text-sm text-[#8B949E]">Referencia</span>
-                  <span className="text-sm font-mono text-[#E6EDF3]">{form.referencia}</span>
+                  <span className="text-sm text-[#737373]">Referencia</span>
+                  <span className="text-sm font-mono text-[#F5F5F5]">{form.referencia}</span>
                 </div>
               )}
               {form.observacion && (
                 <div className="flex justify-between">
-                  <span className="text-sm text-[#8B949E]">Observación</span>
-                  <span className="text-sm text-[#E6EDF3] text-right max-w-[200px]">{form.observacion}</span>
+                  <span className="text-sm text-[#737373]">Observación</span>
+                  <span className="text-sm text-[#F5F5F5] text-right max-w-[200px]">{form.observacion}</span>
                 </div>
               )}
             </div>
@@ -228,11 +228,11 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
 
           <div className="p-6 pt-0 flex gap-3">
             <button onClick={() => setStatus('idle')} disabled={status === 'loading'}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#30363D] text-sm font-medium text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#8B949E] transition-colors disabled:opacity-50">
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#2A2A2A] text-sm font-medium text-[#737373] hover:text-[#F5F5F5] hover:border-[#737373] transition-colors disabled:opacity-50">
               <ArrowLeft className="w-4 h-4" />Editar
             </button>
             <button onClick={handleConfirmar} disabled={status === 'loading'}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#0D1117] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all disabled:opacity-50">
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#F97316] text-[#0C0C0C] rounded-xl font-medium text-sm hover:bg-[#F97316]/80 transition-all disabled:opacity-50">
               {status === 'loading' ? <><Loader2 className="w-4 h-4 animate-spin" />Registrando...</> : <><CheckCircle className="w-4 h-4" />Confirmar Pago</>}
             </button>
           </div>
@@ -244,41 +244,41 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
   // ==================== FORMULARIO ====================
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
-      <div className="bg-[#161B22] rounded-2xl border border-[#30363D] w-full max-w-lg my-8">
-        <div className="flex items-center justify-between p-6 border-b border-[#30363D]">
+      <div className="bg-[#141414] rounded-2xl border border-[#2A2A2A] w-full max-w-lg my-8">
+        <div className="flex items-center justify-between p-6 border-b border-[#2A2A2A]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[rgba(0,208,132,0.12)] flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-[#00D084]" />
+            <div className="w-10 h-10 rounded-xl bg-[rgba(249,115,22,0.12)] flex items-center justify-center">
+              <DollarSign className="w-5 h-5 text-[#F97316]" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[#E6EDF3]">Registrar Pago Manual</h2>
-              <p className="text-xs text-[#8B949E]">Pagos en efectivo, Nequi, transferencia, etc.</p>
+              <h2 className="text-lg font-bold text-[#F5F5F5]">Registrar Pago Manual</h2>
+              <p className="text-xs text-[#737373]">Pagos en efectivo, Nequi, transferencia, etc.</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-[#1E2530] transition-colors">
-            <X className="w-5 h-5 text-[#8B949E]" />
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-[#1A1A1A] transition-colors">
+            <X className="w-5 h-5 text-[#737373]" />
           </button>
         </div>
 
         <form onSubmit={handleRevisar} className="p-6 space-y-4">
           {/* Jugador */}
           <div>
-            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Jugador <span className="text-[#FF5E5E]">*</span></label>
+            <label className="block text-sm font-medium text-[#F5F5F5] mb-1">Jugador <span className="text-[#FF5E5E]">*</span></label>
             <div className="relative">
               <input type="text" placeholder="Buscar por nombre o cédula..." value={busqueda}
                 onChange={e => { setBusqueda(e.target.value); setJugadorSeleccionado(null); }}
-                className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]" />
-              {jugadorSeleccionado && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#00D084] text-xs font-medium">✓ Seleccionado</span>}
+                className="w-full px-4 py-3 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30 focus:border-[#F97316]" />
+              {jugadorSeleccionado && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#F97316] text-xs font-medium">✓ Seleccionado</span>}
             </div>
             {jugadoresFiltrados.length > 0 && !jugadorSeleccionado && (
-              <div className="mt-1 bg-[#1E2530] border border-[#30363D] rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+              <div className="mt-1 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden max-h-48 overflow-y-auto">
                 {jugadoresFiltrados.map((j, i) => {
                   const nombre = `${j['nombre(s)'] || j.nombre || ''} ${j['apellido(s)'] || j.apellidos || ''}`.trim();
                   return (
                     <button key={j.cedula || i} type="button" onClick={() => seleccionarJugador(j)}
-                      className="w-full text-left px-4 py-2 hover:bg-[#161B22] transition-colors border-b border-[#30363D] last:border-0">
-                      <p className="text-sm text-[#E6EDF3]">{nombre}</p>
-                      <p className="text-xs text-[#8B949E]">CC {j.cedula} · {j.celular}</p>
+                      className="w-full text-left px-4 py-2 hover:bg-[#141414] transition-colors border-b border-[#2A2A2A] last:border-0">
+                      <p className="text-sm text-[#F5F5F5]">{nombre}</p>
+                      <p className="text-xs text-[#737373]">CC {j.cedula} · {j.celular}</p>
                     </button>
                   );
                 })}
@@ -288,7 +288,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
 
           {/* Concepto */}
           <div>
-            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Concepto <span className="text-[#FF5E5E]">*</span></label>
+            <label className="block text-sm font-medium text-[#F5F5F5] mb-1">Concepto <span className="text-[#FF5E5E]">*</span></label>
             <select value={form.concepto}
               onChange={e => {
                 handleChange('concepto', e.target.value);
@@ -297,17 +297,17 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
                 handleChange('torneo', '');
                 handleChange('uniforme', '');
               }}
-              className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]">
+              className="w-full px-4 py-3 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] text-sm text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30 focus:border-[#F97316]">
               {CONCEPTOS.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
 
           {form.concepto === 'Torneo' && (
             <div>
-              <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Torneo <span className="text-[#FF5E5E]">*</span></label>
+              <label className="block text-sm font-medium text-[#F5F5F5] mb-1">Torneo <span className="text-[#FF5E5E]">*</span></label>
               <select value={form.torneo}
                 onChange={e => { const t = TORNEOS.find(t => t.label === e.target.value); handleChange('torneo', e.target.value); if (t) handleChange('monto', t.valor.toString()); }}
-                className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]">
+                className="w-full px-4 py-3 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] text-sm text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30 focus:border-[#F97316]">
                 <option value="">Seleccionar torneo...</option>
                 {TORNEOS.map(t => <option key={t.label} value={t.label}>{t.label} — {formatCOP(t.valor)}</option>)}
               </select>
@@ -316,10 +316,10 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
 
           {form.concepto === 'Uniforme' && (
             <div>
-              <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Tipo de uniforme <span className="text-[#FF5E5E]">*</span></label>
+              <label className="block text-sm font-medium text-[#F5F5F5] mb-1">Tipo de uniforme <span className="text-[#FF5E5E]">*</span></label>
               <select value={form.uniforme}
                 onChange={e => { const u = UNIFORMES.find(u => u.label === e.target.value); handleChange('uniforme', e.target.value); if (u) handleChange('monto', u.valor.toString()); }}
-                className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]">
+                className="w-full px-4 py-3 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] text-sm text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30 focus:border-[#F97316]">
                 <option value="">Seleccionar uniforme...</option>
                 {UNIFORMES.map(u => <option key={u.label} value={u.label}>{u.label} — {formatCOP(u.valor)}</option>)}
               </select>
@@ -328,40 +328,40 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
 
           {/* Monto */}
           <div>
-            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Monto <span className="text-[#FF5E5E]">*</span></label>
+            <label className="block text-sm font-medium text-[#F5F5F5] mb-1">Monto <span className="text-[#FF5E5E]">*</span></label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8B949E] text-sm">$</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#737373] text-sm">$</span>
               <input type="text" inputMode="numeric" placeholder="65000" value={form.monto}
                 onChange={e => handleChange('monto', e.target.value.replace(/[^0-9]/g, ''))}
-                className="w-full pl-8 pr-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]" />
+                className="w-full pl-8 pr-4 py-3 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30 focus:border-[#F97316]" />
             </div>
           </div>
 
           {/* Método */}
           <div>
-            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Método de pago <span className="text-[#FF5E5E]">*</span></label>
+            <label className="block text-sm font-medium text-[#F5F5F5] mb-1">Método de pago <span className="text-[#FF5E5E]">*</span></label>
             <select value={form.metodo_pago} onChange={e => handleChange('metodo_pago', e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]">
+              className="w-full px-4 py-3 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] text-sm text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30 focus:border-[#F97316]">
               {METODOS_PAGO.map(m => <option key={m} value={m}>{m}</option>)}
             </select>
           </div>
 
           {form.metodo_pago !== 'Efectivo' && (
             <div>
-              <label className="block text-sm font-medium text-[#E6EDF3] mb-1">Referencia o número de recibo</label>
+              <label className="block text-sm font-medium text-[#F5F5F5] mb-1">Referencia o número de recibo</label>
               <input type="text" placeholder="Ej: REC-001 (opcional)" value={form.referencia}
                 onChange={e => handleChange('referencia', e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084]" />
+                className="w-full px-4 py-3 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30 focus:border-[#F97316]" />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-[#E6EDF3] mb-1">
+            <label className="block text-sm font-medium text-[#F5F5F5] mb-1">
               Observación {form.concepto === 'Otro' && <span className="text-[#FF5E5E]">*</span>}
             </label>
             <textarea placeholder={form.concepto === 'Otro' ? 'Describe el concepto del pago...' : 'Notas adicionales (opcional)'}
               value={form.observacion} onChange={e => handleChange('observacion', e.target.value)} rows={2}
-              className="w-full px-4 py-3 rounded-xl bg-[#1E2530] border border-[#30363D] text-sm text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:ring-2 focus:ring-[#00D084]/30 focus:border-[#00D084] resize-none" />
+              className="w-full px-4 py-3 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:ring-2 focus:ring-[#F97316]/30 focus:border-[#F97316] resize-none" />
           </div>
 
           {status === 'error' && (
@@ -371,7 +371,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
           )}
 
           <button type="submit"
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#00D084] text-[#0D1117] rounded-xl font-medium text-sm hover:bg-[#00D084]/80 transition-all">
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#F97316] text-[#0C0C0C] rounded-xl font-medium text-sm hover:bg-[#F97316]/80 transition-all">
             <Shield className="w-4 h-4" />Revisar y Confirmar
           </button>
         </form>

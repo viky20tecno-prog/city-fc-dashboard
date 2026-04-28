@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle, XCircle, Eye, EyeOff, Loader2, PauseCircle, Package } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
-
-const CLUB_ID = 'city-fc';
+import { getClubId } from '../services/api';
 
 const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(n) || 0);
 
@@ -125,7 +124,7 @@ function SeccionPedidoUniforme({ cedula }) {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    authFetch(`${API_BASE_URL}/uniforms?club_id=${CLUB_ID}`)
+    authFetch(`${API_BASE_URL}/uniforms?club_id=${getClubId()}`)
       .then(r => r.json())
       .then(data => {
         if (data.success) {
@@ -244,7 +243,7 @@ function SeccionHistorialLazy({ cedula }) {
     setCargando(true);
     setError('');
     try {
-      const res  = await authFetch(`${API_BASE_URL}/payments?club_id=${CLUB_ID}&cedula=${cedula}&limit=50`);
+      const res  = await authFetch(`${API_BASE_URL}/payments?club_id=${getClubId()}&cedula=${cedula}&limit=50`);
       const data = await res.json();
       if (data.success) {
         const sorted = (data.data || []).sort((a, b) =>
@@ -322,7 +321,7 @@ function SeccionHistorialLazy({ cedula }) {
             <div key={i} className="p-3 rounded-xl bg-[#0F1F36] border border-[#1A3A5C]">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-bold text-[#F5F5F5]">{formatCOP(p.suma_conceptos || p.monto)}</span>
-                <span className="text-xs text-[#737373]">{p.fecha_comprobante || p.fecha_proceso}</span>
+                <span className="text-xs text-[#737373]">{p.fecha_comprobante || p.fecha_proceso || (p.created_at ? new Date(p.created_at).toLocaleDateString('es-CO') : '—')}</span>
               </div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs text-[#737373]">{p.banco || '—'}</span>

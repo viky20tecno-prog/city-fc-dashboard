@@ -1,350 +1,227 @@
 # ClubContable — Roadmap SaaS
 
 > Documento de continuidad. Si se cierra la sesión, compartir este archivo al inicio de la nueva conversación.
-> Última actualización: 2026-04-15
+> Última actualización: 2026-04-27
 
 ---
 
 ## CONTEXTO DEL PROYECTO
 
 ### Repositorios
-- **Frontend:** https://github.com/viky20tecno-prog/city-fc-dashboard
-- **Backend:** https://github.com/viky20tecno-prog/city-fc-api-v2
-- **Google Sheets (BD actual):** https://docs.google.com/spreadsheets/d/1LuqQipb1_MD7WoVy0064mZ1vwWgWCg9ikBRUN_-F0-A
+- **Frontend:** https://github.com/viky20tecno-prog/city-fc-dashboard — desplegado en `city-fc-dashboard-pi.vercel.app`
+- **Backend:** https://github.com/viky20tecno-prog/city-fc-api-v2 — desplegado en `city-fc-api-v2.vercel.app`
 
 ### Stack actual
-- Frontend: **React + Vite** (no Next.js) — desplegado en `city-fc-dashboard-theta.vercel.app`
-- Backend: **Express.js** — desplegado en `city-fc-api-v2.vercel.app`
-- Base de datos: **Google Sheets** via googleapis
-- Deploy: **Vercel** (ambos repos)
+- Frontend: **React + Vite** — tema azul eléctrico deep-space (`#060C18` bg, `#0A1628` cards, `#1A3A5C` borders, `#00AAFF` accent)
+- Backend: **Express.js serverless en Vercel**
+- Base de datos: **Supabase** (migración desde Google Sheets completada)
+- Auth: **Supabase Auth** — JWT enviado vía `authFetch` en el frontend, validado con `requireAuth` middleware en el backend
+- Deploy: **Vercel** (ambos repos — auto-deploy desde push a `main`)
 
-### Estructura del backend (city-fc-api-v2)
+### Estructura del backend
 ```
 api/
-├── index.js              ← servidor Express principal
-├── package.json
-├── vercel.json
+├── index.js              ← servidor Express principal (auth middleware en línea 81)
+├── middleware/
+│   └── auth.js           ← valida JWT Supabase, protege todas las rutas excepto /inscripcion, /debug, /health
 ├── routes/
+│   ├── arbitrage.js      ← partidos y pagos de árbitros
 │   ├── config.js
 │   ├── debug.js
-│   ├── inscripcion.js    ← inscripción pública de jugadores
-│   ├── invoices.js
+│   ├── inscripcion.js    ← pública (sin auth) — inscripción de jugadores
+│   ├── invoices.js       ← mensualidades, uniformes (tabla vieja), torneos
 │   ├── payments.js       ← registro de pagos manuales
-│   ├── players.js        ← jugadores activos
+│   ├── players.js        ← jugadores
 │   ├── reports.js
-│   └── uniforms.js
+│   ├── suspensiones.js   ← suspensiones de jugadores
+│   ├── uniforms.js       ← pedido_uniformes (tabla nueva) — GET, POST, PUT /:id
+│   └── whatsapp.js
 └── services/
-    └── sheets.js         ← cliente Google Sheets (a reemplazar por Supabase)
+    ├── db.js             ← cliente Supabase (todas las funciones de BD)
+    └── sheets.js         ← DEPRECADO (no se usa, pero existe)
 ```
 
-### Estructura del frontend (city-fc-dashboard)
+### Estructura del frontend
 ```
 src/
-├── App.jsx
-├── config.js             ← CLUB_ID hardcodeado como 'city-fc'
+├── App.jsx               ← rutas: /login (pública), /inscripcion (pública), /* (protegida)
+├── config.js             ← API_BASE_URL, CLUB_ID hardcodeado ('city-fc')
+├── lib/
+│   └── supabase.js       ← cliente Supabase para el frontend
 ├── services/
-│   ├── api.js            ← llamadas al backend
-│   ├── sheets.js
-│   └── writeSheets.js
+│   ├── api.js            ← authFetch: fetch con Bearer token automático
+│   └── sheets.js / writeSheets.js  ← DEPRECADOS
 ├── pages/
-│   ├── Dashboard.jsx     ← 6 tabs: stats, jugadores, uniformes, árbitros, cobros, WhatsApp
+│   ├── Dashboard.jsx     ← 6 tabs: Dashboard, Jugadores, Uniformes, Pago Arbitraje, Ciclo de Cobro, WhatsApp Bot
+│   ├── Login.jsx         ← Supabase signInWithPassword
 │   ├── ArbitrajePagos.jsx
 │   └── PedidoUniforme.jsx
-├── components/           ← componentes reutilizables
+├── components/
+│   ├── StatsCards.jsx
+│   ├── JugadoresTable.jsx    ← tabla de jugadores con modal EstadoCuenta
+│   ├── EstadoCuenta.jsx      ← modal: mensualidades + pedido_uniformes + torneos + pagos
+│   ├── MorososList.jsx
+│   ├── RecaudacionChart.jsx
+│   ├── TimelineCobro.jsx
+│   ├── WhatsAppMockup.jsx
+│   ├── PagoManualModal.jsx   ← registro manual de pagos (mensualidad/uniforme/torneo)
+│   ├── Uniformes.jsx         ← módulo completo de pedidos de uniformes
+│   ├── UniformesTab.jsx
+│   ├── FormInscripcion.jsx   ← formulario público de inscripción (/inscripcion)
+│   ├── ProtectedRoute.jsx    ← guard de autenticación
+│   ├── ArbitrajeCrearPartido.jsx
+│   ├── ArbitrajeGestionPagos.jsx
+│   ├── ArbitrajeListadoPartidos.jsx
+│   ├── SuspensionModal.jsx
+│   └── MorososList.jsx
 └── hooks/
-    └── useSheetData.js   ← hook principal de datos
+    └── useSheetData.js       ← hook principal de datos (aún conectado al backend via API)
 ```
 
-### Hojas en Google Sheets (estructura de datos actual)
-- `JUGADORES` — cedula, nombre, apellidos, celular, municipio, activo
-- `REGISTRO_PAGOS` — historial de pagos
-- `ESTADO_MENSUALIDADES` — club_id, cedula, anio, mes, valor_oficial, valor_pagado, saldo_pendiente, estado (AL_DIA/PENDIENTE/PARCIAL/MORA)
-- `ESTADO_UNIFORMES` — pagos de uniformes por jugador
-- `ESTADO_TORNEOS` — inscripciones a torneos
-- `PEDIDO_UNIFORMES` — pedidos de uniformes
-- `SALDOS_A_FAVOR` — saldos a favor
-- `PARTIDOS` — partidos registrados
-- `ARBITRAJE_PAGOS` — pagos a árbitros
-- `PLANTILLAS_CUOTAS` — plantillas
-
-### Problemas críticos identificados
-1. **Sin autenticación** — cualquiera puede llamar la API
-2. **CORS inconsistente** — players.js tiene `origin: '*'`, index.js restringe al dashboard
-3. **club_id hardcodeado** — 'city-fc' en config.js y localStorage
-4. **Google Sheets como BD** — límite 300 req/min, sin transacciones, sin rollback
-5. **Datos de negocio hardcodeados** — precios ($65.000, $90.000) y torneos fijos en inscripcion.js
-6. **Sin logs ni auditoría**
-
-### Lo que ya funciona bien (NO tocar)
-- UI con diseño oscuro, 6 tabs, glassmorphism — está bien hecha
-- Módulo árbitros: listado de partidos, creación, gestión de pagos
-- Sistema de inscripción con generación automática de mensualidades
-- Módulo uniformes y torneos
-- Reportes con filtros
-- 166 commits en frontend — mucha lógica de negocio ya implementada
+### Tablas Supabase (estado actual)
+- `clubs` — id, name, slug, plan, is_active
+- `players` — cedula, nombre, apellidos, celular, municipio, activo, etc.
+- `mensualidades` — cedula, anio, mes, valor_oficial, valor_pagado, saldo_pendiente, estado
+- `uniformes` — tabla vieja de pagos de uniforme (valor_oficial/pagado/pendiente)
+- `pedido_uniformes` — tabla nueva: id, cedula, nombre, tipo (Jugador/Familiar-Hombre/Familiar-Mujer), prendas, talla, numero_estampar, nombre_estampar, total, estado (PENDIENTE/PAGADO/ENTREGADO), club_id, player_id
+- `torneos` — cedula, nombre_torneo, valor_oficial/pagado/pendiente, estado
+- `pagos` — historial de pagos manuales
+- `partidos` — fecha, rival, lugar, categoria
+- `arbitraje_pagos` — arbitro_nombre, monto, estado, fecha_pago
+- `suspensiones` — jugador, fecha_inicio/fin, motivo
 
 ---
 
-## ROADMAP DE MIGRACIÓN
+## FUNCIONALIDADES IMPLEMENTADAS
 
-### FASE 1 — MVP Vendible (3 semanas)
+### Avances recientes y mejoras no listadas previamente
 
-#### Semana 1 — Base de datos real
-- [ ] Crear proyecto en Supabase (supabase.com — gratis hasta 500MB)
-- [ ] Ejecutar schema SQL en Supabase (ver sección SCHEMA)
-- [ ] Crear script de migración Sheets → Supabase
-- [ ] Correr migración con datos reales de city-fc
-- [ ] Verificar datos migrados
+- **Gestión avanzada de arbitraje:**
+  - Tabs para partidos, registro y gestión de pagos a árbitros.
+  - Registro de partidos con selección de jugadores, monto por jugador, equipos, fecha y hora.
+  - Gestión de pagos individuales por partido, con métodos de pago (efectivo, transferencia, aguas), barra de progreso y métricas financieras.
+  - Visualización y edición de pagos por jugador en cada partido.
 
-#### Semana 2 — Autenticación
-- [ ] Crear `api/middleware/auth.js` en el backend
-- [ ] Aplicar middleware a todas las rutas (excepto /api/inscripcion y /api/health)
-- [ ] Reemplazar `api/services/sheets.js` por `api/services/db.js` (Supabase)
-- [ ] Actualizar routes uno por uno para usar db.js en vez de sheets.js
-- [ ] Página Login.jsx en el frontend
-- [ ] Modificar `src/services/api.js` para enviar Bearer token en cada request
-- [ ] Proteger rutas con guard de autenticación
+- **Integración total con API REST:**
+  - Todos los datos del dashboard (jugadores, mensualidades, uniformes, torneos, pagos, suspensiones, morosos) se obtienen desde el backend Express/Supabase, eliminando dependencia de Google Sheets.
 
-#### Semana 3 — Cobros y multi-club
-- [ ] Crear cuenta Stripe
-- [ ] Agregar Stripe Checkout al frontend (planes básico/pro/premium)
-- [ ] Webhook de Stripe en `/api/webhooks/stripe`
-- [ ] Onboarding: formulario de creación de club al registrarse
-- [ ] Eliminar CLUB_ID hardcodeado — leerlo desde sesión del usuario
-- [ ] Primer cliente pagando ← META
+- **Mejoras UX/UI:**
+  - Botón directo para abrir el formulario de inscripción en nueva pestaña y copiar enlace.
+  - Indicadores visuales de estado, errores y carga en todos los módulos.
+  - Tematización consistente y componentes reutilizables.
 
----
+- **WhatsApp pagos automáticos (Supabase Edge Function):**
+  - `supabase/functions/whatsapp-webhook/index.ts` — reemplaza el flujo Make.com
+  - Twilio → Edge Function → GPT-4o Vision → Supabase DB (pagos + mensualidades)
+  - 150s timeout, $0 costo plataforma, acceso directo a Supabase sin JWT intermedio
+  - Variables de entorno requeridas en Supabase Secrets: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`, `OPENAI_API_KEY`, `CLUB_ID`
+  - Deploy: `supabase functions deploy whatsapp-webhook --project-ref <ref>`
+  - Configurar en Twilio Sandbox → "When a message comes in": `https://<ref>.supabase.co/functions/v1/whatsapp-webhook`
 
-### FASE 2 — Escalamiento (mes 2-3)
-- [ ] Integración GoHighLevel (webhook GHL → crear cuenta trial)
-- [ ] Automatizaciones onboarding en GHL (secuencia día 0, 1, 7, 12, 14)
-- [ ] Reportes PDF descargables (react-pdf)
-- [ ] Dashboard con gráficas mejoradas (Recharts ya instalado)
-- [ ] Sistema de roles (owner, admin, treasurer, viewer)
-- [ ] Invitación de usuarios al club
-- [ ] Logs de auditoría
-- [ ] PWA (app instalable en celular)
 
----
+### Módulo Dashboard (tab principal)
+- [x] StatsCards: totales de jugadores, recaudación, morosos, pendientes
+- [x] RecaudacionChart: gráfica de recaudación mensual
+- [x] MorososList: listado de jugadores en mora
+- [x] TimelineCobro: ciclo visual de cobro
 
-### FASE 3 — Crecimiento (mes 4+)
-- [ ] Módulo de torneos avanzado
-- [ ] Control de inventario completo
-- [ ] Integración bancaria (Belvo API Colombia)
-- [ ] API pública para integraciones
-- [ ] Programa de afiliados
-- [ ] App móvil nativa (React Native)
+### Módulo Jugadores
+- [x] Tabla de jugadores activos con búsqueda
+- [x] Modal EstadoCuenta por jugador:
+  - [x] Mensualidades mes a mes con estado (AL_DIA / PENDIENTE / PARCIAL / MORA)
+  - [x] Pedido de uniforme (pedido_uniformes) con prendas, talla, número, nombre y badge de estado
+  - [x] Torneos inscritos
+  - [x] Historial de pagos
+- [x] SuspensionModal: registrar y ver suspensiones de jugadores
 
----
+### Módulo Uniformes
+- [x] Búsqueda de jugador por cédula para nuevo pedido
+- [x] Formulario multi-step:
+  - Step 1: buscar jugador
+  - Step 2: seleccionar prendas (multi-selección con total acumulado), toggle "Para familiar" (Hombre/Mujer)
+  - Step 3: talla, número a estampar, nombre a estampar
+- [x] Tabla de pedidos con 3 pestañas: PENDIENTE / PAGADO / ENTREGADO
+- [x] Cambio de estado: PENDIENTE → PAGADO (click en badge), PAGADO → ENTREGADO (botón)
+- [x] Editar pedido (modal pre-llenado): prendas, talla, número, nombre, total
+- [x] Badge "Familiar - Hombre/Mujer" en tabla cuando tipo ≠ Jugador
+- [x] Descarga PDF: listado de pendientes, pagados y entregados (jsPDF, A4 landscape)
+- [x] Validación de número duplicado
 
-## SCHEMA SQL (Supabase)
+### Módulo Pago Arbitraje
+- [x] Listado de partidos
+- [x] Crear partido (fecha, rival, lugar, categoría)
+- [x] Gestión de pagos por partido (árbitro principal/asistentes)
+- [x] Marcar árbitros como pagados
 
-```sql
--- Ejecutar en Supabase SQL Editor
+### Módulo Ciclo de Cobro
+- [x] TimelineCobro: visual del ciclo mensual de cobros
 
-CREATE TABLE clubs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
-  logo_url TEXT,
-  country TEXT DEFAULT 'CO',
-  city TEXT,
-  plan TEXT DEFAULT 'free' CHECK (plan IN ('free', 'trial', 'basic', 'pro', 'premium')),
-  plan_expires_at TIMESTAMPTZ,
-  stripe_customer_id TEXT,
-  stripe_subscription_id TEXT,
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+### Módulo WhatsApp Bot
+- [x] WhatsAppMockup: vista de mensajes tipo WhatsApp
 
-CREATE TABLE users (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  full_name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+### Formulario de Inscripción (público)
+- [x] Ruta pública `/inscripcion` sin autenticación
+- [x] Formulario con 5 secciones: personal, contacto, datos adicionales, residencia, emergencia
+- [x] Validaciones: cédula (7-15 dígitos), celular (10 dígitos), email, campos obligatorios
+- [x] Honeypot anti-spam
+- [x] Pantalla de éxito tras inscripción
+- [x] Tema azul eléctrico consistente con el dashboard
 
-CREATE TABLE club_members (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  club_id UUID REFERENCES clubs(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  role TEXT NOT NULL CHECK (role IN ('owner', 'admin', 'treasurer', 'viewer')),
-  is_active BOOLEAN DEFAULT true,
-  joined_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(club_id, user_id)
-);
+### Autenticación
+- [x] Login con email/contraseña via Supabase Auth
+- [x] ProtectedRoute: redirige a /login si no hay sesión
+- [x] authFetch: envía Bearer token en todas las peticiones autenticadas
+- [x] Backend: requireAuth middleware valida JWT en todas las rutas excepto /inscripcion, /debug, /health
 
-CREATE TABLE players (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  club_id UUID REFERENCES clubs(id) ON DELETE CASCADE,
-  cedula TEXT NOT NULL,
-  nombre TEXT NOT NULL,
-  apellidos TEXT NOT NULL,
-  celular TEXT,
-  municipio TEXT,
-  contacto_emergencia TEXT,
-  activo BOOLEAN DEFAULT true,
-  fecha_inscripcion DATE DEFAULT CURRENT_DATE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(club_id, cedula)
-);
-
-CREATE TABLE mensualidades (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  club_id UUID REFERENCES clubs(id) ON DELETE CASCADE,
-  player_id UUID REFERENCES players(id) ON DELETE CASCADE,
-  cedula TEXT NOT NULL,
-  anio INT NOT NULL,
-  mes TEXT NOT NULL,
-  numero_mes INT NOT NULL,
-  valor_oficial DECIMAL(10,2) NOT NULL DEFAULT 65000,
-  valor_pagado DECIMAL(10,2) DEFAULT 0,
-  saldo_pendiente DECIMAL(10,2),
-  estado TEXT CHECK (estado IN ('AL_DIA', 'PENDIENTE', 'PARCIAL', 'MORA')) DEFAULT 'PENDIENTE',
-  fecha_ultima_actualizacion TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE uniformes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  club_id UUID REFERENCES clubs(id) ON DELETE CASCADE,
-  player_id UUID REFERENCES players(id) ON DELETE CASCADE,
-  cedula TEXT NOT NULL,
-  valor_oficial DECIMAL(10,2) DEFAULT 90000,
-  valor_pagado DECIMAL(10,2) DEFAULT 0,
-  saldo_pendiente DECIMAL(10,2),
-  estado TEXT DEFAULT 'PENDIENTE',
-  fecha_ultima_actualizacion TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE torneos (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  club_id UUID REFERENCES clubs(id) ON DELETE CASCADE,
-  player_id UUID REFERENCES players(id) ON DELETE CASCADE,
-  cedula TEXT NOT NULL,
-  nombre_torneo TEXT NOT NULL,
-  valor_oficial DECIMAL(10,2) NOT NULL,
-  valor_pagado DECIMAL(10,2) DEFAULT 0,
-  saldo_pendiente DECIMAL(10,2),
-  estado TEXT DEFAULT 'PENDIENTE',
-  fecha_ultima_actualizacion TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE pagos (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  club_id UUID REFERENCES clubs(id) ON DELETE CASCADE,
-  player_id UUID REFERENCES players(id),
-  cedula TEXT,
-  monto DECIMAL(10,2) NOT NULL,
-  banco TEXT,
-  concepto TEXT CHECK (concepto IN ('mensualidad', 'uniforme', 'torneo', 'arbitraje', 'otro')),
-  referencia TEXT,
-  revisado BOOLEAN DEFAULT false,
-  created_by UUID REFERENCES users(id),
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE partidos (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  club_id UUID REFERENCES clubs(id) ON DELETE CASCADE,
-  fecha DATE NOT NULL,
-  rival TEXT,
-  lugar TEXT,
-  categoria TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE arbitraje_pagos (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  club_id UUID REFERENCES clubs(id) ON DELETE CASCADE,
-  partido_id UUID REFERENCES partidos(id),
-  arbitro_nombre TEXT NOT NULL,
-  arbitro_cedula TEXT,
-  monto DECIMAL(10,2) NOT NULL,
-  estado TEXT DEFAULT 'PENDIENTE',
-  fecha_pago DATE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE audit_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  club_id UUID REFERENCES clubs(id),
-  user_id UUID REFERENCES users(id),
-  action TEXT NOT NULL,
-  entity_type TEXT NOT NULL,
-  entity_id UUID,
-  old_values JSONB,
-  new_values JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Row Level Security
-ALTER TABLE clubs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE players ENABLE ROW LEVEL SECURITY;
-ALTER TABLE mensualidades ENABLE ROW LEVEL SECURITY;
-ALTER TABLE uniformes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE torneos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE pagos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE partidos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE arbitraje_pagos ENABLE ROW LEVEL SECURITY;
-
--- Función helper
-CREATE OR REPLACE FUNCTION get_user_club_ids()
-RETURNS UUID[] AS $$
-  SELECT ARRAY(
-    SELECT club_id FROM club_members 
-    WHERE user_id = auth.uid() AND is_active = true
-  );
-$$ LANGUAGE sql SECURITY DEFINER;
-
--- Políticas RLS (aplicar a cada tabla)
-CREATE POLICY "club_members_access" ON players
-  FOR ALL USING (club_id = ANY(get_user_club_ids()));
-
-CREATE POLICY "club_members_access" ON mensualidades
-  FOR ALL USING (club_id = ANY(get_user_club_ids()));
-
-CREATE POLICY "club_members_access" ON pagos
-  FOR ALL USING (club_id = ANY(get_user_club_ids()));
-
-CREATE POLICY "club_members_access" ON partidos
-  FOR ALL USING (club_id = ANY(get_user_club_ids()));
-
-CREATE POLICY "club_members_access" ON arbitraje_pagos
-  FOR ALL USING (club_id = ANY(get_user_club_ids()));
-```
+### PagoManualModal
+- [x] Registro de pago por jugador (busca por cédula)
+- [x] Conceptos: Mensualidad, Uniformes (11 prendas actuales), Torneo, Otro
+- [x] Registra pago en tabla `pagos` de Supabase
 
 ---
 
-## PLANES Y PRECIOS
+## ROADMAP — LO QUE FALTA
 
-| Plan | Precio COP/mes | Precio USD/mes | Límites |
-|---|---|---|---|
-| Free | Gratis | - | 100 transacciones/mes, 2 usuarios |
-| Básico | $29.900 | $9 | Ilimitado, 5 usuarios, PDF |
-| Pro | $59.900 | $19 | Ilimitado, 15 usuarios, API, multi-torneo |
-| Premium | $99.900 | $29 | Todo ilimitado, soporte WhatsApp |
+### PRIORIDAD ALTA — Funcional / Negocio
 
----
+- [ ] **Multi-club real**: eliminar `CLUB_ID = 'city-fc'` hardcodeado en `config.js`, leerlo desde la sesión del usuario autenticado
+- [ ] **Onboarding**: formulario para crear un club nuevo al registrarse (nombre, ciudad, slug)
+- [ ] **Sistema de roles**: owner / admin / tesorero / viewer (tabla `club_members` ya existe en schema)
+- [ ] **Invitar usuarios al club**: enviar email de invitación a un co-admin o tesorero
 
-## ESTADO ACTUAL DE TAREAS
+### PRIORIDAD MEDIA — Monetización SaaS
 
-### Completado
-- [x] Análisis completo del código real
-- [x] Identificación de problemas críticos
-- [x] Schema SQL definido
-- [x] Código de auth middleware listo
-- [x] Código de db.js (reemplazo de sheets.js) listo
-- [x] Código de webhook Stripe listo
-- [x] Código de webhook GHL listo
-- [x] Planes y precios definidos
-- [x] Estrategia primeros 50 clientes definida
+- [ ] **Stripe Checkout**: planes Básico ($9 USD) / Pro ($19 USD) / Premium ($29 USD)
+- [ ] **Webhook Stripe** en `/api/webhooks/stripe`: actualizar `plan` y `plan_expires_at` en tabla `clubs`
+- [ ] **Página de precios** en el frontend
+- [ ] **Limitar features por plan**: ej. PDF solo en Básico+, reportes avanzados en Pro+
 
-### Pendiente — Próxima sesión
-- [ ] **SIGUIENTE PASO:** Crear proyecto en Supabase + ejecutar schema
-- [ ] Script de migración de Sheets a Supabase
-- [ ] Crear middleware/auth.js en el backend
-- [ ] Reemplazar sheets.js por db.js en el backend
-- [ ] Página de Login en el frontend
+### PRIORIDAD MEDIA — Mejoras de producto
+
+- [ ] **Reportes PDF generales**: estado de mensualidades de todos los jugadores (actualmente solo PDF de uniformes)
+- [ ] **Gráficas mejoradas**: más métricas en RecaudacionChart (tendencia mes a mes, morosos histórico)
+- [ ] **Logs de auditoría**: tabla `audit_logs` ya definida en schema, pero sin implementar
+- [x] **Notificaciones WhatsApp reales**: Supabase Edge Function `whatsapp-webhook` — recibe comprobantes via Twilio, analiza con GPT-4o Vision, registra en Supabase (ver `api/supabase/functions/whatsapp-webhook/index.ts`)
+- [ ] **Búsqueda de jugadores**: mejorar la búsqueda global (por nombre, apellido, cédula) en JugadoresTable
+- [ ] **Editar jugador**: modal para actualizar datos del jugador (celular, dirección, etc.)
+- [ ] **Dar de baja jugador**: marcar `activo = false` con fecha de baja
+
+### PRIORIDAD BAJA — Escalamiento
+
+- [ ] **Integración GoHighLevel**: webhook GHL → crear cuenta trial al registrarse
+- [ ] **PWA**: app instalable en celular (manifest + service worker)
+- [ ] **App móvil**: React Native en el futuro
+- [ ] **Sistema de torneos avanzado**: inscripción por categorías, cuadros de playoff
+- [ ] **API pública**: endpoints documentados para integraciones externas
+- [ ] **Programa de afiliados**: referidos con comisión
+
+### LIMPIEZA TÉCNICA (deuda)
+
+- [ ] Eliminar `src/services/sheets.js` y `src/services/writeSheets.js` (ya deprecados, no se usan en nuevas features)
+- [ ] Eliminar `api/services/sheets.js` del backend (deprecado)
+- [ ] Limpiar `config.js`: remover SHEET_ID, API_KEY, APPS_SCRIPT_URL, SHEETS (todo Google Sheets)
+- [ ] Eliminar `src/hooks/useSheetData.js` y migrar Dashboard a llamadas directas al API REST
+- [ ] Revisar si `invoices.js` aún es necesario o si ya todo migró a `uniforms.js` y `payments.js`
 
 ---
 
@@ -352,9 +229,12 @@ CREATE POLICY "club_members_access" ON arbitraje_pagos
 
 - El frontend usa **Vite**, no webpack — los imports de env son `import.meta.env.VITE_*`
 - El backend corre Express como serverless en Vercel via `api/index.js`
-- La inscripción de jugadores es **pública** (sin auth) — diseño intencional para que jugadores se inscriban solos
-- Los precios están hardcodeados en `api/routes/inscripcion.js` — mover a tabla `club_config` en Supabase
-- El diseño visual del frontend está bien — NO refactorizar UI, solo cambiar la capa de datos
+- `/inscripcion` y `/pedido-uniforme` son **rutas públicas** — sin login
+- El tema visual es **azul eléctrico deep-space**: `#060C18` fondo, `#0A1628` cards, `#1A3A5C` borders, `#00AAFF` acento. Al cambiar colores, actualizar TODOS los componentes
+- jsPDF con fuente Helvetica **no soporta emojis Unicode** — usar solo texto ASCII en PDFs
+- `pedido_uniformes.tipo` acepta: `'Jugador'` | `'Familiar - Hombre'` | `'Familiar - Mujer'`
+- `pedido_uniformes.estado` acepta: `'PENDIENTE'` | `'PAGADO'` | `'ENTREGADO'`
+- El diseño visual del frontend está consolidado — NO refactorizar UI sin razón de producto
 
 ---
 
@@ -362,8 +242,9 @@ CREATE POLICY "club_members_access" ON arbitraje_pagos
 
 Pegar esto al inicio de la sesión:
 ```
-Continúa el proyecto ClubContable. Lee el archivo ROADMAP.md para contexto completo.
-Stack: React+Vite (frontend) + Express.js (backend) + migrando de Google Sheets a Supabase.
+Continúa el proyecto ClubContable (City FC). Lee el archivo Roadmap.md para contexto completo.
+Stack: React+Vite (frontend) + Express.js serverless (backend) + Supabase (BD) + Supabase Auth.
 Repos: github.com/viky20tecno-prog/city-fc-dashboard y city-fc-api-v2
-Siguiente tarea: [INDICAR TAREA DEL CHECKLIST]
+Deploy automático en Vercel al hacer push a main.
+Siguiente tarea: [INDICAR TAREA DEL ROADMAP]
 ```

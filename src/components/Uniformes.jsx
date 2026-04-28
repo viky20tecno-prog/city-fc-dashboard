@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Shirt, CheckCircle, AlertCircle, Search, Loader, X, Pencil, Save, Download } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
+import { getClubId } from '../services/api';
 import jsPDF from 'jspdf';
 
 const PRENDAS = [
@@ -18,7 +19,6 @@ const PRENDAS = [
 ];
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
-const CLUB_ID = 'city-fc';
 
 export default function Uniformes() {
   const [step, setStep] = useState(1);
@@ -68,10 +68,11 @@ export default function Uniformes() {
 
   const cargarDatos = async () => {
     try {
+      const clubId = getClubId();
       const [playersRes, numRes, pedRes] = await Promise.all([
-        authFetch(`${API_BASE}/players?club_id=${CLUB_ID}`),
-        authFetch(`${API_BASE}/uniforms/numeros?club_id=${CLUB_ID}`),
-        authFetch(`${API_BASE}/uniforms?club_id=${CLUB_ID}`),
+        authFetch(`${API_BASE}/players?club_id=${clubId}`),
+        authFetch(`${API_BASE}/uniforms/numeros?club_id=${clubId}`),
+        authFetch(`${API_BASE}/uniforms?club_id=${clubId}`),
       ]);
       const playersData = await playersRes.json();
       const numData = await numRes.json();
@@ -166,9 +167,10 @@ export default function Uniformes() {
       return;
     }
     const numeroPadded = form.numero.padStart(3, '0');
+    const clubId = getClubId();
     setEnviando(true);
     try {
-      const res = await authFetch(`${API_BASE}/uniforms?club_id=${CLUB_ID}`, {
+      const res = await authFetch(`${API_BASE}/uniforms?club_id=${clubId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -177,7 +179,7 @@ export default function Uniformes() {
           prendas: form.prendas.map(p => p.valor).join(', '),
           total,
           numero: numeroPadded,
-          club_id: CLUB_ID,
+          club_id: clubId,
         }),
       });
       const data = await res.json();
@@ -397,9 +399,10 @@ export default function Uniformes() {
   const handleCambiarEstado = async (pedido, nuevoEstado) => {
     const pedidoId = pedido.id ?? pedido._id ?? pedido.rowId ?? pedido.row_id;
     if (!pedidoId) return;
+    const clubId = getClubId();
     setCambiandoEstado(pedidoId);
     try {
-      const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}?club_id=${CLUB_ID}`, {
+      const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}?club_id=${clubId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ estado: nuevoEstado }),
@@ -483,7 +486,7 @@ export default function Uniformes() {
 
     setGuardandoEdit(true);
     try {
-      const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}?club_id=${CLUB_ID}`, {
+      const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}?club_id=${getClubId()}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

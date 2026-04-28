@@ -1,7 +1,15 @@
 import { supabase } from '../lib/supabase';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
-const CLUB_ID = 'city-fc';
+
+// Club ID dinámico - se obtiene desde localStorage o sesión del usuario
+export function getClubId() {
+  return localStorage.getItem('clubId') || 'city-fc'; // fallback para compatibilidad
+}
+
+export function setClubId(clubId) {
+  localStorage.setItem('clubId', clubId);
+}
 
 async function getAuthHeaders() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -33,13 +41,13 @@ export async function fetchAllData() {
       torneosRes,
       suspensionesRes,
     ] = await Promise.all([
-      apiCall(`/players?club_id=${CLUB_ID}`),
-      apiCall(`/invoices?club_id=${CLUB_ID}&anio=2026`),
-      apiCall(`/payments?club_id=${CLUB_ID}&limit=100`),
-      apiCall(`/reports/summary?club_id=${CLUB_ID}`),
-      apiCall(`/invoices/uniformes?club_id=${CLUB_ID}`),
-      apiCall(`/invoices/torneos?club_id=${CLUB_ID}`),
-      apiCall(`/suspensiones?club_id=${CLUB_ID}`),
+      apiCall(`/players?club_id=${getClubId()}`),
+      apiCall(`/invoices?club_id=${getClubId()}&anio=2026`),
+      apiCall(`/payments?club_id=${getClubId()}&limit=100`),
+      apiCall(`/reports/summary?club_id=${getClubId()}`),
+      apiCall(`/invoices/uniformes?club_id=${getClubId()}`),
+      apiCall(`/invoices/torneos?club_id=${getClubId()}`),
+      apiCall(`/suspensiones?club_id=${getClubId()}`),
     ]);
 
     const jugadores     = playersRes.data       || [];
@@ -77,30 +85,30 @@ export async function fetchAllData() {
 }
 
 export async function fetchPlayerDetail(cedula) {
-  return apiCall(`/players/${cedula}?club_id=${CLUB_ID}`);
+  return apiCall(`/players/${cedula}?club_id=${getClubId()}`);
 }
 
 export async function fetchPlayerInvoices(cedula) {
-  return apiCall(`/invoices/player/${cedula}?club_id=${CLUB_ID}`);
+  return apiCall(`/invoices/player/${cedula}?club_id=${getClubId()}`);
 }
 
 export async function fetchSummary(mes, anio) {
-  let url = `/reports/summary?club_id=${CLUB_ID}`;
+  let url = `/reports/summary?club_id=${getClubId()}`;
   if (mes)  url += `&mes=${mes}`;
   if (anio) url += `&anio=${anio}`;
   return apiCall(url);
 }
 
 export async function fetchDefaulters(anio = 2026) {
-  return apiCall(`/reports/defaulters?club_id=${CLUB_ID}&anio=${anio}`);
+  return apiCall(`/reports/defaulters?club_id=${getClubId()}&anio=${anio}`);
 }
 
 export async function fetchConfig() {
-  return apiCall(`/config?club_id=${CLUB_ID}`);
+  return apiCall(`/config?club_id=${getClubId()}`);
 }
 
 export async function registerPayment(paymentData) {
-  const url = `${API_BASE_URL}/payments?club_id=${CLUB_ID}`;
+  const url = `${API_BASE_URL}/payments?club_id=${getClubId()}`;
   try {
     const authHeaders = await getAuthHeaders();
     const res = await fetch(url, {

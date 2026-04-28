@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { X, DollarSign, Loader2, CheckCircle, AlertCircle, ArrowLeft, Shield, PlusCircle } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
-
-const CLUB_ID = 'city-fc';
+import { getClubId } from '../services/api';
 
 const CONCEPTOS = ['Mensualidad', 'Uniforme', 'Torneo', 'Otro'];
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Nequi', 'Daviplata', 'Consignación'];
@@ -105,7 +104,7 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
         url_comprobante: '',
       };
 
-      const res = await authFetch(`${API_BASE_URL}/payments?club_id=${CLUB_ID}`, {
+      const res = await authFetch(`${API_BASE_URL}/payments?club_id=${getClubId()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

@@ -14,7 +14,7 @@ export default function Login() {
     setLoading(true);
     setError('');
 
-    const { error: authError } = await supabase.auth.signInWithPassword({
+    const { data: sessionData, error: authError } = await supabase.auth.signInWithPassword({
       email: form.email.trim(),
       password: form.password,
     });
@@ -24,6 +24,23 @@ export default function Login() {
       setLoading(false);
       return;
     }
+
+    const userId = sessionData?.user?.id;
+    let clubId = 'city-fc';
+
+    if (userId) {
+      const { data: member } = await supabase
+        .from('club_members')
+        .select('club_id')
+        .eq('user_id', userId)
+        .single();
+
+      if (member?.club_id) {
+        clubId = member.club_id;
+      }
+    }
+
+    localStorage.setItem('clubId', clubId);
 
     navigate('/');
   };

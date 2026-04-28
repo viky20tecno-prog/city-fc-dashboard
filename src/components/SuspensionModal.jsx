@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, AlertTriangle, Plane, Clock, HelpCircle, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
+import { getClubId } from '../services/api';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
-const CLUB_ID = 'city-fc';
 
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
@@ -39,7 +39,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
   const cargarSuspensiones = async () => {
     setLoading(true);
     try {
-      const res = await authFetch(`${API_BASE}/suspensiones?club_id=${CLUB_ID}&cedula=${jugador.cedula}`);
+      const res = await authFetch(`${API_BASE}/suspensiones?club_id=${getClubId()}&cedula=${jugador.cedula}`);
       const data = await res.json();
       if (data.success) setSuspensiones(data.data);
     } catch {
@@ -57,7 +57,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
     setEnviando(true);
     setMensaje({ tipo: '', texto: '' });
     try {
-      const res = await authFetch(`${API_BASE}/suspensiones?club_id=${CLUB_ID}`, {
+      const res = await authFetch(`${API_BASE}/suspensiones?club_id=${getClubId()}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, cedula: jugador.cedula }),
@@ -81,7 +81,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
   const handleCancelar = async (id) => {
     setCancelando(id);
     try {
-      const res = await authFetch(`${API_BASE}/suspensiones/${id}?club_id=${CLUB_ID}`, {
+      const res = await authFetch(`${API_BASE}/suspensiones/${id}?club_id=${getClubId()}`, {
         method: 'DELETE',
       });
       const data = await res.json();

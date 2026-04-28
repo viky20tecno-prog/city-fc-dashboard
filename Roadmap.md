@@ -1,7 +1,7 @@
 # ClubContable — Roadmap SaaS
 
 > Documento de continuidad. Si se cierra la sesión, compartir este archivo al inicio de la nueva conversación.
-> Última actualización: 2026-04-27
+> Última actualización: 2026-04-28
 
 ---
 
@@ -52,7 +52,7 @@ src/
 │   ├── api.js            ← authFetch: fetch con Bearer token automático
 │   └── sheets.js / writeSheets.js  ← DEPRECADOS
 ├── pages/
-│   ├── Dashboard.jsx     ← 6 tabs: Dashboard, Jugadores, Uniformes, Pago Arbitraje, Ciclo de Cobro, WhatsApp Bot
+│   ├── Dashboard.jsx     ← 7 tabs: Dashboard, Jugadores, Uniformes, Pago Arbitraje, Ciclo de Cobro, WhatsApp Bot, Conciliación
 │   ├── Login.jsx         ← Supabase signInWithPassword
 │   ├── ArbitrajePagos.jsx
 │   └── PedidoUniforme.jsx
@@ -67,13 +67,13 @@ src/
 │   ├── PagoManualModal.jsx   ← registro manual de pagos (mensualidad/uniforme/torneo)
 │   ├── Uniformes.jsx         ← módulo completo de pedidos de uniformes
 │   ├── UniformesTab.jsx
+│   ├── Conciliacion.jsx      ← lista de pagos WhatsApp pendientes de validación manual
 │   ├── FormInscripcion.jsx   ← formulario público de inscripción (/inscripcion)
 │   ├── ProtectedRoute.jsx    ← guard de autenticación
 │   ├── ArbitrajeCrearPartido.jsx
 │   ├── ArbitrajeGestionPagos.jsx
 │   ├── ArbitrajeListadoPartidos.jsx
-│   ├── SuspensionModal.jsx
-│   └── MorososList.jsx
+│   └── SuspensionModal.jsx
 └── hooks/
     └── useSheetData.js       ← hook principal de datos (aún conectado al backend via API)
 ```
@@ -110,13 +110,14 @@ src/
   - Indicadores visuales de estado, errores y carga en todos los módulos.
   - Tematización consistente y componentes reutilizables.
 
-- **WhatsApp pagos automáticos (Supabase Edge Function):**
-  - `supabase/functions/whatsapp-webhook/index.ts` — reemplaza el flujo Make.com
-  - Twilio → Edge Function → GPT-4o Vision → Supabase DB (pagos + mensualidades)
-  - 150s timeout, $0 costo plataforma, acceso directo a Supabase sin JWT intermedio
-  - Variables de entorno requeridas en Supabase Secrets: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`, `OPENAI_API_KEY`, `CLUB_ID`
-  - Deploy: `supabase functions deploy whatsapp-webhook --project-ref <ref>`
-  - Configurar en Twilio Sandbox → "When a message comes in": `https://<ref>.supabase.co/functions/v1/whatsapp-webhook`
+- **WhatsApp Bot + Conciliación (COMPLETADO 2026-04-28):**
+  - Flujo: Jugador envía foto comprobante → Twilio → Edge Function → GPT-4o Vision extrae monto/banco/referencia → guarda en `pagos` con `estado_revision='pendiente'` → responde acuse de recibo al jugador
+  - El pago **NO se aplica automáticamente** — queda en lista de conciliación para validación manual
+  - Admin revisa en Dashboard → tab Conciliación → puede editar datos, Aprobar (aplica a mensualidad/uniforme/torneo) o Rechazar
+  - Edge Function: `supabase/functions/whatsapp-webhook/index.ts` — project-ref `olcevdnhmexaahymfzii`
+  - Secrets configurados en Supabase: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM` (con prefijo `whatsapp:`), `OPENAI_API_KEY`, `CLUB_ID`, `SKIP_TWILIO_VALIDATION`
+  - Webhook Twilio Sandbox configurado en: `https://olcevdnhmexaahymfzii.supabase.co/functions/v1/whatsapp-webhook`
+  - API: `GET /payments?estado=pendiente`, `PUT /payments/:id` con `{accion: 'aprobar'|'rechazar'}` o edición de campos
 
 
 ### Módulo Dashboard (tab principal)
@@ -159,6 +160,17 @@ src/
 ### Módulo WhatsApp Bot
 - [x] WhatsAppMockup: vista de mensajes tipo WhatsApp
 
+### Módulo Conciliación (NUEVO — 2026-04-28)
+- [x] Tab "Conciliación" en Dashboard (después de WhatsApp Bot)
+- [x] Lista de pagos recibidos por WhatsApp con filtros: Pendiente / Aprobado / Rechazado
+- [x] Columnas: Fecha, Jugador, Concepto, Monto, Banco, Referencia, Comprobante (link), Acciones
+- [x] Modal de edición: concepto, monto, banco, referencia (con datalist de bancos)
+- [x] Aprobar → aplica pago a mensualidad/uniforme/torneo y marca `aprobado_manual`
+- [x] Rechazar → marca `rechazado` sin tocar tablas de estado
+- [x] Total acumulado en footer de tabla
+- [x] Toast de confirmación en cada acción
+- [ ] **Pendiente:** Notificación WhatsApp al jugador al aprobar/rechazar
+
 ### Formulario de Inscripción (público)
 - [x] Ruta pública `/inscripcion` sin autenticación
 - [x] Formulario con 5 secciones: personal, contacto, datos adicionales, residencia, emergencia
@@ -182,6 +194,13 @@ src/
 
 ## ROADMAP — LO QUE FALTA
 
+### ENTREGA CLIENTE — Pruebas inmediatas (esta semana)
+
+- [ ] **Verificar Conciliación en producción**: confirmar que la tab aparece y carga pagos pendientes en Vercel
+- [ ] **Prueba de flujo completo**: jugador envía foto → aparece en conciliación → admin aprueba → mensualidad se actualiza
+- [ ] **Notificación al jugador al aprobar/rechazar**: enviar WhatsApp de confirmación final cuando el admin aprueba (llamar `sendWhatsAppMessage` desde el endpoint PUT /payments/:id con número del jugador)
+- [ ] **Deploy API a producción**: los cambios de `payments.js` y `db.js` deben estar en Vercel (push ya hecho, verificar auto-deploy)
+
 ### PRIORIDAD ALTA — Funcional / Negocio
 
 - [ ] **Multi-club real**: eliminar `CLUB_ID = 'city-fc'` hardcodeado en `config.js`, leerlo desde la sesión del usuario autenticado
@@ -201,7 +220,7 @@ src/
 - [ ] **Reportes PDF generales**: estado de mensualidades de todos los jugadores (actualmente solo PDF de uniformes)
 - [ ] **Gráficas mejoradas**: más métricas en RecaudacionChart (tendencia mes a mes, morosos histórico)
 - [ ] **Logs de auditoría**: tabla `audit_logs` ya definida en schema, pero sin implementar
-- [x] **Notificaciones WhatsApp reales**: Supabase Edge Function `whatsapp-webhook` — recibe comprobantes via Twilio, analiza con GPT-4o Vision, registra en Supabase (ver `api/supabase/functions/whatsapp-webhook/index.ts`)
+- [x] **WhatsApp + Conciliación**: Edge Function completa con GPT-4o Vision + flujo de conciliación manual en dashboard
 - [ ] **Búsqueda de jugadores**: mejorar la búsqueda global (por nombre, apellido, cédula) en JugadoresTable
 - [ ] **Editar jugador**: modal para actualizar datos del jugador (celular, dirección, etc.)
 - [ ] **Dar de baja jugador**: marcar `activo = false` con fecha de baja

@@ -1,7 +1,7 @@
 // src/pages/Dashboard.jsx
 
 import { useState } from 'react';
-import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, Copy, DollarSign, Shirt, Plus, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, Copy, DollarSign, Shirt, Plus, Loader2, AlertCircle, CheckCircle, ClipboardCheck } from 'lucide-react';
 import { useSheetData } from '../hooks/useSheetData';
 import StatsCards from '../components/StatsCards';
 import JugadoresTable from '../components/JugadoresTable';
@@ -12,6 +12,7 @@ import WhatsAppMockup from '../components/WhatsAppMockup';
 import PagoManualModal from '../components/PagoManualModal';
 import Uniformes from '../components/Uniformes';
 import ArbitrajePagos from './ArbitrajePagos';
+import Conciliacion from '../components/Conciliacion';
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -19,7 +20,8 @@ const tabs = [
   { id: 'uniformes', label: 'Uniformes', icon: Shirt },
   { id: 'arbitraje', label: 'Pago Arbitraje', icon: Activity },
   { id: 'cobro', label: 'Ciclo de Cobro', icon: Clock },
-  { id: 'whatsapp', label: 'WhatsApp Bot', icon: MessageSquare },
+  { id: 'whatsapp',      label: 'WhatsApp Bot',  icon: MessageSquare  },
+  { id: 'conciliacion', label: 'Conciliación',  icon: ClipboardCheck },
 ];
 
 export default function Dashboard() {
@@ -184,7 +186,8 @@ export default function Dashboard() {
             {activeTab === 'uniformes' && <Uniformes />}
             {activeTab === 'arbitraje' && <ArbitrajePagos />}
             {activeTab === 'cobro' && <TimelineCobro />}
-            {activeTab === 'whatsapp' && <WhatsAppMockup />}
+            {activeTab === 'whatsapp'      && <WhatsAppMockup />}
+            {activeTab === 'conciliacion' && <Conciliacion />}
 
           </div>
         )}

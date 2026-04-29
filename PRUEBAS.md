@@ -5,6 +5,25 @@
 
 ---
 
+## RESULTADOS POR SESIÓN
+
+### Sesión 2026-04-29
+
+| Caso | Resultado | Observación |
+|---|---|---|
+| WA1 — Sin imagen | ✅ APROBADO | |
+| WA2 — Imagen sin concepto | ✅ APROBADO | |
+| WA3 — Flujo completo mensualidad | ✅ APROBADO | Banco "No especificado" manejado correctamente |
+| WA5 — Número no registrado | ✅ APROBADO | |
+| WA6 — Imagen ilegible | ✅ APROBADO | OCR sensible a calidad de imagen |
+| C1 — Ver pendientes | ✅ APROBADO | |
+| C4 — Aprobar pago | ✅ APROBADO | |
+| C11 — Historial tras aprobación | ✅ APROBADO | Solo pagos aprobados visibles |
+
+**Pendientes esta sesión:** WA4, WA7, WA8, A1-A5, D1-D4, J1-J9, U1-U10, PM1-PM5, AR1-AR5, C2-C3, C5-C10, I1-I5
+
+---
+
 ## URLS
 
 | Entorno | URL |

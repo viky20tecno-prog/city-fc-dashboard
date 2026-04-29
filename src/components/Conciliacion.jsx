@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { CheckCircle, XCircle, Pencil, ExternalLink, RefreshCw, Clock, AlertCircle, CheckCheck } from 'lucide-react';
+import { CheckCircle, XCircle, Pencil, ExternalLink, RefreshCw, Clock, AlertCircle, CheckCheck, Wallet } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 
@@ -9,9 +9,10 @@ const CONCEPTOS = ['mensualidad', 'uniforme', 'torneo', 'otro'];
 const BANCOS    = ['Bancolombia', 'Nequi', 'Daviplata', 'Davivienda', 'BBVA', 'Scotiabank', 'Efectivo', 'No especificado', 'Otro'];
 
 const ESTADOS = [
-  { id: 'pendiente',      label: 'Pendiente',  color: 'text-yellow-400',  bg: 'bg-yellow-400/10 border-yellow-400/20' },
-  { id: 'aprobado_manual',label: 'Aprobados',  color: 'text-green-400',   bg: 'bg-green-400/10 border-green-400/20'  },
-  { id: 'rechazado',      label: 'Rechazados', color: 'text-red-400',     bg: 'bg-red-400/10 border-red-400/20'      },
+  { id: 'pendiente',           label: 'Pendiente',    color: 'text-yellow-400', bg: 'bg-yellow-400/10 border-yellow-400/20' },
+  { id: 'excedente_pendiente', label: 'Saldo a Favor',color: 'text-orange-400', bg: 'bg-orange-400/10 border-orange-400/20' },
+  { id: 'aprobado_manual',     label: 'Aprobados',    color: 'text-green-400',  bg: 'bg-green-400/10 border-green-400/20'  },
+  { id: 'rechazado',           label: 'Rechazados',   color: 'text-red-400',    bg: 'bg-red-400/10 border-red-400/20'      },
 ];
 
 const CONCEPTO_COLORS = {
@@ -201,7 +202,7 @@ function PagoRow({ pago, onEdit, onAction, actionLoading }) {
     ? `${pago.players.nombre} ${pago.players.apellidos}`
     : pago.cedula;
 
-  const isPendiente = pago.estado_revision === 'pendiente';
+  const isPendiente = pago.estado_revision === 'pendiente' || pago.estado_revision === 'excedente_pendiente';
 
   return (
     <tr className="border-b border-[#1A3A5C]/40 hover:bg-white/[0.02] transition-colors">
@@ -265,7 +266,7 @@ function PagoRow({ pago, onEdit, onAction, actionLoading }) {
           </div>
         ) : (
           <span className={`text-xs ${pago.estado_revision === 'aprobado_manual' ? 'text-green-400' : 'text-red-400'}`}>
-            {pago.estado_revision === 'aprobado_manual' ? 'Aprobado' : 'Rechazado'}
+            {pago.estado_revision === 'aprobado_manual' ? 'Aplicado' : 'Rechazado'}
           </span>
         )}
       </td>
@@ -332,7 +333,7 @@ export default function Conciliacion() {
     await cargarPagos();
   };
 
-  const pendienteCount = filtroEstado === 'pendiente' ? pagos.length : null;
+  const pendienteCount = (filtroEstado === 'pendiente' || filtroEstado === 'excedente_pendiente') ? pagos.length : null;
 
   return (
     <div className="space-y-6">
@@ -365,9 +366,10 @@ export default function Conciliacion() {
                 : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
             }`}
           >
-            {e.id === 'pendiente'       && <Clock className="w-4 h-4" />}
-            {e.id === 'aprobado_manual' && <CheckCheck className="w-4 h-4" />}
-            {e.id === 'rechazado'       && <XCircle className="w-4 h-4" />}
+            {e.id === 'pendiente'           && <Clock className="w-4 h-4" />}
+            {e.id === 'excedente_pendiente' && <Wallet className="w-4 h-4" />}
+            {e.id === 'aprobado_manual'     && <CheckCheck className="w-4 h-4" />}
+            {e.id === 'rechazado'           && <XCircle className="w-4 h-4" />}
             {e.label}
             {e.id === 'pendiente' && pendienteCount != null && pendienteCount > 0 && (
               <span className="bg-yellow-400/20 text-yellow-400 text-xs px-1.5 py-0.5 rounded-full font-semibold">

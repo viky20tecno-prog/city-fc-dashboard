@@ -1,13 +1,87 @@
 # Plan de Pruebas — ClubContable (City FC)
 
 > Archivo de referencia permanente. Compartir al inicio de cada sesión si se van a hacer pruebas.
-> Última actualización: 2026-04-29
+> Última actualización: 2026-04-29 (sesión 3 — diagnóstico estático integral)
 
 ---
 
 ## RESULTADOS POR SESIÓN
 
-### Sesión 2026-04-29
+### Sesión 3 — 2026-04-29 (diagnóstico estático integral)
+
+**Metodología:** análisis de código fuente completo — backend Express, Edge Function WhatsApp, frontend React.
+
+#### Estado de módulos (análisis estático)
+
+| Módulo | Estado | Notas |
+|---|---|---|
+| Autenticación | ✅ IMPLEMENTADO | JWT Supabase, ProtectedRoute, requireAuth middleware |
+| Dashboard (stats, chart, morosos) | ✅ IMPLEMENTADO | Datos desde `/api/reports/summary` |
+| Jugadores (tabla, búsqueda, EstadoCuenta) | ✅ IMPLEMENTADO | Búsqueda en-memoria, funcional |
+| Suspensiones | ✅ IMPLEMENTADO | POST/DELETE en backend, SuspensionModal en frontend |
+| Uniformes (pedido, estados, PDF, familiar) | ✅ IMPLEMENTADO | Posible bug menor en comparación de número (string vs string) |
+| Pago Manual | ✅ IMPLEMENTADO | Concepto, monto, banco, referencia |
+| Arbitraje | ✅ IMPLEMENTADO | Partidos, gestión pagos, resumen |
+| Conciliación (filtros, editar, aprobar, rechazar) | ✅ IMPLEMENTADO | |
+| WhatsApp Bot — flujos base | ✅ IMPLEMENTADO | |
+| WhatsApp — esperando_concepto (WA9) | ✅ IMPLEMENTADO | Pendiente prueba end-to-end con Twilio |
+| WhatsApp — excedente_pendiente (WA10/WA11) | ✅ IMPLEMENTADO | Pendiente prueba end-to-end con Twilio |
+| Formulario inscripción | ✅ IMPLEMENTADO | |
+| Sistema de roles | ❌ NO EXISTE | Tabla club_members no está en código; cero verificación de rol |
+
+#### Hallazgos de seguridad (diagnóstico estático)
+
+| Severidad | Hallazgo | Ubicación |
+|---|---|---|
+| 🔴 CRÍTICO | `/api/debug` expone `clientEmail` y primeros 40 chars de `private_key` de Google Service Account sin autenticación | `api/routes/debug.js` línea 33 |
+| 🔴 CRÍTICO | No hay validación que el usuario autenticado pertenece al `club_id` solicitado — usuario de Club A puede leer datos de Club B con `?club_id=otro-club` | `api/index.js` línea 55-73 |
+| 🟠 ALTO | `inscripcion.js` hardcodea `'city-fc'` en línea 32 — inscripción multi-club imposible | `api/routes/inscripcion.js:32` |
+| 🟠 ALTO | Edge Function hardcodea `CLUB_SLUG = 'city-fc'` — bot WhatsApp solo funciona para City FC | `supabase/functions/whatsapp-webhook/index.ts:10` |
+| 🟡 MEDIO | `SKIP_TWILIO_VALIDATION` debería ser env var; si se sube en código como `'true'` permite bypassear firma Twilio en producción | Edge Function línea 11 |
+| 🟡 MEDIO | Webhook Make.com (`/api/whatsapp/pago-comprobante`) validado solo con header secret, sin JWT | `api/routes/whatsapp.js:12-18` |
+
+#### Deuda técnica activa que bloquea roles
+
+1. **Tabla `club_members` no existe** en código ni en `db.js` — hay que crearla en Supabase antes de implementar roles
+2. **Middleware `requireAuth` solo verifica JWT existe**, no extrae rol del usuario
+3. **`club_id` no se valida contra el usuario autenticado** — se acepta cualquier string en query param
+4. **Valores duplicados en 3+ lugares**: CUOTA_MENSUAL, torneos, prendas uniformes, bancos — no bloquea roles pero complica mantenimiento
+
+#### Casos de prueba validados estáticamente (código correcto, listos para probar manualmente)
+
+A1-A5, D1-D4, J1-J8, U1-U4, U6-U10, PM1-PM5, AR1-AR5, C1-C11, WA1-WA8, I1-I5
+
+#### Casos que requieren prueba end-to-end con dispositivo/Twilio
+
+WA9, WA10, WA11 — implementados en código, no verificables estáticamente
+
+#### Casos con riesgo potencial (verificar en prueba manual)
+
+- **J9** (jugador suspendido no aparece en morosos): lógica de suspensiones en reports.js debe excluirlos — verificar
+- **U5** (número duplicado): comparación string vs string en Uniformes.jsx línea 74/110 — puede fallar si uno es número y el otro string
+- **WA10** (saldo a favor): `excedente_pendiente` se crea en BD pero la UI de Conciliación no tiene filtro para ese estado — el admin no lo verá en ningún tab
+
+---
+
+### Sesión 2 — 2026-04-29 (continuación)
+
+| Caso | Resultado | Observación |
+|---|---|---|
+| WA3 — Mensualidades actualizadas | ✅ APROBADO | Fix: excluir meses valor_oficial=0; fix: try-catch silencioso removido |
+| WA9 — Concepto en mensaje separado | ✅ IMPLEMENTADO | esperando_concepto TTL 30 min — pendiente prueba end-to-end |
+| WA10 — Pago con saldo a favor | ✅ IMPLEMENTADO | excedente_pendiente + WhatsApp al jugador — pendiente prueba (requiere Twilio en Vercel) |
+| WA11 — Respuesta a saldo a favor | ✅ IMPLEMENTADO | Aplica excedente al concepto elegido — pendiente prueba |
+
+**Fixes confirmados esta sesión:**
+- Historial EstadoCuenta: whitelist `aprobado_manual` — estados nuevos (esperando_concepto, excedente_pendiente) no aparecen
+- Mensualidades: meses con valor_oficial=0 excluidos del cálculo de pendientes
+- Errores de aprobación ahora visibles en el toast (antes se ocultaban silenciosamente)
+
+**Pendientes de prueba:** WA4, WA7, WA8, WA9, WA10, WA11, A1-A5, D1-D4, J1-J9, U1-U10, PM1-PM5, AR1-AR5, C2-C3, C5-C10, I1-I5
+
+---
+
+### Sesión 1 — 2026-04-29
 
 | Caso | Resultado | Observación |
 |---|---|---|
@@ -19,8 +93,6 @@
 | C1 — Ver pendientes | ✅ APROBADO | |
 | C4 — Aprobar pago | ✅ APROBADO | |
 | C11 — Historial tras aprobación | ✅ APROBADO | Solo pagos aprobados visibles |
-
-**Pendientes esta sesión:** WA4, WA7, WA8, A1-A5, D1-D4, J1-J9, U1-U10, PM1-PM5, AR1-AR5, C2-C3, C5-C10, I1-I5
 
 ---
 
@@ -173,7 +245,10 @@
 | WA5 | Jugador no registrado | Enviar desde número no registrado | Bot responde "no encontramos un jugador registrado con tu número" |
 | WA6 | Imagen ilegible | Enviar imagen sin datos claros | Bot pide reenviar con mejor resolución |
 | WA7 | Imagen en Supabase Storage | Revisar pago en Conciliación | url_comprobante apunta a `supabase.co/storage`, miniatura visible |
-| WA8 | Aprobar → mensualidad actualizada | Aprobar el pago del WA3 | Mensualidad del mes más antiguo pendiente pasa a AL_DIA o PARCIAL |
+| WA8 | Aprobar → mensualidad actualizada | Aprobar el pago del WA3 | Mensualidad del mes más antiguo pendiente (valor_oficial > 0) pasa a AL_DIA o PARCIAL |
+| WA9 | Concepto en mensaje separado | (1) Enviar foto sin texto de concepto → (2) Responder con "mensualidad" en nuevo mensaje | Bot guarda pago como `esperando_concepto` al recibir la foto; al responder el concepto, actualiza el pago a `pendiente` y envía acuse de recibo. No pide reenviar la foto. |
+| WA10 | Saldo a favor — pago excedente | Aprobar un pago cuyo monto supere el valor_oficial de la mensualidad | Admin aprueba desde Conciliación → mensualidad se marca AL_DIA → jugador recibe WhatsApp preguntando a qué concepto abonar el excedente (`excedente_pendiente` creado en BD) |
+| WA11 | Respuesta saldo a favor | Jugador responde "uniforme" (o "mensualidad" / "torneo") al mensaje del excedente | Bot aplica el monto del excedente al concepto elegido → pago excedente pasa a `aprobado_manual` → jugador recibe confirmación |
 
 ---
 
@@ -206,10 +281,25 @@ curl -X POST https://city-fc-api-v2.vercel.app/api/inscripcion \
 
 ---
 
+## 13. SEGURIDAD — HALLAZGOS DEL DIAGNÓSTICO ESTÁTICO
+
+> Sección agregada en sesión 3 (2026-04-29). Estos casos deben resolverse antes de abrir el sistema a múltiples clubs.
+
+| # | Caso | Severidad | Pasos | Esperado | Estado actual |
+|---|---|---|---|---|---|
+| SEC1 | `/api/debug` expone credenciales | 🔴 CRÍTICO | `curl https://city-fc-api-v2.vercel.app/api/debug` sin token | Debe retornar 401 o no exponer private_key/clientEmail | ❌ Expone datos sin auth |
+| SEC2 | Cross-club data access | 🔴 CRÍTICO | Con token válido de City FC, hacer GET `/api/players?club_id=otro-club-slug` | Debe retornar 403 o array vacío | ❌ Retorna datos del club solicitado |
+| SEC3 | Inscripción multi-club | 🟠 ALTO | POST `/api/inscripcion` con datos de club distinto | Debe respetar el club_id enviado | ❌ Siempre registra en city-fc |
+| SEC4 | Bot WhatsApp multi-club | 🟠 ALTO | Configurar segundo club con bot propio | Debe enrutar al club correcto | ❌ Hardcodeado a city-fc |
+
+---
+
 ## BUGS CONOCIDOS / LIMITACIONES ACTUALES
 
 - Los 4 pagos existentes con URLs de Twilio muestran "Sin imagen" (las URLs originales fueron borradas por requerir auth de Twilio). Los nuevos pagos funcionan correctamente con Supabase Storage.
-- El historial de transacciones en EstadoCuenta solo muestra pagos aprobados (correcto por diseño).
+- El historial de transacciones en EstadoCuenta solo muestra pagos `aprobado_manual` (correcto por diseño — whitelist).
+- WA10/WA11 (saldo a favor con WhatsApp): credenciales Twilio ya configuradas en Vercel. Listo para prueba.
+- Meses pre-inscripción (valor_oficial=0) ya se excluyen del cálculo de pendientes — no deben aparecer como PENDIENTE en EstadoCuenta.
 
 ---
 

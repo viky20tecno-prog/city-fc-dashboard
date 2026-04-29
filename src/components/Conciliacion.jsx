@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { CheckCircle, XCircle, Pencil, ExternalLink, RefreshCw, Clock, AlertCircle, CheckCheck } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
@@ -29,6 +29,49 @@ function formatDate(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
   return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+// ─── Miniatura de comprobante con lightbox ───────────────────────────────────
+function ImagenComprobante({ url }) {
+  const [open, setOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  if (!url) return <span className="text-gray-600 text-xs">Sin imagen</span>;
+
+  if (imgError) {
+    return (
+      <a href={url} target="_blank" rel="noreferrer"
+        className="inline-flex items-center gap-1 text-[#00AAFF] text-xs hover:underline">
+        <ExternalLink className="w-3 h-3" /> Ver
+      </a>
+    );
+  }
+
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className="block group">
+        <img
+          src={url}
+          alt="Comprobante"
+          onError={() => setImgError(true)}
+          className="h-10 w-16 object-cover rounded-lg border border-[#1A3A5C] group-hover:border-[#00AAFF]/50 transition cursor-pointer"
+        />
+      </button>
+      {open && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4"
+          onClick={() => setOpen(false)}
+        >
+          <img
+            src={url}
+            alt="Comprobante"
+            className="max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
+      )}
+    </>
+  );
 }
 
 // ─── Modal de edición ────────────────────────────────────────────────────────
@@ -189,14 +232,7 @@ function PagoRow({ pago, onEdit, onAction, actionLoading }) {
 
       {/* Comprobante */}
       <td className="px-4 py-3">
-        {pago.url_comprobante ? (
-          <a href={pago.url_comprobante} target="_blank" rel="noreferrer"
-            className="inline-flex items-center gap-1 text-[#00AAFF] text-xs hover:underline">
-            <ExternalLink className="w-3 h-3" /> Ver
-          </a>
-        ) : (
-          <span className="text-gray-600 text-xs">Sin imagen</span>
-        )}
+        <ImagenComprobante url={pago.url_comprobante} />
       </td>
 
       {/* Acciones */}

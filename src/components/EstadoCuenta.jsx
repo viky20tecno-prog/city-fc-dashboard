@@ -247,7 +247,7 @@ function SeccionHistorialLazy({ cedula }) {
       const data = await res.json();
       if (data.success) {
         const sorted = (data.data || [])
-          .filter(p => p.estado_revision !== 'pendiente' && p.estado_revision !== 'rechazado')
+          .filter(p => p.estado_revision === 'aprobado_manual')
           .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
         setTransacciones(sorted);
         setCargado(true);

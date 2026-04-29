@@ -1,7 +1,7 @@
 # ClubContable — Roadmap SaaS
 
 > Documento de continuidad. Si se cierra la sesión, compartir este archivo al inicio de la nueva conversación.
-> Última actualización: 2026-04-28
+> Última actualización: 2026-04-29
 
 ---
 
@@ -110,7 +110,7 @@ src/
   - Indicadores visuales de estado, errores y carga en todos los módulos.
   - Tematización consistente y componentes reutilizables.
 
-- **WhatsApp Bot + Conciliación (COMPLETADO 2026-04-28):**
+- **WhatsApp Bot + Conciliación (COMPLETADO y PROBADO 2026-04-29):**
   - Flujo: Jugador envía foto comprobante → Twilio → Edge Function → GPT-4o Vision extrae monto/banco/referencia → guarda en `pagos` con `estado_revision='pendiente'` → responde acuse de recibo al jugador
   - El pago **NO se aplica automáticamente** — queda en lista de conciliación para validación manual
   - Admin revisa en Dashboard → tab Conciliación → puede editar datos, Aprobar (aplica a mensualidad/uniforme/torneo) o Rechazar
@@ -118,6 +118,12 @@ src/
   - Secrets configurados en Supabase: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM` (con prefijo `whatsapp:`), `OPENAI_API_KEY`, `CLUB_ID`, `SKIP_TWILIO_VALIDATION`
   - Webhook Twilio Sandbox configurado en: `https://olcevdnhmexaahymfzii.supabase.co/functions/v1/whatsapp-webhook`
   - API: `GET /payments?estado=pendiente`, `PUT /payments/:id` con `{accion: 'aprobar'|'rechazar'}` o edición de campos
+  - Comprobantes: imágenes se suben al bucket público `comprobantes` en Supabase Storage — se muestran como miniatura con lightbox en Conciliación
+  - Historial de transacciones en EstadoCuenta: filtra `pendiente` y `rechazado`, solo muestra aprobados
+
+- **Fixes de deploy 2026-04-29:**
+  - `api/routes/whatsapp.js` no estaba commiteado — causaba que todos los deploys de API fallaran. Corregido.
+  - Edge Function redesplegada manualmente con `supabase functions deploy`
 
 
 ### Módulo Dashboard (tab principal)
@@ -196,10 +202,11 @@ src/
 
 ### ENTREGA CLIENTE — Pruebas inmediatas (esta semana)
 
-- [ ] **Verificar Conciliación en producción**: confirmar que la tab aparece y carga pagos pendientes en Vercel
-- [ ] **Prueba de flujo completo**: jugador envía foto → aparece en conciliación → admin aprueba → mensualidad se actualiza
-- [ ] **Notificación al jugador al aprobar/rechazar**: enviar WhatsApp de confirmación final cuando el admin aprueba (llamar `sendWhatsAppMessage` desde el endpoint PUT /payments/:id con número del jugador)
-- [ ] **Deploy API a producción**: los cambios de `payments.js` y `db.js` deben estar en Vercel (push ya hecho, verificar auto-deploy)
+- [x] **Verificar Conciliación en producción**: ✅ PROBADO 2026-04-29
+- [x] **Prueba de flujo completo**: ✅ PROBADO 2026-04-29 — WA1, WA2, WA3, WA5, WA6, C1, C4, C11 aprobados
+- [x] **Deploy API a producción**: ✅ Corregido y redesplegado 2026-04-29
+- [ ] **Notificación al jugador al aprobar/rechazar**: pendiente — enviar WhatsApp de confirmación cuando admin aprueba (`sendWhatsAppMessage` desde `PUT /payments/:id`)
+- [ ] **Completar set de pruebas restante**: A1-A5, D1-D4, J1-J9, U1-U10, PM1-PM5, AR1-AR5, C2-C3, C5-C10, WA4, WA7, WA8, I1-I5 (ver PRUEBAS.md)
 
 ### PRIORIDAD ALTA — Funcional / Negocio
 

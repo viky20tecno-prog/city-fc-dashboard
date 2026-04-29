@@ -246,9 +246,9 @@ function SeccionHistorialLazy({ cedula }) {
       const res  = await authFetch(`${API_BASE_URL}/payments?club_id=${getClubId()}&cedula=${cedula}&limit=50`);
       const data = await res.json();
       if (data.success) {
-        const sorted = (data.data || []).sort((a, b) =>
-          (b.fecha_proceso || '').localeCompare(a.fecha_proceso || '')
-        );
+        const sorted = (data.data || [])
+          .filter(p => p.estado_revision !== 'pendiente' && p.estado_revision !== 'rechazado')
+          .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
         setTransacciones(sorted);
         setCargado(true);
       } else {

@@ -1,11 +1,48 @@
 # Plan de Pruebas — ClubContable (City FC)
 
 > Archivo de referencia permanente. Compartir al inicio de cada sesión si se van a hacer pruebas.
-> Última actualización: 2026-04-29 (sesión 3 — diagnóstico estático integral)
+> Última actualización: 2026-04-30 (sesión 4 — seguridad aplicada, jugador prueba WA creado)
 
 ---
 
 ## RESULTADOS POR SESIÓN
+
+### Sesión 4 — 2026-04-30 (seguridad, anti-bot, datos prueba WA)
+
+**Objetivo:** resolver hallazgos de seguridad de sesión 3 + preparar pruebas WA9/WA10/WA11.
+
+#### Resumen de cambios aplicados
+
+| Ítem | Estado | Detalle |
+|---|---|---|
+| SEC1 — debug.js eliminado | ✅ RESUELTO | Archivo borrado del repo; nunca estaba montado en index.js |
+| SEC2 — Cross-club access | ✅ RESUELTO | `owner_user_id` en tabla `clubs` + middleware `validateClubAccess` en `api/index.js` |
+| Rate limiting inscripción | ✅ RESUELTO | `express-rate-limit`: 5 req / 15 min por IP (x-forwarded-for para Vercel) |
+| Honeypot server-side | ✅ RESUELTO | Campo `website` oculto; si viene relleno → fake 200 sin guardar |
+| Validaciones formato | ✅ RESUELTO | Regex cédula (7-15 dígitos) y celular (10 dígitos) en inscripcion.js |
+| Security headers | ✅ RESUELTO | X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Cache-Control: no-store |
+| SKIP_TWILIO_VALIDATION | ✅ YA SEGURO | Era env var, no hardcodeado — sin cambios necesarios |
+| Jugador prueba WA creado | ✅ HECHO | PRUEBA001, celular 3023903192, con 12 mensualidades + uniforme + 4 torneos |
+| Diego Escobar celular | ✅ HECHO | Cambiado a 0000000000 para evitar conflictos en pruebas WA |
+| Conciliación — tab excedente | ✅ YA ESTABA | `excedente_pendiente` ya estaba en Conciliacion.jsx — nota de PRUEBAS.md era stale |
+
+#### Hallazgos de seguridad — estado actualizado
+
+| Severidad | Hallazgo | Estado |
+|---|---|---|
+| 🔴 CRÍTICO | debug.js exponía credenciales Google SA | ✅ RESUELTO — archivo eliminado (commit `9ddbb62`) |
+| 🔴 CRÍTICO | Cross-club data access con `?club_id=` | ✅ RESUELTO — owner_user_id + validateClubAccess |
+| 🟠 ALTO | inscripcion.js hardcodea `'city-fc'` | ⏳ PENDIENTE — bloqueante para multi-club |
+| 🟠 ALTO | Edge Function hardcodea `CLUB_SLUG = 'city-fc'` | ⏳ PENDIENTE — bloqueante para multi-club |
+| 🟡 MEDIO | `SKIP_TWILIO_VALIDATION` como env var | ✅ YA SEGURO — era env var desde el inicio |
+| 🟡 MEDIO | Webhook WA validado solo con header secret | ⏳ ACEPTABLE — contexto interno, no expuesto |
+
+#### Pendientes de prueba tras esta sesión
+
+- **WA9, WA10, WA11**: código listo + datos en DB. Requisito previo: unir número `3023903192` al Twilio Sandbox (`join <palabra>` a `+14155238886`).
+- Todos los demás casos del set principal siguen pendientes de prueba manual.
+
+---
 
 ### Sesión 3 — 2026-04-29 (diagnóstico estático integral)
 
@@ -59,7 +96,7 @@ WA9, WA10, WA11 — implementados en código, no verificables estáticamente
 
 - **J9** (jugador suspendido no aparece en morosos): lógica de suspensiones en reports.js debe excluirlos — verificar
 - **U5** (número duplicado): comparación string vs string en Uniformes.jsx línea 74/110 — puede fallar si uno es número y el otro string
-- **WA10** (saldo a favor): `excedente_pendiente` se crea en BD pero la UI de Conciliación no tiene filtro para ese estado — el admin no lo verá en ningún tab
+- ~~**WA10** (saldo a favor): `excedente_pendiente` se crea en BD pero la UI de Conciliación no tiene filtro para ese estado~~ → **RESUELTO**: Conciliacion.jsx ya tenía el tab "Saldo a Favor" para `excedente_pendiente` — la nota de sesión 3 era stale.
 
 ---
 
@@ -111,10 +148,13 @@ WA9, WA10, WA11 — implementados en código, no verificables estáticamente
 
 ## DATOS DE PRUEBA
 
-- **Jugador:** Diego Escobar — cédula `1032401947`
-- **Número WhatsApp jugador:** el registrado en la tabla `players` para esa cédula
-- **WhatsApp Sandbox:** enviar mensaje a `+14155238886` con código `join <palabra>`
-- **Club slug:** `city-fc`
+| Campo | Valor | Notas |
+|---|---|---|
+| Jugador real | Diego Escobar — cédula `1032401947` | celular cambiado a `0000000000` (no usar para pruebas WA) |
+| Jugador prueba WA | PRUEBA001 — "Jugador Prueba WhatsApp" | celular `3023903192` — usar para WA9/WA10/WA11 |
+| WhatsApp Sandbox | `+14155238886` | Enviar `join <palabra>` desde el número `3023903192` antes de probar |
+| Club slug | `city-fc` | |
+| Admin UUID | `327f5286-03e2-4961-a9cc-fae9ebfefe76` | viky20.tecno@gmail.com — owner de city-fc en clubs |
 
 ---
 
@@ -287,10 +327,12 @@ curl -X POST https://city-fc-api-v2.vercel.app/api/inscripcion \
 
 | # | Caso | Severidad | Pasos | Esperado | Estado actual |
 |---|---|---|---|---|---|
-| SEC1 | `/api/debug` expone credenciales | 🔴 CRÍTICO | `curl https://city-fc-api-v2.vercel.app/api/debug` sin token | Debe retornar 401 o no exponer private_key/clientEmail | ❌ Expone datos sin auth |
-| SEC2 | Cross-club data access | 🔴 CRÍTICO | Con token válido de City FC, hacer GET `/api/players?club_id=otro-club-slug` | Debe retornar 403 o array vacío | ❌ Retorna datos del club solicitado |
-| SEC3 | Inscripción multi-club | 🟠 ALTO | POST `/api/inscripcion` con datos de club distinto | Debe respetar el club_id enviado | ❌ Siempre registra en city-fc |
-| SEC4 | Bot WhatsApp multi-club | 🟠 ALTO | Configurar segundo club con bot propio | Debe enrutar al club correcto | ❌ Hardcodeado a city-fc |
+| SEC1 | `/api/debug` expone credenciales | 🔴 CRÍTICO | `curl https://city-fc-api-v2.vercel.app/api/debug` sin token | Debe retornar 404 (ruta eliminada) | ✅ RESUELTO 2026-04-30 — archivo eliminado |
+| SEC2 | Cross-club data access | 🔴 CRÍTICO | Con token válido de City FC, hacer GET `/api/players?club_id=otro-club-slug` | Debe retornar 403 | ✅ RESUELTO 2026-04-30 — owner_user_id + validateClubAccess |
+| SEC3 | Inscripción multi-club | 🟠 ALTO | POST `/api/inscripcion` con datos de club distinto | Debe respetar el club_id enviado | ❌ Siempre registra en city-fc (pendiente — multi-club no implementado aún) |
+| SEC4 | Bot WhatsApp multi-club | 🟠 ALTO | Configurar segundo club con bot propio | Debe enrutar al club correcto | ❌ Hardcodeado a city-fc (pendiente — multi-club) |
+| SEC5 | Rate limit inscripción | 🟡 MEDIO | Enviar >5 POST a `/api/inscripcion` desde la misma IP en 15 min | Debe retornar 429 en el 6to intento | ✅ RESUELTO 2026-04-30 — express-rate-limit |
+| SEC6 | Honeypot anti-bot | 🟡 MEDIO | POST inscripcion con campo `website` relleno | Debe retornar 200 falso sin guardar | ✅ RESUELTO 2026-04-30 — server-side honeypot |
 
 ---
 
@@ -298,8 +340,9 @@ curl -X POST https://city-fc-api-v2.vercel.app/api/inscripcion \
 
 - Los 4 pagos existentes con URLs de Twilio muestran "Sin imagen" (las URLs originales fueron borradas por requerir auth de Twilio). Los nuevos pagos funcionan correctamente con Supabase Storage.
 - El historial de transacciones en EstadoCuenta solo muestra pagos `aprobado_manual` (correcto por diseño — whitelist).
-- WA10/WA11 (saldo a favor con WhatsApp): credenciales Twilio ya configuradas en Vercel. Listo para prueba.
+- WA9/WA10/WA11: código completo y datos de prueba listos. Pendiente: unir número `3023903192` al Twilio Sandbox.
 - Meses pre-inscripción (valor_oficial=0) ya se excluyen del cálculo de pendientes — no deben aparecer como PENDIENTE en EstadoCuenta.
+- Diego Escobar (cédula `1032401947`) tiene celular `0000000000` — no usar para pruebas WhatsApp.
 
 ---
 
@@ -308,8 +351,10 @@ curl -X POST https://city-fc-api-v2.vercel.app/api/inscripcion \
 Antes de cada despliegue verificar mínimo:
 
 - [ ] Login funciona
-- [ ] Tabla de jugadores carga
-- [ ] EstadoCuenta de Diego Escobar (cédula 1032401947) abre y muestra mensualidades
-- [ ] Tab Conciliación carga sin error
+- [ ] Tabla de jugadores carga (incluye PRUEBA001 visible)
+- [ ] EstadoCuenta de PRUEBA001 (cédula PRUEBA001) abre y muestra 12 mensualidades + uniforme + torneos
+- [ ] Tab Conciliación carga sin error, tabs Pendiente / Aprobados / Rechazados / Saldo a Favor visibles
 - [ ] Formulario `/inscripcion` accesible sin login
 - [ ] `GET /api/health` retorna 200
+- [ ] `curl /api/players?club_id=city-fc` sin token → 401
+- [ ] `curl /api/players?club_id=city-fc` con token válido → 200 con datos del club correcto

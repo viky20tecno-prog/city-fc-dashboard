@@ -1,7 +1,7 @@
 # ClubContable — Roadmap SaaS
 
 > Documento de continuidad. Si se cierra la sesión, compartir este archivo al inicio de la nueva conversación.
-> Última actualización: 2026-04-29
+> Última actualización: 2026-04-30 (sesión 4 — seguridad, anti-bot, jugador de prueba WA)
 
 ---
 
@@ -21,16 +21,15 @@
 ### Estructura del backend
 ```
 api/
-├── index.js              ← servidor Express principal (auth middleware en línea 81)
+├── index.js              ← servidor Express principal; auth + validateClubAccess middleware (post-SEC2 fix)
 ├── middleware/
-│   └── auth.js           ← valida JWT Supabase, protege todas las rutas excepto /inscripcion, /debug, /health
+│   └── auth.js           ← valida JWT Supabase, protege todas las rutas excepto /inscripcion, /health, /whatsapp
 ├── routes/
 │   ├── arbitrage.js      ← partidos y pagos de árbitros
 │   ├── config.js
-│   ├── debug.js
-│   ├── inscripcion.js    ← pública (sin auth) — inscripción de jugadores
+│   ├── inscripcion.js    ← pública (sin auth) — inscripción de jugadores (rate-limited: 5/15min)
 │   ├── invoices.js       ← mensualidades, uniformes (tabla vieja), torneos
-│   ├── payments.js       ← registro de pagos manuales
+│   ├── payments.js       ← registro de pagos manuales + sendWhatsAppMessage (Twilio)
 │   ├── players.js        ← jugadores
 │   ├── reports.js
 │   ├── suspensiones.js   ← suspensiones de jugadores
@@ -40,6 +39,7 @@ api/
     ├── db.js             ← cliente Supabase (todas las funciones de BD)
     └── sheets.js         ← DEPRECADO (no se usa, pero existe)
 ```
+> ⚠️ `debug.js` fue eliminado en sesión 4 (2026-04-30) — exponía credenciales de Google Service Account.
 
 ### Estructura del frontend
 ```
@@ -79,7 +79,7 @@ src/
 ```
 
 ### Tablas Supabase (estado actual)
-- `clubs` — id, name, slug, plan, is_active
+- `clubs` — id, name, slug, plan, is_active, **owner_user_id** (UUID → auth.users; migrado 2026-04-30)
 - `players` — cedula, nombre, apellidos, celular, municipio, activo, etc.
 - `mensualidades` — cedula, anio, mes, valor_oficial, valor_pagado, saldo_pendiente, estado
 - `uniformes` — tabla vieja de pagos de uniforme (valor_oficial/pagado/pendiente)
@@ -93,6 +93,20 @@ src/
 ---
 
 ## FUNCIONALIDADES IMPLEMENTADAS
+
+### Seguridad — sesión 4 (2026-04-30) ✅ COMPLETADO
+
+- **SEC1 — debug.js eliminado**: ruta legacy que exponía `clientEmail` y primeros 40 chars del `private_key` de Google Service Account. Nunca estuvo montada en index.js (riesgo teórico), pero se eliminó para evitar accidentes futuros. Commit `9ddbb62`.
+- **SEC2 — Cross-club data access resuelto**:
+  - `ALTER TABLE clubs ADD COLUMN owner_user_id UUID REFERENCES auth.users(id)` ejecutado en Supabase.
+  - UUID del admin (`viky20.tecno@gmail.com` → `327f5286-03e2-4961-a9cc-fae9ebfefe76`) asignado al club `city-fc`.
+  - `validateClubAccess` middleware agregado a `api/index.js` (post-auth): valida `clubs.owner_user_id === req.user.id`. Si `owner_user_id` es NULL → acceso permitido (retrocompatible con clubs sin migrar).
+- **Rate limiting — inscripción**: `express-rate-limit` (máx 5 req/15 min por IP, usando `x-forwarded-for` para Vercel). Respuesta genérica para no revelar el límite.
+- **Honeypot server-side**: campo oculto `website` en formulario de inscripción; si viene relleno → respuesta fake 200 sin guardar nada.
+- **Validaciones de formato server-side**: cédula (7-15 dígitos) y celular (10 dígitos) validados con regex antes de tocar la BD.
+- **Security headers**: `X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`, `Permissions-Policy`, `Cache-Control: no-store` en todas las respuestas.
+- **Jugador de prueba WA**: creado `PRUEBA001` ("Jugador Prueba WhatsApp") con celular `3023903192`, 12 mensualidades, uniforme y 4 torneos. Diego Escobar (cédula `1032401947`) movido a celular `0000000000` para evitar conflictos de prueba.
+- **`SKIP_TWILIO_VALIDATION`**: ya era env var (no hardcodeado) — verificado, sin cambios necesarios.
 
 ### Avances recientes y mejoras no listadas previamente
 
@@ -119,11 +133,20 @@ src/
   - Webhook Twilio Sandbox configurado en: `https://olcevdnhmexaahymfzii.supabase.co/functions/v1/whatsapp-webhook`
   - API: `GET /payments?estado=pendiente`, `PUT /payments/:id` con `{accion: 'aprobar'|'rechazar'}` o edición de campos
   - Comprobantes: imágenes se suben al bucket público `comprobantes` en Supabase Storage — se muestran como miniatura con lightbox en Conciliación
-  - Historial de transacciones en EstadoCuenta: filtra `pendiente` y `rechazado`, solo muestra aprobados
+  - Historial de transacciones en EstadoCuenta: whitelist `aprobado_manual` — excluye pendiente, rechazado, esperando_concepto, excedente_pendiente
 
 - **Fixes de deploy 2026-04-29:**
   - `api/routes/whatsapp.js` no estaba commiteado — causaba que todos los deploys de API fallaran. Corregido.
   - Edge Function redesplegada manualmente con `supabase functions deploy`
+
+- **WhatsApp flujo avanzado — sesión 2 (2026-04-29):**
+  - **Sesión de concepto (`esperando_concepto`)**: cuando jugador envía imagen sin concepto, el pago se guarda con `estado_revision='esperando_concepto'` en vez de solo preguntar. Cuando el jugador responde el concepto en mensaje de texto, el sistema busca el pago pendiente (últimos 30 min) y lo actualiza a `estado_revision='pendiente'` con el concepto correcto. Evita que el jugador tenga que reenviar la foto.
+  - **Saldo a favor (`excedente_pendiente`)**: cuando un pago supera el `valor_oficial`, el excedente se guarda como nuevo registro en `pagos` con `estado_revision='excedente_pendiente'`. El jugador recibe un WhatsApp preguntando a qué concepto abonarlo. Cuando responde, el excedente se aplica y el registro pasa a `aprobado_manual`.
+  - **Fix mensualidades**: `getMensualidadesPendientes` en `db.js` y `actualizarMensualidad` en Edge Function ahora filtran `.gt('valor_oficial', 0)` — excluye meses pre-inscripción (valor_oficial = 0).
+  - **Fix historial EstadoCuenta**: filtro cambiado de blacklist a whitelist → solo muestra `estado_revision === 'aprobado_manual'`. Antes `esperando_concepto` y `excedente_pendiente` podían aparecer en el historial.
+  - **Fix try-catch silencioso**: las funciones `actualizarMensualidad/Uniforme/Torneo` en `payments.js` tenían try-catch que ocultaba errores. Removido — ahora los errores propagaban y devuelven HTTP 500 con mensaje visible en el toast de Conciliación.
+  - **`sendWhatsAppMessage` en Express API**: función agregada a `payments.js` que usa `TWILIO_ACCOUNT_SID/AUTH_TOKEN/WHATSAPP_FROM` de Vercel env. Si no están configuradas, loguea warning y continúa (excedente sí se guarda en DB).
+  - **⚠️ Pendiente manual**: agregar `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM=whatsapp:+14155238886` en Vercel → city-fc-api-v2 → Settings → Environment Variables
 
 
 ### Módulo Dashboard (tab principal)
@@ -166,7 +189,7 @@ src/
 ### Módulo WhatsApp Bot
 - [x] WhatsAppMockup: vista de mensajes tipo WhatsApp
 
-### Módulo Conciliación (NUEVO — 2026-04-28)
+### Módulo Conciliación (2026-04-28/29)
 - [x] Tab "Conciliación" en Dashboard (después de WhatsApp Bot)
 - [x] Lista de pagos recibidos por WhatsApp con filtros: Pendiente / Aprobado / Rechazado
 - [x] Columnas: Fecha, Jugador, Concepto, Monto, Banco, Referencia, Comprobante (link), Acciones
@@ -174,8 +197,16 @@ src/
 - [x] Aprobar → aplica pago a mensualidad/uniforme/torneo y marca `aprobado_manual`
 - [x] Rechazar → marca `rechazado` sin tocar tablas de estado
 - [x] Total acumulado en footer de tabla
-- [x] Toast de confirmación en cada acción
-- [ ] **Pendiente:** Notificación WhatsApp al jugador al aprobar/rechazar
+- [x] Toast de confirmación con error HTTP 500 visible (fix try-catch silencioso)
+- [x] Saldo a favor: excedente guardado como `excedente_pendiente` + WhatsApp al jugador
+- [ ] **Pendiente:** Notificación WhatsApp al jugador al aprobar/rechazar pago normal
+
+### WhatsApp Bot — estados de sesión (2026-04-29)
+- `pendiente` — pago recibido, listo para conciliación
+- `aprobado_manual` — pago aprobado por admin
+- `rechazado` — rechazado por admin
+- `esperando_concepto` — imagen recibida, esperando respuesta del jugador con concepto (TTL 30 min)
+- `excedente_pendiente` — saldo a favor, esperando respuesta del jugador sobre dónde abonar
 
 ### Formulario de Inscripción (público)
 - [x] Ruta pública `/inscripcion` sin autenticación
@@ -189,7 +220,8 @@ src/
 - [x] Login con email/contraseña via Supabase Auth
 - [x] ProtectedRoute: redirige a /login si no hay sesión
 - [x] authFetch: envía Bearer token en todas las peticiones autenticadas
-- [x] Backend: requireAuth middleware valida JWT en todas las rutas excepto /inscripcion, /debug, /health
+- [x] Backend: requireAuth middleware valida JWT en todas las rutas excepto /inscripcion, /health, /whatsapp
+- [x] validateClubAccess: verifica que el usuario autenticado sea dueño del club solicitado (2026-04-30)
 
 ### PagoManualModal
 - [x] Registro de pago por jugador (busca por cédula)
@@ -205,7 +237,19 @@ src/
 - [x] **Verificar Conciliación en producción**: ✅ PROBADO 2026-04-29
 - [x] **Prueba de flujo completo**: ✅ PROBADO 2026-04-29 — WA1, WA2, WA3, WA5, WA6, C1, C4, C11 aprobados
 - [x] **Deploy API a producción**: ✅ Corregido y redesplegado 2026-04-29
-- [ ] **Notificación al jugador al aprobar/rechazar**: pendiente — enviar WhatsApp de confirmación cuando admin aprueba (`sendWhatsAppMessage` desde `PUT /payments/:id`)
+- [x] **Saldo a favor (excedente)**: ✅ Implementado — guarda excedente_pendiente + WhatsApp al jugador
+- [x] **Sesión de concepto**: ✅ Implementado — esperando_concepto con TTL 30 min
+- [x] **Fix mensualidades**: ✅ Excluye meses con valor_oficial=0
+- [x] **Twilio env vars en Vercel**: ✅ `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM` configurados en Vercel → city-fc-api-v2
+- [ ] **Notificación al jugador al aprobar/rechazar pago normal**: WhatsApp de confirmación cuando admin aprueba o rechaza
+- [x] **SEC1 — debug.js eliminado**: ✅ 2026-04-30
+- [x] **SEC2 — Cross-club data access**: ✅ owner_user_id + validateClubAccess middleware 2026-04-30
+- [x] **Rate limiting inscripción**: ✅ express-rate-limit 5/15min 2026-04-30
+- [x] **Security headers**: ✅ X-Content-Type-Options, X-Frame-Options, etc. 2026-04-30
+- [x] **Anti-bot inscripción**: ✅ honeypot server-side + validaciones regex 2026-04-30
+- [x] **Jugador de prueba WA9/WA10/WA11**: ✅ PRUEBA001 (3023903192) creado en Supabase 2026-04-30
+- [ ] **Notificación al jugador al aprobar/rechazar pago normal**: WhatsApp de confirmación cuando admin aprueba o rechaza
+- [ ] **Completar set de pruebas WA9/WA10/WA11**: ⬅ PRÓXIMO — número 3023903192 debe unirse al Sandbox de Twilio (`join <palabra>` a `+14155238886`) antes de probar
 - [ ] **Completar set de pruebas restante**: A1-A5, D1-D4, J1-J9, U1-U10, PM1-PM5, AR1-AR5, C2-C3, C5-C10, WA4, WA7, WA8, I1-I5 (ver PRUEBAS.md)
 
 ### PRIORIDAD ALTA — Funcional / Negocio
@@ -266,11 +310,23 @@ src/
 
 ## CÓMO CONTINUAR EN NUEVA SESIÓN
 
-Pegar esto al inicio de la sesión:
+Pegar esto al inicio de la sesión (reemplazar la última línea según lo que se quiera hacer):
+
 ```
-Continúa el proyecto ClubContable (City FC). Lee el archivo Roadmap.md para contexto completo.
-Stack: React+Vite (frontend) + Express.js serverless (backend) + Supabase (BD) + Supabase Auth.
-Repos: github.com/viky20tecno-prog/city-fc-dashboard y city-fc-api-v2
-Deploy automático en Vercel al hacer push a main.
-Siguiente tarea: [INDICAR TAREA DEL ROADMAP]
+Continúa el proyecto ClubContable (City FC). Lee Roadmap.md y PRUEBAS.md para contexto completo.
+
+Stack: React+Vite (frontend) + Express.js serverless Vercel (backend) + Supabase BD + Supabase Auth.
+Repos: github.com/viky20tecno-prog/city-fc-dashboard y city-fc-api-v2 — deploy automático en Vercel al push a main.
+
+Estado actual (2026-04-30):
+- WhatsApp bot completo con GPT-4o Vision, conciliación manual, sesión de concepto (esperando_concepto) y saldo a favor (excedente_pendiente).
+- Credenciales Twilio configuradas en Vercel (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM).
+- Pagos: estado_revision puede ser pendiente / aprobado_manual / rechazado / esperando_concepto / excedente_pendiente.
+- EstadoCuenta historial: solo muestra aprobado_manual (whitelist).
+- Mensualidades: excluye meses con valor_oficial=0 (pre-inscripción).
+- Seguridad: SEC1 y SEC2 resueltos, rate limiting, security headers, honeypot server-side.
+- Jugador prueba WA: PRUEBA001 (celular 3023903192), Diego Escobar → celular 0000000000.
+- DB: clubs.owner_user_id = '327f5286-03e2-4961-a9cc-fae9ebfefe76' para city-fc.
+
+Siguiente tarea: [INDICAR — ej: "continuar pruebas WA9/WA10/WA11" (unir 3023903192 al Sandbox primero) o "notificación WhatsApp al aprobar/rechazar pago normal" o ver PRUEBAS.md]
 ```

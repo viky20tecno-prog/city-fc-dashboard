@@ -305,7 +305,7 @@ export default function Conciliacion() {
 
   const showToast = (msg, type = 'ok') => {
     setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    setTimeout(() => setToast(null), type === 'warn' ? 6000 : 3500);
   };
 
   const handleAction = async (pagoId, accion) => {
@@ -318,7 +318,19 @@ export default function Conciliacion() {
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
-      showToast(accion === 'aprobar' ? 'Pago aprobado y registrado ✓' : 'Pago rechazado', accion === 'aprobar' ? 'ok' : 'error');
+
+      if (accion === 'aprobar') {
+        if (data.excedente > 0 && !data.wa_enviado) {
+          showToast(
+            `Aprobado ✓ — Saldo a favor $${Number(data.excedente).toLocaleString('es-CO')} guardado. Notifica al jugador manualmente por WhatsApp.`,
+            'warn',
+          );
+        } else {
+          showToast('Pago aprobado y registrado ✓');
+        }
+      } else {
+        showToast('Pago rechazado', 'error');
+      }
       await cargarPagos();
     } catch (e) {
       showToast(e.message, 'error');
@@ -442,13 +454,17 @@ export default function Conciliacion() {
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-2xl text-sm font-medium transition-all ${
+        <div className={`fixed bottom-6 right-6 z-50 flex items-start gap-2 px-4 py-3 rounded-xl shadow-2xl text-sm font-medium transition-all max-w-sm ${
           toast.type === 'ok'
             ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+            : toast.type === 'warn'
+            ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
             : 'bg-red-500/20 border border-red-500/30 text-red-400'
         }`}>
-          {toast.type === 'ok' ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-          {toast.msg}
+          {toast.type === 'ok'   && <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />}
+          {toast.type === 'warn' && <AlertCircle  className="w-4 h-4 mt-0.5 shrink-0" />}
+          {toast.type === 'error'&& <XCircle      className="w-4 h-4 mt-0.5 shrink-0" />}
+          <span>{toast.msg}</span>
         </div>
       )}
     </div>

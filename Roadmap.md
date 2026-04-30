@@ -199,7 +199,7 @@ src/
 - [x] Total acumulado en footer de tabla
 - [x] Toast de confirmación con error HTTP 500 visible (fix try-catch silencioso)
 - [x] Saldo a favor: excedente guardado como `excedente_pendiente` + WhatsApp al jugador
-- [ ] **Pendiente:** Notificación WhatsApp al jugador al aprobar/rechazar pago normal
+- [x] Notificación WhatsApp al jugador al aprobar pago normal (✅ confirmación) y al rechazar (❌ aviso)
 
 ### WhatsApp Bot — estados de sesión (2026-04-29)
 - `pendiente` — pago recibido, listo para conciliación
@@ -241,14 +241,13 @@ src/
 - [x] **Sesión de concepto**: ✅ Implementado — esperando_concepto con TTL 30 min
 - [x] **Fix mensualidades**: ✅ Excluye meses con valor_oficial=0
 - [x] **Twilio env vars en Vercel**: ✅ `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM` configurados en Vercel → city-fc-api-v2
-- [ ] **Notificación al jugador al aprobar/rechazar pago normal**: WhatsApp de confirmación cuando admin aprueba o rechaza
+- [x] **Notificación al jugador al aprobar/rechazar pago normal**: ✅ 2026-04-30 — WA ✅/❌ enviado por Vercel API en aprobar y rechazar; toast en Conciliación muestra si se notificó
 - [x] **SEC1 — debug.js eliminado**: ✅ 2026-04-30
 - [x] **SEC2 — Cross-club data access**: ✅ owner_user_id + validateClubAccess middleware 2026-04-30
 - [x] **Rate limiting inscripción**: ✅ express-rate-limit 5/15min 2026-04-30
 - [x] **Security headers**: ✅ X-Content-Type-Options, X-Frame-Options, etc. 2026-04-30
 - [x] **Anti-bot inscripción**: ✅ honeypot server-side + validaciones regex 2026-04-30
 - [x] **Jugador de prueba WA9/WA10/WA11**: ✅ PRUEBA001 (3023903192) creado en Supabase 2026-04-30
-- [ ] **Notificación al jugador al aprobar/rechazar pago normal**: WhatsApp de confirmación cuando admin aprueba o rechaza
 - [ ] **Completar set de pruebas WA9/WA10/WA11**: ⬅ PRÓXIMO — número 3023903192 debe unirse al Sandbox de Twilio (`join <palabra>` a `+14155238886`) antes de probar
 - [ ] **Completar set de pruebas restante**: A1-A5, D1-D4, J1-J9, U1-U10, PM1-PM5, AR1-AR5, C2-C3, C5-C10, WA4, WA7, WA8, I1-I5 (ver PRUEBAS.md)
 

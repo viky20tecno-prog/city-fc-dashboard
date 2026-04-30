@@ -326,10 +326,10 @@ export default function Conciliacion() {
             'warn',
           );
         } else {
-          showToast('Pago aprobado y registrado ✓');
+          showToast('Pago aprobado y registrado ✓' + (data.wa_enviado ? ' — Jugador notificado por WhatsApp' : ''));
         }
       } else {
-        showToast('Pago rechazado', 'error');
+        showToast('Pago rechazado' + (data.wa_enviado ? ' — Jugador notificado por WhatsApp' : ''), 'error');
       }
       await cargarPagos();
     } catch (e) {

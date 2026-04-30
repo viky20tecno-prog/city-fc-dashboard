@@ -1,11 +1,39 @@
 # Plan de Pruebas — ClubContable (City FC)
 
 > Archivo de referencia permanente. Compartir al inicio de cada sesión si se van a hacer pruebas.
-> Última actualización: 2026-04-30 (sesión 4 — seguridad aplicada, jugador prueba WA creado)
+> Última actualización: 2026-04-30 (sesión 5 — notificación WA al jugador en aprobar/rechazar)
 
 ---
 
 ## RESULTADOS POR SESIÓN
+
+### Sesión 5 — 2026-04-30 (notificación WA al jugador al aprobar/rechazar)
+
+**Objetivo:** implementar notificación WhatsApp al jugador cuando el admin aprueba o rechaza un pago normal.
+
+#### Cambios aplicados
+
+| Ítem | Estado | Detalle |
+|---|---|---|
+| WA confirmar aprobación | ✅ IMPLEMENTADO | `payments.js` PUT aprobar: si excedente=0 envía "✅ Pago confirmado — $X aplicado a [concepto]" |
+| WA notificar rechazo | ✅ IMPLEMENTADO | `payments.js` PUT rechazar: envía "❌ Pago no verificado — comunícate con el admin" |
+| Toast Conciliación | ✅ ACTUALIZADO | Toast muestra "— Jugador notificado por WhatsApp" si `wa_enviado=true` |
+| Roadmap actualizado | ✅ HECHO | Ítem marcado como completado |
+
+#### Casos de prueba para esta sesión
+
+| # | Caso | Pasos | Esperado |
+|---|---|---|---|
+| C12 | Aprobar pago — jugador notificado | Aprobar un pago en Conciliación | Toast "Pago aprobado — Jugador notificado por WhatsApp"; jugador recibe WA ✅ |
+| C13 | Rechazar pago — jugador notificado | Rechazar un pago en Conciliación | Toast "Pago rechazado — Jugador notificado por WhatsApp"; jugador recibe WA ❌ |
+| C14 | Aprobar sin celular registrado | Aprobar pago de jugador sin celular en BD | Toast "Pago aprobado" sin mención de WA; no hay error |
+
+#### Pendientes de prueba
+
+- **C12, C13**: requieren Twilio env vars en Vercel + jugador con celular real unido al Sandbox.
+- **WA9, WA10, WA11**: código listo. Requiere que número `3023903192` se una al Sandbox (`join <palabra>` a `+14155238886`).
+
+---
 
 ### Sesión 4 — 2026-04-30 (seguridad, anti-bot, datos prueba WA)
 
@@ -269,6 +297,9 @@ WA9, WA10, WA11 — implementados en código, no verificables estáticamente
 | C9 | Total en footer | Ver footer de tabla | Suma correcta de montos en el filtro activo |
 | C10 | No aparece en historial | Verificar EstadoCuenta del jugador | Pagos pendientes NO aparecen en historial de transacciones |
 | C11 | Sí aparece en historial tras aprobar | Aprobar → abrir EstadoCuenta | Pago aprobado aparece en historial |
+| C12 | Aprobar — jugador notificado | Aprobar pago de jugador con celular registrado | Toast "Pago aprobado ✓ — Jugador notificado por WhatsApp"; jugador recibe "✅ Pago confirmado" |
+| C13 | Rechazar — jugador notificado | Rechazar pago de jugador con celular registrado | Toast "Pago rechazado — Jugador notificado por WhatsApp"; jugador recibe "❌ Pago no verificado" |
+| C14 | Aprobar — sin celular | Aprobar pago de jugador sin celular en BD | Toast "Pago aprobado ✓" (sin mención WA); sin error |
 
 ---
 

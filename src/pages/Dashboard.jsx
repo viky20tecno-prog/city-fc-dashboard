@@ -1,35 +1,143 @@
-// src/pages/Dashboard.jsx
-
 import { useState } from 'react';
-import { RefreshCw, Activity, LayoutDashboard, Users, MessageSquare, Clock, Link2, Check, Copy, DollarSign, Shirt, Plus, Loader2, AlertCircle, CheckCircle, ClipboardCheck } from 'lucide-react';
+import {
+  RefreshCw, LayoutDashboard, Users, Shirt, Activity,
+  Clock, MessageSquare, ClipboardCheck, Settings,
+  Copy, Check, Bell,
+} from 'lucide-react';
 import { useSheetData } from '../hooks/useSheetData';
-import StatsCards from '../components/StatsCards';
+import DashboardOverview from '../components/DashboardOverview';
 import JugadoresTable from '../components/JugadoresTable';
-import RecaudacionChart from '../components/RecaudacionChart';
-import MorososList from '../components/MorososList';
-import TimelineCobro from '../components/TimelineCobro';
-import WhatsAppMockup from '../components/WhatsAppMockup';
-import PagoManualModal from '../components/PagoManualModal';
 import Uniformes from '../components/Uniformes';
 import ArbitrajePagos from './ArbitrajePagos';
+import TimelineCobro from '../components/TimelineCobro';
+import WhatsAppMockup from '../components/WhatsAppMockup';
 import Conciliacion from '../components/Conciliacion';
+import PagoManualModal from '../components/PagoManualModal';
 
-const tabs = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'jugadores', label: 'Jugadores', icon: Users },
-  { id: 'uniformes', label: 'Uniformes', icon: Shirt },
-  { id: 'arbitraje', label: 'Pago Arbitraje', icon: Activity },
-  { id: 'cobro', label: 'Ciclo de Cobro', icon: Clock },
-  { id: 'whatsapp',      label: 'WhatsApp Bot',  icon: MessageSquare  },
-  { id: 'conciliacion', label: 'Conciliación',  icon: ClipboardCheck },
+const NAV = [
+  { id: 'dashboard',    Icon: LayoutDashboard, title: 'Dashboard'     },
+  { id: 'jugadores',    Icon: Users,            title: 'Jugadores'     },
+  { id: 'uniformes',    Icon: Shirt,            title: 'Uniformes'     },
+  { id: 'arbitraje',    Icon: Activity,         title: 'Pago Arbitraje'},
+  { id: 'cobro',        Icon: Clock,            title: 'Ciclo de Cobro'},
+  { id: 'whatsapp',     Icon: MessageSquare,    title: 'WhatsApp Bot'  },
+  { id: 'conciliacion', Icon: ClipboardCheck,   title: 'Conciliación'  },
 ];
 
+/* ── estilos del shell (no usan Tailwind para respetar el grid exacto del diseño) ── */
+const S = {
+  shell: {
+    display: 'grid',
+    gridTemplateRows: '58px 1fr',
+    gridTemplateColumns: '64px 1fr',
+    height: '100vh',
+    overflow: 'hidden',
+    fontFamily: "'Inter', system-ui, sans-serif",
+    background: '#161616',
+  },
+  topbar: {
+    gridColumn: '1 / -1',
+    background: 'rgba(18,18,18,0.96)',
+    borderBottom: '1px solid rgba(225,73,36,0.2)',
+    backdropFilter: 'blur(12px)',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 18px 0 16px',
+    gap: '12px',
+    position: 'relative',
+    zIndex: 50,
+  },
+  sep: {
+    width: '1px', height: '30px',
+    background: 'rgba(225,73,36,0.25)',
+    flexShrink: 0,
+  },
+  sidebar: {
+    background: 'rgba(15,15,15,0.98)',
+    borderRight: '1px solid rgba(225,73,36,0.15)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '14px 0 12px',
+    gap: '4px',
+    overflowY: 'auto',
+    scrollbarWidth: 'none',
+  },
+  main: {
+    overflowY: 'auto',
+    padding: '16px 18px 24px',
+    scrollbarWidth: 'thin',
+    scrollbarColor: 'rgba(225,73,36,0.2) transparent',
+  },
+  iconBtn: (active) => ({
+    width: '42px', height: '42px',
+    borderRadius: '10px',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    cursor: 'pointer',
+    border: 'none',
+    background: active ? 'rgba(225,73,36,0.12)' : 'transparent',
+    position: 'relative',
+    transition: 'all 0.2s',
+    flexShrink: 0,
+  }),
+  actionBtn: (primary) => ({
+    padding: '6px 12px',
+    borderRadius: '8px',
+    border: `1px solid ${primary ? 'rgba(225,73,36,0.3)' : 'rgba(182,134,49,0.3)'}`,
+    background: primary ? 'rgba(225,73,36,0.08)' : 'rgba(182,134,49,0.08)',
+    color: primary ? '#E14924' : '#B68631',
+    fontSize: '11px', letterSpacing: '1px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
+  }),
+  roundBtn: {
+    width: '34px', height: '34px',
+    borderRadius: '8px',
+    border: '1px solid rgba(225,73,36,0.25)',
+    background: 'rgba(225,73,36,0.06)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    cursor: 'pointer',
+    position: 'relative',
+    flexShrink: 0,
+    transition: 'all 0.2s',
+  },
+};
+
+function NavBtn({ id, Icon, title, active, onClick }) {
+  return (
+    <button style={S.iconBtn(active)} onClick={() => onClick(id)} title={title}>
+      {active && (
+        <div style={{
+          position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+          width: '3px', height: '24px',
+          background: '#E14924', borderRadius: '0 2px 2px 0',
+          boxShadow: '0 0 8px #E14924, 0 0 16px rgba(225,73,36,0.4)',
+          pointerEvents: 'none',
+        }} />
+      )}
+      <Icon
+        size={18}
+        color={active ? '#E14924' : '#7A7A7A'}
+        style={active ? { filter: 'drop-shadow(0 0 5px rgba(225,73,36,0.9))' } : {}}
+        strokeWidth={1.7}
+      />
+    </button>
+  );
+}
+
 export default function Dashboard() {
-  const { jugadores, mensualidades, uniformes, torneos, registroPagos, morosos, suspensiones, loading, error, lastUpdated, refresh } = useSheetData();
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [refreshing, setRefreshing] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
-  const [showPagoManual, setShowPagoManual] = useState(false);
+  const {
+    jugadores, mensualidades, uniformes, torneos,
+    registroPagos, morosos, suspensiones,
+    loading, error, refresh,
+  } = useSheetData();
+
+  const [activeTab,     setActiveTab]     = useState('dashboard');
+  const [refreshing,    setRefreshing]    = useState(false);
+  const [linkCopied,    setLinkCopied]    = useState(false);
+  const [showPagoModal, setShowPagoModal] = useState(false);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -39,173 +147,178 @@ export default function Dashboard() {
 
   const inscripcionUrl = `${window.location.origin}/inscripcion`;
 
-  const handleOpenInscripcion = () => {
-    window.open(inscripcionUrl, '_blank');
-  };
-
   const handleCopyLink = () => {
     navigator.clipboard.writeText(inscripcionUrl);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
   };
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#060C18] flex items-center justify-center p-4">
-        <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-8 max-w-md text-center shadow-[0_0_40px_rgba(255,0,0,0.1)]">
-          <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-            <Activity className="w-8 h-8 text-red-400" />
-          </div>
-          <h2 className="text-xl font-bold text-white mb-2">Error de conexión</h2>
-          <p className="text-gray-400 mb-4 text-sm">{error}</p>
-          <button onClick={refresh} className="px-4 py-2 bg-[#00AAFF] text-white rounded-xl text-sm font-medium hover:opacity-80 transition">
-            Reintentar
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const nowStr = new Date()
+    .toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+    .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#060C18]">
+    <div style={S.shell}>
 
-      {/* HEADER */}
-      <header className="bg-[#0A1525]/95 border-b border-[#1A3A5C] sticky top-0 z-50 shadow-[0_1px_30px_rgba(0,120,255,0.12)] backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-16">
+      {/* ───── TOPBAR ───── */}
+      <header style={S.topbar}>
+        {/* gradiente inferior */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: '1px',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(225,73,36,0.5) 30%, rgba(182,134,49,0.3) 70%, transparent 100%)',
+          pointerEvents: 'none',
+        }} />
 
-            <div className="flex items-center gap-3">
-              <img src="/10894351.png" alt="Logo" className="w-9 h-9 rounded-xl object-contain" />
-              <div>
-                <h1 className="text-lg font-bold text-white">City FC</h1>
-                <p className="text-xs text-gray-400">Agente Contable</p>
-              </div>
-            </div>
+        {/* Escudo SVG */}
+        <svg width="38" height="44" viewBox="0 0 38 44" fill="none" style={{ flexShrink: 0 }}>
+          <path d="M19 2L3 8.5V22C3 32.8 10 40.5 19 43C28 40.5 35 32.8 35 22V8.5L19 2Z"
+                fill="#161616" stroke="#E14924" strokeWidth="1.4"/>
+          <path d="M19 5L6 10.8V22C6 31.4 11.5 38.2 19 40.5C26.5 38.2 32 31.4 32 22V10.8L19 5Z"
+                fill="rgba(225,73,36,0.07)" stroke="rgba(225,73,36,0.18)" strokeWidth="0.8"/>
+          <line x1="6" y1="21" x2="32" y2="21" stroke="#E14924" strokeWidth="0.7" opacity="0.4"/>
+          <text x="19" y="18.5" textAnchor="middle" fill="#E14924"
+                fontFamily="Bebas Neue, sans-serif" fontSize="9.5" letterSpacing="1.5">CFC</text>
+          <line x1="13" y1="24" x2="25" y2="24" stroke="#B68631" strokeWidth="0.8" opacity="0.6"/>
+          <text x="19" y="35" textAnchor="middle" fill="#B68631" fontFamily="Arial" fontSize="6.5" letterSpacing="1">★ ★ ★</text>
+        </svg>
 
-            <div className="flex items-center gap-3">
+        {/* Nombre del club */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', flexShrink: 0 }}>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '20px', letterSpacing: '3px', lineHeight: 1, color: '#fff' }}>
+            CITY F.C.<span style={{ color: '#B68631', marginLeft: '4px', fontSize: '12px' }}>★</span>
+          </span>
+          <span style={{ fontSize: '9px', letterSpacing: '3.5px', textTransform: 'uppercase', color: '#7A7A7A' }}>
+            Lo Hacemos Diferente
+          </span>
+        </div>
 
-              <button
-                onClick={() => setShowPagoManual(true)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-yellow-400/20 bg-yellow-400/10 text-sm text-yellow-400 hover:bg-yellow-400/20 transition"
-              >
-                <DollarSign className="w-4 h-4" />
-                <span className="hidden sm:inline">Pago Manual</span>
-              </button>
+        <div style={S.sep} />
+        <div style={{ flex: 1 }} />
 
-              {/* Botón principal — abre formulario en nueva pestaña */}
-              <button
-                onClick={handleOpenInscripcion}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#00AAFF]/25 bg-[#00AAFF]/10 text-sm text-[#00AAFF] hover:bg-[#00AAFF]/20 transition"
-              >
-                <Link2 className="w-4 h-4" />
-                <span className="hidden sm:inline">Registrarse</span>
-              </button>
+        {/* Indicador en vivo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', letterSpacing: '2px', color: '#7A7A7A', textTransform: 'uppercase', flexShrink: 0 }}>
+          <div style={{ width: '6px', height: '6px', background: '#22C55E', borderRadius: '50%', boxShadow: '0 0 6px #22C55E', animation: 'pulse-green 2s ease-in-out infinite' }} />
+          En Vivo
+        </div>
 
-              {/* Botón copiar link */}
-              <button
-                onClick={handleCopyLink}
-                title="Copiar link de inscripción"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[#1A3A5C] text-sm text-gray-400 hover:text-green-400 hover:border-green-400/20 transition"
-              >
-                {linkCopied ? (
-                  <><Check className="w-4 h-4 text-[#00AAFF]" /><span className="hidden sm:inline text-[#00AAFF] text-xs">¡Copiado!</span></>
-                ) : (
-                  <><Copy className="w-4 h-4" /><span className="hidden sm:inline text-xs">Copiar link</span></>
-                )}
-              </button>
+        <div style={S.sep} />
 
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing || loading}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#1A3A5C] text-sm text-gray-400 hover:text-white transition"
-              >
-                <RefreshCw className={`w-4 h-4 ${refreshing || loading ? 'animate-spin' : ''}`} />
-              </button>
+        {/* Fecha */}
+        <div style={{ fontSize: '11px', color: '#7A7A7A', letterSpacing: '1px', textTransform: 'uppercase', flexShrink: 0 }}>
+          {nowStr}
+        </div>
 
-            </div>
-          </div>
+        <div style={S.sep} />
+
+        {/* Pago Manual */}
+        <button style={S.actionBtn(true)} onClick={() => setShowPagoModal(true)}>
+          PAGO MANUAL
+        </button>
+
+        {/* Inscripción */}
+        <button style={S.actionBtn(false)} onClick={() => window.open(inscripcionUrl, '_blank')}>
+          INSCRIPCIÓN
+        </button>
+
+        {/* Copiar link */}
+        <div style={S.roundBtn} onClick={handleCopyLink} title="Copiar link de inscripción">
+          {linkCopied
+            ? <Check size={14} color="#22C55E" />
+            : <Copy size={14} color="#7A7A7A" />}
+        </div>
+
+        {/* Refresh */}
+        <div
+          style={S.roundBtn}
+          onClick={handleRefresh}
+          title="Actualizar datos"
+        >
+          <RefreshCw
+            size={14}
+            color="#7A7A7A"
+            style={{ animation: (refreshing || loading) ? 'spin 1s linear infinite' : 'none' }}
+          />
+        </div>
+
+        {/* Notificaciones */}
+        <div style={S.roundBtn} title="Notificaciones">
+          <Bell size={14} color="#7A7A7A" />
+          <span style={{
+            position: 'absolute', top: '6px', right: '7px',
+            width: '6px', height: '6px',
+            background: '#E14924', borderRadius: '50%',
+            boxShadow: '0 0 6px #E14924',
+          }} />
         </div>
       </header>
 
-      {/* NAV */}
-      <nav className="bg-[#060C18]/90 border-b border-[#1A3A5C]/60 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex gap-2 overflow-x-auto py-2">
+      {/* ───── SIDEBAR ───── */}
+      <nav style={S.sidebar}>
+        {NAV.map(({ id, Icon, title }) => (
+          <NavBtn key={id} id={id} Icon={Icon} title={title} active={activeTab === id} onClick={setActiveTab} />
+        ))}
 
-            {tabs.map(tab => {
-              const Icon = tab.icon;
-              const active = activeTab === tab.id;
+        <div style={{ flex: 1 }} />
 
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all ${
-                    active
-                      ? 'bg-[#00AAFF]/10 text-[#00AAFF] border border-[#00AAFF]/20 shadow-[0_0_20px_rgba(0,170,255,0.25),0_0_0_1px_rgba(0,170,255,0.1)]'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
-
-          </div>
-        </div>
+        <button style={S.iconBtn(false)} title="Configuración">
+          <Settings size={18} color="#7A7A7A" strokeWidth={1.7} />
+        </button>
       </nav>
 
-      {/* MAIN */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-
+      {/* ───── MAIN ───── */}
+      <main style={S.main}>
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <RefreshCw className="w-8 h-8 text-[#00AAFF] animate-spin" />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
+            <RefreshCw size={24} color="#E14924" style={{ animation: 'spin 1s linear infinite' }} />
+          </div>
+        ) : error ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
+            <div style={{ textAlign: 'center', color: '#E14924', fontSize: '14px' }}>
+              Error de conexión: {error}
+              <button
+                onClick={refresh}
+                style={{ display: 'block', margin: '12px auto 0', padding: '6px 16px', borderRadius: '8px', border: '1px solid rgba(225,73,36,0.3)', background: 'rgba(225,73,36,0.08)', color: '#E14924', cursor: 'pointer', fontSize: '12px' }}
+              >
+                Reintentar
+              </button>
+            </div>
           </div>
         ) : (
-          <div className="space-y-8">
-
+          <>
             {activeTab === 'dashboard' && (
-              <>
-                <StatsCards mensualidades={mensualidades} jugadores={jugadores} morosos={morosos} />
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                    <RecaudacionChart mensualidades={mensualidades} />
-                  </div>
-                  <MorososList morosos={morosos} />
-                </div>
-              </>
+              <DashboardOverview
+                jugadores={jugadores}
+                mensualidades={mensualidades}
+                morosos={morosos}
+              />
             )}
-
             {activeTab === 'jugadores' && (
-              <JugadoresTable jugadores={jugadores} mensualidades={mensualidades} uniformes={uniformes} torneos={torneos} registroPagos={registroPagos} suspensiones={suspensiones} onRefresh={handleRefresh} />
+              <JugadoresTable
+                jugadores={jugadores}
+                mensualidades={mensualidades}
+                uniformes={uniformes}
+                torneos={torneos}
+                registroPagos={registroPagos}
+                suspensiones={suspensiones}
+                onRefresh={handleRefresh}
+              />
             )}
-
-            {activeTab === 'uniformes' && <Uniformes />}
-            {activeTab === 'arbitraje' && <ArbitrajePagos />}
-            {activeTab === 'cobro' && <TimelineCobro />}
-            {activeTab === 'whatsapp'      && <WhatsAppMockup />}
+            {activeTab === 'uniformes'    && <Uniformes />}
+            {activeTab === 'arbitraje'    && <ArbitrajePagos />}
+            {activeTab === 'cobro'        && <TimelineCobro />}
+            {activeTab === 'whatsapp'     && <WhatsAppMockup />}
             {activeTab === 'conciliacion' && <Conciliacion />}
-
-          </div>
+          </>
         )}
       </main>
 
-      {showPagoManual && (
+      {showPagoModal && (
         <PagoManualModal
           jugadores={jugadores}
-          onClose={() => setShowPagoManual(false)}
+          onClose={() => setShowPagoModal(false)}
           onSuccess={handleRefresh}
         />
       )}
-
-      <footer className="border-t border-[#1A3A5C] mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-center text-xs text-gray-500">
-          Powered by AI · Sistema inteligente de cobros
-        </div>
-      </footer>
     </div>
   );
 }

@@ -107,25 +107,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos })
   }, [activos, morososSet, mensualidades, mesActual]);
 
   return (
-    /* contenedor con marca de agua */
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-
-      {/* ── MARCA DE AGUA: logo del club ── */}
-      <div style={{
-        position: 'fixed',
-        top: '50%', left: 'calc(64px + 50%)',   /* centrado en el área main (64px es el sidebar) */
-        transform: 'translate(-50%, -50%)',
-        width: '520px', height: '520px',
-        pointerEvents: 'none',
-        zIndex: 0,
-        opacity: 0.045,
-      }}>
-        <img
-          src="/10894351.png"
-          alt=""
-          style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'grayscale(100%) brightness(2)' }}
-        />
-      </div>
 
       {/* ── 6 KPI CARDS ── */}
       <div style={{

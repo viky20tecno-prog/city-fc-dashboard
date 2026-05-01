@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell, LabelList, Legend,
+  Tooltip, ResponsiveContainer, Cell, LabelList,
 } from 'recharts';
 
 const MESES_ORDEN = [
@@ -19,7 +19,7 @@ const fmtK = (v) => {
 };
 
 export default function RecaudacionChart({ mensualidades }) {
-  const mesActualIdx = new Date().getMonth(); // 0-based
+  const mesActualIdx = new Date().getMonth();
 
   const data = useMemo(() => {
     const meses = {};
@@ -39,129 +39,155 @@ export default function RecaudacionChart({ mensualidades }) {
       .slice(0, mesActualIdx + 2)
       .map(m => ({
         ...m,
-        total:   m.pagado + m.pendiente,
-        pct:     m.pagado + m.pendiente > 0
+        total:    m.pagado + m.pendiente,
+        pct:      m.pagado + m.pendiente > 0
           ? Math.round((m.pagado / (m.pagado + m.pendiente)) * 100)
           : 0,
         esActual: m.idx === mesActualIdx,
       }));
   }, [mensualidades, mesActualIdx]);
 
-  // KPIs
   const totalPagado    = data.reduce((s, d) => s + d.pagado,    0);
   const totalPendiente = data.reduce((s, d) => s + d.pendiente, 0);
   const totalGeneral   = totalPagado + totalPendiente;
   const pctGlobal      = totalGeneral > 0 ? Math.round((totalPagado / totalGeneral) * 100) : 0;
   const mejorMes       = data.reduce((best, d) => d.pagado > (best?.pagado || 0) ? d : best, null);
 
-  // Tooltip personalizado
-  const CustomTooltip = ({ active, payload, label }) => {
+  /* ── tooltip ── */
+  const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
     const d = payload[0]?.payload;
     return (
-      <div className="bg-[#0A1628] border border-[#1A3A5C] rounded-xl p-3.5 shadow-2xl min-w-[160px]">
-        <p className="text-white font-semibold text-sm mb-2">{d?.mesCompleto}</p>
-        <div className="space-y-1.5">
-          <div className="flex justify-between gap-4 text-xs">
-            <span className="text-[#00AAFF]">Pagado</span>
-            <span className="text-white font-medium">{fmtCOP(d?.pagado || 0)}</span>
+      <div style={{
+        background: '#141414', border: '1px solid rgba(225,73,36,0.35)',
+        borderRadius: '10px', padding: '12px 14px', minWidth: '160px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+      }}>
+        <p style={{ color: '#fff', fontWeight: 600, fontSize: '13px', marginBottom: '8px' }}>{d?.mesCompleto}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px' }}>
+            <span style={{ color: '#E14924' }}>Pagado</span>
+            <span style={{ color: '#fff', fontWeight: 600 }}>{fmtCOP(d?.pagado || 0)}</span>
           </div>
-          <div className="flex justify-between gap-4 text-xs">
-            <span className="text-[#00AAFF]">Pendiente</span>
-            <span className="text-white font-medium">{fmtCOP(d?.pendiente || 0)}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px' }}>
+            <span style={{ color: '#B68631' }}>Pendiente</span>
+            <span style={{ color: '#fff', fontWeight: 600 }}>{fmtCOP(d?.pendiente || 0)}</span>
           </div>
-          <div className="border-t border-[#1A3A5C] pt-1.5 mt-1 flex justify-between gap-4 text-xs">
-            <span className="text-gray-400">% cobrado</span>
-            <span className={`font-bold ${d?.pct >= 80 ? 'text-green-400' : d?.pct >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
-              {d?.pct}%
-            </span>
+          <div style={{
+            borderTop: '1px solid rgba(225,73,36,0.2)', paddingTop: '6px', marginTop: '2px',
+            display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px',
+          }}>
+            <span style={{ color: '#7A7A7A' }}>% cobrado</span>
+            <span style={{
+              fontWeight: 700,
+              color: d?.pct >= 80 ? '#22C55E' : d?.pct >= 50 ? '#F59E0B' : '#EF4444',
+            }}>{d?.pct}%</span>
           </div>
         </div>
       </div>
     );
   };
 
-  // Etiqueta encima de barra pagado
-  const PctLabel = ({ x, y, width, value, index }) => {
+  /* ── etiqueta % encima de barra ── */
+  const PctLabel = ({ x, y, width, index }) => {
     const d = data[index];
     if (!d || d.pct === 0) return null;
     return (
       <text
-        x={x + width / 2}
-        y={y - 5}
-        fill={d.pct >= 80 ? '#00AAFF' : d.pct >= 50 ? '#F59E0B' : '#EF4444'}
-        textAnchor="middle"
-        fontSize={10}
-        fontWeight="600"
+        x={x + width / 2} y={y - 5}
+        fill={d.pct >= 80 ? '#22C55E' : d.pct >= 50 ? '#F59E0B' : '#EF4444'}
+        textAnchor="middle" fontSize={10} fontWeight="600"
       >
         {d.pct}%
       </text>
     );
   };
 
-  return (
-    <div className="relative bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6 overflow-hidden
-      shadow-[0_4px_30px_rgba(0,50,150,0.2),0_0_0_1px_rgba(0,170,255,0.08)]">
+  /* ── color del badge global ── */
+  const badgeStyle = pctGlobal >= 80
+    ? { bg: 'rgba(34,197,94,0.12)',  border: 'rgba(34,197,94,0.3)',  text: '#22C55E'  }
+    : pctGlobal >= 50
+    ? { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)', text: '#F59E0B'  }
+    : { bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.3)',  text: '#EF4444'  };
 
-      {/* Glow ambiental */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-1/2 h-1 bg-gradient-to-r from-transparent via-[#00AAFF]/30 to-transparent rounded-full blur-sm" />
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 blur-2xl" />
-      </div>
+  return (
+    <div style={{
+      position: 'relative',
+      background: '#141414',
+      borderRadius: '16px',
+      border: '1px solid rgba(225,73,36,0.22)',
+      padding: '24px',
+      overflow: 'hidden',
+    }}>
+      {/* top accent line */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+        background: 'linear-gradient(90deg, transparent, rgba(225,73,36,0.5) 40%, rgba(182,134,49,0.3) 60%, transparent)',
+        pointerEvents: 'none',
+      }} />
+      {/* ambient glow */}
+      <div style={{
+        position: 'absolute', top: 0, left: '25%', right: '25%', height: '1px',
+        background: 'rgba(225,73,36,0.3)', filter: 'blur(4px)',
+        pointerEvents: 'none',
+      }} />
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-5 relative">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div>
-          <h2 className="text-lg font-semibold text-white tracking-tight">Recaudación por Mes</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Pagado vs pendiente · {new Date().getFullYear()}</p>
+          <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#fff', letterSpacing: '-0.2px' }}>
+            Recaudación por Mes
+          </h2>
+          <p style={{ fontSize: '11px', color: '#5A5A5A', marginTop: '2px' }}>
+            Pagado vs pendiente · {new Date().getFullYear()}
+          </p>
         </div>
-        {/* Badge % global */}
-        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold border ${
-          pctGlobal >= 80 ? 'bg-[#00AAFF]/10 border-[#00AAFF]/30 text-[#00AAFF]'
-          : pctGlobal >= 50 ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400'
-          : 'bg-red-500/10 border-red-500/30 text-red-400'
-        }`}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '6px',
+          padding: '5px 12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700,
+          background: badgeStyle.bg, border: `1px solid ${badgeStyle.border}`, color: badgeStyle.text,
+        }}>
           {pctGlobal}% cobrado
         </div>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-3 gap-3 mb-5 relative">
-        <div className="bg-[#0F1F36] border border-[#1A3A5C] rounded-xl p-3">
-          <p className="text-xs text-gray-500 mb-1">Total recaudado</p>
-          <p className="text-[#00AAFF] font-bold text-sm">{fmtK(totalPagado)}</p>
-        </div>
-        <div className="bg-[#0F1F36] border border-[#1A3A5C] rounded-xl p-3">
-          <p className="text-xs text-gray-500 mb-1">Por cobrar</p>
-          <p className="text-[#00AAFF] font-bold text-sm">{fmtK(totalPendiente)}</p>
-        </div>
-        <div className="bg-[#0F1F36] border border-[#1A3A5C] rounded-xl p-3">
-          <p className="text-xs text-gray-500 mb-1">Mejor mes</p>
-          <p className="text-yellow-400 font-bold text-sm truncate">
-            {mejorMes ? `${mejorMes.mes} ${fmtK(mejorMes.pagado)}` : '—'}
-          </p>
-        </div>
+      {/* KPIs internos */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '20px' }}>
+        {[
+          { label: 'Total recaudado', value: fmtK(totalPagado),    color: '#E14924' },
+          { label: 'Por cobrar',      value: fmtK(totalPendiente), color: '#B68631' },
+          { label: 'Mejor mes',       value: mejorMes ? `${mejorMes.mes} ${fmtK(mejorMes.pagado)}` : '—', color: '#F59E0B' },
+        ].map((item, i) => (
+          <div key={i} style={{
+            background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: '10px', padding: '12px',
+          }}>
+            <p style={{ fontSize: '10px', color: '#5A5A5A', marginBottom: '4px', letterSpacing: '0.5px' }}>{item.label}</p>
+            <p style={{ color: item.color, fontWeight: 700, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {item.value}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Gráfica */}
-      <div className="h-64 relative">
+      <div style={{ height: '256px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} barGap={4} margin={{ top: 20, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="gradPagado" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#00AAFF" stopOpacity={1} />
-                <stop offset="100%" stopColor="#0044AA" stopOpacity={0.45} />
+                <stop offset="0%"   stopColor="#E14924" stopOpacity={1} />
+                <stop offset="100%" stopColor="#8B2A14" stopOpacity={0.5} />
               </linearGradient>
               <linearGradient id="gradPendiente" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#38BDF8" stopOpacity={0.55} />
-                <stop offset="100%" stopColor="#0055AA" stopOpacity={0.15} />
+                <stop offset="0%"   stopColor="#B68631" stopOpacity={0.6} />
+                <stop offset="100%" stopColor="#7A5820" stopOpacity={0.2} />
               </linearGradient>
               <linearGradient id="gradPagadoActual" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#00D4FF" stopOpacity={1} />
-                <stop offset="100%" stopColor="#0066FF" stopOpacity={0.85} />
+                <stop offset="0%"   stopColor="#FF6B3D" stopOpacity={1} />
+                <stop offset="100%" stopColor="#E14924" stopOpacity={0.85} />
               </linearGradient>
-              {/* Filtro glow para mes actual */}
-              <filter id="glow">
+              <filter id="glowOrange">
                 <feGaussianBlur stdDeviation="3" result="coloredBlur" />
                 <feMerge>
                   <feMergeNode in="coloredBlur" />
@@ -170,80 +196,61 @@ export default function RecaudacionChart({ mensualidades }) {
               </filter>
             </defs>
 
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.05)"
-              vertical={false}
-            />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
 
             <XAxis
               dataKey="mes"
-              tick={{ fontSize: 11, fill: '#6B7280' }}
+              tick={{ fontSize: 11, fill: '#5A5A5A' }}
               axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
               tickLine={false}
             />
-
             <YAxis
               tickFormatter={fmtK}
-              tick={{ fontSize: 11, fill: '#6B7280' }}
-              axisLine={false}
-              tickLine={false}
-              width={48}
+              tick={{ fontSize: 11, fill: '#5A5A5A' }}
+              axisLine={false} tickLine={false} width={48}
             />
 
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
 
-            {/* Barra pagado */}
-            <Bar dataKey="pagado" name="Pagado" radius={[6, 6, 0, 0]} maxBarSize={32}>
+            <Bar dataKey="pagado" name="Pagado" radius={[5, 5, 0, 0]} maxBarSize={32}>
               {data.map((entry, i) => (
                 <Cell
                   key={i}
                   fill={entry.esActual ? 'url(#gradPagadoActual)' : 'url(#gradPagado)'}
-                  filter={entry.esActual ? 'url(#glow)' : undefined}
+                  filter={entry.esActual ? 'url(#glowOrange)' : undefined}
                 />
               ))}
               <LabelList content={<PctLabel />} />
             </Bar>
 
-            {/* Barra pendiente */}
-            <Bar dataKey="pendiente" name="Pendiente" fill="url(#gradPendiente)" radius={[6, 6, 0, 0]} maxBarSize={32} />
+            <Bar dataKey="pendiente" name="Pendiente" fill="url(#gradPendiente)" radius={[5, 5, 0, 0]} maxBarSize={32} />
 
-            {/* Línea de tendencia (pagado) */}
             <Line
-              type="monotone"
-              dataKey="pagado"
-              stroke="#00AAFF"
-              strokeWidth={1.5}
-              strokeDasharray="4 3"
-              dot={false}
-              activeDot={false}
-              strokeOpacity={0.4}
+              type="monotone" dataKey="pagado"
+              stroke="#E14924" strokeWidth={1.5} strokeDasharray="4 3"
+              dot={false} activeDot={false} strokeOpacity={0.35}
             />
-
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Leyenda manual */}
-      <div className="flex items-center gap-5 mt-4 relative justify-center">
-        <span className="flex items-center gap-1.5 text-xs text-gray-400">
-          <span className="w-3 h-3 rounded-sm bg-[#00AAFF] inline-block" />
-          Pagado
-        </span>
-        <span className="flex items-center gap-1.5 text-xs text-gray-400">
-          <span className="w-3 h-3 rounded-sm bg-[#F59E0B] inline-block opacity-80" />
-          Pendiente
-        </span>
-        <span className="flex items-center gap-1.5 text-xs text-gray-400">
-          <span className="w-5 border-t-2 border-dashed border-[#00AAFF] opacity-40 inline-block" />
-          Tendencia
-        </span>
-        <span className="flex items-center gap-1.5 text-xs text-yellow-400">
-          <span className="w-3 h-3 rounded-sm bg-[#38BDF8] inline-block" style={{ filter: 'blur(1px)' }} />
-          Mes actual
-        </span>
+      {/* Leyenda */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '16px', justifyContent: 'center' }}>
+        {[
+          { color: '#E14924', label: 'Pagado',      dash: false },
+          { color: '#B68631', label: 'Pendiente',   dash: false },
+          { color: '#E14924', label: 'Tendencia',   dash: true  },
+          { color: '#FF6B3D', label: 'Mes actual',  dash: false, glow: true },
+        ].map((item, i) => (
+          <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#5A5A5A' }}>
+            {item.dash
+              ? <span style={{ width: '20px', borderTop: `2px dashed ${item.color}`, opacity: 0.5, display: 'inline-block' }} />
+              : <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: item.color, display: 'inline-block', boxShadow: item.glow ? `0 0 6px ${item.color}` : 'none' }} />
+            }
+            {item.label}
+          </span>
+        ))}
       </div>
-
     </div>
   );
 }

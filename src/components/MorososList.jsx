@@ -5,7 +5,7 @@ const formatCOP = (n) => new Intl.NumberFormat('es-CO', {
 }).format(parseInt(n) || 0);
 
 function exportarPDF(morosos) {
-  const fecha = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+  const fecha     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
   const mesActual = new Date().toLocaleString('es-CO', { month: 'long', year: 'numeric' });
   const totalSaldo = morosos.reduce((sum, m) => sum + (parseInt(m.saldo_total) || 0), 0);
 
@@ -48,8 +48,7 @@ function exportarPDF(morosos) {
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #10b981">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #E14924">
     <div>
       <h1 style="font-size:22px;font-weight:800;color:#111">⚽ City FC</h1>
       <p style="font-size:13px;color:#6b7280;margin-top:2px">Agente Contable — Sistema de Gestión</p>
@@ -61,7 +60,6 @@ function exportarPDF(morosos) {
     </div>
   </div>
 
-  <!-- Resumen -->
   <div style="display:flex;gap:16px;margin-bottom:24px">
     <div style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:16px;text-align:center">
       <p style="font-size:12px;color:#dc2626;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Jugadores en mora</p>
@@ -77,7 +75,6 @@ function exportarPDF(morosos) {
     </div>
   </div>
 
-  <!-- Tabla -->
   <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
     <thead>
       <tr style="background:#111827">
@@ -93,25 +90,19 @@ function exportarPDF(morosos) {
     <tbody>${filas}</tbody>
     <tfoot>
       <tr style="background:#f9fafb">
-        <td colspan="6" style="padding:12px;font-size:14px;font-weight:700;text-align:right;border-top:2px solid #e5e7eb">
-          TOTAL A COBRAR
-        </td>
-        <td style="padding:12px;font-size:14px;font-weight:800;color:#dc2626;text-align:right;border-top:2px solid #e5e7eb">
-          ${formatCOP(totalSaldo)}
-        </td>
+        <td colspan="6" style="padding:12px;font-size:14px;font-weight:700;text-align:right;border-top:2px solid #e5e7eb">TOTAL A COBRAR</td>
+        <td style="padding:12px;font-size:14px;font-weight:800;color:#dc2626;text-align:right;border-top:2px solid #e5e7eb">${formatCOP(totalSaldo)}</td>
       </tr>
     </tfoot>
   </table>
 
-  <!-- Footer -->
   <div style="margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
     <p style="font-size:11px;color:#9ca3af">City FC — Documento confidencial · No compartir públicamente</p>
-    <p style="font-size:11px;color:#9ca3af">city-fc-dashboard-theta.vercel.app</p>
+    <p style="font-size:11px;color:#9ca3af">city-fc-dashboard-pi.vercel.app</p>
   </div>
 
-  <!-- Botón imprimir -->
   <div class="no-print" style="margin-top:24px;text-align:center">
-    <button onclick="window.print()" style="background:#10b981;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
+    <button onclick="window.print()" style="background:#E14924;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
       🖨️ Imprimir / Guardar PDF
     </button>
   </div>
@@ -127,66 +118,100 @@ function exportarPDF(morosos) {
 export default function MorososList({ morosos }) {
   if (!morosos || morosos.length === 0) {
     return (
-      <div className="relative bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[#00AAFF]/10 blur-2xl" />
-        </div>
-        <h2 className="text-lg font-semibold text-white mb-4">Morosos</h2>
-        <div className="text-center py-10 text-gray-400">
-          <AlertCircle className="w-8 h-8 mx-auto mb-2 text-[#00AAFF]" />
+      <div style={{
+        background: '#141414', borderRadius: '16px',
+        border: '1px solid rgba(225,73,36,0.22)', padding: '24px',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+          background: 'linear-gradient(90deg, transparent, rgba(225,73,36,0.45), transparent)',
+          pointerEvents: 'none',
+        }} />
+        <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>Morosos</h2>
+        <div style={{ textAlign: 'center', padding: '32px 0', color: '#5A5A5A' }}>
+          <AlertCircle style={{ width: '32px', height: '32px', margin: '0 auto 8px', color: '#22C55E' }} />
           ¡Sin morosos!
         </div>
       </div>
     );
   }
 
+  const totalSaldo = morosos.reduce((sum, m) => sum + (parseInt(m.saldo_total) || 0), 0);
+
   return (
-    <div className="relative bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6 overflow-hidden">
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute inset-0 bg-red-500/10 blur-2xl" />
-      </div>
+    <div style={{
+      background: '#141414', borderRadius: '16px',
+      border: '1px solid rgba(225,73,36,0.22)', padding: '24px',
+      position: 'relative', overflow: 'hidden',
+    }}>
+      {/* top accent line */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+        background: 'linear-gradient(90deg, transparent, rgba(225,73,36,0.45), transparent)',
+        pointerEvents: 'none',
+      }} />
+      {/* ambient glow */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse at 50% 0%, rgba(239,68,68,0.05) 0%, transparent 60%)',
+        pointerEvents: 'none',
+      }} />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-5 relative">
-        <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-white tracking-tight">Morosos</h2>
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#fff', letterSpacing: '-0.2px' }}>Morosos</h2>
+          <span style={{
+            padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 600,
+            background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)',
+          }}>
             {morosos.length} jugadores
           </span>
         </div>
-        {/* ✅ Botón exportar PDF */}
         <button
           onClick={() => exportarPDF(morosos)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#00AAFF]/30 bg-[rgba(0,170,255,0.1)] text-xs font-medium text-[#00AAFF] hover:bg-[rgba(0,170,255,0.2)] transition-colors"
+          style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            padding: '6px 12px', borderRadius: '8px', cursor: 'pointer',
+            border: '1px solid rgba(225,73,36,0.3)', background: 'rgba(225,73,36,0.08)',
+            color: '#E14924', fontSize: '11px', fontWeight: 500, letterSpacing: '0.5px',
+            transition: 'all 0.2s',
+          }}
         >
-          <FileDown className="w-3.5 h-3.5" />
+          <FileDown size={13} />
           Exportar PDF
         </button>
       </div>
 
       {/* Lista */}
-      <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1 relative">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto', position: 'relative' }}>
         {morosos.map((m, i) => (
-          <div key={m.cedula || i}
-            className="group flex items-center justify-between p-4 rounded-xl
-              bg-red-500/5 border border-[#1A3A5C]
-              hover:border-red-500/30 hover:bg-red-500/10
-              transition-all duration-300">
+          <div key={m.cedula || i} style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '12px 14px', borderRadius: '10px',
+            background: 'rgba(239,68,68,0.04)',
+            border: '1px solid rgba(225,73,36,0.15)',
+            transition: 'all 0.2s',
+          }}>
             <div>
-              <p className="font-medium text-white text-sm">{m.nombre}</p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p style={{ fontWeight: 600, color: '#fff', fontSize: '13px' }}>{m.nombre}</p>
+              <p style={{ fontSize: '11px', color: '#5A5A5A', marginTop: '3px' }}>
                 CC {m.cedula} · {m.meses_mora} mes{m.meses_mora !== 1 ? 'es' : ''} de mora
               </p>
               {m.meses_detalle && (
-                <p className="text-xs text-red-400/70 mt-0.5">{m.meses_detalle}</p>
+                <p style={{ fontSize: '11px', color: 'rgba(239,68,68,0.7)', marginTop: '2px' }}>{m.meses_detalle}</p>
               )}
             </div>
-            <div className="text-right">
-              <p className="font-semibold text-red-400 text-sm">{formatCOP(m.saldo_total)}</p>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <p style={{ fontWeight: 700, color: '#EF4444', fontSize: '13px' }}>{formatCOP(m.saldo_total)}</p>
               {m.celular && (
-                <a href={`https://wa.me/57${m.celular}`} target="_blank" rel="noopener noreferrer"
-                  className="text-xs text-gray-400 hover:text-[#00AAFF] inline-flex items-center gap-1 mt-1 transition">
-                  <Phone className="w-3 h-3" />
+                <a
+                  href={`https://wa.me/57${m.celular}`}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: '11px', color: '#5A5A5A', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px', textDecoration: 'none' }}
+                >
+                  <Phone size={11} />
                   {m.celular}
                 </a>
               )}
@@ -196,10 +221,15 @@ export default function MorososList({ morosos }) {
       </div>
 
       {/* Total */}
-      <div className="mt-4 pt-3 border-t border-[#1A3A5C] flex justify-between items-center relative">
-        <span className="text-xs text-gray-400">Total en mora</span>
-        <span className="text-sm font-bold text-red-400">
-          {formatCOP(morosos.reduce((sum, m) => sum + (parseInt(m.saldo_total) || 0), 0))}
+      <div style={{
+        marginTop: '16px', paddingTop: '12px',
+        borderTop: '1px solid rgba(225,73,36,0.15)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        position: 'relative',
+      }}>
+        <span style={{ fontSize: '12px', color: '#5A5A5A' }}>Total en mora</span>
+        <span style={{ fontSize: '14px', fontWeight: 700, color: '#EF4444' }}>
+          {formatCOP(totalSaldo)}
         </span>
       </div>
     </div>

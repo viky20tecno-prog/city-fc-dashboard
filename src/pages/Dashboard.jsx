@@ -267,6 +267,23 @@ export default function Dashboard() {
 
       {/* ───── MAIN ───── */}
       <main style={S.main}>
+        {/* Marca de agua — logo del club, persiste en todos los tabs */}
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: 'calc(64px + (100vw - 64px) / 2)',
+          transform: 'translate(-50%, -50%)',
+          width: '500px', height: '500px',
+          pointerEvents: 'none',
+          zIndex: 0,
+          opacity: 0.04,
+        }}>
+          <img
+            src="/10894351.png"
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'grayscale(100%) brightness(2)' }}
+          />
+        </div>
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
             <RefreshCw size={24} color="#E14924" style={{ animation: 'spin 1s linear infinite' }} />

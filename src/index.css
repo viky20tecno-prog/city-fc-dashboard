@@ -3,7 +3,7 @@
 :root {
   /* Brand identity — City F.C. */
   --primary:   #E14924;
-  --bg:        #161616;
+  --bg:        #0A0A0A;
   --card:      #1E1E1E;
   --card-alt:  #1A1A1A;
   --accent:    #B68631;
@@ -20,7 +20,7 @@
   --font-body:    'Inter', system-ui, sans-serif;
 
   /* Legacy aliases — mantienen compatibilidad con componentes existentes */
-  --bg-primary:   #161616;
+  --bg-primary:   #0A0A0A;
   --bg-secondary: #1E1E1E;
   --bg-tertiary:  #1A1A1A;
   --blue:         #E14924;
@@ -46,15 +46,15 @@ body {
       -45deg,
       transparent 0px,
       transparent 28px,
-      rgba(255,255,255,0.013) 28px,
-      rgba(255,255,255,0.013) 29px
+      rgba(255,255,255,0.008) 28px,
+      rgba(255,255,255,0.008) 29px
     ),
     repeating-linear-gradient(
       45deg,
       transparent 0px,
       transparent 60px,
-      rgba(225,73,36,0.018) 60px,
-      rgba(225,73,36,0.018) 61px
+      rgba(225,73,36,0.012) 60px,
+      rgba(225,73,36,0.012) 61px
     );
 }
 

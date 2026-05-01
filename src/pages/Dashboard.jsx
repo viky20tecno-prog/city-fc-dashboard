@@ -33,7 +33,7 @@ const S = {
     height: '100vh',
     overflow: 'hidden',
     fontFamily: "'Inter', system-ui, sans-serif",
-    background: '#161616',
+    background: '#0A0A0A',
   },
   topbar: {
     gridColumn: '1 / -1',

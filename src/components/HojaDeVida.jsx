@@ -420,8 +420,11 @@ const TABS = [
   { key: 'carnet',     label: 'Carnet',     icon: CreditCard },
 ];
 
-export default function HojaDeVida({ jugador, mensualidades, torneos, suspensiones, onClose, onRefresh, initialTab = 'perfil' }) {
-  const [tab, setTab]               = useState(initialTab);
+export default function HojaDeVida({ jugador, mensualidades, torneos, suspensiones, onClose, onRefresh, initialTab = 'perfil', visibleTabs }) {
+  const tabsToShow = visibleTabs
+    ? TABS.filter(t => visibleTabs.includes(t.key))
+    : TABS;
+  const [tab, setTab] = useState(initialTab);
   const [jugadorLocal, setJugadorLocal] = useState(jugador);
 
   const nombre = `${jugadorLocal['nombre(s)'] || jugadorLocal.nombre || ''} ${jugadorLocal['apellido(s)'] || jugadorLocal.apellidos || ''}`.trim();
@@ -462,9 +465,9 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
           </button>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs — solo se muestran las permitidas */}
         <div className="flex border-b border-[#2A2A2A] flex-shrink-0">
-          {TABS.map(t => {
+          {tabsToShow.map(t => {
             const Icon   = t.icon;
             const active = tab === t.key;
             return (

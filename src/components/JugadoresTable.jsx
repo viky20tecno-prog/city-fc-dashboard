@@ -324,6 +324,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           torneos={torneos || []}
           suspensiones={suspensiones}
           initialTab={jugadorDetalleTab}
+          visibleTabs={jugadorDetalleTab === 'financiero' ? ['financiero'] : ['perfil', 'carnet']}
           onClose={() => setJugadorDetalle(null)}
           onRefresh={onRefresh}
         />

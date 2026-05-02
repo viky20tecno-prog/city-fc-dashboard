@@ -1,30 +1,84 @@
-import { useState, useMemo } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle } from 'lucide-react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check } from 'lucide-react';
 import { ESTADO_COLORS } from '../config';
 import HojaDeVida from './HojaDeVida';
 import SuspensionModal from './SuspensionModal';
 
-function EstadoBadge({ estado }) {
-  const colors = ESTADO_COLORS[estado] || {
-    bg: 'bg-white/5',
-    text: 'text-gray-400',
-    dot: 'bg-gray-400',
-  };
+/* ── colores de cada estado para el dropdown ── */
+const ESTADO_DOT = {
+  TODOS:    '#6A6A6A',
+  AL_DIA:   '#22C55E',
+  PENDIENTE:'#F59E0B',
+  PARCIAL:  '#60A5FA',
+  MORA:     '#EF4444',
+};
+
+/* ── dropdown custom (reemplaza <select> nativo) ── */
+function FiltroDropdown({ value, onChange, opciones }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ background: '#1E1E1E', border: '1px solid #2A2A2A', minWidth: '140px' }}
+        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-white hover:border-[#E14924]/50 transition"
+      >
+        <span className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ESTADO_DOT[value] || '#6A6A6A' }} />
+          {value}
+        </span>
+        <ChevronDown className={`w-4 h-4 text-[#6A6A6A] transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 rounded-xl overflow-hidden z-30 shadow-2xl"
+          style={{ background: '#1E1E1E', border: '1px solid #2A2A2A', minWidth: '160px' }}
+        >
+          {opciones.map(opt => (
+            <button
+              key={opt}
+              onClick={() => { onChange(opt); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition hover:bg-[#2A2A2A] text-left"
+              style={{ color: value === opt ? '#E14924' : '#F5F5F5' }}
+            >
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ESTADO_DOT[opt] || '#6A6A6A' }} />
+              <span className="flex-1">{opt}</span>
+              {value === opt && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── badge de estado en la tabla ── */
+function EstadoBadge({ estado }) {
+  const colors = ESTADO_COLORS[estado] || { bg: 'bg-white/5', text: 'text-[#6A6A6A]', dot: 'bg-[#6A6A6A]' };
+  return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`}></span>
+      <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
       {estado}
     </span>
   );
 }
 
+/* ── componente principal ── */
 export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, suspensiones = [], onRefresh }) {
-  const [search, setSearch] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('TODOS');
-  const [sortField, setSortField] = useState('nombreCompleto');
-  const [sortDir, setSortDir] = useState('asc');
-  const [jugadorDetalle, setJugadorDetalle] = useState(null);
+  const [search, setSearch]               = useState('');
+  const [filtroEstado, setFiltroEstado]   = useState('TODOS');
+  const [sortField, setSortField]         = useState('nombreCompleto');
+  const [sortDir, setSortDir]             = useState('asc');
+  const [jugadorDetalle, setJugadorDetalle]       = useState(null);
   const [jugadorSuspension, setJugadorSuspension] = useState(null);
 
   const tieneSuspensionActiva = (cedula) =>
@@ -34,22 +88,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
   const jugadoresConPago = useMemo(() => {
     return jugadores.map(j => {
-      const mensJugador = mensualidades.filter(m => (m.cedula || m.jugador_id) == j.cedula);
-
-      const mesActualData = mensJugador.find(m => parseInt(m.numero_mes) === mesActual);
-      const estadoPago = mesActualData?.estado || 'SIN_DATOS';
-
-      const saldoPendiente = mensJugador.reduce((sum, m) => sum + (parseFloat(m.saldo_pendiente) || 0), 0);
-      const totalPagado = mensJugador.reduce((sum, m) => sum + (parseFloat(m.valor_pagado) || 0), 0);
-
+      const mensJugador    = mensualidades.filter(m => (m.cedula || m.jugador_id) == j.cedula);
+      const mesActualData  = mensJugador.find(m => parseInt(m.numero_mes) === mesActual);
+      const estadoPago     = mesActualData?.estado || 'SIN_DATOS';
+      const saldoPendiente = mensJugador.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
+      const totalPagado    = mensJugador.reduce((s, m) => s + (parseFloat(m.valor_pagado)    || 0), 0);
       const nombre = `${j.nombre || j['nombre(s)'] || ''} ${j.apellidos || j['apellido(s)'] || ''}`.trim();
-
       return {
-        ...j,
-        nombreCompleto: nombre,
-        estadoPago,
-        saldoPendiente,
-        totalPagado,
+        ...j, nombreCompleto: nombre, estadoPago, saldoPendiente, totalPagado,
         activo: j.activo === true || (j.activo || '').toString().toUpperCase() === 'SI',
       };
     });
@@ -58,85 +104,58 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const filtered = useMemo(() => {
     return jugadoresConPago
       .filter(j => {
-        const matchSearch =
-          search === '' ||
-          j.nombreCompleto?.toLowerCase().includes(search.toLowerCase()) ||
-          j.cedula?.includes(search);
-
-        const matchEstado =
-          filtroEstado === 'TODOS' || j.estadoPago === filtroEstado;
-
+        const matchSearch  = search === '' || j.nombreCompleto?.toLowerCase().includes(search.toLowerCase()) || j.cedula?.includes(search);
+        const matchEstado  = filtroEstado === 'TODOS' || j.estadoPago === filtroEstado;
         return matchSearch && matchEstado;
       })
       .sort((a, b) => {
-        const aVal = a[sortField] || '';
-        const bVal = b[sortField] || '';
-        const cmp = aVal.toString().localeCompare(bVal.toString(), 'es', { numeric: true });
+        const cmp = (a[sortField] || '').toString().localeCompare((b[sortField] || '').toString(), 'es', { numeric: true });
         return sortDir === 'asc' ? cmp : -cmp;
       });
   }, [jugadoresConPago, search, filtroEstado, sortField, sortDir]);
 
   const toggleSort = (field) => {
-    if (sortField === field) {
-      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortField(field);
-      setSortDir('asc');
-    }
+    if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortField(field); setSortDir('asc'); }
   };
 
   const SortIcon = ({ field }) => {
     if (sortField !== field) return null;
-    return sortDir === 'asc'
-      ? <ChevronUp className="w-4 h-4" />
-      : <ChevronDown className="w-4 h-4" />;
+    return sortDir === 'asc' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />;
   };
+
+  const formatCOP = (n) =>
+    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
 
   const estados = ['TODOS', 'AL_DIA', 'PENDIENTE', 'PARCIAL', 'MORA'];
 
-  const formatCOP = (n) =>
-    new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0,
-    }).format(n);
-
   return (
     <>
-      <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] overflow-hidden">
+      <div style={{ background: '#141414', border: '1px solid #2A2A2A', borderRadius: '16px', overflow: 'hidden' }}>
 
         {/* HEADER */}
-        <div className="p-6 border-b border-[#1A3A5C]">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-
-            <h2 className="text-lg font-semibold text-white">
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid #2A2A2A' }}>
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '22px', letterSpacing: '2px', color: '#FFF' }}>
               Jugadores
             </h2>
 
-            <div className="flex gap-3 w-full sm:w-auto">
-
+            <div className="flex gap-2 w-full sm:w-auto">
+              {/* Buscador */}
               <div className="relative flex-1 sm:flex-initial">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6A6A6A]" />
                 <input
                   type="text"
                   placeholder="Buscar nombre o cédula..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full sm:w-64 pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-[#1A3A5C] text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00AAFF]/30"
+                  style={{ background: '#1E1E1E', border: '1px solid #2A2A2A' }}
+                  className="w-full sm:w-60 pl-10 pr-4 py-2 rounded-xl text-sm text-white placeholder-[#6A6A6A] focus:outline-none focus:border-[#E14924]/50 transition"
                 />
               </div>
 
-              <select
-                value={filtroEstado}
-                onChange={e => setFiltroEstado(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-white/5 border border-[#1A3A5C] text-sm text-white"
-              >
-                {estados.map(e => (
-                  <option key={e} value={e}>{e}</option>
-                ))}
-              </select>
-
+              {/* Filtro de estado — dropdown custom */}
+              <FiltroDropdown value={filtroEstado} onChange={setFiltroEstado} opciones={estados} />
             </div>
           </div>
         </div>
@@ -144,22 +163,22 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         {/* TABLE */}
         <div className="overflow-x-auto">
           <table className="w-full">
-
             <thead>
-              <tr className="border-b border-[#1A3A5C]">
+              <tr style={{ borderBottom: '1px solid #2A2A2A' }}>
                 {[
-                  { key: 'nombreCompleto', label: 'Nombre' },
-                  { key: 'cedula', label: 'Cédula' },
-                  { key: 'celular', label: 'Celular' },
-                  { key: 'estadoPago', label: 'Estado' },
-                  { key: 'totalPagado', label: 'Pagado' },
-                  { key: 'saldoPendiente', label: 'Pendiente' },
-                  { key: 'acciones', label: '' },
+                  { key: 'nombreCompleto', label: 'Nombre'   },
+                  { key: 'cedula',         label: 'Cédula'   },
+                  { key: 'celular',        label: 'Celular'  },
+                  { key: 'estadoPago',     label: 'Estado'   },
+                  { key: 'totalPagado',    label: 'Pagado'   },
+                  { key: 'saldoPendiente', label: 'Pendiente'},
+                  { key: 'acciones',       label: ''         },
                 ].map(col => (
                   <th
                     key={col.key}
                     onClick={() => col.key !== 'acciones' && toggleSort(col.key)}
-                    className="text-left px-6 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-white"
+                    className="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider cursor-pointer transition"
+                    style={{ color: sortField === col.key ? '#E14924' : '#6A6A6A' }}
                   >
                     <span className="inline-flex items-center gap-1">
                       {col.label}
@@ -170,59 +189,78 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-white/5">
+            <tbody>
               {filtered.map((j, i) => (
                 <tr
                   key={j.cedula || i}
-                  className="hover:bg-white/5 transition-all"
+                  style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                  className="hover:bg-white/[0.03] transition-colors"
                 >
+                  {/* Nombre */}
                   <td className="px-6 py-4">
-                    <div className="font-medium text-white flex items-center gap-2">
-                      {j.nombreCompleto}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-white text-sm">{j.nombreCompleto}</span>
                       {tieneSuspensionActiva(j.cedula) && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
                           <PauseCircle className="w-3 h-3" /> Suspendido
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs mt-0.5" style={{ color: '#4A4A4A' }}>
                       {j.activo ? '🟢 Activo' : '🔴 Inactivo'}
                     </div>
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-gray-400 font-mono">
+                  {/* Cédula */}
+                  <td className="px-6 py-4 text-sm font-mono" style={{ color: '#8A8A8A' }}>
                     {j.cedula}
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-gray-400">
+                  {/* Celular */}
+                  <td className="px-6 py-4 text-sm" style={{ color: '#8A8A8A' }}>
                     {j.celular}
                   </td>
 
+                  {/* Estado */}
                   <td className="px-6 py-4">
                     <EstadoBadge estado={j.estadoPago} />
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-[#00AAFF] font-semibold">
+                  {/* Pagado */}
+                  <td className="px-6 py-4 text-sm font-semibold" style={{ color: '#22C55E' }}>
                     {formatCOP(j.totalPagado)}
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-yellow-400 font-semibold">
+                  {/* Pendiente */}
+                  <td className="px-6 py-4 text-sm font-semibold" style={{ color: j.saldoPendiente > 0 ? '#F59E0B' : '#4A4A4A' }}>
                     {formatCOP(j.saldoPendiente)}
                   </td>
 
+                  {/* Acciones */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1">
+                      {/* Hoja de vida */}
                       <button
                         onClick={() => setJugadorDetalle(j)}
-                        className="p-2 rounded-lg hover:bg-[#E14924]/10 transition"
-                        title="Ver hoja de vida"
+                        title="Hoja de vida"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
+                        style={{ background: 'rgba(225,73,36,0.08)', border: '1px solid rgba(225,73,36,0.2)', color: '#E14924' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(225,73,36,0.18)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(225,73,36,0.08)'}
                       >
-                        <BookOpen className="w-4 h-4 text-gray-400 hover:text-[#E14924]" />
+                        <BookOpen className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Ver</span>
                       </button>
+
+                      {/* Suspensión */}
                       <button
                         onClick={() => setJugadorSuspension(j)}
-                        className={`p-2 rounded-lg transition ${tieneSuspensionActiva(j.cedula) ? 'bg-yellow-400/10 text-yellow-400' : 'hover:bg-yellow-400/10 text-gray-400 hover:text-yellow-400'}`}
                         title="Gestionar suspensión"
+                        className={`p-1.5 rounded-lg transition ${
+                          tieneSuspensionActiva(j.cedula)
+                            ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20'
+                            : 'text-[#4A4A4A] hover:text-yellow-400 hover:bg-yellow-400/10'
+                        }`}
                       >
                         <PauseCircle className="w-4 h-4" />
                       </button>
@@ -234,17 +272,16 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           </table>
 
           {filtered.length === 0 && (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-12 text-[#6A6A6A] text-sm">
               No se encontraron jugadores
             </div>
           )}
         </div>
 
         {/* FOOTER */}
-        <div className="px-6 py-3 border-t border-[#1A3A5C] text-sm text-gray-400">
+        <div style={{ padding: '12px 24px', borderTop: '1px solid #2A2A2A', color: '#6A6A6A', fontSize: '13px' }}>
           {filtered.length} de {jugadores.length} jugadores
         </div>
-
       </div>
 
       {/* DRAWER HOJA DE VIDA */}

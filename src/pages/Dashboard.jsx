@@ -279,7 +279,7 @@ export default function Dashboard() {
           opacity: 0.06,
         }}>
           <img
-            src="/LOGO_CITY_2026.png"
+            src="/logo_marca_agua.png"
             alt=""
             style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'invert(1) brightness(1.8)' }}
           />

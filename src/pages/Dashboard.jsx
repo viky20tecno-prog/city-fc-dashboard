@@ -267,27 +267,22 @@ export default function Dashboard() {
 
       {/* ───── MAIN ───── */}
       <main style={S.main}>
-        {/* Marca de agua — escudo del club, persiste en todos los tabs */}
+        {/* Marca de agua — logo oficial del club, persiste en todos los tabs */}
         <div style={{
           position: 'fixed',
           top: '50%',
           left: 'calc(64px + (100vw - 64px) / 2)',
           transform: 'translate(-50%, -50%)',
+          width: '500px', height: '500px',
           pointerEvents: 'none',
           zIndex: 0,
-          opacity: 0.045,
+          opacity: 0.06,
         }}>
-          <svg width="480" height="556" viewBox="0 0 38 44" fill="none">
-            <path d="M19 2L3 8.5V22C3 32.8 10 40.5 19 43C28 40.5 35 32.8 35 22V8.5L19 2Z"
-                  fill="#fff" stroke="#fff" strokeWidth="1.2"/>
-            <path d="M19 5L6 10.8V22C6 31.4 11.5 38.2 19 40.5C26.5 38.2 32 31.4 32 22V10.8L19 5Z"
-                  fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8"/>
-            <line x1="6" y1="21" x2="32" y2="21" stroke="#fff" strokeWidth="0.7"/>
-            <text x="19" y="18.5" textAnchor="middle" fill="#fff"
-                  fontFamily="Bebas Neue, sans-serif" fontSize="9.5" letterSpacing="1.5">CFC</text>
-            <line x1="13" y1="24" x2="25" y2="24" stroke="#fff" strokeWidth="0.8"/>
-            <text x="19" y="35" textAnchor="middle" fill="#fff" fontFamily="Arial" fontSize="6.5" letterSpacing="1">★ ★ ★</text>
-          </svg>
+          <img
+            src="/LOGO_CITY_2026.png"
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'grayscale(100%) brightness(3)' }}
+          />
         </div>
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>

@@ -73,7 +73,7 @@ function EstadoBadge({ estado }) {
 }
 
 /* ── componente principal ── */
-export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, suspensiones = [], onRefresh }) {
+export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, suspensiones = [], morosos = [], onRefresh }) {
   const [search, setSearch]               = useState('');
   const [filtroEstado, setFiltroEstado]   = useState('TODOS');
   const [sortField, setSortField]         = useState('nombreCompleto');
@@ -84,7 +84,13 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const tieneSuspensionActiva = (cedula) =>
     suspensiones.some(s => s.activa && s.cedula === String(cedula));
 
-  // Prioridad de estados: el "peor" estado de todos los meses del jugador
+  // Cédulas de jugadores morosos según el backend (fuente de verdad)
+  const cedulasMorosos = useMemo(
+    () => new Set((morosos || []).map(m => String(m.cedula))),
+    [morosos]
+  );
+
+  // Peor estado local (para PENDIENTE / PARCIAL / AL_DIA)
   const PRIORIDAD = { MORA: 4, PENDIENTE: 3, PARCIAL: 2, AL_DIA: 1, SIN_DATOS: 0 };
   const peorEstado = (mensJugador) =>
     mensJugador.reduce((worst, m) => {
@@ -94,7 +100,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const jugadoresConPago = useMemo(() => {
     return jugadores.map(j => {
       const mensJugador    = mensualidades.filter(m => (m.cedula || m.jugador_id) == j.cedula);
-      const estadoPago     = peorEstado(mensJugador);
+      // Si el backend lo marca como moroso → MORA; si no, calculamos localmente
+      const esMoroso       = cedulasMorosos.has(String(j.cedula));
+      const estadoLocal    = peorEstado(mensJugador);
+      const estadoPago     = esMoroso ? 'MORA' : estadoLocal;
       const saldoPendiente = mensJugador.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
       const totalPagado    = mensJugador.reduce((s, m) => s + (parseFloat(m.valor_pagado)    || 0), 0);
       const nombre = `${j.nombre || j['nombre(s)'] || ''} ${j.apellidos || j['apellido(s)'] || ''}`.trim();
@@ -103,7 +112,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         activo: j.activo === true || (j.activo || '').toString().toUpperCase() === 'SI',
       };
     });
-  }, [jugadores, mensualidades]);
+  }, [jugadores, mensualidades, cedulasMorosos]);
 
   const filtered = useMemo(() => {
     return jugadoresConPago

@@ -17,17 +17,6 @@ const POSICIONES = [
 
 /* ── utilitarios ── */
 
-function Campo({ label, valor }) {
-  return (
-    <div className="space-y-0.5">
-      <p className="text-xs text-[#6A6A6A] uppercase tracking-wider">{label}</p>
-      <p className="text-sm text-[#F5F5F5] font-medium break-words">
-        {valor || <span className="text-[#3A3A3A]">—</span>}
-      </p>
-    </div>
-  );
-}
-
 function Seccion({ titulo, children }) {
   return (
     <div className="bg-[#1E1E1E] rounded-xl border border-[#2A2A2A] p-4">
@@ -59,15 +48,55 @@ function EscudoSVG({ size = 32 }) {
 
 /* ── Tab Perfil ── */
 
+const INPUT_CLS = "w-full px-3 py-2 rounded-lg bg-[#141414] border border-[#2A2A2A] text-sm text-[#F5F5F5] focus:outline-none focus:border-[#E14924]/50 placeholder-[#3A3A3A]";
+
+function CampoEdit({ label, value, onChange, type = 'text', placeholder = '', ...rest }) {
+  return (
+    <div className="space-y-1">
+      <label className="text-xs text-[#6A6A6A] uppercase tracking-wider">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={INPUT_CLS}
+        {...rest}
+      />
+    </div>
+  );
+}
+
 function TabPerfil({ jugador, onFotoUpdate }) {
   const fileRef    = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [fotoUrl,   setFotoUrl]   = useState(jugador.foto_url || null);
-  const [posicion,  setPosicion]  = useState(jugador.posicion || '');
-  const [numero,    setNumero]    = useState(jugador.numero_camiseta || '');
   const [guardando, setGuardando] = useState(false);
   const [guardado,  setGuardado]  = useState(false);
   const [error,     setError]     = useState('');
+
+  const [form, setForm] = useState({
+    posicion:            jugador.posicion            || '',
+    numero_camiseta:     jugador.numero_camiseta     || '',
+    tipo_id:             jugador.tipo_id             || '',
+    nombre:              jugador.nombre              || '',
+    apellidos:           jugador.apellidos           || '',
+    celular:             jugador.celular             || '',
+    correo_electronico:  jugador.correo_electronico  || '',
+    instagram:           jugador.instagram           || '',
+    lugar_de_nacimiento: jugador.lugar_de_nacimiento || '',
+    fecha_nacimiento:    jugador.fecha_nacimiento    || '',
+    tipo_sangre:         jugador.tipo_sangre         || '',
+    eps:                 jugador.eps                 || '',
+    estatura:            jugador.estatura            || '',
+    peso:                jugador.peso                || '',
+    municipio:           jugador.municipio           || '',
+    barrio:              jugador.barrio              || '',
+    direccion:           jugador.direccion           || '',
+    familiar_emergencia: jugador.familiar_emergencia || '',
+    celular_contacto:    jugador.celular_contacto    || '',
+  });
+
+  const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
 
   const subirFoto = async (e) => {
     const file = e.target.files?.[0];
@@ -96,7 +125,6 @@ function TabPerfil({ jugador, onFotoUpdate }) {
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Error guardando foto');
 
-      // cache-bust para forzar reload de la imagen
       setFotoUrl(`${publicUrl}?t=${Date.now()}`);
       onFotoUpdate?.(publicUrl);
     } catch (err) {
@@ -106,17 +134,21 @@ function TabPerfil({ jugador, onFotoUpdate }) {
     }
   };
 
-  const guardarDeportivos = async () => {
+  const guardar = async () => {
     setGuardando(true);
     setError('');
     try {
+      const payload = {
+        ...form,
+        numero_camiseta: form.numero_camiseta ? parseInt(form.numero_camiseta)  : null,
+        estatura:        form.estatura        ? parseFloat(form.estatura)        : null,
+        peso:            form.peso            ? parseFloat(form.peso)            : null,
+        fecha_nacimiento: form.fecha_nacimiento || null,
+      };
       const res  = await authFetch(
         `${API_BASE_URL}/players/${jugador.cedula}?club_id=${getClubId()}`,
         { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            posicion:        posicion || null,
-            numero_camiseta: numero ? parseInt(numero) : null,
-          }) },
+          body: JSON.stringify(payload) },
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Error al guardar');
@@ -129,7 +161,7 @@ function TabPerfil({ jugador, onFotoUpdate }) {
     }
   };
 
-  const nombre = `${jugador['nombre(s)'] || jugador.nombre || ''} ${jugador['apellido(s)'] || jugador.apellidos || ''}`.trim();
+  const nombreDisplay = `${form.nombre} ${form.apellidos}`.trim();
 
   return (
     <div className="space-y-5">
@@ -141,7 +173,7 @@ function TabPerfil({ jugador, onFotoUpdate }) {
             className="w-20 h-20 rounded-full bg-[#1E1E1E] border-2 border-[#E14924]/30 overflow-hidden cursor-pointer flex items-center justify-center hover:border-[#E14924]/60 transition"
           >
             {fotoUrl
-              ? <img src={fotoUrl} alt={nombre} className="w-full h-full object-cover" />
+              ? <img src={fotoUrl} alt={nombreDisplay} className="w-full h-full object-cover" />
               : <User className="w-8 h-8 text-[#3A3A3A]" />}
           </div>
           <button
@@ -155,7 +187,7 @@ function TabPerfil({ jugador, onFotoUpdate }) {
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={subirFoto} />
         </div>
         <div>
-          <p className="text-base font-bold text-[#F5F5F5]">{nombre}</p>
+          <p className="text-base font-bold text-[#F5F5F5]">{nombreDisplay || '—'}</p>
           <p className="text-sm text-[#6A6A6A]">CC {jugador.cedula}</p>
           <p className="text-xs text-[#4A4A4A] mt-0.5">Clic en la foto para cambiar</p>
         </div>
@@ -165,90 +197,98 @@ function TabPerfil({ jugador, onFotoUpdate }) {
         <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-[#EF4444]">{error}</div>
       )}
 
-      {/* Datos deportivos (editables) */}
+      {/* Datos deportivos */}
       <Seccion titulo="Datos Deportivos">
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs text-[#6A6A6A]">Posición</label>
+            <label className="text-xs text-[#6A6A6A] uppercase tracking-wider">Posición</label>
             <select
-              value={posicion}
-              onChange={e => setPosicion(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-[#141414] border border-[#2A2A2A] text-sm text-[#F5F5F5] focus:outline-none focus:border-[#E14924]/50"
+              value={form.posicion}
+              onChange={set('posicion')}
+              className={INPUT_CLS}
             >
               <option value="">— Sin asignar —</option>
               {POSICIONES.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
+          <CampoEdit
+            label="Número de camiseta"
+            type="number" min="1" max="99"
+            value={form.numero_camiseta}
+            onChange={set('numero_camiseta')}
+            placeholder="Ej: 10"
+          />
+        </div>
+      </Seccion>
+
+      {/* Datos personales */}
+      <Seccion titulo="Datos Personales">
+        <div className="grid grid-cols-2 gap-3">
+          <CampoEdit label="Tipo de documento" value={form.tipo_id}   onChange={set('tipo_id')}   placeholder="CC, TI, CE…" />
           <div className="space-y-1">
-            <label className="text-xs text-[#6A6A6A]">Número de camiseta</label>
-            <input
-              type="number" min="1" max="99"
-              value={numero}
-              onChange={e => setNumero(e.target.value)}
-              placeholder="Ej: 10"
-              className="w-full px-3 py-2 rounded-lg bg-[#141414] border border-[#2A2A2A] text-sm text-[#F5F5F5] focus:outline-none focus:border-[#E14924]/50 placeholder-[#3A3A3A]"
-            />
+            <label className="text-xs text-[#6A6A6A] uppercase tracking-wider">Cédula / ID</label>
+            <p className="text-sm text-[#F5F5F5] font-medium px-3 py-2">{jugador.cedula}</p>
+          </div>
+          <CampoEdit label="Nombre(s)"   value={form.nombre}    onChange={set('nombre')}    placeholder="Nombre(s)" />
+          <CampoEdit label="Apellido(s)" value={form.apellidos} onChange={set('apellidos')} placeholder="Apellido(s)" />
+        </div>
+      </Seccion>
+
+      {/* Contacto */}
+      <Seccion titulo="Contacto">
+        <div className="grid grid-cols-2 gap-3">
+          <CampoEdit label="Celular"            value={form.celular}            onChange={set('celular')}            placeholder="3001234567" />
+          <CampoEdit label="Correo electrónico" value={form.correo_electronico} onChange={set('correo_electronico')} placeholder="correo@email.com" type="email" />
+          <CampoEdit label="Instagram"          value={form.instagram}          onChange={set('instagram')}          placeholder="@usuario" />
+        </div>
+      </Seccion>
+
+      {/* Datos médicos */}
+      <Seccion titulo="Datos Médicos">
+        <div className="grid grid-cols-2 gap-3">
+          <CampoEdit label="Lugar de nacimiento" value={form.lugar_de_nacimiento} onChange={set('lugar_de_nacimiento')} placeholder="Ciudad" />
+          <CampoEdit label="Fecha de nacimiento" value={form.fecha_nacimiento}    onChange={set('fecha_nacimiento')}    type="date" />
+          <CampoEdit label="Tipo de sangre"      value={form.tipo_sangre}         onChange={set('tipo_sangre')}         placeholder="O+, A-, B+…" />
+          <CampoEdit label="EPS"                 value={form.eps}                 onChange={set('eps')}                 placeholder="Nombre EPS" />
+          <CampoEdit label="Estatura (m)"        value={form.estatura}            onChange={set('estatura')}            type="number" step="0.01" min="1" max="2.5" placeholder="1.75" />
+          <CampoEdit label="Peso (kg)"           value={form.peso}               onChange={set('peso')}               type="number" step="0.1"  min="20" max="200" placeholder="70" />
+        </div>
+      </Seccion>
+
+      {/* Residencia */}
+      <Seccion titulo="Residencia">
+        <div className="grid grid-cols-2 gap-3">
+          <CampoEdit label="Municipio" value={form.municipio} onChange={set('municipio')} placeholder="Medellín" />
+          <CampoEdit label="Barrio"    value={form.barrio}    onChange={set('barrio')}    placeholder="Barrio" />
+          <div className="col-span-2">
+            <CampoEdit label="Dirección" value={form.direccion} onChange={set('direccion')} placeholder="Calle, carrera, número…" />
           </div>
         </div>
-        <button
-          onClick={guardarDeportivos}
-          disabled={guardando || guardado}
-          className={`mt-3 w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold transition ${
-            guardado
-              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-              : 'bg-[#E14924] hover:bg-[#C9381A] text-white disabled:opacity-60'
-          }`}
-        >
-          {guardando ? <Loader2 className="w-4 h-4 animate-spin" />
-            : guardado ? <CheckCircle className="w-4 h-4" />
-            : <Save className="w-4 h-4" />}
-          {guardado ? 'Guardado' : guardando ? 'Guardando...' : 'Guardar cambios'}
-        </button>
       </Seccion>
 
-      {/* Datos del registro (solo lectura) */}
-      <Seccion titulo="Datos Personales">
-        <div className="grid grid-cols-2 gap-4">
-          <Campo label="Tipo de documento"   valor={jugador.tipo_id || jugador.tipo_documento} />
-          <Campo label="Cédula / ID"          valor={jugador.cedula} />
-          <Campo label="Nombre(s)"            valor={jugador['nombre(s)'] || jugador.nombre} />
-          <Campo label="Apellido(s)"          valor={jugador['apellido(s)'] || jugador.apellidos} />
-        </div>
-      </Seccion>
-
-      <Seccion titulo="Contacto">
-        <div className="grid grid-cols-2 gap-4">
-          <Campo label="Celular"              valor={jugador.celular} />
-          <Campo label="Correo electrónico"   valor={jugador.correo_electronico} />
-          <Campo label="Instagram"            valor={jugador.instagram} />
-        </div>
-      </Seccion>
-
-      <Seccion titulo="Datos Médicos">
-        <div className="grid grid-cols-2 gap-4">
-          <Campo label="Lugar de nacimiento"  valor={jugador.lugar_de_nacimiento} />
-          <Campo label="Fecha de nacimiento"  valor={jugador.fecha_nacimiento} />
-          <Campo label="Tipo de sangre"       valor={jugador.tipo_sangre} />
-          <Campo label="EPS"                  valor={jugador.eps} />
-          <Campo label="Estatura"             valor={jugador.estatura ? `${jugador.estatura} m` : null} />
-          <Campo label="Peso"                 valor={jugador.peso    ? `${jugador.peso} kg`    : null} />
-        </div>
-      </Seccion>
-
-      <Seccion titulo="Residencia">
-        <div className="grid grid-cols-2 gap-4">
-          <Campo label="Municipio"            valor={jugador.municipio} />
-          <Campo label="Barrio"               valor={jugador.barrio} />
-          <Campo label="Dirección"            valor={jugador.direccion} />
-        </div>
-      </Seccion>
-
+      {/* Contacto de emergencia */}
       <Seccion titulo="Contacto de Emergencia">
-        <div className="grid grid-cols-2 gap-4">
-          <Campo label="Familiar / Contacto"  valor={jugador.familiar_emergencia} />
-          <Campo label="Celular de contacto"  valor={jugador.celular_contacto} />
+        <div className="grid grid-cols-2 gap-3">
+          <CampoEdit label="Familiar / Contacto"  value={form.familiar_emergencia} onChange={set('familiar_emergencia')} placeholder="Nombre completo" />
+          <CampoEdit label="Celular de contacto"  value={form.celular_contacto}    onChange={set('celular_contacto')}    placeholder="3001234567" />
         </div>
       </Seccion>
+
+      {/* Botón global guardar */}
+      <button
+        onClick={guardar}
+        disabled={guardando || guardado}
+        className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition ${
+          guardado
+            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+            : 'bg-[#E14924] hover:bg-[#C9381A] text-white disabled:opacity-60'
+        }`}
+      >
+        {guardando ? <Loader2 className="w-4 h-4 animate-spin" />
+          : guardado ? <CheckCircle className="w-4 h-4" />
+          : <Save className="w-4 h-4" />}
+        {guardado ? 'Guardado' : guardando ? 'Guardando...' : 'Guardar todos los cambios'}
+      </button>
     </div>
   );
 }

@@ -420,8 +420,8 @@ const TABS = [
   { key: 'carnet',     label: 'Carnet',     icon: CreditCard },
 ];
 
-export default function HojaDeVida({ jugador, mensualidades, torneos, suspensiones, onClose, onRefresh }) {
-  const [tab, setTab]               = useState('perfil');
+export default function HojaDeVida({ jugador, mensualidades, torneos, suspensiones, onClose, onRefresh, initialTab = 'perfil' }) {
+  const [tab, setTab]               = useState(initialTab);
   const [jugadorLocal, setJugadorLocal] = useState(jugador);
 
   const nombre = `${jugadorLocal['nombre(s)'] || jugadorLocal.nombre || ''} ${jugadorLocal['apellido(s)'] || jugadorLocal.apellidos || ''}`.trim();

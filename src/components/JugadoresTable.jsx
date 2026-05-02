@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign } from 'lucide-react';
 import { ESTADO_COLORS } from '../config';
 import HojaDeVida from './HojaDeVida';
 import SuspensionModal from './SuspensionModal';
@@ -79,7 +79,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const [sortField, setSortField]         = useState('nombreCompleto');
   const [sortDir, setSortDir]             = useState('asc');
   const [jugadorDetalle, setJugadorDetalle]       = useState(null);
+  const [jugadorDetalleTab, setJugadorDetalleTab] = useState('perfil');
   const [jugadorSuspension, setJugadorSuspension] = useState(null);
+
+  const abrirHoja = (j, tab = 'perfil') => { setJugadorDetalle(j); setJugadorDetalleTab(tab); };
 
   const tieneSuspensionActiva = (cedula) =>
     suspensiones.some(s => s.activa && s.cedula === String(cedula));
@@ -209,18 +212,34 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
                   className="hover:bg-white/[0.03] transition-colors"
                 >
-                  {/* Nombre */}
+                  {/* Nombre — con botón Ver a la izquierda */}
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-white text-sm">{j.nombreCompleto}</span>
-                      {tieneSuspensionActiva(j.cedula) && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
-                          <PauseCircle className="w-3 h-3" /> Suspendido
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs mt-0.5" style={{ color: '#4A4A4A' }}>
-                      {j.activo ? '🟢 Activo' : '🔴 Inactivo'}
+                    <div className="flex items-center gap-3">
+                      {/* Botón Ver (abre Hoja de Vida en Perfil) */}
+                      <button
+                        onClick={() => abrirHoja(j, 'perfil')}
+                        title="Hoja de vida"
+                        className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition"
+                        style={{ background: 'rgba(225,73,36,0.10)', border: '1px solid rgba(225,73,36,0.25)', color: '#E14924' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(225,73,36,0.22)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(225,73,36,0.10)'}
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                      </button>
+
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-white text-sm">{j.nombreCompleto}</span>
+                          {tieneSuspensionActiva(j.cedula) && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
+                              <PauseCircle className="w-3 h-3" /> Suspendido
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs mt-0.5" style={{ color: '#4A4A4A' }}>
+                          {j.activo ? '🟢 Activo' : '🔴 Inactivo'}
+                        </div>
+                      </div>
                     </div>
                   </td>
 
@@ -252,17 +271,17 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   {/* Acciones */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1">
-                      {/* Hoja de vida */}
+                      {/* Financiero */}
                       <button
-                        onClick={() => setJugadorDetalle(j)}
-                        title="Hoja de vida"
+                        onClick={() => abrirHoja(j, 'financiero')}
+                        title="Estado financiero"
                         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
-                        style={{ background: 'rgba(225,73,36,0.08)', border: '1px solid rgba(225,73,36,0.2)', color: '#E14924' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(225,73,36,0.18)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(225,73,36,0.08)'}
+                        style={{ background: 'rgba(182,134,49,0.08)', border: '1px solid rgba(182,134,49,0.25)', color: '#B68631' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(182,134,49,0.18)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(182,134,49,0.08)'}
                       >
-                        <BookOpen className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Ver</span>
+                        <DollarSign className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Finanzas</span>
                       </button>
 
                       {/* Suspensión */}
@@ -304,6 +323,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           mensualidades={mensualidades}
           torneos={torneos || []}
           suspensiones={suspensiones}
+          initialTab={jugadorDetalleTab}
           onClose={() => setJugadorDetalle(null)}
           onRefresh={onRefresh}
         />

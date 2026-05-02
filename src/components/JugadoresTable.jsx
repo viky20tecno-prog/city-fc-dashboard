@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Search, ChevronUp, ChevronDown, Eye, PauseCircle } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle } from 'lucide-react';
 import { ESTADO_COLORS } from '../config';
-import EstadoCuenta from './EstadoCuenta';
+import HojaDeVida from './HojaDeVida';
 import SuspensionModal from './SuspensionModal';
 
 function EstadoBadge({ estado }) {
@@ -214,10 +214,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => setJugadorDetalle(j)}
-                        className="p-2 rounded-lg hover:bg-[#00AAFF]/10 transition"
-                        title="Ver estado de cuenta"
+                        className="p-2 rounded-lg hover:bg-[#E14924]/10 transition"
+                        title="Ver hoja de vida"
                       >
-                        <Eye className="w-4 h-4 text-gray-400 hover:text-[#00AAFF]" />
+                        <BookOpen className="w-4 h-4 text-gray-400 hover:text-[#E14924]" />
                       </button>
                       <button
                         onClick={() => setJugadorSuspension(j)}
@@ -247,16 +247,15 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
       </div>
 
-      {/* MODAL ESTADO CUENTA */}
+      {/* DRAWER HOJA DE VIDA */}
       {jugadorDetalle && (
-        <EstadoCuenta
+        <HojaDeVida
           jugador={jugadorDetalle}
           mensualidades={mensualidades}
-          uniformes={uniformes || []}
           torneos={torneos || []}
-          registroPagos={registroPagos || []}
           suspensiones={suspensiones}
           onClose={() => setJugadorDetalle(null)}
+          onRefresh={onRefresh}
         />
       )}
 

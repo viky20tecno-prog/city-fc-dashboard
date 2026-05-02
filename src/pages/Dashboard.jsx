@@ -281,7 +281,7 @@ export default function Dashboard() {
           <img
             src="/LOGO_CITY_2026.png"
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'grayscale(100%) brightness(3)' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'invert(1) brightness(1.8)' }}
           />
         </div>
         {loading ? (

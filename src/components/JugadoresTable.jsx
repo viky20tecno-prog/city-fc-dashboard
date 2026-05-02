@@ -84,13 +84,17 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const tieneSuspensionActiva = (cedula) =>
     suspensiones.some(s => s.activa && s.cedula === String(cedula));
 
-  const mesActual = new Date().getMonth() + 1;
+  // Prioridad de estados: el "peor" estado de todos los meses del jugador
+  const PRIORIDAD = { MORA: 4, PENDIENTE: 3, PARCIAL: 2, AL_DIA: 1, SIN_DATOS: 0 };
+  const peorEstado = (mensJugador) =>
+    mensJugador.reduce((worst, m) => {
+      return (PRIORIDAD[m.estado] || 0) > (PRIORIDAD[worst] || 0) ? m.estado : worst;
+    }, 'SIN_DATOS');
 
   const jugadoresConPago = useMemo(() => {
     return jugadores.map(j => {
       const mensJugador    = mensualidades.filter(m => (m.cedula || m.jugador_id) == j.cedula);
-      const mesActualData  = mensJugador.find(m => parseInt(m.numero_mes) === mesActual);
-      const estadoPago     = mesActualData?.estado || 'SIN_DATOS';
+      const estadoPago     = peorEstado(mensJugador);
       const saldoPendiente = mensJugador.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
       const totalPagado    = mensJugador.reduce((s, m) => s + (parseFloat(m.valor_pagado)    || 0), 0);
       const nombre = `${j.nombre || j['nombre(s)'] || ''} ${j.apellidos || j['apellido(s)'] || ''}`.trim();
@@ -99,7 +103,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         activo: j.activo === true || (j.activo || '').toString().toUpperCase() === 'SI',
       };
     });
-  }, [jugadores, mensualidades, mesActual]);
+  }, [jugadores, mensualidades]);
 
   const filtered = useMemo(() => {
     return jugadoresConPago

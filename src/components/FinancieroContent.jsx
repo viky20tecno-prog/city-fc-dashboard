@@ -99,21 +99,31 @@ function SeccionMensualidades({ datos, suspensiones = [] }) {
       </div>
       <div className="space-y-2">
         {sorted.map((m, i) => {
-          const susp = getSuspension(m.numero_mes);
+          const susp      = getSuspension(m.numero_mes);
+          const penalidad = parseFloat(m.penalidad) || 0;
+          const totalDeuda = (parseFloat(m.valor_oficial) || 0) + penalidad;
           return (
-            <div key={i} className={`flex items-center justify-between p-3 rounded-xl border ${
+            <div key={i} className={`p-3 rounded-xl border ${
               susp ? 'bg-yellow-400/5 border-yellow-400/20' : 'bg-[#1E1E1E] border-[#2A2A2A]'
             }`}>
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <span className="text-sm font-medium text-[#F5F5F5] w-16 flex-shrink-0">{m.mes}</span>
-                {susp
-                  ? <SuspendidoBadge motivo={susp.motivo} detalle={susp.detalle} cancelada={!susp.activa} />
-                  : <EstadoBadge estado={m.estado} />}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <span className="text-sm font-medium text-[#F5F5F5] w-16 flex-shrink-0">{m.mes}</span>
+                  {susp
+                    ? <SuspendidoBadge motivo={susp.motivo} detalle={susp.detalle} cancelada={!susp.activa} />
+                    : <EstadoBadge estado={m.estado} />}
+                </div>
+                <p className="text-sm font-medium text-[#F5F5F5] flex-shrink-0 ml-2">
+                  {formatCOP(m.valor_pagado)}
+                  <span className="text-[#6A6A6A]"> / {formatCOP(totalDeuda)}</span>
+                </p>
               </div>
-              <p className="text-sm font-medium text-[#F5F5F5] flex-shrink-0 ml-2">
-                {formatCOP(m.valor_pagado)}
-                <span className="text-[#6A6A6A]"> / {formatCOP(m.valor_oficial)}</span>
-              </p>
+              {penalidad > 0 && (
+                <div className="flex items-center gap-1.5 mt-1.5 ml-[76px]">
+                  <AlertTriangle className="w-3 h-3 text-[#EF4444] flex-shrink-0" />
+                  <span className="text-xs text-[#EF4444]">Penalidad por mora: {formatCOP(penalidad)}</span>
+                </div>
+              )}
             </div>
           );
         })}

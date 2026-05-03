@@ -101,7 +101,7 @@ export default function FormInscripcion() {
         setErrorMsg('Ya existe un jugador inscrito con ese número de documento.');
       } else {
         setStatus('error');
-        setErrorMsg(data.error || data.message || 'Error al registrar. Intenta de nuevo.');
+        setErrorMsg(data.message || data.error || 'Error al registrar. Intenta de nuevo.');
       }
     } catch (err) {
       console.error('Error completo:', err);

@@ -1,8 +1,9 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle } from 'lucide-react';
 import { ESTADO_COLORS } from '../config';
 import HojaDeVida from './HojaDeVida';
 import SuspensionModal from './SuspensionModal';
+import { deletePlayer } from '../services/api';
 
 /* ── colores de cada estado para el dropdown ── */
 const ESTADO_DOT = {
@@ -81,8 +82,24 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const [jugadorDetalle, setJugadorDetalle]       = useState(null);
   const [jugadorDetalleTab, setJugadorDetalleTab] = useState('perfil');
   const [jugadorSuspension, setJugadorSuspension] = useState(null);
+  const [jugadorAEliminar, setJugadorAEliminar]   = useState(null);
+  const [eliminando, setEliminando]               = useState(false);
 
   const abrirHoja = (j, tab = 'perfil') => { setJugadorDetalle(j); setJugadorDetalleTab(tab); };
+
+  const confirmarEliminar = async () => {
+    if (!jugadorAEliminar) return;
+    setEliminando(true);
+    try {
+      await deletePlayer(jugadorAEliminar.cedula);
+      setJugadorAEliminar(null);
+      onRefresh();
+    } catch (err) {
+      alert('Error al eliminar jugador: ' + err.message);
+    } finally {
+      setEliminando(false);
+    }
+  };
 
   const tieneSuspensionActiva = (cedula) =>
     suspensiones.some(s => s.activa && s.cedula === String(cedula));
@@ -296,6 +313,15 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                       >
                         <PauseCircle className="w-4 h-4" />
                       </button>
+
+                      {/* Eliminar */}
+                      <button
+                        onClick={() => setJugadorAEliminar(j)}
+                        title="Eliminar jugador"
+                        className="p-1.5 rounded-lg transition text-[#4A4A4A] hover:text-red-500 hover:bg-red-500/10"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -337,6 +363,54 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           onClose={() => setJugadorSuspension(null)}
           onSuccess={onRefresh}
         />
+      )}
+
+      {/* MODAL CONFIRMAR ELIMINACIÓN */}
+      {jugadorAEliminar && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => !eliminando && setJugadorAEliminar(null)}
+        >
+          <div
+            style={{ background: '#1A1A1A', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '16px', padding: '28px 32px', width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '20px' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Icono + título */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <AlertTriangle size={20} color="#EF4444" />
+              </div>
+              <div>
+                <div style={{ color: '#F5F5F5', fontWeight: 600, fontSize: '15px' }}>¿Eliminar jugador?</div>
+                <div style={{ color: '#6A6A6A', fontSize: '12px', marginTop: '2px' }}>Esta acción no se puede deshacer</div>
+              </div>
+            </div>
+
+            {/* Datos del jugador */}
+            <div style={{ background: '#141414', borderRadius: '10px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ color: '#F5F5F5', fontWeight: 600, fontSize: '14px' }}>{jugadorAEliminar.nombreCompleto}</div>
+              <div style={{ color: '#6A6A6A', fontSize: '12px', fontFamily: 'monospace' }}>CC {jugadorAEliminar.cedula}</div>
+            </div>
+
+            {/* Botones */}
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => setJugadorAEliminar(null)}
+                disabled={eliminando}
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #2A2A2A', background: '#141414', color: '#8A8A8A', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarEliminar}
+                disabled={eliminando}
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.12)', color: '#EF4444', fontSize: '13px', fontWeight: 600, cursor: eliminando ? 'not-allowed' : 'pointer', opacity: eliminando ? 0.6 : 1 }}
+              >
+                {eliminando ? 'Eliminando…' : 'Sí, eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

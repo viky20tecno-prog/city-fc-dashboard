@@ -107,6 +107,14 @@ export async function fetchConfig() {
   return apiCall(`/config?club_id=${getClubId()}`);
 }
 
+export async function deletePlayer(cedula) {
+  const url = `${API_BASE_URL}/players/${cedula}?club_id=${getClubId()}`;
+  const authHeaders = await getAuthHeaders();
+  const res = await fetch(url, { method: 'DELETE', headers: authHeaders });
+  if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+  return await res.json();
+}
+
 export async function registerPayment(paymentData) {
   const url = `${API_BASE_URL}/payments?club_id=${getClubId()}`;
   try {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle, XCircle, Eye, EyeOff, Loader2, PauseCircle, Package } from 'lucide-react';
+import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle, XCircle, Eye, EyeOff, Loader2, PauseCircle, Package, MessageCircle, Wallet, Pencil } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
@@ -329,8 +329,11 @@ function SeccionHistorialLazy({ cedula }) {
                   {estadoLabel(p.estado_revision)}
                 </span>
               </div>
+              <div className="flex items-center justify-between mt-1">
+                {p.concepto ? <p className="text-xs text-[#737373]">{conceptoLabel(p.concepto)}</p> : <span />}
+                <OrigenBadge origen={p.tipo_origen} />
+              </div>
               {p.referencia && <p className="text-xs text-[#737373]">Ref: {p.referencia}</p>}
-              {p.concepto && <p className="text-xs text-[#737373] mt-1">{conceptoLabel(p.concepto)}</p>}
               {p.mensaje_alerta && <p className="text-xs text-[#C678FF] mt-1 italic">📝 {p.mensaje_alerta}</p>}
               {p.url_comprobante && (
                 <a href={p.url_comprobante} target="_blank" rel="noopener noreferrer"
@@ -343,6 +346,23 @@ function SeccionHistorialLazy({ cedula }) {
         </div>
       )}
     </div>
+  );
+}
+
+const ORIGEN_CONFIG = {
+  TRANSFERENCIA:           { label: 'WhatsApp',    icon: MessageCircle, color: 'text-green-400', bg: 'bg-green-400/10 border border-green-400/20'  },
+  TRANSFERENCIA_EXCEDENTE: { label: 'Saldo favor', icon: Wallet,        color: 'text-[#B68631]', bg: 'bg-[#B68631]/10 border border-[#B68631]/20'  },
+  MANUAL:                  { label: 'Manual',      icon: Pencil,        color: 'text-[#737373]', bg: 'bg-[#737373]/10 border border-[#737373]/20'  },
+};
+
+function OrigenBadge({ origen }) {
+  const cfg = ORIGEN_CONFIG[origen];
+  if (!cfg) return null;
+  const Icon = cfg.icon;
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color}`}>
+      <Icon className="w-3 h-3" />{cfg.label}
+    </span>
   );
 }
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Calendar, Shirt, Trophy, FileText, CheckCircle, Clock,
   AlertTriangle, XCircle, Eye, EyeOff, Loader2, PauseCircle, Package,
+  MessageCircle, Wallet, Pencil,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
@@ -28,6 +29,23 @@ const MOTIVO_LABEL = {
   LESION: 'Lesión', VIAJE: 'Viaje',
   RETIRO_TEMPORAL: 'Retiro temporal', OTRO: 'Otro motivo',
 };
+
+const ORIGEN_CONFIG = {
+  TRANSFERENCIA:           { label: 'WhatsApp',    icon: MessageCircle, color: 'text-green-400',  bg: 'bg-green-400/10 border border-green-400/20'   },
+  TRANSFERENCIA_EXCEDENTE: { label: 'Saldo favor', icon: Wallet,        color: 'text-[#B68631]',  bg: 'bg-[#B68631]/10 border border-[#B68631]/20'   },
+  MANUAL:                  { label: 'Manual',      icon: Pencil,        color: 'text-[#6A6A6A]',  bg: 'bg-[#6A6A6A]/10 border border-[#6A6A6A]/20'   },
+};
+
+function OrigenBadge({ origen }) {
+  const cfg = ORIGEN_CONFIG[origen];
+  if (!cfg) return null;
+  const Icon = cfg.icon;
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color}`}>
+      <Icon className="w-3 h-3" />{cfg.label}
+    </span>
+  );
+}
 
 function EmptySection({ texto }) {
   return <div className="text-center py-6 text-[#6A6A6A] text-sm">{texto}</div>;
@@ -334,8 +352,11 @@ function SeccionHistorialLazy({ cedula }) {
                   {estadoLabel(p.estado_revision)}
                 </span>
               </div>
+              <div className="flex items-center justify-between mt-1">
+                {p.concepto ? <p className="text-xs text-[#6A6A6A]">{conceptoLabel(p.concepto)}</p> : <span />}
+                <OrigenBadge origen={p.tipo_origen} />
+              </div>
               {p.referencia && <p className="text-xs text-[#6A6A6A]">Ref: {p.referencia}</p>}
-              {p.concepto   && <p className="text-xs text-[#6A6A6A] mt-1">{conceptoLabel(p.concepto)}</p>}
               {p.mensaje_alerta && <p className="text-xs text-[#E14924] mt-1 italic">📝 {p.mensaje_alerta}</p>}
               {p.url_comprobante && (
                 <a href={p.url_comprobante} target="_blank" rel="noopener noreferrer"

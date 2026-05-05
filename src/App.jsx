@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
+import LandingPage from './pages/LandingPage';
+import RegistroClub from './pages/RegistroClub';
 import FormInscripcion from './components/FormInscripcion';
 import PedidoUniforme from './pages/PedidoUniforme';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -10,6 +12,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Rutas públicas */}
+        <Route path="/landing"         element={<LandingPage />} />
+        <Route path="/registro"        element={<RegistroClub />} />
         <Route path="/login"           element={<Login />} />
         <Route path="/inscripcion"     element={<FormInscripcion />} />
         <Route path="/pedido-uniforme" element={<PedidoUniforme />} />

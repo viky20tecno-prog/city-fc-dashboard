@@ -115,6 +115,15 @@ export async function deletePlayer(cedula) {
   return await res.json();
 }
 
+export async function fetchClubConfig() {
+  const clubId = getClubId();
+  const url = `${API_BASE_URL}/config?club_id=${clubId}`;
+  const headers = await getAuthHeaders();
+  const res = await fetch(url, { headers });
+  if (!res.ok) throw new Error(`API Error: ${res.status}`);
+  return await res.json();
+}
+
 export async function registerPayment(paymentData) {
   const url = `${API_BASE_URL}/payments?club_id=${getClubId()}`;
   try {

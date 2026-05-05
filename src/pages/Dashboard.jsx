@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useSheetData } from '../hooks/useSheetData';
+import { useClubConfig } from '../hooks/useClubConfig';
 import DashboardOverview from '../components/DashboardOverview';
 import JugadoresTable from '../components/JugadoresTable';
 import Uniformes from '../components/Uniformes';
@@ -131,6 +132,7 @@ function NavBtn({ id, Icon, title, active, onClick }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { config: clubConfig } = useClubConfig();
   const {
     jugadores, mensualidades, uniformes, torneos,
     registroPagos, morosos, suspensiones,
@@ -154,7 +156,8 @@ export default function Dashboard() {
     setRefreshing(false);
   };
 
-  const inscripcionUrl = `${window.location.origin}/inscripcion`;
+  const clubId = localStorage.getItem('clubId') || 'city-fc';
+  const inscripcionUrl = `${window.location.origin}/inscripcion?club_id=${clubId}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(inscripcionUrl);
@@ -194,10 +197,10 @@ export default function Dashboard() {
         {/* Nombre del club */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', flexShrink: 0 }}>
           <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '20px', letterSpacing: '3px', lineHeight: 1, color: '#fff' }}>
-            CITY F.C.<span style={{ color: '#B68631', marginLeft: '4px', fontSize: '12px' }}>★</span>
+            {clubConfig?.nombre || 'Mi Club'}
           </span>
           <span style={{ fontSize: '9px', letterSpacing: '3.5px', textTransform: 'uppercase', color: '#7A7A7A' }}>
-            Lo Hacemos Diferente
+            {clubConfig?.subtitulo || ''}
           </span>
         </div>
 

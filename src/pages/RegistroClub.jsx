@@ -66,7 +66,7 @@ export default function RegistroClub() {
       setExito(true);
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {
-      setError('No se pudo conectar con el servidor. Intenta de nuevo.');
+      setError('No se pudo conectar con el servidor. ' + (err?.message || 'Intenta de nuevo.'));
     } finally {
       setLoading(false);
     }

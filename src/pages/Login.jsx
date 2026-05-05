@@ -14,6 +14,8 @@ export default function Login() {
     setLoading(true);
     setError('');
 
+    await supabase.auth.signOut();
+
     const { data: sessionData, error: authError } = await supabase.auth.signInWithPassword({
       email: form.email.trim(),
       password: form.password,

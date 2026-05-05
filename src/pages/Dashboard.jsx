@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
   Clock, MessageSquare, ClipboardCheck, Settings,
-  Copy, Check, Bell,
+  Copy, Check, Bell, LogOut,
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import { useSheetData } from '../hooks/useSheetData';
 import DashboardOverview from '../components/DashboardOverview';
 import JugadoresTable from '../components/JugadoresTable';
@@ -128,6 +130,7 @@ function NavBtn({ id, Icon, title, active, onClick }) {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const {
     jugadores, mensualidades, uniformes, torneos,
     registroPagos, morosos, suspensiones,
@@ -138,6 +141,12 @@ export default function Dashboard() {
   const [refreshing,    setRefreshing]    = useState(false);
   const [linkCopied,    setLinkCopied]    = useState(false);
   const [showPagoModal, setShowPagoModal] = useState(false);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem('clubId');
+    navigate('/login');
+  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -262,6 +271,9 @@ export default function Dashboard() {
 
         <button style={S.iconBtn(false)} title="Configuración">
           <Settings size={18} color="#7A7A7A" strokeWidth={1.7} />
+        </button>
+        <button style={S.iconBtn(false)} title="Cerrar sesión" onClick={handleLogout}>
+          <LogOut size={18} color="#7A7A7A" strokeWidth={1.7} />
         </button>
       </nav>
 

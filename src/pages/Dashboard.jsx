@@ -80,6 +80,11 @@ export default function Dashboard() {
 
   const c = clubConfig?.color || '#E14924';
 
+  // Iniciales del escudo: máx 3 letras de las primeras palabras del nombre
+  const initials = clubConfig?.nombre
+    ? clubConfig.nombre.split(' ').slice(0, 3).map(w => w[0]).join('').toUpperCase().slice(0, 3)
+    : '?';
+
   useEffect(() => {
     document.title = clubConfig?.nombre
       ? `${clubConfig.nombre} — App`
@@ -223,7 +228,7 @@ export default function Dashboard() {
                 fill={`${c}12`} stroke={`${c}2E`} strokeWidth="0.8"/>
           <line x1="6" y1="21" x2="32" y2="21" stroke={c} strokeWidth="0.7" opacity="0.4"/>
           <text x="19" y="18.5" textAnchor="middle" fill={c}
-                fontFamily="Bebas Neue, sans-serif" fontSize="9.5" letterSpacing="1.5">CFC</text>
+                fontFamily="Bebas Neue, sans-serif" fontSize="9.5" letterSpacing="1.5">{initials}</text>
           <line x1="13" y1="24" x2="25" y2="24" stroke="#B68631" strokeWidth="0.8" opacity="0.6"/>
           <text x="19" y="35" textAnchor="middle" fill="#B68631" fontFamily="Arial" fontSize="6.5" letterSpacing="1">★ ★ ★</text>
         </svg>
@@ -313,22 +318,24 @@ export default function Dashboard() {
 
       {/* ───── MAIN ───── */}
       <main style={S.main}>
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          left: 'calc(64px + (100vw - 64px) / 2)',
-          transform: 'translate(-50%, -50%)',
-          width: '500px', height: '500px',
-          pointerEvents: 'none',
-          zIndex: 0,
-          opacity: 0.06,
-        }}>
-          <img
-            src="/logo_marca_agua.png"
-            alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'invert(1) brightness(1.8)' }}
-          />
-        </div>
+        {clubConfig?.logo_url && (
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: 'calc(64px + (100vw - 64px) / 2)',
+            transform: 'translate(-50%, -50%)',
+            width: '500px', height: '500px',
+            pointerEvents: 'none',
+            zIndex: 0,
+            opacity: 0.06,
+          }}>
+            <img
+              src={clubConfig.logo_url}
+              alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'invert(1) brightness(1.8)' }}
+            />
+          </div>
+        )}
 
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>

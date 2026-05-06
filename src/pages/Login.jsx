@@ -63,11 +63,17 @@ export default function Login() {
       return;
     }
     const userId = data?.user?.id;
-    let clubId = 'city-fc';
+    let clubId = null;
     if (userId) {
-      const { data: member } = await supabase
-        .from('club_members').select('club_id').eq('user_id', userId).single();
-      if (member?.club_id) clubId = member.club_id;
+      const { data: ownedClub } = await supabase
+        .from('clubs').select('slug').eq('owner_user_id', userId).single();
+      if (ownedClub?.slug) clubId = ownedClub.slug;
+    }
+    if (!clubId) {
+      setError('No se encontró un club asociado a esta cuenta.');
+      await supabase.auth.signOut();
+      setLoading(false);
+      return;
     }
     localStorage.setItem('clubId', clubId);
     navigate('/app');

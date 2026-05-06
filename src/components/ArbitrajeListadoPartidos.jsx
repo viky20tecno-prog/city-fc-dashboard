@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, Clock, Users, Eye, RefreshCw } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
+import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 
 const fmt = (n) =>
   Number(n).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });

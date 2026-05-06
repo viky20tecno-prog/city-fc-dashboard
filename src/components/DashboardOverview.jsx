@@ -4,10 +4,10 @@ import {
 } from 'lucide-react';
 import RecaudacionChart from './RecaudacionChart';
 import MorososList from './MorososList';
+import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 
 /* ── formateo ── */
-const formatCOP = (n) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
+const formatCOP = (n) => formatMoney(n, getCodigoPais());
 
 /* ── KPI card con identidad City F.C. ── */
 const COLORS = {

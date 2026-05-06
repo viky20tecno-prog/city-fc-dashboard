@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CheckCircle, ChevronRight, DollarSign, Shirt, Trophy, AlertTriangle, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
+import { getCurrencyLabel, getCodigoPais } from '../lib/formatMoney';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 
@@ -35,6 +36,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
   const [nuevoTorneo, setNuevoT] = useState({ nombre: '', fecha: '', valor: '' });
 
   const c = color;
+  const currencyLabel = getCurrencyLabel(clubConfig?.codigo_pais || getCodigoPais());
 
   const saveAndFinish = async () => {
     setSaving(true);
@@ -156,7 +158,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
 
               <div>
                 <label style={{ display: 'block', fontSize: 13, color: '#9CA3AF', marginBottom: 8 }}>
-                  Valor de la cuota mensual (COP)
+                  Valor de la cuota mensual ({currencyLabel})
                 </label>
                 <input
                   type="number"
@@ -182,7 +184,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 13, color: '#9CA3AF', marginBottom: 8 }}>
-                    Penalidad por mora (COP)
+                    Penalidad por mora ({currencyLabel})
                   </label>
                   <input
                     type="number"
@@ -298,7 +300,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
                     type="number"
                     value={nuevoTorneo.valor}
                     onChange={e => setNuevoT(t => ({ ...t, valor: e.target.value }))}
-                    placeholder="Inscripción (COP)"
+                    placeholder={`Inscripción por jugador (${currencyLabel})`}
                     style={inp}
                     min={0}
                   />

@@ -89,15 +89,17 @@ export default function Dashboard() {
 
   const c = clubConfig?.color || '#E14924';
 
-  // Inyecta el color del club como variables CSS globales para que todos los
-  // componentes hijos puedan consumirlo via var(--cc), var(--cc12), etc.
+  // Inyecta el color del club como variables CSS globales y persiste codigo_pais
   useEffect(() => {
     document.documentElement.style.setProperty('--cc',   c);
     document.documentElement.style.setProperty('--cc12', `${c}1F`);
     document.documentElement.style.setProperty('--cc20', `${c}33`);
     document.documentElement.style.setProperty('--cc30', `${c}4D`);
     document.documentElement.style.setProperty('--cc50', `${c}80`);
-  }, [c]);
+    if (clubConfig?.codigo_pais) {
+      localStorage.setItem('codigoPais', clubConfig.codigo_pais);
+    }
+  }, [c, clubConfig?.codigo_pais]);
 
   // Iniciales del escudo: máx 3 letras de las primeras palabras del nombre
   const initials = clubConfig?.nombre
@@ -327,7 +329,7 @@ export default function Dashboard() {
 
         <div style={{ flex: 1 }} />
 
-        <button style={S.iconBtn(false)} title="Configuración">
+        <button style={S.iconBtn(false)} title="Configuración del club" onClick={() => setShowOnboarding(true)}>
           <Settings size={18} color="#7A7A7A" strokeWidth={1.7} />
         </button>
         <button style={S.iconBtn(false)} title="Cerrar sesión" onClick={handleLogout}>

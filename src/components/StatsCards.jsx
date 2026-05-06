@@ -1,4 +1,5 @@
 import { Users, CheckCircle, AlertTriangle, XCircle, DollarSign, Clock } from 'lucide-react';
+import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 
 function StatCard({ icon: Icon, label, value, subtext, color, wide }) {
   const colors = {
@@ -82,10 +83,7 @@ export default function StatsCards({ mensualidades, jugadores, morosos }) {
     ? Math.round((countAlDia / activos.length) * 100)
     : 0;
 
-  const formatCOP = n =>
-    new Intl.NumberFormat('es-CO', {
-      style: 'currency', currency: 'COP', maximumFractionDigits: 0,
-    }).format(n);
+  const formatCOP = (n) => formatMoney(n, getCodigoPais());
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">

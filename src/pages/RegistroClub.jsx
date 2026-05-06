@@ -71,6 +71,7 @@ export default function RegistroClub() {
   const [color, setColor]       = useState(PALETA[0].hex);
   const [pais, setPais]         = useState(PAISES[0]);
   const [loading, setLoading]   = useState(false);
+  const [slowHint, setSlowHint] = useState(false);
   const [error, setError]       = useState('');
   const [exito, setExito]       = useState(false);
 
@@ -86,15 +87,23 @@ export default function RegistroClub() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSlowHint(false);
     if (form.password !== form.confirmacion) {
       setError('Las contraseñas no coinciden.');
       return;
     }
     setLoading(true);
+
+    // Aviso de "tardando" a los 5 s; timeout duro a los 25 s
+    const slowTimer    = setTimeout(() => setSlowHint(true), 5000);
+    const controller   = new AbortController();
+    const timeoutTimer = setTimeout(() => controller.abort(), 25000);
+
     try {
       const res = await fetch(`${API_BASE_URL}/registro`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           nombre_club:   form.nombre_club.trim(),
           ciudad:        form.ciudad.trim(),
@@ -109,7 +118,6 @@ export default function RegistroClub() {
       const data = await res.json();
       if (!res.ok || !data.success) {
         setError(data.error || 'Ocurrió un error al registrar el club.');
-        setLoading(false);
         return;
       }
       if (data.access_token && data.refresh_token) {
@@ -122,9 +130,16 @@ export default function RegistroClub() {
       setExito(true);
       setTimeout(() => navigate('/app'), 2000);
     } catch (err) {
-      setError('No se pudo conectar con el servidor. ' + (err?.message || 'Intenta de nuevo.'));
+      if (err.name === 'AbortError') {
+        setError('El servidor tardó demasiado en responder. Verifica tu conexión e intenta de nuevo.');
+      } else {
+        setError('No se pudo conectar con el servidor. ' + (err?.message || 'Intenta de nuevo.'));
+      }
     } finally {
+      clearTimeout(slowTimer);
+      clearTimeout(timeoutTimer);
       setLoading(false);
+      setSlowHint(false);
     }
   };
 
@@ -405,13 +420,19 @@ export default function RegistroClub() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 transition: 'background 0.5s, box-shadow 0.5s',
                 boxShadow: loading ? 'none' : `0 4px 24px ${ac}55`,
-                marginBottom: 16,
+                marginBottom: slowHint ? 8 : 16,
               }}
             >
               {loading
                 ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Creando tu club…</>
                 : 'Crear mi club gratis'}
             </button>
+
+            {slowHint && (
+              <p style={{ textAlign: 'center', color: '#6B7280', fontSize: 12, margin: '0 0 14px', lineHeight: 1.5 }}>
+                El servidor está despertando, puede tardar unos segundos más…
+              </p>
+            )}
 
             <p style={{ textAlign: 'center', color: '#4B5563', fontSize: 13 }}>
               ¿Ya tienes cuenta?{' '}

@@ -1,62 +1,103 @@
 @import "tailwindcss";
 
+/* ══════════════════════════════════════════════════════
+   TEMA NEGRO (default)
+   ══════════════════════════════════════════════════════ */
+:root, [data-theme="dark"] {
+  --bg-app:      #0A0A0A;
+  --bg-card:     #111111;
+  --bg-surface:  #1A1A1A;
+  --bg-input:    #0E0E0E;
+  --text-pri:    #FFFFFF;
+  --text-sec:    #9CA3AF;
+  --text-mut:    #4B5563;
+  --border-sub:  rgba(255,255,255,0.07);
+}
+[data-theme="carbon"] {
+  --bg-app:      #0D1117;
+  --bg-card:     #161B22;
+  --bg-surface:  #21262D;
+  --bg-input:    #0D1117;
+  --text-pri:    #E6EDF3;
+  --text-sec:    #8B949E;
+  --text-mut:    #484F58;
+  --border-sub:  rgba(255,255,255,0.08);
+}
+[data-theme="slate"] {
+  --bg-app:      #0F172A;
+  --bg-card:     #1E293B;
+  --bg-surface:  #2A3A52;
+  --bg-input:    #162032;
+  --text-pri:    #F1F5F9;
+  --text-sec:    #94A3B8;
+  --text-mut:    #475569;
+  --border-sub:  rgba(255,255,255,0.08);
+}
+[data-theme="graphite"] {
+  --bg-app:      #18181B;
+  --bg-card:     #27272A;
+  --bg-surface:  #3F3F46;
+  --bg-input:    #1F1F22;
+  --text-pri:    #FAFAFA;
+  --text-sec:    #A1A1AA;
+  --text-mut:    #52525B;
+  --border-sub:  rgba(255,255,255,0.08);
+}
+[data-theme="light"] {
+  --bg-app:      #F1F5F9;
+  --bg-card:     #FFFFFF;
+  --bg-surface:  #E9EFF6;
+  --bg-input:    #FFFFFF;
+  --text-pri:    #0F172A;
+  --text-sec:    #475569;
+  --text-mut:    #94A3B8;
+  --border-sub:  rgba(0,0,0,0.10);
+}
+
 :root {
-  /* Brand identity — City F.C. */
-  --primary:   #E14924;
-  --bg:        #0A0A0A;
-  --card:      #1E1E1E;
-  --card-alt:  #1A1A1A;
-  --accent:    #B68631;
-  --secondary: #2A3495;
-  --green:     #22C55E;
-  --text:      #FFFFFF;
-  --muted:     #7A7A7A;
-  --border:    rgba(225,73,36,0.25);
-  --border-dim: rgba(255,255,255,0.06);
-  --glow-sm:   0 0 12px rgba(225,73,36,0.25);
-  --glow-md:   0 0 24px rgba(225,73,36,0.35);
-  --glow-lg:   0 0 40px rgba(225,73,36,0.45);
+  /* Brand / legacy aliases */
+  --primary:      #E14924;
+  --bg:           var(--bg-app);
+  --card:         var(--bg-card);
+  --card-alt:     var(--bg-surface);
+  --accent:       #B68631;
+  --green:        #22C55E;
+  --text:         var(--text-pri);
+  --muted:        var(--text-sec);
+  --border-dim:   var(--border-sub);
   --font-display: 'Bebas Neue', cursive;
   --font-body:    'Inter', system-ui, sans-serif;
-
-  /* Legacy aliases — mantienen compatibilidad con componentes existentes */
-  --bg-primary:   #0A0A0A;
-  --bg-secondary: #1E1E1E;
-  --bg-tertiary:  #1A1A1A;
-  --blue:         #E14924;
-  --cyan:         #B68631;
+  --text-primary: var(--text-pri);
+  --text-muted:   var(--text-sec);
   --yellow:       #F59E0B;
   --red:          #EF4444;
   --purple:       #C678FF;
-  --text-primary: #FFFFFF;
-  --text-muted:   #7A7A7A;
-  --blue-dim:     rgba(225,73,36,0.12);
-  --yellow-dim:   rgba(245,158,11,0.12);
-  --green-dim:    rgba(34,197,94,0.12);
-  --red-dim:      rgba(239,68,68,0.12);
-  --purple-dim:   rgba(198,120,255,0.12);
 }
 
 body {
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: var(--bg-app);
+  color: var(--text-pri);
   font-family: var(--font-body);
-  background-image:
-    repeating-linear-gradient(
-      -45deg,
-      transparent 0px,
-      transparent 28px,
-      rgba(255,255,255,0.008) 28px,
-      rgba(255,255,255,0.008) 29px
-    ),
-    repeating-linear-gradient(
-      45deg,
-      transparent 0px,
-      transparent 60px,
-      rgba(225,73,36,0.012) 60px,
-      rgba(225,73,36,0.012) 61px
-    );
+  transition: background-color 0.4s ease, color 0.3s ease;
 }
+
+/* ── Texto en tema claro ───────────────────────────────── */
+[data-theme="light"] main .text-white,
+[data-theme="light"] nav  .text-white,
+[data-theme="light"] header .text-white { color: var(--text-pri) !important; }
+
+[data-theme="light"] main .text-gray-400,
+[data-theme="light"] main .text-gray-500,
+[data-theme="light"] main .text-gray-600 { color: var(--text-sec) !important; }
+
+[data-theme="light"] main .text-gray-300,
+[data-theme="light"] main .text-gray-200 { color: var(--text-pri) !important; }
+
+[data-theme="light"] main .border-white\/\[0\.06\],
+[data-theme="light"] main [class*="border-white"] { border-color: var(--border-sub) !important; }
+
+[data-theme="light"] main .bg-white\/\[0\.04\],
+[data-theme="light"] main [class*="bg-white/0"] { background-color: var(--bg-surface) !important; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 3px; height: 3px; }

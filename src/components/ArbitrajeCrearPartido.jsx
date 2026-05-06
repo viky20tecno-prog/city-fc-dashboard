@@ -9,7 +9,7 @@ const fmt = (n) =>
 
 // Input oscuro para fecha/hora — fuerza el color-scheme dark en el picker nativo
 const darkPickerClass =
-  'w-full bg-[#0F1F36] border border-[#1A3A5C] focus:border-[#00AAFF] text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors [color-scheme:dark]';
+  'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors [color-scheme:dark]';
 
 export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
   const [formData, setFormData] = useState({
@@ -115,16 +115,16 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
 
   if (success) {
     return (
-      <div className="bg-[#0A1628] border border-[#003080] rounded-xl p-12 text-center">
+      <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl p-12 text-center">
         <div className="text-5xl mb-4">✅</div>
-        <h3 className="text-[#00AAFF] font-semibold text-lg mb-2">Partido registrado con éxito</h3>
+        <h3 className="text-[var(--cc)] font-semibold text-lg mb-2">Partido registrado con éxito</h3>
         <p className="text-gray-400 text-sm">Redirigiendo al listado...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#0A1628] border border-[#1A3A5C] rounded-xl p-6">
+    <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl p-6">
       <h2 className="text-white font-semibold text-lg mb-6">Registrar nuevo partido</h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -138,7 +138,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
             value={formData.titulo}
             onChange={handleInputChange}
             placeholder="Ej: Torneo Copa Ciudad – Semifinal"
-            className="w-full bg-[#0F1F36] border border-[#1A3A5C] focus:border-[#00AAFF] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+            className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
           />
         </div>
 
@@ -186,7 +186,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
               value={formData.equipoA}
               onChange={handleInputChange}
               placeholder="Ej: City FC"
-              className="w-full bg-[#0F1F36] border border-[#1A3A5C] focus:border-[#00AAFF] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+              className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
             />
           </div>
           <div>
@@ -197,7 +197,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
               value={formData.equipoB}
               onChange={handleInputChange}
               placeholder="Ej: Independiente"
-              className="w-full bg-[#0F1F36] border border-[#1A3A5C] focus:border-[#00AAFF] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+              className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
             />
           </div>
         </div>
@@ -212,12 +212,12 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
             onChange={handleInputChange}
             placeholder="Ej: 15000"
             min="0"
-            className="w-full bg-[#0F1F36] border border-[#1A3A5C] focus:border-[#00AAFF] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+            className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
           />
           {montoTotal > 0 && (
             <p className="mt-1.5 text-xs text-gray-500">
               Total a recaudar:{' '}
-              <span className="text-[#00AAFF] font-semibold">{fmt(montoTotal)}</span>
+              <span className="text-[var(--cc)] font-semibold">{fmt(montoTotal)}</span>
               {' '}({selectedJugadores.length} jugadores × {fmt(formData.montoPorJugador)})
             </p>
           )}
@@ -233,7 +233,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
               <button
                 type="button"
                 onClick={toggleTodos}
-                className="text-xs text-[#00AAFF] hover:text-[#38BDF8] transition-colors"
+                className="text-xs text-[var(--cc)] hover:text-[#38BDF8] transition-colors"
               >
                 {selectedJugadores.length === jugadoresFiltrados.length
                   ? 'Deseleccionar todos'
@@ -251,7 +251,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 placeholder="Buscar por nombre..."
-                className="w-full bg-[#0F1F36] border border-[#1A3A5C] focus:border-[#00AAFF] text-white placeholder-gray-500 rounded-lg pl-9 pr-4 py-2 text-sm outline-none transition-colors"
+                className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white placeholder-gray-500 rounded-lg pl-9 pr-4 py-2 text-sm outline-none transition-colors"
               />
               {busqueda && (
                 <button
@@ -277,7 +277,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
               Sin resultados para "<span className="text-gray-400">{busqueda}</span>"
             </p>
           ) : (
-            <div className="max-h-52 overflow-y-auto border border-[#1A3A5C] rounded-lg divide-y divide-gray-800">
+            <div className="max-h-52 overflow-y-auto border border-[var(--cc20)] rounded-lg divide-y divide-gray-800">
               {jugadoresFiltrados.map(j => {
                 const nombre = `${j['nombre(s)'] || j.nombre || ''} ${j.apellidos || ''}`.trim();
                 const selected = selectedJugadores.includes(j.cedula);
@@ -287,11 +287,11 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
                     type="button"
                     onClick={() => toggleJugador(j.cedula)}
                     className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                      selected ? 'bg-[#003080]/20' : 'hover:bg-[#0F1F36]'
+                      selected ? 'bg-[var(--cc)]/10' : 'hover:bg-[var(--bg-surface)]'
                     }`}
                   >
                     {selected
-                      ? <CheckSquare size={16} className="text-[#00AAFF] shrink-0" />
+                      ? <CheckSquare size={16} className="text-[var(--cc)] shrink-0" />
                       : <Square size={16} className="text-gray-600 shrink-0" />
                     }
                     <div>
@@ -317,7 +317,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-[#0078FF] hover:bg-[#00AAFF] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 bg-[var(--cc)] hover:bg-[var(--cc)] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
         >
           {loading
             ? <><Loader2 size={16} className="animate-spin" /> Registrando...</>

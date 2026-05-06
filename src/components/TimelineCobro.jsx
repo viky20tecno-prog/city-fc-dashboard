@@ -43,11 +43,11 @@ const steps = [
   },
 ];
 
-export default function TimelineCobro({ color = '#00AAFF' }) {
+export default function TimelineCobro({ color = 'var(--cc)' }) {
   const today = new Date().getDate();
 
   return (
-    <div className="bg-[#0A1628] rounded-2xl border border-[#1A3A5C] p-6">
+    <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--cc20)] p-6">
       <h2 className="text-lg font-semibold text-[#F5F5F5] mb-6">Ciclo de Cobro Automático</h2>
       <div className="relative">
         <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-[#2A2A2A]"></div>
@@ -86,7 +86,7 @@ export default function TimelineCobro({ color = '#00AAFF' }) {
                     )}
                   </div>
                   <p className="text-sm text-[#737373] mt-0.5">{step.desc}</p>
-                  <p className="text-sm italic text-[#737373] mt-1 bg-[#0F1F36] rounded-lg px-3 py-1.5 inline-block border border-[#1A3A5C]">{step.msg}</p>
+                  <p className="text-sm italic text-[#737373] mt-1 bg-[var(--bg-surface)] rounded-lg px-3 py-1.5 inline-block border border-[var(--cc20)]">{step.msg}</p>
                 </div>
               </div>
             );

@@ -17,6 +17,7 @@ import WhatsAppMockup from '../components/WhatsAppMockup';
 import Conciliacion from '../components/Conciliacion';
 import PagoManualModal from '../components/PagoManualModal';
 import OnboardingWizard from '../components/OnboardingWizard';
+import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSelector';
 
 const NAV = [
   { id: 'dashboard',    Icon: LayoutDashboard, title: 'Dashboard'     },
@@ -79,6 +80,7 @@ export default function Dashboard() {
   const [linkCopied,      setLinkCopied]      = useState(false);
   const [showPagoModal,   setShowPagoModal]   = useState(false);
   const [showOnboarding,  setShowOnboarding]  = useState(false);
+  const [showTheme,       setShowTheme]       = useState(false);
 
   // Mostrar onboarding solo cuando el config ya cargó y no está completado
   useEffect(() => {
@@ -88,6 +90,9 @@ export default function Dashboard() {
   }, [clubConfig]);
 
   const c = clubConfig?.color || '#E14924';
+
+  // Aplica tema guardado al montar
+  useEffect(() => { applyTheme(getStoredTheme()); }, []);
 
   // Inyecta el color del club como variables CSS globales y persiste codigo_pais
   useEffect(() => {
@@ -129,11 +134,11 @@ export default function Dashboard() {
       height: '100vh',
       overflow: 'hidden',
       fontFamily: "'Inter', system-ui, sans-serif",
-      background: '#0A0A0A',
+      background: 'var(--bg-app)',
     },
     topbar: {
       gridColumn: '1 / -1',
-      background: 'rgba(18,18,18,0.96)',
+      background: 'var(--bg-card)',
       borderBottom: `1px solid ${c}33`,
       backdropFilter: 'blur(12px)',
       display: 'flex',
@@ -151,7 +156,7 @@ export default function Dashboard() {
       transition: 'background 0.5s',
     },
     sidebar: {
-      background: 'rgba(15,15,15,0.98)',
+      background: 'var(--bg-card)',
       borderRight: `1px solid ${c}26`,
       display: 'flex',
       flexDirection: 'column',
@@ -165,6 +170,7 @@ export default function Dashboard() {
     main: {
       overflowY: 'auto',
       padding: '16px 18px 24px',
+      background: 'var(--bg-app)',
       scrollbarWidth: 'thin',
       scrollbarColor: `${c}33 transparent`,
     },
@@ -256,10 +262,10 @@ export default function Dashboard() {
 
         {/* Nombre del club */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', flexShrink: 0 }}>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '20px', letterSpacing: '3px', lineHeight: 1, color: '#fff' }}>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '20px', letterSpacing: '3px', lineHeight: 1, color: 'var(--text-pri)' }}>
             {clubConfig?.nombre || 'Mi Club'}
           </span>
-          <span style={{ fontSize: '9px', letterSpacing: '3.5px', textTransform: 'uppercase', color: '#7A7A7A' }}>
+          <span style={{ fontSize: '9px', letterSpacing: '3.5px', textTransform: 'uppercase', color: 'var(--text-mut)' }}>
             {clubConfig?.subtitulo || ''}
           </span>
         </div>
@@ -268,7 +274,7 @@ export default function Dashboard() {
         <div style={{ flex: 1 }} />
 
         {/* Indicador en vivo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', letterSpacing: '2px', color: '#7A7A7A', textTransform: 'uppercase', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', letterSpacing: '2px', color: 'var(--text-mut)', textTransform: 'uppercase', flexShrink: 0 }}>
           <div style={{ width: '6px', height: '6px', background: '#22C55E', borderRadius: '50%', boxShadow: '0 0 6px #22C55E', animation: 'pulse-green 2s ease-in-out infinite' }} />
           En Vivo
         </div>
@@ -276,7 +282,7 @@ export default function Dashboard() {
         <div style={S.sep} />
 
         {/* Fecha */}
-        <div style={{ fontSize: '11px', color: '#7A7A7A', letterSpacing: '1px', textTransform: 'uppercase', flexShrink: 0 }}>
+        <div style={{ fontSize: '11px', color: 'var(--text-mut)', letterSpacing: '1px', textTransform: 'uppercase', flexShrink: 0 }}>
           {nowStr}
         </div>
 
@@ -329,8 +335,12 @@ export default function Dashboard() {
 
         <div style={{ flex: 1 }} />
 
-        <button style={S.iconBtn(false)} title="Configuración del club" onClick={() => setShowOnboarding(true)}>
-          <Settings size={18} color="#7A7A7A" strokeWidth={1.7} />
+        <button
+          style={{ ...S.iconBtn(showTheme), position: 'relative' }}
+          title="Apariencia y configuración"
+          onClick={() => setShowTheme(v => !v)}
+        >
+          <Settings size={18} color={showTheme ? c : 'var(--text-mut)'} strokeWidth={1.7} />
         </button>
         <button style={S.iconBtn(false)} title="Cerrar sesión" onClick={handleLogout}>
           <LogOut size={18} color="#7A7A7A" strokeWidth={1.7} />
@@ -419,6 +429,14 @@ export default function Dashboard() {
           color={c}
           clubConfig={clubConfig}
           onComplete={() => setShowOnboarding(false)}
+        />
+      )}
+
+      {showTheme && (
+        <ThemeSelector
+          color={c}
+          onClose={() => setShowTheme(false)}
+          onOpenConfig={() => { setShowTheme(false); setShowOnboarding(true); }}
         />
       )}
     </div>

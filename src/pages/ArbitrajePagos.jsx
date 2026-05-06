@@ -9,7 +9,7 @@ const TABS = [
   { label: 'Gestión de Pagos', icon: '💳' },
 ];
 
-export default function ArbitrajePagos({ color = '#00AAFF' }) {
+export default function ArbitrajePagos({ color = 'var(--cc)' }) {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedPartidoId, setSelectedPartidoId] = useState(null);
   const [clubId] = useState(() => localStorage.getItem('clubId') || 'city-fc');
@@ -24,7 +24,7 @@ export default function ArbitrajePagos({ color = '#00AAFF' }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#060C18] text-white">
+    <div className="min-h-screen bg-[var(--bg-app)] text-white">
       <div className="max-w-6xl mx-auto px-4 py-6">
 
         {/* Header */}
@@ -36,7 +36,7 @@ export default function ArbitrajePagos({ color = '#00AAFF' }) {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-[#0A1628] border border-[#1A3A5C] rounded-xl p-1">
+        <div className="flex gap-1 mb-6 bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl p-1">
           {TABS.map((tab, idx) => (
             <button
               key={idx}
@@ -45,7 +45,7 @@ export default function ArbitrajePagos({ color = '#00AAFF' }) {
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === idx
                   ? 'text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-[#0F1F36]'
+                  : 'text-gray-400 hover:text-white hover:bg-[var(--bg-surface)]'
               }`}
             >
               <span>{tab.icon}</span>

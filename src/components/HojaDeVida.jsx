@@ -190,7 +190,7 @@ function TabPerfil({ jugador, onFotoUpdate }) {
         <div>
           <p className="text-base font-bold text-[var(--text-pri)]">{nombreDisplay || '—'}</p>
           <p className="text-sm text-[var(--text-mut)]">CC {jugador.cedula}</p>
-          <p className="text-xs text-[#4A4A4A] mt-0.5">Clic en la foto para cambiar</p>
+          <p className="text-xs text-[var(--text-mut)] mt-0.5">Clic en la foto para cambiar</p>
         </div>
       </div>
 

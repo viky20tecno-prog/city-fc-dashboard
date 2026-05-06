@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { API_BASE_URL } from '../config';
 import {
@@ -64,11 +64,18 @@ const INITIAL = {
 
 export default function RegistroClub() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [colorIdx, setColorIdx] = useState(0);
+
+  // Si viene de la landing con un color elegido, usarlo como valor inicial
+  const colorFromLanding = searchParams.get('color');
+  const initialColor = colorFromLanding && PALETA.some(p => p.hex === decodeURIComponent(colorFromLanding))
+    ? decodeURIComponent(colorFromLanding)
+    : PALETA[0].hex;
 
   useEffect(() => { document.title = 'ClubContable — Registrar club'; }, []);
   const [form, setForm]         = useState(INITIAL);
-  const [color, setColor]       = useState(PALETA[0].hex);
+  const [color, setColor]       = useState(initialColor);
   const [pais, setPais]         = useState(PAISES[0]);
   const [loading, setLoading]   = useState(false);
   const [slowHint, setSlowHint] = useState(false);

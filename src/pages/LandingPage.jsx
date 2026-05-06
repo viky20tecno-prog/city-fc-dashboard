@@ -219,7 +219,7 @@ export default function LandingPage() {
           <button onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: '#9CA3AF', fontSize: 14, cursor: 'pointer', padding: '6px 12px' }}>
             Iniciar sesión
           </button>
-          <button onClick={() => navigate('/registro')} style={{ background: '#00AAFF', border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 8, padding: '8px 18px', cursor: 'pointer' }}>
+          <button onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 8, padding: '8px 18px', cursor: 'pointer', transition: 'background 0.3s' }}>
             Registrar mi club
           </button>
         </div>
@@ -239,7 +239,7 @@ export default function LandingPage() {
           Todo en un solo panel, sin hojas de cálculo.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button onClick={() => navigate('/registro')} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#00AAFF', border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '14px 28px', cursor: 'pointer' }}>
+          <button onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: previewColor, border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '14px 28px', cursor: 'pointer', boxShadow: `0 4px 24px ${previewColor}55`, transition: 'all 0.3s' }}>
             Probar 5 días gratis <ChevronRight size={16} />
           </button>
           <button onClick={() => navigate('/login')} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 15, borderRadius: 12, padding: '14px 28px', cursor: 'pointer' }}>
@@ -369,7 +369,7 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 14, fontWeight: 600, borderRadius: 10, padding: '12px 0', cursor: 'pointer' }}>
+            <button onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 14, fontWeight: 600, borderRadius: 10, padding: '12px 0', cursor: 'pointer' }}>
               Probar 5 días gratis
             </button>
             <PaymentDivider />
@@ -404,7 +404,7 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: '#00AAFF', border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 10, padding: '12px 0', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,170,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <button onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 10, padding: '12px 0', cursor: 'pointer', boxShadow: `0 4px 20px ${previewColor}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.3s' }}>
               Probar 5 días gratis <ChevronRight size={15} />
             </button>
             <PaymentDivider />
@@ -436,7 +436,7 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: 'rgba(198,120,255,0.12)', border: '1px solid rgba(198,120,255,0.35)', color: '#C678FF', fontSize: 14, fontWeight: 700, borderRadius: 10, padding: '12px 0', cursor: 'pointer' }}>
+            <button onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(198,120,255,0.12)', border: '1px solid rgba(198,120,255,0.35)', color: '#C678FF', fontSize: 14, fontWeight: 700, borderRadius: 10, padding: '12px 0', cursor: 'pointer' }}>
               Probar 5 días gratis
             </button>
             <PaymentDivider />
@@ -464,7 +464,7 @@ export default function LandingPage() {
         </p>
         <div style={{ display: 'flex', gap: 20, justifyContent: 'center' }}>
           <button onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>Iniciar sesión</button>
-          <button onClick={() => navigate('/registro')} style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>Registrar club</button>
+          <button onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>Registrar club</button>
         </div>
       </footer>
     </div>

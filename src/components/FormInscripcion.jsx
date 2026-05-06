@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import { UserPlus, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
@@ -14,31 +15,46 @@ const CAMPOS = [
   { key: 'lugar_de_nacimiento', label: 'Lugar de nacimiento', type: 'text', placeholder: 'Ej: Ciudad de México, Lima, Bogotá…', required: true, section: 'medica' },
   { key: 'fecha_nacimiento', label: 'Fecha de nacimiento', type: 'date', required: true, section: 'medica' },
   { key: 'tipo_sangre', label: 'Tipo de sangre', type: 'select', required: true, section: 'medica', options: ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'] },
-  { key: 'eps', label: 'EPS', type: 'text', placeholder: 'Ej: Sura, Nueva EPS, Sanitas...', required: true, section: 'medica' },
+  { key: 'eps', label: 'EPS / Seguro médico', type: 'text', placeholder: 'Ej: Sura, Nueva EPS, Sanitas...', required: true, section: 'medica' },
   { key: 'estatura', label: 'Estatura (cm)', type: 'number', placeholder: 'Ej: 175', required: false, section: 'medica' },
   { key: 'peso', label: 'Peso (kg)', type: 'number', placeholder: 'Ej: 72', required: false, section: 'medica' },
   { key: 'direccion', label: 'Dirección', type: 'text', placeholder: 'Ej: Cra 45 #67-89', required: false, section: 'residencia' },
   { key: 'municipio', label: 'Municipio / Ciudad', type: 'text', placeholder: 'Ej: Buenos Aires, Santiago, Lima…', required: true, section: 'residencia' },
   { key: 'barrio', label: 'Barrio', type: 'text', placeholder: 'Ej: Laureles', required: false, section: 'residencia' },
-  { key: 'familiar_emergencia', label: 'Contacto en caso de emergencia (familiar)', type: 'text', placeholder: 'Nombre de un familiar o acudiente', required: true, section: 'emergencia' },
+  { key: 'familiar_emergencia', label: 'Contacto de emergencia', type: 'text', placeholder: 'Nombre de un familiar o acudiente', required: true, section: 'emergencia' },
   { key: 'celular_contacto', label: 'Celular del contacto de emergencia', type: 'tel', placeholder: 'Número diferente al tuyo', required: true, section: 'emergencia' },
 ];
 
 const SECCIONES = [
-  { id: 'personal',   label: 'Datos personales',      color: '#00AAFF' },
-  { id: 'contacto',   label: 'Contacto',              color: '#00D4FF' },
-  { id: 'medica',     label: 'Datos adicionales',     color: '#F59E0B' },
-  { id: 'residencia', label: 'Lugar de residencia',   color: '#C678FF' },
-  { id: 'emergencia', label: 'Emergencia',            color: '#EF4444' },
+  { id: 'personal',   label: 'Datos personales',    color: '#60A5FA' },
+  { id: 'contacto',   label: 'Contacto',            color: '#34D399' },
+  { id: 'medica',     label: 'Datos adicionales',   color: '#FBBF24' },
+  { id: 'residencia', label: 'Lugar de residencia', color: '#C084FC' },
+  { id: 'emergencia', label: 'Emergencia',          color: '#F87171' },
 ];
 
 export default function FormInscripcion() {
   const [searchParams] = useSearchParams();
   const clubId = searchParams.get('club_id') || 'city-fc';
-  const [form, setForm] = useState({});
-  const [status, setStatus] = useState('idle');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [honeypot, setHoneypot] = useState('');
+
+  const [clubConfig, setClubConfig] = useState(null);
+  const [form, setForm]             = useState({});
+  const [status, setStatus]         = useState('idle');
+  const [errorMsg, setErrorMsg]     = useState('');
+  const [honeypot, setHoneypot]     = useState('');
+
+  const c        = clubConfig?.color  || '#00AAFF';
+  const clubName = clubConfig?.nombre || clubId;
+  const ciudad   = clubConfig?.ciudad || '';
+
+  useEffect(() => {
+    supabase
+      .from('clubs')
+      .select('config')
+      .eq('slug', clubId)
+      .single()
+      .then(({ data }) => { if (data?.config) setClubConfig(data.config); });
+  }, [clubId]);
 
   const handleChange = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -47,36 +63,29 @@ export default function FormInscripcion() {
     setStatus('loading');
     setErrorMsg('');
 
-    if (honeypot) {
-      setTimeout(() => setStatus('success'), 1500);
-      return;
-    }
+    if (honeypot) { setTimeout(() => setStatus('success'), 1500); return; }
 
-    const faltantes = CAMPOS.filter(c => c.required && !form[c.key]?.toString().trim());
+    const faltantes = CAMPOS.filter(f => f.required && !form[f.key]?.toString().trim());
     if (faltantes.length > 0) {
       setStatus('error');
-      setErrorMsg(`Faltan campos obligatorios: ${faltantes.map(c => c.label).join(', ')}`);
+      setErrorMsg(`Faltan campos obligatorios: ${faltantes.map(f => f.label).join(', ')}`);
       return;
     }
-
     if (!/^\d{7,15}$/.test(form.cedula.trim())) {
       setStatus('error');
       setErrorMsg('El número de documento debe tener entre 7 y 15 dígitos.');
       return;
     }
-
     if (!/^\d{6,15}$/.test(form.celular.trim())) {
       setStatus('error');
       setErrorMsg('El celular debe tener entre 6 y 15 dígitos (sin código de país).');
       return;
     }
-
     if (form.celular_contacto && !/^\d{6,15}$/.test(form.celular_contacto.trim())) {
       setStatus('error');
       setErrorMsg('El celular del contacto debe tener entre 6 y 15 dígitos.');
       return;
     }
-
     if (form.celular_contacto && form.celular && form.celular_contacto.trim() === form.celular.trim()) {
       setStatus('error');
       setErrorMsg('El celular de emergencia debe ser diferente al tuyo.');
@@ -94,9 +103,7 @@ export default function FormInscripcion() {
           fecha_inscripcion: new Date().toISOString().split('T')[0],
         }),
       });
-
       const data = await res.json();
-
       if (data.success) {
         setStatus('success');
       } else if (res.status === 409) {
@@ -106,8 +113,7 @@ export default function FormInscripcion() {
         setStatus('error');
         setErrorMsg(data.message || data.error || 'Error al registrar. Intenta de nuevo.');
       }
-    } catch (err) {
-      console.error('Error completo:', err);
+    } catch {
       setStatus('error');
       setErrorMsg('Error al registrar. Intenta de nuevo.');
     }
@@ -115,101 +121,153 @@ export default function FormInscripcion() {
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen bg-[#060C18] flex items-center justify-center p-4"
-        style={{ backgroundImage: 'radial-gradient(ellipse at 20% 50%, rgba(0,100,255,0.08) 0%, transparent 55%), radial-gradient(ellipse at 80% 10%, rgba(0,180,255,0.06) 0%, transparent 45%)' }}>
-        <div className="bg-[#0A1628] rounded-3xl border border-[#1A3A5C] p-8 max-w-md w-full text-center shadow-[0_8px_40px_rgba(0,50,150,0.3)]">
-          <div className="w-20 h-20 rounded-full bg-[rgba(0,170,255,0.12)] border border-[#00AAFF]/20 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-[#00AAFF]" />
+      <div style={{ minHeight: '100vh', background: '#060C18', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div style={{ background: '#0A1020', borderRadius: 24, border: `1px solid ${c}30`, padding: '40px 32px', maxWidth: 420, width: '100%', textAlign: 'center', boxShadow: `0 0 60px ${c}12` }}>
+          <div style={{ width: 72, height: 72, borderRadius: '50%', background: `${c}15`, border: `1px solid ${c}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', boxShadow: `0 0 28px ${c}30` }}>
+            <CheckCircle size={36} color={c} />
           </div>
-          <h2 className="text-2xl font-bold text-[#F5F5F5] mb-3">¡Inscripción exitosa!</h2>
-          <p className="text-[#737373] mb-2">
-            Bienvenido a <span className="font-semibold text-[#00AAFF]">City FC</span>
+          <h2 style={{ color: '#fff', fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¡Inscripción exitosa!</h2>
+          <p style={{ color: '#9CA3AF', marginBottom: 4, fontSize: 14 }}>
+            Bienvenido a <span style={{ color: c, fontWeight: 700 }}>{clubName}</span>
+            {ciudad ? <span style={{ color: '#6B7280' }}> · {ciudad}</span> : null}
           </p>
-          <div className="bg-[rgba(0,170,255,0.08)] rounded-2xl p-4 mt-6 text-left border border-[#00AAFF]/20">
-            <p className="text-sm text-[#00AAFF] font-medium mb-2">¿Qué sigue?</p>
-            <ul className="text-sm text-[#F5F5F5] space-y-1.5">
-              <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#00AAFF] flex-shrink-0" />Tu registro ha sido procesado correctamente</li>
-              <li className="flex items-center gap-2"><span className="w-4 h-4 flex-shrink-0 text-center text-xs">📱</span>Recibirás un mensaje de bienvenida por WhatsApp</li>
-              <li className="flex items-center gap-2"><span className="w-4 h-4 flex-shrink-0 text-center text-xs">⚽</span>¡Ya eres parte del equipo!</li>
-            </ul>
+          <div style={{ background: `${c}0E`, border: `1px solid ${c}25`, borderRadius: 14, padding: '16px 18px', marginTop: 22, textAlign: 'left' }}>
+            <p style={{ color: c, fontSize: 12, fontWeight: 700, marginBottom: 10 }}>¿Qué sigue?</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[
+                ['✅', 'Tu registro ha sido procesado correctamente'],
+                ['📱', 'Recibirás un mensaje de bienvenida por WhatsApp'],
+                ['🏅', '¡Ya eres parte del club!'],
+              ].map(([icon, text]) => (
+                <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 14, flexShrink: 0 }}>{icon}</span>
+                  <span style={{ color: '#D1D5DB', fontSize: 13 }}>{text}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="text-xs text-[#737373] mt-6">Te contactaremos por WhatsApp con los detalles de tu primer pago</p>
+          <p style={{ color: '#4B5563', fontSize: 12, marginTop: 20 }}>
+            Te contactaremos por WhatsApp con los detalles del primer pago
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#060C18] flex items-center justify-center p-4 py-8"
-      style={{ backgroundImage: 'radial-gradient(ellipse at 15% 40%, rgba(0,100,255,0.10) 0%, transparent 55%), radial-gradient(ellipse at 85% 10%, rgba(0,180,255,0.07) 0%, transparent 45%), radial-gradient(ellipse at 50% 90%, rgba(0,60,180,0.06) 0%, transparent 40%)' }}>
-      <div className="bg-[#0A1628] rounded-3xl border border-[#1A3A5C] p-8 max-w-lg w-full shadow-[0_8px_40px_rgba(0,50,150,0.25),0_0_0_1px_rgba(0,170,255,0.06)]">
+    <div style={{ minHeight: '100vh', background: '#060C18', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px 40px', fontFamily: "'Inter', system-ui, sans-serif" }}>
+
+      <style>{`
+        .insc-input {
+          width: 100%; box-sizing: border-box;
+          padding: 11px 14px; font-size: 14px;
+          background: rgba(255,255,255,0.04);
+          border: 1.5px solid rgba(255,255,255,0.09);
+          border-radius: 10px; color: #F5F5F5; outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          font-family: inherit;
+        }
+        .insc-input::placeholder { color: #4B5563; }
+        .insc-input:focus {
+          border-color: ${c};
+          box-shadow: 0 0 0 3px ${c}20;
+        }
+        .insc-input option { background: #0A1020; color: #F5F5F5; }
+      `}</style>
+
+      <div style={{ background: '#0A1020', borderRadius: 24, border: `1px solid ${c}25`, padding: '32px 28px', maxWidth: 520, width: '100%', boxShadow: `0 8px 60px ${c}10, 0 0 0 1px ${c}08` }}>
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-[rgba(0,170,255,0.12)] border border-[#00AAFF]/20 flex items-center justify-center mx-auto mb-4 shadow-[0_0_24px_rgba(0,170,255,0.2)]">
-            <span className="text-3xl">⚽</span>
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <div style={{
+            width: 60, height: 60, borderRadius: 16,
+            background: `${c}15`, border: `1px solid ${c}30`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 14px', fontSize: 26,
+            boxShadow: `0 0 24px ${c}20`,
+          }}>
+            🏅
           </div>
-          <h1 className="text-2xl font-bold text-[#F5F5F5]">Únete a City FC</h1>
-          <p className="text-[#737373] mt-2 text-sm">Completa tus datos para inscribirte al club</p>
+          <h1 style={{ color: '#F5F5F5', fontSize: 20, fontWeight: 800, marginBottom: 4 }}>
+            Únete a <span style={{ color: c }}>{clubName}</span>
+          </h1>
+          {ciudad && <p style={{ color: '#6B7280', fontSize: 12, marginBottom: 2 }}>{ciudad}</p>}
+          <p style={{ color: '#6B7280', fontSize: 13 }}>Completa tus datos para inscribirte</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit}>
           {/* Honeypot */}
-          <div style={{ position: 'absolute', left: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }} aria-hidden="true" tabIndex={-1}>
-            <input type="text" value={honeypot} onChange={e => setHoneypot(e.target.value)} autoComplete="off" />
+          <div style={{ position: 'absolute', left: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }} aria-hidden="true">
+            <input type="text" value={honeypot} onChange={e => setHoneypot(e.target.value)} autoComplete="off" tabIndex={-1} />
           </div>
 
           {SECCIONES.map(seccion => (
-            <div key={seccion.id}>
-              <div className="flex items-center gap-2 border-b border-[#1A3A5C] pb-2 mb-3 pt-4 first:pt-0">
-                <span className="w-1.5 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: seccion.color }} />
-                <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: seccion.color }}>
+            <div key={seccion.id} style={{ marginBottom: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: 8, marginBottom: 12, paddingTop: 16 }}>
+                <span style={{ width: 4, height: 14, borderRadius: 2, background: seccion.color, flexShrink: 0 }} />
+                <p style={{ color: seccion.color, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.5, margin: 0 }}>
                   {seccion.label}
                 </p>
               </div>
-              {CAMPOS.filter(c => c.section === seccion.id).map(campo => (
-                <FormField key={campo.key} campo={campo} form={form} onChange={handleChange} sectionColor={seccion.color} />
-              ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {CAMPOS.filter(f => f.section === seccion.id).map(campo => (
+                  <FormField key={campo.key} campo={campo} form={form} onChange={handleChange} />
+                ))}
+              </div>
             </div>
           ))}
 
           {status === 'error' && (
-            <div className="flex items-start gap-2 p-3 bg-[rgba(239,68,68,0.12)] rounded-xl text-sm text-[#EF4444] border border-[#EF4444]/20">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '11px 14px', background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, fontSize: 13, color: '#F87171', marginTop: 16 }}>
+              <AlertCircle size={15} style={{ flexShrink: 0, marginTop: 1 }} />
               {errorMsg}
             </div>
           )}
 
-          <button type="submit" disabled={status === 'loading'}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#00AAFF] text-[#060C18] rounded-xl font-bold text-sm hover:bg-[#00AAFF]/85 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-6 shadow-[0_4px_20px_rgba(0,170,255,0.3)]">
-            {status === 'loading' ? (
-              <><Loader2 className="w-4 h-4 animate-spin" />Registrando...</>
-            ) : (
-              <><UserPlus className="w-4 h-4" />Inscribirme</>
-            )}
+          <button
+            type="submit"
+            disabled={status === 'loading'}
+            style={{
+              width: '100%', marginTop: 24,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              padding: '13px', borderRadius: 12, border: 'none',
+              background: status === 'loading' ? 'rgba(255,255,255,0.07)' : c,
+              color: '#fff', fontSize: 15, fontWeight: 700,
+              cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+              boxShadow: status === 'loading' ? 'none' : `0 4px 24px ${c}44`,
+              transition: 'all 0.3s',
+            }}
+          >
+            {status === 'loading'
+              ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Registrando...</>
+              : <><UserPlus size={16} /> Inscribirme</>}
           </button>
         </form>
 
-        <p className="text-center text-xs text-[#737373] mt-6">
-          Al inscribirte serás parte oficial del club ⚽
+        <p style={{ textAlign: 'center', color: '#374151', fontSize: 12, marginTop: 18 }}>
+          Al inscribirte aceptas ser parte oficial del club 🏅
         </p>
       </div>
+
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
 
-function FormField({ campo, form, onChange, sectionColor }) {
-  const inputClass = "w-full px-4 py-3 rounded-xl bg-[#060C18] border border-[#1A3A5C] text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[#00AAFF] focus:ring-1 focus:ring-[#00AAFF]/30 transition-colors";
+function FormField({ campo, form, onChange }) {
+  const labelStyle = { display: 'block', fontSize: 13, fontWeight: 500, color: '#D1D5DB', marginBottom: 5 };
 
   if (campo.type === 'select') {
     return (
-      <div className="mt-3">
-        <label className="block text-sm font-medium text-[#F5F5F5] mb-1">
-          {campo.label} {campo.required && <span className="text-[#EF4444]">*</span>}
-        </label>
-        <select value={form[campo.key] || ''} onChange={e => onChange(campo.key, e.target.value)} required={campo.required}
-          className={inputClass}>
-          <option value="">Seleccionar...</option>
+      <div>
+        <label style={labelStyle}>{campo.label}{campo.required && <span style={{ color: '#F87171', marginLeft: 3 }}>*</span>}</label>
+        <select
+          value={form[campo.key] || ''}
+          onChange={e => onChange(campo.key, e.target.value)}
+          required={campo.required}
+          className="insc-input"
+        >
+          <option value="">Seleccionar…</option>
           {campo.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
       </div>
@@ -217,13 +275,16 @@ function FormField({ campo, form, onChange, sectionColor }) {
   }
 
   return (
-    <div className="mt-3">
-      <label className="block text-sm font-medium text-[#F5F5F5] mb-1">
-        {campo.label} {campo.required && <span className="text-[#EF4444]">*</span>}
-      </label>
-      <input type={campo.type} placeholder={campo.placeholder} value={form[campo.key] || ''}
-        onChange={e => onChange(campo.key, e.target.value)} required={campo.required}
-        className={inputClass} />
+    <div>
+      <label style={labelStyle}>{campo.label}{campo.required && <span style={{ color: '#F87171', marginLeft: 3 }}>*</span>}</label>
+      <input
+        type={campo.type}
+        placeholder={campo.placeholder}
+        value={form[campo.key] || ''}
+        onChange={e => onChange(campo.key, e.target.value)}
+        required={campo.required}
+        className="insc-input"
+      />
     </div>
   );
 }

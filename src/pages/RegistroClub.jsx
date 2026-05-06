@@ -354,10 +354,10 @@ export default function RegistroClub() {
 
             <SecLabel text="Color del club" color={ac} />
             <div style={{ marginBottom: 26 }}>
-              <p style={{ color: '#6B7280', fontSize: 12, marginBottom: 10 }}>
+              <p style={{ color: '#6B7280', fontSize: 12, marginBottom: 12 }}>
                 Aparecerá en tu dashboard y comunicaciones.
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 8, marginBottom: 10 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
                 {PALETA.map(p => (
                   <button
                     key={p.hex}
@@ -365,22 +365,32 @@ export default function RegistroClub() {
                     title={p.nombre}
                     onClick={() => setColor(p.hex)}
                     style={{
-                      width: '100%', aspectRatio: '1',
-                      borderRadius: 10, background: p.hex,
+                      width: 30, height: 30,
+                      borderRadius: 8, background: p.hex,
                       border: color === p.hex ? '2px solid #fff' : '2px solid transparent',
-                      boxShadow: color === p.hex ? `0 0 0 2px ${p.hex}, 0 0 12px ${p.hex}88` : 'none',
-                      cursor: 'pointer',
+                      boxShadow: color === p.hex ? `0 0 0 2px ${p.hex}, 0 0 10px ${p.hex}99` : 'none',
+                      cursor: 'pointer', flexShrink: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      transition: 'all 0.2s', padding: 0,
+                      transition: 'all 0.15s', padding: 0,
                     }}
                   >
-                    {color === p.hex && <Check size={12} color="#fff" strokeWidth={3} />}
+                    {color === p.hex && <Check size={11} color="#fff" strokeWidth={3} />}
                   </button>
                 ))}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 16, height: 16, borderRadius: 4, background: color, flexShrink: 0, boxShadow: `0 0 8px ${color}88` }} />
-                <span style={{ color: '#6B7280', fontSize: 12 }}>{colorActivo.nombre}</span>
+              {/* Preview del color seleccionado */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                background: `${color}12`,
+                border: `1px solid ${color}40`,
+                borderRadius: 10, padding: '10px 14px',
+                transition: 'all 0.3s',
+              }}>
+                <div style={{ width: 28, height: 28, borderRadius: 7, background: color, flexShrink: 0, boxShadow: `0 0 12px ${color}88` }} />
+                <div>
+                  <p style={{ color: '#fff', fontSize: 13, fontWeight: 600, margin: 0 }}>{colorActivo.nombre}</p>
+                  <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>Color principal del dashboard</p>
+                </div>
               </div>
             </div>
 

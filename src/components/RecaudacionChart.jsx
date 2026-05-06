@@ -18,15 +18,21 @@ const fmtK = (v) => {
   return `$${v}`;
 };
 
+// Lee la variable CSS --cc en tiempo real
+function getCC() {
+  if (typeof window === 'undefined') return '#E14924';
+  return getComputedStyle(document.documentElement).getPropertyValue('--cc').trim() || '#E14924';
+}
+
 export default function RecaudacionChart({ mensualidades }) {
   const mesActualIdx = new Date().getMonth();
+  const cc = getCC();
 
   const data = useMemo(() => {
     const meses = {};
     MESES_ORDEN.forEach((m, i) => {
       meses[m] = { mes: m.substring(0, 3), mesCompleto: m, idx: i, pagado: 0, pendiente: 0 };
     });
-
     mensualidades.forEach(m => {
       const mes    = m.mes || '';
       const mesCap = mes.charAt(0).toUpperCase() + mes.slice(1).toLowerCase();
@@ -34,7 +40,6 @@ export default function RecaudacionChart({ mensualidades }) {
       meses[mesCap].pagado    += parseFloat(m.valor_pagado)    || 0;
       meses[mesCap].pendiente += parseFloat(m.saldo_pendiente) || 0;
     });
-
     return Object.values(meses)
       .slice(0, mesActualIdx + 2)
       .map(m => ({
@@ -53,34 +58,44 @@ export default function RecaudacionChart({ mensualidades }) {
   const pctGlobal      = totalGeneral > 0 ? Math.round((totalPagado / totalGeneral) * 100) : 0;
   const mejorMes       = data.reduce((best, d) => d.pagado > (best?.pagado || 0) ? d : best, null);
 
-  /* ── tooltip ── */
+  /* ── Badge global de % ── */
+  const badgeStyle = pctGlobal >= 80
+    ? { bg: 'rgba(34,197,94,0.12)',  border: 'rgba(34,197,94,0.3)',  text: '#22C55E' }
+    : pctGlobal >= 50
+    ? { bg: `${cc}18`,               border: `${cc}40`,              text: cc        }
+    : { bg: 'rgba(239,68,68,0.10)',  border: 'rgba(239,68,68,0.25)', text: '#EF4444' };
+
+  /* ── Tooltip ── */
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
     const d = payload[0]?.payload;
     return (
       <div style={{
-        background: 'var(--bg-card)', border: '1px solid rgba(225,73,36,0.35)',
-        borderRadius: '10px', padding: '12px 14px', minWidth: '160px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+        background: 'var(--bg-card)',
+        border: `1px solid ${cc}30`,
+        borderRadius: 10, padding: '12px 14px', minWidth: 160,
+        boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
       }}>
-        <p style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: '13px', marginBottom: '8px' }}>{d?.mesCompleto}</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px' }}>
-            <span style={{ color: '#E14924' }}>Pagado</span>
+        <p style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>
+          {d?.mesCompleto}
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12 }}>
+            <span style={{ color: cc }}>Pagado</span>
             <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d?.pagado || 0)}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px' }}>
-            <span style={{ color: '#B68631' }}>Pendiente</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12 }}>
+            <span style={{ color: 'var(--text-sec)' }}>Pendiente</span>
             <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d?.pendiente || 0)}</span>
           </div>
           <div style={{
-            borderTop: '1px solid rgba(225,73,36,0.2)', paddingTop: '6px', marginTop: '2px',
-            display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px',
+            borderTop: `1px solid ${cc}20`, paddingTop: 6, marginTop: 2,
+            display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12,
           }}>
             <span style={{ color: 'var(--text-mut)' }}>% cobrado</span>
             <span style={{
               fontWeight: 700,
-              color: d?.pct >= 80 ? '#22C55E' : d?.pct >= 50 ? '#F59E0B' : '#EF4444',
+              color: d?.pct >= 80 ? '#22C55E' : d?.pct >= 50 ? cc : '#EF4444',
             }}>{d?.pct}%</span>
           </div>
         </div>
@@ -88,14 +103,15 @@ export default function RecaudacionChart({ mensualidades }) {
     );
   };
 
-  /* ── etiqueta % encima de barra ── */
+  /* ── Etiqueta % encima de barra pagado ── */
   const PctLabel = ({ x, y, width, index }) => {
     const d = data[index];
     if (!d || d.pct === 0) return null;
+    const labelColor = d.pct >= 80 ? '#22C55E' : d.pct >= 50 ? cc : '#EF4444';
     return (
       <text
         x={x + width / 2} y={y - 5}
-        fill={d.pct >= 80 ? '#22C55E' : d.pct >= 50 ? '#F59E0B' : '#EF4444'}
+        fill={labelColor}
         textAnchor="middle" fontSize={10} fontWeight="600"
       >
         {d.pct}%
@@ -103,67 +119,56 @@ export default function RecaudacionChart({ mensualidades }) {
     );
   };
 
-  /* ── color del badge global ── */
-  const badgeStyle = pctGlobal >= 80
-    ? { bg: 'rgba(34,197,94,0.12)',  border: 'rgba(34,197,94,0.3)',  text: '#22C55E'  }
-    : pctGlobal >= 50
-    ? { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)', text: '#F59E0B'  }
-    : { bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.3)',  text: '#EF4444'  };
-
   return (
     <div style={{
       position: 'relative',
       background: 'var(--bg-card)',
-      borderRadius: '16px',
-      border: '1px solid rgba(225,73,36,0.22)',
-      padding: '24px',
+      borderRadius: 16,
+      border: `1px solid ${cc}22`,
+      padding: 24,
       overflow: 'hidden',
     }}>
-      {/* top accent line */}
+      {/* Línea de acento superior con el color del club */}
       <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-        background: 'linear-gradient(90deg, transparent, rgba(225,73,36,0.5) 40%, rgba(182,134,49,0.3) 60%, transparent)',
-        pointerEvents: 'none',
-      }} />
-      {/* ambient glow */}
-      <div style={{
-        position: 'absolute', top: 0, left: '25%', right: '25%', height: '1px',
-        background: 'rgba(225,73,36,0.3)', filter: 'blur(4px)',
+        position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+        background: `linear-gradient(90deg, transparent, ${cc}55 40%, ${cc}30 60%, transparent)`,
         pointerEvents: 'none',
       }} />
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
         <div>
-          <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-pri)', letterSpacing: '-0.2px' }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-pri)', letterSpacing: '-0.2px', margin: 0 }}>
             Recaudación por Mes
           </h2>
-          <p style={{ fontSize: '11px', color: 'var(--text-mut)', marginTop: '2px' }}>
+          <p style={{ fontSize: 11, color: 'var(--text-mut)', marginTop: 2 }}>
             Pagado vs pendiente · {new Date().getFullYear()}
           </p>
         </div>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: '6px',
-          padding: '5px 12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700,
+          display: 'flex', alignItems: 'center', gap: 6,
+          padding: '5px 12px', borderRadius: 10, fontSize: 13, fontWeight: 700,
           background: badgeStyle.bg, border: `1px solid ${badgeStyle.border}`, color: badgeStyle.text,
         }}>
           {pctGlobal}% cobrado
         </div>
       </div>
 
-      {/* KPIs internos */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '20px' }}>
+      {/* KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
         {[
-          { label: 'Total recaudado', value: fmtK(totalPagado),    color: '#E14924' },
-          { label: 'Por cobrar',      value: fmtK(totalPendiente), color: '#B68631' },
-          { label: 'Mejor mes',       value: mejorMes ? `${mejorMes.mes} ${fmtK(mejorMes.pagado)}` : '—', color: '#F59E0B' },
+          { label: 'Total recaudado', value: fmtK(totalPagado),    color: cc              },
+          { label: 'Por cobrar',      value: fmtK(totalPendiente), color: 'var(--text-sec)'},
+          { label: 'Mejor mes',       value: mejorMes ? `${mejorMes.mes} ${fmtK(mejorMes.pagado)}` : '—', color: cc },
         ].map((item, i) => (
           <div key={i} style={{
             background: 'var(--bg-surface)', border: '1px solid var(--border-sub)',
-            borderRadius: '10px', padding: '12px',
+            borderRadius: 10, padding: 12,
           }}>
-            <p style={{ fontSize: '10px', color: 'var(--text-mut)', marginBottom: '4px', letterSpacing: '0.5px' }}>{item.label}</p>
-            <p style={{ color: item.color, fontWeight: 700, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <p style={{ fontSize: 10, color: 'var(--text-mut)', marginBottom: 4, letterSpacing: '0.5px', margin: '0 0 4px' }}>
+              {item.label}
+            </p>
+            <p style={{ color: item.color, fontWeight: 700, fontSize: 13, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {item.value}
             </p>
           </div>
@@ -171,81 +176,89 @@ export default function RecaudacionChart({ mensualidades }) {
       </div>
 
       {/* Gráfica */}
-      <div style={{ height: '256px' }}>
+      <div style={{ height: 256 }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} barGap={4} margin={{ top: 20, right: 4, left: 0, bottom: 0 }}>
             <defs>
+              {/* Barra pagado — color del club, sólido arriba, suave abajo */}
               <linearGradient id="gradPagado" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#E14924" stopOpacity={1} />
-                <stop offset="100%" stopColor="#8B2A14" stopOpacity={0.5} />
+                <stop offset="0%"   stopColor={cc} stopOpacity={0.95} />
+                <stop offset="100%" stopColor={cc} stopOpacity={0.55} />
               </linearGradient>
-              <linearGradient id="gradPendiente" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#B68631" stopOpacity={0.6} />
-                <stop offset="100%" stopColor="#7A5820" stopOpacity={0.2} />
-              </linearGradient>
+              {/* Barra mes actual — más brillante */}
               <linearGradient id="gradPagadoActual" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#FF6B3D" stopOpacity={1} />
-                <stop offset="100%" stopColor="#E14924" stopOpacity={0.85} />
+                <stop offset="0%"   stopColor={cc} stopOpacity={1}    />
+                <stop offset="100%" stopColor={cc} stopOpacity={0.75} />
               </linearGradient>
-              <filter id="glowOrange">
-                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                <feMerge>
-                  <feMergeNode in="coloredBlur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
+              {/* Barra pendiente — gris neutro muy sutil */}
+              <linearGradient id="gradPendiente" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="var(--text-sec)" stopOpacity={0.22} />
+                <stop offset="100%" stopColor="var(--text-sec)" stopOpacity={0.07} />
+              </linearGradient>
             </defs>
 
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="var(--border-sub)"
+              vertical={false}
+            />
             <XAxis
               dataKey="mes"
-              tick={{ fontSize: 11, fill: '#5A5A5A' }}
-              axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
+              tick={{ fontSize: 11, fill: 'var(--text-mut)' }}
+              axisLine={false}
               tickLine={false}
             />
             <YAxis
               tickFormatter={fmtK}
-              tick={{ fontSize: 11, fill: '#5A5A5A' }}
+              tick={{ fontSize: 11, fill: 'var(--text-mut)' }}
               axisLine={false} tickLine={false} width={48}
             />
 
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: `${cc}08` }} />
 
+            {/* Barras pendiente — fondo gris neutro */}
+            <Bar dataKey="pendiente" name="Pendiente" fill="url(#gradPendiente)" radius={[4, 4, 0, 0]} maxBarSize={32} />
+
+            {/* Barras pagado — color del club */}
             <Bar dataKey="pagado" name="Pagado" radius={[5, 5, 0, 0]} maxBarSize={32}>
               {data.map((entry, i) => (
                 <Cell
                   key={i}
                   fill={entry.esActual ? 'url(#gradPagadoActual)' : 'url(#gradPagado)'}
-                  filter={entry.esActual ? 'url(#glowOrange)' : undefined}
+                  style={entry.esActual ? { filter: `drop-shadow(0 0 6px ${cc}80)` } : {}}
                 />
               ))}
               <LabelList content={<PctLabel />} />
             </Bar>
 
-            <Bar dataKey="pendiente" name="Pendiente" fill="url(#gradPendiente)" radius={[5, 5, 0, 0]} maxBarSize={32} />
-
+            {/* Línea de tendencia — color del club, punteada */}
             <Line
               type="monotone" dataKey="pagado"
-              stroke="#E14924" strokeWidth={1.5} strokeDasharray="4 3"
-              dot={false} activeDot={false} strokeOpacity={0.35}
+              stroke={cc} strokeWidth={1.5} strokeDasharray="4 3"
+              dot={false} activeDot={false} strokeOpacity={0.3}
             />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
       {/* Leyenda */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '16px', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 16, justifyContent: 'center' }}>
         {[
-          { color: '#E14924', label: 'Pagado',      dash: false },
-          { color: '#B68631', label: 'Pendiente',   dash: false },
-          { color: '#E14924', label: 'Tendencia',   dash: true  },
-          { color: '#FF6B3D', label: 'Mes actual',  dash: false, glow: true },
+          { color: cc,                   label: 'Pagado',     dash: false, glow: false },
+          { color: 'var(--text-mut)',     label: 'Pendiente',  dash: false, glow: false, opacity: 0.4 },
+          { color: cc,                   label: 'Tendencia',  dash: true,  glow: false },
+          { color: cc,                   label: 'Mes actual', dash: false, glow: true  },
         ].map((item, i) => (
-          <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--text-mut)' }}>
+          <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-mut)' }}>
             {item.dash
-              ? <span style={{ width: '20px', borderTop: `2px dashed ${item.color}`, opacity: 0.5, display: 'inline-block' }} />
-              : <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: item.color, display: 'inline-block', boxShadow: item.glow ? `0 0 6px ${item.color}` : 'none' }} />
+              ? <span style={{ width: 20, borderTop: `2px dashed ${item.color}`, opacity: 0.45, display: 'inline-block' }} />
+              : <span style={{
+                  width: 12, height: 12, borderRadius: 3,
+                  background: item.color,
+                  opacity: item.opacity ?? 1,
+                  display: 'inline-block',
+                  boxShadow: item.glow ? `0 0 8px ${item.color}` : 'none',
+                }} />
             }
             {item.label}
           </span>

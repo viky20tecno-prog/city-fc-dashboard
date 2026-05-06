@@ -3,16 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Bot, BarChart2, CreditCard, Shield, ChevronRight, CheckCircle } from 'lucide-react';
 
 const DEPORTES_STRIP = [
-  { emoji: '⚽', label: 'Fútbol'        },
-  { emoji: '🏀', label: 'Basketball'    },
-  { emoji: '🏊', label: 'Natación'      },
-  { emoji: '🚴', label: 'Ciclismo'      },
+  { emoji: '⚽', label: 'Fútbol'         },
+  { emoji: '🏀', label: 'Basketball'     },
+  { emoji: '🏊', label: 'Natación'       },
+  { emoji: '🚴', label: 'Ciclismo'       },
   { emoji: '🥊', label: 'Artes Marciales'},
-  { emoji: '🏋️', label: 'Gimnasio'      },
-  { emoji: '🎾', label: 'Tenis'         },
-  { emoji: '🏐', label: 'Voleibol'      },
-  { emoji: '🏊', label: 'Atletismo'     },
-  { emoji: '🤸', label: 'Gimnasia'      },
+  { emoji: '🏋️', label: 'Gimnasio'       },
+  { emoji: '🎾', label: 'Tenis'          },
+  { emoji: '🏐', label: 'Voleibol'       },
+  { emoji: '🏊', label: 'Atletismo'      },
+  { emoji: '🤸', label: 'Gimnasia'       },
 ];
 
 const FEATURES = [
@@ -42,6 +42,82 @@ const FEATURES = [
   },
 ];
 
+// Configura los links de pago según tu cuenta en cada plataforma.
+// Wompi: https://comercios.wompi.co → crea un botón de cobro y pega el link aquí.
+// Mercado Pago: https://www.mercadopago.com.co → crea preferencia de pago y pega el link.
+const PAYMENT_LINKS = {
+  starter: {
+    wompi: 'https://checkout.wompi.co/l/STARTER_REF',
+    mp:    'https://mpago.la/STARTER_REF',
+  },
+  pro: {
+    wompi: 'https://checkout.wompi.co/l/PRO_REF',
+    mp:    'https://mpago.la/PRO_REF',
+  },
+  total: {
+    wompi: 'https://checkout.wompi.co/l/TOTAL_REF',
+    mp:    'https://mpago.la/TOTAL_REF',
+  },
+};
+
+function WompiBtn({ href }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        width: '100%', padding: '10px 0', borderRadius: 10,
+        background: 'rgba(255,94,37,0.10)',
+        border: '1px solid rgba(255,94,37,0.35)',
+        color: '#FF5E25', fontSize: 13, fontWeight: 700,
+        textDecoration: 'none', cursor: 'pointer',
+        transition: 'background 0.2s',
+      }}
+    >
+      {/* Wompi wordmark inline */}
+      <svg width="54" height="16" viewBox="0 0 54 16" fill="none">
+        <text x="0" y="13" fontFamily="'Inter',system-ui,sans-serif" fontSize="13" fontWeight="800" fill="#FF5E25">Wompi</text>
+      </svg>
+    </a>
+  );
+}
+
+function MercadoPagoBtn({ href }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        width: '100%', padding: '10px 0', borderRadius: 10,
+        background: 'rgba(0,158,227,0.10)',
+        border: '1px solid rgba(0,158,227,0.35)',
+        color: '#009EE3', fontSize: 13, fontWeight: 700,
+        textDecoration: 'none', cursor: 'pointer',
+        transition: 'background 0.2s',
+      }}
+    >
+      <svg width="16" height="16" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" fill="#009EE3"/>
+        <text x="16" y="21" textAnchor="middle" fontFamily="Arial" fontSize="13" fontWeight="900" fill="#fff">MP</text>
+      </svg>
+      Mercado Pago
+    </a>
+  );
+}
+
+function PaymentDivider() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '14px 0 12px' }}>
+      <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+      <span style={{ fontSize: 11, color: '#4B5563', letterSpacing: 1, whiteSpace: 'nowrap' }}>O PAGA DIRECTAMENTE</span>
+      <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -49,7 +125,7 @@ export default function LandingPage() {
   useEffect(() => { document.title = 'ClubContable — Landing'; }, []);
 
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#060C18', minHeight: '100vh', color: '#fff' }}>
+    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#0E1B2D', minHeight: '100vh', color: '#fff' }}>
 
       {/* ── NAVBAR ─────────────────────────────────────────────────────────── */}
       <nav style={{ borderBottom: '1px solid rgba(0,170,255,0.12)', padding: '0 24px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 1100, margin: '0 auto', width: '100%' }}>
@@ -78,7 +154,7 @@ export default function LandingPage() {
       {/* ── HERO ───────────────────────────────────────────────────────────── */}
       <section style={{ textAlign: 'center', padding: '80px 24px 48px', maxWidth: 760, margin: '0 auto' }}>
         <div style={{ display: 'inline-block', background: 'rgba(0,170,255,0.1)', border: '1px solid rgba(0,170,255,0.25)', borderRadius: 999, padding: '4px 14px', fontSize: 12, color: '#00AAFF', fontWeight: 600, marginBottom: 20, letterSpacing: 0.5 }}>
-          🏅 14 días gratis · Sin tarjeta de crédito
+          🏅 5 días gratis · Sin tarjeta de crédito
         </div>
         <h1 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontWeight: 800, lineHeight: 1.1, marginBottom: 20, letterSpacing: '-1px' }}>
           Gestiona tu club deportivo<br />
@@ -93,7 +169,7 @@ export default function LandingPage() {
             onClick={() => navigate('/registro')}
             style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#00AAFF', border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '14px 28px', cursor: 'pointer' }}
           >
-            Probar 14 días gratis <ChevronRight size={16} />
+            Probar 5 días gratis <ChevronRight size={16} />
           </button>
           <button
             onClick={() => navigate('/login')}
@@ -113,8 +189,8 @@ export default function LandingPage() {
           {DEPORTES_STRIP.map(d => (
             <div key={d.label} style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.10)',
               borderRadius: 999,
               padding: '7px 14px',
               fontSize: 13, color: '#9CA3AF',
@@ -125,8 +201,8 @@ export default function LandingPage() {
           ))}
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8,
-            background: 'rgba(0,170,255,0.06)',
-            border: '1px solid rgba(0,170,255,0.15)',
+            background: 'rgba(0,170,255,0.07)',
+            border: '1px solid rgba(0,170,255,0.18)',
             borderRadius: 999,
             padding: '7px 14px',
             fontSize: 13, color: '#00AAFF',
@@ -140,7 +216,7 @@ export default function LandingPage() {
       <section style={{ padding: '0 24px 80px', maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
           {FEATURES.map(({ icon: Icon, color, title, desc }) => (
-            <div key={title} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px 20px' }}>
+            <div key={title} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '24px 20px' }}>
               <div style={{ width: 40, height: 40, borderRadius: 10, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
                 <Icon size={20} color={color} />
               </div>
@@ -156,18 +232,18 @@ export default function LandingPage() {
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 10 }}>Activa solo lo que necesitas</h2>
           <p style={{ color: '#9CA3AF', fontSize: 15, margin: 0 }}>
-            3 planes modulares · 14 días gratis · Sin permanencia
+            3 planes modulares · 5 días gratis · Sin permanencia
           </p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, alignItems: 'start' }}>
 
           {/* ── STARTER ── */}
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '28px 24px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 20, padding: '28px 24px' }}>
             <p style={{ color: '#9CA3AF', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Starter</p>
             <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$59.000<span style={{ fontSize: 14, color: '#6B7280', fontWeight: 400 }}>/mes</span></div>
             <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 24 }}>Para clubes que están empezando a organizarse</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
               {[
                 [true,  'Dashboard y reportes'],
                 [true,  'Gestión de miembros'],
@@ -184,9 +260,14 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 14, fontWeight: 600, borderRadius: 10, padding: '12px 0', cursor: 'pointer' }}>
-              Comenzar
+            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 14, fontWeight: 600, borderRadius: 10, padding: '12px 0', cursor: 'pointer', marginBottom: 4 }}>
+              Probar 5 días gratis
             </button>
+            <PaymentDivider />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <WompiBtn href={PAYMENT_LINKS.starter.wompi} />
+              <MercadoPagoBtn href={PAYMENT_LINKS.starter.mp} />
+            </div>
           </div>
 
           {/* ── PRO ── */}
@@ -197,7 +278,7 @@ export default function LandingPage() {
             <p style={{ color: '#00AAFF', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Pro</p>
             <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$99.000<span style={{ fontSize: 14, color: '#6B7280', fontWeight: 400 }}>/mes</span></div>
             <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 24 }}>Cobro automático por WhatsApp incluido</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
               {[
                 [true,  'Dashboard y reportes'],
                 [true,  'Gestión de miembros'],
@@ -214,17 +295,22 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: '#00AAFF', border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 10, padding: '12px 0', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,170,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-              Probar gratis 14 días <ChevronRight size={15} />
+            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: '#00AAFF', border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 10, padding: '12px 0', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,170,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 4 }}>
+              Probar 5 días gratis <ChevronRight size={15} />
             </button>
+            <PaymentDivider />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <WompiBtn href={PAYMENT_LINKS.pro.wompi} />
+              <MercadoPagoBtn href={PAYMENT_LINKS.pro.mp} />
+            </div>
           </div>
 
           {/* ── TOTAL ── */}
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '28px 24px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 20, padding: '28px 24px' }}>
             <p style={{ color: '#C678FF', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Total</p>
             <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$149.000<span style={{ fontSize: 14, color: '#6B7280', fontWeight: 400 }}>/mes</span></div>
             <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 24 }}>Acceso completo a todos los módulos</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
               {[
                 [true, 'Dashboard y reportes'],
                 [true, 'Gestión de miembros'],
@@ -241,9 +327,14 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: 'rgba(198,120,255,0.12)', border: '1px solid rgba(198,120,255,0.35)', color: '#C678FF', fontSize: 14, fontWeight: 700, borderRadius: 10, padding: '12px 0', cursor: 'pointer' }}>
-              Comenzar
+            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: 'rgba(198,120,255,0.12)', border: '1px solid rgba(198,120,255,0.35)', color: '#C678FF', fontSize: 14, fontWeight: 700, borderRadius: 10, padding: '12px 0', cursor: 'pointer', marginBottom: 4 }}>
+              Probar 5 días gratis
             </button>
+            <PaymentDivider />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <WompiBtn href={PAYMENT_LINKS.total.wompi} />
+              <MercadoPagoBtn href={PAYMENT_LINKS.total.mp} />
+            </div>
           </div>
 
         </div>
@@ -254,7 +345,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '24px', textAlign: 'center', color: '#4B5563', fontSize: 13 }}>
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '24px', textAlign: 'center', color: '#4B5563', fontSize: 13 }}>
         <p>ClubContable · Gestión deportiva para toda América Latina 🏅</p>
         <div style={{ marginTop: 8, display: 'flex', gap: 20, justifyContent: 'center' }}>
           <button onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>Iniciar sesión</button>

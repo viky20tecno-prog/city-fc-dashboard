@@ -80,6 +80,15 @@ export default function Dashboard() {
 
   const c = clubConfig?.color || '#E14924';
 
+  // Filtra el nav según los módulos habilitados en el plan del club.
+  // Sin config (clubs existentes o trial) → todos visibles.
+  const modulos = clubConfig?.modulos;
+  const navVisible = NAV.filter(({ id }) => {
+    if (id === 'dashboard' || id === 'jugadores') return true;
+    if (!modulos) return true;
+    return modulos[id] !== false;
+  });
+
   const S = {
     shell: {
       display: 'grid',
@@ -282,7 +291,7 @@ export default function Dashboard() {
 
       {/* ───── SIDEBAR ───── */}
       <nav style={S.sidebar}>
-        {NAV.map(({ id, Icon, title }) => (
+        {navVisible.map(({ id, Icon, title }) => (
           <NavBtn key={id} id={id} Icon={Icon} title={title} active={activeTab === id} color={c} onClick={setActiveTab} />
         ))}
 

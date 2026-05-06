@@ -41,15 +41,6 @@ const FEATURES = [
   },
 ];
 
-const INCLUYE = [
-  'WhatsApp Bot de cobro automático',
-  'Dashboard administrador ilimitado',
-  'Perfil y carnet digital por miembro',
-  'Historial de pagos y comprobantes',
-  'Reportes de mora y estado financiero',
-  'Equipamiento y gestión de eventos',
-  'Soporte por WhatsApp',
-];
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -108,9 +99,6 @@ export default function LandingPage() {
             Ya tengo cuenta
           </button>
         </div>
-        <p style={{ fontSize: 12, color: '#6B7280', marginTop: 14 }}>
-          30 días gratis · Sin tarjeta de crédito · Cancela cuando quieras
-        </p>
       </section>
 
       {/* ── STRIP DE DEPORTES ──────────────────────────────────────────────── */}
@@ -161,29 +149,105 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ────────────────────────────────────────────────────────── */}
-      <section style={{ padding: '0 24px 80px', maxWidth: 480, margin: '0 auto', textAlign: 'center' }}>
-        <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Un precio, todo incluido</h2>
-        <p style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 32 }}>Sin sorpresas. Sin planes confusos.</p>
-        <div style={{ background: 'rgba(0,170,255,0.06)', border: '1px solid rgba(0,170,255,0.2)', borderRadius: 20, padding: '32px 28px' }}>
-          <div style={{ fontSize: 42, fontWeight: 800, marginBottom: 2 }}>
-            $99.000<span style={{ fontSize: 16, color: '#9CA3AF', fontWeight: 400 }}>/mes</span>
-          </div>
-          <p style={{ color: '#00AAFF', fontSize: 13, fontWeight: 600, marginBottom: 24 }}>✓ 30 días gratis para tu club</p>
-          <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
-            {INCLUYE.map(item => (
-              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: '#D1D5DB' }}>
-                <CheckCircle size={15} color="#00D084" style={{ flexShrink: 0 }} />
-                {item}
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={() => navigate('/registro')}
-            style={{ width: '100%', background: '#00AAFF', border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 10, padding: '14px 0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-          >
-            Empezar gratis <ChevronRight size={16} />
-          </button>
+      <section style={{ padding: '0 24px 80px', maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 10 }}>Activa solo lo que necesitas</h2>
+          <p style={{ color: '#9CA3AF', fontSize: 15, margin: 0 }}>
+            3 planes modulares · Cambia cuando quieras · Sin permanencia
+          </p>
         </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, alignItems: 'start' }}>
+
+          {/* ── STARTER ── */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '28px 24px' }}>
+            <p style={{ color: '#9CA3AF', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Starter</p>
+            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$59.000<span style={{ fontSize: 14, color: '#6B7280', fontWeight: 400 }}>/mes</span></div>
+            <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 24 }}>Para clubes que están empezando a organizarse</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+              {[
+                [true,  'Dashboard y reportes'],
+                [true,  'Gestión de miembros'],
+                [true,  'Pagos manuales y mora'],
+                [true,  'Carnet digital'],
+                [false, 'WhatsApp Bot automático'],
+                [false, 'Conciliación de pagos'],
+                [false, 'Uniformes y equipamiento'],
+                [false, 'Arbitraje y partidos'],
+              ].map(([on, label]) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: on ? 1 : 0.35 }}>
+                  <CheckCircle size={14} color={on ? '#00D084' : '#4B5563'} style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, color: on ? '#D1D5DB' : '#6B7280' }}>{label}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 14, fontWeight: 600, borderRadius: 10, padding: '12px 0', cursor: 'pointer' }}>
+              Comenzar
+            </button>
+          </div>
+
+          {/* ── PRO ── */}
+          <div style={{ background: 'rgba(0,170,255,0.06)', border: '2px solid rgba(0,170,255,0.35)', borderRadius: 20, padding: '28px 24px', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: '#00AAFF', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 14px', letterSpacing: 1, whiteSpace: 'nowrap' }}>
+              ★ MÁS POPULAR
+            </div>
+            <p style={{ color: '#00AAFF', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Pro</p>
+            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$99.000<span style={{ fontSize: 14, color: '#6B7280', fontWeight: 400 }}>/mes</span></div>
+            <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 24 }}>Cobro automático por WhatsApp incluido</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+              {[
+                [true,  'Dashboard y reportes'],
+                [true,  'Gestión de miembros'],
+                [true,  'Pagos manuales y mora'],
+                [true,  'Carnet digital'],
+                [true,  'WhatsApp Bot automático'],
+                [true,  'Conciliación de pagos'],
+                [false, 'Uniformes y equipamiento'],
+                [false, 'Arbitraje y partidos'],
+              ].map(([on, label]) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: on ? 1 : 0.35 }}>
+                  <CheckCircle size={14} color={on ? '#00D084' : '#4B5563'} style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, color: on ? '#D1D5DB' : '#6B7280' }}>{label}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: '#00AAFF', border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 10, padding: '12px 0', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,170,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              Comenzar gratis <ChevronRight size={15} />
+            </button>
+          </div>
+
+          {/* ── TOTAL ── */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '28px 24px' }}>
+            <p style={{ color: '#C678FF', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Total</p>
+            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$149.000<span style={{ fontSize: 14, color: '#6B7280', fontWeight: 400 }}>/mes</span></div>
+            <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 24 }}>Acceso completo a todos los módulos</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+              {[
+                [true, 'Dashboard y reportes'],
+                [true, 'Gestión de miembros'],
+                [true, 'Pagos manuales y mora'],
+                [true, 'Carnet digital'],
+                [true, 'WhatsApp Bot automático'],
+                [true, 'Conciliación de pagos'],
+                [true, 'Uniformes y equipamiento'],
+                [true, 'Arbitraje y partidos'],
+              ].map(([on, label]) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <CheckCircle size={14} color="#00D084" style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, color: '#D1D5DB' }}>{label}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => navigate('/registro')} style={{ width: '100%', background: 'rgba(198,120,255,0.12)', border: '1px solid rgba(198,120,255,0.35)', color: '#C678FF', fontSize: 14, fontWeight: 700, borderRadius: 10, padding: '12px 0', cursor: 'pointer' }}>
+              Comenzar
+            </button>
+          </div>
+
+        </div>
+
+        <p style={{ textAlign: 'center', color: '#4B5563', fontSize: 13, marginTop: 28 }}>
+          Todos los planes incluyen soporte por WhatsApp · Cancela cuando quieras
+        </p>
       </section>
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}

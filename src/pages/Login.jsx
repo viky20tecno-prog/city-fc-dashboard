@@ -201,24 +201,48 @@ export default function Login() {
             ))}
           </div>
 
-          {/* Color accent bar */}
-          <div style={{
-            height: 3, borderRadius: 2,
-            background: `linear-gradient(90deg, ${color}, ${color}44)`,
-            transition: 'background 0.7s',
-            margin: '28px 0 14px',
-          }} />
-
-          {/* Dots indicador de ciclo */}
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 12 }}>
-            {CYCLE_COLORS.map((c, i) => (
-              <div key={i} style={{
-                width: i === colorIdx ? 16 : 6,
-                height: 6, borderRadius: 3,
-                background: i === colorIdx ? color : '#1F2937',
-                transition: 'all 0.5s',
-              }} />
+          {/* ── HUD Ring ── */}
+          <div style={{ position: 'relative', width: 150, height: 150, margin: '20px auto 20px', flexShrink: 0 }}>
+            {/* Outer dashed ring — gira */}
+            <div style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              border: `1.5px dashed ${color}55`,
+              animation: 'hud-spin 10s linear infinite',
+              transition: 'border-color 0.7s',
+            }} />
+            {/* Tick marks en los 4 ejes */}
+            {[0, 90, 180, 270].map(deg => (
+              <div key={deg} style={{
+                position: 'absolute', inset: 0, borderRadius: '50%',
+                display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+                transform: `rotate(${deg}deg)`,
+              }}>
+                <div style={{ width: 3, height: 9, borderRadius: 1, background: `${color}88`, marginTop: 1, transition: 'background 0.7s' }} />
+              </div>
             ))}
+            {/* Anillo pulsante */}
+            <div style={{
+              position: 'absolute', inset: '18px', borderRadius: '50%',
+              border: `1px solid ${color}99`,
+              boxShadow: `0 0 18px ${color}44, inset 0 0 18px ${color}22`,
+              animation: 'hud-pulse 2s ease-in-out infinite',
+              transition: 'all 0.7s',
+            }} />
+            {/* Anillo interno contra-rotante */}
+            <div style={{
+              position: 'absolute', inset: '36px', borderRadius: '50%',
+              border: `1.5px dashed ${color}66`,
+              animation: 'hud-spin-rev 7s linear infinite',
+              transition: 'border-color 0.7s',
+            }} />
+            {/* Centro radiante */}
+            <div style={{
+              position: 'absolute', inset: '54px', borderRadius: '50%',
+              background: `radial-gradient(circle, ${color} 0%, ${color}99 50%, transparent 100%)`,
+              boxShadow: `0 0 20px ${color}, 0 0 40px ${color}66`,
+              animation: 'hud-glow 2s ease-in-out infinite',
+              transition: 'all 0.7s',
+            }} />
           </div>
 
           <p style={{ color: '#374151', fontSize: 11, margin: 0 }}>
@@ -412,6 +436,22 @@ export default function Login() {
         @keyframes spin {
           from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
+        }
+        @keyframes hud-spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        @keyframes hud-spin-rev {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(-360deg); }
+        }
+        @keyframes hud-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50%       { opacity: 0.6; transform: scale(1.06); }
+        }
+        @keyframes hud-glow {
+          0%, 100% { opacity: 0.7; transform: scale(1); }
+          50%       { opacity: 1;   transform: scale(1.15); }
         }
         input::placeholder { color: #374151; }
         input:focus {

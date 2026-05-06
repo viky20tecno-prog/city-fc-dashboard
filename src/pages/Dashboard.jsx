@@ -322,6 +322,7 @@ export default function Dashboard() {
                 jugadores={jugadores}
                 mensualidades={mensualidades}
                 morosos={morosos}
+                codigoPais={clubConfig?.codigo_pais || '57'}
               />
             )}
             {activeTab === 'jugadores' && (

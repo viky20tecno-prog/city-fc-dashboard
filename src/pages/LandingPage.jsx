@@ -71,7 +71,7 @@ export default function LandingPage() {
       {/* ── HERO ───────────────────────────────────────────────────────────── */}
       <section style={{ textAlign: 'center', padding: '80px 24px 64px', maxWidth: 760, margin: '0 auto' }}>
         <div style={{ display: 'inline-block', background: 'rgba(0,170,255,0.1)', border: '1px solid rgba(0,170,255,0.25)', borderRadius: 999, padding: '4px 14px', fontSize: 12, color: '#00AAFF', fontWeight: 600, marginBottom: 20, letterSpacing: 0.5 }}>
-          ⚽ Hecho para clubes colombianos
+          ⚽ Para clubes de toda América Latina
         </div>
         <h1 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontWeight: 800, lineHeight: 1.1, marginBottom: 20, letterSpacing: '-1px' }}>
           Gestiona tu club de fútbol<br />
@@ -143,7 +143,7 @@ export default function LandingPage() {
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '24px', textAlign: 'center', color: '#4B5563', fontSize: 13 }}>
-        <p>ClubContable · Hecho para clubes colombianos ⚽</p>
+        <p>ClubContable · Para clubes de toda América Latina ⚽</p>
         <div style={{ marginTop: 8, display: 'flex', gap: 20, justifyContent: 'center' }}>
           <button onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>Iniciar sesión</button>
           <button onClick={() => navigate('/registro')} style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>Registrar club</button>

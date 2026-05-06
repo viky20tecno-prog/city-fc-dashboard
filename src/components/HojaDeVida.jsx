@@ -237,7 +237,7 @@ function TabPerfil({ jugador, onFotoUpdate }) {
       {/* Contacto */}
       <Seccion titulo="Contacto">
         <div className="grid grid-cols-2 gap-3">
-          <CampoEdit label="Celular"            value={form.celular}            onChange={set('celular')}            placeholder="3001234567" />
+          <CampoEdit label="Celular"            value={form.celular}            onChange={set('celular')}            placeholder="Ej: 3001234567" />
           <CampoEdit label="Correo electrónico" value={form.correo_electronico} onChange={set('correo_electronico')} placeholder="correo@email.com" type="email" />
           <CampoEdit label="Instagram"          value={form.instagram}          onChange={set('instagram')}          placeholder="@usuario" />
         </div>
@@ -258,7 +258,7 @@ function TabPerfil({ jugador, onFotoUpdate }) {
       {/* Residencia */}
       <Seccion titulo="Residencia">
         <div className="grid grid-cols-2 gap-3">
-          <CampoEdit label="Municipio" value={form.municipio} onChange={set('municipio')} placeholder="Medellín" />
+          <CampoEdit label="Municipio / Ciudad" value={form.municipio} onChange={set('municipio')} placeholder="Tu ciudad" />
           <CampoEdit label="Barrio"    value={form.barrio}    onChange={set('barrio')}    placeholder="Barrio" />
           <div className="col-span-2">
             <CampoEdit label="Dirección" value={form.direccion} onChange={set('direccion')} placeholder="Calle, carrera, número…" />

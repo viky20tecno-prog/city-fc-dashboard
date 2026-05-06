@@ -2,7 +2,7 @@ export default function WhatsAppMockup() {
   const messages = [
     {
       from: 'bot',
-      text: 'Hola Santiago 🏟️ Ya está activa tu cuota de Marzo: $65.000 COP. Puedes pagar por Bancolombia y enviarnos el comprobante por aquí. ¡Gracias!',
+      text: 'Hola Santiago 🏟️ Ya está activa tu cuota de Marzo. Realiza tu pago y envíanos el comprobante por aquí. ¡Gracias!',
       time: '8:00 AM',
     },
     {
@@ -12,13 +12,13 @@ export default function WhatsAppMockup() {
     },
     {
       from: 'user',
-      text: '📷 comprobante_bancolombia.jpg',
+      text: '📷 comprobante_pago.jpg',
       time: '2:15 PM',
       isImage: true,
     },
     {
       from: 'bot',
-      text: '✅ ¡Pago confirmado, Santiago! Tu cuota de Marzo por $65.000 quedó registrada. ¡Gracias! ⚽',
+      text: '✅ ¡Pago confirmado, Santiago! Tu cuota de Marzo quedó registrada. ¡Gracias! ⚽',
       time: '2:15 PM',
     },
   ];

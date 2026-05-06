@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { UserPlus, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
@@ -7,17 +8,17 @@ const CAMPOS = [
   { key: 'cedula', label: 'Número de documento', type: 'text', placeholder: 'Ej: 1234567890', required: true, section: 'personal' },
   { key: 'nombre', label: 'Nombre(s)', type: 'text', placeholder: 'Ej: Santiago', required: true, section: 'personal' },
   { key: 'apellidos', label: 'Apellido(s)', type: 'text', placeholder: 'Ej: García Salazar', required: true, section: 'personal' },
-  { key: 'celular', label: 'Celular (WhatsApp)', type: 'tel', placeholder: 'Ej: 3001234567', required: true, section: 'contacto' },
+  { key: 'celular', label: 'Celular (WhatsApp)', type: 'tel', placeholder: 'Ej: 3001234567 (sin código de país)', required: true, section: 'contacto' },
   { key: 'correo_electronico', label: 'Correo electrónico', type: 'email', placeholder: 'Ej: correo@ejemplo.com', required: true, section: 'contacto' },
   { key: 'instagram', label: 'Instagram (opcional)', type: 'text', placeholder: 'Ej: @tucuenta', required: false, section: 'contacto' },
-  { key: 'lugar_de_nacimiento', label: 'Lugar de nacimiento', type: 'text', placeholder: 'Ej: Bogotá', required: true, section: 'medica' },
+  { key: 'lugar_de_nacimiento', label: 'Lugar de nacimiento', type: 'text', placeholder: 'Ej: Ciudad de México, Lima, Bogotá…', required: true, section: 'medica' },
   { key: 'fecha_nacimiento', label: 'Fecha de nacimiento', type: 'date', required: true, section: 'medica' },
   { key: 'tipo_sangre', label: 'Tipo de sangre', type: 'select', required: true, section: 'medica', options: ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'] },
   { key: 'eps', label: 'EPS', type: 'text', placeholder: 'Ej: Sura, Nueva EPS, Sanitas...', required: true, section: 'medica' },
   { key: 'estatura', label: 'Estatura (cm)', type: 'number', placeholder: 'Ej: 175', required: false, section: 'medica' },
   { key: 'peso', label: 'Peso (kg)', type: 'number', placeholder: 'Ej: 72', required: false, section: 'medica' },
   { key: 'direccion', label: 'Dirección', type: 'text', placeholder: 'Ej: Cra 45 #67-89', required: false, section: 'residencia' },
-  { key: 'municipio', label: 'Municipio', type: 'text', placeholder: 'Ej: Medellín', required: true, section: 'residencia' },
+  { key: 'municipio', label: 'Municipio / Ciudad', type: 'text', placeholder: 'Ej: Buenos Aires, Santiago, Lima…', required: true, section: 'residencia' },
   { key: 'barrio', label: 'Barrio', type: 'text', placeholder: 'Ej: Laureles', required: false, section: 'residencia' },
   { key: 'familiar_emergencia', label: 'Contacto en caso de emergencia (familiar)', type: 'text', placeholder: 'Nombre de un familiar o acudiente', required: true, section: 'emergencia' },
   { key: 'celular_contacto', label: 'Celular del contacto de emergencia', type: 'tel', placeholder: 'Número diferente al tuyo', required: true, section: 'emergencia' },
@@ -32,6 +33,8 @@ const SECCIONES = [
 ];
 
 export default function FormInscripcion() {
+  const [searchParams] = useSearchParams();
+  const clubId = searchParams.get('club_id') || 'city-fc';
   const [form, setForm] = useState({});
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -62,15 +65,15 @@ export default function FormInscripcion() {
       return;
     }
 
-    if (!/^\d{10}$/.test(form.celular.trim())) {
+    if (!/^\d{6,15}$/.test(form.celular.trim())) {
       setStatus('error');
-      setErrorMsg('El celular debe tener 10 dígitos (ej: 3001234567).');
+      setErrorMsg('El celular debe tener entre 6 y 15 dígitos (sin código de país).');
       return;
     }
 
-    if (form.celular_contacto && !/^\d{10}$/.test(form.celular_contacto.trim())) {
+    if (form.celular_contacto && !/^\d{6,15}$/.test(form.celular_contacto.trim())) {
       setStatus('error');
-      setErrorMsg('El celular del contacto debe tener 10 dígitos.');
+      setErrorMsg('El celular del contacto debe tener entre 6 y 15 dígitos.');
       return;
     }
 
@@ -81,7 +84,7 @@ export default function FormInscripcion() {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/inscripcion`, {
+      const res = await fetch(`${API_BASE_URL}/inscripcion?club_id=${clubId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

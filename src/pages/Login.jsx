@@ -342,7 +342,7 @@ export default function Login() {
 
       {/* Footer */}
       <p style={{ color: '#374151', fontSize: 12, marginTop: 24, textAlign: 'center' }}>
-        ClubContable · Hecho para clubes colombianos ⚽
+        ClubContable · Para clubes de toda América Latina ⚽
       </p>
 
       <style>{`

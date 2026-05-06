@@ -115,7 +115,7 @@ function exportarPDF(morosos) {
   ventana.focus();
 }
 
-export default function MorososList({ morosos }) {
+export default function MorososList({ morosos, codigoPais = '57' }) {
   if (!morosos || morosos.length === 0) {
     return (
       <div style={{
@@ -207,7 +207,7 @@ export default function MorososList({ morosos }) {
               <p style={{ fontWeight: 700, color: '#EF4444', fontSize: '13px' }}>{formatCOP(m.saldo_total)}</p>
               {m.celular && (
                 <a
-                  href={`https://wa.me/57${m.celular}`}
+                  href={`https://wa.me/${codigoPais}${m.celular}`}
                   target="_blank" rel="noopener noreferrer"
                   style={{ fontSize: '11px', color: '#5A5A5A', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px', textDecoration: 'none' }}
                 >

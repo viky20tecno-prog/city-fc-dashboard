@@ -6,7 +6,7 @@ import { getClubId } from '../services/api';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 
 const CONCEPTOS = ['mensualidad', 'uniforme', 'torneo', 'otro'];
-const BANCOS    = ['Bancolombia', 'Nequi', 'Daviplata', 'Davivienda', 'BBVA', 'Scotiabank', 'Efectivo', 'No especificado', 'Otro'];
+const BANCOS    = ['Efectivo', 'Transferencia', 'BBVA', 'Santander', 'Scotiabank', 'Bancolombia', 'Nequi', 'Daviplata', 'Davivienda', 'Yape', 'Plin', 'Mercado Pago', 'No especificado', 'Otro'];
 
 const ESTADOS = [
   { id: 'pendiente',           label: 'Pendiente',    color: 'text-yellow-400', bg: 'bg-yellow-400/10 border-yellow-400/20' },
@@ -154,7 +154,7 @@ function EditModal({ pago, onClose, onSaved }) {
               value={form.banco}
               onChange={e => setForm(f => ({ ...f, banco: e.target.value }))}
               className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#00AAFF]/50"
-              placeholder="Bancolombia, Nequi..."
+              placeholder="Efectivo, Transferencia..."
             />
             <datalist id="bancos-list">
               {BANCOS.map(b => <option key={b} value={b} />)}

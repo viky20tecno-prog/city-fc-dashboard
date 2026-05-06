@@ -75,7 +75,7 @@ export default function RegistroClub() {
   const ac = CYCLE_COLORS[colorIdx];
 
   useEffect(() => {
-    const timer = setInterval(() => setColorIdx(i => (i + 1) % CYCLE_COLORS.length), 4000);
+    const timer = setInterval(() => setColorIdx(i => (i + 1) % CYCLE_COLORS.length), 10000);
     return () => clearInterval(timer);
   }, []);
 

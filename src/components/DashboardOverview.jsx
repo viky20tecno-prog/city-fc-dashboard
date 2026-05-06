@@ -23,7 +23,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
   const c = colorObj || COLORS[color];
   return (
     <div style={{
-      background: '#141414',
+      background: 'var(--bg-card)',
       border: `1px solid ${c.border}`,
       borderRadius: '14px',
       padding: '20px',
@@ -59,14 +59,14 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
       </div>
 
       <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-        <div style={{ fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#6A6A6A', marginBottom: '6px', fontWeight: 500 }}>
+        <div style={{ fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--text-mut)', marginBottom: '6px', fontWeight: 500 }}>
           {label}
         </div>
-        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '38px', lineHeight: 1, color: '#FFFFFF', letterSpacing: '1px' }}>
+        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '38px', lineHeight: 1, color: 'var(--text-pri)', letterSpacing: '1px' }}>
           {value}
         </div>
         {sub != null && (
-          <div style={{ fontSize: '11px', color: '#5A5A5A', marginTop: '5px' }}>{sub}</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-mut)', marginTop: '5px' }}>{sub}</div>
         )}
       </div>
     </div>

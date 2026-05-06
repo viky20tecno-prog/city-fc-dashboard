@@ -59,25 +59,25 @@ export default function RecaudacionChart({ mensualidades }) {
     const d = payload[0]?.payload;
     return (
       <div style={{
-        background: '#141414', border: '1px solid rgba(225,73,36,0.35)',
+        background: 'var(--bg-card)', border: '1px solid rgba(225,73,36,0.35)',
         borderRadius: '10px', padding: '12px 14px', minWidth: '160px',
         boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
       }}>
-        <p style={{ color: '#fff', fontWeight: 600, fontSize: '13px', marginBottom: '8px' }}>{d?.mesCompleto}</p>
+        <p style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: '13px', marginBottom: '8px' }}>{d?.mesCompleto}</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px' }}>
             <span style={{ color: '#E14924' }}>Pagado</span>
-            <span style={{ color: '#fff', fontWeight: 600 }}>{fmtCOP(d?.pagado || 0)}</span>
+            <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d?.pagado || 0)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px' }}>
             <span style={{ color: '#B68631' }}>Pendiente</span>
-            <span style={{ color: '#fff', fontWeight: 600 }}>{fmtCOP(d?.pendiente || 0)}</span>
+            <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d?.pendiente || 0)}</span>
           </div>
           <div style={{
             borderTop: '1px solid rgba(225,73,36,0.2)', paddingTop: '6px', marginTop: '2px',
             display: 'flex', justifyContent: 'space-between', gap: '16px', fontSize: '12px',
           }}>
-            <span style={{ color: '#7A7A7A' }}>% cobrado</span>
+            <span style={{ color: 'var(--text-mut)' }}>% cobrado</span>
             <span style={{
               fontWeight: 700,
               color: d?.pct >= 80 ? '#22C55E' : d?.pct >= 50 ? '#F59E0B' : '#EF4444',
@@ -113,7 +113,7 @@ export default function RecaudacionChart({ mensualidades }) {
   return (
     <div style={{
       position: 'relative',
-      background: '#141414',
+      background: 'var(--bg-card)',
       borderRadius: '16px',
       border: '1px solid rgba(225,73,36,0.22)',
       padding: '24px',
@@ -135,10 +135,10 @@ export default function RecaudacionChart({ mensualidades }) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div>
-          <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#fff', letterSpacing: '-0.2px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-pri)', letterSpacing: '-0.2px' }}>
             Recaudación por Mes
           </h2>
-          <p style={{ fontSize: '11px', color: '#5A5A5A', marginTop: '2px' }}>
+          <p style={{ fontSize: '11px', color: 'var(--text-mut)', marginTop: '2px' }}>
             Pagado vs pendiente · {new Date().getFullYear()}
           </p>
         </div>
@@ -159,10 +159,10 @@ export default function RecaudacionChart({ mensualidades }) {
           { label: 'Mejor mes',       value: mejorMes ? `${mejorMes.mes} ${fmtK(mejorMes.pagado)}` : '—', color: '#F59E0B' },
         ].map((item, i) => (
           <div key={i} style={{
-            background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)',
+            background: 'var(--bg-surface)', border: '1px solid var(--border-sub)',
             borderRadius: '10px', padding: '12px',
           }}>
-            <p style={{ fontSize: '10px', color: '#5A5A5A', marginBottom: '4px', letterSpacing: '0.5px' }}>{item.label}</p>
+            <p style={{ fontSize: '10px', color: 'var(--text-mut)', marginBottom: '4px', letterSpacing: '0.5px' }}>{item.label}</p>
             <p style={{ color: item.color, fontWeight: 700, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {item.value}
             </p>
@@ -242,7 +242,7 @@ export default function RecaudacionChart({ mensualidades }) {
           { color: '#E14924', label: 'Tendencia',   dash: true  },
           { color: '#FF6B3D', label: 'Mes actual',  dash: false, glow: true },
         ].map((item, i) => (
-          <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#5A5A5A' }}>
+          <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--text-mut)' }}>
             {item.dash
               ? <span style={{ width: '20px', borderTop: `2px dashed ${item.color}`, opacity: 0.5, display: 'inline-block' }} />
               : <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: item.color, display: 'inline-block', boxShadow: item.glow ? `0 0 6px ${item.color}` : 'none' }} />

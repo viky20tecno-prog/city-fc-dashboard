@@ -29,7 +29,7 @@ function FiltroDropdown({ value, onChange, opciones }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ background: '#1E1E1E', border: '1px solid #2A2A2A', minWidth: '140px' }}
+        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)', minWidth: '140px' }}
         className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-white hover:border-[#E14924]/50 transition"
       >
         <span className="flex items-center gap-2">
@@ -42,7 +42,7 @@ function FiltroDropdown({ value, onChange, opciones }) {
       {open && (
         <div
           className="absolute right-0 top-full mt-1 rounded-xl overflow-hidden z-30 shadow-2xl"
-          style={{ background: '#1E1E1E', border: '1px solid #2A2A2A', minWidth: '160px' }}
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)', minWidth: '160px' }}
         >
           {opciones.map(opt => (
             <button
@@ -164,12 +164,12 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
   return (
     <>
-      <div style={{ background: '#141414', border: '1px solid #2A2A2A', borderRadius: '16px', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-sub)', borderRadius: '16px', overflow: 'hidden' }}>
 
         {/* HEADER */}
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid #2A2A2A' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-sub)' }}>
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '22px', letterSpacing: '2px', color: '#FFF' }}>
+            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '22px', letterSpacing: '2px', color: 'var(--text-pri)' }}>
               Jugadores
             </h2>
 
@@ -182,7 +182,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   placeholder="Buscar nombre o cédula..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  style={{ background: '#1E1E1E', border: '1px solid #2A2A2A' }}
+                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)' }}
                   className="w-full sm:w-60 pl-10 pr-4 py-2 rounded-xl text-sm text-white placeholder-[#6A6A6A] focus:outline-none focus:border-[#E14924]/50 transition"
                 />
               </div>
@@ -197,7 +197,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr style={{ borderBottom: '1px solid #2A2A2A' }}>
+              <tr style={{ borderBottom: '1px solid var(--border-sub)' }}>
                 {[
                   { key: 'nombreCompleto', label: 'Nombre'   },
                   { key: 'cedula',         label: 'Cédula'   },
@@ -261,12 +261,12 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   </td>
 
                   {/* Cédula */}
-                  <td className="px-6 py-4 text-sm font-mono" style={{ color: '#8A8A8A' }}>
+                  <td className="px-6 py-4 text-sm font-mono" style={{ color: 'var(--text-mut)' }}>
                     {j.cedula}
                   </td>
 
                   {/* Celular */}
-                  <td className="px-6 py-4 text-sm" style={{ color: '#8A8A8A' }}>
+                  <td className="px-6 py-4 text-sm" style={{ color: 'var(--text-mut)' }}>
                     {j.celular}
                   </td>
 
@@ -337,7 +337,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         </div>
 
         {/* FOOTER */}
-        <div style={{ padding: '12px 24px', borderTop: '1px solid #2A2A2A', color: '#6A6A6A', fontSize: '13px' }}>
+        <div style={{ padding: '12px 24px', borderTop: '1px solid var(--border-sub)', color: 'var(--text-mut)', fontSize: '13px' }}>
           {filtered.length} de {jugadores.length} jugadores
         </div>
       </div>
@@ -372,7 +372,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           onClick={() => !eliminando && setJugadorAEliminar(null)}
         >
           <div
-            style={{ background: '#1A1A1A', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '16px', padding: '28px 32px', width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '20px' }}
+            style={{ background: 'var(--bg-surface)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '16px', padding: '28px 32px', width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '20px' }}
             onClick={e => e.stopPropagation()}
           >
             {/* Icono + título */}
@@ -381,15 +381,15 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 <AlertTriangle size={20} color="#EF4444" />
               </div>
               <div>
-                <div style={{ color: '#F5F5F5', fontWeight: 600, fontSize: '15px' }}>¿Eliminar jugador?</div>
-                <div style={{ color: '#6A6A6A', fontSize: '12px', marginTop: '2px' }}>Esta acción no se puede deshacer</div>
+                <div style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: '15px' }}>¿Eliminar jugador?</div>
+                <div style={{ color: 'var(--text-mut)', fontSize: '12px', marginTop: '2px' }}>Esta acción no se puede deshacer</div>
               </div>
             </div>
 
             {/* Datos del jugador */}
-            <div style={{ background: '#141414', borderRadius: '10px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ color: '#F5F5F5', fontWeight: 600, fontSize: '14px' }}>{jugadorAEliminar.nombreCompleto}</div>
-              <div style={{ color: '#6A6A6A', fontSize: '12px', fontFamily: 'monospace' }}>CC {jugadorAEliminar.cedula}</div>
+            <div style={{ background: 'var(--bg-card)', borderRadius: '10px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: '14px' }}>{jugadorAEliminar.nombreCompleto}</div>
+              <div style={{ color: 'var(--text-mut)', fontSize: '12px', fontFamily: 'monospace' }}>CC {jugadorAEliminar.cedula}</div>
             </div>
 
             {/* Botones */}
@@ -397,7 +397,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               <button
                 onClick={() => setJugadorAEliminar(null)}
                 disabled={eliminando}
-                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #2A2A2A', background: '#141414', color: '#8A8A8A', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid var(--border-sub)', background: 'var(--bg-card)', color: 'var(--text-mut)', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
               >
                 Cancelar
               </button>

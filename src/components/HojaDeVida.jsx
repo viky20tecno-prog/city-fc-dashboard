@@ -353,7 +353,7 @@ function TabCarnet({ jugador }) {
         }}>
           <EscudoSVG size={28} />
           <div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '18px', letterSpacing: '3px', color: '#FFF', lineHeight: 1 }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '18px', letterSpacing: '3px', color: 'var(--text-pri)', lineHeight: 1 }}>
               CITY F.C. <span style={{ color: '#B68631', fontSize: '11px' }}>★</span>
             </div>
             <div style={{ fontSize: '8px', letterSpacing: '3px', color: '#555', textTransform: 'uppercase' }}>
@@ -366,7 +366,7 @@ function TabCarnet({ jugador }) {
         <div style={{ display: 'flex', gap: '16px', padding: '16px 20px 12px', alignItems: 'flex-start' }}>
           <div style={{
             width: '82px', height: '82px', borderRadius: '10px', flexShrink: 0,
-            overflow: 'hidden', background: '#1A1A1A',
+            overflow: 'hidden', background: 'var(--bg-surface)',
             border: '1.5px solid rgba(225,73,36,0.35)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
@@ -380,7 +380,7 @@ function TabCarnet({ jugador }) {
             )}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '22px', color: '#FFF', lineHeight: 1, letterSpacing: '1.5px' }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '22px', color: 'var(--text-pri)', lineHeight: 1, letterSpacing: '1.5px' }}>
               {nombre}
             </div>
             <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '18px', color: '#E14924', lineHeight: 1.1, letterSpacing: '1px' }}>
@@ -417,7 +417,7 @@ function TabCarnet({ jugador }) {
         </div>
 
         {/* Divisor */}
-        <div style={{ height: '1px', margin: '0 20px', background: 'rgba(255,255,255,0.04)' }} />
+        <div style={{ height: '1px', margin: '0 20px', background: 'var(--bg-surface)' }} />
 
         {/* Emergencia */}
         {(jugador.familiar_emergencia || jugador.celular_contacto) && (

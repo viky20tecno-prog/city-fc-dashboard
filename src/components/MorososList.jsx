@@ -120,7 +120,7 @@ export default function MorososList({ morosos, codigoPais = '57' }) {
   if (!morosos || morosos.length === 0) {
     return (
       <div style={{
-        background: '#141414', borderRadius: '16px',
+        background: 'var(--bg-card)', borderRadius: '16px',
         border: '1px solid rgba(225,73,36,0.22)', padding: '24px',
         position: 'relative', overflow: 'hidden',
       }}>
@@ -129,8 +129,8 @@ export default function MorososList({ morosos, codigoPais = '57' }) {
           background: 'linear-gradient(90deg, transparent, rgba(225,73,36,0.45), transparent)',
           pointerEvents: 'none',
         }} />
-        <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#fff', marginBottom: '16px' }}>Morosos</h2>
-        <div style={{ textAlign: 'center', padding: '32px 0', color: '#5A5A5A' }}>
+        <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-pri)', marginBottom: '16px' }}>Morosos</h2>
+        <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-mut)' }}>
           <AlertCircle style={{ width: '32px', height: '32px', margin: '0 auto 8px', color: '#22C55E' }} />
           ¡Sin morosos!
         </div>
@@ -142,7 +142,7 @@ export default function MorososList({ morosos, codigoPais = '57' }) {
 
   return (
     <div style={{
-      background: '#141414', borderRadius: '16px',
+      background: 'var(--bg-card)', borderRadius: '16px',
       border: '1px solid rgba(225,73,36,0.22)', padding: '24px',
       position: 'relative', overflow: 'hidden',
     }}>
@@ -162,7 +162,7 @@ export default function MorososList({ morosos, codigoPais = '57' }) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#fff', letterSpacing: '-0.2px' }}>Morosos</h2>
+          <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-pri)', letterSpacing: '-0.2px' }}>Morosos</h2>
           <span style={{
             padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 600,
             background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)',
@@ -196,8 +196,8 @@ export default function MorososList({ morosos, codigoPais = '57' }) {
             transition: 'all 0.2s',
           }}>
             <div>
-              <p style={{ fontWeight: 600, color: '#fff', fontSize: '13px' }}>{m.nombre}</p>
-              <p style={{ fontSize: '11px', color: '#5A5A5A', marginTop: '3px' }}>
+              <p style={{ fontWeight: 600, color: 'var(--text-pri)', fontSize: '13px' }}>{m.nombre}</p>
+              <p style={{ fontSize: '11px', color: 'var(--text-mut)', marginTop: '3px' }}>
                 CC {m.cedula} · {m.meses_mora} mes{m.meses_mora !== 1 ? 'es' : ''} de mora
               </p>
               {m.meses_detalle && (
@@ -210,7 +210,7 @@ export default function MorososList({ morosos, codigoPais = '57' }) {
                 <a
                   href={`https://wa.me/${codigoPais}${m.celular}`}
                   target="_blank" rel="noopener noreferrer"
-                  style={{ fontSize: '11px', color: '#5A5A5A', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px', textDecoration: 'none' }}
+                  style={{ fontSize: '11px', color: 'var(--text-mut)', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px', textDecoration: 'none' }}
                 >
                   <Phone size={11} />
                   {m.celular}
@@ -228,7 +228,7 @@ export default function MorososList({ morosos, codigoPais = '57' }) {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         position: 'relative',
       }}>
-        <span style={{ fontSize: '12px', color: '#5A5A5A' }}>Total en mora</span>
+        <span style={{ fontSize: '12px', color: 'var(--text-mut)' }}>Total en mora</span>
         <span style={{ fontSize: '14px', fontWeight: 700, color: '#EF4444' }}>
           {formatCOP(totalSaldo)}
         </span>

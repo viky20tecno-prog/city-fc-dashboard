@@ -36,7 +36,7 @@ function FiltroDropdown({ value, onChange, opciones }) {
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ESTADO_DOT[value] || '#6A6A6A' }} />
           {value}
         </span>
-        <ChevronDown className={`w-4 h-4 text-[#6A6A6A] transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-[var(--text-sec)] transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
@@ -48,7 +48,7 @@ function FiltroDropdown({ value, onChange, opciones }) {
             <button
               key={opt}
               onClick={() => { onChange(opt); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition hover:bg-[#2A2A2A] text-left"
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition hover:bg-[var(--bg-surface)] text-left"
               style={{ color: value === opt ? '#E14924' : '#F5F5F5' }}
             >
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ESTADO_DOT[opt] || '#6A6A6A' }} />
@@ -64,7 +64,7 @@ function FiltroDropdown({ value, onChange, opciones }) {
 
 /* ── badge de estado en la tabla ── */
 function EstadoBadge({ estado }) {
-  const colors = ESTADO_COLORS[estado] || { bg: 'bg-white/5', text: 'text-[#6A6A6A]', dot: 'bg-[#6A6A6A]' };
+  const colors = ESTADO_COLORS[estado] || { bg: 'bg-white/5', text: 'text-[var(--text-sec)]', dot: 'bg-[var(--text-sec)]' };
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
@@ -176,7 +176,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
             <div className="flex gap-2 w-full sm:w-auto">
               {/* Buscador */}
               <div className="relative flex-1 sm:flex-initial">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6A6A6A]" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-sec)]" />
                 <input
                   type="text"
                   placeholder="Buscar nombre o cédula..."
@@ -308,7 +308,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                         className={`p-1.5 rounded-lg transition ${
                           tieneSuspensionActiva(j.cedula)
                             ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20'
-                            : 'text-[#4A4A4A] hover:text-yellow-400 hover:bg-yellow-400/10'
+                            : 'text-[var(--text-mut)] hover:text-yellow-400 hover:bg-yellow-400/10'
                         }`}
                       >
                         <PauseCircle className="w-4 h-4" />
@@ -318,7 +318,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                       <button
                         onClick={() => setJugadorAEliminar(j)}
                         title="Eliminar jugador"
-                        className="p-1.5 rounded-lg transition text-[#4A4A4A] hover:text-red-500 hover:bg-red-500/10"
+                        className="p-1.5 rounded-lg transition text-[var(--text-mut)] hover:text-red-500 hover:bg-red-500/10"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -330,7 +330,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           </table>
 
           {filtered.length === 0 && (
-            <div className="text-center py-12 text-[#6A6A6A] text-sm">
+            <div className="text-center py-12 text-[var(--text-sec)] text-sm">
               No se encontraron jugadores
             </div>
           )}

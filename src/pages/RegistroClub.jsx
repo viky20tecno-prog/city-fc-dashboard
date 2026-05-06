@@ -140,7 +140,7 @@ export default function RegistroClub() {
 
   if (exito) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#04060C', fontFamily: "'Inter', system-ui, sans-serif", position: 'relative', overflow: 'hidden' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-app)', fontFamily: "'Inter', system-ui, sans-serif", position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
           <img src="/Tony tech.jpg" alt="" style={{ position: 'absolute', top: '50%', left: '50%', width: '200vmax', height: '200vmax', objectFit: 'cover', animation: 'rotate-bg 90s linear infinite' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(4,6,12,0.88)' }} />
@@ -149,7 +149,7 @@ export default function RegistroClub() {
         <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '48px 56px', background: 'rgba(8,10,20,0.72)', backdropFilter: 'blur(32px)', borderRadius: 24, border: `1px solid ${ac}30`, boxShadow: `0 0 60px ${ac}15` }}>
           <CheckCircle size={60} color="#00D084" style={{ marginBottom: 20, filter: 'drop-shadow(0 0 16px #00D08488)' }} />
           <h2 style={{ color: '#fff', fontSize: 24, fontWeight: 800, marginBottom: 10 }}>¡Club registrado con éxito!</h2>
-          <p style={{ color: '#9CA3AF', fontSize: 15 }}>Redirigiendo a tu dashboard…</p>
+          <p style={{ color: 'var(--text-sec)', fontSize: 15 }}>Redirigiendo a tu dashboard…</p>
         </div>
         <style>{`@keyframes rotate-bg { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }`}</style>
       </div>
@@ -166,7 +166,7 @@ export default function RegistroClub() {
     }}>
 
       {/* ── FONDO ANIMADO ── */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', background: '#04060C' }}>
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', background: 'var(--bg-app)' }}>
         <img
           src="/Tony tech.jpg"
           alt=""
@@ -218,7 +218,7 @@ export default function RegistroClub() {
             </div>
             <div>
               <p style={{ color: '#fff', fontWeight: 800, fontSize: 15, margin: 0, letterSpacing: '-0.2px' }}>ClubContable</p>
-              <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>Para toda América Latina</p>
+              <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0 }}>Para toda América Latina</p>
             </div>
           </div>
 
@@ -229,7 +229,7 @@ export default function RegistroClub() {
             <h2 style={{ color: ac, fontSize: 26, fontWeight: 800, margin: '0 0 10px', letterSpacing: '-0.5px', lineHeight: 1.2, transition: 'color 0.7s' }}>
               en minutos
             </h2>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+            <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: 0, lineHeight: 1.6 }}>
               Configura, personaliza y comienza a gestionar tu club hoy.
             </p>
           </div>
@@ -246,7 +246,7 @@ export default function RegistroClub() {
                 }}>
                   {f.icon}
                 </div>
-                <span style={{ color: '#9CA3AF', fontSize: 13 }}>{f.text}</span>
+                <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{f.text}</span>
               </div>
             ))}
           </div>
@@ -261,7 +261,7 @@ export default function RegistroClub() {
             transition: 'background 0.7s, box-shadow 0.7s',
           }} />
 
-          <p style={{ color: '#374151', fontSize: 11, margin: 0 }}>
+          <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0 }}>
             Sistema de gestión deportiva © 2026
           </p>
         </div>
@@ -275,12 +275,12 @@ export default function RegistroClub() {
           <div style={{ marginBottom: 22 }}>
             <button
               onClick={() => navigate('/login')}
-              style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 14, padding: 0 }}
+              style={{ background: 'none', border: 'none', color: 'var(--text-sec)', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 14, padding: 0 }}
             >
               <ChevronLeft size={15} /> Volver al inicio
             </button>
             <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 800, margin: '0 0 4px' }}>Crear cuenta</h3>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Completa los datos de tu club deportivo</p>
+            <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: 0 }}>Completa los datos de tu club deportivo</p>
           </div>
 
           {error && (
@@ -294,10 +294,10 @@ export default function RegistroClub() {
 
             <SecLabel text="Datos del club" color={ac} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 22 }}>
-              <Campo label="Nombre del club *" icon={<Building2 size={15} color="#6B7280" />}
+              <Campo label="Nombre del club *" icon={<Building2 size={15} color="var(--text-sec)" />}
                 value={form.nombre_club} onChange={v => set('nombre_club', v)}
                 placeholder="Ej: Atlético Central FC" required />
-              <Campo label="Ciudad" icon={<MapPin size={15} color="#6B7280" />}
+              <Campo label="Ciudad" icon={<MapPin size={15} color="var(--text-sec)" />}
                 value={form.ciudad} onChange={v => set('ciudad', v)}
                 placeholder="Ej: Bogotá, Buenos Aires, Lima…" />
             </div>
@@ -331,37 +331,37 @@ export default function RegistroClub() {
                   );
                 })}
               </div>
-              <p style={{ color: '#6B7280', fontSize: 11, margin: '6px 0 0' }}>
+              <p style={{ color: 'var(--text-sec)', fontSize: 11, margin: '6px 0 0' }}>
                 Código WhatsApp: <strong style={{ color: ac, transition: 'color 0.5s' }}>+{pais.codigo}</strong>
               </p>
             </div>
 
             <SecLabel text="Administrador" color={ac} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 22 }}>
-              <Campo label="Tu nombre *" icon={<User size={15} color="#6B7280" />}
+              <Campo label="Tu nombre *" icon={<User size={15} color="var(--text-sec)" />}
                 value={form.nombre_admin} onChange={v => set('nombre_admin', v)}
                 placeholder="Ej: Juan García" required />
-              <Campo label="Celular (WhatsApp)" icon={<Phone size={15} color="#6B7280" />}
+              <Campo label="Celular (WhatsApp)" icon={<Phone size={15} color="var(--text-sec)" />}
                 value={form.celular_admin} onChange={v => set('celular_admin', v)}
                 placeholder={`+${pais.codigo} 300 1234567`} type="tel" />
-              <Campo label="Email *" icon={<Mail size={15} color="#6B7280" />}
+              <Campo label="Email *" icon={<Mail size={15} color="var(--text-sec)" />}
                 value={form.email} onChange={v => set('email', v)}
                 placeholder="tu@email.com" type="email" required />
             </div>
 
             <SecLabel text="Contraseña" color={ac} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 22 }}>
-              <Campo label="Contraseña * (mínimo 8 caracteres)" icon={<Lock size={15} color="#6B7280" />}
+              <Campo label="Contraseña * (mínimo 8 caracteres)" icon={<Lock size={15} color="var(--text-sec)" />}
                 value={form.password} onChange={v => set('password', v)}
                 type="password" required />
-              <Campo label="Confirmar contraseña *" icon={<Lock size={15} color="#6B7280" />}
+              <Campo label="Confirmar contraseña *" icon={<Lock size={15} color="var(--text-sec)" />}
                 value={form.confirmacion} onChange={v => set('confirmacion', v)}
                 type="password" required />
             </div>
 
             <SecLabel text="Color del club" color={ac} />
             <div style={{ marginBottom: 26 }}>
-              <p style={{ color: '#6B7280', fontSize: 12, marginBottom: 12 }}>
+              <p style={{ color: 'var(--text-sec)', fontSize: 12, marginBottom: 12 }}>
                 Aparecerá en tu dashboard y comunicaciones.
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
@@ -396,7 +396,7 @@ export default function RegistroClub() {
                 <div style={{ width: 28, height: 28, borderRadius: 7, background: color, flexShrink: 0, boxShadow: `0 0 12px ${color}88` }} />
                 <div>
                   <p style={{ color: '#fff', fontSize: 13, fontWeight: 600, margin: 0 }}>{colorActivo.nombre}</p>
-                  <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>Color principal del dashboard</p>
+                  <p style={{ color: 'var(--text-sec)', fontSize: 11, margin: 0 }}>Color principal del dashboard</p>
                 </div>
               </div>
             </div>
@@ -422,12 +422,12 @@ export default function RegistroClub() {
             </button>
 
             {slowHint && (
-              <p style={{ textAlign: 'center', color: '#6B7280', fontSize: 12, margin: '0 0 14px', lineHeight: 1.5 }}>
+              <p style={{ textAlign: 'center', color: 'var(--text-sec)', fontSize: 12, margin: '0 0 14px', lineHeight: 1.5 }}>
                 El servidor está despertando, puede tardar unos segundos más…
               </p>
             )}
 
-            <p style={{ textAlign: 'center', color: '#4B5563', fontSize: 13 }}>
+            <p style={{ textAlign: 'center', color: 'var(--text-mut)', fontSize: 13 }}>
               ¿Ya tienes cuenta?{' '}
               <button onClick={() => navigate('/login')}
                 style={{ background: 'none', border: 'none', color: ac, cursor: 'pointer', fontSize: 13, fontWeight: 600, padding: 0, transition: 'color 0.5s' }}>
@@ -478,7 +478,7 @@ function SecLabel({ text, color }) {
 function Campo({ label, icon, type = 'text', value, onChange, placeholder, required = false }) {
   return (
     <div>
-      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#D1D5DB', marginBottom: 7 }}>{label}</label>
+      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-sec)', marginBottom: 7 }}>{label}</label>
       <div style={{ position: 'relative' }}>
         <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>{icon}</span>
         <input

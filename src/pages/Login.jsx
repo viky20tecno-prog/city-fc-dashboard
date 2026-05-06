@@ -121,7 +121,7 @@ export default function Login() {
     }}>
 
       {/* ── FONDO ANIMADO ── */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', background: '#04060C' }}>
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', background: 'var(--bg-app)' }}>
         <img
           src="/Tony tech.jpg"
           alt=""
@@ -174,7 +174,7 @@ export default function Login() {
             </div>
             <div>
               <p style={{ color: '#fff', fontWeight: 800, fontSize: 15, margin: 0, letterSpacing: '-0.2px' }}>ClubContable</p>
-              <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>Para toda América Latina</p>
+              <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0 }}>Para toda América Latina</p>
             </div>
           </div>
 
@@ -186,7 +186,7 @@ export default function Login() {
             <h2 style={{ color, fontSize: 28, fontWeight: 800, margin: '0 0 12px', letterSpacing: '-0.5px', lineHeight: 1.2, transition: 'color 0.7s' }}>
               como un profesional
             </h2>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+            <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: 0, lineHeight: 1.6 }}>
               Cobros, jugadores, uniformes y WhatsApp — todo en un solo lugar.
             </p>
           </div>
@@ -204,7 +204,7 @@ export default function Login() {
                 }}>
                   {f.icon}
                 </div>
-                <span style={{ color: '#9CA3AF', fontSize: 13 }}>{f.text}</span>
+                <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{f.text}</span>
               </div>
             ))}
           </div>
@@ -253,7 +253,7 @@ export default function Login() {
             </svg>
           </div>
 
-          <p style={{ color: '#374151', fontSize: 11, margin: 0 }}>
+          <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0 }}>
             Sistema de gestión deportiva © 2026
           </p>
         </div>
@@ -279,17 +279,17 @@ export default function Login() {
           {vista === 'login' && (
             <>
               <h3 style={{ color: '#fff', fontSize: 22, fontWeight: 800, margin: '0 0 4px' }}>Iniciar Sesión</h3>
-              <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 26px' }}>Accede a tu club deportivo</p>
+              <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: '0 0 26px' }}>Accede a tu club deportivo</p>
 
               <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <Campo label="Email" icon={<Mail size={15} color="#6B7280" />}
+                <Campo label="Email" icon={<Mail size={15} color="var(--text-sec)" />}
                   type="email" value={email} onChange={setEmail}
                   placeholder="tu@email.com" autoComplete="email" required />
 
                 <div>
                   <label style={lbl}>Contraseña</label>
                   <div style={{ position: 'relative' }}>
-                    <span style={icoL}><Lock size={15} color="#6B7280" /></span>
+                    <span style={icoL}><Lock size={15} color="var(--text-sec)" /></span>
                     <input
                       type={verClave ? 'text' : 'password'}
                       value={password}
@@ -299,7 +299,7 @@ export default function Login() {
                       style={{ ...inp, paddingRight: 44 }}
                     />
                     <button type="button" onClick={() => setVerClave(v => !v)}
-                      style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6B7280' }}>
+                      style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--text-sec)' }}>
                       {verClave ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
@@ -308,7 +308,7 @@ export default function Login() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer' }}>
                     <input type="checkbox" style={{ accentColor: color, width: 14, height: 14 }} />
-                    <span style={{ color: '#9CA3AF', fontSize: 13 }}>Recordarme</span>
+                    <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>Recordarme</span>
                   </label>
                   <button type="button" onClick={irRecuperar}
                     style={{ background: 'none', border: 'none', color, fontSize: 13, cursor: 'pointer', padding: 0, transition: 'color 0.5s' }}>
@@ -323,7 +323,7 @@ export default function Login() {
                 </button>
               </form>
 
-              <p style={{ textAlign: 'center', color: '#4B5563', fontSize: 13, marginTop: 18 }}>
+              <p style={{ textAlign: 'center', color: 'var(--text-mut)', fontSize: 13, marginTop: 18 }}>
                 ¿No tienes cuenta?{' '}
                 <button onClick={() => navigate('/registro')}
                   style={{ background: 'none', border: 'none', color, cursor: 'pointer', fontSize: 13, fontWeight: 600, padding: 0, transition: 'color 0.5s' }}>
@@ -340,11 +340,11 @@ export default function Login() {
                 <ArrowLeft size={13} /> Volver
               </button>
               <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 800, margin: '0 0 6px' }}>Recuperar contraseña</h3>
-              <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 22px', lineHeight: 1.6 }}>
+              <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: '0 0 22px', lineHeight: 1.6 }}>
                 Escribe tu correo y te enviamos un enlace para crear una nueva contraseña.
               </p>
               <form onSubmit={handleRecuperar} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <Campo label="Correo electrónico" icon={<Mail size={15} color="#6B7280" />}
+                <Campo label="Correo electrónico" icon={<Mail size={15} color="var(--text-sec)" />}
                   type="email" value={email} onChange={setEmail}
                   placeholder="tu@email.com" autoComplete="email" required />
                 <button type="submit" disabled={loading} style={btn(color, loading)}>
@@ -354,7 +354,7 @@ export default function Login() {
                 </button>
               </form>
               <div style={{ marginTop: 18, padding: '13px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12 }}>
-                <p style={{ color: '#9CA3AF', fontSize: 12, margin: '0 0 9px' }}>¿No recuerdas el correo?</p>
+                <p style={{ color: 'var(--text-sec)', fontSize: 12, margin: '0 0 9px' }}>¿No recuerdas el correo?</p>
                 <a href={`https://wa.me/${WHATSAPP_SOPORTE}?text=Hola, necesito ayuda para recuperar el acceso a mi club en ClubContable`}
                   target="_blank" rel="noopener noreferrer"
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#25D366', color: '#fff', padding: '9px 14px', borderRadius: 10, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
@@ -369,10 +369,10 @@ export default function Login() {
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 46, marginBottom: 14 }}>📬</div>
               <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 8px' }}>¡Revisa tu correo!</h3>
-              <p style={{ color: '#9CA3AF', fontSize: 14, margin: '0 0 4px' }}>Enviamos un enlace a</p>
+              <p style={{ color: 'var(--text-sec)', fontSize: 14, margin: '0 0 4px' }}>Enviamos un enlace a</p>
               <p style={{ color, fontSize: 15, fontWeight: 700, margin: '0 0 18px', transition: 'color 0.5s' }}>{email}</p>
               <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 16px', marginBottom: 18, textAlign: 'left' }}>
-                <p style={{ color: '#9CA3AF', fontSize: 13, margin: 0, lineHeight: 1.8 }}>
+                <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: 0, lineHeight: 1.8 }}>
                   <strong style={{ color: '#fff' }}>Pasos:</strong><br />
                   1. Abre el correo de ClubContable<br />
                   2. Clic en "Restablecer contraseña"<br />
@@ -392,24 +392,24 @@ export default function Login() {
               <div style={{ textAlign: 'center', marginBottom: 22 }}>
                 <KeyRound size={34} color={color} style={{ marginBottom: 8, filter: `drop-shadow(0 0 8px ${color})`, transition: 'all 0.5s' }} />
                 <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>Nueva contraseña</h3>
-                <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Mínimo 8 caracteres</p>
+                <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: 0 }}>Mínimo 8 caracteres</p>
               </div>
               <form onSubmit={handleNuevaClave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
                   <label style={lbl}>Nueva contraseña</label>
                   <div style={{ position: 'relative' }}>
-                    <span style={icoL}><Lock size={15} color="#6B7280" /></span>
+                    <span style={icoL}><Lock size={15} color="var(--text-sec)" /></span>
                     <input type={verNueva ? 'text' : 'password'} value={newPw}
                       onChange={e => setNewPw(e.target.value)}
                       placeholder="Mínimo 8 caracteres" required minLength={8}
                       style={{ ...inp, paddingRight: 44 }} />
                     <button type="button" onClick={() => setVerNueva(v => !v)}
-                      style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6B7280' }}>
+                      style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--text-sec)' }}>
                       {verNueva ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
                 </div>
-                <Campo label="Confirmar contraseña" icon={<Lock size={15} color="#6B7280" />}
+                <Campo label="Confirmar contraseña" icon={<Lock size={15} color="var(--text-sec)" />}
                   type="password" value={confirmPw} onChange={setConfirmPw}
                   placeholder="Repite la contraseña" required />
                 <button type="submit" disabled={loading} style={btn(color, loading)}>
@@ -426,7 +426,7 @@ export default function Login() {
             <div style={{ textAlign: 'center' }}>
               <CheckCircle size={50} color={color} style={{ marginBottom: 14, filter: `drop-shadow(0 0 12px ${color})`, transition: 'all 0.5s' }} />
               <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 10px' }}>¡Contraseña actualizada!</h3>
-              <p style={{ color: '#9CA3AF', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
+              <p style={{ color: 'var(--text-sec)', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
                 Ya puedes ingresar al dashboard con tu nueva contraseña.
               </p>
               <button onClick={irLogin} style={btn(color, false)}>→ Ir al login</button>
@@ -478,7 +478,7 @@ function Campo({ label, icon, type = 'text', value, onChange, placeholder, autoC
 
 const lbl = {
   display: 'block', fontSize: 13, fontWeight: 600,
-  color: '#D1D5DB', marginBottom: 7,
+  color: 'var(--text-sec)', marginBottom: 7,
 };
 
 const icoL = {

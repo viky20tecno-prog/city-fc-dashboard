@@ -2,3 +2,20 @@ node_modules
 dist
 .env
 .env.local
+
+# Herramientas de desarrollo local — no subir al repo
+.claude/
+.agents/
+.augment/
+.aider-desk/
+.codebuddy/
+.codemaker/
+skills/
+skills-lock.json
+whatsapp-agentkit/
+supabase/.temp/
+
+# Archivos locales varios
+documentacion_plataforma.md
+plan_tecnico_clubcontable.md
+"public/Tony tech.jpg"

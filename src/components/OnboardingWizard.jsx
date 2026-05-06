@@ -157,7 +157,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 13, color: '#9CA3AF', marginBottom: 8 }}>
+                <label style={{ display: 'block', fontSize: 13, color: 'var(--text-sec)', marginBottom: 8 }}>
                   Valor de la cuota mensual ({currencyLabel})
                 </label>
                 <input
@@ -171,7 +171,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, color: '#9CA3AF', marginBottom: 8 }}>
+                  <label style={{ display: 'block', fontSize: 13, color: 'var(--text-sec)', marginBottom: 8 }}>
                     Días de gracia antes de mora
                   </label>
                   <input
@@ -183,7 +183,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, color: '#9CA3AF', marginBottom: 8 }}>
+                  <label style={{ display: 'block', fontSize: 13, color: 'var(--text-sec)', marginBottom: 8 }}>
                     Penalidad por mora ({currencyLabel})
                   </label>
                   <input
@@ -198,7 +198,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
 
               <div style={{ padding: '10px 14px', background: 'rgba(245,158,11,0.08)', borderRadius: 10, border: '1px solid rgba(245,158,11,0.2)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <AlertTriangle size={14} color="#F59E0B" style={{ marginTop: 1, flexShrink: 0 }} />
-                <p style={{ fontSize: 12, color: '#9CA3AF', margin: 0, lineHeight: 1.6 }}>
+                <p style={{ fontSize: 12, color: 'var(--text-sec)', margin: 0, lineHeight: 1.6 }}>
                   La mora se aplica automáticamente cuando un jugador supera los días de gracia sin pagar.
                 </p>
               </div>
@@ -272,7 +272,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
               {torneos.map((t, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)' }}>
                   <Trophy size={14} color={c} style={{ flexShrink: 0 }} />
-                  <span style={{ flex: 1, fontSize: 13, color: '#D1D5DB' }}>{t.nombre}</span>
+                  <span style={{ flex: 1, fontSize: 13, color: 'var(--text-sec)' }}>{t.nombre}</span>
                   {t.fecha && <span style={{ fontSize: 11, color: 'var(--text-sec)' }}>{t.fecha}</span>}
                   {t.valor > 0 && <span style={{ fontSize: 11, color: c }}>${t.valor.toLocaleString('es-CO')}</span>}
                   <button

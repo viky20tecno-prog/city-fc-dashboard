@@ -156,14 +156,14 @@ export default function FormInscripcion() {
             <CheckCircle size={36} color={c} />
           </div>
           <h2 style={{ color: '#fff', fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¡Inscripción exitosa!</h2>
-          <p style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 22 }}>
+          <p style={{ color: 'var(--text-sec)', fontSize: 14, marginBottom: 22 }}>
             Bienvenido a <span style={{ color: c, fontWeight: 700 }}>{clubName}</span>
           </p>
           <div style={{ background: `${c}0E`, border: `1px solid ${c}25`, borderRadius: 14, padding: '16px 18px', textAlign: 'left' }}>
             {[['✅','Tu registro fue procesado correctamente'],['📱','Recibirás un mensaje de bienvenida por WhatsApp'],['🏅','¡Ya eres parte del club!']].map(([ico, txt]) => (
               <div key={txt} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 <span style={{ fontSize: 14 }}>{ico}</span>
-                <span style={{ color: '#D1D5DB', fontSize: 13 }}>{txt}</span>
+                <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{txt}</span>
               </div>
             ))}
           </div>
@@ -219,7 +219,7 @@ export default function FormInscripcion() {
 
           {/* ── COLUMNA FOTO ── */}
           <div style={S.photoCol}>
-            <p style={{ color: '#9CA3AF', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>
+            <p style={{ color: 'var(--text-sec)', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>
               Fotografía
             </p>
 
@@ -254,7 +254,7 @@ export default function FormInscripcion() {
                   <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
                     <Upload size={20} color="var(--text-sec)" />
                   </div>
-                  <span style={{ color: '#9CA3AF', fontSize: 13, fontWeight: 500 }}>Subir foto</span>
+                  <span style={{ color: 'var(--text-sec)', fontSize: 13, fontWeight: 500 }}>Subir foto</span>
                   <span style={{ color: 'var(--text-mut)', fontSize: 11, marginTop: 4 }}>o arrastra aquí</span>
                 </>
               )}
@@ -288,7 +288,7 @@ export default function FormInscripcion() {
                   {/* Título de sección */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: sec.hint ? 8 : 14 }}>
                     <div style={{ width: 3, height: 16, background: c, borderRadius: 2, flexShrink: 0 }} />
-                    <span style={{ color: '#D1D5DB', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+                    <span style={{ color: 'var(--text-sec)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>
                       {sec.label}
                     </span>
                   </div>
@@ -297,7 +297,7 @@ export default function FormInscripcion() {
                   {sec.hint && (
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 10px', borderRadius: 8, background: `${c}0D`, border: `1px solid ${c}25`, marginBottom: 12 }}>
                       <Info size={13} color={c} style={{ flexShrink: 0, marginTop: 1 }} />
-                      <span style={{ fontSize: 12, color: '#9CA3AF', lineHeight: 1.55 }}>{sec.hint}</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-sec)', lineHeight: 1.55 }}>{sec.hint}</span>
                     </div>
                   )}
 
@@ -369,7 +369,7 @@ function FieldBox({ campo, form, onChange, c }) {
   const isSelect = campo.type === 'select';
 
   const labelEl = (
-    <label style={{ display: 'block', fontSize: 12, color: '#9CA3AF', marginBottom: 5, fontWeight: 500 }}>
+    <label style={{ display: 'block', fontSize: 12, color: 'var(--text-sec)', marginBottom: 5, fontWeight: 500 }}>
       {campo.label}
       {campo.required && <span style={{ color: '#F87171', marginLeft: 3 }}>*</span>}
     </label>

@@ -34,7 +34,7 @@ const MOTIVO_LABEL = {
 const ORIGEN_CONFIG = {
   TRANSFERENCIA:           { label: 'WhatsApp',    icon: MessageCircle, color: 'text-green-400',  bg: 'bg-green-400/10 border border-green-400/20'   },
   TRANSFERENCIA_EXCEDENTE: { label: 'Saldo favor', icon: Wallet,        color: 'text-[#B68631]',  bg: 'bg-[#B68631]/10 border border-[#B68631]/20'   },
-  MANUAL:                  { label: 'Manual',      icon: Pencil,        color: 'text-[#6A6A6A]',  bg: 'bg-[#6A6A6A]/10 border border-[#6A6A6A]/20'   },
+  MANUAL:                  { label: 'Manual',      icon: Pencil,        color: 'text-[var(--text-sec)]',  bg: 'bg-[var(--text-sec)]/10 border border-[var(--text-sec)]/20'   },
 };
 
 function OrigenBadge({ origen }) {
@@ -49,7 +49,7 @@ function OrigenBadge({ origen }) {
 }
 
 function EmptySection({ texto }) {
-  return <div className="text-center py-6 text-[#6A6A6A] text-sm">{texto}</div>;
+  return <div className="text-center py-6 text-[var(--text-sec)] text-sm">{texto}</div>;
 }
 
 function EstadoBadge({ estado }) {
@@ -66,12 +66,12 @@ function SuspendidoBadge({ motivo, detalle, cancelada }) {
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-        cancelada ? 'bg-[#3A3A3A]/20 text-[#6A6A6A] border-[#3A3A3A]/30'
+        cancelada ? 'bg-[var(--bg-surface)]/20 text-[var(--text-sec)] border-[var(--bg-surface)]/30'
                   : 'bg-yellow-400/10 text-yellow-400 border-yellow-400/20'
       }`}>
         <PauseCircle className="w-3 h-3" /> SUSPENDIDO
       </span>
-      <span className="text-xs text-[#6A6A6A]">
+      <span className="text-xs text-[var(--text-sec)]">
         {MOTIVO_LABEL[motivo] || motivo}{detalle ? ` · ${detalle}` : ''}
         {cancelada && <span className="ml-1 italic">(anulada)</span>}
       </span>
@@ -99,7 +99,7 @@ function SeccionMensualidades({ datos, suspensiones = [] }) {
     <div>
       <div className="flex items-center gap-2 mb-3">
         <Calendar className="w-5 h-5 text-[#E14924]" />
-        <h3 className="text-base font-semibold text-[#F5F5F5]">Mensualidades 2026</h3>
+        <h3 className="text-base font-semibold text-[var(--text-pri)]">Mensualidades 2026</h3>
         {totalSusp > 0 && (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
             <PauseCircle className="w-3 h-3" /> {totalSusp} suspendido{totalSusp > 1 ? 's' : ''}
@@ -108,11 +108,11 @@ function SeccionMensualidades({ datos, suspensiones = [] }) {
       </div>
       <div className="grid grid-cols-2 gap-2 mb-3">
         <div className="bg-[rgba(225,73,36,0.08)] rounded-xl p-3 border border-[#E14924]/20">
-          <p className="text-xs text-[#6A6A6A]">Total pagado</p>
+          <p className="text-xs text-[var(--text-sec)]">Total pagado</p>
           <p className="text-lg font-bold text-[#E14924]">{formatCOP(totalPagado)}</p>
         </div>
         <div className="bg-[rgba(245,158,11,0.08)] rounded-xl p-3 border border-yellow-500/20">
-          <p className="text-xs text-[#6A6A6A]">Saldo pendiente</p>
+          <p className="text-xs text-[var(--text-sec)]">Saldo pendiente</p>
           <p className="text-lg font-bold text-[#F59E0B]">{formatCOP(totalPendiente)}</p>
         </div>
       </div>
@@ -123,18 +123,18 @@ function SeccionMensualidades({ datos, suspensiones = [] }) {
           const totalDeuda = (parseFloat(m.valor_oficial) || 0) + penalidad;
           return (
             <div key={i} className={`p-3 rounded-xl border ${
-              susp ? 'bg-yellow-400/5 border-yellow-400/20' : 'bg-[#1E1E1E] border-[#2A2A2A]'
+              susp ? 'bg-yellow-400/5 border-yellow-400/20' : 'bg-[var(--bg-surface)] border-[var(--bg-surface)]'
             }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <span className="text-sm font-medium text-[#F5F5F5] w-16 flex-shrink-0">{m.mes}</span>
+                  <span className="text-sm font-medium text-[var(--text-pri)] w-16 flex-shrink-0">{m.mes}</span>
                   {susp
                     ? <SuspendidoBadge motivo={susp.motivo} detalle={susp.detalle} cancelada={!susp.activa} />
                     : <EstadoBadge estado={m.estado} />}
                 </div>
-                <p className="text-sm font-medium text-[#F5F5F5] flex-shrink-0 ml-2">
+                <p className="text-sm font-medium text-[var(--text-pri)] flex-shrink-0 ml-2">
                   {formatCOP(m.valor_pagado)}
-                  <span className="text-[#6A6A6A]"> / {formatCOP(totalDeuda)}</span>
+                  <span className="text-[var(--text-sec)]"> / {formatCOP(totalDeuda)}</span>
                 </p>
               </div>
               {penalidad > 0 && (
@@ -177,17 +177,17 @@ function SeccionPedidoUniforme({ cedula }) {
     <div>
       <div className="flex items-center gap-2 mb-3">
         <Shirt className="w-5 h-5 text-[#E14924]" />
-        <h3 className="text-base font-semibold text-[#F5F5F5]">Uniforme</h3>
+        <h3 className="text-base font-semibold text-[var(--text-pri)]">Uniforme</h3>
       </div>
       {cargando ? (
-        <div className="flex items-center gap-2 py-4 text-[#6A6A6A]">
+        <div className="flex items-center gap-2 py-4 text-[var(--text-sec)]">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-sm">Cargando pedido...</span>
         </div>
       ) : !pedido ? (
         <EmptySection texto="Sin pedido de uniforme registrado" />
       ) : (
-        <div className="bg-[#1E1E1E] border border-[#2A2A2A] rounded-xl p-4 space-y-3">
+        <div className="bg-[var(--bg-surface)] border border-[var(--bg-surface)] rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.color}`}>
               {pedido.estado === 'PENDIENTE' && <Clock className="w-3 h-3" />}
@@ -199,26 +199,26 @@ function SeccionPedidoUniforme({ cedula }) {
           </div>
           {prendas.length > 0 && (
             <div>
-              <p className="text-xs text-[#6A6A6A] mb-1.5">Prendas</p>
+              <p className="text-xs text-[var(--text-sec)] mb-1.5">Prendas</p>
               <div className="flex flex-wrap gap-1.5">
                 {prendas.map((p, i) => (
-                  <span key={i} className="px-2.5 py-1 rounded-lg bg-[#141414] border border-[#2A2A2A] text-xs text-[#F5F5F5]">{p}</span>
+                  <span key={i} className="px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--bg-surface)] text-xs text-[var(--text-pri)]">{p}</span>
                 ))}
               </div>
             </div>
           )}
-          <div className="grid grid-cols-3 gap-2 pt-1 border-t border-[#2A2A2A]">
+          <div className="grid grid-cols-3 gap-2 pt-1 border-t border-[var(--bg-surface)]">
             <div>
-              <p className="text-xs text-[#6A6A6A]">Talla</p>
-              <p className="text-sm font-semibold text-[#F5F5F5]">{pedido.talla || '—'}</p>
+              <p className="text-xs text-[var(--text-sec)]">Talla</p>
+              <p className="text-sm font-semibold text-[var(--text-pri)]">{pedido.talla || '—'}</p>
             </div>
             <div>
-              <p className="text-xs text-[#6A6A6A]">Número</p>
-              <p className="text-sm font-semibold text-[#F5F5F5] font-mono">#{pedido.numero_estampar || '—'}</p>
+              <p className="text-xs text-[var(--text-sec)]">Número</p>
+              <p className="text-sm font-semibold text-[var(--text-pri)] font-mono">#{pedido.numero_estampar || '—'}</p>
             </div>
             <div>
-              <p className="text-xs text-[#6A6A6A]">Estampa</p>
-              <p className="text-sm font-semibold text-[#F5F5F5] truncate">{pedido.nombre_estampar || '—'}</p>
+              <p className="text-xs text-[var(--text-sec)]">Estampa</p>
+              <p className="text-sm font-semibold text-[var(--text-pri)] truncate">{pedido.nombre_estampar || '—'}</p>
             </div>
           </div>
         </div>
@@ -233,17 +233,17 @@ function SeccionTorneos({ datos }) {
     <div>
       <div className="flex items-center gap-2 mb-3">
         <Trophy className="w-5 h-5 text-[#B68631]" />
-        <h3 className="text-base font-semibold text-[#F5F5F5]">Torneos</h3>
+        <h3 className="text-base font-semibold text-[var(--text-pri)]">Torneos</h3>
       </div>
       <div className="space-y-2">
         {datos.map((t, i) => (
-          <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-[#1E1E1E] border border-[#2A2A2A]">
+          <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--bg-surface)]">
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-[#F5F5F5]">{t.torneo || 'Torneo'}</span>
+              <span className="text-sm font-medium text-[var(--text-pri)]">{t.torneo || 'Torneo'}</span>
               <EstadoBadge estado={t.estado} />
             </div>
-            <p className="text-sm font-medium text-[#F5F5F5]">
-              {formatCOP(t.valor_pagado)} <span className="text-[#6A6A6A]">/ {formatCOP(t.valor_oficial)}</span>
+            <p className="text-sm font-medium text-[var(--text-pri)]">
+              {formatCOP(t.valor_pagado)} <span className="text-[var(--text-sec)]">/ {formatCOP(t.valor_oficial)}</span>
             </p>
           </div>
         ))}
@@ -287,7 +287,7 @@ function SeccionHistorialLazy({ cedula }) {
   const estadoColor = (e) => {
     if (e?.includes('manual'))     return 'text-[#F59E0B] bg-yellow-500/10';
     if (e?.includes('automatica')) return 'text-green-400 bg-green-400/10';
-    return 'text-[#6A6A6A] bg-[#141414]';
+    return 'text-[var(--text-sec)] bg-[var(--bg-card)]';
   };
   const estadoLabel = (e) => {
     if (e === 'aprobado_manual')          return 'Manual';
@@ -314,8 +314,8 @@ function SeccionHistorialLazy({ cedula }) {
             <FileText className="w-4 h-4 text-[#E14924]" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-semibold text-[#F5F5F5]">Historial de transacciones</p>
-            <p className="text-xs text-[#6A6A6A]">
+            <p className="text-sm font-semibold text-[var(--text-pri)]">Historial de transacciones</p>
+            <p className="text-xs text-[var(--text-sec)]">
               {cargado ? `${transacciones.length} registro${transacciones.length !== 1 ? 's' : ''}` : 'Clic para cargar'}
             </p>
           </div>
@@ -328,7 +328,7 @@ function SeccionHistorialLazy({ cedula }) {
       {visible && (
         <div className="mt-3 space-y-2">
           {cargando && (
-            <div className="flex items-center justify-center py-8 gap-2 text-[#6A6A6A]">
+            <div className="flex items-center justify-center py-8 gap-2 text-[var(--text-sec)]">
               <Loader2 className="w-4 h-4 animate-spin" />
               <span className="text-sm">Cargando historial...</span>
             </div>
@@ -337,27 +337,27 @@ function SeccionHistorialLazy({ cedula }) {
             <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-[#EF4444]">{error}</div>
           )}
           {!cargando && !error && transacciones.length === 0 && (
-            <div className="text-center py-6 text-[#6A6A6A] text-sm">Sin transacciones registradas</div>
+            <div className="text-center py-6 text-[var(--text-sec)] text-sm">Sin transacciones registradas</div>
           )}
           {!cargando && transacciones.map((p, i) => (
-            <div key={i} className="p-3 rounded-xl bg-[#1E1E1E] border border-[#2A2A2A]">
+            <div key={i} className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--bg-surface)]">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-[#F5F5F5]">{formatCOP(p.suma_conceptos || p.monto)}</span>
-                <span className="text-xs text-[#6A6A6A]">
+                <span className="text-sm font-bold text-[var(--text-pri)]">{formatCOP(p.suma_conceptos || p.monto)}</span>
+                <span className="text-xs text-[var(--text-sec)]">
                   {p.fecha_comprobante || p.fecha_proceso || (p.created_at ? new Date(p.created_at).toLocaleDateString('es-CO') : '—')}
                 </span>
               </div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-[#6A6A6A]">{p.banco || '—'}</span>
+                <span className="text-xs text-[var(--text-sec)]">{p.banco || '—'}</span>
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${estadoColor(p.estado_revision)}`}>
                   {estadoLabel(p.estado_revision)}
                 </span>
               </div>
               <div className="flex items-center justify-between mt-1">
-                {p.concepto ? <p className="text-xs text-[#6A6A6A]">{conceptoLabel(p.concepto)}</p> : <span />}
+                {p.concepto ? <p className="text-xs text-[var(--text-sec)]">{conceptoLabel(p.concepto)}</p> : <span />}
                 <OrigenBadge origen={p.tipo_origen} />
               </div>
-              {p.referencia && <p className="text-xs text-[#6A6A6A]">Ref: {p.referencia}</p>}
+              {p.referencia && <p className="text-xs text-[var(--text-sec)]">Ref: {p.referencia}</p>}
               {p.mensaje_alerta && <p className="text-xs text-[#E14924] mt-1 italic">📝 {p.mensaje_alerta}</p>}
               {p.url_comprobante && (
                 <a href={p.url_comprobante} target="_blank" rel="noopener noreferrer"

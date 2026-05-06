@@ -19,7 +19,7 @@ const DEPORTES_STRIP = [
 const FEATURES = [
   {
     icon: Bot,
-    color: '#00AAFF',
+    color: 'var(--cc)',
     title: 'Cobros automáticos por WhatsApp',
     desc: 'Avisos preventivos, recordatorios y alertas de mora enviados automáticamente. Sin llamar a nadie.',
   },
@@ -90,11 +90,11 @@ function DashboardMockup({ color }) {
         </svg>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <span style={{ fontFamily: 'sans-serif', fontSize: 10, fontWeight: 800, color: '#fff', letterSpacing: 2 }}>MI CLUB FC</span>
-          <span style={{ fontSize: 8, color: '#5A5A5A', letterSpacing: 1.5 }}>DEPORTIVO</span>
+          <span style={{ fontSize: 8, color: 'var(--text-mut)', letterSpacing: 1.5 }}>DEPORTIVO</span>
         </div>
         <div style={{ flex: 1 }} />
         <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
-        <span style={{ fontSize: 8, color: '#5A5A5A', letterSpacing: 1 }}>EN VIVO</span>
+        <span style={{ fontSize: 8, color: 'var(--text-mut)', letterSpacing: 1 }}>EN VIVO</span>
         <div style={{ width: 22, height: 22, borderRadius: 6, background: `${color}18`, border: `1px solid ${color}40`, transition: 'all 0.4s' }} />
         <div style={{ width: 22, height: 22, borderRadius: 6, background: `${color}18`, border: `1px solid ${color}40`, transition: 'all 0.4s' }} />
       </div>
@@ -123,7 +123,7 @@ function DashboardMockup({ color }) {
               { label: 'Morosos',   val: '6',  c: '#FF5E5E'},
             ].map(s => (
               <div key={s.label} style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${s.c}28`, borderRadius: 8, padding: '7px 9px', transition: 'border-color 0.4s' }}>
-                <div style={{ fontSize: 8.5, color: '#5A5A5A', marginBottom: 3, letterSpacing: 0.5 }}>{s.label}</div>
+                <div style={{ fontSize: 8.5, color: 'var(--text-mut)', marginBottom: 3, letterSpacing: 0.5 }}>{s.label}</div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: s.c, lineHeight: 1, transition: 'color 0.4s' }}>{s.val}</div>
               </div>
             ))}
@@ -182,7 +182,7 @@ function PaymentDivider() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '14px 0 12px' }}>
       <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
-      <span style={{ fontSize: 11, color: '#4B5563', letterSpacing: 1, whiteSpace: 'nowrap' }}>O PAGA DIRECTAMENTE</span>
+      <span style={{ fontSize: 11, color: 'var(--text-mut)', letterSpacing: 1, whiteSpace: 'nowrap' }}>O PAGA DIRECTAMENTE</span>
       <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
     </div>
   );
@@ -203,7 +203,7 @@ export default function LandingPage() {
       {/* ── NAVBAR ───────────────────────────────────────────────────────── */}
       <nav style={{ borderBottom: '1px solid rgba(0,170,255,0.12)', padding: '0 24px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <button onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: '#9CA3AF', fontSize: 14, cursor: 'pointer', padding: '6px 12px' }}>
+          <button onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: 'var(--text-sec)', fontSize: 14, cursor: 'pointer', padding: '6px 12px' }}>
             Iniciar sesión
           </button>
           <button onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 8, padding: '8px 18px', cursor: 'pointer', transition: 'background 0.3s' }}>
@@ -214,14 +214,14 @@ export default function LandingPage() {
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section style={{ textAlign: 'center', padding: '80px 24px 48px', maxWidth: 760, margin: '0 auto' }}>
-        <div style={{ display: 'inline-block', background: 'rgba(0,170,255,0.1)', border: '1px solid rgba(0,170,255,0.25)', borderRadius: 999, padding: '4px 14px', fontSize: 12, color: '#00AAFF', fontWeight: 600, marginBottom: 20, letterSpacing: 0.5 }}>
+        <div style={{ display: 'inline-block', background: 'rgba(0,170,255,0.1)', border: '1px solid rgba(0,170,255,0.25)', borderRadius: 999, padding: '4px 14px', fontSize: 12, color: 'var(--cc)', fontWeight: 600, marginBottom: 20, letterSpacing: 0.5 }}>
           🏅 5 días gratis · Sin tarjeta de crédito
         </div>
         <h1 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontWeight: 800, lineHeight: 1.1, marginBottom: 20, letterSpacing: '-1px' }}>
           Gestiona tu club deportivo<br />
-          <span style={{ color: '#00AAFF' }}>como un profesional</span>
+          <span style={{ color: 'var(--cc)' }}>como un profesional</span>
         </h1>
-        <p style={{ fontSize: 18, color: '#9CA3AF', lineHeight: 1.6, marginBottom: 36, maxWidth: 560, margin: '0 auto 36px' }}>
+        <p style={{ fontSize: 18, color: 'var(--text-sec)', lineHeight: 1.6, marginBottom: 36, maxWidth: 560, margin: '0 auto 36px' }}>
           Cobros automáticos por WhatsApp, control de mora, carnet digital y más.<br />
           Todo en un solo panel, sin hojas de cálculo.
         </p>
@@ -237,17 +237,17 @@ export default function LandingPage() {
 
       {/* ── DEPORTES ─────────────────────────────────────────────────────── */}
       <section style={{ padding: '0 24px 64px', maxWidth: 900, margin: '0 auto' }}>
-        <p style={{ textAlign: 'center', color: '#4B5563', fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
+        <p style={{ textAlign: 'center', color: 'var(--text-mut)', fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
           Funciona para cualquier disciplina
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
           {DEPORTES_STRIP.map(d => (
-            <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 999, padding: '7px 14px', fontSize: 13, color: '#9CA3AF' }}>
+            <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 999, padding: '7px 14px', fontSize: 13, color: 'var(--text-sec)' }}>
               <span style={{ fontSize: 16 }}>{d.emoji}</span>
               {d.label}
             </div>
           ))}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,170,255,0.07)', border: '1px solid rgba(0,170,255,0.18)', borderRadius: 999, padding: '7px 14px', fontSize: 13, color: '#00AAFF' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,170,255,0.07)', border: '1px solid rgba(0,170,255,0.18)', borderRadius: 999, padding: '7px 14px', fontSize: 13, color: 'var(--cc)' }}>
             + cualquier deporte con afiliados
           </div>
         </div>
@@ -262,7 +262,7 @@ export default function LandingPage() {
                 <Icon size={20} color={color} />
               </div>
               <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 8, lineHeight: 1.3 }}>{title}</h3>
-              <p style={{ fontSize: 13, color: '#9CA3AF', lineHeight: 1.6, margin: 0 }}>{desc}</p>
+              <p style={{ fontSize: 13, color: 'var(--text-sec)', lineHeight: 1.6, margin: 0 }}>{desc}</p>
             </div>
           ))}
         </div>
@@ -272,7 +272,7 @@ export default function LandingPage() {
       <section style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 10 }}>La interfaz con los colores de tu club</h2>
-          <p style={{ color: '#9CA3AF', fontSize: 15, margin: 0 }}>
+          <p style={{ color: 'var(--text-sec)', fontSize: 15, margin: 0 }}>
             Elige tu color al registrarte. Toda la app adopta tu identidad visual.
           </p>
         </div>
@@ -308,11 +308,11 @@ export default function LandingPage() {
               <div style={{ width: 28, height: 28, borderRadius: 8, background: previewColor, boxShadow: `0 0 12px ${previewColor}80`, transition: 'all 0.3s', flexShrink: 0 }} />
               <div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: previewColor, transition: 'color 0.3s' }}>{colorActivo.nombre}</div>
-                <div style={{ fontSize: 12, color: '#4B5563', letterSpacing: 1 }}>{previewColor.toUpperCase()}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-mut)', letterSpacing: 1 }}>{previewColor.toUpperCase()}</div>
               </div>
             </div>
 
-            <p style={{ color: '#4B5563', fontSize: 12, lineHeight: 1.6, maxWidth: 290, margin: 0 }}>
+            <p style={{ color: 'var(--text-mut)', fontSize: 12, lineHeight: 1.6, maxWidth: 290, margin: 0 }}>
               El color se aplica al escudo, barras de navegación, indicadores y acentos.<br />
               Puedes cambiarlo desde configuración en cualquier momento.
             </p>
@@ -327,7 +327,7 @@ export default function LandingPage() {
       <section style={{ padding: '0 24px 80px', maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 10 }}>Activa solo lo que necesitas</h2>
-          <p style={{ color: '#9CA3AF', fontSize: 15, margin: 0 }}>
+          <p style={{ color: 'var(--text-sec)', fontSize: 15, margin: 0 }}>
             3 planes modulares · 5 días gratis · Sin permanencia
           </p>
         </div>
@@ -336,9 +336,9 @@ export default function LandingPage() {
 
           {/* STARTER */}
           <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 20, padding: '28px 24px' }}>
-            <p style={{ color: '#9CA3AF', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Starter</p>
-            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$59.000<span style={{ fontSize: 14, color: '#6B7280', fontWeight: 400 }}>/mes</span></div>
-            <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 24 }}>Para clubes que están empezando a organizarse</p>
+            <p style={{ color: 'var(--text-sec)', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Starter</p>
+            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$59.000<span style={{ fontSize: 14, color: 'var(--text-sec)', fontWeight: 400 }}>/mes</span></div>
+            <p style={{ color: 'var(--text-sec)', fontSize: 13, marginBottom: 24 }}>Para clubes que están empezando a organizarse</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
               {[
                 [true,  'Dashboard y reportes'],
@@ -368,12 +368,12 @@ export default function LandingPage() {
 
           {/* PRO */}
           <div style={{ background: 'rgba(0,170,255,0.06)', border: '2px solid rgba(0,170,255,0.35)', borderRadius: 20, padding: '28px 24px', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: '#00AAFF', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 14px', letterSpacing: 1, whiteSpace: 'nowrap' }}>
+            <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--cc)', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 14px', letterSpacing: 1, whiteSpace: 'nowrap' }}>
               ★ MÁS POPULAR
             </div>
-            <p style={{ color: '#00AAFF', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Pro</p>
-            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$99.000<span style={{ fontSize: 14, color: '#6B7280', fontWeight: 400 }}>/mes</span></div>
-            <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 24 }}>Cobro automático por WhatsApp incluido</p>
+            <p style={{ color: 'var(--cc)', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Pro</p>
+            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$99.000<span style={{ fontSize: 14, color: 'var(--text-sec)', fontWeight: 400 }}>/mes</span></div>
+            <p style={{ color: 'var(--text-sec)', fontSize: 13, marginBottom: 24 }}>Cobro automático por WhatsApp incluido</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
               {[
                 [true,  'Dashboard y reportes'],
@@ -404,8 +404,8 @@ export default function LandingPage() {
           {/* TOTAL */}
           <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 20, padding: '28px 24px' }}>
             <p style={{ color: '#C678FF', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Total</p>
-            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$149.000<span style={{ fontSize: 14, color: '#6B7280', fontWeight: 400 }}>/mes</span></div>
-            <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 24 }}>Acceso completo a todos los módulos</p>
+            <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 4 }}>$149.000<span style={{ fontSize: 14, color: 'var(--text-sec)', fontWeight: 400 }}>/mes</span></div>
+            <p style={{ color: 'var(--text-sec)', fontSize: 13, marginBottom: 24 }}>Acceso completo a todos los módulos</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
               {[
                 [true, 'Dashboard y reportes'],
@@ -419,7 +419,7 @@ export default function LandingPage() {
               ].map(([on, label]) => (
                 <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <CheckCircle size={14} color="#00D084" style={{ flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, color: '#D1D5DB' }}>{label}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-sec)' }}>{label}</span>
                 </div>
               ))}
             </div>
@@ -435,14 +435,14 @@ export default function LandingPage() {
 
         </div>
 
-        <p style={{ textAlign: 'center', color: '#4B5563', fontSize: 13, marginTop: 28 }}>
+        <p style={{ textAlign: 'center', color: 'var(--text-mut)', fontSize: 13, marginTop: 28 }}>
           Todos los planes incluyen soporte por WhatsApp · Cancela cuando quieras
         </p>
       </section>
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '28px 24px', textAlign: 'center' }}>
-        <p style={{ color: '#4B5563', fontSize: 13, margin: '0 0 6px' }}>
+        <p style={{ color: 'var(--text-mut)', fontSize: 13, margin: '0 0 6px' }}>
           ClubContable · Gestión deportiva para toda América Latina 🏅
         </p>
         <p style={{ color: '#2A3A4A', fontSize: 12, margin: '0 0 14px', letterSpacing: 0.5 }}>
@@ -450,8 +450,8 @@ export default function LandingPage() {
           <span style={{ color: '#3B82F6', fontWeight: 700 }}>Zenpra</span>
         </p>
         <div style={{ display: 'flex', gap: 20, justifyContent: 'center' }}>
-          <button onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>Iniciar sesión</button>
-          <button onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>Registrar club</button>
+          <button onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: 'var(--text-sec)', fontSize: 13, cursor: 'pointer' }}>Iniciar sesión</button>
+          <button onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: 'none', border: 'none', color: 'var(--text-sec)', fontSize: 13, cursor: 'pointer' }}>Registrar club</button>
         </div>
       </footer>
     </div>

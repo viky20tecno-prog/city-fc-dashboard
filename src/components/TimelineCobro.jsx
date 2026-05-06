@@ -48,9 +48,9 @@ export default function TimelineCobro({ color = 'var(--cc)' }) {
 
   return (
     <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--cc20)] p-6">
-      <h2 className="text-lg font-semibold text-[#F5F5F5] mb-6">Ciclo de Cobro Automático</h2>
+      <h2 className="text-lg font-semibold text-[var(--text-pri)] mb-6">Ciclo de Cobro Automático</h2>
       <div className="relative">
-        <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-[#2A2A2A]"></div>
+        <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-[var(--bg-surface)]"></div>
         
         <div className="space-y-6">
           {steps.map((step, i) => {
@@ -76,8 +76,8 @@ export default function TimelineCobro({ color = 'var(--cc)' }) {
                 </div>
                 <div className="pt-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-[#F5F5F5]">Día {step.day}</span>
-                    <span className="text-sm text-[#737373]">— {step.label}</span>
+                    <span className="font-semibold text-[var(--text-pri)]">Día {step.day}</span>
+                    <span className="text-sm text-[var(--text-sec)]">— {step.label}</span>
                     {isActive && (
                       <span
                         className="px-2 py-0.5 rounded-full text-xs font-medium"
@@ -85,8 +85,8 @@ export default function TimelineCobro({ color = 'var(--cc)' }) {
                       >HOY</span>
                     )}
                   </div>
-                  <p className="text-sm text-[#737373] mt-0.5">{step.desc}</p>
-                  <p className="text-sm italic text-[#737373] mt-1 bg-[var(--bg-surface)] rounded-lg px-3 py-1.5 inline-block border border-[var(--cc20)]">{step.msg}</p>
+                  <p className="text-sm text-[var(--text-sec)] mt-0.5">{step.desc}</p>
+                  <p className="text-sm italic text-[var(--text-sec)] mt-1 bg-[var(--bg-surface)] rounded-lg px-3 py-1.5 inline-block border border-[var(--cc20)]">{step.msg}</p>
                 </div>
               </div>
             );

@@ -25,7 +25,7 @@ export default function WhatsAppMockup() {
 
   return (
     <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--cc20)] p-6">
-      <h2 className="text-lg font-semibold text-[#F5F5F5] mb-4">Así se ve en WhatsApp</h2>
+      <h2 className="text-lg font-semibold text-[var(--text-pri)] mb-4">Así se ve en WhatsApp</h2>
       
       <div className="max-w-sm mx-auto">
         <div className="bg-[var(--bg-app)] rounded-3xl p-2 shadow-xl border border-[var(--cc20)]">
@@ -52,8 +52,8 @@ export default function WhatsAppMockup() {
                       <span className="text-2xl">🧾</span>
                     </div>
                   ) : null}
-                  <p className="text-sm text-[#F5F5F5] leading-relaxed">{msg.text}</p>
-                  <p className="text-[10px] text-[#737373] text-right mt-1">{msg.time}</p>
+                  <p className="text-sm text-[var(--text-pri)] leading-relaxed">{msg.text}</p>
+                  <p className="text-[10px] text-[var(--text-sec)] text-right mt-1">{msg.time}</p>
                 </div>
               </div>
             ))}
@@ -61,7 +61,7 @@ export default function WhatsAppMockup() {
           
           {/* Input bar */}
           <div className="bg-[#1F2C34] rounded-b-2xl px-3 py-2 flex items-center gap-2">
-            <div className="flex-1 bg-[#2A3942] rounded-full px-4 py-2 text-xs text-[#737373]">Escribe un mensaje...</div>
+            <div className="flex-1 bg-[#2A3942] rounded-full px-4 py-2 text-xs text-[var(--text-sec)]">Escribe un mensaje...</div>
             <div className="w-8 h-8 rounded-full bg-[var(--cc)] flex items-center justify-center">
               <span className="text-white text-sm">🎤</span>
             </div>
@@ -69,7 +69,7 @@ export default function WhatsAppMockup() {
         </div>
       </div>
       
-      <p className="text-center text-xs text-[#737373] mt-4">
+      <p className="text-center text-xs text-[var(--text-sec)] mt-4">
         Todo automático: el bot cobra, recibe el comprobante, valida con IA y confirma al jugador
       </p>
     </div>

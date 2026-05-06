@@ -107,9 +107,9 @@ export default function PedidoUniforme() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex items-center gap-3 mb-2">
             <Shirt className="w-8 h-8 text-[var(--cc)]" />
-            <h1 className="text-3xl font-bold text-[#F5F5F5]">Pedido de Uniforme</h1>
+            <h1 className="text-3xl font-bold text-[var(--text-pri)]">Pedido de Uniforme</h1>
           </div>
-          <p className="text-[#737373]">Registra nuevos pedidos de uniformes para los jugadores</p>
+          <p className="text-[var(--text-sec)]">Registra nuevos pedidos de uniformes para los jugadores</p>
         </div>
       </header>
 
@@ -134,18 +134,18 @@ export default function PedidoUniforme() {
 
             {/* Jugador */}
             <div>
-              <label className="block text-sm font-semibold text-[#F5F5F5] mb-2">
+              <label className="block text-sm font-semibold text-[var(--text-pri)] mb-2">
                 Seleccionar Jugador *
               </label>
               {jugadoresLoading ? (
-                <div className="p-3 bg-[var(--bg-surface)] rounded-lg text-[#737373]">Cargando jugadores...</div>
+                <div className="p-3 bg-[var(--bg-surface)] rounded-lg text-[var(--text-sec)]">Cargando jugadores...</div>
               ) : (
                 <select
                   name="cedula"
                   value={form.cedula}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30 focus:border-[var(--cc)]"
+                  className="w-full px-4 py-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30 focus:border-[var(--cc)]"
                 >
                   <option value="">-- Selecciona un jugador --</option>
                   {jugadores.map(j => (
@@ -165,14 +165,14 @@ export default function PedidoUniforme() {
             <div className="grid grid-cols-2 gap-4">
               {/* Tipo */}
               <div>
-                <label className="block text-sm font-semibold text-[#F5F5F5] mb-2">
+                <label className="block text-sm font-semibold text-[var(--text-pri)] mb-2">
                   Tipo de Uniforme *
                 </label>
                 <select
                   name="tipo"
                   value={form.tipo}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                  className="w-full px-4 py-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
                 >
                   {tiposUniformes.map(t => (
                     <option key={t.valor} value={t.valor}>
@@ -184,14 +184,14 @@ export default function PedidoUniforme() {
 
               {/* Talla */}
               <div>
-                <label className="block text-sm font-semibold text-[#F5F5F5] mb-2">
+                <label className="block text-sm font-semibold text-[var(--text-pri)] mb-2">
                   Talla *
                 </label>
                 <select
                   name="talla"
                   value={form.talla}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                  className="w-full px-4 py-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
                 >
                   {tallas.map(t => (
                     <option key={t} value={t}>{t}</option>
@@ -203,7 +203,7 @@ export default function PedidoUniforme() {
             <div className="grid grid-cols-2 gap-4">
               {/* Nombre a Estampar */}
               <div>
-                <label className="block text-sm font-semibold text-[#F5F5F5] mb-2">
+                <label className="block text-sm font-semibold text-[var(--text-pri)] mb-2">
                   Nombre a Estampar (máx 12) *
                 </label>
                 <input
@@ -214,14 +214,14 @@ export default function PedidoUniforme() {
                   onChange={handleChange}
                   placeholder="Ej: DIEGO"
                   required
-                  className="w-full px-4 py-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                  className="w-full px-4 py-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] placeholder-[var(--text-sec)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
                 />
-                <p className="text-xs text-[#737373] mt-1">{form.nombre_estampar.length}/12</p>
+                <p className="text-xs text-[var(--text-sec)] mt-1">{form.nombre_estampar.length}/12</p>
               </div>
 
               {/* Número */}
               <div>
-                <label className="block text-sm font-semibold text-[#F5F5F5] mb-2">
+                <label className="block text-sm font-semibold text-[var(--text-pri)] mb-2">
                   Número Camiseta (1-99) *
                 </label>
                 <input
@@ -232,7 +232,7 @@ export default function PedidoUniforme() {
                   value={form.numero_estampar}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                  className="w-full px-4 py-3 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
                 />
               </div>
             </div>
@@ -241,11 +241,11 @@ export default function PedidoUniforme() {
             <div className="bg-[var(--bg-app)] rounded-lg p-4 border border-[var(--cc20)]">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-[#737373] mb-1">Tipo Seleccionado</p>
-                  <p className="font-semibold text-[#F5F5F5]">{form.tipo}</p>
+                  <p className="text-xs text-[var(--text-sec)] mb-1">Tipo Seleccionado</p>
+                  <p className="font-semibold text-[var(--text-pri)]">{form.tipo}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-[#737373] mb-1">Valor del Uniforme</p>
+                  <p className="text-xs text-[var(--text-sec)] mb-1">Valor del Uniforme</p>
                   <p className="font-semibold text-[var(--cc)]">${precioActual.toLocaleString()} COP</p>
                 </div>
               </div>
@@ -274,8 +274,8 @@ export default function PedidoUniforme() {
 
         {/* Info */}
         <div className="mt-8 bg-[var(--bg-card)] rounded-xl border border-[var(--cc20)] p-6">
-          <h3 className="font-semibold text-[#F5F5F5] mb-3">📋 ¿Cómo funciona?</h3>
-          <ul className="space-y-2 text-sm text-[#737373]">
+          <h3 className="font-semibold text-[var(--text-pri)] mb-3">📋 ¿Cómo funciona?</h3>
+          <ul className="space-y-2 text-sm text-[var(--text-sec)]">
             <li>✅ Selecciona el jugador</li>
             <li>✅ Elige tipo, talla, número y nombre a estampar</li>
             <li>✅ Haz click "Guardar Pedido"</li>

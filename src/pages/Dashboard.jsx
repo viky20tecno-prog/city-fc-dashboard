@@ -325,21 +325,21 @@ export default function Dashboard() {
         <div style={S.roundBtn} onClick={handleCopyLink} title="Copiar link de inscripción">
           {linkCopied
             ? <Check size={14} color="#22C55E" />
-            : <Copy size={14} color="#7A7A7A" />}
+            : <Copy size={14} color="var(--text-sec)" />}
         </div>
 
         {/* Refresh */}
         <div style={S.roundBtn} onClick={handleRefresh} title="Actualizar datos">
           <RefreshCw
             size={14}
-            color="#7A7A7A"
+            color="var(--text-sec)"
             style={{ animation: (refreshing || loading) ? 'spin 1s linear infinite' : 'none' }}
           />
         </div>
 
         {/* Notificaciones */}
         <div style={S.roundBtn} title="Notificaciones">
-          <Bell size={14} color="#7A7A7A" />
+          <Bell size={14} color="var(--text-sec)" />
           <span style={{
             position: 'absolute', top: '6px', right: '7px',
             width: '6px', height: '6px',
@@ -366,7 +366,7 @@ export default function Dashboard() {
           <Settings size={18} color={showTheme ? c : 'var(--text-mut)'} strokeWidth={1.7} />
         </button>
         <button style={S.iconBtn(false)} title="Cerrar sesión" onClick={handleLogout}>
-          <LogOut size={18} color="#7A7A7A" strokeWidth={1.7} />
+          <LogOut size={18} color="var(--text-sec)" strokeWidth={1.7} />
         </button>
       </nav>
 

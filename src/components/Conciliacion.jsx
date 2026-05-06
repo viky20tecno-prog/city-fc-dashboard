@@ -55,7 +55,7 @@ function ImagenComprobante({ url }) {
           src={url}
           alt="Comprobante"
           onError={() => setImgError(true)}
-          className="h-10 w-16 object-cover rounded-lg border border-[#1A3A5C] group-hover:border-[var(--cc)]/50 transition cursor-pointer"
+          className="h-10 w-16 object-cover rounded-lg border border-[var(--cc20)] group-hover:border-[var(--cc)]/50 transition cursor-pointer"
         />
       </button>
       {open && (
@@ -107,8 +107,8 @@ function EditModal({ pago, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-[#0A1628] border border-[#1A3A5C] rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between p-5 border-b border-[#1A3A5C]">
+      <div className="bg-[#0D1117] border border-[var(--cc20)] rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="flex items-center justify-between p-5 border-b border-[var(--cc20)]">
           <h3 className="text-white font-semibold">Editar pago</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition">✕</button>
         </div>
@@ -129,7 +129,7 @@ function EditModal({ pago, onClose, onSaved }) {
             <select
               value={form.concepto}
               onChange={e => setForm(f => ({ ...f, concepto: e.target.value }))}
-              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
+              className="w-full bg-[#0A0A0A] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
             >
               {CONCEPTOS.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
             </select>
@@ -142,7 +142,7 @@ function EditModal({ pago, onClose, onSaved }) {
               type="number"
               value={form.monto}
               onChange={e => setForm(f => ({ ...f, monto: parseInt(e.target.value) || 0 }))}
-              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
+              className="w-full bg-[#0A0A0A] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
             />
           </div>
 
@@ -153,7 +153,7 @@ function EditModal({ pago, onClose, onSaved }) {
               list="bancos-list"
               value={form.banco}
               onChange={e => setForm(f => ({ ...f, banco: e.target.value }))}
-              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
+              className="w-full bg-[#0A0A0A] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
               placeholder="Efectivo, Transferencia..."
             />
             <datalist id="bancos-list">
@@ -168,7 +168,7 @@ function EditModal({ pago, onClose, onSaved }) {
               type="text"
               value={form.referencia}
               onChange={e => setForm(f => ({ ...f, referencia: e.target.value }))}
-              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
+              className="w-full bg-[#0A0A0A] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
               placeholder="123456789"
             />
           </div>
@@ -176,10 +176,10 @@ function EditModal({ pago, onClose, onSaved }) {
           {error && <p className="text-red-400 text-xs">{error}</p>}
         </div>
 
-        <div className="flex gap-3 p-5 border-t border-[#1A3A5C]">
+        <div className="flex gap-3 p-5 border-t border-[var(--cc20)]">
           <button
             onClick={onClose}
-            className="flex-1 py-2 rounded-xl border border-[#1A3A5C] text-gray-400 text-sm hover:text-white transition"
+            className="flex-1 py-2 rounded-xl border border-[var(--cc20)] text-gray-400 text-sm hover:text-white transition"
           >
             Cancelar
           </button>
@@ -205,7 +205,7 @@ function PagoRow({ pago, onEdit, onAction, actionLoading }) {
   const isPendiente = pago.estado_revision === 'pendiente' || pago.estado_revision === 'excedente_pendiente';
 
   return (
-    <tr className="border-b border-[#1A3A5C]/40 hover:bg-white/[0.02] transition-colors">
+    <tr className="border-b border-[var(--cc20)] hover:bg-white/[0.02] transition-colors">
       {/* Fecha */}
       <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">{formatDate(pago.created_at)}</td>
 
@@ -359,7 +359,7 @@ export default function Conciliacion({ color = 'var(--cc)' }) {
         </div>
         <button
           onClick={cargarPagos}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#1A3A5C] text-gray-400 hover:text-white text-sm transition"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[var(--cc20)] text-gray-400 hover:text-white text-sm transition"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Actualizar
@@ -393,7 +393,7 @@ export default function Conciliacion({ color = 'var(--cc)' }) {
       </div>
 
       {/* Tabla */}
-      <div className="bg-[#0A1628] border border-[#1A3A5C] rounded-2xl overflow-hidden">
+      <div className="bg-[#0D1117] border border-[var(--cc20)] rounded-2xl overflow-hidden">
         {error && (
           <div className="flex items-center gap-2 p-4 text-red-400 text-sm">
             <AlertCircle className="w-4 h-4" /> {error}
@@ -413,7 +413,7 @@ export default function Conciliacion({ color = 'var(--cc)' }) {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#1A3A5C] text-left">
+                <tr className="border-b border-[var(--cc20)] text-left">
                   {['Fecha', 'Jugador', 'Concepto', 'Monto', 'Banco', 'Referencia', 'Comprobante', 'Acciones'].map(h => (
                     <th key={h} className="px-4 py-3 text-xs text-gray-500 font-medium uppercase tracking-wider">
                       {h}
@@ -438,7 +438,7 @@ export default function Conciliacion({ color = 'var(--cc)' }) {
 
         {/* Footer con total */}
         {pagos.length > 0 && (
-          <div className="px-4 py-3 border-t border-[#1A3A5C]/50 flex items-center justify-between">
+          <div className="px-4 py-3 border-t border-[var(--cc20)] flex items-center justify-between">
             <span className="text-xs text-gray-500">{pagos.length} registros</span>
             <span className="text-sm font-semibold text-white">
               Total: {formatMoney(pagos.reduce((s, p) => s + Number(p.monto || 0), 0))}

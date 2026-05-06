@@ -1,13 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Loader2, Eye, EyeOff, Mail, Lock, CheckCircle, KeyRound, ArrowLeft, MessageCircle } from 'lucide-react';
+import {
+  Loader2, Eye, EyeOff, Mail, Lock, CheckCircle, KeyRound,
+  ArrowLeft, MessageCircle, Target, Trophy, Dumbbell, Bike, Waves, MoreHorizontal,
+} from 'lucide-react';
 
 const WHATSAPP_SOPORTE = '573023903192';
 
+const DEPORTES = [
+  { id: 'futbol',   label: 'Fútbol',     Icon: Target,         color: '#22C55E' },
+  { id: 'basket',   label: 'Basketball', Icon: Trophy,         color: '#F97316' },
+  { id: 'gimnasio', label: 'Gimnasio',   Icon: Dumbbell,       color: '#EC4899' },
+  { id: 'ciclismo', label: 'Ciclismo',   Icon: Bike,           color: '#06B6D4' },
+  { id: 'natacion', label: 'Natación',   Icon: Waves,          color: '#00AAFF' },
+  { id: 'otros',    label: 'Otros',      Icon: MoreHorizontal, color: '#8B5CF6' },
+];
+
 export default function Login() {
   const navigate = useNavigate();
-  const [vista, setVista]         = useState('login'); // login | recuperar | enviado | nueva_clave | actualizada
+  const [sport, setSport]         = useState(DEPORTES[0]);
+  const [vista, setVista]         = useState('login');
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
   const [verClave, setVerClave]   = useState(false);
@@ -17,7 +30,8 @@ export default function Login() {
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState('');
 
-  // Detecta el token de recuperación que viene en la URL al hacer click en el email
+  const color = sport.color;
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setVista('nueva_clave');
@@ -27,24 +41,20 @@ export default function Login() {
 
   const limpiar = () => setError('');
 
-  // ── Login normal ──────────────────────────────────────────────────────────
   const handleLogin = async (e) => {
     e.preventDefault();
     limpiar();
     setLoading(true);
     await supabase.auth.signOut();
-
     const { data, error: authError } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
     });
-
     if (authError) {
       setError('El email o la contraseña no son correctos. Verifícalos e intenta de nuevo.');
       setLoading(false);
       return;
     }
-
     const userId = data?.user?.id;
     let clubId = 'city-fc';
     if (userId) {
@@ -56,7 +66,6 @@ export default function Login() {
     navigate('/');
   };
 
-  // ── Enviar email de recuperación ──────────────────────────────────────────
   const handleRecuperar = async (e) => {
     e.preventDefault();
     limpiar();
@@ -74,12 +83,11 @@ export default function Login() {
     }
   };
 
-  // ── Guardar nueva contraseña ───────────────────────────────────────────────
   const handleNuevaClave = async (e) => {
     e.preventDefault();
     limpiar();
     if (newPw.length < 8) { setError('La contraseña debe tener mínimo 8 caracteres.'); return; }
-    if (newPw !== confirmPw) { setError('Las contraseñas no coinciden. Verifícalas.'); return; }
+    if (newPw !== confirmPw) { setError('Las contraseñas no coinciden.'); return; }
     setLoading(true);
     const { error: updateError } = await supabase.auth.updateUser({ password: newPw });
     setLoading(false);
@@ -87,280 +95,316 @@ export default function Login() {
     else setVista('actualizada');
   };
 
-  const irLogin    = () => { setVista('login'); limpiar(); };
+  const irLogin     = () => { setVista('login');     limpiar(); };
   const irRecuperar = () => { setVista('recuperar'); limpiar(); };
 
-  // ─────────────────────────────────────────────────────────────────────────
   return (
     <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(160deg, #060C18 0%, #0A1628 60%, #060C18 100%)',
-      display: 'flex', flexDirection: 'column',
+      minHeight: '100vh', display: 'flex',
       alignItems: 'center', justifyContent: 'center',
       fontFamily: "'Inter', system-ui, sans-serif",
+      position: 'relative', overflow: 'hidden',
       padding: '24px 16px',
     }}>
 
-      {/* Logo */}
-      <div style={{ textAlign: 'center', marginBottom: 32 }}>
+      {/* ── FONDO ANIMADO ── */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', background: '#04060C' }}>
+        <img
+          src="/Tony tech.jpg"
+          alt=""
+          style={{
+            position: 'absolute',
+            top: '50%', left: '50%',
+            width: '200vmax', height: '200vmax',
+            objectFit: 'cover',
+            animation: 'rotate-bg 90s linear infinite',
+          }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(4, 6, 12, 0.80)' }} />
         <div style={{
-          width: 72, height: 72, borderRadius: 20,
-          background: 'rgba(0,170,255,0.12)', border: '1px solid rgba(0,170,255,0.25)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 16px',
-        }}>
-          <img src="/10894351.png" alt="ClubContable" style={{ width: 46, height: 46, objectFit: 'contain' }}
-            onError={e => { e.target.style.display = 'none'; }} />
-        </div>
-        <h1 style={{ color: '#fff', fontSize: 26, fontWeight: 800, margin: 0 }}>ClubContable</h1>
-        <p style={{ color: '#6B7280', fontSize: 14, margin: '6px 0 0' }}>
-          Panel de gestión para tu club de fútbol
-        </p>
+          position: 'absolute', inset: 0,
+          background: `radial-gradient(ellipse at 60% 50%, ${color}12 0%, transparent 60%)`,
+          transition: 'background 0.7s ease',
+          pointerEvents: 'none',
+        }} />
       </div>
 
-      {/* ── CARD ── */}
+      {/* ── CARD SPLIT ── */}
       <div style={{
-        width: '100%', maxWidth: 420,
-        background: 'rgba(10,22,40,0.9)',
-        border: '1px solid rgba(0,170,255,0.15)',
-        borderRadius: 20, padding: '32px 28px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+        position: 'relative', zIndex: 10,
+        width: '100%', maxWidth: 880,
+        display: 'grid', gridTemplateColumns: '1fr 1px 1fr',
+        background: 'rgba(8, 10, 20, 0.72)',
+        backdropFilter: 'blur(32px)',
+        WebkitBackdropFilter: 'blur(32px)',
+        border: `1px solid ${color}30`,
+        borderRadius: 24,
+        boxShadow: `0 0 80px ${color}15, 0 32px 80px rgba(0,0,0,0.55)`,
+        overflow: 'hidden',
+        transition: 'border-color 0.5s, box-shadow 0.5s',
+        minHeight: 500,
       }}>
 
-        {/* Error */}
-        {error && (
-          <div style={{
-            background: 'rgba(255,94,94,0.1)', border: '1px solid rgba(255,94,94,0.25)',
-            borderRadius: 12, padding: '14px 16px', marginBottom: 20,
-            display: 'flex', gap: 10, alignItems: 'flex-start',
-          }}>
-            <span style={{ fontSize: 18, flexShrink: 0 }}>⚠️</span>
-            <p style={{ color: '#FF7070', fontSize: 14, margin: 0, lineHeight: 1.5 }}>{error}</p>
-          </div>
-        )}
-
-        {/* ═══════════ VISTA: LOGIN ═══════════ */}
-        {vista === 'login' && (
-          <>
-            <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 6px' }}>
+        {/* ── PANEL IZQ: selector deportes ── */}
+        <div style={{ padding: '44px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div>
+            <h2 style={{ color: '#fff', fontSize: 30, fontWeight: 800, margin: '0 0 6px', letterSpacing: '-0.5px' }}>
               Bienvenido
             </h2>
-            <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 24px' }}>
-              Ingresa con el correo y contraseña de tu club
+            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>
+              Selecciona la categoría de tu club
             </p>
+          </div>
 
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <Campo
-                label="Correo electrónico"
-                icon={<Mail size={17} color="#4B7CAF" />}
-                type="email"
-                value={email}
-                onChange={setEmail}
-                placeholder="ejemplo@correo.com"
-                autoComplete="email"
-                required
-              />
-              <div>
-                <label style={labelStyle}>Contraseña</label>
-                <div style={{ position: 'relative' }}>
-                  <span style={iconLeft}><Lock size={17} color="#4B7CAF" /></span>
-                  <input
-                    type={verClave ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="Tu contraseña"
-                    required
-                    autoComplete="current-password"
-                    style={{ ...inputStyle, paddingLeft: 44, paddingRight: 44 }}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {DEPORTES.map(d => {
+              const active = sport.id === d.id;
+              return (
+                <button
+                  key={d.id}
+                  onClick={() => setSport(d)}
+                  style={{
+                    background: active ? `${d.color}20` : 'rgba(255,255,255,0.04)',
+                    border: `1.5px solid ${active ? d.color : 'rgba(255,255,255,0.07)'}`,
+                    borderRadius: 14,
+                    padding: '16px 10px',
+                    cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', gap: 8,
+                    transition: 'all 0.25s',
+                    boxShadow: active ? `0 0 22px ${d.color}44` : 'none',
+                  }}
+                >
+                  <d.Icon
+                    size={22}
+                    color={active ? d.color : '#4B5563'}
+                    style={{
+                      transition: 'color 0.25s',
+                      filter: active ? `drop-shadow(0 0 6px ${d.color})` : 'none',
+                    }}
                   />
-                  <button type="button" onClick={() => setVerClave(v => !v)}
-                    style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#4B7CAF' }}>
-                    {verClave ? <EyeOff size={17} /> : <Eye size={17} />}
+                  <span style={{
+                    color: active ? d.color : '#6B7280',
+                    fontSize: 12, fontWeight: active ? 700 : 400,
+                    transition: 'color 0.25s',
+                  }}>
+                    {d.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <p style={{ color: '#374151', fontSize: 11, margin: '0 0 0', marginTop: 'auto' }}>
+            Sistema de gestión para clubes deportivos © 2026
+          </p>
+        </div>
+
+        {/* Divisor vertical */}
+        <div style={{ background: `${color}22`, transition: 'background 0.5s' }} />
+
+        {/* ── PANEL DER: formulario ── */}
+        <div style={{ padding: '44px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+
+          {error && (
+            <div style={{
+              background: 'rgba(255,94,94,0.1)', border: '1px solid rgba(255,94,94,0.25)',
+              borderRadius: 12, padding: '11px 14px', marginBottom: 18,
+              display: 'flex', gap: 10, alignItems: 'flex-start',
+            }}>
+              <span style={{ fontSize: 15, flexShrink: 0 }}>⚠️</span>
+              <p style={{ color: '#FF7070', fontSize: 13, margin: 0, lineHeight: 1.5 }}>{error}</p>
+            </div>
+          )}
+
+          {/* ══ LOGIN ══ */}
+          {vista === 'login' && (
+            <>
+              <h3 style={{ color: '#fff', fontSize: 22, fontWeight: 800, margin: '0 0 4px' }}>Iniciar Sesión</h3>
+              <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 26px' }}>Accede a tu club deportivo</p>
+
+              <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Campo label="Email" icon={<Mail size={15} color="#6B7280" />}
+                  type="email" value={email} onChange={setEmail}
+                  placeholder="tu@email.com" autoComplete="email" required />
+
+                <div>
+                  <label style={lbl}>Contraseña</label>
+                  <div style={{ position: 'relative' }}>
+                    <span style={icoL}><Lock size={15} color="#6B7280" /></span>
+                    <input
+                      type={verClave ? 'text' : 'password'}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required autoComplete="current-password"
+                      style={{ ...inp, paddingRight: 44 }}
+                    />
+                    <button type="button" onClick={() => setVerClave(v => !v)}
+                      style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6B7280' }}>
+                      {verClave ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer' }}>
+                    <input type="checkbox" style={{ accentColor: color, width: 14, height: 14 }} />
+                    <span style={{ color: '#9CA3AF', fontSize: 13 }}>Recordarme</span>
+                  </label>
+                  <button type="button" onClick={irRecuperar}
+                    style={{ background: 'none', border: 'none', color, fontSize: 13, cursor: 'pointer', padding: 0 }}>
+                    ¿Olvidaste tu contraseña?
                   </button>
                 </div>
+
+                <button type="submit" disabled={loading} style={btn(color, loading)}>
+                  {loading
+                    ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Ingresando...</>
+                    : 'Ingresar al Club'}
+                </button>
+              </form>
+
+              <p style={{ textAlign: 'center', color: '#4B5563', fontSize: 13, marginTop: 18 }}>
+                ¿No tienes cuenta?{' '}
+                <button onClick={() => navigate('/registro')}
+                  style={{ background: 'none', border: 'none', color, cursor: 'pointer', fontSize: 13, fontWeight: 600, padding: 0 }}>
+                  Regístrate aquí
+                </button>
+              </p>
+            </>
+          )}
+
+          {/* ══ RECUPERAR ══ */}
+          {vista === 'recuperar' && (
+            <>
+              <button onClick={irLogin} style={{ background: 'none', border: 'none', color, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, marginBottom: 18, padding: 0 }}>
+                <ArrowLeft size={13} /> Volver
+              </button>
+              <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 800, margin: '0 0 6px' }}>Recuperar contraseña</h3>
+              <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 22px', lineHeight: 1.6 }}>
+                Escribe tu correo y te enviamos un enlace para crear una nueva contraseña.
+              </p>
+              <form onSubmit={handleRecuperar} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <Campo label="Correo electrónico" icon={<Mail size={15} color="#6B7280" />}
+                  type="email" value={email} onChange={setEmail}
+                  placeholder="tu@email.com" autoComplete="email" required />
+                <button type="submit" disabled={loading} style={btn(color, loading)}>
+                  {loading
+                    ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Enviando...</>
+                    : '📧  Enviar enlace de recuperación'}
+                </button>
+              </form>
+              <div style={{ marginTop: 18, padding: '13px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12 }}>
+                <p style={{ color: '#9CA3AF', fontSize: 12, margin: '0 0 9px' }}>¿No recuerdas el correo?</p>
+                <a href={`https://wa.me/${WHATSAPP_SOPORTE}?text=Hola, necesito ayuda para recuperar el acceso a mi club en ClubContable`}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#25D366', color: '#fff', padding: '9px 14px', borderRadius: 10, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
+                  <MessageCircle size={13} /> Soporte por WhatsApp
+                </a>
               </div>
+            </>
+          )}
 
-              <button type="submit" disabled={loading} style={btnPrimary(loading)}>
-                {loading
-                  ? <><Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> Ingresando...</>
-                  : '→  Ingresar al dashboard'}
+          {/* ══ EMAIL ENVIADO ══ */}
+          {vista === 'enviado' && (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 46, marginBottom: 14 }}>📬</div>
+              <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 8px' }}>¡Revisa tu correo!</h3>
+              <p style={{ color: '#9CA3AF', fontSize: 14, margin: '0 0 4px' }}>Enviamos un enlace a</p>
+              <p style={{ color, fontSize: 15, fontWeight: 700, margin: '0 0 18px', transition: 'color 0.4s' }}>{email}</p>
+              <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 16px', marginBottom: 18, textAlign: 'left' }}>
+                <p style={{ color: '#9CA3AF', fontSize: 13, margin: 0, lineHeight: 1.8 }}>
+                  <strong style={{ color: '#fff' }}>Pasos:</strong><br />
+                  1. Abre el correo de ClubContable<br />
+                  2. Clic en "Restablecer contraseña"<br />
+                  3. Escribe tu nueva contraseña<br />
+                  4. Listo — ingresa al dashboard
+                </p>
+              </div>
+              <button onClick={irRecuperar} style={{ background: 'none', border: 'none', color, fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}>
+                Reenviar el correo
               </button>
-            </form>
-
-            <div style={{ marginTop: 20, textAlign: 'center' }}>
-              <button onClick={irRecuperar} style={btnLink}>
-                ¿Olvidaste tu contraseña? Recupérala aquí
-              </button>
             </div>
-          </>
-        )}
+          )}
 
-        {/* ═══════════ VISTA: RECUPERAR ═══════════ */}
-        {vista === 'recuperar' && (
-          <>
-            <button onClick={irLogin} style={{ ...btnLink, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, fontSize: 13 }}>
-              <ArrowLeft size={14} /> Volver al login
-            </button>
-
-            <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 8px' }}>
-              Recuperar contraseña
-            </h2>
-            <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
-              Escribe el correo con el que registraste tu club. Te enviaremos un enlace para crear una nueva contraseña.
-            </p>
-
-            <form onSubmit={handleRecuperar} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <Campo
-                label="Correo electrónico del club"
-                icon={<Mail size={17} color="#4B7CAF" />}
-                type="email"
-                value={email}
-                onChange={setEmail}
-                placeholder="ejemplo@correo.com"
-                autoComplete="email"
-                required
-              />
-              <button type="submit" disabled={loading} style={btnPrimary(loading)}>
-                {loading
-                  ? <><Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> Enviando...</>
-                  : '📧  Enviar enlace de recuperación'}
-              </button>
-            </form>
-
-            <div style={{ marginTop: 24, padding: '16px', background: 'rgba(0,170,255,0.06)', border: '1px solid rgba(0,170,255,0.15)', borderRadius: 12 }}>
-              <p style={{ color: '#9CA3AF', fontSize: 13, margin: '0 0 10px', lineHeight: 1.5 }}>
-                ¿No recuerdas el correo o no llega el email?
-              </p>
-              <a
-                href={`https://wa.me/${WHATSAPP_SOPORTE}?text=Hola, necesito ayuda para recuperar el acceso a mi club en ClubContable`}
-                target="_blank" rel="noopener noreferrer"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#25D366', color: '#fff', padding: '10px 16px', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
-                <MessageCircle size={15} /> Contactar soporte por WhatsApp
-              </a>
-            </div>
-          </>
-        )}
-
-        {/* ═══════════ VISTA: EMAIL ENVIADO ═══════════ */}
-        {vista === 'enviado' && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 56, marginBottom: 16 }}>📬</div>
-            <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 12px' }}>
-              ¡Revisa tu correo!
-            </h2>
-            <p style={{ color: '#9CA3AF', fontSize: 15, lineHeight: 1.7, margin: '0 0 8px' }}>
-              Enviamos un enlace a
-            </p>
-            <p style={{ color: '#00AAFF', fontSize: 16, fontWeight: 700, margin: '0 0 20px' }}>
-              {email}
-            </p>
-            <div style={{ background: 'rgba(0,170,255,0.06)', border: '1px solid rgba(0,170,255,0.15)', borderRadius: 12, padding: 16, marginBottom: 24, textAlign: 'left' }}>
-              <p style={{ color: '#9CA3AF', fontSize: 13, margin: 0, lineHeight: 1.8 }}>
-                <strong style={{ color: '#fff' }}>Pasos a seguir:</strong><br />
-                1. Abre el correo de ClubContable<br />
-                2. Haz clic en el botón "Restablecer contraseña"<br />
-                3. Se abrirá esta misma página con un formulario<br />
-                4. Escribe y confirma tu nueva contraseña
-              </p>
-            </div>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 16px' }}>
-              ¿No llegó? Revisa la carpeta de spam o espera unos minutos.
-            </p>
-            <button onClick={irRecuperar} style={btnLink}>
-              Reenviar el correo
-            </button>
-          </div>
-        )}
-
-        {/* ═══════════ VISTA: NUEVA CONTRASEÑA ═══════════ */}
-        {vista === 'nueva_clave' && (
-          <>
-            <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <KeyRound size={40} color="#00AAFF" style={{ marginBottom: 12 }} />
-              <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 8px' }}>
-                Crea tu nueva contraseña
-              </h2>
-              <p style={{ color: '#6B7280', fontSize: 14, margin: 0 }}>
-                Elige una contraseña segura de mínimo 8 caracteres
-              </p>
-            </div>
-
-            <form onSubmit={handleNuevaClave} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <div>
-                <label style={labelStyle}>Nueva contraseña</label>
-                <div style={{ position: 'relative' }}>
-                  <span style={iconLeft}><Lock size={17} color="#4B7CAF" /></span>
-                  <input
-                    type={verNueva ? 'text' : 'password'}
-                    value={newPw}
-                    onChange={e => setNewPw(e.target.value)}
-                    placeholder="Mínimo 8 caracteres"
-                    required minLength={8}
-                    style={{ ...inputStyle, paddingLeft: 44, paddingRight: 44 }}
-                  />
-                  <button type="button" onClick={() => setVerNueva(v => !v)}
-                    style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#4B7CAF' }}>
-                    {verNueva ? <EyeOff size={17} /> : <Eye size={17} />}
-                  </button>
+          {/* ══ NUEVA CONTRASEÑA ══ */}
+          {vista === 'nueva_clave' && (
+            <>
+              <div style={{ textAlign: 'center', marginBottom: 22 }}>
+                <KeyRound size={34} color={color} style={{ marginBottom: 8, filter: `drop-shadow(0 0 8px ${color})`, transition: 'filter 0.4s' }} />
+                <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>Nueva contraseña</h3>
+                <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Mínimo 8 caracteres</p>
+              </div>
+              <form onSubmit={handleNuevaClave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div>
+                  <label style={lbl}>Nueva contraseña</label>
+                  <div style={{ position: 'relative' }}>
+                    <span style={icoL}><Lock size={15} color="#6B7280" /></span>
+                    <input type={verNueva ? 'text' : 'password'} value={newPw}
+                      onChange={e => setNewPw(e.target.value)}
+                      placeholder="Mínimo 8 caracteres" required minLength={8}
+                      style={{ ...inp, paddingRight: 44 }} />
+                    <button type="button" onClick={() => setVerNueva(v => !v)}
+                      style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#6B7280' }}>
+                      {verNueva ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <Campo
-                label="Confirmar contraseña"
-                icon={<Lock size={17} color="#4B7CAF" />}
-                type="password"
-                value={confirmPw}
-                onChange={setConfirmPw}
-                placeholder="Repite la contraseña"
-                required
-              />
-              <button type="submit" disabled={loading} style={btnPrimary(loading)}>
-                {loading
-                  ? <><Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> Guardando...</>
-                  : '✓  Guardar nueva contraseña'}
-              </button>
-            </form>
-          </>
-        )}
+                <Campo label="Confirmar contraseña" icon={<Lock size={15} color="#6B7280" />}
+                  type="password" value={confirmPw} onChange={setConfirmPw}
+                  placeholder="Repite la contraseña" required />
+                <button type="submit" disabled={loading} style={btn(color, loading)}>
+                  {loading
+                    ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Guardando...</>
+                    : '✓  Guardar nueva contraseña'}
+                </button>
+              </form>
+            </>
+          )}
 
-        {/* ═══════════ VISTA: CONTRASEÑA ACTUALIZADA ═══════════ */}
-        {vista === 'actualizada' && (
-          <div style={{ textAlign: 'center' }}>
-            <CheckCircle size={56} color="#00D084" style={{ marginBottom: 16 }} />
-            <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 12px' }}>
-              ¡Contraseña actualizada!
-            </h2>
-            <p style={{ color: '#9CA3AF', fontSize: 15, margin: '0 0 28px', lineHeight: 1.6 }}>
-              Tu nueva contraseña quedó guardada. Ya puedes ingresar al dashboard.
-            </p>
-            <button onClick={irLogin} style={btnPrimary(false)}>
-              → Ir al login
-            </button>
-          </div>
-        )}
+          {/* ══ ACTUALIZADA ══ */}
+          {vista === 'actualizada' && (
+            <div style={{ textAlign: 'center' }}>
+              <CheckCircle size={50} color={color} style={{ marginBottom: 14, filter: `drop-shadow(0 0 12px ${color})`, transition: 'filter 0.4s' }} />
+              <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 10px' }}>¡Contraseña actualizada!</h3>
+              <p style={{ color: '#9CA3AF', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
+                Ya puedes ingresar al dashboard con tu nueva contraseña.
+              </p>
+              <button onClick={irLogin} style={btn(color, false)}>→ Ir al login</button>
+            </div>
+          )}
 
+        </div>
       </div>
 
-      {/* Footer */}
-      <p style={{ color: '#374151', fontSize: 12, marginTop: 24, textAlign: 'center' }}>
-        ClubContable · Para clubes de toda América Latina ⚽
-      </p>
-
       <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        input::placeholder { color: #4B5563; }
-        input:focus { outline: none; border-color: #00AAFF !important; box-shadow: 0 0 0 3px rgba(0,170,255,0.1); }
+        @keyframes rotate-bg {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to   { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        input::placeholder { color: #374151; }
+        input:focus {
+          outline: none;
+          border-color: ${color} !important;
+          box-shadow: 0 0 0 3px ${color}22;
+        }
       `}</style>
     </div>
   );
 }
 
-// ─── Componente campo reutilizable ─────────────────────────────────────────
+// ── Componente Campo ───────────────────────────────────────────────────────
 function Campo({ label, icon, type = 'text', value, onChange, placeholder, autoComplete, required }) {
   return (
     <div>
-      <label style={labelStyle}>{label}</label>
+      <label style={lbl}>{label}</label>
       <div style={{ position: 'relative' }}>
-        <span style={iconLeft}>{icon}</span>
+        <span style={icoL}>{icon}</span>
         <input
           type={type}
           value={value}
@@ -368,49 +412,45 @@ function Campo({ label, icon, type = 'text', value, onChange, placeholder, autoC
           placeholder={placeholder}
           autoComplete={autoComplete}
           required={required}
-          style={{ ...inputStyle, paddingLeft: 44 }}
+          style={inp}
         />
       </div>
     </div>
   );
 }
 
-// ─── Estilos compartidos ───────────────────────────────────────────────────
-const labelStyle = {
+// ── Estilos ────────────────────────────────────────────────────────────────
+const lbl = {
   display: 'block', fontSize: 13, fontWeight: 600,
-  color: '#9CA3AF', marginBottom: 8,
+  color: '#D1D5DB', marginBottom: 7,
 };
 
-const inputStyle = {
-  width: '100%', boxSizing: 'border-box',
-  background: 'rgba(255,255,255,0.04)',
-  border: '1.5px solid rgba(0,170,255,0.2)',
-  borderRadius: 12, padding: '13px 16px',
-  fontSize: 15, color: '#fff',
-  transition: 'border-color 0.2s, box-shadow 0.2s',
-};
-
-const iconLeft = {
-  position: 'absolute', left: 14,
+const icoL = {
+  position: 'absolute', left: 13,
   top: '50%', transform: 'translateY(-50%)',
   pointerEvents: 'none',
 };
 
-const btnPrimary = (disabled) => ({
-  width: '100%', padding: '14px',
-  background: disabled ? '#1A3A5C' : '#00AAFF',
+const inp = {
+  width: '100%', boxSizing: 'border-box',
+  background: 'rgba(255,255,255,0.06)',
+  border: '1.5px solid rgba(255,255,255,0.10)',
+  borderRadius: 12,
+  paddingTop: 12, paddingBottom: 12,
+  paddingLeft: 40, paddingRight: 16,
+  fontSize: 14, color: '#fff',
+  outline: 'none',
+  transition: 'border-color 0.2s, box-shadow 0.2s',
+};
+
+const btn = (color, disabled) => ({
+  width: '100%', padding: '13px',
+  background: disabled ? 'rgba(255,255,255,0.07)' : color,
   border: 'none', borderRadius: 12,
-  color: '#fff', fontSize: 16, fontWeight: 700,
+  color: '#fff', fontSize: 15, fontWeight: 700,
   cursor: disabled ? 'not-allowed' : 'pointer',
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-  transition: 'background 0.2s',
+  transition: 'background 0.5s, box-shadow 0.5s',
+  boxShadow: disabled ? 'none' : `0 4px 24px ${color}55`,
   marginTop: 4,
 });
-
-const btnLink = {
-  background: 'none', border: 'none',
-  color: '#00AAFF', fontSize: 14,
-  cursor: 'pointer', padding: 0,
-  textDecoration: 'underline', textDecorationColor: 'transparent',
-  transition: 'text-decoration-color 0.2s',
-};

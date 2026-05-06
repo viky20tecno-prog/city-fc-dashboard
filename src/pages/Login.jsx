@@ -201,48 +201,48 @@ export default function Login() {
             ))}
           </div>
 
-          {/* ── HUD Ring ── */}
-          <div style={{ position: 'relative', width: 150, height: 150, margin: '20px auto 20px', flexShrink: 0 }}>
-            {/* Outer dashed ring — gira */}
-            <div style={{
-              position: 'absolute', inset: 0, borderRadius: '50%',
-              border: `1.5px dashed ${color}55`,
-              animation: 'hud-spin 10s linear infinite',
-              transition: 'border-color 0.7s',
-            }} />
-            {/* Tick marks en los 4 ejes */}
-            {[0, 90, 180, 270].map(deg => (
-              <div key={deg} style={{
-                position: 'absolute', inset: 0, borderRadius: '50%',
-                display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-                transform: `rotate(${deg}deg)`,
-              }}>
-                <div style={{ width: 3, height: 9, borderRadius: 1, background: `${color}88`, marginTop: 1, transition: 'background 0.7s' }} />
-              </div>
-            ))}
-            {/* Anillo pulsante */}
-            <div style={{
-              position: 'absolute', inset: '18px', borderRadius: '50%',
-              border: `1px solid ${color}99`,
-              boxShadow: `0 0 18px ${color}44, inset 0 0 18px ${color}22`,
-              animation: 'hud-pulse 2s ease-in-out infinite',
-              transition: 'all 0.7s',
-            }} />
-            {/* Anillo interno contra-rotante */}
-            <div style={{
-              position: 'absolute', inset: '36px', borderRadius: '50%',
-              border: `1.5px dashed ${color}66`,
-              animation: 'hud-spin-rev 7s linear infinite',
-              transition: 'border-color 0.7s',
-            }} />
-            {/* Centro radiante */}
-            <div style={{
-              position: 'absolute', inset: '54px', borderRadius: '50%',
-              background: `radial-gradient(circle, ${color} 0%, ${color}99 50%, transparent 100%)`,
-              boxShadow: `0 0 20px ${color}, 0 0 40px ${color}66`,
-              animation: 'hud-glow 2s ease-in-out infinite',
-              transition: 'all 0.7s',
-            }} />
+          {/* ── Radar Sweep ── */}
+          <div style={{ width: 160, height: 160, margin: '16px auto 20px', flexShrink: 0 }}>
+            <svg width="160" height="160" viewBox="0 0 160 160">
+              <circle cx="80" cy="80" r="72" fill="rgba(0,0,0,0.18)" />
+              {/* Range rings */}
+              <circle cx="80" cy="80" r="72" fill="none" stroke={`${color}22`} strokeWidth="1" />
+              <circle cx="80" cy="80" r="48" fill="none" stroke={`${color}14`} strokeWidth="0.8" strokeDasharray="3 6" />
+              <circle cx="80" cy="80" r="24" fill="none" stroke={`${color}1A`} strokeWidth="0.8" />
+              {/* Crosshairs */}
+              <line x1="80" y1="8" x2="80" y2="152" stroke={`${color}12`} strokeWidth="0.8" />
+              <line x1="8" y1="80" x2="152" y2="80" stroke={`${color}12`} strokeWidth="0.8" />
+              {/* Sweep group — rotates around center via SVG animateTransform */}
+              <g>
+                <animateTransform attributeName="transform" type="rotate" from="0 80 80" to="360 80 80" dur="3s" repeatCount="indefinite" />
+                {/* Trailing halo (70°) */}
+                <path d="M 80 80 L 80 8 A 72 72 0 0 1 148 55 Z" fill={`${color}0E`} />
+                {/* Main sector (40°) */}
+                <path d="M 80 80 L 80 8 A 72 72 0 0 1 126 25 Z" fill={`${color}28`} />
+                {/* Leading edge */}
+                <line x1="80" y1="80" x2="80" y2="8" stroke={`${color}70`} strokeWidth="1.5" />
+              </g>
+              {/* Center */}
+              <circle cx="80" cy="80" r="7" fill="none" stroke={`${color}35`} strokeWidth="1" />
+              <circle cx="80" cy="80" r="3.5" fill={color} style={{ filter: `drop-shadow(0 0 5px ${color})` }}>
+                <animate attributeName="opacity" values="0.7;1;0.7" dur="1.5s" repeatCount="indefinite" />
+              </circle>
+              {/* Blips */}
+              <circle cx="112" cy="48" r="3" fill={color} opacity="0">
+                <animate attributeName="opacity" values="0;1;0.8;0" dur="3s" begin="1.1s" repeatCount="indefinite" />
+                <animate attributeName="r" values="1;3;2.5;1" dur="3s" begin="1.1s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="54" cy="102" r="2.5" fill={color} opacity="0">
+                <animate attributeName="opacity" values="0;1;0.7;0" dur="3s" begin="2.3s" repeatCount="indefinite" />
+                <animate attributeName="r" values="1;2.5;2;1" dur="3s" begin="2.3s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="98" cy="116" r="2" fill={color} opacity="0">
+                <animate attributeName="opacity" values="0;0.9;0.5;0" dur="4s" begin="0.6s" repeatCount="indefinite" />
+              </circle>
+              <circle cx="46" cy="56" r="2" fill={color} opacity="0">
+                <animate attributeName="opacity" values="0;0.8;0.4;0" dur="3.5s" begin="1.8s" repeatCount="indefinite" />
+              </circle>
+            </svg>
           </div>
 
           <p style={{ color: '#374151', fontSize: 11, margin: 0 }}>
@@ -436,22 +436,6 @@ export default function Login() {
         @keyframes spin {
           from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
-        }
-        @keyframes hud-spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes hud-spin-rev {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(-360deg); }
-        }
-        @keyframes hud-pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%       { opacity: 0.6; transform: scale(1.06); }
-        }
-        @keyframes hud-glow {
-          0%, 100% { opacity: 0.7; transform: scale(1); }
-          50%       { opacity: 1;   transform: scale(1.15); }
         }
         input::placeholder { color: #374151; }
         input:focus {

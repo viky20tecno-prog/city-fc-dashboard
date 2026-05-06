@@ -241,18 +241,15 @@ export default function RegistroClub() {
             ))}
           </div>
 
-          {/* HUD Ring */}
-          <div style={{ position: 'relative', width: 130, height: 130, margin: '20px auto 16px', flexShrink: 0 }}>
-            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: `1.5px dashed ${ac}55`, animation: 'hud-spin 10s linear infinite', transition: 'border-color 0.7s' }} />
-            {[0, 90, 180, 270].map(deg => (
-              <div key={deg} style={{ position: 'absolute', inset: 0, borderRadius: '50%', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', transform: `rotate(${deg}deg)` }}>
-                <div style={{ width: 3, height: 8, borderRadius: 1, background: `${ac}88`, marginTop: 1, transition: 'background 0.7s' }} />
-              </div>
-            ))}
-            <div style={{ position: 'absolute', inset: '16px', borderRadius: '50%', border: `1px solid ${ac}99`, boxShadow: `0 0 18px ${ac}44, inset 0 0 18px ${ac}22`, animation: 'hud-pulse 2s ease-in-out infinite', transition: 'all 0.7s' }} />
-            <div style={{ position: 'absolute', inset: '32px', borderRadius: '50%', border: `1.5px dashed ${ac}66`, animation: 'hud-spin-rev 7s linear infinite', transition: 'border-color 0.7s' }} />
-            <div style={{ position: 'absolute', inset: '48px', borderRadius: '50%', background: `radial-gradient(circle, ${ac} 0%, ${ac}99 50%, transparent 100%)`, boxShadow: `0 0 20px ${ac}, 0 0 40px ${ac}66`, animation: 'hud-glow 2s ease-in-out infinite', transition: 'all 0.7s' }} />
-          </div>
+          {/* ── Blob Morfante ── */}
+          <div style={{
+            width: 130, height: 130, margin: '20px auto 16px', flexShrink: 0,
+            background: `radial-gradient(circle at 38% 38%, ${ac} 0%, ${ac}AA 35%, ${ac}44 65%, transparent 100%)`,
+            animation: 'blob-morph 10s ease-in-out infinite',
+            filter: 'blur(1.5px)',
+            boxShadow: `0 0 40px ${ac}44, 0 0 80px ${ac}18`,
+            transition: 'background 0.7s, box-shadow 0.7s',
+          }} />
 
           <p style={{ color: '#374151', fontSize: 11, margin: 0 }}>
             Sistema de gestión deportiva © 2026
@@ -434,21 +431,14 @@ export default function RegistroClub() {
           from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
         }
-        @keyframes hud-spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes hud-spin-rev {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(-360deg); }
-        }
-        @keyframes hud-pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%       { opacity: 0.6; transform: scale(1.06); }
-        }
-        @keyframes hud-glow {
-          0%, 100% { opacity: 0.7; transform: scale(1); }
-          50%       { opacity: 1;   transform: scale(1.15); }
+        @keyframes blob-morph {
+          0%   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+          16%  { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+          33%  { border-radius: 50% 60% 30% 40% / 40% 30% 70% 60%; }
+          50%  { border-radius: 40% 60% 50% 70% / 60% 50% 40% 30%; }
+          66%  { border-radius: 70% 30% 50% 50% / 30% 50% 60% 70%; }
+          83%  { border-radius: 45% 55% 65% 35% / 55% 45% 35% 65%; }
+          100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
         }
         input::placeholder { color: #374151; }
         input:focus {

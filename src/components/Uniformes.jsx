@@ -534,8 +534,8 @@ export default function Uniformes({ color = 'var(--cc)' }) {
               <Shirt className="w-5 h-5 text-[var(--cc)]" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[#F5F5F5]">Pedido de Uniforme</h2>
-              <p className="text-xs text-[#737373]">
+              <h2 className="text-lg font-bold text-[var(--text-pri)]">Pedido de Uniforme</h2>
+              <p className="text-xs text-[var(--text-sec)]">
                 {step === 1 ? 'Paso 1 — Buscá el jugador por nombre o cédula' : 'Paso 2 — Datos del uniforme'}
               </p>
             </div>
@@ -559,21 +559,21 @@ export default function Uniformes({ color = 'var(--cc)' }) {
           {step === 1 && (
             <div className="space-y-4">
               <div ref={searchRef} className="relative">
-                <label className="block text-xs text-[#737373] mb-1.5">Buscar jugador *</label>
+                <label className="block text-xs text-[var(--text-sec)] mb-1.5">Buscar jugador *</label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#737373]" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-sec)]" />
                   <input
                     type="text"
                     value={busqueda}
                     onChange={handleBusquedaChange}
                     onFocus={() => busqueda.trim().length >= 2 && setMostrarSugerencias(true)}
                     placeholder="Nombre, apellido o cédula..."
-                    className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl pl-10 pr-10 py-2.5 text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                    className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl pl-10 pr-10 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
                   />
                   {busqueda && (
                     <button
                       onClick={limpiarBusqueda}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#737373] hover:text-[#F5F5F5] transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -595,8 +595,8 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                           </span>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-[#F5F5F5]">{j.nombre} {j.apellidos}</p>
-                          <p className="text-xs text-[#737373]">CC {j.cedula}</p>
+                          <p className="text-sm font-medium text-[var(--text-pri)]">{j.nombre} {j.apellidos}</p>
+                          <p className="text-xs text-[var(--text-sec)]">CC {j.cedula}</p>
                         </div>
                       </button>
                     ))}
@@ -605,11 +605,11 @@ export default function Uniformes({ color = 'var(--cc)' }) {
 
                 {mostrarSugerencias && sugerencias.length === 0 && busqueda.trim().length >= 2 && (
                   <div className="absolute z-20 w-full mt-1 bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-xl px-4 py-3">
-                    <p className="text-sm text-[#737373]">No se encontró ningún jugador</p>
+                    <p className="text-sm text-[var(--text-sec)]">No se encontró ningún jugador</p>
                   </div>
                 )}
               </div>
-              <p className="text-xs text-[#737373]">Escribe al menos 2 caracteres para ver sugerencias</p>
+              <p className="text-xs text-[var(--text-sec)]">Escribe al menos 2 caracteres para ver sugerencias</p>
             </div>
           )}
 
@@ -621,14 +621,14 @@ export default function Uniformes({ color = 'var(--cc)' }) {
               <div className="p-3 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/20 flex items-center gap-3">
                 <CheckCircle className="w-4 h-4 text-[var(--cc)] flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-[#F5F5F5]">
+                  <p className="text-sm font-medium text-[var(--text-pri)]">
                     {jugadorEncontrado.nombre} {jugadorEncontrado.apellidos}
                   </p>
-                  <p className="text-xs text-[#737373]">CC {jugadorEncontrado.cedula}</p>
+                  <p className="text-xs text-[var(--text-sec)]">CC {jugadorEncontrado.cedula}</p>
                 </div>
                 <button
                   onClick={limpiarBusqueda}
-                  className="ml-auto text-xs text-[#737373] hover:text-[#F5F5F5] transition-colors"
+                  className="ml-auto text-xs text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors"
                 >
                   Cambiar
                 </button>
@@ -648,10 +648,10 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                   <div className="flex items-center gap-3">
                     <span className="text-base">👨‍👩‍👦</span>
                     <div>
-                      <p className={`text-sm font-medium ${form.es_familiar ? 'text-[#C678FF]' : 'text-[#737373]'}`}>
+                      <p className={`text-sm font-medium ${form.es_familiar ? 'text-[#C678FF]' : 'text-[var(--text-sec)]'}`}>
                         Pedido para familiar
                       </p>
-                      <p className="text-xs text-[#737373]">
+                      <p className="text-xs text-[var(--text-sec)]">
                         {form.es_familiar ? 'Uniforme para un familiar del jugador' : 'Activar si el uniforme es para un familiar'}
                       </p>
                     </div>
@@ -669,7 +669,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                 {/* Selector de género — solo cuando es_familiar */}
                 {form.es_familiar && (
                   <div className="px-4 pb-4 pt-1 border-t border-[#C678FF]/20">
-                    <p className="text-xs text-[#737373] mb-2">Género del familiar *</p>
+                    <p className="text-xs text-[var(--text-sec)] mb-2">Género del familiar *</p>
                     <div className="flex gap-3">
                       {['Hombre', 'Mujer'].map(g => (
                         <button
@@ -679,7 +679,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                           className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                             form.genero === g
                               ? 'bg-[rgba(198,120,255,0.15)] border-[#C678FF]/50 text-[#C678FF]'
-                              : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[#737373] hover:text-[#F5F5F5]'
+                              : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
                           }`}
                         >
                           <span>{g === 'Hombre' ? '👨' : '👩'}</span>
@@ -692,7 +692,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
               </div>
 
               <div>
-                <label className="block text-xs text-[#737373] mb-1.5">Prendas * <span className="font-normal">(podés seleccionar varias)</span></label>
+                <label className="block text-xs text-[var(--text-sec)] mb-1.5">Prendas * <span className="font-normal">(podés seleccionar varias)</span></label>
                 <div className="grid grid-cols-1 gap-2">
                   {PRENDAS.map(p => {
                     const seleccionada = form.prendas.find(x => x.valor === p.valor);
@@ -703,7 +703,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                         className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                           seleccionada
                             ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
-                            : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[#737373] hover:text-[#F5F5F5]'
+                            : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
                         }`}
                       >
                         <span>{p.valor}</span>
@@ -714,29 +714,29 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                 </div>
                 {form.prendas.length > 0 && (
                   <div className="mt-3 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--cc)]/30">
-                    <span className="text-xs text-[#737373]">{form.prendas.length} prenda{form.prendas.length > 1 ? 's' : ''} seleccionada{form.prendas.length > 1 ? 's' : ''}</span>
+                    <span className="text-xs text-[var(--text-sec)]">{form.prendas.length} prenda{form.prendas.length > 1 ? 's' : ''} seleccionada{form.prendas.length > 1 ? 's' : ''}</span>
                     <span className="text-sm font-bold text-[var(--cc)]">Total: ${total.toLocaleString('es-CO')}</span>
                   </div>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs text-[#737373] mb-1.5">
+                <label className="block text-xs text-[var(--text-sec)] mb-1.5">
                   Nombre a estampar
-                  <span className="ml-2 text-[#737373] font-normal italic">— puede ser apodo o sobrenombre</span>
+                  <span className="ml-2 text-[var(--text-sec)] font-normal italic">— puede ser apodo o sobrenombre</span>
                 </label>
                 <input
                   type="text"
                   value={form.nombre_estampar}
                   onChange={e => setForm(f => ({ ...f, nombre_estampar: e.target.value.toUpperCase() }))}
                   placeholder="Ej: CAÑÓN, TOÑO, EL DIEZ..."
-                  className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                  className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-[#737373] mb-1.5">Talla *</label>
+                  <label className="block text-xs text-[var(--text-sec)] mb-1.5">Talla *</label>
                   <div className="grid grid-cols-2 gap-2">
                     {['S', 'M', 'L', 'XL'].map(t => (
                       <button
@@ -745,7 +745,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                         className={`py-2 rounded-xl text-sm font-medium border transition-colors ${
                           form.talla === t
                             ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
-                            : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[#737373] hover:text-[#F5F5F5]'
+                            : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
                         }`}
                       >
                         {t}
@@ -754,8 +754,8 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-[#737373] mb-1.5">
-                    Número * <span className="text-[#737373] font-normal">(3 dígitos)</span>
+                  <label className="block text-xs text-[var(--text-sec)] mb-1.5">
+                    Número * <span className="text-[var(--text-sec)] font-normal">(3 dígitos)</span>
                   </label>
                   <input
                     type="text"
@@ -764,7 +764,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                     onChange={e => setForm(f => ({ ...f, numero: formatNumero(e.target.value) }))}
                     placeholder="001"
                     maxLength={3}
-                    className={`w-full bg-[var(--bg-app)] border rounded-xl px-4 py-2.5 text-sm font-mono text-[#F5F5F5] placeholder-[#737373] focus:outline-none transition-colors ${
+                    className={`w-full bg-[var(--bg-app)] border rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none transition-colors ${
                       numeroRepetido
                         ? 'border-[#FF5E5E] focus:border-[#FF5E5E]'
                         : 'border-[var(--cc20)] focus:border-[var(--cc)]'
@@ -783,7 +783,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
               <button
                 onClick={handleSubmit}
                 disabled={form.prendas.length === 0 || !form.talla || !form.numero || enviando || !numeroValido}
-                className="w-full py-3 rounded-xl bg-[var(--cc)] text-[#060C18] text-sm font-bold hover:bg-[var(--cc)]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-[var(--cc)] text-white text-sm font-bold hover:bg-[var(--cc)]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {enviando ? (
                   <><Loader className="w-4 h-4 animate-spin" /> Registrando...</>
@@ -791,7 +791,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                   'Registrar pedido'
                 )}
               </button>
-              <p className="text-xs text-[#737373] text-center">* Campos obligatorios</p>
+              <p className="text-xs text-[var(--text-sec)] text-center">* Campos obligatorios</p>
             </div>
           )}
         </div>
@@ -825,7 +825,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
                     tabPedidos === t.key
                       ? t.activeClass
-                      : 'border-[var(--cc20)] text-[#737373] hover:text-[#F5F5F5]'
+                      : 'border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
                   }`}
                 >
                   {t.label}
@@ -835,7 +835,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                 </button>
               ))}
               <div className="ml-auto flex items-center gap-3">
-                <span className="text-xs text-[#737373]">{pedidos.length} total</span>
+                <span className="text-xs text-[var(--text-sec)]">{pedidos.length} total</span>
                 <button
                   onClick={generarPDF}
                   disabled={generandoPDF || pedidos.length === 0}
@@ -850,7 +850,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
             </div>
 
             {vistaActual.length === 0 ? (
-              <p className="text-center text-sm text-[#737373] py-8">
+              <p className="text-center text-sm text-[var(--text-sec)] py-8">
                 No hay pedidos en este estado
               </p>
             ) : (
@@ -859,7 +859,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                   <thead>
                     <tr className="border-b border-[var(--cc20)]">
                       {['Cédula', 'Nombre', 'Prendas', 'Estampar', 'Talla', 'Número', 'Total', 'Fecha', 'Estado', ''].map(h => (
-                        <th key={h} className="text-left py-2 px-3 text-xs text-[#737373] font-medium">{h}</th>
+                        <th key={h} className="text-left py-2 px-3 text-xs text-[var(--text-sec)] font-medium">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -869,8 +869,8 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                       const cargando = cambiandoEstado === pid;
                       return (
                         <tr key={i} className="border-b border-[var(--cc20)] hover:bg-[var(--bg-surface)] transition-colors">
-                          <td className="py-2 px-3 text-[#737373]">{p.cedula}</td>
-                          <td className="py-2 px-3 text-[#F5F5F5]">
+                          <td className="py-2 px-3 text-[var(--text-sec)]">{p.cedula}</td>
+                          <td className="py-2 px-3 text-[var(--text-pri)]">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               {p.nombre}
                               {p.tipo && p.tipo !== 'Jugador' && (
@@ -880,16 +880,16 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                               )}
                             </div>
                           </td>
-                          <td className="py-2 px-3 text-[#F5F5F5] max-w-[180px]">
+                          <td className="py-2 px-3 text-[var(--text-pri)] max-w-[180px]">
                             <span className="block truncate" title={p.prendas || p.prenda}>{p.prendas || p.prenda || '—'}</span>
                           </td>
-                          <td className="py-2 px-3 text-[#F5F5F5]">{p.nombre_estampar || '—'}</td>
-                          <td className="py-2 px-3 text-[#F5F5F5]">{p.talla}</td>
-                          <td className="py-2 px-3 text-[#F5F5F5] font-mono font-bold">{p.numero_estampar}</td>
+                          <td className="py-2 px-3 text-[var(--text-pri)]">{p.nombre_estampar || '—'}</td>
+                          <td className="py-2 px-3 text-[var(--text-pri)]">{p.talla}</td>
+                          <td className="py-2 px-3 text-[var(--text-pri)] font-mono font-bold">{p.numero_estampar}</td>
                           <td className="py-2 px-3 text-[var(--cc)] font-semibold">
                             {p.total ? `$${Number(p.total).toLocaleString('es-CO')}` : '—'}
                           </td>
-                          <td className="py-2 px-3 text-[#737373] text-xs">{formatFecha(p.created_at)}</td>
+                          <td className="py-2 px-3 text-[var(--text-sec)] text-xs">{formatFecha(p.created_at)}</td>
                           <td className="py-2 px-3">
                             {/* Badge de estado — clicable si hay siguiente estado */}
                             {p.estado === 'PENDIENTE' && (
@@ -930,7 +930,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                                 <button
                                   onClick={() => abrirEditar(p)}
                                   title="Editar pedido"
-                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc20)] text-[#737373] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition-all text-xs"
+                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition-all text-xs"
                                 >
                                   <Pencil className="w-3.5 h-3.5" />
                                   Editar
@@ -961,11 +961,11 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                   <Pencil className="w-4 h-4 text-[var(--cc)]" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#F5F5F5]">Editar Pedido</h3>
-                  <p className="text-xs text-[#737373]">{pedidoEditando.nombre} · #{pedidoEditando.numero_estampar}</p>
+                  <h3 className="text-base font-bold text-[var(--text-pri)]">Editar Pedido</h3>
+                  <p className="text-xs text-[var(--text-sec)]">{pedidoEditando.nombre} · #{pedidoEditando.numero_estampar}</p>
                 </div>
               </div>
-              <button onClick={cerrarEditar} className="p-2 rounded-lg text-[#737373] hover:text-[#F5F5F5] hover:bg-[var(--bg-surface)] transition-colors">
+              <button onClick={cerrarEditar} className="p-2 rounded-lg text-[var(--text-sec)] hover:text-[var(--text-pri)] hover:bg-[var(--bg-surface)] transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -981,8 +981,8 @@ export default function Uniformes({ color = 'var(--cc)' }) {
 
               {/* Prendas */}
               <div>
-                <label className="block text-xs text-[#737373] mb-2">
-                  Prendas <span className="text-[#737373] font-normal">(podés agregar o quitar)</span>
+                <label className="block text-xs text-[var(--text-sec)] mb-2">
+                  Prendas <span className="text-[var(--text-sec)] font-normal">(podés agregar o quitar)</span>
                 </label>
                 <div className="grid grid-cols-1 gap-1.5">
                   {PRENDAS.map(p => {
@@ -994,7 +994,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                         className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                           sel
                             ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
-                            : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[#737373] hover:text-[#F5F5F5]'
+                            : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
                         }`}
                       >
                         <span>{p.valor}</span>
@@ -1005,7 +1005,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                 </div>
                 {editForm.prendas.length > 0 && (
                   <div className="mt-2 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--cc)]/30">
-                    <span className="text-xs text-[#737373]">
+                    <span className="text-xs text-[var(--text-sec)]">
                       {editForm.prendas.length} prenda{editForm.prendas.length > 1 ? 's' : ''}
                     </span>
                     <span className="text-sm font-bold text-[var(--cc)]">
@@ -1017,20 +1017,20 @@ export default function Uniformes({ color = 'var(--cc)' }) {
 
               {/* Nombre a estampar */}
               <div>
-                <label className="block text-xs text-[#737373] mb-1.5">Nombre a estampar</label>
+                <label className="block text-xs text-[var(--text-sec)] mb-1.5">Nombre a estampar</label>
                 <input
                   type="text"
                   value={editForm.nombre_estampar}
                   onChange={e => setEditForm(f => ({ ...f, nombre_estampar: e.target.value.toUpperCase() }))}
                   placeholder="Ej: CAÑÓN, TOÑO..."
-                  className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                  className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
                 />
               </div>
 
               {/* Talla y Número */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-[#737373] mb-1.5">Talla *</label>
+                  <label className="block text-xs text-[var(--text-sec)] mb-1.5">Talla *</label>
                   <div className="grid grid-cols-2 gap-1.5">
                     {['S', 'M', 'L', 'XL'].map(t => (
                       <button
@@ -1039,7 +1039,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                         className={`py-2 rounded-xl text-sm font-medium border transition-colors ${
                           editForm.talla === t
                             ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
-                            : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[#737373] hover:text-[#F5F5F5]'
+                            : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
                         }`}
                       >
                         {t}
@@ -1048,7 +1048,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-[#737373] mb-1.5">Número *</label>
+                  <label className="block text-xs text-[var(--text-sec)] mb-1.5">Número *</label>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -1056,7 +1056,7 @@ export default function Uniformes({ color = 'var(--cc)' }) {
                     onChange={e => setEditForm(f => ({ ...f, numero: e.target.value.replace(/\D/g, '').slice(0, 3) }))}
                     placeholder="001"
                     maxLength={3}
-                    className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm font-mono text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                    className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
                   />
                   {editForm.numero && (() => {
                     const norm = String(parseInt(editForm.numero, 10));
@@ -1075,14 +1075,14 @@ export default function Uniformes({ color = 'var(--cc)' }) {
               <div className="flex gap-3 pt-1">
                 <button
                   onClick={cerrarEditar}
-                  className="flex-1 py-2.5 rounded-xl border border-[var(--cc20)] text-[#737373] hover:text-[#F5F5F5] text-sm font-medium transition-colors"
+                  className="flex-1 py-2.5 rounded-xl border border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)] text-sm font-medium transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleGuardarEdit}
                   disabled={guardandoEdit || editForm.prendas.length === 0}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--cc)] text-[#060C18] text-sm font-bold hover:bg-[var(--cc)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--cc)] text-white text-sm font-bold hover:bg-[var(--cc)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {guardandoEdit
                     ? <><Loader className="w-4 h-4 animate-spin" /> Guardando...</>

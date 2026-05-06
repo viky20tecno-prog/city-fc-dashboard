@@ -49,9 +49,9 @@
   --bg-surface:  #E9EFF6;
   --bg-input:    #FFFFFF;
   --text-pri:    #0F172A;
-  --text-sec:    #475569;
-  --text-mut:    #94A3B8;
-  --border-sub:  rgba(0,0,0,0.10);
+  --text-sec:    #334155;
+  --text-mut:    #64748B;
+  --border-sub:  rgba(0,0,0,0.12);
 }
 
 :root {

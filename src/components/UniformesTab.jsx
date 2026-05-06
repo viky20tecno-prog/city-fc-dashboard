@@ -68,10 +68,10 @@ export default function UniformesTab({ jugadores }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-[#F5F5F5]">Gestión de Uniformes</h2>
+        <h2 className="text-2xl font-bold text-[var(--text-pri)]">Gestión de Uniformes</h2>
         <button
           onClick={() => setMostrarModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--cc)] text-[#060C18] rounded-lg font-medium hover:bg-[var(--cc)]/80 transition"
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--cc)] text-white rounded-lg font-medium hover:bg-[var(--cc)]/80 transition"
         >
           <Plus className="w-4 h-4" />
           Nuevo Uniforme
@@ -82,7 +82,7 @@ export default function UniformesTab({ jugadores }) {
       {mostrarModal && (
         <div className="fixed inset-0 bg-[var(--bg-app)]/50 flex items-center justify-center z-50 p-4">
           <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--cc20)] p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-[#F5F5F5] mb-4">Registrar Uniforme</h3>
+            <h3 className="text-xl font-bold text-[var(--text-pri)] mb-4">Registrar Uniforme</h3>
 
             {message.text && (
               <div className={`flex items-start gap-2 p-3 rounded-lg mb-4 ${message.type === 'error' ? 'bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/20' : 'bg-[var(--cc12)] border border-[var(--cc)]/20'}`}>
@@ -100,7 +100,7 @@ export default function UniformesTab({ jugadores }) {
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Jugador */}
               <div>
-                <label className="block text-sm font-medium text-[#F5F5F5] mb-1">
+                <label className="block text-sm font-medium text-[var(--text-pri)] mb-1">
                   Seleccionar Jugador *
                 </label>
                 <select
@@ -108,7 +108,7 @@ export default function UniformesTab({ jugadores }) {
                   value={form.cedula}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
                 >
                   <option value="">-- Selecciona jugador --</option>
                   {jugadores && jugadores.map(j => (
@@ -121,14 +121,14 @@ export default function UniformesTab({ jugadores }) {
 
               {/* Tipo Uniforme */}
               <div>
-                <label className="block text-sm font-medium text-[#F5F5F5] mb-1">
+                <label className="block text-sm font-medium text-[var(--text-pri)] mb-1">
                   Tipo Uniforme *
                 </label>
                 <select
                   name="tipo_uniforme"
                   value={form.tipo_uniforme}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
                 >
                   {tiposUniformes.map(t => (
                     <option key={t.valor} value={t.valor}>
@@ -140,7 +140,7 @@ export default function UniformesTab({ jugadores }) {
 
               {/* Número Camiseta */}
               <div>
-                <label className="block text-sm font-medium text-[#F5F5F5] mb-1">
+                <label className="block text-sm font-medium text-[var(--text-pri)] mb-1">
                   Número Camiseta (1-99) *
                 </label>
                 <input
@@ -151,13 +151,13 @@ export default function UniformesTab({ jugadores }) {
                   value={form.numero}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
                 />
               </div>
 
               {/* Nombre a Estampar */}
               <div>
-                <label className="block text-sm font-medium text-[#F5F5F5] mb-1">
+                <label className="block text-sm font-medium text-[var(--text-pri)] mb-1">
                   Nombre a Estampar (máx 12 caracteres) *
                 </label>
                 <input
@@ -168,23 +168,23 @@ export default function UniformesTab({ jugadores }) {
                   onChange={handleChange}
                   placeholder="Ej: DIEGO"
                   required
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[#F5F5F5] placeholder-[#737373] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
                 />
-                <p className="text-xs text-[#737373] mt-1">
+                <p className="text-xs text-[var(--text-sec)] mt-1">
                   {form.nombre_estampar.length}/12
                 </p>
               </div>
 
               {/* Talla */}
               <div>
-                <label className="block text-sm font-medium text-[#F5F5F5] mb-1">
+                <label className="block text-sm font-medium text-[var(--text-pri)] mb-1">
                   Talla *
                 </label>
                 <select
                   name="talla"
                   value={form.talla}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[#F5F5F5] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
                 >
                   {tallas.map(t => (
                     <option key={t} value={t}>{t}</option>
@@ -194,7 +194,7 @@ export default function UniformesTab({ jugadores }) {
 
               {/* Resumen precio */}
               <div className="bg-[var(--bg-app)] rounded-lg p-3 border border-[var(--cc20)]">
-                <p className="text-xs text-[#737373]">Valor:</p>
+                <p className="text-xs text-[var(--text-sec)]">Valor:</p>
                 <p className="text-lg font-bold text-[var(--cc)]">
                   ${precioActual.toLocaleString()} COP
                 </p>
@@ -206,14 +206,14 @@ export default function UniformesTab({ jugadores }) {
                   type="button"
                   onClick={() => setMostrarModal(false)}
                   disabled={loading}
-                  className="flex-1 px-4 py-2 bg-[#2A2A2A] text-[#F5F5F5] rounded-lg font-medium hover:bg-[#2A2A2A]/80 transition disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-[var(--bg-surface)] text-[var(--text-pri)] rounded-lg font-medium hover:bg-[var(--bg-surface)]/80 transition disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[var(--cc)] text-[#060C18] rounded-lg font-medium hover:bg-[var(--cc)]/80 transition disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[var(--cc)] text-white rounded-lg font-medium hover:bg-[var(--cc)]/80 transition disabled:opacity-50"
                 >
                   {loading ? (
                     <>
@@ -232,7 +232,7 @@ export default function UniformesTab({ jugadores }) {
 
       {/* Placeholder Info */}
       <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--cc20)] p-6 text-center">
-        <p className="text-[#737373]">
+        <p className="text-[var(--text-sec)]">
           Haz click en "Nuevo Uniforme" para registrar uniformes de los jugadores
         </p>
       </div>

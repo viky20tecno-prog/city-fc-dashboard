@@ -118,7 +118,7 @@ export default function RegistroClub() {
         localStorage.setItem('clubId', data.club_slug);
       }
       setExito(true);
-      setTimeout(() => navigate('/'), 2000);
+      setTimeout(() => navigate('/app'), 2000);
     } catch (err) {
       setError('No se pudo conectar con el servidor. ' + (err?.message || 'Intenta de nuevo.'));
     } finally {

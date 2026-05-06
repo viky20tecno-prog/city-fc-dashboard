@@ -68,7 +68,7 @@ export default function Login() {
       if (member?.club_id) clubId = member.club_id;
     }
     localStorage.setItem('clubId', clubId);
-    navigate('/');
+    navigate('/app');
   };
 
   const handleRecuperar = async (e) => {

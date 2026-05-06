@@ -12,14 +12,14 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Rutas públicas */}
-        <Route path="/landing"         element={<LandingPage />} />
+        <Route path="/"                element={<LandingPage />} />
         <Route path="/registro"        element={<RegistroClub />} />
         <Route path="/login"           element={<Login />} />
         <Route path="/inscripcion"     element={<FormInscripcion />} />
         <Route path="/pedido-uniforme" element={<PedidoUniforme />} />
 
         {/* Rutas protegidas */}
-        <Route path="/*" element={
+        <Route path="/app/*" element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>

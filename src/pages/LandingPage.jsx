@@ -75,7 +75,7 @@ export default function LandingPage() {
       {/* ── HERO ───────────────────────────────────────────────────────────── */}
       <section style={{ textAlign: 'center', padding: '80px 24px 48px', maxWidth: 760, margin: '0 auto' }}>
         <div style={{ display: 'inline-block', background: 'rgba(0,170,255,0.1)', border: '1px solid rgba(0,170,255,0.25)', borderRadius: 999, padding: '4px 14px', fontSize: 12, color: '#00AAFF', fontWeight: 600, marginBottom: 20, letterSpacing: 0.5 }}>
-          🏅 Para clubes deportivos de toda América Latina
+          🏅 14 días gratis · Sin tarjeta de crédito
         </div>
         <h1 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontWeight: 800, lineHeight: 1.1, marginBottom: 20, letterSpacing: '-1px' }}>
           Gestiona tu club deportivo<br />
@@ -90,7 +90,7 @@ export default function LandingPage() {
             onClick={() => navigate('/registro')}
             style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#00AAFF', border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '14px 28px', cursor: 'pointer' }}
           >
-            Registrar mi club gratis <ChevronRight size={16} />
+            Probar 14 días gratis <ChevronRight size={16} />
           </button>
           <button
             onClick={() => navigate('/login')}
@@ -153,7 +153,7 @@ export default function LandingPage() {
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 10 }}>Activa solo lo que necesitas</h2>
           <p style={{ color: '#9CA3AF', fontSize: 15, margin: 0 }}>
-            3 planes modulares · Cambia cuando quieras · Sin permanencia
+            3 planes modulares · 14 días gratis · Sin permanencia
           </p>
         </div>
 
@@ -212,7 +212,7 @@ export default function LandingPage() {
               ))}
             </div>
             <button onClick={() => navigate('/registro')} style={{ width: '100%', background: '#00AAFF', border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 10, padding: '12px 0', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,170,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-              Comenzar gratis <ChevronRight size={15} />
+              Probar gratis 14 días <ChevronRight size={15} />
             </button>
           </div>
 

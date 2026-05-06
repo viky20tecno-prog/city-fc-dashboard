@@ -19,6 +19,27 @@ const PALETA = [
   { hex: '#334155', nombre: 'Azul Marino'       },
 ];
 
+const PAISES = [
+  { codigo: '57',  bandera: '🇨🇴', nombre: 'Colombia'            },
+  { codigo: '52',  bandera: '🇲🇽', nombre: 'México'              },
+  { codigo: '54',  bandera: '🇦🇷', nombre: 'Argentina'           },
+  { codigo: '51',  bandera: '🇵🇪', nombre: 'Perú'               },
+  { codigo: '56',  bandera: '🇨🇱', nombre: 'Chile'              },
+  { codigo: '593', bandera: '🇪🇨', nombre: 'Ecuador'             },
+  { codigo: '58',  bandera: '🇻🇪', nombre: 'Venezuela'           },
+  { codigo: '595', bandera: '🇵🇾', nombre: 'Paraguay'            },
+  { codigo: '598', bandera: '🇺🇾', nombre: 'Uruguay'             },
+  { codigo: '591', bandera: '🇧🇴', nombre: 'Bolivia'             },
+  { codigo: '506', bandera: '🇨🇷', nombre: 'Costa Rica'          },
+  { codigo: '502', bandera: '🇬🇹', nombre: 'Guatemala'           },
+  { codigo: '503', bandera: '🇸🇻', nombre: 'El Salvador'         },
+  { codigo: '504', bandera: '🇭🇳', nombre: 'Honduras'            },
+  { codigo: '505', bandera: '🇳🇮', nombre: 'Nicaragua'           },
+  { codigo: '507', bandera: '🇵🇦', nombre: 'Panamá'              },
+  { codigo: '1',   bandera: '🇩🇴', nombre: 'Rep. Dominicana'     },
+  { codigo: '34',  bandera: '🇪🇸', nombre: 'España'              },
+];
+
 const INITIAL = {
   nombre_club:   '',
   ciudad:        '',
@@ -33,6 +54,7 @@ export default function RegistroClub() {
   const navigate = useNavigate();
   const [form, setForm]         = useState(INITIAL);
   const [color, setColor]       = useState(PALETA[0].hex);
+  const [pais, setPais]         = useState(PAISES[0]);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
   const [exito, setExito]       = useState(false);
@@ -61,6 +83,7 @@ export default function RegistroClub() {
           email:         form.email.trim(),
           password:      form.password,
           color,
+          codigo_pais:   pais.codigo,
         }),
       });
 
@@ -140,6 +163,41 @@ export default function RegistroClub() {
 
             <Campo label="Nombre del club *" value={form.nombre_club} onChange={v => set('nombre_club', v)} placeholder="Ej: Atlético Central FC" required />
             <Campo label="Ciudad" value={form.ciudad} onChange={v => set('ciudad', v)} placeholder="Ej: Buenos Aires, Lima, Bogotá…" />
+
+            {/* Selector de país */}
+            <div>
+              <label style={{ display: 'block', fontSize: 12, color: '#9CA3AF', marginBottom: 6 }}>País</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                {PAISES.map(p => {
+                  const activo = pais.codigo === p.codigo;
+                  return (
+                    <button
+                      key={p.codigo}
+                      type="button"
+                      onClick={() => setPais(p)}
+                      style={{
+                        background: activo ? `${color}22` : 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${activo ? color : 'rgba(255,255,255,0.08)'}`,
+                        borderRadius: 8,
+                        padding: '7px 8px',
+                        cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: 6,
+                        transition: 'all 0.2s',
+                        boxShadow: activo ? `0 0 8px ${color}44` : 'none',
+                      }}
+                    >
+                      <span style={{ fontSize: 16, lineHeight: 1 }}>{p.bandera}</span>
+                      <span style={{ color: activo ? '#fff' : '#9CA3AF', fontSize: 11, fontWeight: activo ? 600 : 400, transition: 'color 0.2s', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {p.nombre}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p style={{ color: '#6B7280', fontSize: 11, margin: '6px 0 0' }}>
+                Código del país: <strong style={{ color }}> +{pais.codigo}</strong> — usado para WhatsApp
+              </p>
+            </div>
 
             {/* Sección admin */}
             <p style={{ color: color, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, margin: '8px 0 0', transition: 'color 0.3s' }}>Administrador</p>

@@ -6,8 +6,11 @@ import {
   Copy, Check, Bell, LogOut,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { authFetch } from '../lib/authFetch';
 import { useSheetData } from '../hooks/useSheetData';
 import { useClubConfig } from '../hooks/useClubConfig';
+import { getClubId } from '../services/api';
+import { API_BASE_URL } from '../config';
 import DashboardOverview from '../components/DashboardOverview';
 import JugadoresTable from '../components/JugadoresTable';
 import Uniformes from '../components/Uniformes';
@@ -81,6 +84,7 @@ export default function Dashboard() {
   const [showPagoModal,   setShowPagoModal]   = useState(false);
   const [showOnboarding,  setShowOnboarding]  = useState(false);
   const [showTheme,       setShowTheme]       = useState(false);
+  const [colorOverride,   setColorOverride]   = useState(null);
 
   // Mostrar onboarding solo cuando el config ya cargó y no está completado
   useEffect(() => {
@@ -89,7 +93,26 @@ export default function Dashboard() {
     }
   }, [clubConfig]);
 
-  const c = clubConfig?.color || '#E14924';
+  const c = colorOverride || clubConfig?.color || '#E14924';
+
+  // Cambia el color del club: aplica CSS vars inmediatamente y persiste en API
+  const handleColorChange = async (newColor) => {
+    setColorOverride(newColor);
+    document.documentElement.style.setProperty('--cc',   newColor);
+    document.documentElement.style.setProperty('--cc12', `${newColor}1F`);
+    document.documentElement.style.setProperty('--cc20', `${newColor}33`);
+    document.documentElement.style.setProperty('--cc30', `${newColor}4D`);
+    document.documentElement.style.setProperty('--cc50', `${newColor}80`);
+    try {
+      await authFetch(`${API_BASE_URL}/config?club_id=${getClubId()}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ color: newColor }),
+      });
+    } catch (err) {
+      console.error('Error guardando color:', err);
+    }
+  };
 
   // Aplica tema guardado al montar
   useEffect(() => { applyTheme(getStoredTheme()); }, []);
@@ -437,6 +460,7 @@ export default function Dashboard() {
           color={c}
           onClose={() => setShowTheme(false)}
           onOpenConfig={() => { setShowTheme(false); setShowOnboarding(true); }}
+          onColorChange={handleColorChange}
         />
       )}
     </div>

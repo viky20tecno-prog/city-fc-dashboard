@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bot, BarChart2, CreditCard, Shield, ChevronRight, CheckCircle } from 'lucide-react';
+import { PALETA } from '../components/ThemeSelector';
 
 const DEPORTES_STRIP = [
   { emoji: '⚽', label: 'Fútbol'         },
@@ -42,20 +43,6 @@ const FEATURES = [
   },
 ];
 
-const PALETA = [
-  { hex: '#E14924', nombre: 'Naranja Ciudad'    },
-  { hex: '#00AAFF', nombre: 'Azul Cobalto'      },
-  { hex: '#10B981', nombre: 'Verde Esmeralda'   },
-  { hex: '#F59E0B', nombre: 'Dorado Campeón'    },
-  { hex: '#8B5CF6', nombre: 'Violeta Real'      },
-  { hex: '#EF4444', nombre: 'Rojo Pasión'       },
-  { hex: '#F97316', nombre: 'Naranja Solar'     },
-  { hex: '#0D9488', nombre: 'Teal Agua'          },
-  { hex: '#EC4899', nombre: 'Rosa Dinámico'     },
-  { hex: '#84CC16', nombre: 'Lima Fresco'       },
-  { hex: '#FACC15', nombre: 'Amarillo Flash'    },
-  { hex: '#334155', nombre: 'Azul Marino'       },
-];
 
 const PAYMENT_LINKS = {
   starter: {

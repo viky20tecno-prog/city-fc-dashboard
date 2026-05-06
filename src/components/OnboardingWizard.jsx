@@ -100,7 +100,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
       border: `2px solid ${idx <= step ? c : 'rgba(255,255,255,0.1)'}`,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: 11, fontWeight: 700,
-      color: idx < step ? '#fff' : idx === step ? c : '#4B5563',
+      color: idx < step ? '#fff' : idx === step ? c : 'var(--text-mut)',
       flexShrink: 0,
       transition: 'all 0.3s',
     }}>
@@ -119,11 +119,11 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
               <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>
                 Configura tu club
               </h2>
-              <p style={{ color: '#6B7280', fontSize: 13, margin: '4px 0 0' }}>
+              <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: '4px 0 0' }}>
                 Toma menos de 2 minutos · Puedes cambiarlo luego
               </p>
             </div>
-            <button onClick={skip} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', padding: 4 }} title="Saltar configuración">
+            <button onClick={skip} style={{ background: 'none', border: 'none', color: 'var(--text-mut)', cursor: 'pointer', padding: 4 }} title="Saltar configuración">
               <X size={18} />
             </button>
           </div>
@@ -134,7 +134,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
               <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 8, flex: i < STEPS.length - 2 ? 1 : 'none' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <StepDot idx={i} />
-                  <span style={{ fontSize: 11, color: i === step ? c : '#4B5563', fontWeight: i === step ? 600 : 400, whiteSpace: 'nowrap', transition: 'color 0.3s' }}>
+                  <span style={{ fontSize: 11, color: i === step ? c : 'var(--text-mut)', fontWeight: i === step ? 600 : 400, whiteSpace: 'nowrap', transition: 'color 0.3s' }}>
                     {s.label}
                   </span>
                 </div>
@@ -212,7 +212,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
                 <p style={{ color: c, fontSize: 12, fontWeight: 600, margin: 0, letterSpacing: 0.5 }}>
                   EQUIPAMIENTO DEL CLUB
                 </p>
-                <p style={{ color: '#6B7280', fontSize: 12, margin: '4px 0 0' }}>
+                <p style={{ color: 'var(--text-sec)', fontSize: 12, margin: '4px 0 0' }}>
                   Define las prendas disponibles para pedidos de uniformes
                 </p>
               </div>
@@ -264,7 +264,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
                 <p style={{ color: c, fontSize: 12, fontWeight: 600, margin: 0, letterSpacing: 0.5 }}>
                   TORNEOS Y COMPETENCIAS
                 </p>
-                <p style={{ color: '#6B7280', fontSize: 12, margin: '4px 0 0' }}>
+                <p style={{ color: 'var(--text-sec)', fontSize: 12, margin: '4px 0 0' }}>
                   Crea los torneos en los que participa tu club (puedes agregar más luego)
                 </p>
               </div>
@@ -273,11 +273,11 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)' }}>
                   <Trophy size={14} color={c} style={{ flexShrink: 0 }} />
                   <span style={{ flex: 1, fontSize: 13, color: '#D1D5DB' }}>{t.nombre}</span>
-                  {t.fecha && <span style={{ fontSize: 11, color: '#6B7280' }}>{t.fecha}</span>}
+                  {t.fecha && <span style={{ fontSize: 11, color: 'var(--text-sec)' }}>{t.fecha}</span>}
                   {t.valor > 0 && <span style={{ fontSize: 11, color: c }}>${t.valor.toLocaleString('es-CO')}</span>}
                   <button
                     onClick={() => setTorneos(ts => ts.filter((_, j) => j !== i))}
-                    style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', padding: 0 }}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-mut)', cursor: 'pointer', padding: 0 }}
                   ><X size={14} /></button>
                 </div>
               ))}
@@ -317,7 +317,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
                 </button>
               </div>
 
-              <p style={{ fontSize: 12, color: '#4B5563', margin: 0 }}>
+              <p style={{ fontSize: 12, color: 'var(--text-mut)', margin: 0 }}>
                 Este paso es opcional — puedes saltarlo y crear torneos desde el módulo de Arbitraje.
               </p>
             </div>
@@ -329,7 +329,7 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
         <div style={{ padding: '16px 28px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button
             onClick={skip}
-            style={{ background: 'none', border: 'none', color: '#4B5563', fontSize: 13, cursor: 'pointer' }}
+            style={{ background: 'none', border: 'none', color: 'var(--text-mut)', fontSize: 13, cursor: 'pointer' }}
           >
             Saltar configuración
           </button>

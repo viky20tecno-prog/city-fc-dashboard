@@ -200,13 +200,13 @@ export default function FormInscripcion() {
           <h1 style={{ color: '#fff', fontSize: 22, fontWeight: 800, margin: '0 0 4px' }}>
             Únete a <span style={{ color: c }}>{clubName}</span>
           </h1>
-          <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Completa tus datos para inscribirte</p>
+          <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: 0 }}>Completa tus datos para inscribirte</p>
 
           {/* Barra de progreso */}
           <div style={{ marginTop: 18 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#4B5563', marginBottom: 6, letterSpacing: '0.5px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-mut)', marginBottom: 6, letterSpacing: '0.5px' }}>
               <span>Progreso del formulario</span>
-              <span style={{ color: progress > 0 ? c : '#4B5563', fontWeight: 600 }}>{progress}%</span>
+              <span style={{ color: progress > 0 ? c : 'var(--text-mut)', fontWeight: 600 }}>{progress}%</span>
             </div>
             <div style={{ height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 99, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: `${progress}%`, background: `linear-gradient(90deg, ${c}BB, ${c})`, borderRadius: 99, transition: 'width 0.4s ease' }} />
@@ -252,10 +252,10 @@ export default function FormInscripcion() {
               ) : (
                 <>
                   <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
-                    <Upload size={20} color="#6B7280" />
+                    <Upload size={20} color="var(--text-sec)" />
                   </div>
                   <span style={{ color: '#9CA3AF', fontSize: 13, fontWeight: 500 }}>Subir foto</span>
-                  <span style={{ color: '#4B5563', fontSize: 11, marginTop: 4 }}>o arrastra aquí</span>
+                  <span style={{ color: 'var(--text-mut)', fontSize: 11, marginTop: 4 }}>o arrastra aquí</span>
                 </>
               )}
             </div>
@@ -268,7 +268,7 @@ export default function FormInscripcion() {
               onChange={(e) => handlePhotoSelect(e.target.files[0])}
             />
 
-            <p style={{ color: '#374151', fontSize: 11, textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
+            <p style={{ color: 'var(--text-sec)', fontSize: 11, textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
               Formatos: JPG, PNG. Máx 5MB
             </p>
           </div>
@@ -353,7 +353,7 @@ export default function FormInscripcion() {
                 : <><UserPlus size={16} /> Inscribirme</>}
             </button>
 
-            <p style={{ textAlign: 'center', color: '#374151', fontSize: 12, marginTop: 2 }}>
+            <p style={{ textAlign: 'center', color: 'var(--text-sec)', fontSize: 12, marginTop: 2 }}>
               Al inscribirte aceptas ser parte oficial del club 🏅
             </p>
           </form>
@@ -379,7 +379,7 @@ function FieldBox({ campo, form, onChange, c }) {
   const iconEl = Icon ? (
     <Icon
       size={14}
-      color="#4B5563"
+      color="var(--text-mut)"
       style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
     />
   ) : null;
@@ -399,7 +399,7 @@ function FieldBox({ campo, form, onChange, c }) {
             <option value="">Seleccionar…</option>
             {campo.options.map(o => <option key={o} value={o}>{o}</option>)}
           </select>
-          <ChevronDown size={13} color="#4B5563" style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+          <ChevronDown size={13} color="var(--text-mut)" style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
         </div>
       </div>
     );

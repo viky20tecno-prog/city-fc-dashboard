@@ -77,7 +77,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
     return (
       <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl p-12 text-center">
         <div className="text-5xl mb-4">👈</div>
-        <h3 className="text-white font-semibold mb-2">Selecciona un partido</h3>
+        <h3 className="text-[var(--text-pri)] font-semibold mb-2">Selecciona un partido</h3>
         <p className="text-gray-400 text-sm">
           Ve a la pestaña <span className="text-[var(--cc)] font-medium">Partidos</span> y haz clic en "Ver pagos".
         </p>
@@ -118,7 +118,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Partido</p>
-              <h3 className="text-white font-bold text-base leading-tight">
+              <h3 className="text-[var(--text-pri)] font-bold text-base leading-tight">
                 {resumen.titulo || 'Sin título'}
               </h3>
               {(resumen.equipoA || resumen.equipoB) && (
@@ -148,7 +148,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
           <div className="mb-4">
             <div className="flex justify-between text-xs text-gray-400 mb-1.5">
               <span>Progreso de cobro</span>
-              <span className="text-white font-medium">{pct}%</span>
+              <span className="text-[var(--text-pri)] font-medium">{pct}%</span>
             </div>
             <div className="h-2 bg-[var(--bg-surface)] rounded-full overflow-hidden">
               <div
@@ -161,7 +161,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
           {/* Métricas */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Monto total', value: fmt(resumen.montoTotal),    color: 'text-white' },
+              { label: 'Monto total', value: fmt(resumen.montoTotal),    color: 'text-[var(--text-pri)]' },
               { label: 'Recaudado',   value: fmt(resumen.totalRecaudado), color: 'text-[var(--cc)]' },
               { label: 'Pendiente',   value: fmt(resumen.faltante),       color: 'text-[var(--cc)]' },
               { label: 'Sin pagar',   value: `${resumen.cantidadPendiente} de ${resumen.cantidadTotal}`, color: 'text-yellow-400' },
@@ -178,7 +178,7 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
       {/* ── Lista de pagos ── */}
       <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-[var(--cc20)]">
-          <h3 className="text-white font-semibold">Registro de pagos individuales</h3>
+          <h3 className="text-[var(--text-pri)] font-semibold">Registro de pagos individuales</h3>
         </div>
 
         {pagos.length === 0 ? (
@@ -205,13 +205,13 @@ export default function ArbitrajeGestionPagos({ clubId, partidoId }) {
 
                   {/* Nombre y cédula */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">{pago.nombre}</p>
+                    <p className="text-[var(--text-pri)] text-sm font-medium truncate">{pago.nombre}</p>
                     <p className="text-gray-500 text-xs">{pago.cedula}</p>
                   </div>
 
                   {/* Valor — centro */}
                   <div className="text-center px-3 shrink-0">
-                    <p className="text-white font-bold text-sm">{fmt(pago.valor)}</p>
+                    <p className="text-[var(--text-pri)] font-bold text-sm">{fmt(pago.valor)}</p>
                   </div>
 
                   {/* Estado / botón — derecha */}

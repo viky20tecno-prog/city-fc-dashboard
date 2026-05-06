@@ -24,12 +24,12 @@ export default function ArbitrajePagos({ color = 'var(--cc)' }) {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-app)] text-white">
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-pri)]">
       <div className="max-w-6xl mx-auto px-4 py-6">
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white">Pago de Árbitros</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-pri)]">Pago de Árbitros</h1>
           <p className="text-gray-400 text-sm mt-1">
             Gestiona los partidos y los pagos a árbitros del club
           </p>
@@ -44,8 +44,8 @@ export default function ArbitrajePagos({ color = 'var(--cc)' }) {
               style={activeTab === idx ? { background: color, boxShadow: `0 4px 16px ${color}40` } : {}}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === idx
-                  ? 'text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-[var(--bg-surface)]'
+                  ? 'text-[var(--text-pri)]'
+                  : 'text-[var(--text-sec)] hover:text-[var(--text-pri)] hover:bg-[var(--bg-surface)]'
               }`}
             >
               <span>{tab.icon}</span>

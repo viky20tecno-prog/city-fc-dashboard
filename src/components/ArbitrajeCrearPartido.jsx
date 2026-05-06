@@ -9,7 +9,7 @@ const fmt = (n) =>
 
 // Input oscuro para fecha/hora — fuerza el color-scheme dark en el picker nativo
 const darkPickerClass =
-  'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white rounded-lg px-4 py-2.5 text-sm outline-none transition-colors [color-scheme:dark]';
+  'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] rounded-lg px-4 py-2.5 text-sm outline-none transition-colors [color-scheme:dark]';
 
 export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
   const [formData, setFormData] = useState({
@@ -125,7 +125,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
 
   return (
     <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl p-6">
-      <h2 className="text-white font-semibold text-lg mb-6">Registrar nuevo partido</h2>
+      <h2 className="text-[var(--text-pri)] font-semibold text-lg mb-6">Registrar nuevo partido</h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
 
@@ -138,7 +138,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
             value={formData.titulo}
             onChange={handleInputChange}
             placeholder="Ej: Torneo Copa Ciudad – Semifinal"
-            className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+            className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
           />
         </div>
 
@@ -186,7 +186,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
               value={formData.equipoA}
               onChange={handleInputChange}
               placeholder="Ej: City FC"
-              className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+              className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
             />
           </div>
           <div>
@@ -197,7 +197,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
               value={formData.equipoB}
               onChange={handleInputChange}
               placeholder="Ej: Independiente"
-              className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+              className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
             />
           </div>
         </div>
@@ -212,7 +212,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
             onChange={handleInputChange}
             placeholder="Ej: 15000"
             min="0"
-            className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
+            className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-4 py-2.5 text-sm outline-none transition-colors"
           />
           {montoTotal > 0 && (
             <p className="mt-1.5 text-xs text-gray-500">
@@ -251,7 +251,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 placeholder="Buscar por nombre..."
-                className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-white placeholder-gray-500 rounded-lg pl-9 pr-4 py-2 text-sm outline-none transition-colors"
+                className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg pl-9 pr-4 py-2 text-sm outline-none transition-colors"
               />
               {busqueda && (
                 <button
@@ -295,7 +295,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
                       : <Square size={16} className="text-gray-600 shrink-0" />
                     }
                     <div>
-                      <p className="text-sm text-white">{nombre}</p>
+                      <p className="text-sm text-[var(--text-pri)]">{nombre}</p>
                       <p className="text-xs text-gray-500">{j.cedula}</p>
                     </div>
                   </button>

@@ -82,19 +82,30 @@ body {
 }
 
 /* ── Texto en tema claro ───────────────────────────────── */
+/* Cobertura global: headings, párrafos, inputs, divs con text-white */
+[data-theme="light"] h1.text-white,
+[data-theme="light"] h2.text-white,
+[data-theme="light"] h3.text-white,
+[data-theme="light"] h4.text-white,
+[data-theme="light"] p.text-white,
+[data-theme="light"] span.text-white,
+[data-theme="light"] label.text-white,
+[data-theme="light"] input.text-white,
+[data-theme="light"] textarea.text-white,
+[data-theme="light"] div.text-white,
 [data-theme="light"] main .text-white,
 [data-theme="light"] nav  .text-white,
 [data-theme="light"] header .text-white { color: var(--text-pri) !important; }
 
-[data-theme="light"] main .text-gray-400,
-[data-theme="light"] main .text-gray-500,
-[data-theme="light"] main .text-gray-600 { color: var(--text-sec) !important; }
+[data-theme="light"] .text-gray-400,
+[data-theme="light"] .text-gray-500,
+[data-theme="light"] .text-gray-600 { color: var(--text-sec) !important; }
 
-[data-theme="light"] main .text-gray-300,
-[data-theme="light"] main .text-gray-200 { color: var(--text-pri) !important; }
+[data-theme="light"] .text-gray-300,
+[data-theme="light"] .text-gray-200 { color: var(--text-pri) !important; }
 
 [data-theme="light"] main .border-white\/\[0\.06\],
-[data-theme="light"] main [class*="border-white"] { border-color: var(--border-sub) !important; }
+[data-theme="light"] [class*="border-white"] { border-color: var(--border-sub) !important; }
 
 [data-theme="light"] main .bg-white\/\[0\.04\],
 [data-theme="light"] main [class*="bg-white/0"] { background-color: var(--bg-surface) !important; }

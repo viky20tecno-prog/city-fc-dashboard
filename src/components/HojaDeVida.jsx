@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import {
   X, User, DollarSign, CreditCard, Camera, Save,
-  Loader2, Printer, CheckCircle,
+  Loader2, Printer, CheckCircle, ClipboardList,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -19,8 +19,8 @@ const POSICIONES = [
 
 function Seccion({ titulo, children }) {
   return (
-    <div className="bg-[#1E1E1E] rounded-xl border border-[#2A2A2A] p-4">
-      <p className="text-xs text-[#6A6A6A] uppercase tracking-wider mb-3 flex items-center gap-2">
+    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-sub)] p-4">
+      <p className="text-xs text-[var(--text-mut)] uppercase tracking-wider mb-3 flex items-center gap-2">
         <span className="w-3 h-0.5 bg-[#E14924] inline-block rounded" />
         {titulo}
       </p>
@@ -48,12 +48,12 @@ function EscudoSVG({ size = 32 }) {
 
 /* ── Tab Perfil ── */
 
-const INPUT_CLS = "w-full px-3 py-2 rounded-lg bg-[#141414] border border-[#2A2A2A] text-sm text-[#F5F5F5] focus:outline-none focus:border-[#E14924]/50 placeholder-[#3A3A3A]";
+const INPUT_CLS = "w-full px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] focus:outline-none focus:border-[#E14924]/50 placeholder-[var(--text-mut)]";
 
 function CampoEdit({ label, value, onChange, type = 'text', placeholder = '', ...rest }) {
   return (
     <div className="space-y-1">
-      <label className="text-xs text-[#6A6A6A] uppercase tracking-wider">{label}</label>
+      <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">{label}</label>
       <input
         type={type}
         value={value}
@@ -94,6 +94,7 @@ function TabPerfil({ jugador, onFotoUpdate }) {
     direccion:           jugador.direccion           || '',
     familiar_emergencia: jugador.familiar_emergencia || '',
     celular_contacto:    jugador.celular_contacto    || '',
+    notas:               jugador.notas               || '',
   });
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
@@ -170,11 +171,11 @@ function TabPerfil({ jugador, onFotoUpdate }) {
         <div className="relative flex-shrink-0">
           <div
             onClick={() => !uploading && fileRef.current?.click()}
-            className="w-20 h-20 rounded-full bg-[#1E1E1E] border-2 border-[#E14924]/30 overflow-hidden cursor-pointer flex items-center justify-center hover:border-[#E14924]/60 transition"
+            className="w-20 h-20 rounded-full bg-[var(--bg-surface)] border-2 border-[#E14924]/30 overflow-hidden cursor-pointer flex items-center justify-center hover:border-[#E14924]/60 transition"
           >
             {fotoUrl
               ? <img src={fotoUrl} alt={nombreDisplay} className="w-full h-full object-cover" />
-              : <User className="w-8 h-8 text-[#3A3A3A]" />}
+              : <User className="w-8 h-8 text-[var(--text-mut)]" />}
           </div>
           <button
             onClick={() => !uploading && fileRef.current?.click()}
@@ -187,8 +188,8 @@ function TabPerfil({ jugador, onFotoUpdate }) {
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={subirFoto} />
         </div>
         <div>
-          <p className="text-base font-bold text-[#F5F5F5]">{nombreDisplay || '—'}</p>
-          <p className="text-sm text-[#6A6A6A]">CC {jugador.cedula}</p>
+          <p className="text-base font-bold text-[var(--text-pri)]">{nombreDisplay || '—'}</p>
+          <p className="text-sm text-[var(--text-mut)]">CC {jugador.cedula}</p>
           <p className="text-xs text-[#4A4A4A] mt-0.5">Clic en la foto para cambiar</p>
         </div>
       </div>
@@ -201,7 +202,7 @@ function TabPerfil({ jugador, onFotoUpdate }) {
       <Seccion titulo="Datos Deportivos">
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label className="text-xs text-[#6A6A6A] uppercase tracking-wider">Posición</label>
+            <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Posición</label>
             <select
               value={form.posicion}
               onChange={set('posicion')}
@@ -226,8 +227,8 @@ function TabPerfil({ jugador, onFotoUpdate }) {
         <div className="grid grid-cols-2 gap-3">
           <CampoEdit label="Tipo de documento" value={form.tipo_id}   onChange={set('tipo_id')}   placeholder="CC, TI, CE…" />
           <div className="space-y-1">
-            <label className="text-xs text-[#6A6A6A] uppercase tracking-wider">Cédula / ID</label>
-            <p className="text-sm text-[#F5F5F5] font-medium px-3 py-2">{jugador.cedula}</p>
+            <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Cédula / ID</label>
+            <p className="text-sm text-[var(--text-pri)] font-medium px-3 py-2">{jugador.cedula}</p>
           </div>
           <CampoEdit label="Nombre(s)"   value={form.nombre}    onChange={set('nombre')}    placeholder="Nombre(s)" />
           <CampoEdit label="Apellido(s)" value={form.apellidos} onChange={set('apellidos')} placeholder="Apellido(s)" />
@@ -273,6 +274,34 @@ function TabPerfil({ jugador, onFotoUpdate }) {
           <CampoEdit label="Celular de contacto"  value={form.celular_contacto}    onChange={set('celular_contacto')}    placeholder="3001234567" />
         </div>
       </Seccion>
+
+      {/* Observaciones / Notas médicas */}
+      <div className="rounded-xl border border-[var(--border-sub)] p-4" style={{ background: 'var(--bg-surface)' }}>
+        <p className="text-xs text-[var(--text-mut)] uppercase tracking-wider mb-3 flex items-center gap-2">
+          <ClipboardList className="w-3 h-3 text-[#E14924]" />
+          Observaciones y notas
+        </p>
+        <p className="text-xs text-[var(--text-mut)] mb-2 leading-relaxed">
+          Lesiones, condiciones médicas, alergias, restricciones de juego u otros datos relevantes del jugador.
+        </p>
+        <textarea
+          value={form.notas}
+          onChange={set('notas')}
+          placeholder="Ej: Esguince tobillo derecho — feb 2026. Alérgico a la penicilina. No puede jugar de portero por lesión de hombro…"
+          rows={4}
+          className="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none resize-none"
+          style={{
+            background: 'var(--bg-input, var(--bg-card))',
+            border: '1.5px solid var(--border-sub)',
+            color: 'var(--text-pri)',
+            fontFamily: 'inherit',
+            lineHeight: 1.6,
+            transition: 'border-color .2s',
+          }}
+          onFocus={e => e.target.style.borderColor = '#E14924'}
+          onBlur={e  => e.target.style.borderColor = 'var(--border-sub)'}
+        />
+      </div>
 
       {/* Botón global guardar */}
       <button
@@ -356,7 +385,7 @@ function TabCarnet({ jugador }) {
             <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '18px', letterSpacing: '3px', color: 'var(--text-pri)', lineHeight: 1 }}>
               CITY F.C. <span style={{ color: '#B68631', fontSize: '11px' }}>★</span>
             </div>
-            <div style={{ fontSize: '8px', letterSpacing: '3px', color: '#555', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '8px', letterSpacing: '3px', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
               Lo Hacemos Diferente
             </div>
           </div>
@@ -386,10 +415,10 @@ function TabCarnet({ jugador }) {
             <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '18px', color: '#E14924', lineHeight: 1.1, letterSpacing: '1px' }}>
               {apellidos}
             </div>
-            <div style={{ fontSize: '10px', color: '#555', marginTop: '6px', letterSpacing: '0.5px' }}>
+            <div style={{ fontSize: '10px', color: 'var(--text-mut)', marginTop: '6px', letterSpacing: '0.5px' }}>
               CC {jugador.cedula}
             </div>
-            <div style={{ fontSize: '9px', letterSpacing: '2px', color: '#444', textTransform: 'uppercase', marginTop: '2px' }}>
+            <div style={{ fontSize: '9px', letterSpacing: '2px', color: 'var(--text-mut)', textTransform: 'uppercase', marginTop: '2px' }}>
               JUGADOR
             </div>
           </div>
@@ -409,7 +438,7 @@ function TabCarnet({ jugador }) {
               <div style={{ fontSize: '15px', fontWeight: 700, color: item.color, fontFamily: "'Bebas Neue', cursive", letterSpacing: '1px' }}>
                 {item.value}
               </div>
-              <div style={{ fontSize: '7.5px', color: '#444', letterSpacing: '1.5px', textTransform: 'uppercase', marginTop: '2px' }}>
+              <div style={{ fontSize: '7.5px', color: 'var(--text-mut)', letterSpacing: '1.5px', textTransform: 'uppercase', marginTop: '2px' }}>
                 {item.label}
               </div>
             </div>
@@ -422,10 +451,10 @@ function TabCarnet({ jugador }) {
         {/* Emergencia */}
         {(jugador.familiar_emergencia || jugador.celular_contacto) && (
           <div style={{ padding: '10px 20px 14px' }}>
-            <div style={{ fontSize: '7.5px', color: '#444', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <div style={{ fontSize: '7.5px', color: 'var(--text-mut)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '4px' }}>
               Contacto de Emergencia
             </div>
-            <div style={{ fontSize: '10px', color: '#888' }}>
+            <div style={{ fontSize: '10px', color: 'var(--text-sec)' }}>
               {jugador.familiar_emergencia || '—'} · {jugador.celular_contacto || '—'}
             </div>
           </div>
@@ -436,14 +465,14 @@ function TabCarnet({ jugador }) {
       </div>
 
       {jugador.posicion === '' && jugador.numero_camiseta === '' && (
-        <p className="text-center text-xs text-[#6A6A6A]">
+        <p className="text-center text-xs text-[var(--text-mut)]">
           Completa posición y número en la pestaña Perfil para que aparezcan en el carnet.
         </p>
       )}
 
       <button
         onClick={imprimir}
-        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#1E1E1E] border border-[#2A2A2A] text-sm font-semibold text-[#F5F5F5] hover:border-[#E14924]/40 hover:bg-[#E14924]/5 transition"
+        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-sub)] text-sm font-semibold text-[var(--text-pri)] hover:border-[#E14924]/40 hover:bg-[#E14924]/5 transition"
       >
         <Printer className="w-4 h-4 text-[#E14924]" />
         Imprimir Carnet
@@ -484,11 +513,11 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
 
       {/* Panel lateral */}
       <div
-        className="relative w-full max-w-[560px] h-full bg-[#141414] border-l border-[#2A2A2A] flex flex-col shadow-2xl"
+        className="relative w-full max-w-[560px] h-full bg-[var(--bg-card)] border-l border-[var(--border-sub)] flex flex-col shadow-2xl"
         style={{ animation: 'hdv-slide-in 0.22s ease both' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A2A2A] flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-sub)] flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded-full bg-[#E14924]/10 border border-[#E14924]/20 overflow-hidden flex-shrink-0 flex items-center justify-center">
               {jugadorLocal.foto_url
@@ -496,17 +525,17 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
                 : <User className="w-4 h-4 text-[#E14924]" />}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#F5F5F5] truncate">{nombre}</p>
-              <p className="text-xs text-[#6A6A6A]">CC {jugadorLocal.cedula}</p>
+              <p className="text-sm font-semibold text-[var(--text-pri)] truncate">{nombre}</p>
+              <p className="text-xs text-[var(--text-mut)]">CC {jugadorLocal.cedula}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#1E1E1E] transition flex-shrink-0">
-            <X className="w-5 h-5 text-[#6A6A6A]" />
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-[var(--bg-surface)] transition flex-shrink-0">
+            <X className="w-5 h-5 text-[var(--text-mut)]" />
           </button>
         </div>
 
         {/* Tabs — solo se muestran las permitidas */}
-        <div className="flex border-b border-[#2A2A2A] flex-shrink-0">
+        <div className="flex border-b border-[var(--border-sub)] flex-shrink-0">
           {tabsToShow.map(t => {
             const Icon   = t.icon;
             const active = tab === t.key;
@@ -515,7 +544,7 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-semibold transition relative ${
-                  active ? 'text-[#E14924]' : 'text-[#6A6A6A] hover:text-[#F5F5F5]'
+                  active ? 'text-[#E14924]' : 'text-[var(--text-mut)] hover:text-[var(--text-pri)]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />

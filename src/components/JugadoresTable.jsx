@@ -30,7 +30,7 @@ function FiltroDropdown({ value, onChange, opciones }) {
       <button
         onClick={() => setOpen(o => !o)}
         style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)', minWidth: '140px' }}
-        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-white hover:border-[#E14924]/50 transition"
+        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-[var(--text-pri)] hover:border-[#E14924]/50 transition"
       >
         <span className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ESTADO_DOT[value] || '#6A6A6A' }} />
@@ -183,7 +183,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)' }}
-                  className="w-full sm:w-60 pl-10 pr-4 py-2 rounded-xl text-sm text-white placeholder-[#6A6A6A] focus:outline-none focus:border-[#E14924]/50 transition"
+                  className="w-full sm:w-60 pl-10 pr-4 py-2 rounded-xl text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[#E14924]/50 transition"
                 />
               </div>
 
@@ -246,14 +246,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-semibold text-white text-sm">{j.nombreCompleto}</span>
+                          <span className="font-semibold text-[var(--text-pri)] text-sm">{j.nombreCompleto}</span>
                           {tieneSuspensionActiva(j.cedula) && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
                               <PauseCircle className="w-3 h-3" /> Suspendido
                             </span>
                           )}
                         </div>
-                        <div className="text-xs mt-0.5" style={{ color: '#4A4A4A' }}>
+                        <div className="text-xs mt-0.5" style={{ color: 'var(--text-mut)' }}>
                           {j.activo ? '🟢 Activo' : '🔴 Inactivo'}
                         </div>
                       </div>

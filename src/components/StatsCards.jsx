@@ -25,9 +25,9 @@ function StatCard({ icon: Icon, label, value, subtext, color, wide }) {
       </div>
       <div className="relative flex items-center justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-gray-400">{label}</p>
-          <p className="text-2xl font-bold mt-1 text-white tracking-tight">{value}</p>
-          {subtext && <p className="text-sm text-gray-500 mt-1">{subtext}</p>}
+          <p className="text-sm font-medium text-[var(--text-sec)]">{label}</p>
+          <p className="text-2xl font-bold mt-1 text-[var(--text-pri)] tracking-tight">{value}</p>
+          {subtext && <p className="text-sm text-[var(--text-sec)] mt-1">{subtext}</p>}
         </div>
         <div className={`w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center flex-shrink-0
           transition-transform duration-300 group-hover:scale-110`}

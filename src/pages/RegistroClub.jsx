@@ -132,7 +132,7 @@ export default function RegistroClub() {
         {/* Header */}
         <div style={{ marginBottom: 32 }}>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/login')}
             style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 24, padding: 0 }}
           >
             <ChevronLeft size={15} /> Volver al inicio

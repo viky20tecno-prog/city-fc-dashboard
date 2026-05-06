@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bot, BarChart2, CreditCard, Shield, ChevronRight, CheckCircle } from 'lucide-react';
 
@@ -44,6 +45,8 @@ const FEATURES = [
 
 export default function LandingPage() {
   const navigate = useNavigate();
+
+  useEffect(() => { document.title = 'ClubContable — Landing'; }, []);
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#060C18', minHeight: '100vh', color: '#fff' }}>

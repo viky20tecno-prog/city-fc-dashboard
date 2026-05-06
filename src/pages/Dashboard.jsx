@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
@@ -79,6 +79,12 @@ export default function Dashboard() {
   const [showPagoModal, setShowPagoModal] = useState(false);
 
   const c = clubConfig?.color || '#E14924';
+
+  useEffect(() => {
+    document.title = clubConfig?.nombre
+      ? `${clubConfig.nombre} — App`
+      : 'ClubContable — App';
+  }, [clubConfig?.nombre]);
 
   // Filtra el nav según los módulos habilitados en el plan del club.
   // Sin config (clubs existentes o trial) → todos visibles.

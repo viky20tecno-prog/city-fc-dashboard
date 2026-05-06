@@ -65,6 +65,8 @@ const INITIAL = {
 export default function RegistroClub() {
   const navigate = useNavigate();
   const [colorIdx, setColorIdx] = useState(0);
+
+  useEffect(() => { document.title = 'ClubContable — Registrar club'; }, []);
   const [form, setForm]         = useState(INITIAL);
   const [color, setColor]       = useState(PALETA[0].hex);
   const [pais, setPais]         = useState(PAISES[0]);

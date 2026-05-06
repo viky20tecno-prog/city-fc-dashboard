@@ -20,6 +20,8 @@ const FEATURES = [
 export default function Login() {
   const navigate = useNavigate();
   const [colorIdx, setColorIdx]   = useState(0);
+
+  useEffect(() => { document.title = 'ClubContable — Iniciar sesión'; }, []);
   const [vista, setVista]         = useState('login');
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');

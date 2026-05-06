@@ -7,7 +7,7 @@ import {
   Lock, Mail, User, Phone, Building2, MapPin, ChevronLeft,
 } from 'lucide-react';
 
-const CYCLE_COLORS = ['#10B981', '#00AAFF', '#8B5CF6', '#06B6D4', '#F97316'];
+const CYCLE_COLORS = ['#10B981', '#00AAFF', '#8B5CF6', '#0D9488', '#F97316'];
 
 const PALETA = [
   { hex: '#E14924', nombre: 'Naranja Ciudad'    },
@@ -17,7 +17,7 @@ const PALETA = [
   { hex: '#8B5CF6', nombre: 'Violeta Real'      },
   { hex: '#EF4444', nombre: 'Rojo Pasión'       },
   { hex: '#F97316', nombre: 'Naranja Solar'     },
-  { hex: '#06B6D4', nombre: 'Celeste Deportivo' },
+  { hex: '#0D9488', nombre: 'Teal Agua'         },
   { hex: '#EC4899', nombre: 'Rosa Dinámico'     },
   { hex: '#84CC16', nombre: 'Lima Fresco'       },
   { hex: '#FACC15', nombre: 'Amarillo Flash'    },

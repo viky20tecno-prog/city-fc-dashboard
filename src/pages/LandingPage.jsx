@@ -50,7 +50,7 @@ const PALETA = [
   { hex: '#8B5CF6', nombre: 'Violeta Real'      },
   { hex: '#EF4444', nombre: 'Rojo Pasión'       },
   { hex: '#F97316', nombre: 'Naranja Solar'     },
-  { hex: '#06B6D4', nombre: 'Celeste Deportivo' },
+  { hex: '#0D9488', nombre: 'Teal Agua'          },
   { hex: '#EC4899', nombre: 'Rosa Dinámico'     },
   { hex: '#84CC16', nombre: 'Lima Fresco'       },
   { hex: '#FACC15', nombre: 'Amarillo Flash'    },
@@ -215,7 +215,6 @@ export default function LandingPage() {
 
       {/* ── NAVBAR ───────────────────────────────────────────────────────── */}
       <nav style={{ borderBottom: '1px solid rgba(0,170,255,0.12)', padding: '0 24px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-        <span style={{ fontWeight: 700, fontSize: 16, color: '#fff', letterSpacing: '-0.3px' }}>ClubContable</span>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <button onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: '#9CA3AF', fontSize: 14, cursor: 'pointer', padding: '6px 12px' }}>
             Iniciar sesión

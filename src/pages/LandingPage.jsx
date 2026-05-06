@@ -1,6 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import { Bot, BarChart2, CreditCard, Shield, ChevronRight, CheckCircle } from 'lucide-react';
 
+const DEPORTES_STRIP = [
+  { emoji: '⚽', label: 'Fútbol'        },
+  { emoji: '🏀', label: 'Basketball'    },
+  { emoji: '🏊', label: 'Natación'      },
+  { emoji: '🚴', label: 'Ciclismo'      },
+  { emoji: '🥊', label: 'Artes Marciales'},
+  { emoji: '🏋️', label: 'Gimnasio'      },
+  { emoji: '🎾', label: 'Tenis'         },
+  { emoji: '🏐', label: 'Voleibol'      },
+  { emoji: '🏊', label: 'Atletismo'     },
+  { emoji: '🤸', label: 'Gimnasia'      },
+];
+
 const FEATURES = [
   {
     icon: Bot,
@@ -12,13 +25,13 @@ const FEATURES = [
     icon: BarChart2,
     color: '#00D084',
     title: 'Control financiero en tiempo real',
-    desc: 'Mensualidades, uniformes y torneos en un solo panel. Aprueba comprobantes con un clic.',
+    desc: 'Mensualidades, equipamiento y eventos en un solo panel. Aprueba comprobantes con un clic.',
   },
   {
     icon: CreditCard,
     color: '#F5A623',
-    title: 'Carnet y hoja de vida digital',
-    desc: 'Perfil completo con foto, estadísticas, historial médico y carnet imprimible para cada jugador.',
+    title: 'Carnet y perfil digital',
+    desc: 'Perfil completo con foto, historial médico y carnet imprimible para cada miembro del club.',
   },
   {
     icon: Shield,
@@ -30,11 +43,11 @@ const FEATURES = [
 
 const INCLUYE = [
   'WhatsApp Bot de cobro automático',
-  'Dashboard admin ilimitado',
-  'Hoja de vida + carnet por jugador',
+  'Dashboard administrador ilimitado',
+  'Perfil y carnet digital por miembro',
   'Historial de pagos y comprobantes',
   'Reportes de mora y estado financiero',
-  'Uniformes y torneos',
+  'Equipamiento y gestión de eventos',
   'Soporte por WhatsApp',
 ];
 
@@ -69,12 +82,12 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ───────────────────────────────────────────────────────────── */}
-      <section style={{ textAlign: 'center', padding: '80px 24px 64px', maxWidth: 760, margin: '0 auto' }}>
+      <section style={{ textAlign: 'center', padding: '80px 24px 48px', maxWidth: 760, margin: '0 auto' }}>
         <div style={{ display: 'inline-block', background: 'rgba(0,170,255,0.1)', border: '1px solid rgba(0,170,255,0.25)', borderRadius: 999, padding: '4px 14px', fontSize: 12, color: '#00AAFF', fontWeight: 600, marginBottom: 20, letterSpacing: 0.5 }}>
-          ⚽ Para clubes de toda América Latina
+          🏅 Para clubes deportivos de toda América Latina
         </div>
         <h1 style={{ fontSize: 'clamp(32px, 6vw, 56px)', fontWeight: 800, lineHeight: 1.1, marginBottom: 20, letterSpacing: '-1px' }}>
-          Gestiona tu club de fútbol<br />
+          Gestiona tu club deportivo<br />
           <span style={{ color: '#00AAFF' }}>como un profesional</span>
         </h1>
         <p style={{ fontSize: 18, color: '#9CA3AF', lineHeight: 1.6, marginBottom: 36, maxWidth: 560, margin: '0 auto 36px' }}>
@@ -98,6 +111,38 @@ export default function LandingPage() {
         <p style={{ fontSize: 12, color: '#6B7280', marginTop: 14 }}>
           30 días gratis · Sin tarjeta de crédito · Cancela cuando quieras
         </p>
+      </section>
+
+      {/* ── STRIP DE DEPORTES ──────────────────────────────────────────────── */}
+      <section style={{ padding: '0 24px 64px', maxWidth: 900, margin: '0 auto' }}>
+        <p style={{ textAlign: 'center', color: '#4B5563', fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>
+          Funciona para cualquier disciplina
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
+          {DEPORTES_STRIP.map(d => (
+            <div key={d.label} style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 999,
+              padding: '7px 14px',
+              fontSize: 13, color: '#9CA3AF',
+            }}>
+              <span style={{ fontSize: 16 }}>{d.emoji}</span>
+              {d.label}
+            </div>
+          ))}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'rgba(0,170,255,0.06)',
+            border: '1px solid rgba(0,170,255,0.15)',
+            borderRadius: 999,
+            padding: '7px 14px',
+            fontSize: 13, color: '#00AAFF',
+          }}>
+            + cualquier deporte con afiliados
+          </div>
+        </div>
       </section>
 
       {/* ── FEATURES ───────────────────────────────────────────────────────── */}
@@ -143,7 +188,7 @@ export default function LandingPage() {
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '24px', textAlign: 'center', color: '#4B5563', fontSize: 13 }}>
-        <p>ClubContable · Para clubes de toda América Latina ⚽</p>
+        <p>ClubContable · Gestión deportiva para toda América Latina 🏅</p>
         <div style={{ marginTop: 8, display: 'flex', gap: 20, justifyContent: 'center' }}>
           <button onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>Iniciar sesión</button>
           <button onClick={() => navigate('/registro')} style={{ background: 'none', border: 'none', color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>Registrar club</button>

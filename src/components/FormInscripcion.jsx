@@ -5,7 +5,7 @@ import {
   ClipboardList, CheckCircle, AlertCircle, Loader2,
   Upload, User, CreditCard, Phone, Mail, Instagram,
   MapPin, Calendar, Droplets, Building2, Home, UserPlus,
-  ChevronDown, X,
+  ChevronDown, X, Info,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useClubConfigPublic } from '../hooks/useClubConfigPublic';
@@ -33,7 +33,7 @@ const CAMPOS = [
 
 const SECCIONES = [
   { id: 'personal',   label: 'Datos personales'    },
-  { id: 'contacto',   label: 'Contacto'            },
+  { id: 'contacto',   label: 'Contacto',           hint: 'Si el jugador es menor de edad, ingresa los datos del padre, madre o acudiente.' },
   { id: 'adicional',  label: 'Datos adicionales'   },
   { id: 'residencia', label: 'Lugar de residencia' },
   { id: 'emergencia', label: 'Emergencia'          },
@@ -285,22 +285,42 @@ export default function FormInscripcion() {
               const rows   = GRID_2[sec.id] || campos.map(f => [f.key]);
               return (
                 <div key={sec.id} style={S.card}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                  {/* Título de sección */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: sec.hint ? 8 : 14 }}>
                     <div style={{ width: 3, height: 16, background: c, borderRadius: 2, flexShrink: 0 }} />
                     <span style={{ color: '#D1D5DB', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>
                       {sec.label}
                     </span>
                   </div>
 
+                  {/* Nota de sección (ej: contacto de acudiente) */}
+                  {sec.hint && (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 10px', borderRadius: 8, background: `${c}0D`, border: `1px solid ${c}25`, marginBottom: 12 }}>
+                      <Info size={13} color={c} style={{ flexShrink: 0, marginTop: 1 }} />
+                      <span style={{ fontSize: 12, color: '#9CA3AF', lineHeight: 1.55 }}>{sec.hint}</span>
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {rows.map((row, ri) => (
-                      <div key={ri} style={{ display: 'grid', gridTemplateColumns: row.length === 2 ? '1fr 1fr' : '1fr', gap: 10 }}>
-                        {row.map(key => {
-                          const campo = campos.find(f => f.key === key);
-                          if (!campo) return null;
-                          return <FieldBox key={key} campo={campo} form={form} onChange={handleChange} c={c} />;
-                        })}
-                      </div>
+                      <>
+                        <div key={ri} style={{ display: 'grid', gridTemplateColumns: row.length === 2 ? '1fr 1fr' : '1fr', gap: 10 }}>
+                          {row.map(key => {
+                            const campo = campos.find(f => f.key === key);
+                            if (!campo) return null;
+                            return <FieldBox key={key} campo={campo} form={form} onChange={handleChange} c={c} />;
+                          })}
+                        </div>
+                        {/* Nota para Tarjeta de Identidad (menores) */}
+                        {sec.id === 'personal' && ri === 0 && form.tipo_id === 'Tarjeta de Identidad' && (
+                          <div key="ti-hint" style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 10px', borderRadius: 8, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)', animation: 'fadein .25s ease' }}>
+                            <Info size={13} color="#FBBF24" style={{ flexShrink: 0, marginTop: 1 }} />
+                            <span style={{ fontSize: 12, color: '#D1A93A', lineHeight: 1.55 }}>
+                              La Tarjeta de Identidad es el documento para <strong>menores de edad</strong>. Ingresa el número tal como aparece en el documento del niño o niña.
+                            </span>
+                          </div>
+                        )}
+                      </>
                     ))}
                   </div>
                 </div>

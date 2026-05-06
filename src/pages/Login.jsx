@@ -3,23 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import {
   Loader2, Eye, EyeOff, Mail, Lock, CheckCircle, KeyRound,
-  ArrowLeft, MessageCircle, Target, Trophy, Dumbbell, Bike, Waves, MoreHorizontal,
+  ArrowLeft, MessageCircle,
 } from 'lucide-react';
 
 const WHATSAPP_SOPORTE = '573023903192';
 
-const DEPORTES = [
-  { id: 'futbol',   label: 'Fútbol',     Icon: Target,         color: '#22C55E' },
-  { id: 'basket',   label: 'Basketball', Icon: Trophy,         color: '#F97316' },
-  { id: 'gimnasio', label: 'Gimnasio',   Icon: Dumbbell,       color: '#EC4899' },
-  { id: 'ciclismo', label: 'Ciclismo',   Icon: Bike,           color: '#06B6D4' },
-  { id: 'natacion', label: 'Natación',   Icon: Waves,          color: '#00AAFF' },
-  { id: 'otros',    label: 'Otros',      Icon: MoreHorizontal, color: '#8B5CF6' },
+const CYCLE_COLORS = ['#10B981', '#00AAFF', '#8B5CF6', '#06B6D4', '#F97316'];
+
+const FEATURES = [
+  { icon: '⚡', text: 'Cobros automáticos por WhatsApp' },
+  { icon: '📊', text: 'Dashboard en tiempo real' },
+  { icon: '🌎', text: 'Disponible en toda América Latina' },
+  { icon: '🏅', text: 'Fútbol, basket, gimnasio y más' },
 ];
 
 export default function Login() {
   const navigate = useNavigate();
-  const [sport, setSport]         = useState(DEPORTES[0]);
+  const [colorIdx, setColorIdx]   = useState(0);
   const [vista, setVista]         = useState('login');
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
@@ -30,7 +30,12 @@ export default function Login() {
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState('');
 
-  const color = sport.color;
+  const color = CYCLE_COLORS[colorIdx];
+
+  useEffect(() => {
+    const timer = setInterval(() => setColorIdx(i => (i + 1) % CYCLE_COLORS.length), 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
@@ -145,58 +150,79 @@ export default function Login() {
         minHeight: 500,
       }}>
 
-        {/* ── PANEL IZQ: selector deportes ── */}
-        <div style={{ padding: '44px 36px', display: 'flex', flexDirection: 'column', gap: 24 }}>
-          <div>
-            <h2 style={{ color: '#fff', fontSize: 30, fontWeight: 800, margin: '0 0 6px', letterSpacing: '-0.5px' }}>
-              Bienvenido
+        {/* ── PANEL IZQ: brand ── */}
+        <div style={{ padding: '44px 36px', display: 'flex', flexDirection: 'column' }}>
+
+          {/* Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: 12,
+              background: `${color}22`, border: `1px solid ${color}44`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.7s',
+            }}>
+              <img src="/10894351.png" alt="Logo" style={{ width: 24, height: 24, objectFit: 'contain' }}
+                onError={e => { e.target.style.display = 'none'; }} />
+            </div>
+            <div>
+              <p style={{ color: '#fff', fontWeight: 800, fontSize: 15, margin: 0, letterSpacing: '-0.2px' }}>ClubContable</p>
+              <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>Para toda América Latina</p>
+            </div>
+          </div>
+
+          {/* Headline */}
+          <div style={{ marginBottom: 28 }}>
+            <h2 style={{ color: '#fff', fontSize: 28, fontWeight: 800, margin: '0 0 2px', letterSpacing: '-0.5px', lineHeight: 1.2 }}>
+              Gestiona tu club
             </h2>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>
-              Selecciona la categoría de tu club
+            <h2 style={{ color, fontSize: 28, fontWeight: 800, margin: '0 0 12px', letterSpacing: '-0.5px', lineHeight: 1.2, transition: 'color 0.7s' }}>
+              como un profesional
+            </h2>
+            <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+              Cobros, jugadores, uniformes y WhatsApp — todo en un solo lugar.
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {DEPORTES.map(d => {
-              const active = sport.id === d.id;
-              return (
-                <button
-                  key={d.id}
-                  onClick={() => setSport(d)}
-                  style={{
-                    background: active ? `${d.color}20` : 'rgba(255,255,255,0.04)',
-                    border: `1.5px solid ${active ? d.color : 'rgba(255,255,255,0.07)'}`,
-                    borderRadius: 14,
-                    padding: '16px 10px',
-                    cursor: 'pointer',
-                    display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', gap: 8,
-                    transition: 'all 0.25s',
-                    boxShadow: active ? `0 0 22px ${d.color}44` : 'none',
-                  }}
-                >
-                  <d.Icon
-                    size={22}
-                    color={active ? d.color : '#4B5563'}
-                    style={{
-                      transition: 'color 0.25s',
-                      filter: active ? `drop-shadow(0 0 6px ${d.color})` : 'none',
-                    }}
-                  />
-                  <span style={{
-                    color: active ? d.color : '#6B7280',
-                    fontSize: 12, fontWeight: active ? 700 : 400,
-                    transition: 'color 0.25s',
-                  }}>
-                    {d.label}
-                  </span>
-                </button>
-              );
-            })}
+          {/* Features */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
+            {FEATURES.map(f => (
+              <div key={f.icon} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: `${color}18`, border: `1px solid ${color}33`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 15, flexShrink: 0,
+                  transition: 'all 0.7s',
+                }}>
+                  {f.icon}
+                </div>
+                <span style={{ color: '#9CA3AF', fontSize: 13 }}>{f.text}</span>
+              </div>
+            ))}
           </div>
 
-          <p style={{ color: '#374151', fontSize: 11, margin: '0 0 0', marginTop: 'auto' }}>
-            Sistema de gestión para clubes deportivos © 2026
+          {/* Color accent bar */}
+          <div style={{
+            height: 3, borderRadius: 2,
+            background: `linear-gradient(90deg, ${color}, ${color}44)`,
+            transition: 'background 0.7s',
+            margin: '28px 0 14px',
+          }} />
+
+          {/* Dots indicador de ciclo */}
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 12 }}>
+            {CYCLE_COLORS.map((c, i) => (
+              <div key={i} style={{
+                width: i === colorIdx ? 16 : 6,
+                height: 6, borderRadius: 3,
+                background: i === colorIdx ? color : '#1F2937',
+                transition: 'all 0.5s',
+              }} />
+            ))}
+          </div>
+
+          <p style={{ color: '#374151', fontSize: 11, margin: 0 }}>
+            Sistema de gestión deportiva © 2026
           </p>
         </div>
 
@@ -253,7 +279,7 @@ export default function Login() {
                     <span style={{ color: '#9CA3AF', fontSize: 13 }}>Recordarme</span>
                   </label>
                   <button type="button" onClick={irRecuperar}
-                    style={{ background: 'none', border: 'none', color, fontSize: 13, cursor: 'pointer', padding: 0 }}>
+                    style={{ background: 'none', border: 'none', color, fontSize: 13, cursor: 'pointer', padding: 0, transition: 'color 0.5s' }}>
                     ¿Olvidaste tu contraseña?
                   </button>
                 </div>
@@ -268,7 +294,7 @@ export default function Login() {
               <p style={{ textAlign: 'center', color: '#4B5563', fontSize: 13, marginTop: 18 }}>
                 ¿No tienes cuenta?{' '}
                 <button onClick={() => navigate('/registro')}
-                  style={{ background: 'none', border: 'none', color, cursor: 'pointer', fontSize: 13, fontWeight: 600, padding: 0 }}>
+                  style={{ background: 'none', border: 'none', color, cursor: 'pointer', fontSize: 13, fontWeight: 600, padding: 0, transition: 'color 0.5s' }}>
                   Regístrate aquí
                 </button>
               </p>
@@ -278,7 +304,7 @@ export default function Login() {
           {/* ══ RECUPERAR ══ */}
           {vista === 'recuperar' && (
             <>
-              <button onClick={irLogin} style={{ background: 'none', border: 'none', color, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, marginBottom: 18, padding: 0 }}>
+              <button onClick={irLogin} style={{ background: 'none', border: 'none', color, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, marginBottom: 18, padding: 0, transition: 'color 0.5s' }}>
                 <ArrowLeft size={13} /> Volver
               </button>
               <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 800, margin: '0 0 6px' }}>Recuperar contraseña</h3>
@@ -312,7 +338,7 @@ export default function Login() {
               <div style={{ fontSize: 46, marginBottom: 14 }}>📬</div>
               <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 8px' }}>¡Revisa tu correo!</h3>
               <p style={{ color: '#9CA3AF', fontSize: 14, margin: '0 0 4px' }}>Enviamos un enlace a</p>
-              <p style={{ color, fontSize: 15, fontWeight: 700, margin: '0 0 18px', transition: 'color 0.4s' }}>{email}</p>
+              <p style={{ color, fontSize: 15, fontWeight: 700, margin: '0 0 18px', transition: 'color 0.5s' }}>{email}</p>
               <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 16px', marginBottom: 18, textAlign: 'left' }}>
                 <p style={{ color: '#9CA3AF', fontSize: 13, margin: 0, lineHeight: 1.8 }}>
                   <strong style={{ color: '#fff' }}>Pasos:</strong><br />
@@ -322,7 +348,7 @@ export default function Login() {
                   4. Listo — ingresa al dashboard
                 </p>
               </div>
-              <button onClick={irRecuperar} style={{ background: 'none', border: 'none', color, fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}>
+              <button onClick={irRecuperar} style={{ background: 'none', border: 'none', color, fontSize: 13, cursor: 'pointer', textDecoration: 'underline', transition: 'color 0.5s' }}>
                 Reenviar el correo
               </button>
             </div>
@@ -332,7 +358,7 @@ export default function Login() {
           {vista === 'nueva_clave' && (
             <>
               <div style={{ textAlign: 'center', marginBottom: 22 }}>
-                <KeyRound size={34} color={color} style={{ marginBottom: 8, filter: `drop-shadow(0 0 8px ${color})`, transition: 'filter 0.4s' }} />
+                <KeyRound size={34} color={color} style={{ marginBottom: 8, filter: `drop-shadow(0 0 8px ${color})`, transition: 'all 0.5s' }} />
                 <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>Nueva contraseña</h3>
                 <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Mínimo 8 caracteres</p>
               </div>
@@ -366,7 +392,7 @@ export default function Login() {
           {/* ══ ACTUALIZADA ══ */}
           {vista === 'actualizada' && (
             <div style={{ textAlign: 'center' }}>
-              <CheckCircle size={50} color={color} style={{ marginBottom: 14, filter: `drop-shadow(0 0 12px ${color})`, transition: 'filter 0.4s' }} />
+              <CheckCircle size={50} color={color} style={{ marginBottom: 14, filter: `drop-shadow(0 0 12px ${color})`, transition: 'all 0.5s' }} />
               <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 10px' }}>¡Contraseña actualizada!</h3>
               <p style={{ color: '#9CA3AF', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
                 Ya puedes ingresar al dashboard con tu nueva contraseña.
@@ -398,7 +424,6 @@ export default function Login() {
   );
 }
 
-// ── Componente Campo ───────────────────────────────────────────────────────
 function Campo({ label, icon, type = 'text', value, onChange, placeholder, autoComplete, required }) {
   return (
     <div>
@@ -419,7 +444,6 @@ function Campo({ label, icon, type = 'text', value, onChange, placeholder, autoC
   );
 }
 
-// ── Estilos ────────────────────────────────────────────────────────────────
 const lbl = {
   display: 'block', fontSize: 13, fontWeight: 600,
   color: '#D1D5DB', marginBottom: 7,

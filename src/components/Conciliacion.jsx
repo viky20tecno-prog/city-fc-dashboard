@@ -42,7 +42,7 @@ function ImagenComprobante({ url }) {
   if (imgError) {
     return (
       <a href={url} target="_blank" rel="noreferrer"
-        className="inline-flex items-center gap-1 text-[#00AAFF] text-xs hover:underline">
+        className="inline-flex items-center gap-1 text-[var(--cc)] text-xs hover:underline">
         <ExternalLink className="w-3 h-3" /> Ver
       </a>
     );
@@ -55,7 +55,7 @@ function ImagenComprobante({ url }) {
           src={url}
           alt="Comprobante"
           onError={() => setImgError(true)}
-          className="h-10 w-16 object-cover rounded-lg border border-[#1A3A5C] group-hover:border-[#00AAFF]/50 transition cursor-pointer"
+          className="h-10 w-16 object-cover rounded-lg border border-[#1A3A5C] group-hover:border-[var(--cc)]/50 transition cursor-pointer"
         />
       </button>
       {open && (
@@ -129,7 +129,7 @@ function EditModal({ pago, onClose, onSaved }) {
             <select
               value={form.concepto}
               onChange={e => setForm(f => ({ ...f, concepto: e.target.value }))}
-              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#00AAFF]/50"
+              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
             >
               {CONCEPTOS.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
             </select>
@@ -142,7 +142,7 @@ function EditModal({ pago, onClose, onSaved }) {
               type="number"
               value={form.monto}
               onChange={e => setForm(f => ({ ...f, monto: parseInt(e.target.value) || 0 }))}
-              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#00AAFF]/50"
+              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
             />
           </div>
 
@@ -153,7 +153,7 @@ function EditModal({ pago, onClose, onSaved }) {
               list="bancos-list"
               value={form.banco}
               onChange={e => setForm(f => ({ ...f, banco: e.target.value }))}
-              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#00AAFF]/50"
+              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
               placeholder="Efectivo, Transferencia..."
             />
             <datalist id="bancos-list">
@@ -168,7 +168,7 @@ function EditModal({ pago, onClose, onSaved }) {
               type="text"
               value={form.referencia}
               onChange={e => setForm(f => ({ ...f, referencia: e.target.value }))}
-              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#00AAFF]/50"
+              className="w-full bg-[#060C18] border border-[#1A3A5C] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
               placeholder="123456789"
             />
           </div>
@@ -186,7 +186,7 @@ function EditModal({ pago, onClose, onSaved }) {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 py-2 rounded-xl bg-[#00AAFF]/10 border border-[#00AAFF]/30 text-[#00AAFF] text-sm font-medium hover:bg-[#00AAFF]/20 transition disabled:opacity-50"
+            className="flex-1 py-2 rounded-xl bg-[var(--cc)]/10 border border-[var(--cc)]/30 text-[var(--cc)] text-sm font-medium hover:bg-[var(--cc)]/20 transition disabled:opacity-50"
           >
             {saving ? 'Guardando...' : 'Guardar cambios'}
           </button>
@@ -275,7 +275,7 @@ function PagoRow({ pago, onEdit, onAction, actionLoading }) {
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
-export default function Conciliacion() {
+export default function Conciliacion({ color = 'var(--cc)' }) {
   const [pagos, setPagos]           = useState([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState('');
@@ -374,7 +374,7 @@ export default function Conciliacion() {
             onClick={() => setFiltro(e.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm border transition-all ${
               filtroEstado === e.id
-                ? `${e.bg} ${e.color} shadow-[0_0_15px_rgba(0,170,255,0.1)]`
+                ? `${e.bg} ${e.color} shadow-[0_0_15px_var(--cc12)]`
                 : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -402,7 +402,7 @@ export default function Conciliacion() {
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <RefreshCw className="w-6 h-6 text-[#00AAFF] animate-spin" />
+            <RefreshCw className="w-6 h-6 text-[var(--cc)] animate-spin" />
           </div>
         ) : pagos.length === 0 ? (
           <div className="text-center py-16 text-gray-500">

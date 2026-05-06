@@ -16,6 +16,7 @@ import TimelineCobro from '../components/TimelineCobro';
 import WhatsAppMockup from '../components/WhatsAppMockup';
 import Conciliacion from '../components/Conciliacion';
 import PagoManualModal from '../components/PagoManualModal';
+import OnboardingWizard from '../components/OnboardingWizard';
 
 const NAV = [
   { id: 'dashboard',    Icon: LayoutDashboard, title: 'Dashboard'     },
@@ -73,12 +74,30 @@ export default function Dashboard() {
     loading, error, refresh,
   } = useSheetData();
 
-  const [activeTab,     setActiveTab]     = useState('dashboard');
-  const [refreshing,    setRefreshing]    = useState(false);
-  const [linkCopied,    setLinkCopied]    = useState(false);
-  const [showPagoModal, setShowPagoModal] = useState(false);
+  const [activeTab,       setActiveTab]       = useState('dashboard');
+  const [refreshing,      setRefreshing]      = useState(false);
+  const [linkCopied,      setLinkCopied]      = useState(false);
+  const [showPagoModal,   setShowPagoModal]   = useState(false);
+  const [showOnboarding,  setShowOnboarding]  = useState(false);
+
+  // Mostrar onboarding solo cuando el config ya cargó y no está completado
+  useEffect(() => {
+    if (clubConfig && !clubConfig.onboarding_completed) {
+      setShowOnboarding(true);
+    }
+  }, [clubConfig]);
 
   const c = clubConfig?.color || '#E14924';
+
+  // Inyecta el color del club como variables CSS globales para que todos los
+  // componentes hijos puedan consumirlo via var(--cc), var(--cc12), etc.
+  useEffect(() => {
+    document.documentElement.style.setProperty('--cc',   c);
+    document.documentElement.style.setProperty('--cc12', `${c}1F`);
+    document.documentElement.style.setProperty('--cc20', `${c}33`);
+    document.documentElement.style.setProperty('--cc30', `${c}4D`);
+    document.documentElement.style.setProperty('--cc50', `${c}80`);
+  }, [c]);
 
   // Iniciales del escudo: máx 3 letras de las primeras palabras del nombre
   const initials = clubConfig?.nombre
@@ -361,6 +380,7 @@ export default function Dashboard() {
                 mensualidades={mensualidades}
                 morosos={morosos}
                 codigoPais={clubConfig?.codigo_pais || '57'}
+                color={c}
               />
             )}
             {activeTab === 'jugadores' && (
@@ -375,11 +395,11 @@ export default function Dashboard() {
                 onRefresh={handleRefresh}
               />
             )}
-            {activeTab === 'uniformes'    && <Uniformes />}
-            {activeTab === 'arbitraje'    && <ArbitrajePagos />}
-            {activeTab === 'cobro'        && <TimelineCobro />}
-            {activeTab === 'whatsapp'     && <WhatsAppMockup />}
-            {activeTab === 'conciliacion' && <Conciliacion />}
+            {activeTab === 'uniformes'    && <Uniformes    color={c} />}
+            {activeTab === 'arbitraje'    && <ArbitrajePagos color={c} />}
+            {activeTab === 'cobro'        && <TimelineCobro  color={c} />}
+            {activeTab === 'whatsapp'     && <WhatsAppMockup color={c} />}
+            {activeTab === 'conciliacion' && <Conciliacion   color={c} />}
           </>
         )}
       </main>
@@ -389,6 +409,14 @@ export default function Dashboard() {
           jugadores={jugadores}
           onClose={() => setShowPagoModal(false)}
           onSuccess={handleRefresh}
+        />
+      )}
+
+      {showOnboarding && (
+        <OnboardingWizard
+          color={c}
+          clubConfig={clubConfig}
+          onComplete={() => setShowOnboarding(false)}
         />
       )}
     </div>

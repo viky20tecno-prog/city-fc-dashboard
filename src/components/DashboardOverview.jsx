@@ -19,8 +19,8 @@ const COLORS = {
   gold:   { icon: '#B68631', bg: 'rgba(182,134,49,0.08)',   border: 'rgba(182,134,49,0.2)',   glow: 'rgba(182,134,49,0.12)'   },
 };
 
-function KpiCard({ icon: Icon, label, value, sub, color = 'blue', delay = 0, wide }) {
-  const c = COLORS[color];
+function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, delay = 0, wide }) {
+  const c = colorObj || COLORS[color];
   return (
     <div style={{
       background: '#141414',
@@ -74,7 +74,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', delay = 0, wid
 }
 
 /* ── componente principal ── */
-export default function DashboardOverview({ jugadores, mensualidades, morosos, codigoPais = '57' }) {
+export default function DashboardOverview({ jugadores, mensualidades, morosos, codigoPais = '57', color = '#60A5FA' }) {
   const mesActual = new Date().getMonth() + 1;
 
   const activos = useMemo(
@@ -106,6 +106,13 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
     return { alDia, pendientes, parciales, mora, recaudado, totalEsperado, pct };
   }, [activos, morososSet, mensualidades, mesActual]);
 
+  const clubColor = {
+    icon:   color,
+    bg:     `${color}14`,
+    border: `${color}33`,
+    glow:   `${color}18`,
+  };
+
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
@@ -116,7 +123,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
         gridTemplateColumns: 'repeat(3, 1fr) repeat(3, 1fr)',
         gap: '12px',
       }}>
-        <KpiCard icon={Users}         label="Jugadores"  value={activos.length}          sub="Activos"                          color="blue"   delay={0.05} />
+        <KpiCard icon={Users}         label="Jugadores"  value={activos.length}          sub="Activos"                          colorObj={clubColor} delay={0.05} />
         <KpiCard icon={CheckCircle}   label="Al Día"     value={stats.alDia}             sub={`${stats.pct}%`}                  color="green"  delay={0.10} />
         <KpiCard icon={Clock}         label="Pendientes" value={stats.pendientes}         sub="Por cobrar"                       color="yellow" delay={0.15} />
         <KpiCard icon={XCircle}       label="En Mora"    value={stats.mora}              sub={`${stats.mora} jugadores`}        color="red"    delay={0.20} />

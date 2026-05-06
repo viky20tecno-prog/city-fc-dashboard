@@ -9,7 +9,7 @@ const TABS = [
   { label: 'Gestión de Pagos', icon: '💳' },
 ];
 
-export default function ArbitrajePagos() {
+export default function ArbitrajePagos({ color = '#00AAFF' }) {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedPartidoId, setSelectedPartidoId] = useState(null);
   const [clubId] = useState(() => localStorage.getItem('clubId') || 'city-fc');
@@ -41,9 +41,10 @@ export default function ArbitrajePagos() {
             <button
               key={idx}
               onClick={() => setActiveTab(idx)}
+              style={activeTab === idx ? { background: color, boxShadow: `0 4px 16px ${color}40` } : {}}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === idx
-                  ? 'bg-[#0078FF] text-white shadow-lg shadow-blue-900/30'
+                  ? 'text-white'
                   : 'text-gray-400 hover:text-white hover:bg-[#0F1F36]'
               }`}
             >

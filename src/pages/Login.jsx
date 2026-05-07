@@ -48,6 +48,19 @@ export default function Login() {
 
   const limpiar = () => setError('');
 
+  const handleGoogleLogin = async () => {
+    limpiar();
+    setLoading(true);
+    const { error: authError } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (authError) {
+      setError('No se pudo iniciar con Google. Intenta de nuevo.');
+      setLoading(false);
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     limpiar();
@@ -322,6 +335,40 @@ export default function Login() {
                     : 'Ingresar al Club'}
                 </button>
               </form>
+
+              {/* Divisor */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '18px 0 14px' }}>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+                <span style={{ color: 'var(--text-mut)', fontSize: 12 }}>o continúa con</span>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+              </div>
+
+              {/* Google */}
+              <button
+                type="button"
+                disabled={loading}
+                onClick={handleGoogleLogin}
+                style={{
+                  width: '100%', padding: '12px',
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1.5px solid rgba(255,255,255,0.12)',
+                  borderRadius: 12, cursor: loading ? 'not-allowed' : 'pointer',
+                  color: '#fff', fontSize: 14, fontWeight: 600,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                  transition: 'background 0.2s, border-color 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.10)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+              >
+                {/* Google icon */}
+                <svg width="18" height="18" viewBox="0 0 48 48" fill="none">
+                  <path d="M44.5 20H24v8.5h11.8C34.7 33.9 29.9 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.6 20-21 0-1.4-.2-2.7-.5-4z" fill="#FFC107"/>
+                  <path d="M6.3 14.7l7 5.1C15.2 16 19.3 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3c-7.6 0-14.2 4.3-17.7 11.7z" fill="#FF3D00"/>
+                  <path d="M24 45c5.8 0 10.7-1.9 14.7-5.2l-6.8-5.7C29.9 35.9 27.1 37 24 37c-5.8 0-10.7-3.8-12.4-9.1l-7 5.4C8.1 40.7 15.5 45 24 45z" fill="#4CAF50"/>
+                  <path d="M44.5 20H24v8.5h11.8c-.9 2.6-2.7 4.8-5.1 6.3l6.8 5.7C41.6 37.1 45 31 45 24c0-1.4-.2-2.7-.5-4z" fill="#1976D2"/>
+                </svg>
+                Continuar con Google
+              </button>
 
               <p style={{ textAlign: 'center', color: 'var(--text-mut)', fontSize: 13, marginTop: 18 }}>
                 ¿No tienes cuenta?{' '}

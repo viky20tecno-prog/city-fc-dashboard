@@ -59,6 +59,7 @@ export default function FormInscripcion() {
   const [photoFile, setPhotoFile]     = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [photoDragging, setPhotoDragging] = useState(false);
+  const [savedForm, setSavedForm]     = useState(null);
   const photoInputRef = useRef(null);
 
   const c        = clubConfig?.color  || '#E88C2A';
@@ -136,6 +137,7 @@ export default function FormInscripcion() {
       });
       const data = await res.json();
       if (data.success) {
+        setSavedForm({ ...form, foto_url, fotoPreview: photoPreview });
         setStatus('success');
       } else if (res.status === 409) {
         setStatus('error'); setError('Ya existe un jugador con ese número de documento.');
@@ -145,6 +147,88 @@ export default function FormInscripcion() {
     } catch {
       setStatus('error'); setError('Error de conexión. Intenta de nuevo.');
     }
+  };
+
+  /* ── PDF FICHA ─────────────────────────────────────────────────────── */
+  const generarFichaPDF = () => {
+    const f    = savedForm || {};
+    const fecha = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+    const fila  = (label, value) => value
+      ? `<tr><td style="padding:6px 10px;font-size:12px;color:#6b7280;width:45%">${label}</td><td style="padding:6px 10px;font-size:12px;font-weight:600;color:#111">${value}</td></tr>`
+      : '';
+
+    const fotoHtml = f.fotoPreview
+      ? `<img src="${f.fotoPreview}" alt="Foto" style="width:90px;height:90px;object-fit:cover;border-radius:50%;border:3px solid ${c};float:right;margin-left:16px" />`
+      : '';
+
+    const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<title>Ficha — ${f.nombre} ${f.apellidos}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;background:#fff;padding:32px}@media print{body{padding:16px}.no-print{display:none!important}}</style>
+</head><body>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid ${c}">
+  <div>
+    <h1 style="font-size:20px;font-weight:800;color:#111">⚽ ${clubName}</h1>
+    <p style="font-size:13px;color:#6b7280;margin-top:2px">Ficha de Inscripción</p>
+  </div>
+  <div style="text-align:right">
+    <p style="font-size:12px;color:#6b7280">Registrado: ${fecha}</p>
+  </div>
+</div>
+<div style="clearfix:both;margin-bottom:20px">
+  ${fotoHtml}
+  <h2 style="font-size:18px;font-weight:800;margin-bottom:4px">${f.nombre || ''} ${f.apellidos || ''}</h2>
+  <p style="font-size:13px;color:#6b7280">${f.tipo_id || 'Documento'}: ${f.cedula || ''}</p>
+  <div style="clear:both"></div>
+</div>
+<table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:16px">
+  <thead><tr style="background:${c}"><th colspan="2" style="padding:10px 12px;text-align:left;font-size:12px;color:#fff;font-weight:700;letter-spacing:0.05em">DATOS DE CONTACTO</th></tr></thead>
+  <tbody>
+    ${fila('Celular (WhatsApp)', f.celular)}
+    ${fila('Correo electrónico', f.correo_electronico)}
+    ${fila('Instagram', f.instagram)}
+  </tbody>
+</table>
+<table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:16px">
+  <thead><tr style="background:${c}"><th colspan="2" style="padding:10px 12px;text-align:left;font-size:12px;color:#fff;font-weight:700;letter-spacing:0.05em">DATOS ADICIONALES</th></tr></thead>
+  <tbody>
+    ${fila('Lugar de nacimiento', f.lugar_de_nacimiento)}
+    ${fila('Fecha de nacimiento', f.fecha_nacimiento)}
+    ${fila('Tipo de sangre', f.tipo_sangre)}
+    ${fila('EPS / Seguro médico', f.eps)}
+    ${fila('Estatura', f.estatura ? f.estatura + ' cm' : '')}
+    ${fila('Peso', f.peso ? f.peso + ' kg' : '')}
+  </tbody>
+</table>
+<table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:16px">
+  <thead><tr style="background:${c}"><th colspan="2" style="padding:10px 12px;text-align:left;font-size:12px;color:#fff;font-weight:700;letter-spacing:0.05em">RESIDENCIA</th></tr></thead>
+  <tbody>
+    ${fila('Municipio / Ciudad', f.municipio)}
+    ${fila('Dirección', f.direccion)}
+    ${fila('Barrio', f.barrio)}
+  </tbody>
+</table>
+<table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:24px">
+  <thead><tr style="background:${c}"><th colspan="2" style="padding:10px 12px;text-align:left;font-size:12px;color:#fff;font-weight:700;letter-spacing:0.05em">CONTACTO DE EMERGENCIA</th></tr></thead>
+  <tbody>
+    ${fila('Familiar / Contacto', f.familiar_emergencia)}
+    ${fila('Celular emergencia', f.celular_contacto)}
+  </tbody>
+</table>
+<div style="margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
+  <p style="font-size:11px;color:#9ca3af">ZenSports — Documento confidencial</p>
+  <p style="font-size:11px;color:#9ca3af">zensports.vercel.app</p>
+</div>
+<div class="no-print" style="margin-top:24px;text-align:center">
+  <button onclick="window.print()" style="background:${c};color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
+    Imprimir / Guardar PDF
+  </button>
+</div>
+</body></html>`;
+
+    const ventana = window.open('', '_blank');
+    ventana.document.write(html);
+    ventana.document.close();
+    ventana.focus();
   };
 
   /* ── ÉXITO ─────────────────────────────────────────────────────────── */
@@ -159,7 +243,7 @@ export default function FormInscripcion() {
           <p style={{ color: 'var(--text-sec)', fontSize: 14, marginBottom: 22 }}>
             Bienvenido a <span style={{ color: c, fontWeight: 700 }}>{clubName}</span>
           </p>
-          <div style={{ background: `${c}0E`, border: `1px solid ${c}25`, borderRadius: 14, padding: '16px 18px', textAlign: 'left' }}>
+          <div style={{ background: `${c}0E`, border: `1px solid ${c}25`, borderRadius: 14, padding: '16px 18px', textAlign: 'left', marginBottom: 20 }}>
             {[['✅','Tu registro fue procesado correctamente'],['📱','Recibirás un mensaje de bienvenida por WhatsApp'],['🏅','¡Ya eres parte del club!']].map(([ico, txt]) => (
               <div key={txt} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 <span style={{ fontSize: 14 }}>{ico}</span>
@@ -167,6 +251,16 @@ export default function FormInscripcion() {
               </div>
             ))}
           </div>
+          <button
+            onClick={generarFichaPDF}
+            style={{
+              width: '100%', padding: '12px', borderRadius: 12, border: `1px solid ${c}55`,
+              background: `${c}18`, color: c, fontSize: 14, fontWeight: 700,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            }}
+          >
+            📄 Descargar ficha de inscripción (PDF)
+          </button>
         </div>
       </div>
     );

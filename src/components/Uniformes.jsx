@@ -83,7 +83,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
       }
       if (pedData.success) setPedidos(pedData.data || []);
       if (configData.success) {
-        setCatalogo(normalizarCatalogo(configData.data?.prendas_uniforme));
+        setCatalogo(normalizarCatalogo(configData.prendas_uniforme));
       }
     } catch (e) {
       console.error('Error cargando datos:', e);

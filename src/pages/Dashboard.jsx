@@ -416,6 +416,7 @@ export default function Dashboard() {
                 morosos={morosos}
                 codigoPais={clubConfig?.codigo_pais || '57'}
                 color={c}
+                clubNombre={clubConfig?.nombre}
               />
             )}
             {activeTab === 'jugadores' && (
@@ -430,10 +431,10 @@ export default function Dashboard() {
                 onRefresh={handleRefresh}
               />
             )}
-            {activeTab === 'uniformes'    && <Uniformes    color={c} />}
+            {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} />}
             {activeTab === 'arbitraje'    && <ArbitrajePagos color={c} />}
             {activeTab === 'cobro'        && <TimelineCobro  color={c} />}
-            {activeTab === 'whatsapp'     && <WhatsAppMockup color={c} />}
+            {activeTab === 'whatsapp'     && <WhatsAppMockup color={c} clubNombre={clubConfig?.nombre} />}
             {activeTab === 'conciliacion' && <Conciliacion   color={c} />}
           </>
         )}

@@ -1,4 +1,4 @@
-export default function WhatsAppMockup() {
+export default function WhatsAppMockup({ clubNombre = 'Mi Club' }) {
   const messages = [
     {
       from: 'bot',
@@ -33,7 +33,7 @@ export default function WhatsAppMockup() {
           <div className="bg-[#075e54] rounded-t-2xl px-4 py-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold">⚽</div>
             <div>
-              <p className="text-white text-sm font-medium">City FC Pagos</p>
+              <p className="text-white text-sm font-medium">{clubNombre} Pagos</p>
               <p className="text-white/60 text-xs">en línea</p>
             </div>
           </div>

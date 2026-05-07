@@ -9,7 +9,7 @@ import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 /* ── formateo ── */
 const formatCOP = (n) => formatMoney(n, getCodigoPais());
 
-/* ── KPI card con identidad City F.C. ── */
+/* ── KPI card ── */
 const COLORS = {
   blue:   { icon: '#60A5FA', bg: 'rgba(96,165,250,0.08)',   border: 'rgba(96,165,250,0.2)',   glow: 'rgba(96,165,250,0.12)'   },
   green:  { icon: '#22C55E', bg: 'rgba(34,197,94,0.08)',    border: 'rgba(34,197,94,0.2)',    glow: 'rgba(34,197,94,0.12)'    },
@@ -74,7 +74,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
 }
 
 /* ── componente principal ── */
-export default function DashboardOverview({ jugadores, mensualidades, morosos, codigoPais = '57', color = '#60A5FA' }) {
+export default function DashboardOverview({ jugadores, mensualidades, morosos, codigoPais = '57', color = '#60A5FA', clubNombre = 'Mi Club' }) {
   const mesActual = new Date().getMonth() + 1;
 
   const activos = useMemo(
@@ -147,7 +147,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
         alignItems: 'start',
       }}>
         <RecaudacionChart mensualidades={mensualidades} />
-        <MorososList morosos={morosos} codigoPais={codigoPais} />
+        <MorososList morosos={morosos} codigoPais={codigoPais} clubNombre={clubNombre} />
       </div>
 
     </div>

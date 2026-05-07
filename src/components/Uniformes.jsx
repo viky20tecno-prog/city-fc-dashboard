@@ -20,7 +20,7 @@ const PRENDAS = [
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 
-export default function Uniformes({ color = 'var(--cc)' }) {
+export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' }) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     cedula: '',
@@ -386,11 +386,11 @@ export default function Uniformes({ color = 'var(--cc)' }) {
         doc.setFillColor(6, 12, 24);
         doc.rect(0, H - 7, W, 7, 'F');
         doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(70, 95, 130);
-        doc.text('City FC  --  Agente Contable', M, H - 2.2);
+        doc.text(`${clubNombre}  --  ZenSports`, M, H - 2.2);
         doc.text(`Pag. ${i} / ${pages}`, W - M, H - 2.2, { align: 'right' });
       }
 
-      doc.save(`city-fc-uniformes-${new Date().toISOString().slice(0, 10)}.pdf`);
+      doc.save(`${clubNombre.toLowerCase().replace(/\s+/g, '-')}-uniformes-${new Date().toISOString().slice(0, 10)}.pdf`);
     } finally {
       setGenerandoPDF(false);
     }

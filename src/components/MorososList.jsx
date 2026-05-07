@@ -5,7 +5,7 @@ const formatCOP = (n) => new Intl.NumberFormat('es-CO', {
   style: 'currency', currency: 'COP', maximumFractionDigits: 0,
 }).format(parseInt(n) || 0);
 
-function exportarPDF(morosos) {
+function exportarPDF(morosos, clubNombre = 'Mi Club') {
   const fecha     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
   const mesActual = new Date().toLocaleString('es-CO', { month: 'long', year: 'numeric' });
   const totalSaldo = morosos.reduce((sum, m) => sum + (parseInt(m.saldo_total) || 0), 0);
@@ -38,7 +38,7 @@ function exportarPDF(morosos) {
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
-  <title>Reporte Morosos — City FC</title>
+  <title>Reporte Morosos — ${clubNombre}</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: Arial, sans-serif; color: #111; background: #fff; padding: 32px; }
@@ -51,7 +51,7 @@ function exportarPDF(morosos) {
 <body>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #E14924">
     <div>
-      <h1 style="font-size:22px;font-weight:800;color:#111">⚽ City FC</h1>
+      <h1 style="font-size:22px;font-weight:800;color:#111">⚽ ${clubNombre}</h1>
       <p style="font-size:13px;color:#6b7280;margin-top:2px">Agente Contable — Sistema de Gestión</p>
     </div>
     <div style="text-align:right">
@@ -98,8 +98,8 @@ function exportarPDF(morosos) {
   </table>
 
   <div style="margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
-    <p style="font-size:11px;color:#9ca3af">City FC — Documento confidencial · No compartir públicamente</p>
-    <p style="font-size:11px;color:#9ca3af">city-fc-dashboard-pi.vercel.app</p>
+    <p style="font-size:11px;color:#9ca3af">ZenSports — Documento confidencial · No compartir públicamente</p>
+    <p style="font-size:11px;color:#9ca3af">zensports.vercel.app</p>
   </div>
 
   <div class="no-print" style="margin-top:24px;text-align:center">
@@ -116,7 +116,7 @@ function exportarPDF(morosos) {
   ventana.focus();
 }
 
-export default function MorososList({ morosos, codigoPais = '57' }) {
+export default function MorososList({ morosos, codigoPais = '57', clubNombre = 'Mi Club' }) {
   if (!morosos || morosos.length === 0) {
     return (
       <div style={{
@@ -171,7 +171,7 @@ export default function MorososList({ morosos, codigoPais = '57' }) {
           </span>
         </div>
         <button
-          onClick={() => exportarPDF(morosos)}
+          onClick={() => exportarPDF(morosos, clubNombre)}
           style={{
             display: 'flex', alignItems: 'center', gap: '6px',
             padding: '6px 12px', borderRadius: '8px', cursor: 'pointer',

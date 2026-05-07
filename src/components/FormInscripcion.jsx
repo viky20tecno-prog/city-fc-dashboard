@@ -251,16 +251,69 @@ export default function FormInscripcion() {
               </div>
             ))}
           </div>
+          {/* PDF */}
           <button
             onClick={generarFichaPDF}
             style={{
               width: '100%', padding: '12px', borderRadius: 12, border: `1px solid ${c}55`,
               background: `${c}18`, color: c, fontSize: 14, fontWeight: 700,
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              marginBottom: 10,
             }}
           >
             📄 Descargar ficha de inscripción (PDF)
           </button>
+
+          {/* Acciones post-registro */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <button
+              onClick={() => {
+                setForm({});
+                setPhotoFile(null);
+                setPhotoPreview(null);
+                setSavedForm(null);
+                setError('');
+                setStatus('idle');
+              }}
+              style={{
+                padding: '11px', borderRadius: 12,
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(255,255,255,0.06)', color: 'var(--text-sec)',
+                fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              ＋ Registrar otro
+            </button>
+            <button
+              onClick={() => {
+                const cerrado = window.close();
+                if (cerrado === undefined) setStatus('cerrar');
+              }}
+              style={{
+                padding: '11px', borderRadius: 12,
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(255,255,255,0.06)', color: 'var(--text-sec)',
+                fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              }}
+            >
+              ✓ Listo
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── LISTO (no se pudo cerrar automáticamente) ─────────────────────── */
+  if (status === 'cerrar') {
+    return (
+      <div style={S.page}>
+        <div style={{ ...S.successCard, borderColor: 'rgba(255,255,255,0.1)', textAlign: 'center' }}>
+          <div style={{ fontSize: 52, marginBottom: 16 }}>✅</div>
+          <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 800, marginBottom: 8 }}>¡Todo listo!</h2>
+          <p style={{ color: 'var(--text-sec)', fontSize: 14, lineHeight: 1.6 }}>
+            Ya puedes <strong style={{ color: '#fff' }}>cerrar esta pestaña</strong>.
+          </p>
         </div>
       </div>
     );

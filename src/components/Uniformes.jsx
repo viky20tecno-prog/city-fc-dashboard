@@ -126,6 +126,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
       setTimeout(() => setCatalogoMsg(''), 2500);
       return;
     }
+    if (guardandoCatalogo) return;
     const nuevo = [...catalogo, { nombre, precio }];
     setNuevaPrenda({ nombre: '', precio: '' });
     saveCatalogo(nuevo);
@@ -874,6 +875,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
                 type="text"
                 value={nuevaPrenda.nombre}
                 onChange={e => setNuevaPrenda(f => ({ ...f, nombre: e.target.value }))}
+                onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
                 placeholder="Nombre de la prenda"
                 className="flex-1 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
               />
@@ -882,12 +884,13 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
                 inputMode="numeric"
                 value={nuevaPrenda.precio}
                 onChange={e => setNuevaPrenda(f => ({ ...f, precio: e.target.value.replace(/\D/g, '') }))}
+                onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
                 placeholder="Precio"
                 className="w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
               />
               <button
                 onClick={agregarPrenda}
-                disabled={!nuevaPrenda.nombre.trim() || guardandoCatalogo || catalogo.length >= MAX_PRENDAS}
+                disabled={!nuevaPrenda.nombre.trim() || catalogo.length >= MAX_PRENDAS}
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--cc)] text-white text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--cc)]/80 transition-colors"
               >
                 {guardandoCatalogo ? <Loader className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}

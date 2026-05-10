@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X, User, DollarSign, CreditCard, Camera, Save,
   Loader2, Printer, CheckCircle, ClipboardList, ZoomIn,
@@ -197,10 +198,10 @@ function TabPerfil({ jugador, onFotoUpdate }) {
           {fotoUrl && <p className="text-xs text-[var(--text-mut)] mt-0.5 flex items-center gap-1"><ZoomIn className="w-3 h-3" /> Clic en la foto para ver</p>}
         </div>
 
-        {/* Lightbox */}
-        {lightbox && fotoUrl && (
+        {/* Lightbox — portal para escapar del transform del drawer */}
+        {lightbox && fotoUrl && createPortal(
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-sm"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-sm"
             onClick={() => setLightbox(false)}
           >
             <button
@@ -215,7 +216,8 @@ function TabPerfil({ jugador, onFotoUpdate }) {
               className="max-h-[88vh] max-w-[88vw] rounded-2xl shadow-2xl object-contain"
               onClick={e => e.stopPropagation()}
             />
-          </div>
+          </div>,
+          document.body
         )}
       </div>
 

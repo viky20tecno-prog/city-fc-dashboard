@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import { CheckCircle, ChevronRight, DollarSign, Shirt, Trophy, AlertTriangle, X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { CheckCircle, ChevronRight, DollarSign, Shirt, Trophy, X, Phone, Palette, Building2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
-import { getCurrencyLabel, getCodigoPais } from '../lib/formatMoney';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 
@@ -10,16 +9,59 @@ const PRENDAS_DEFAULT = [
   'Camiseta titular', 'Camiseta visitante', 'Pantaloneta', 'Medias', 'Chaqueta', 'Guayos',
 ];
 
-const STEPS = [
-  { id: 'mensualidad', icon: DollarSign, label: 'Mensualidad y mora'  },
-  { id: 'uniformes',   icon: Shirt,       label: 'Equipamiento'        },
-  { id: 'torneos',     icon: Trophy,      label: 'Torneos'             },
-  { id: 'done',        icon: CheckCircle, label: 'Listo'               },
+const PAISES_LIST = [
+  { codigo: '57',  bandera: '🇨🇴', nombre: 'Colombia',       moneda: 'COP' },
+  { codigo: '52',  bandera: '🇲🇽', nombre: 'México',         moneda: 'MXN' },
+  { codigo: '54',  bandera: '🇦🇷', nombre: 'Argentina',      moneda: 'ARS' },
+  { codigo: '51',  bandera: '🇵🇪', nombre: 'Perú',           moneda: 'PEN' },
+  { codigo: '56',  bandera: '🇨🇱', nombre: 'Chile',          moneda: 'CLP' },
+  { codigo: '58',  bandera: '🇻🇪', nombre: 'Venezuela',      moneda: 'USD' },
+  { codigo: '593', bandera: '🇪🇨', nombre: 'Ecuador',        moneda: 'USD' },
+  { codigo: '598', bandera: '🇺🇾', nombre: 'Uruguay',        moneda: 'UYU' },
+  { codigo: '591', bandera: '🇧🇴', nombre: 'Bolivia',        moneda: 'BOB' },
+  { codigo: '595', bandera: '🇵🇾', nombre: 'Paraguay',       moneda: 'PYG' },
+  { codigo: '507', bandera: '🇵🇦', nombre: 'Panamá',         moneda: 'USD' },
+  { codigo: '502', bandera: '🇬🇹', nombre: 'Guatemala',      moneda: 'GTQ' },
+  { codigo: '503', bandera: '🇸🇻', nombre: 'El Salvador',    moneda: 'USD' },
+  { codigo: '504', bandera: '🇭🇳', nombre: 'Honduras',       moneda: 'HNL' },
+  { codigo: '505', bandera: '🇳🇮', nombre: 'Nicaragua',      moneda: 'NIO' },
+  { codigo: '506', bandera: '🇨🇷', nombre: 'Costa Rica',     moneda: 'CRC' },
+  { codigo: '1',   bandera: '🇺🇸', nombre: 'Estados Unidos', moneda: 'USD' },
 ];
 
-export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComplete }) {
-  const [step, setStep]       = useState(0);
-  const [saving, setSaving]   = useState(false);
+const COLORES_PRESET = [
+  '#E14924', '#FF6B35', '#F59E0B', '#22C55E', '#14B8A6',
+  '#00AAFF', '#6366F1', '#A855F7', '#EC4899', '#EF4444',
+];
+
+const STEPS = [
+  { id: 'club',        Icon: Building2,   label: 'Tu club'       },
+  { id: 'visual',      Icon: Palette,     label: 'Identidad'     },
+  { id: 'mensualidad', Icon: DollarSign,  label: 'Mensualidad'   },
+  { id: 'whatsapp',    Icon: Phone,       label: 'WhatsApp'      },
+  { id: 'uniformes',   Icon: Shirt,       label: 'Equipamiento'  },
+  { id: 'torneos',     Icon: Trophy,      label: 'Torneos'       },
+  { id: 'done',        Icon: CheckCircle, label: 'Listo'         },
+];
+
+const CONTENT_STEPS = STEPS.length - 1; // sin 'done'
+
+export default function OnboardingWizard({ color = '#E14924', clubConfig, onComplete }) {
+  const [step, setStep]         = useState(0);
+  const [saving, setSaving]     = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoRef = useRef(null);
+
+  /* ── Estado por paso ──────────────────────────────────────── */
+  const [club, setClub] = useState({
+    nombre:      clubConfig?.nombre      || '',
+    subtitulo:   clubConfig?.subtitulo   || '',
+    ciudad:      clubConfig?.ciudad      || '',
+    codigo_pais: clubConfig?.codigo_pais || '57',
+  });
+
+  const [colorClub, setColorClub] = useState(clubConfig?.color    || '#E14924');
+  const [logoUrl,   setLogoUrl]   = useState(clubConfig?.logo_url  || '');
 
   const [mensualidad, setMensualidad] = useState({
     valor:       clubConfig?.valor_mensualidad || 65000,
@@ -27,283 +69,395 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
     penalidad:   clubConfig?.penalidad_mora    || 5000,
   });
 
-  const [prendas, setPrendas]   = useState(
+  const [whatsapp, setWhatsapp] = useState(clubConfig?.whatsapp || '');
+
+  const [prendas,    setPrendas]  = useState(
     clubConfig?.prendas_uniforme?.length ? clubConfig.prendas_uniforme : PRENDAS_DEFAULT,
   );
   const [nuevaPrenda, setNuevaP] = useState('');
 
-  const [torneos, setTorneos]   = useState(clubConfig?.torneos_iniciales || []);
+  const [torneos,    setTorneos]  = useState(clubConfig?.torneos_iniciales || []);
   const [nuevoTorneo, setNuevoT] = useState({ nombre: '', fecha: '', valor: '' });
 
-  const c = color;
-  const currencyLabel = getCurrencyLabel(clubConfig?.codigo_pais || getCodigoPais());
+  /* ── Helpers ──────────────────────────────────────────────── */
+  const c        = colorClub || color;
+  const paisActual = PAISES_LIST.find(p => p.codigo === club.codigo_pais) || PAISES_LIST[0];
 
-  const saveAndFinish = async () => {
-    setSaving(true);
+  const uploadLogo = async (file) => {
+    setUploadingLogo(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      await fetch(`${API_BASE}/config?club_id=${getClubId()}`, {
-        method:  'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          valor_mensualidad:  mensualidad.valor,
-          dias_gracia_mora:   mensualidad.dias_gracia,
-          penalidad_mora:     mensualidad.penalidad,
-          prendas_uniforme:   prendas,
-          torneos_iniciales:  torneos,
-          onboarding_completed: true,
-        }),
-      });
-    } catch (_) {
-      // Si falla el guardado igual cerramos — no bloquear al usuario
+      const ext  = file.name.split('.').pop();
+      const path = `${getClubId()}/logo.${ext}`;
+      const { error } = await supabase.storage.from('club-logos').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('club-logos').getPublicUrl(path);
+      setLogoUrl(publicUrl);
+    } catch (err) {
+      console.error('Error subiendo logo:', err);
     } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const saveToApi = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    await fetch(`${API_BASE}/config?club_id=${getClubId()}`, {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        nombre:               club.nombre,
+        subtitulo:            club.subtitulo,
+        ciudad:               club.ciudad,
+        codigo_pais:          club.codigo_pais,
+        color:                colorClub,
+        logo_url:             logoUrl || null,
+        valor_mensualidad:    mensualidad.valor,
+        dias_gracia_mora:     mensualidad.dias_gracia,
+        penalidad_mora:       mensualidad.penalidad,
+        whatsapp,
+        prendas_uniforme:     prendas,
+        torneos_iniciales:    torneos,
+        onboarding_completed: true,
+      }),
+    });
+  };
+
+  const next = async () => {
+    if (step < CONTENT_STEPS - 1) {
+      setStep(s => s + 1);
+    } else if (step === CONTENT_STEPS - 1) {
+      // Último paso de contenido → guardar y mostrar done
+      setSaving(true);
+      try { await saveToApi(); } catch (_) {}
       setSaving(false);
+      setStep(CONTENT_STEPS); // done
+    } else {
+      // Pantalla done → cerrar
       onComplete();
     }
   };
 
-  const next = () => {
-    if (step < STEPS.length - 1) setStep(s => s + 1);
-    else saveAndFinish();
+  const back = () => { if (step > 0 && step < CONTENT_STEPS) setStep(s => s - 1); };
+
+  const skip = async () => {
+    try { await saveToApi(); } catch (_) {}
+    onComplete();
   };
 
-  const skip = () => saveAndFinish();
-
-  /* ── Estilos base ─────────────────────────────────────────────────── */
+  /* ── Estilos base ─────────────────────────────────────────── */
   const overlay = {
     position: 'fixed', inset: 0, zIndex: 9999,
-    background: 'rgba(4,6,12,0.85)', backdropFilter: 'blur(8px)',
+    background: 'rgba(4,6,12,0.88)', backdropFilter: 'blur(10px)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    padding: '24px',
+    padding: '16px',
   };
   const card = {
     background: '#0D1627', borderRadius: 20,
-    border: `1px solid ${c}30`,
-    boxShadow: `0 24px 64px rgba(0,0,0,0.6), 0 0 48px ${c}18`,
-    width: '100%', maxWidth: 560,
-    overflow: 'hidden',
+    border: `1px solid ${c}35`,
+    boxShadow: `0 24px 64px rgba(0,0,0,0.65), 0 0 60px ${c}15`,
+    width: '100%', maxWidth: 580, maxHeight: '94vh',
+    overflow: 'hidden', display: 'flex', flexDirection: 'column',
     fontFamily: "'Inter', system-ui, sans-serif",
+    transition: 'border-color 0.4s',
   };
   const inp = {
     width: '100%', boxSizing: 'border-box',
     background: 'rgba(255,255,255,0.06)',
     border: '1px solid rgba(255,255,255,0.12)',
-    borderRadius: 10, padding: '10px 14px',
+    borderRadius: 10, padding: '11px 14px',
     color: '#fff', fontSize: 14, outline: 'none',
   };
-
-  const StepDot = ({ idx }) => (
-    <div style={{
-      width: 28, height: 28, borderRadius: '50%',
-      background: idx < step ? c : idx === step ? `${c}25` : 'rgba(255,255,255,0.05)',
-      border: `2px solid ${idx <= step ? c : 'rgba(255,255,255,0.1)'}`,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: 11, fontWeight: 700,
-      color: idx < step ? '#fff' : idx === step ? c : 'var(--text-mut)',
-      flexShrink: 0,
-      transition: 'all 0.3s',
-    }}>
-      {idx < step ? '✓' : idx + 1}
-    </div>
-  );
+  const lbl = { display: 'block', fontSize: 12, color: '#8B95A3', marginBottom: 7, fontWeight: 500, letterSpacing: 0.3 };
+  const isDone = step === CONTENT_STEPS;
 
   return (
     <div style={overlay}>
       <div style={card}>
 
-        {/* Header */}
-        <div style={{ padding: '24px 28px 20px', borderBottom: `1px solid ${c}20` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        {/* ── Header ─────────────────────────────────── */}
+        <div style={{ padding: '20px 26px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isDone ? 0 : 16 }}>
             <div>
-              <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>
-                Configura tu club
+              <h2 style={{ color: '#fff', fontSize: 18, fontWeight: 800, margin: 0, letterSpacing: '-0.3px' }}>
+                {isDone ? `¡${club.nombre || 'Tu club'} está listo!` : 'Configura tu club'}
               </h2>
-              <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: '4px 0 0' }}>
-                Toma menos de 2 minutos · Puedes cambiarlo luego
+              <p style={{ color: '#8B95A3', fontSize: 12, margin: '3px 0 0' }}>
+                {isDone
+                  ? 'Configuración guardada. Puedes editarla en cualquier momento.'
+                  : `Paso ${step + 1} de ${CONTENT_STEPS} · ${STEPS[step].label}`}
               </p>
             </div>
-            <button onClick={skip} style={{ background: 'none', border: 'none', color: 'var(--text-mut)', cursor: 'pointer', padding: 4 }} title="Saltar configuración">
-              <X size={18} />
-            </button>
+            {!isDone && (
+              <button onClick={skip}
+                style={{ background: 'none', border: 'none', color: '#8B95A3', cursor: 'pointer', padding: 4 }}
+                title="Saltar configuración">
+                <X size={16} />
+              </button>
+            )}
           </div>
 
-          {/* Stepper */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 20 }}>
-            {STEPS.slice(0, -1).map((s, i) => (
-              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 8, flex: i < STEPS.length - 2 ? 1 : 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <StepDot idx={i} />
-                  <span style={{ fontSize: 11, color: i === step ? c : 'var(--text-mut)', fontWeight: i === step ? 600 : 400, whiteSpace: 'nowrap', transition: 'color 0.3s' }}>
-                    {s.label}
-                  </span>
-                </div>
-                {i < STEPS.length - 2 && <div style={{ flex: 1, height: 1, background: `${c}25`, minWidth: 20 }} />}
-              </div>
-            ))}
-          </div>
+          {/* Barra de progreso */}
+          {!isDone && (
+            <div style={{ background: 'rgba(255,255,255,0.07)', borderRadius: 99, height: 4 }}>
+              <div style={{
+                background: c, borderRadius: 99, height: 4,
+                width: `${((step + 1) / CONTENT_STEPS) * 100}%`,
+                transition: 'width 0.4s ease, background 0.4s',
+              }} />
+            </div>
+          )}
         </div>
 
-        {/* Body */}
-        <div style={{ padding: '24px 28px' }}>
+        {/* ── Cuerpo ─────────────────────────────────── */}
+        <div style={{ padding: '22px 26px', overflowY: 'auto', flex: 1 }}>
 
-          {/* ── PASO 1: MENSUALIDAD ── */}
+          {/* PASO 1 — TU CLUB */}
           {step === 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <div style={{ padding: '12px 16px', background: `${c}0E`, borderRadius: 12, border: `1px solid ${c}25` }}>
-                <p style={{ color: c, fontSize: 12, fontWeight: 600, margin: 0, letterSpacing: 0.5 }}>
-                  MENSUALIDAD Y MORA
-                </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <StepBadge color={c} icon="🏟️" title="Información básica" desc="Aparecerá en toda la aplicación y en los recibos" />
+
+              <div>
+                <label style={lbl}>Nombre del club *</label>
+                <input value={club.nombre}
+                  onChange={e => setClub(cl => ({ ...cl, nombre: e.target.value }))}
+                  placeholder="Ej: City FC, Deportivo Los Alpes…" style={inp} />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 13, color: 'var(--text-sec)', marginBottom: 8 }}>
-                  Valor de la cuota mensual ({currencyLabel})
-                </label>
-                <input
-                  type="number"
-                  value={mensualidad.valor}
-                  onChange={e => setMensualidad(m => ({ ...m, valor: +e.target.value }))}
-                  style={inp}
-                  min={0}
-                />
+                <label style={lbl}>Subtítulo / categoría</label>
+                <input value={club.subtitulo}
+                  onChange={e => setClub(cl => ({ ...cl, subtitulo: e.target.value }))}
+                  placeholder="Ej: Fútbol 7 · Masculino · Sub-20" style={inp} />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, color: 'var(--text-sec)', marginBottom: 8 }}>
-                    Días de gracia antes de mora
-                  </label>
-                  <input
-                    type="number"
-                    value={mensualidad.dias_gracia}
-                    onChange={e => setMensualidad(m => ({ ...m, dias_gracia: +e.target.value }))}
-                    style={inp}
-                    min={0} max={30}
-                  />
+                  <label style={lbl}>Ciudad</label>
+                  <input value={club.ciudad}
+                    onChange={e => setClub(cl => ({ ...cl, ciudad: e.target.value }))}
+                    placeholder="Ej: Medellín" style={inp} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, color: 'var(--text-sec)', marginBottom: 8 }}>
-                    Penalidad por mora ({currencyLabel})
-                  </label>
-                  <input
-                    type="number"
-                    value={mensualidad.penalidad}
-                    onChange={e => setMensualidad(m => ({ ...m, penalidad: +e.target.value }))}
-                    style={inp}
-                    min={0}
-                  />
+                  <label style={lbl}>País / Moneda</label>
+                  <select value={club.codigo_pais}
+                    onChange={e => setClub(cl => ({ ...cl, codigo_pais: e.target.value }))}
+                    style={{ ...inp, appearance: 'none', WebkitAppearance: 'none' }}>
+                    {PAISES_LIST.map(p => (
+                      <option key={p.codigo} value={p.codigo}>
+                        {p.bandera} {p.nombre} · {p.moneda}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              <div style={{ padding: '10px 14px', background: 'rgba(245,158,11,0.08)', borderRadius: 10, border: '1px solid rgba(245,158,11,0.2)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <AlertTriangle size={14} color="#F59E0B" style={{ marginTop: 1, flexShrink: 0 }} />
-                <p style={{ fontSize: 12, color: 'var(--text-sec)', margin: 0, lineHeight: 1.6 }}>
-                  La mora se aplica automáticamente cuando un jugador supera los días de gracia sin pagar.
-                </p>
+              <InfoBox>El país define la moneda y el formato de los números en toda la app.</InfoBox>
+            </div>
+          )}
+
+          {/* PASO 2 — IDENTIDAD VISUAL */}
+          {step === 1 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <StepBadge color={c} icon="🎨" title="Identidad visual" desc="Personaliza los colores y el logo de tu club" />
+
+              {/* Color */}
+              <div>
+                <label style={lbl}>Color principal del club</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
+                  {COLORES_PRESET.map(col => (
+                    <button key={col} onClick={() => setColorClub(col)} style={{
+                      width: 36, height: 36, borderRadius: '50%', background: col,
+                      border: 'none', cursor: 'pointer', flexShrink: 0,
+                      outline: colorClub === col ? `3px solid ${col}` : '3px solid transparent',
+                      outlineOffset: 3,
+                      boxShadow: colorClub === col ? `0 0 14px ${col}90` : 'none',
+                      transition: 'box-shadow 0.2s, outline 0.15s',
+                    }} />
+                  ))}
+                  {/* Selector personalizado */}
+                  <label title="Color personalizado" style={{
+                    width: 36, height: 36, borderRadius: '50%', cursor: 'pointer', flexShrink: 0,
+                    border: '2px dashed rgba(255,255,255,0.25)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 18, color: 'rgba(255,255,255,0.4)', position: 'relative', overflow: 'hidden',
+                  }}>
+                    +
+                    <input type="color" value={colorClub} onChange={e => setColorClub(e.target.value)}
+                      style={{ opacity: 0, position: 'absolute', width: '100%', height: '100%', cursor: 'pointer' }} />
+                  </label>
+                </div>
+
+                {/* Preview */}
+                <div style={{ padding: '12px 16px', borderRadius: 12, background: `${c}12`, border: `1px solid ${c}35`, display: 'flex', alignItems: 'center', gap: 12, transition: 'all 0.4s' }}>
+                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: c, flexShrink: 0, transition: 'background 0.4s' }} />
+                  <div>
+                    <p style={{ color: '#fff', fontWeight: 700, margin: 0, fontSize: 14 }}>{club.nombre || 'Mi Club'}</p>
+                    <p style={{ color: c, fontSize: 11, margin: '2px 0 0', fontWeight: 600, transition: 'color 0.4s' }}>Vista previa del color</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Logo */}
+              <div>
+                <label style={lbl}>Logo del club</label>
+                <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                  {/* Preview */}
+                  <div onClick={() => logoRef.current?.click()}
+                    style={{
+                      width: 76, height: 76, borderRadius: 14, flexShrink: 0, overflow: 'hidden', cursor: 'pointer',
+                      background: logoUrl ? 'transparent' : `${c}10`,
+                      border: `2px dashed ${c}40`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30,
+                    }}>
+                    {logoUrl
+                      ? <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={() => setLogoUrl('')} />
+                      : uploadingLogo ? '⏳' : '📷'}
+                  </div>
+
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <button onClick={() => logoRef.current?.click()} disabled={uploadingLogo}
+                      style={{ padding: '9px 14px', background: `${c}18`, border: `1px solid ${c}35`, borderRadius: 10, color: c, fontWeight: 600, fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
+                      {uploadingLogo ? '⏳ Subiendo…' : '📁 Subir imagen'}
+                    </button>
+                    <input value={logoUrl} onChange={e => setLogoUrl(e.target.value)}
+                      placeholder="O pega un URL de imagen"
+                      style={{ ...inp, padding: '9px 12px', fontSize: 12 }} />
+                  </div>
+                </div>
+                <input ref={logoRef} type="file" accept="image/*" style={{ display: 'none' }}
+                  onChange={e => e.target.files?.[0] && uploadLogo(e.target.files[0])} />
+                <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 8, marginBottom: 0 }}>PNG, JPG o SVG. Recomendado: fondo transparente.</p>
               </div>
             </div>
           )}
 
-          {/* ── PASO 2: UNIFORMES ── */}
-          {step === 1 && (
+          {/* PASO 3 — MENSUALIDADES */}
+          {step === 2 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ padding: '12px 16px', background: `${c}0E`, borderRadius: 12, border: `1px solid ${c}25` }}>
-                <p style={{ color: c, fontSize: 12, fontWeight: 600, margin: 0, letterSpacing: 0.5 }}>
-                  EQUIPAMIENTO DEL CLUB
-                </p>
-                <p style={{ color: 'var(--text-sec)', fontSize: 12, margin: '4px 0 0' }}>
-                  Define las prendas disponibles para pedidos de uniformes
+              <StepBadge color={c} icon="💰" title="Mensualidades y mora" desc="Define cuánto y cuándo cobrar a los jugadores" />
+
+              <div>
+                <label style={lbl}>Valor de la cuota mensual ({paisActual.moneda})</label>
+                <input type="number" value={mensualidad.valor} min={0}
+                  onChange={e => setMensualidad(m => ({ ...m, valor: +e.target.value }))} style={inp} />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={lbl}>Días de gracia antes de mora</label>
+                  <input type="number" value={mensualidad.dias_gracia} min={0} max={30}
+                    onChange={e => setMensualidad(m => ({ ...m, dias_gracia: +e.target.value }))} style={inp} />
+                </div>
+                <div>
+                  <label style={lbl}>Penalidad por mora ({paisActual.moneda})</label>
+                  <input type="number" value={mensualidad.penalidad} min={0}
+                    onChange={e => setMensualidad(m => ({ ...m, penalidad: +e.target.value }))} style={inp} />
+                </div>
+              </div>
+
+              <InfoBox icon="⚠️">
+                La mora se aplica automáticamente cuando un jugador supera los días de gracia sin pagar. Puedes ajustar estos valores en cualquier momento.
+              </InfoBox>
+            </div>
+          )}
+
+          {/* PASO 4 — WHATSAPP */}
+          {step === 3 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <StepBadge color={c} icon="💬" title="WhatsApp" desc="Número desde el que se envían mensajes automáticos de cobro" />
+
+              <div>
+                <label style={lbl}>Número de WhatsApp (con código de país, sin + ni espacios)</label>
+                <input
+                  value={whatsapp}
+                  onChange={e => setWhatsapp(e.target.value.replace(/\D/g, ''))}
+                  placeholder={`Ej: ${club.codigo_pais}3001234567`}
+                  style={inp} type="tel"
+                />
+                <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 6, marginBottom: 0 }}>
+                  Incluye el código de país (+{club.codigo_pais}) sin el símbolo +.
                 </p>
               </div>
 
+              <InfoBox>
+                Este número recibirá y enviará recordatorios de cobro, confirmaciones de pago y avisos de mora automáticamente.
+              </InfoBox>
+
+              <div style={{ padding: '14px 16px', background: 'rgba(245,158,11,0.08)', borderRadius: 12, border: '1px solid rgba(245,158,11,0.22)' }}>
+                <p style={{ color: '#F59E0B', fontSize: 12, fontWeight: 700, margin: '0 0 8px' }}>⚡ Durante el período de prueba</p>
+                <p style={{ color: '#8B95A3', fontSize: 12, margin: '0 0 10px', lineHeight: 1.65 }}>
+                  WhatsApp funciona en modo sandbox. El número debe enviar este mensaje al <strong style={{ color: '#CBD5E1' }}>+1 415 523 8886</strong> de Twilio:
+                </p>
+                <code style={{ display: 'block', background: 'rgba(245,158,11,0.14)', padding: '8px 12px', borderRadius: 8, color: '#F5C542', fontSize: 13, fontWeight: 700 }}>
+                  join &lt;palabra-del-sandbox&gt;
+                </code>
+                <p style={{ color: '#8B95A3', fontSize: 11, margin: '8px 0 0', lineHeight: 1.5 }}>
+                  Tu administrador de ClubContable te dará la palabra exacta.
+                </p>
+              </div>
+
+              <p style={{ fontSize: 12, color: '#8B95A3', margin: 0 }}>
+                Este paso es opcional — puedes configurarlo luego desde el módulo de WhatsApp.
+              </p>
+            </div>
+          )}
+
+          {/* PASO 5 — EQUIPAMIENTO */}
+          {step === 4 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <StepBadge color={c} icon="👕" title="Equipamiento" desc="Prendas disponibles para pedidos de uniformes" />
+
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {prendas.map(p => (
-                  <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 6, background: `${c}12`, border: `1px solid ${c}30`, borderRadius: 20, padding: '5px 12px' }}>
-                    <span style={{ fontSize: 13, color: c }}>{p}</span>
-                    <button
-                      onClick={() => setPrendas(ps => ps.filter(x => x !== p))}
-                      style={{ background: 'none', border: 'none', color: `${c}80`, cursor: 'pointer', padding: 0, lineHeight: 1, fontSize: 14 }}
-                    >×</button>
+                  <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 6, background: `${c}14`, border: `1px solid ${c}30`, borderRadius: 20, padding: '5px 12px' }}>
+                    <span style={{ fontSize: 13, color: '#fff' }}>{p}</span>
+                    <button onClick={() => setPrendas(ps => ps.filter(x => x !== p))}
+                      style={{ background: 'none', border: 'none', color: `${c}70`, cursor: 'pointer', padding: 0, lineHeight: 1, fontSize: 16 }}>×</button>
                   </div>
                 ))}
               </div>
 
               <div style={{ display: 'flex', gap: 8 }}>
-                <input
-                  value={nuevaPrenda}
-                  onChange={e => setNuevaP(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && nuevaPrenda.trim()) {
-                      setPrendas(ps => [...ps, nuevaPrenda.trim()]);
-                      setNuevaP('');
-                    }
-                  }}
-                  placeholder="Agregar prenda... (Enter)"
-                  style={{ ...inp, flex: 1 }}
-                />
+                <input value={nuevaPrenda} onChange={e => setNuevaP(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && nuevaPrenda.trim()) { setPrendas(ps => [...ps, nuevaPrenda.trim()]); setNuevaP(''); } }}
+                  placeholder="Agregar prenda… (Enter para confirmar)" style={{ ...inp, flex: 1 }} />
                 <button
-                  onClick={() => {
-                    if (nuevaPrenda.trim()) {
-                      setPrendas(ps => [...ps, nuevaPrenda.trim()]);
-                      setNuevaP('');
-                    }
-                  }}
-                  style={{ padding: '10px 16px', background: c, border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
-                >
-                  +
-                </button>
+                  onClick={() => { if (nuevaPrenda.trim()) { setPrendas(ps => [...ps, nuevaPrenda.trim()]); setNuevaP(''); } }}
+                  style={{ padding: '10px 16px', background: c, border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 15, cursor: 'pointer', flexShrink: 0 }}>+</button>
               </div>
+
+              <InfoBox>Estas prendas aparecen al crear pedidos de uniformes. Puedes editarlas en Uniformes → Catálogo.</InfoBox>
             </div>
           )}
 
-          {/* ── PASO 3: TORNEOS ── */}
-          {step === 2 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ padding: '12px 16px', background: `${c}0E`, borderRadius: 12, border: `1px solid ${c}25` }}>
-                <p style={{ color: c, fontSize: 12, fontWeight: 600, margin: 0, letterSpacing: 0.5 }}>
-                  TORNEOS Y COMPETENCIAS
-                </p>
-                <p style={{ color: 'var(--text-sec)', fontSize: 12, margin: '4px 0 0' }}>
-                  Crea los torneos en los que participa tu club (puedes agregar más luego)
-                </p>
-              </div>
+          {/* PASO 6 — TORNEOS */}
+          {step === 5 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <StepBadge color={c} icon="🏆" title="Torneos y competencias" desc="Opcional — puedes agregar más en cualquier momento" />
 
               {torneos.map((t, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <Trophy size={14} color={c} style={{ flexShrink: 0 }} />
-                  <span style={{ flex: 1, fontSize: 13, color: 'var(--text-sec)' }}>{t.nombre}</span>
-                  {t.fecha && <span style={{ fontSize: 11, color: 'var(--text-sec)' }}>{t.fecha}</span>}
+                  <span style={{ flex: 1, fontSize: 13, color: '#CBD5E1' }}>🏆 {t.nombre}</span>
+                  {t.fecha && <span style={{ fontSize: 11, color: '#8B95A3' }}>{t.fecha}</span>}
                   {t.valor > 0 && <span style={{ fontSize: 11, color: c }}>${t.valor.toLocaleString('es-CO')}</span>}
-                  <button
-                    onClick={() => setTorneos(ts => ts.filter((_, j) => j !== i))}
-                    style={{ background: 'none', border: 'none', color: 'var(--text-mut)', cursor: 'pointer', padding: 0 }}
-                  ><X size={14} /></button>
+                  <button onClick={() => setTorneos(ts => ts.filter((_, j) => j !== i))}
+                    style={{ background: 'none', border: 'none', color: '#8B95A3', cursor: 'pointer', padding: 0 }}>
+                    <X size={14} />
+                  </button>
                 </div>
               ))}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '14px', background: 'rgba(255,255,255,0.03)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.07)' }}>
-                <input
-                  value={nuevoTorneo.nombre}
-                  onChange={e => setNuevoT(t => ({ ...t, nombre: e.target.value }))}
-                  placeholder="Nombre del torneo *"
-                  style={inp}
-                />
+                <input value={nuevoTorneo.nombre} onChange={e => setNuevoT(t => ({ ...t, nombre: e.target.value }))}
+                  placeholder="Nombre del torneo *" style={inp} />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <input
-                    type="date"
-                    value={nuevoTorneo.fecha}
+                  <input type="date" value={nuevoTorneo.fecha}
                     onChange={e => setNuevoT(t => ({ ...t, fecha: e.target.value }))}
-                    style={{ ...inp, colorScheme: 'dark' }}
-                  />
-                  <input
-                    type="number"
-                    value={nuevoTorneo.valor}
+                    style={{ ...inp, colorScheme: 'dark' }} />
+                  <input type="number" value={nuevoTorneo.valor}
                     onChange={e => setNuevoT(t => ({ ...t, valor: e.target.value }))}
-                    placeholder={`Inscripción por jugador (${currencyLabel})`}
-                    style={inp}
-                    min={0}
-                  />
+                    placeholder={`Inscripción (${paisActual.moneda})`} style={inp} min={0} />
                 </div>
                 <button
                   onClick={() => {
@@ -311,49 +465,115 @@ export default function OnboardingWizard({ color = '#00AAFF', clubConfig, onComp
                     setTorneos(ts => [...ts, { nombre: nuevoTorneo.nombre.trim(), fecha: nuevoTorneo.fecha, valor: +nuevoTorneo.valor || 0 }]);
                     setNuevoT({ nombre: '', fecha: '', valor: '' });
                   }}
-                  style={{ padding: '9px', background: `${c}18`, border: `1px solid ${c}35`, borderRadius: 10, color: c, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
-                >
+                  style={{ padding: '9px', background: `${c}18`, border: `1px solid ${c}35`, borderRadius: 10, color: c, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
                   + Agregar torneo
                 </button>
               </div>
 
-              <p style={{ fontSize: 12, color: 'var(--text-mut)', margin: 0 }}>
-                Este paso es opcional — puedes saltarlo y crear torneos desde el módulo de Arbitraje.
+              <p style={{ fontSize: 12, color: '#8B95A3', margin: 0 }}>
+                Puedes agregar y gestionar torneos en cualquier momento desde el módulo de Arbitraje.
               </p>
+            </div>
+          )}
+
+          {/* DONE */}
+          {step === CONTENT_STEPS && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22, padding: '8px 0' }}>
+              <div style={{ width: 76, height: 76, borderRadius: '50%', background: `${c}18`, border: `2px solid ${c}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36 }}>
+                🎉
+              </div>
+
+              <div style={{ textAlign: 'center' }}>
+                <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 800, margin: '0 0 8px' }}>
+                  ¡Todo configurado!
+                </h3>
+                <p style={{ color: '#8B95A3', fontSize: 13, margin: 0, lineHeight: 1.7 }}>
+                  Tu club está listo. Puedes ajustar cualquier dato en el módulo de Configuración.
+                </p>
+              </div>
+
+              {/* Resumen */}
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 7 }}>
+                {[
+                  { label: 'Club',       val: club.nombre || '—' },
+                  { label: 'Ciudad',     val: club.ciudad || '—' },
+                  { label: 'País',       val: `${paisActual.bandera} ${paisActual.nombre} · ${paisActual.moneda}` },
+                  { label: 'Mensualidad', val: `${paisActual.moneda} ${mensualidad.valor.toLocaleString()}` },
+                  { label: 'Mora',       val: `${mensualidad.dias_gracia} días gracia · ${paisActual.moneda} ${mensualidad.penalidad.toLocaleString()}` },
+                  { label: 'WhatsApp',   val: whatsapp ? `+${whatsapp}` : 'No configurado' },
+                  { label: 'Prendas',    val: `${prendas.length} items en catálogo` },
+                  { label: 'Torneos',    val: torneos.length ? `${torneos.length} torneo(s) registrados` : 'Ninguno aún' },
+                ].map(({ label, val }) => (
+                  <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)', gap: 12 }}>
+                    <span style={{ fontSize: 12, color: '#8B95A3', flexShrink: 0 }}>{label}</span>
+                    <span style={{ fontSize: 12, color: '#fff', fontWeight: 600, textAlign: 'right' }}>{val}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
         </div>
 
-        {/* Footer */}
-        <div style={{ padding: '16px 28px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <button
-            onClick={skip}
-            style={{ background: 'none', border: 'none', color: 'var(--text-mut)', fontSize: 13, cursor: 'pointer' }}
-          >
-            Saltar configuración
-          </button>
-          <button
-            onClick={next}
-            disabled={saving}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: c, border: 'none', borderRadius: 12,
-              color: '#fff', fontSize: 14, fontWeight: 700,
-              padding: '11px 24px', cursor: saving ? 'not-allowed' : 'pointer',
-              boxShadow: `0 4px 20px ${c}40`,
-              opacity: saving ? 0.7 : 1,
-            }}
-          >
-            {saving ? 'Guardando…' : step < STEPS.length - 2 ? (
-              <><span>Siguiente</span><ChevronRight size={16} /></>
+        {/* ── Footer ──────────────────────────────────── */}
+        <div style={{ padding: '14px 26px 22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
+          {isDone ? (
+            <div /> // spacer
+          ) : step === 0 ? (
+            <button onClick={skip}
+              style={{ background: 'none', border: 'none', color: '#8B95A3', fontSize: 13, cursor: 'pointer', padding: '8px 4px' }}>
+              Saltar configuración
+            </button>
+          ) : (
+            <button onClick={back}
+              style={{ background: 'none', border: 'none', color: '#8B95A3', fontSize: 13, cursor: 'pointer', padding: '8px 4px' }}>
+              ← Atrás
+            </button>
+          )}
+
+          <button onClick={next} disabled={saving} style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: c, border: 'none', borderRadius: 12,
+            color: '#fff', fontSize: 14, fontWeight: 700,
+            padding: '11px 24px', cursor: saving ? 'not-allowed' : 'pointer',
+            boxShadow: `0 4px 20px ${c}45`,
+            opacity: saving ? 0.7 : 1,
+            transition: 'background 0.4s, box-shadow 0.4s',
+          }}>
+            {saving ? 'Guardando…' : isDone ? (
+              <><CheckCircle size={15} /><span>¡Empezar!</span></>
+            ) : step === CONTENT_STEPS - 1 ? (
+              <><CheckCircle size={15} /><span>Finalizar</span></>
             ) : (
-              <><CheckCircle size={15} /><span>Empezar</span></>
+              <><span>Siguiente</span><ChevronRight size={16} /></>
             )}
           </button>
         </div>
 
       </div>
+    </div>
+  );
+}
+
+/* ── Componentes auxiliares ────────────────────────────────── */
+
+function StepBadge({ color, icon, title, desc }) {
+  return (
+    <div style={{ padding: '12px 16px', background: `${color}0E`, borderRadius: 12, border: `1px solid ${color}25`, display: 'flex', alignItems: 'center', gap: 12 }}>
+      <span style={{ fontSize: 22, flexShrink: 0 }}>{icon}</span>
+      <div>
+        <p style={{ color: '#fff', fontSize: 14, fontWeight: 700, margin: 0 }}>{title}</p>
+        <p style={{ color: '#8B95A3', fontSize: 12, margin: '2px 0 0' }}>{desc}</p>
+      </div>
+    </div>
+  );
+}
+
+function InfoBox({ children, icon = 'ℹ️' }) {
+  return (
+    <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+      <span style={{ fontSize: 14, flexShrink: 0 }}>{icon}</span>
+      <p style={{ fontSize: 12, color: '#8B95A3', margin: 0, lineHeight: 1.65 }}>{children}</p>
     </div>
   );
 }

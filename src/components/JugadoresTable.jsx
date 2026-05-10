@@ -288,36 +288,55 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                     </div>
                   </td>
 
-                  {/* Uniforme — icono con popover */}
-                  <td className="px-3 py-4 relative">
+                  {/* Foto + Uniforme */}
+                  <td className="px-3 py-4">
                     {(() => {
                       const status = uniformeStatus(j.cedula);
                       const st = UNIFORME_STYLE[status || 'none'];
                       const open = uniformePopover === j.cedula;
+                      const initials = j.nombreCompleto
+                        ? j.nombreCompleto.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
+                        : '?';
                       return (
-                        <div className="relative inline-block">
+                        <div className="flex items-center gap-2">
+                          {/* Avatar foto */}
                           <button
-                            onClick={() => setUniformePopover(open ? null : j.cedula)}
-                            className="p-1.5 rounded-lg transition"
-                            style={{ color: st.color, background: st.bg, border: `1px solid ${st.border}` }}
+                            onClick={() => abrirHoja(j, 'perfil')}
+                            title="Ver hoja de vida"
+                            className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden transition ring-1 ring-transparent hover:ring-[var(--cc)] hover:ring-offset-1"
+                            style={{ background: 'var(--bg-surface)' }}
                           >
-                            <Shirt className="w-4 h-4" />
+                            {j.foto_url
+                              ? <img src={j.foto_url} alt={j.nombreCompleto} className="w-full h-full object-cover" />
+                              : <span className="w-full h-full flex items-center justify-center text-[10px] font-bold" style={{ color: 'var(--text-sec)' }}>{initials}</span>
+                            }
                           </button>
-                          {open && (
-                            <div
-                              className="absolute z-30 left-0 top-8 min-w-[160px] rounded-xl shadow-xl p-3 text-sm"
-                              style={{ background: 'var(--bg-card)', border: `1px solid ${st.border}` }}
+
+                          {/* Icono uniforme */}
+                          <div className="relative">
+                            <button
+                              onClick={() => setUniformePopover(open ? null : j.cedula)}
+                              className="p-1.5 rounded-lg transition"
+                              style={{ color: st.color, background: st.bg, border: `1px solid ${st.border}` }}
                             >
-                              <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--text-sec)' }}>Uniforme</p>
-                              <span
-                                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-bold"
-                                style={{ color: st.color, background: st.bg, border: `1px solid ${st.border}` }}
+                              <Shirt className="w-4 h-4" />
+                            </button>
+                            {open && (
+                              <div
+                                className="absolute z-30 left-0 top-8 min-w-[160px] rounded-xl shadow-xl p-3 text-sm"
+                                style={{ background: 'var(--bg-card)', border: `1px solid ${st.border}` }}
                               >
-                                <Shirt className="w-3 h-3" />
-                                {st.label}
-                              </span>
-                            </div>
-                          )}
+                                <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--text-sec)' }}>Uniforme</p>
+                                <span
+                                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-bold"
+                                  style={{ color: st.color, background: st.bg, border: `1px solid ${st.border}` }}
+                                >
+                                  <Shirt className="w-3 h-3" />
+                                  {st.label}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       );
                     })()}

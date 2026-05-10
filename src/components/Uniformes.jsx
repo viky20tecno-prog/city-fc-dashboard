@@ -196,10 +196,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
 
   const total = form.prendas.reduce((sum, p) => sum + p.precio, 0);
   const formatNumero = (val) => val.replace(/\D/g, '').slice(0, 3);
-  const numeroNormalizado = form.numero ? String(parseInt(form.numero, 10)) : '';
-  const numeroDisplay = form.numero ? form.numero.padStart(3, '0') : '';
-  const numeroRepetido = numeroNormalizado ? numerosUsados.includes(numeroNormalizado) : false;
-  const numeroValido = form.numero && !numeroRepetido;
+  const numeroValido = !!form.numero;
 
   const handleSubmit = async () => {
     setError('');
@@ -208,7 +205,6 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
     if (!form.talla) faltantes.push('talla');
     if (!form.numero) faltantes.push('número');
     if (faltantes.length > 0) { setError(`Faltá completar: ${faltantes.join(', ')}.`); return; }
-    if (numeroRepetido) { setError(`El número ${numeroDisplay} ya está asignado. Elegí otro.`); return; }
     const clubId = getClubId();
     setEnviando(true);
     try {
@@ -410,12 +406,6 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
     if (editForm.prendas.length === 0) { setEditError('Seleccioná al menos una prenda.'); return; }
     if (!editForm.talla)               { setEditError('Seleccioná una talla.'); return; }
     if (!editForm.numero)              { setEditError('Ingresá el número de camiseta.'); return; }
-    const numeroNorm = String(parseInt(editForm.numero, 10));
-    const numeroPadded = editForm.numero.padStart(3, '0');
-    const numOriginal = pedidoEditando.numero_estampar ? String(parseInt(pedidoEditando.numero_estampar, 10)) : '';
-    if (numeroNorm !== numOriginal && numerosUsados.includes(numeroNorm)) {
-      setEditError(`El número ${numeroPadded} ya está asignado a otro jugador.`); return;
-    }
     const totalEdit = editForm.prendas.reduce((s, p) => s + p.precio, 0);
     const pedidoId = pedidoEditando.id ?? pedidoEditando._id ?? pedidoEditando.rowId ?? pedidoEditando.row_id;
     if (!pedidoId) { setEditError('No se encontró el ID del pedido.'); return; }
@@ -696,13 +686,11 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
                       type="text" inputMode="numeric" value={form.numero}
                       onChange={e => setForm(f => ({ ...f, numero: formatNumero(e.target.value) }))}
                       placeholder="001" maxLength={3}
-                      className={`w-full bg-[var(--bg-app)] border rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none transition-colors ${
-                        numeroRepetido ? 'border-[#FF5E5E]' : 'border-[var(--cc20)] focus:border-[var(--cc)]'
-                      }`}
+                      className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
                     />
                     {form.numero && (
-                      <p className={`text-xs mt-1 font-mono ${numeroValido ? 'text-[var(--cc)]' : 'text-[#FF5E5E]'}`}>
-                        {numeroValido ? `✓ #${numeroDisplay} disponible` : `✗ #${numeroDisplay} ya asignado`}
+                      <p className="text-xs mt-1 font-mono text-[var(--cc)]">
+                        #{form.numero.padStart(3, '0')}
                       </p>
                     )}
                   </div>
@@ -1056,16 +1044,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
                     placeholder="001" maxLength={3}
                     className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
                   />
-                  {editForm.numero && (() => {
-                    const norm = String(parseInt(editForm.numero, 10));
-                    const origNorm = pedidoEditando.numero_estampar ? String(parseInt(pedidoEditando.numero_estampar, 10)) : '';
-                    const ocupado = norm !== origNorm && numerosUsados.includes(norm);
-                    return (
-                      <p className={`text-xs mt-1 font-mono ${ocupado ? 'text-[#FF5E5E]' : 'text-[var(--cc)]'}`}>
-                        {ocupado ? `✗ #${editForm.numero.padStart(3,'0')} ocupado` : `✓ #${editForm.numero.padStart(3,'0')}`}
-                      </p>
-                    );
-                  })()}
+                  {editForm.numero && (
+                    <p className="text-xs mt-1 font-mono text-[var(--cc)]">#{editForm.numero.padStart(3,'0')}</p>
+                  )}
                 </div>
               </div>
 

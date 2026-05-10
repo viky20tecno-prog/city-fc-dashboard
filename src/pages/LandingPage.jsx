@@ -161,7 +161,16 @@ function DashboardMockup({ color }) {
 }
 
 /* ── Payment buttons ────────────────────────────────────────────────────── */
+const isPlaceholder = (href) => !href || href.includes('_REF') || href.includes('STARTER') || href.includes('PRO_REF') || href.includes('TOTAL');
+
 function WompiBtn({ href }) {
+  if (isPlaceholder(href)) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 0', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.25)', fontSize: 13, fontWeight: 700, cursor: 'not-allowed' }}>
+        Wompi — Próximamente
+      </div>
+    );
+  }
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 0', borderRadius: 10, background: 'rgba(255,94,37,0.10)', border: '1px solid rgba(255,94,37,0.35)', color: '#FF5E25', fontSize: 13, fontWeight: 700, textDecoration: 'none', cursor: 'pointer' }}>
       <svg width="56" height="16" viewBox="0 0 56 16" fill="none"><text x="0" y="13" fontFamily="'Inter',system-ui,sans-serif" fontSize="13" fontWeight="800" fill="#FF5E25">Wompi</text></svg>
@@ -170,6 +179,13 @@ function WompiBtn({ href }) {
 }
 
 function MercadoPagoBtn({ href }) {
+  if (isPlaceholder(href)) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 0', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.25)', fontSize: 13, fontWeight: 700, cursor: 'not-allowed' }}>
+        Mercado Pago — Próximamente
+      </div>
+    );
+  }
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 0', borderRadius: 10, background: 'rgba(0,158,227,0.10)', border: '1px solid rgba(0,158,227,0.35)', color: '#009EE3', fontSize: 13, fontWeight: 700, textDecoration: 'none', cursor: 'pointer' }}>
       <svg width="16" height="16" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#009EE3"/><text x="16" y="21" textAnchor="middle" fontFamily="Arial" fontSize="13" fontWeight="900" fill="#fff">MP</text></svg>

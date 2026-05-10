@@ -5,7 +5,6 @@ import AuthCallback from './pages/AuthCallback';
 import LandingPage from './pages/LandingPage';
 import RegistroClub from './pages/RegistroClub';
 import FormInscripcion from './components/FormInscripcion';
-import PedidoUniforme from './pages/PedidoUniforme';
 import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
@@ -18,7 +17,6 @@ export default function App() {
         <Route path="/login"           element={<Login />} />
         <Route path="/auth/callback"   element={<AuthCallback />} />
         <Route path="/inscripcion"     element={<FormInscripcion />} />
-        <Route path="/pedido-uniforme" element={<PedidoUniforme />} />
 
         {/* Rutas protegidas */}
         <Route path="/app/*" element={

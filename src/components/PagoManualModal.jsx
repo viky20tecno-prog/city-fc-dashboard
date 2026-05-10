@@ -8,19 +8,9 @@ import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 const CONCEPTOS = ['Mensualidad', 'Uniforme', 'Torneo', 'Otro'];
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Nequi', 'Daviplata', 'Consignación'];
 
-const UNIFORMES = [
-  { label: 'Uniforme naranja',  valor: 120000 },
-  { label: 'Camiseta naranja',  valor: 75000  },
-  { label: 'Uniforme blanco',   valor: 110000 },
-  { label: 'Camiseta blanca',   valor: 65000  },
-  { label: 'Uniforme Portero',  valor: 120000 },
-  { label: 'Camiseta Portero',  valor: 75000  },
-  { label: 'Peto',              valor: 44000  },
-  { label: 'Pantaloneta',       valor: 45000  },
-  { label: 'Chaqueta',          valor: 170000 },
-  { label: 'Sudadera',          valor: 115000 },
-  { label: 'Medias',            valor: 15000  },
-];
+const normalizarPrendas = (raw = []) =>
+  raw.map(p => typeof p === 'string' ? { label: p, valor: 0 } : { label: p.nombre || p.label || '', valor: p.precio ?? p.valor ?? 0 })
+     .filter(p => p.label);
 
 const TORNEOS = [
   { label: 'Punto y Coma', valor: 80000 },
@@ -36,7 +26,8 @@ const FORM_INICIAL = {
   metodo_pago: 'Efectivo', referencia: '', observacion: '', torneo: '', uniforme: '',
 };
 
-export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
+export default function PagoManualModal({ jugadores, catalogoUniformes = [], onClose, onSuccess }) {
+  const UNIFORMES = normalizarPrendas(catalogoUniformes);
   const [form, setForm] = useState({ ...FORM_INICIAL });
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -323,13 +314,19 @@ export default function PagoManualModal({ jugadores, onClose, onSuccess }) {
 
           {form.concepto === 'Uniforme' && (
             <div>
-              <label className="block text-sm font-medium text-[var(--text-pri)] mb-1">Tipo de uniforme <span className="text-[#FF5E5E]">*</span></label>
-              <select value={form.uniforme}
-                onChange={e => { const u = UNIFORMES.find(u => u.label === e.target.value); handleChange('uniforme', e.target.value); if (u) handleChange('monto', u.valor.toString()); }}
-                className="w-full px-4 py-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)] text-sm text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30 focus:border-[var(--cc)]">
-                <option value="">Seleccionar uniforme...</option>
-                {UNIFORMES.map(u => <option key={u.label} value={u.label}>{u.label} — {formatCOP(u.valor)}</option>)}
-              </select>
+              <label className="block text-sm font-medium text-[var(--text-pri)] mb-1">Prenda <span className="text-[#FF5E5E]">*</span></label>
+              {UNIFORMES.length === 0 ? (
+                <p className="text-xs text-[var(--text-sec)] px-4 py-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)]">
+                  El club no tiene prendas configuradas. Agrégalas en Uniformes → Catálogo.
+                </p>
+              ) : (
+                <select value={form.uniforme}
+                  onChange={e => { const u = UNIFORMES.find(u => u.label === e.target.value); handleChange('uniforme', e.target.value); if (u && u.valor) handleChange('monto', u.valor.toString()); }}
+                  className="w-full px-4 py-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)] text-sm text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30 focus:border-[var(--cc)]">
+                  <option value="">Seleccionar prenda...</option>
+                  {UNIFORMES.map(u => <option key={u.label} value={u.label}>{u.label}{u.valor ? ` — ${formatCOP(u.valor)}` : ''}</option>)}
+                </select>
+              )}
             </div>
           )}
 

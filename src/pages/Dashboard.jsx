@@ -443,6 +443,7 @@ export default function Dashboard() {
       {showPagoModal && (
         <PagoManualModal
           jugadores={jugadores}
+          catalogoUniformes={clubConfig?.prendas_uniforme || []}
           onClose={() => setShowPagoModal(false)}
           onSuccess={handleRefresh}
         />

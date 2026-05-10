@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt } from 'lucide-react';
 import { ESTADO_COLORS } from '../config';
 import HojaDeVida from './HojaDeVida';
 import SuspensionModal from './SuspensionModal';
@@ -103,6 +103,22 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
   const tieneSuspensionActiva = (cedula) =>
     suspensiones.some(s => s.activa && s.cedula === String(cedula));
+
+  const uniformeStatus = (cedula) => {
+    const u = (uniformes || []).find(u => String(u.cedula) === String(cedula));
+    if (!u) return null;
+    if (u.estado === 'AL_DIA')                         return 'entregado';
+    if (u.estado === 'MORA')                           return 'mora';
+    if (u.estado === 'PENDIENTE' || u.estado === 'PARCIAL') return 'pendiente';
+    return 'pendiente';
+  };
+
+  const UNIFORME_STYLE = {
+    pendiente: { color: '#F5A623', bg: 'rgba(245,166,35,0.12)', border: 'rgba(245,166,35,0.30)', title: 'Uniforme pendiente de pago' },
+    mora:      { color: '#EF4444', bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.30)',  title: 'Uniforme en mora'           },
+    entregado: { color: '#22C55E', bg: 'rgba(34,197,94,0.12)',  border: 'rgba(34,197,94,0.30)',  title: 'Uniforme al día / entregado' },
+    none:      { color: 'var(--text-mut)', bg: 'transparent', border: 'transparent', title: 'Sin pedido de uniforme' },
+  };
 
   // Cédulas de jugadores morosos según el backend (fuente de verdad)
   const cedulasMorosos = useMemo(
@@ -300,6 +316,24 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                         <DollarSign className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Finanzas</span>
                       </button>
+
+                      {/* Uniforme */}
+                      {(() => {
+                        const status = uniformeStatus(j.cedula);
+                        const st = UNIFORME_STYLE[status || 'none'];
+                        return (
+                          <button
+                            onClick={() => abrirHoja(j, 'financiero')}
+                            title={st.title}
+                            className="p-1.5 rounded-lg transition"
+                            style={{ color: st.color, background: st.bg, border: `1px solid ${st.border}` }}
+                            onMouseEnter={e => { e.currentTarget.style.background = status ? st.bg.replace('0.12', '0.22') : 'rgba(255,255,255,0.05)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = st.bg; }}
+                          >
+                            <Shirt className="w-4 h-4" />
+                          </button>
+                        );
+                      })()}
 
                       {/* Suspensión */}
                       <button

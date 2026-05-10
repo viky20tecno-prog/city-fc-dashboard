@@ -303,12 +303,12 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                           <button
                             onClick={() => abrirHoja(j, 'perfil')}
                             title="Ver hoja de vida"
-                            className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden transition ring-1 ring-transparent hover:ring-[var(--cc)] hover:ring-offset-1"
+                            className="flex-shrink-0 w-11 h-11 rounded-full overflow-hidden transition ring-2 ring-transparent hover:ring-[var(--cc)] hover:ring-offset-1 hover:ring-offset-[var(--bg-card)]"
                             style={{ background: 'var(--bg-surface)' }}
                           >
                             {j.foto_url
                               ? <img src={j.foto_url} alt={j.nombreCompleto} className="w-full h-full object-cover" />
-                              : <span className="w-full h-full flex items-center justify-center text-[10px] font-bold" style={{ color: 'var(--text-sec)' }}>{initials}</span>
+                              : <span className="w-full h-full flex items-center justify-center text-xs font-bold" style={{ color: 'var(--text-sec)' }}>{initials}</span>
                             }
                           </button>
 

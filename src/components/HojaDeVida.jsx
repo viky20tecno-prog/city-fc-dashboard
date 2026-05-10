@@ -1,7 +1,7 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   X, User, DollarSign, CreditCard, Camera, Save,
-  Loader2, Printer, CheckCircle, ClipboardList,
+  Loader2, Printer, CheckCircle, ClipboardList, ZoomIn,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -70,6 +70,7 @@ function TabPerfil({ jugador, onFotoUpdate }) {
   const fileRef    = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [fotoUrl,   setFotoUrl]   = useState(jugador.foto_url || null);
+  const [lightbox,  setLightbox]  = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [guardado,  setGuardado]  = useState(false);
   const [error,     setError]     = useState('');
@@ -169,16 +170,19 @@ function TabPerfil({ jugador, onFotoUpdate }) {
       {/* Avatar + nombre */}
       <div className="flex items-center gap-4">
         <div className="relative flex-shrink-0">
+          {/* Foto — clic abre lightbox */}
           <div
-            onClick={() => !uploading && fileRef.current?.click()}
-            className="w-20 h-20 rounded-full bg-[var(--bg-surface)] border-2 border-[#E14924]/30 overflow-hidden cursor-pointer flex items-center justify-center hover:border-[#E14924]/60 transition"
+            onClick={() => fotoUrl && setLightbox(true)}
+            className={`w-20 h-20 rounded-full bg-[var(--bg-surface)] border-2 border-[#E14924]/30 overflow-hidden flex items-center justify-center transition ${fotoUrl ? 'cursor-zoom-in hover:border-[#E14924]/70' : 'cursor-default'}`}
           >
             {fotoUrl
               ? <img src={fotoUrl} alt={nombreDisplay} className="w-full h-full object-cover" />
               : <User className="w-8 h-8 text-[var(--text-mut)]" />}
           </div>
+          {/* Botón cambiar foto */}
           <button
             onClick={() => !uploading && fileRef.current?.click()}
+            title="Cambiar foto"
             className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#E14924] flex items-center justify-center shadow-lg hover:bg-[#C9381A] transition"
           >
             {uploading
@@ -190,8 +194,29 @@ function TabPerfil({ jugador, onFotoUpdate }) {
         <div>
           <p className="text-base font-bold text-[var(--text-pri)]">{nombreDisplay || '—'}</p>
           <p className="text-sm text-[var(--text-mut)]">CC {jugador.cedula}</p>
-          <p className="text-xs text-[var(--text-mut)] mt-0.5">Clic en la foto para cambiar</p>
+          {fotoUrl && <p className="text-xs text-[var(--text-mut)] mt-0.5 flex items-center gap-1"><ZoomIn className="w-3 h-3" /> Clic en la foto para ver</p>}
         </div>
+
+        {/* Lightbox */}
+        {lightbox && fotoUrl && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-sm"
+            onClick={() => setLightbox(false)}
+          >
+            <button
+              onClick={() => setLightbox(false)}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+            <img
+              src={fotoUrl}
+              alt={nombreDisplay}
+              className="max-h-[88vh] max-w-[88vw] rounded-2xl shadow-2xl object-contain"
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+        )}
       </div>
 
       {error && (

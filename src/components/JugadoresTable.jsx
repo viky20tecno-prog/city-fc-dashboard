@@ -104,20 +104,31 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const tieneSuspensionActiva = (cedula) =>
     suspensiones.some(s => s.activa && s.cedula === String(cedula));
 
+  const [uniformePopover, setUniformePopover] = useState(null);
+  useEffect(() => {
+    if (!uniformePopover) return;
+    const close = () => setUniformePopover(null);
+    document.addEventListener('click', close, true);
+    return () => document.removeEventListener('click', close, true);
+  }, [uniformePopover]);
+
+  const uniformeData = (cedula) =>
+    (uniformes || []).find(u => String(u.cedula) === String(cedula)) || null;
+
   const uniformeStatus = (cedula) => {
-    const u = (uniformes || []).find(u => String(u.cedula) === String(cedula));
+    const u = uniformeData(cedula);
     if (!u) return null;
-    if (u.estado === 'AL_DIA')                         return 'entregado';
-    if (u.estado === 'MORA')                           return 'mora';
+    if (u.estado === 'AL_DIA')                              return 'entregado';
+    if (u.estado === 'MORA')                                return 'mora';
     if (u.estado === 'PENDIENTE' || u.estado === 'PARCIAL') return 'pendiente';
     return 'pendiente';
   };
 
   const UNIFORME_STYLE = {
-    pendiente: { color: '#F5A623', bg: 'rgba(245,166,35,0.12)', border: 'rgba(245,166,35,0.30)', title: 'Uniforme pendiente de pago' },
-    mora:      { color: '#EF4444', bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.30)',  title: 'Uniforme en mora'           },
-    entregado: { color: '#22C55E', bg: 'rgba(34,197,94,0.12)',  border: 'rgba(34,197,94,0.30)',  title: 'Uniforme al día / entregado' },
-    none:      { color: 'var(--text-mut)', bg: 'transparent', border: 'transparent', title: 'Sin pedido de uniforme' },
+    pendiente: { color: '#F5A623', bg: 'rgba(245,166,35,0.12)', border: 'rgba(245,166,35,0.30)', label: 'Pendiente de pago' },
+    mora:      { color: '#EF4444', bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.30)',  label: 'En mora'           },
+    entregado: { color: '#22C55E', bg: 'rgba(34,197,94,0.12)',  border: 'rgba(34,197,94,0.30)',  label: 'Al día / Entregado' },
+    none:      { color: 'var(--text-mut)', bg: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)', label: 'Sin pedido' },
   };
 
   // Cédulas de jugadores morosos según el backend (fuente de verdad)
@@ -216,6 +227,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               <tr style={{ borderBottom: '1px solid var(--border-sub)' }}>
                 {[
                   { key: 'nombreCompleto', label: 'Nombre'   },
+                  { key: 'uniforme',       label: ''         },
                   { key: 'cedula',         label: 'Cédula'   },
                   { key: 'celular',        label: 'Celular'  },
                   { key: 'estadoPago',     label: 'Estado'   },
@@ -225,13 +237,13 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 ].map(col => (
                   <th
                     key={col.key}
-                    onClick={() => col.key !== 'acciones' && toggleSort(col.key)}
+                    onClick={() => !['acciones','uniforme'].includes(col.key) && toggleSort(col.key)}
                     className="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider cursor-pointer transition"
                     style={{ color: sortField === col.key ? '#E14924' : '#6A6A6A' }}
                   >
                     <span className="inline-flex items-center gap-1">
                       {col.label}
-                      {col.key !== 'acciones' && <SortIcon field={col.key} />}
+                      {!['acciones','uniforme'].includes(col.key) && <SortIcon field={col.key} />}
                     </span>
                   </th>
                 ))}
@@ -276,6 +288,41 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                     </div>
                   </td>
 
+                  {/* Uniforme — icono con popover */}
+                  <td className="px-3 py-4 relative">
+                    {(() => {
+                      const status = uniformeStatus(j.cedula);
+                      const st = UNIFORME_STYLE[status || 'none'];
+                      const open = uniformePopover === j.cedula;
+                      return (
+                        <div className="relative inline-block">
+                          <button
+                            onClick={() => setUniformePopover(open ? null : j.cedula)}
+                            className="p-1.5 rounded-lg transition"
+                            style={{ color: st.color, background: st.bg, border: `1px solid ${st.border}` }}
+                          >
+                            <Shirt className="w-4 h-4" />
+                          </button>
+                          {open && (
+                            <div
+                              className="absolute z-30 left-0 top-8 min-w-[160px] rounded-xl shadow-xl p-3 text-sm"
+                              style={{ background: 'var(--bg-card)', border: `1px solid ${st.border}` }}
+                            >
+                              <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--text-sec)' }}>Uniforme</p>
+                              <span
+                                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-bold"
+                                style={{ color: st.color, background: st.bg, border: `1px solid ${st.border}` }}
+                              >
+                                <Shirt className="w-3 h-3" />
+                                {st.label}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </td>
+
                   {/* Cédula */}
                   <td className="px-6 py-4 text-sm font-mono" style={{ color: 'var(--text-mut)' }}>
                     {j.cedula}
@@ -316,24 +363,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                         <DollarSign className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Finanzas</span>
                       </button>
-
-                      {/* Uniforme */}
-                      {(() => {
-                        const status = uniformeStatus(j.cedula);
-                        const st = UNIFORME_STYLE[status || 'none'];
-                        return (
-                          <button
-                            onClick={() => abrirHoja(j, 'financiero')}
-                            title={st.title}
-                            className="p-1.5 rounded-lg transition"
-                            style={{ color: st.color, background: st.bg, border: `1px solid ${st.border}` }}
-                            onMouseEnter={e => { e.currentTarget.style.background = status ? st.bg.replace('0.12', '0.22') : 'rgba(255,255,255,0.05)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = st.bg; }}
-                          >
-                            <Shirt className="w-4 h-4" />
-                          </button>
-                        );
-                      })()}
 
                       {/* Suspensión */}
                       <button

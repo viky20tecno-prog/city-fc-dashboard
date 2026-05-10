@@ -104,21 +104,28 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
         setCatalogoMsg('Catálogo guardado ✓');
         setTimeout(() => setCatalogoMsg(''), 2500);
       } else {
-        setCatalogoMsg('Error al guardar');
-        setTimeout(() => setCatalogoMsg(''), 2500);
+        setCatalogoMsg(`Error: ${data.error || data.message || 'no se pudo guardar'}`);
+        setTimeout(() => setCatalogoMsg(''), 4000);
       }
-    } catch {
-      setCatalogoMsg('Error de conexión');
-      setTimeout(() => setCatalogoMsg(''), 2500);
+    } catch (err) {
+      setCatalogoMsg(`Error de conexión: ${err.message}`);
+      setTimeout(() => setCatalogoMsg(''), 4000);
     } finally {
       setGuardandoCatalogo(false);
     }
   };
 
+  const MAX_PRENDAS = 15;
+
   const agregarPrenda = () => {
     const nombre = nuevaPrenda.nombre.trim();
     const precio = Number(String(nuevaPrenda.precio).replace(/\D/g, '')) || 0;
     if (!nombre) return;
+    if (catalogo.length >= MAX_PRENDAS) {
+      setCatalogoMsg(`Límite de ${MAX_PRENDAS} prendas alcanzado`);
+      setTimeout(() => setCatalogoMsg(''), 2500);
+      return;
+    }
     const nuevo = [...catalogo, { nombre, precio }];
     setNuevaPrenda({ nombre: '', precio: '' });
     saveCatalogo(nuevo);
@@ -880,7 +887,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
               />
               <button
                 onClick={agregarPrenda}
-                disabled={!nuevaPrenda.nombre.trim() || guardandoCatalogo}
+                disabled={!nuevaPrenda.nombre.trim() || guardandoCatalogo || catalogo.length >= MAX_PRENDAS}
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--cc)] text-white text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--cc)]/80 transition-colors"
               >
                 {guardandoCatalogo ? <Loader className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
@@ -945,7 +952,10 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
                     )}
                   </div>
                 ))}
-                <p className="text-xs text-[var(--text-sec)] text-right pt-1">{catalogo.length} prenda{catalogo.length !== 1 ? 's' : ''} en catálogo</p>
+                <p className="text-xs text-[var(--text-sec)] text-right pt-1">
+                  {catalogo.length} / {MAX_PRENDAS} prendas
+                  {catalogo.length >= MAX_PRENDAS && <span className="text-[#F5A623] ml-1">— límite alcanzado</span>}
+                </p>
               </div>
             )}
           </div>

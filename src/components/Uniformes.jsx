@@ -367,6 +367,18 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
     finally { setCambiandoEstado(null); }
   };
 
+  const handleEliminar = async (pedido) => {
+    const pid = pedido.id ?? pedido._id;
+    if (!pid) return;
+    if (!window.confirm(`¿Eliminar pedido de ${pedido.nombre}? Esta acción no se puede deshacer.`)) return;
+    const clubId = getClubId();
+    try {
+      const res = await authFetch(`${API_BASE}/uniforms/${pid}?club_id=${clubId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok || data.success) await cargarDatos();
+    } catch (e) { console.error('[Uniformes] Error eliminando pedido:', e); }
+  };
+
   const abrirEditar = (pedido) => {
     const prendasStr = pedido.prendas || pedido.prenda || '';
     const prendasArray = prendasStr
@@ -815,6 +827,11 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
                                   <Pencil className="w-3.5 h-3.5" /> Editar
                                 </button>
                               )}
+                              <button onClick={() => handleEliminar(p)} disabled={cargando}
+                                className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/40 transition-all text-xs disabled:opacity-50"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
                             </div>
                           </td>
                         </tr>

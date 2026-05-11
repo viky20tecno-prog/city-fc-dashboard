@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { CheckCircle, ChevronRight, DollarSign, Shirt, Trophy, X, Phone, Palette, Building2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { CheckCircle, ChevronRight, DollarSign, Shirt, Trophy, X, Phone, Palette, Building2, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
 
@@ -240,15 +240,12 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                 </div>
                 <div>
                   <label style={lbl}>País / Moneda</label>
-                  <select value={club.codigo_pais}
-                    onChange={e => setClub(cl => ({ ...cl, codigo_pais: e.target.value }))}
-                    style={{ ...inp, appearance: 'none', WebkitAppearance: 'none' }}>
-                    {PAISES_LIST.map(p => (
-                      <option key={p.codigo} value={p.codigo}>
-                        {p.bandera} {p.nombre} · {p.moneda}
-                      </option>
-                    ))}
-                  </select>
+                  <PaisDropdown
+                    value={club.codigo_pais}
+                    onChange={v => setClub(cl => ({ ...cl, codigo_pais: v }))}
+                    inp={inp}
+                    c={c}
+                  />
                 </div>
               </div>
 
@@ -556,6 +553,72 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
 }
 
 /* ── Componentes auxiliares ────────────────────────────────── */
+
+function PaisDropdown({ value, onChange, inp, c }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const ref = useRef(null);
+  const selected = PAISES_LIST.find(p => p.codigo === value) || PAISES_LIST[0];
+  const filtrados = PAISES_LIST.filter(p =>
+    p.nombre.toLowerCase().includes(query.toLowerCase()) ||
+    p.moneda.toLowerCase().includes(query.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      {/* Trigger */}
+      <button type="button" onClick={() => { setOpen(o => !o); setQuery(''); }}
+        style={{ ...inp, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, cursor: 'pointer', textAlign: 'left' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 20, lineHeight: 1 }}>{selected.bandera}</span>
+          <span style={{ color: '#fff', fontSize: 14 }}>{selected.nombre}</span>
+          <span style={{ color: '#8B95A3', fontSize: 12, background: 'rgba(255,255,255,0.08)', padding: '2px 7px', borderRadius: 6 }}>{selected.moneda}</span>
+        </span>
+        <ChevronDown size={14} color="#8B95A3" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 100,
+          background: '#0D1627', border: `1px solid ${c}35`, borderRadius: 12,
+          boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
+          maxHeight: 240, display: 'flex', flexDirection: 'column',
+        }}>
+          <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <input autoFocus value={query} onChange={e => setQuery(e.target.value)}
+              placeholder="Buscar país…"
+              style={{ ...inp, padding: '7px 10px', fontSize: 13, width: '100%', boxSizing: 'border-box' }} />
+          </div>
+          <div style={{ overflowY: 'auto', flex: 1 }}>
+            {filtrados.map(p => (
+              <button key={p.codigo} type="button"
+                onClick={() => { onChange(p.codigo); setOpen(false); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                  padding: '9px 14px', background: p.codigo === value ? `${c}18` : 'none',
+                  border: 'none', cursor: 'pointer', textAlign: 'left',
+                }}>
+                <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>{p.bandera}</span>
+                <span style={{ flex: 1, color: '#fff', fontSize: 13 }}>{p.nombre}</span>
+                <span style={{ color: '#8B95A3', fontSize: 11, background: 'rgba(255,255,255,0.07)', padding: '2px 7px', borderRadius: 6 }}>{p.moneda}</span>
+              </button>
+            ))}
+            {filtrados.length === 0 && (
+              <p style={{ color: '#8B95A3', fontSize: 13, textAlign: 'center', padding: '16px 0' }}>Sin resultados</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function StepBadge({ color, icon, title, desc }) {
   return (

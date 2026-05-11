@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
   Clock, MessageSquare, ClipboardCheck, Settings,
-  Copy, Check, Bell, LogOut,
+  Copy, Check, Bell, LogOut, TrendingUp,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -18,6 +18,7 @@ import ArbitrajePagos from './ArbitrajePagos';
 import TimelineCobro from '../components/TimelineCobro';
 import WhatsAppMockup from '../components/WhatsAppMockup';
 import Conciliacion from '../components/Conciliacion';
+import Finanzas from '../components/Finanzas';
 import PagoManualModal from '../components/PagoManualModal';
 import OnboardingWizard from '../components/OnboardingWizard';
 import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSelector';
@@ -30,6 +31,7 @@ const NAV = [
   { id: 'cobro',        Icon: Clock,            title: 'Ciclo de Cobro'},
   { id: 'whatsapp',     Icon: MessageSquare,    title: 'WhatsApp Bot'  },
   { id: 'conciliacion', Icon: ClipboardCheck,   title: 'Conciliación'  },
+  { id: 'finanzas',     Icon: TrendingUp,       title: 'Finanzas'      },
 ];
 
 function NavBtn({ id, Icon, title, active, color, onClick }) {
@@ -429,6 +431,7 @@ export default function Dashboard() {
                 suspensiones={suspensiones}
                 morosos={morosos}
                 onRefresh={handleRefresh}
+                categoriasJugadores={clubConfig?.categorias_jugadores || []}
               />
             )}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} />}
@@ -436,6 +439,7 @@ export default function Dashboard() {
             {activeTab === 'cobro'        && <TimelineCobro  color={c} />}
             {activeTab === 'whatsapp'     && <WhatsAppMockup color={c} clubNombre={clubConfig?.nombre} />}
             {activeTab === 'conciliacion' && <Conciliacion   color={c} />}
+            {activeTab === 'finanzas'     && <Finanzas color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
           </>
         )}
       </main>

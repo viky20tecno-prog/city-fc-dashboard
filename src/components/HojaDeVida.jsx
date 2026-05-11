@@ -67,7 +67,7 @@ function CampoEdit({ label, value, onChange, type = 'text', placeholder = '', ..
   );
 }
 
-function TabPerfil({ jugador, onFotoUpdate }) {
+function TabPerfil({ jugador, onFotoUpdate, categoriasJugadores = [] }) {
   const fileRef    = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [fotoUrl,   setFotoUrl]   = useState(jugador.foto_url || null);
@@ -97,6 +97,7 @@ function TabPerfil({ jugador, onFotoUpdate }) {
     familiar_emergencia: jugador.familiar_emergencia || '',
     celular_contacto:    jugador.celular_contacto    || '',
     notas:               jugador.notas               || '',
+    categoria:           jugador.categoria           || '',
   });
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
@@ -246,6 +247,17 @@ function TabPerfil({ jugador, onFotoUpdate }) {
             onChange={set('numero_camiseta')}
             placeholder="Ej: 10"
           />
+          {categoriasJugadores.length > 0 && (
+            <div className="space-y-1 col-span-2">
+              <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Categoría del jugador</label>
+              <select value={form.categoria} onChange={set('categoria')} className={INPUT_CLS}>
+                <option value="">— Sin categoría —</option>
+                {categoriasJugadores.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </Seccion>
 
@@ -516,7 +528,7 @@ const TABS = [
   { key: 'carnet',     label: 'Carnet',     icon: CreditCard },
 ];
 
-export default function HojaDeVida({ jugador, mensualidades, torneos, suspensiones, onClose, onRefresh, initialTab = 'perfil', visibleTabs }) {
+export default function HojaDeVida({ jugador, mensualidades, torneos, suspensiones, onClose, onRefresh, initialTab = 'perfil', visibleTabs, categoriasJugadores = [] }) {
   const tabsToShow = visibleTabs
     ? TABS.filter(t => visibleTabs.includes(t.key))
     : TABS;
@@ -587,7 +599,7 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
         {/* Contenido del tab */}
         <div className="flex-1 overflow-y-auto p-6">
           {tab === 'perfil' && (
-            <TabPerfil jugador={jugadorLocal} onFotoUpdate={handleFotoUpdate} />
+            <TabPerfil jugador={jugadorLocal} onFotoUpdate={handleFotoUpdate} categoriasJugadores={categoriasJugadores} />
           )}
           {tab === 'financiero' && (
             <FinancieroContent

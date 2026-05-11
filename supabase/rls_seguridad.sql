@@ -22,6 +22,13 @@ CREATE POLICY "Owner puede leer su club"
   TO authenticated
   USING (owner_user_id = auth.uid());
 
+-- 2b. Lectura pública de clubs para verificación de carnets (usuario anon)
+DROP POLICY IF EXISTS "Lectura pública clubs verificación" ON clubs;
+CREATE POLICY "Lectura pública clubs verificación"
+  ON clubs FOR SELECT
+  TO anon
+  USING (true);
+
 -- 3. Storage — bucket player-photos (fotos de jugadores desde HojaDeVida)
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('player-photos', 'player-photos', true)

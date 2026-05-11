@@ -12,6 +12,7 @@ export default function VerificarMiembro() {
   const qrNum    = searchParams.get('num')   || '';
   const qrCat    = searchParams.get('cat')   || '';
   const qrColor  = searchParams.get('color') || '#00AAFF';
+  const qrClub   = searchParams.get('club')  || '';
 
   const [estado, setEstado] = useState('cargando');
   const [clubConfig, setClubConfig] = useState(null);
@@ -39,7 +40,7 @@ export default function VerificarMiembro() {
   }, [clubSlug]);
 
   const color      = clubConfig?.color     || qrColor;
-  const clubNombre = clubConfig?.nombre    || clubSlug || 'Club Deportivo';
+  const clubNombre = clubConfig?.nombre    || qrClub || clubSlug || 'Club Deportivo';
   const clubSub    = clubConfig?.subtitulo || '';
   const logoUrl    = clubConfig?.logo_url  || null;
   const initials   = clubNombre.split(' ').slice(0, 3).map(w => w[0]).join('').toUpperCase().slice(0, 3) || 'FC';
@@ -60,7 +61,7 @@ export default function VerificarMiembro() {
     return (
       <div style={{ minHeight: '100vh', background: '#080C14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 48, height: 48, borderRadius: '50%', border: `3px solid ${fallbackColor}`, borderTopColor: 'transparent', margin: '0 auto 16px', animation: 'spin 0.8s linear infinite' }} />
+          <div style={{ width: 48, height: 48, borderRadius: '50%', border: `3px solid ${qrColor}`, borderTopColor: 'transparent', margin: '0 auto 16px', animation: 'spin 0.8s linear infinite' }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, fontFamily: 'Inter, sans-serif' }}>Verificando membresía…</p>
         </div>

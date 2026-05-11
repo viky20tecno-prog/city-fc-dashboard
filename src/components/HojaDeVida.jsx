@@ -424,11 +424,12 @@ function TabCarnet({ jugador, clubConfig = {} }) {
 
   const verifyBase = typeof window !== 'undefined' ? window.location.origin : 'https://zensports.vercel.app';
   const verifyParams = new URLSearchParams({
-    n:   `${nombre} ${apellidos}`.trim(),
-    pos: jugador.posicion  || '',
-    num: jugador.numero    || '',
-    cat: jugador.categoria || '',
+    n:    `${nombre} ${apellidos}`.trim(),
+    pos:  jugador.posicion  || '',
+    num:  jugador.numero    || '',
+    cat:  jugador.categoria || '',
     color: clubColor,
+    club:  clubNombre,
   });
   const verifyUrl = jugador.cedula
     ? `${verifyBase}/verificar/${getClubId()}/${jugador.cedula}?${verifyParams.toString()}`

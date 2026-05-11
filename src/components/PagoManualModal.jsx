@@ -12,22 +12,18 @@ const normalizarPrendas = (raw = []) =>
   raw.map(p => typeof p === 'string' ? { label: p, valor: 0 } : { label: p.nombre || p.label || '', valor: p.precio ?? p.valor ?? 0 })
      .filter(p => p.label);
 
-const TORNEOS = [
-  { label: 'Punto y Coma', valor: 80000 },
-  { label: 'JBC (Fútbol 7)', valor: 50000 },
-  { label: 'INDESA 2026 I', valor: 120000 },
-  { label: 'INDER Envigado', valor: 100000 },
-];
+const normalizarTorneos = (raw = []) =>
+  raw.map(t => ({ label: t.nombre || '', valor: parseFloat(t.valor) || 0 })).filter(t => t.label);
 
 const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseInt(n) || 0);
 
-const FORM_INICIAL = {
-  cedula: '', nombre: '', concepto: 'Mensualidad', monto: '65000',
-  metodo_pago: 'Efectivo', referencia: '', observacion: '', torneo: '', uniforme: '',
-};
-
-export default function PagoManualModal({ jugadores, catalogoUniformes = [], onClose, onSuccess }) {
+export default function PagoManualModal({ jugadores, catalogoUniformes = [], torneosConfig = [], valorMensualidad = 0, onClose, onSuccess }) {
   const UNIFORMES = normalizarPrendas(catalogoUniformes);
+  const TORNEOS   = normalizarTorneos(torneosConfig);
+  const FORM_INICIAL = {
+    cedula: '', nombre: '', concepto: 'Mensualidad', monto: String(valorMensualidad || ''),
+    metodo_pago: 'Efectivo', referencia: '', observacion: '', torneo: '', uniforme: '',
+  };
   const [form, setForm] = useState({ ...FORM_INICIAL });
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -296,7 +292,7 @@ export default function PagoManualModal({ jugadores, catalogoUniformes = [], onC
             <select value={form.concepto}
               onChange={e => {
                 handleChange('concepto', e.target.value);
-                if (e.target.value === 'Mensualidad') handleChange('monto', '65000');
+                if (e.target.value === 'Mensualidad') handleChange('monto', String(valorMensualidad || ''));
                 else if (e.target.value === 'Otro') handleChange('monto', '');
                 handleChange('torneo', '');
                 handleChange('uniforme', '');

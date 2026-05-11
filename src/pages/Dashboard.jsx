@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
   Clock, MessageSquare, ClipboardCheck, Settings,
-  Copy, Check, Bell, LogOut, TrendingUp,
+  Copy, Check, Bell, LogOut, TrendingUp, Trophy,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -19,6 +19,7 @@ import TimelineCobro from '../components/TimelineCobro';
 import WhatsAppMockup from '../components/WhatsAppMockup';
 import Conciliacion from '../components/Conciliacion';
 import Finanzas from '../components/Finanzas';
+import TorneosPage from '../components/TorneosPage';
 import PagoManualModal from '../components/PagoManualModal';
 import OnboardingWizard from '../components/OnboardingWizard';
 import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSelector';
@@ -28,6 +29,7 @@ const NAV = [
   { id: 'dashboard',    Icon: LayoutDashboard, title: 'Dashboard'     },
   { id: 'jugadores',    Icon: Users,            title: 'Jugadores'     },
   { id: 'uniformes',    Icon: Shirt,            title: 'Uniformes'     },
+  { id: 'torneos',      Icon: Trophy,           title: 'Torneos'       },
   { id: 'arbitraje',    Icon: Activity,         title: 'Pago Arbitraje'},
   { id: 'cobro',        Icon: Clock,            title: 'Ciclo de Cobro'},
   { id: 'whatsapp',     Icon: MessageSquare,    title: 'WhatsApp Bot'  },
@@ -445,6 +447,7 @@ export default function Dashboard() {
               />
             )}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} />}
+            {activeTab === 'torneos'      && <TorneosPage  color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'arbitraje'    && <ArbitrajePagos color={c} />}
             {activeTab === 'cobro'        && <TimelineCobro  color={c} />}
             {activeTab === 'whatsapp'     && <WhatsAppMockup color={c} clubNombre={clubConfig?.nombre} />}
@@ -458,6 +461,8 @@ export default function Dashboard() {
         <PagoManualModal
           jugadores={jugadores}
           catalogoUniformes={clubConfig?.prendas_uniforme || []}
+          torneosConfig={clubConfig?.torneos_iniciales || []}
+          valorMensualidad={clubConfig?.valor_mensualidad || 0}
           onClose={() => setShowPagoModal(false)}
           onSuccess={handleRefresh}
         />

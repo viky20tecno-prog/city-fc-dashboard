@@ -591,7 +591,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
               {/* Tipo */}
               <div className="grid grid-cols-2 gap-2">
                 {[['ingreso','↑ Ingreso','#22C55E'],['gasto','↓ Gasto','#EF4444']].map(([v,l,col]) => (
-                  <button key={v} type="button" onClick={() => setForm(f => ({ ...f, tipo: v, categoria: v === 'ingreso' ? CATEGORIAS_INGRESO[0] : CATEGORIAS_GASTO[0] }))}
+                  <button key={v} type="button" onClick={() => setForm(f => ({ ...f, tipo: v, categoria: v === 'ingreso' ? catsIngreso[0] : catsGasto[0] }))}
                     style={form.tipo === v ? { background: col + '20', borderColor: col + '60', color: col } : {}}
                     className={`py-2.5 rounded-xl border text-sm font-semibold transition ${form.tipo === v ? 'border-current' : 'border-[var(--border-sub)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'}`}>
                     {l}

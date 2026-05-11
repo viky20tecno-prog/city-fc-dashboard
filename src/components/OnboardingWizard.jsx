@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { CheckCircle, ChevronRight, DollarSign, Shirt, Trophy, X, Phone, Palette, Building2, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
+import { applyTheme, getStoredTheme, THEMES } from './ThemeSelector';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 
@@ -30,8 +31,26 @@ const PAISES_LIST = [
 ];
 
 const COLORES_PRESET = [
-  '#E14924', '#FF6B35', '#F59E0B', '#22C55E', '#14B8A6',
-  '#00AAFF', '#6366F1', '#A855F7', '#EC4899', '#EF4444',
+  { hex: '#EF4444', nombre: 'Rojo Pasión'     },
+  { hex: '#E14924', nombre: 'Naranja Ciudad'  },
+  { hex: '#DC2626', nombre: 'Escarlata'       },
+  { hex: '#F97316', nombre: 'Naranja Solar'   },
+  { hex: '#FB923C', nombre: 'Naranja Fuego'   },
+  { hex: '#EAB308', nombre: 'Dorado Campeón'  },
+  { hex: '#84CC16', nombre: 'Lima Fresco'     },
+  { hex: '#22C55E', nombre: 'Verde Energía'   },
+  { hex: '#10B981', nombre: 'Verde Esmeralda' },
+  { hex: '#14B8A6', nombre: 'Teal Agua'       },
+  { hex: '#06B6D4', nombre: 'Cian Deportivo'  },
+  { hex: '#00AAFF', nombre: 'Azul Cobalto'    },
+  { hex: '#3B82F6', nombre: 'Azul Eléctrico'  },
+  { hex: '#2563EB', nombre: 'Azul Real'       },
+  { hex: '#6366F1', nombre: 'Índigo Dinámico' },
+  { hex: '#8B5CF6', nombre: 'Violeta Real'    },
+  { hex: '#A855F7', nombre: 'Púrpura'         },
+  { hex: '#EC4899', nombre: 'Rosa Dinámico'   },
+  { hex: '#DB2777', nombre: 'Rosa Fuerte'     },
+  { hex: '#64748B', nombre: 'Gris Pizarra'    },
 ];
 
 const STEPS = [
@@ -65,8 +84,9 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
     codigo_pais: clubConfig?.codigo_pais || '57',
   });
 
-  const [colorClub, setColorClub] = useState(clubConfig?.color    || '#E14924');
-  const [logoUrl,   setLogoUrl]   = useState(clubConfig?.logo_url  || '');
+  const [colorClub,      setColorClub]      = useState(clubConfig?.color   || '#E14924');
+  const [logoUrl,        setLogoUrl]        = useState(clubConfig?.logo_url || '');
+  const [selectedTheme,  setSelectedTheme]  = useState(getStoredTheme);
 
   const [mensualidad, setMensualidad] = useState({
     valor:       clubConfig?.valor_mensualidad || 65000,
@@ -271,23 +291,23 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
               {/* Color */}
               <div>
                 <label style={lbl}>Color principal del club</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-                  {COLORES_PRESET.map(col => (
-                    <button key={col} onClick={() => setColorClub(col)} style={{
-                      width: 36, height: 36, borderRadius: '50%', background: col,
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12 }}>
+                  {COLORES_PRESET.map(({ hex, nombre }) => (
+                    <button key={hex} title={nombre} onClick={() => setColorClub(hex)} style={{
+                      width: 32, height: 32, borderRadius: '50%', background: hex,
                       border: 'none', cursor: 'pointer', flexShrink: 0,
-                      outline: colorClub === col ? `3px solid ${col}` : '3px solid transparent',
+                      outline: colorClub === hex ? `3px solid ${hex}` : '3px solid transparent',
                       outlineOffset: 3,
-                      boxShadow: colorClub === col ? `0 0 14px ${col}90` : 'none',
+                      boxShadow: colorClub === hex ? `0 0 14px ${hex}90` : 'none',
                       transition: 'box-shadow 0.2s, outline 0.15s',
                     }} />
                   ))}
                   {/* Selector personalizado */}
                   <label title="Color personalizado" style={{
-                    width: 36, height: 36, borderRadius: '50%', cursor: 'pointer', flexShrink: 0,
+                    width: 32, height: 32, borderRadius: '50%', cursor: 'pointer', flexShrink: 0,
                     border: '2px dashed rgba(255,255,255,0.25)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 18, color: 'rgba(255,255,255,0.4)', position: 'relative', overflow: 'hidden',
+                    fontSize: 16, color: 'rgba(255,255,255,0.4)', position: 'relative', overflow: 'hidden',
                   }}>
                     +
                     <input type="color" value={colorClub} onChange={e => setColorClub(e.target.value)}
@@ -295,13 +315,43 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                   </label>
                 </div>
 
-                {/* Preview */}
+                {/* Preview color */}
                 <div style={{ padding: '12px 16px', borderRadius: 12, background: `${c}12`, border: `1px solid ${c}35`, display: 'flex', alignItems: 'center', gap: 12, transition: 'all 0.4s' }}>
                   <div style={{ width: 38, height: 38, borderRadius: '50%', background: c, flexShrink: 0, transition: 'background 0.4s' }} />
                   <div>
                     <p style={{ color: '#fff', fontWeight: 700, margin: 0, fontSize: 14 }}>{club.nombre || 'Mi Club'}</p>
-                    <p style={{ color: c, fontSize: 11, margin: '2px 0 0', fontWeight: 600, transition: 'color 0.4s' }}>Vista previa del color</p>
+                    <p style={{ color: c, fontSize: 11, margin: '2px 0 0', fontWeight: 600, transition: 'color 0.4s' }}>
+                      {COLORES_PRESET.find(p => p.hex === colorClub)?.nombre || 'Color personalizado'}
+                    </p>
                   </div>
+                </div>
+              </div>
+
+              {/* Fondo */}
+              <div>
+                <label style={lbl}>Fondo de la aplicación</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+                  {THEMES.map(t => {
+                    const isActive = selectedTheme === t.id;
+                    return (
+                      <button key={t.id} onClick={() => { setSelectedTheme(t.id); applyTheme(t.id); }}
+                        style={{
+                          padding: '8px 6px', borderRadius: 10, border: `2px solid ${isActive ? c : 'rgba(255,255,255,0.1)'}`,
+                          background: isActive ? `${c}12` : 'rgba(255,255,255,0.03)',
+                          cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                          transition: 'border-color 0.2s, background 0.2s',
+                        }}>
+                        <div style={{ display: 'flex', gap: 2, borderRadius: 6, overflow: 'hidden', width: '100%', height: 24 }}>
+                          {t.preview.map((bg, i) => (
+                            <div key={i} style={{ flex: 1, background: bg }} />
+                          ))}
+                        </div>
+                        <span style={{ fontSize: 10, color: isActive ? c : '#8B95A3', fontWeight: isActive ? 700 : 500, transition: 'color 0.2s' }}>
+                          {t.label}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

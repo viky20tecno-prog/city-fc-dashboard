@@ -74,7 +74,7 @@ function NavBtn({ id, Icon, title, active, color, onClick }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { config: clubConfig } = useClubConfig();
+  const { config: clubConfig, refetch: refetchConfig } = useClubConfig();
   const {
     jugadores, mensualidades, uniformes, torneos,
     registroPagos, morosos, suspensiones,
@@ -459,7 +459,7 @@ export default function Dashboard() {
           <OnboardingWizard
             color={c}
             clubConfig={clubConfig}
-            onComplete={() => setShowOnboarding(false)}
+            onComplete={() => { setShowOnboarding(false); refetchConfig(); }}
           />
         </ErrorBoundary>
       )}

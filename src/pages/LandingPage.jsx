@@ -684,10 +684,7 @@ export default function LandingPage() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ width: 32, height: 32, borderRadius: 9, background: previewColor, boxShadow: `0 0 16px ${previewColor}70`, transition: 'all 0.3s', flexShrink: 0 }} />
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: previewColor, transition: 'color 0.3s' }}>{colorActivo.nombre}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', letterSpacing: 1 }}>{previewColor.toUpperCase()}</div>
-              </div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: previewColor, transition: 'color 0.3s' }}>{colorActivo.nombre}</div>
             </div>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, lineHeight: 1.65, maxWidth: 290, margin: 0 }}>
               El color se aplica al escudo, barras, indicadores y acentos.<br />

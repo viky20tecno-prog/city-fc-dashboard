@@ -363,6 +363,42 @@ function TabPerfil({ jugador, onFotoUpdate, categoriasJugadores = [] }) {
   );
 }
 
+/* ── Sello Holográfico ── */
+function SelloHolograma({ color, initials, logoUrl, dark }) {
+  const id = `holo-${color.replace(/[^a-zA-Z0-9]/g, '')}`;
+  return (
+    <svg width="34" height="34" viewBox="0 0 34 34" style={{ filter: `drop-shadow(0 0 4px ${color}80)`, flexShrink: 0 }}>
+      <defs>
+        <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#FF6B6B" />
+          <stop offset="25%"  stopColor="#FFE66D" />
+          <stop offset="50%"  stopColor="#4ECDC4" />
+          <stop offset="75%"  stopColor="#A8E6CF" />
+          <stop offset="100%" stopColor="#C678FF" />
+        </linearGradient>
+      </defs>
+      {/* Anillo externo punteado */}
+      <circle cx="17" cy="17" r="15.5" fill="none" stroke={color} strokeWidth="0.8" opacity="0.5" strokeDasharray="2,1.8" />
+      {/* Anillo shimmer */}
+      <circle cx="17" cy="17" r="13" fill="none" stroke={`url(#${id})`} strokeWidth="1.8" opacity="0.5" />
+      {/* Fondo interior */}
+      <circle cx="17" cy="17" r="11.5" fill={dark ? '#0E0E0E' : '#FAFAFA'} stroke={color} strokeWidth="1.1" />
+      {/* Logo o iniciales */}
+      {logoUrl
+        ? <image href={logoUrl} x="10" y="10" width="14" height="14" />
+        : <text x="17" y="21" textAnchor="middle" fontSize="8.5" fontWeight="900" fill={color}
+                fontFamily="'Bebas Neue', cursive" letterSpacing="0.5">{initials.slice(0, 2)}</text>
+      }
+      {/* 8 puntos decorativos en el anillo exterior */}
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => {
+        const rad = (deg - 90) * Math.PI / 180;
+        return <circle key={i} cx={17 + 14 * Math.cos(rad)} cy={17 + 14 * Math.sin(rad)}
+                       r={i % 2 === 0 ? 1 : 0.6} fill={color} opacity={i % 2 === 0 ? 0.9 : 0.5} />;
+      })}
+    </svg>
+  );
+}
+
 /* ── Tab Carnet ── */
 
 function TabCarnet({ jugador, clubConfig = {} }) {
@@ -596,14 +632,29 @@ function TabCarnet({ jugador, clubConfig = {} }) {
             </div>
             {qrUrl && (
               <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                <div style={{
-                  width: '88px', height: '88px', borderRadius: '8px', overflow: 'hidden',
-                  border: `1.5px solid ${th.border}`, background: dark ? '#111' : '#F9F9F9',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
+                {/* QR con logo del club al centro */}
+                <div style={{ position: 'relative', width: '88px', height: '88px', borderRadius: '8px', overflow: 'hidden', border: `1.5px solid ${th.border}`, background: dark ? '#111' : '#F9F9F9' }}>
                   <img src={qrUrl} alt="QR" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  {/* Logo / iniciales incrustadas en el centro del QR */}
+                  <div style={{
+                    position: 'absolute', top: '50%', left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '22px', height: '22px', borderRadius: '5px',
+                    background: dark ? '#0D0D0D' : '#FFFFFF',
+                    border: `1.5px solid ${clubColor}`,
+                    boxShadow: `0 0 6px ${clubColor}90`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    overflow: 'hidden',
+                  }}>
+                    {logoUrl
+                      ? <img src={logoUrl} alt="" style={{ width: '17px', height: '17px', objectFit: 'contain' }} />
+                      : <span style={{ fontSize: '6.5px', fontWeight: 900, color: clubColor, fontFamily: "'Bebas Neue', cursive", letterSpacing: '0.3px' }}>{initials.slice(0, 2)}</span>
+                    }
+                  </div>
                 </div>
-                <div style={{ fontSize: '7px', color: th.textMut, letterSpacing: '1px', textAlign: 'center' }}>ESCANEAR</div>
+                {/* Sello holográfico */}
+                <SelloHolograma color={clubColor} initials={initials} logoUrl={logoUrl} dark={dark} />
+                <div style={{ fontSize: '6.5px', color: clubColor, letterSpacing: '1.5px', textAlign: 'center', fontWeight: 700 }}>✓ MIEMBRO OFICIAL</div>
               </div>
             )}
           </div>

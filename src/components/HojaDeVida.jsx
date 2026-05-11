@@ -641,28 +641,12 @@ function TabCarnet({ jugador, clubConfig = {} }) {
               ))}
             </div>
             {qrUrl && (
-              <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                {/* QR con logo del club al centro */}
-                <div style={{ position: 'relative', width: '88px', height: '88px', borderRadius: '8px', overflow: 'hidden', border: `1.5px solid ${th.border}`, background: dark ? '#111' : '#F9F9F9' }}>
+              <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                {/* QR limpio — sin overlay para garantizar escaneo */}
+                <div style={{ width: '88px', height: '88px', borderRadius: '8px', overflow: 'hidden', border: `1.5px solid ${th.border}`, background: dark ? '#111' : '#F9F9F9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <img src={qrUrl} alt="QR" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                  {/* Logo / iniciales incrustadas en el centro del QR */}
-                  <div style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '22px', height: '22px', borderRadius: '5px',
-                    background: dark ? '#0D0D0D' : '#FFFFFF',
-                    border: `1.5px solid ${clubColor}`,
-                    boxShadow: `0 0 6px ${clubColor}90`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    overflow: 'hidden',
-                  }}>
-                    {logoUrl
-                      ? <img src={logoUrl} alt="" style={{ width: '17px', height: '17px', objectFit: 'contain' }} />
-                      : <span style={{ fontSize: '6.5px', fontWeight: 900, color: clubColor, fontFamily: "'Bebas Neue', cursive", letterSpacing: '0.3px' }}>{initials.slice(0, 2)}</span>
-                    }
-                  </div>
                 </div>
-                {/* Sello holográfico */}
+                {/* Sello holográfico con logo del club */}
                 <SelloHolograma color={clubColor} initials={initials} logoUrl={logoUrl} dark={dark} />
                 <div style={{ fontSize: '6.5px', color: clubColor, letterSpacing: '1.5px', textAlign: 'center', fontWeight: 700 }}>✓ MIEMBRO OFICIAL</div>
               </div>

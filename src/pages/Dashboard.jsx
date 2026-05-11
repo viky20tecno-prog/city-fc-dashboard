@@ -273,18 +273,27 @@ export default function Dashboard() {
           transition: 'background 0.5s',
         }} />
 
-        {/* Escudo SVG con color del club */}
-        <svg width="38" height="44" viewBox="0 0 38 44" fill="none" style={{ flexShrink: 0 }}>
-          <path d="M19 2L3 8.5V22C3 32.8 10 40.5 19 43C28 40.5 35 32.8 35 22V8.5L19 2Z"
-                fill="#161616" stroke={c} strokeWidth="1.4"/>
-          <path d="M19 5L6 10.8V22C6 31.4 11.5 38.2 19 40.5C26.5 38.2 32 31.4 32 22V10.8L19 5Z"
-                fill={`${c}12`} stroke={`${c}2E`} strokeWidth="0.8"/>
-          <line x1="6" y1="21" x2="32" y2="21" stroke={c} strokeWidth="0.7" opacity="0.4"/>
-          <text x="19" y="18.5" textAnchor="middle" fill={c}
-                fontFamily="Bebas Neue, sans-serif" fontSize="9.5" letterSpacing="1.5">{initials}</text>
-          <line x1="13" y1="24" x2="25" y2="24" stroke="#B68631" strokeWidth="0.8" opacity="0.6"/>
-          <text x="19" y="35" textAnchor="middle" fill="#B68631" fontFamily="Arial" fontSize="6.5" letterSpacing="1">★ ★ ★</text>
-        </svg>
+        {/* Logo o escudo del club */}
+        {clubConfig?.logo_url ? (
+          <img
+            src={clubConfig.logo_url}
+            alt={clubConfig.nombre || 'Logo'}
+            style={{ width: 38, height: 38, borderRadius: 8, objectFit: 'contain', flexShrink: 0 }}
+            onError={e => { e.target.style.display = 'none'; }}
+          />
+        ) : (
+          <svg width="38" height="44" viewBox="0 0 38 44" fill="none" style={{ flexShrink: 0 }}>
+            <path d="M19 2L3 8.5V22C3 32.8 10 40.5 19 43C28 40.5 35 32.8 35 22V8.5L19 2Z"
+                  fill="#161616" stroke={c} strokeWidth="1.4"/>
+            <path d="M19 5L6 10.8V22C6 31.4 11.5 38.2 19 40.5C26.5 38.2 32 31.4 32 22V10.8L19 5Z"
+                  fill={`${c}12`} stroke={`${c}2E`} strokeWidth="0.8"/>
+            <line x1="6" y1="21" x2="32" y2="21" stroke={c} strokeWidth="0.7" opacity="0.4"/>
+            <text x="19" y="18.5" textAnchor="middle" fill={c}
+                  fontFamily="Bebas Neue, sans-serif" fontSize="9.5" letterSpacing="1.5">{initials}</text>
+            <line x1="13" y1="24" x2="25" y2="24" stroke="#B68631" strokeWidth="0.8" opacity="0.6"/>
+            <text x="19" y="35" textAnchor="middle" fill="#B68631" fontFamily="Arial" fontSize="6.5" letterSpacing="1">★ ★ ★</text>
+          </svg>
+        )}
 
         {/* Nombre del club */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', flexShrink: 0 }}>

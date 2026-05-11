@@ -201,38 +201,129 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
   };
 
   /* ── Exportar PDF ────────────────────────────────────── */
-  const exportarPDF = () => {
-    const doc    = new jsPDF();
+  const exportarPDF = async () => {
+    const doc   = new jsPDF();
+    const W     = 210;
+    const M     = 14;
+    const acHex = color || '#E14924';
+    const cr    = parseInt(acHex.slice(1,3), 16);
+    const cg    = parseInt(acHex.slice(3,5), 16);
+    const cb_   = parseInt(acHex.slice(5,7), 16);
+
     const { desde, hasta } = rangoMes(filtroMes);
-    const rows   = movimientos.filter(m => m.fecha >= desde && m.fecha <= hasta);
-    const ing    = rows.filter(r => r.tipo === 'ingreso').reduce((s, r) => s + Number(r.monto), 0);
-    const gasto  = rows.filter(r => r.tipo === 'gasto').reduce((s, r) => s + Number(r.monto), 0);
+    const rows  = movimientos.filter(m => m.fecha >= desde && m.fecha <= hasta);
+    const ing   = rows.filter(r => r.tipo === 'ingreso').reduce((s, r) => s + Number(r.monto), 0);
+    const gasto = rows.filter(r => r.tipo === 'gasto').reduce((s, r) => s + Number(r.monto), 0);
+    const saldo = ing - gasto;
+    const genDate = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
 
-    doc.setFontSize(16); doc.setFont('helvetica', 'bold');
-    doc.text(`${clubNombre} — Estado Financiero`, 14, 20);
-    doc.setFontSize(11); doc.setFont('helvetica', 'normal');
-    doc.text(`Período: ${mesLabel(filtroMes)}`, 14, 30);
-    doc.text(`Ingresos: ${fmt(ing)}   Gastos: ${fmt(gasto)}   Saldo: ${fmt(ing - gasto)}`, 14, 38);
+    // ── Header band ──────────────────────────────────────
+    doc.setFillColor(cr, cg, cb_);
+    doc.rect(0, 0, W, 36, 'F');
 
-    let y = 52;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Fecha', 14, y); doc.text('Tipo', 38, y); doc.text('Categoría', 58, y);
-    doc.text('Descripción', 108, y); doc.text('Monto', 178, y);
-    y += 4; doc.line(14, y, 196, y); y += 6;
+    // Logo
+    let textX = M;
+    if (clubConfig?.logo_url) {
+      try {
+        const imgData = await new Promise((res, rej) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            const cvs = document.createElement('canvas');
+            cvs.width = img.width; cvs.height = img.height;
+            cvs.getContext('2d').drawImage(img, 0, 0);
+            res(cvs.toDataURL('image/png'));
+          };
+          img.onerror = rej;
+          img.src = clubConfig.logo_url;
+        });
+        doc.addImage(imgData, 'PNG', M, 8, 20, 20);
+        textX = M + 24;
+      } catch (_) {}
+    }
 
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-    rows.forEach(r => {
-      if (y > 275) { doc.addPage(); y = 20; }
-      const desc = r.descripcion.length > 35 ? r.descripcion.slice(0, 34) + '…' : r.descripcion;
-      doc.text(r.fecha, 14, y);
-      doc.text(r.tipo, 38, y);
-      doc.text(r.categoria.slice(0, 22), 58, y);
-      doc.text(desc, 108, y);
-      doc.text(fmt(r.monto), 178, y);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
+    doc.text(clubNombre || 'Mi Club', textX, 18);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    doc.setTextColor(225, 225, 225);
+    doc.text('Estado Financiero', textX, 27);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text(mesLabel(filtroMes), W - M, 17, { align: 'right' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+    doc.setTextColor(215, 215, 215);
+    doc.text(`Generado: ${genDate}`, W - M, 27, { align: 'right' });
+
+    // ── Summary boxes ─────────────────────────────────────
+    const boxes = [
+      { label: 'Total Ingresos', val: fmt(ing),   r: 34,  g: 197, b: 94  },
+      { label: 'Total Gastos',   val: fmt(gasto), r: 239, g: 68,  b: 68  },
+      { label: 'Saldo Neto',     val: fmt(saldo), r: saldo >= 0 ? 34 : 239, g: saldo >= 0 ? 197 : 68, b: saldo >= 0 ? 94 : 68 },
+    ];
+    const bW = 58; const bH = 22; const bY = 42;
+    const bXs = [M, W / 2 - bW / 2, W - M - bW];
+    boxes.forEach(({ label, val, r, g, b }, i) => {
+      const bx = bXs[i];
+      doc.setFillColor(245, 247, 250);
+      doc.rect(bx, bY, bW, bH, 'F');
+      doc.setFillColor(r, g, b);
+      doc.rect(bx, bY, 3, bH, 'F');
+      doc.setDrawColor(r, g, b); doc.setLineWidth(0.3);
+      doc.rect(bx, bY, bW, bH, 'S');
+      doc.setTextColor(100, 100, 100); doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
+      doc.text(label, bx + bW / 2, bY + 7, { align: 'center' });
+      doc.setTextColor(r, g, b); doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+      doc.text(val, bx + bW / 2, bY + 18, { align: 'center' });
+    });
+
+    // ── Table ─────────────────────────────────────────────
+    let y = 74;
+    doc.setTextColor(cr, cg, cb_); doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+    doc.text('MOVIMIENTOS DEL PERÍODO', M, y);
+    doc.setDrawColor(cr, cg, cb_); doc.setLineWidth(0.3);
+    doc.line(M, y + 2, W - M, y + 2);
+    y += 9;
+
+    doc.setFillColor(cr, cg, cb_);
+    doc.rect(M, y, W - M * 2, 7, 'F');
+    doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
+    doc.text('Fecha',       M + 1,      y + 5);
+    doc.text('Tipo',        M + 26,     y + 5);
+    doc.text('Categoría',   M + 44,     y + 5);
+    doc.text('Descripción', M + 88,     y + 5);
+    doc.text('Monto',       W - M - 1,  y + 5, { align: 'right' });
+    y += 10;
+
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    rows.forEach((r, idx) => {
+      if (y > 278) { doc.addPage(); y = 20; }
+      if (idx % 2 === 0) { doc.setFillColor(248, 250, 253); doc.rect(M, y - 4, W - M * 2, 7, 'F'); }
+      const isIng = r.tipo === 'ingreso';
+      const [tr, tg, tb] = isIng ? [22, 163, 74] : [220, 38, 38];
+      doc.setTextColor(80, 80, 80); doc.setFont('helvetica', 'normal');
+      doc.text(r.fecha, M + 1, y);
+      doc.setTextColor(tr, tg, tb); doc.setFont('helvetica', 'bold');
+      doc.text(r.tipo, M + 26, y);
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80);
+      doc.text(r.categoria.slice(0, 20), M + 44, y);
+      const desc = r.descripcion.length > 42 ? r.descripcion.slice(0, 41) + '…' : r.descripcion;
+      doc.text(desc, M + 88, y);
+      doc.setTextColor(tr, tg, tb); doc.setFont('helvetica', 'bold');
+      doc.text(fmt(r.monto), W - M - 1, y, { align: 'right' });
       y += 7;
     });
 
-    doc.save(`finanzas-${filtroMes}.pdf`);
+    if (!rows.length) { doc.setTextColor(150,150,150); doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.text('No hay movimientos en este período.', M, y + 4); }
+
+    // ── Footer ────────────────────────────────────────────
+    doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.3);
+    doc.line(M, 287, W - M, 287);
+    doc.setTextColor(160, 160, 160); doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5);
+    doc.text('Generado con ZenSports.app — Software de gestión para clubes deportivos', M, 292);
+    doc.text(`${rows.length} movimiento(s)`, W - M, 292, { align: 'right' });
+
+    doc.save(`finanzas-${(clubNombre || 'club').replace(/\s+/g, '-')}-${filtroMes}.pdf`);
   };
 
   /* ── Derivados ───────────────────────────────────────── */

@@ -118,10 +118,10 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
     setUploadingLogo(true);
     try {
       const ext  = file.name.split('.').pop();
-      const path = `${getClubId()}/logo.${ext}`;
-      const { error } = await supabase.storage.from('club-logos').upload(path, file, { upsert: true });
+      const path = `clubs/${getClubId()}/logo.${ext}`;
+      const { error } = await supabase.storage.from('player-photos').upload(path, file, { upsert: true });
       if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage.from('club-logos').getPublicUrl(path);
+      const { data: { publicUrl } } = supabase.storage.from('player-photos').getPublicUrl(path);
       setLogoUrl(publicUrl);
     } catch (err) {
       console.error('Error subiendo logo:', err);

@@ -912,33 +912,35 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
             ) : (
               <div className="space-y-2">
                 {catalogo.map((p, idx) => (
-                  <div key={idx} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[var(--bg-app)] border border-[var(--cc20)]">
+                  <div key={idx} className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[var(--bg-app)] border border-[var(--cc20)]">
                     {editandoIdx === idx ? (
                       <>
                         <input
                           type="text"
                           value={editandoPrenda.nombre}
                           onChange={e => setEditandoPrenda(f => ({ ...f, nombre: e.target.value }))}
-                          className="flex-1 bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
+                          className="flex-1 min-w-0 bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
                         />
                         <input
                           type="text"
                           inputMode="numeric"
                           value={editandoPrenda.precio}
                           onChange={e => setEditandoPrenda(f => ({ ...f, precio: e.target.value.replace(/\D/g, '') }))}
-                          className="w-24 bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
+                          className="w-20 shrink-0 bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
                         />
-                        <button onClick={guardarEditPrenda} disabled={guardandoCatalogo}
-                          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--cc)] text-white text-xs font-medium disabled:opacity-40"
-                        >
-                          {guardandoCatalogo ? <Loader className="w-3 h-3 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                          Guardar
-                        </button>
-                        <button onClick={() => setEditandoIdx(null)}
-                          className="px-3 py-1.5 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] text-xs hover:text-[var(--text-pri)] transition-colors"
-                        >
-                          Cancelar
-                        </button>
+                        <div className="flex gap-1 shrink-0">
+                          <button onClick={guardarEditPrenda} disabled={guardandoCatalogo}
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--cc)] text-white text-xs font-medium disabled:opacity-40"
+                          >
+                            {guardandoCatalogo ? <Loader className="w-3 h-3 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                            Guardar
+                          </button>
+                          <button onClick={() => setEditandoIdx(null)}
+                            className="px-3 py-1.5 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] text-xs hover:text-[var(--text-pri)] transition-colors"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
                       </>
                     ) : (
                       <>

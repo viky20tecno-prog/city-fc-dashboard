@@ -50,7 +50,12 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
   const [step, setStep]         = useState(0);
   const [saving, setSaving]     = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const logoRef = useRef(null);
+  const logoRef  = useRef(null);
+  const bodyRef  = useRef(null);
+
+  useEffect(() => {
+    if (bodyRef.current) bodyRef.current.scrollTop = 0;
+  }, [step]);
 
   /* ── Estado por paso ──────────────────────────────────────── */
   const [club, setClub] = useState({
@@ -71,12 +76,18 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
 
   const [whatsapp, setWhatsapp] = useState(clubConfig?.whatsapp || '');
 
-  const [prendas,    setPrendas]  = useState(
-    clubConfig?.prendas_uniforme?.length ? clubConfig.prendas_uniforme : PRENDAS_DEFAULT,
-  );
+  const [prendas,    setPrendas]  = useState(() => {
+    const raw = clubConfig?.prendas_uniforme;
+    if (!Array.isArray(raw) || raw.length === 0) return PRENDAS_DEFAULT;
+    // Normaliza por si los items son objetos {nombre, precio} de versiones antiguas
+    const strings = raw.map(p => (typeof p === 'string' ? p : p?.nombre)).filter(Boolean);
+    return strings.length > 0 ? strings : PRENDAS_DEFAULT;
+  });
   const [nuevaPrenda, setNuevaP] = useState('');
 
-  const [torneos,    setTorneos]  = useState(clubConfig?.torneos_iniciales || []);
+  const [torneos,    setTorneos]  = useState(
+    Array.isArray(clubConfig?.torneos_iniciales) ? clubConfig.torneos_iniciales : [],
+  );
   const [nuevoTorneo, setNuevoT] = useState({ nombre: '', fecha: '', valor: '' });
 
   /* ── Helpers ──────────────────────────────────────────────── */
@@ -129,8 +140,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
     } else if (step === CONTENT_STEPS - 1) {
       // Último paso de contenido → guardar y mostrar done
       setSaving(true);
-      try { await saveToApi(); } catch (_) {}
-      setSaving(false);
+      try { await saveToApi(); } catch (_) {} finally { setSaving(false); }
       setStep(CONTENT_STEPS); // done
     } else {
       // Pantalla done → cerrar
@@ -210,7 +220,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
         </div>
 
         {/* ── Cuerpo ─────────────────────────────────── */}
-        <div style={{ padding: '22px 26px', overflowY: 'auto', flex: 1 }}>
+        <div ref={bodyRef} style={{ padding: '22px 26px', overflowY: 'auto', flex: 1, minHeight: 0 }}>
 
           {/* PASO 1 — TU CLUB */}
           {step === 0 && (

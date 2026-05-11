@@ -22,6 +22,7 @@ import Finanzas from '../components/Finanzas';
 import PagoManualModal from '../components/PagoManualModal';
 import OnboardingWizard from '../components/OnboardingWizard';
 import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSelector';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 const NAV = [
   { id: 'dashboard',    Icon: LayoutDashboard, title: 'Dashboard'     },
@@ -454,11 +455,13 @@ export default function Dashboard() {
       )}
 
       {showOnboarding && (
-        <OnboardingWizard
-          color={c}
-          clubConfig={clubConfig}
-          onComplete={() => setShowOnboarding(false)}
-        />
+        <ErrorBoundary>
+          <OnboardingWizard
+            color={c}
+            clubConfig={clubConfig}
+            onComplete={() => setShowOnboarding(false)}
+          />
+        </ErrorBoundary>
       )}
 
       {showTheme && (

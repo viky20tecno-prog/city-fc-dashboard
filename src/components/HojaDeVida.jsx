@@ -70,7 +70,7 @@ function CampoEdit({ label, value, onChange, type = 'text', placeholder = '', ..
   );
 }
 
-function TabPerfil({ jugador, onFotoUpdate, categoriasJugadores = [] }) {
+function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }) {
   const fileRef    = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [fotoUrl,   setFotoUrl]   = useState(jugador.foto_url || null);
@@ -159,6 +159,7 @@ function TabPerfil({ jugador, onFotoUpdate, categoriasJugadores = [] }) {
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Error al guardar');
+      onUpdate?.(payload);
       setGuardado(true);
       setTimeout(() => setGuardado(false), 2500);
     } catch (err) {
@@ -425,8 +426,8 @@ function TabCarnet({ jugador, clubConfig = {} }) {
   const verifyBase = typeof window !== 'undefined' ? window.location.origin : 'https://zensports.vercel.app';
   const verifyParams = new URLSearchParams({
     n:    `${nombre} ${apellidos}`.trim(),
-    pos:  jugador.posicion  || '',
-    num:  jugador.numero    || '',
+    pos:  jugador.posicion        || '',
+    num:  jugador.numero_camiseta || jugador.numero || '',
     cat:  jugador.categoria || '',
     color: clubColor,
     club:  clubNombre,
@@ -743,6 +744,11 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
     onRefresh?.();
   }, [onRefresh]);
 
+  const handleUpdate = useCallback((campos) => {
+    setJugadorLocal(j => ({ ...j, ...campos }));
+    onRefresh?.();
+  }, [onRefresh]);
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Overlay */}
@@ -800,7 +806,7 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
         {/* Contenido del tab */}
         <div className="flex-1 overflow-y-auto p-6">
           {tab === 'perfil' && (
-            <TabPerfil jugador={jugadorLocal} onFotoUpdate={handleFotoUpdate} categoriasJugadores={categoriasJugadores} />
+            <TabPerfil jugador={jugadorLocal} onFotoUpdate={handleFotoUpdate} onUpdate={handleUpdate} categoriasJugadores={categoriasJugadores} />
           )}
           {tab === 'financiero' && (
             <FinancieroContent

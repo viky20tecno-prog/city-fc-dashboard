@@ -424,20 +424,20 @@ function TabCarnet({ jugador, clubConfig = {} }) {
   const bgHex = dark ? '0D0D0D' : 'FFFFFF';
   const fgHex = dark ? 'F0F0F0' : '111111';
   const verifyBase = typeof window !== 'undefined' ? window.location.origin : 'https://zensports.app';
+  // Solo params ligeros — las URLs de foto y logo se reconstruyen en la página de verificación
   const verifyParams = new URLSearchParams({
     n:   `${nombre} ${apellidos}`.trim(),
     pos: jugador.posicion  || '',
     num: jugador.numero    || '',
     cat: jugador.categoria || '',
     color: clubColor,
-    ...(jugador.foto_url && { foto: jugador.foto_url }),
-    ...(logoUrl           && { logo: logoUrl }),
   });
   const verifyUrl = jugador.cedula
     ? `${verifyBase}/verificar/${getClubId()}/${jugador.cedula}?${verifyParams.toString()}`
     : null;
+  // 300px para que el QR tenga celdas grandes y sea fácil de escanear incluso en pantalla
   const qrUrl = verifyUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=160x160&ecc=H&data=${encodeURIComponent(verifyUrl)}&bgcolor=${bgHex}&color=${fgHex}&margin=6`
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=M&data=${encodeURIComponent(verifyUrl)}&bgcolor=${bgHex}&color=${fgHex}&margin=8`
     : null;
 
   const fmtFecha = (f) => {

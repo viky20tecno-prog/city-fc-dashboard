@@ -877,7 +877,7 @@ export default function LandingPage() {
               <div style={{ fontSize: 38, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$149.000<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 26 }}>Acceso completo a todos los módulos</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 26 }}>
-                {['Dashboard y reportes','Gestión de miembros','Pagos manuales y mora','Carnet digital','WhatsApp Bot automático','Inscripciones digitales','Uniformes y equipamiento','Estadísticas avanzadas'].map(label => (
+                {['Dashboard y reportes','Gestión de miembros','Pagos manuales y mora','Carnet digital','WhatsApp Bot automático','Inscripciones digitales','Uniformes y equipamiento','Estadísticas avanzadas','Finanzas — Ingresos, gastos y nómina'].map(label => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <CheckCircle size={14} color="#00D084" style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>{label}</span>

@@ -6,54 +6,54 @@ export default function VerificarMiembro() {
   const { clubSlug, cedula } = useParams();
   const [searchParams] = useSearchParams();
 
-  // Datos que vienen codificados en el QR (fuente principal — no requieren auth)
-  const qrNombre  = searchParams.get('n')    || '';
-  const qrPos     = searchParams.get('pos')  || '';
-  const qrNum     = searchParams.get('num')  || '';
-  const qrCat     = searchParams.get('cat')  || '';
-  const qrColor   = searchParams.get('color') || '#00AAFF';
-  const qrFoto    = searchParams.get('foto') || null;
-  const qrLogo    = searchParams.get('logo') || null;
+  // Datos del QR — no requieren auth
+  const qrNombre = searchParams.get('n')     || '';
+  const qrPos    = searchParams.get('pos')   || '';
+  const qrNum    = searchParams.get('num')   || '';
+  const qrCat    = searchParams.get('cat')   || '';
+  const qrColor  = searchParams.get('color') || '#00AAFF';
 
   const [estado, setEstado] = useState('cargando');
   const [clubConfig, setClubConfig] = useState(null);
+  const [clubId, setClubId] = useState(null);
 
   useEffect(() => {
     document.title = 'Verificación de Miembro · ZenSports';
 
     async function cargar() {
       try {
-        // Solo pedimos config del club (nombre, color, subtítulo) — no datos del jugador (RLS lo bloquea)
-        const { data: clubData } = await supabase
+        // Clubs es tabla con acceso anon — obtenemos id + config (logo, color, nombre)
+        const { data } = await supabase
           .from('clubs')
-          .select('config')
+          .select('id, config')
           .eq('slug', clubSlug)
           .single();
-        if (clubData?.config) setClubConfig(clubData.config);
-      } catch {
-        // Si falla, usamos datos del QR — no es crítico
-      } finally {
-        setEstado('ok');
-      }
+        if (data?.config) setClubConfig(data.config);
+        if (data?.id)     setClubId(data.id);
+      } catch { /* usa datos del QR */ }
+      finally { setEstado('ok'); }
     }
 
     if (clubSlug) cargar();
     else setEstado('ok');
   }, [clubSlug]);
 
-  // Foto y logo: primero del QR (siempre disponible), luego del config del club
-  const color      = clubConfig?.color      || qrColor;
-  const clubNombre = clubConfig?.nombre     || clubSlug || 'Club Deportivo';
-  const clubSub    = clubConfig?.subtitulo  || '';
-  const logoUrl    = qrLogo || clubConfig?.logo_url || null;
+  const color      = clubConfig?.color     || qrColor;
+  const clubNombre = clubConfig?.nombre    || clubSlug || 'Club Deportivo';
+  const clubSub    = clubConfig?.subtitulo || '';
+  const logoUrl    = clubConfig?.logo_url  || null;
   const initials   = clubNombre.split(' ').slice(0, 3).map(w => w[0]).join('').toUpperCase().slice(0, 3) || 'FC';
 
   const nombreCompleto = qrNombre || '—';
   const posicion       = qrPos;
   const numero         = qrNum;
   const categoria      = qrCat;
-  const fotoUrl        = qrFoto;
   const temporada      = new Date().getFullYear();
+
+  // Foto: bucket player-photos es público — path predecible {clubId}/{cedula}.jpg
+  const fotoUrl = clubId
+    ? supabase.storage.from('player-photos').getPublicUrl(`${clubId}/${cedula}.jpg`).data?.publicUrl
+    : null;
 
   if (estado === 'cargando') {
     return (

@@ -17,11 +17,15 @@ export const PALETA = [
 ];
 
 export const THEMES = [
-  { id: 'dark',     label: 'Negro',   app: '#0A0A0A', card: '#111111', preview: ['#0A0A0A', '#111111', '#1A1A1A'] },
-  { id: 'carbon',   label: 'Carbón',  app: '#0D1117', card: '#161B22', preview: ['#0D1117', '#161B22', '#21262D'] },
-  { id: 'slate',    label: 'Pizarra', app: '#0F172A', card: '#1E293B', preview: ['#0F172A', '#1E293B', '#2A3A52'] },
-  { id: 'graphite', label: 'Grafito', app: '#18181B', card: '#27272A', preview: ['#18181B', '#27272A', '#3F3F46'] },
-  { id: 'light',    label: 'Claro',   app: '#F1F5F9', card: '#FFFFFF', preview: ['#F1F5F9', '#FFFFFF', '#E9EFF6'] },
+  { id: 'dark',     label: 'Negro',      app: '#0A0A0A', card: '#111111', surface: '#1A1A1A', text: '#FFFFFF',  preview: ['#0A0A0A', '#111111', '#1A1A1A'] },
+  { id: 'carbon',   label: 'Carbón',     app: '#0D1117', card: '#161B22', surface: '#21262D', text: '#E6EDF3', preview: ['#0D1117', '#161B22', '#21262D'] },
+  { id: 'slate',    label: 'Pizarra',    app: '#0F172A', card: '#1E293B', surface: '#2A3A52', text: '#F1F5F9', preview: ['#0F172A', '#1E293B', '#2A3A52'] },
+  { id: 'graphite', label: 'Grafito',    app: '#18181B', card: '#27272A', surface: '#3F3F46', text: '#FAFAFA', preview: ['#18181B', '#27272A', '#3F3F46'] },
+  { id: 'navy',     label: 'Marina',     app: '#040C1A', card: '#0A1628', surface: '#142240', text: '#E2E8F4', preview: ['#040C1A', '#0A1628', '#142240'] },
+  { id: 'midnight', label: 'Medianoche', app: '#0C0820', card: '#160E38', surface: '#1E1450', text: '#E8E2F8', preview: ['#0C0820', '#160E38', '#1E1450'] },
+  { id: 'forest',   label: 'Bosque',     app: '#071810', card: '#0E2818', surface: '#163820', text: '#E2F0E6', preview: ['#071810', '#0E2818', '#163820'] },
+  { id: 'coffee',   label: 'Café',       app: '#18100A', card: '#26180E', surface: '#34220E', text: '#F0EAE2', preview: ['#18100A', '#26180E', '#34220E'] },
+  { id: 'light',    label: 'Claro',      app: '#F1F5F9', card: '#FFFFFF', surface: '#E9EFF6', text: '#0F172A', preview: ['#F1F5F9', '#FFFFFF', '#E9EFF6'] },
 ];
 
 export function applyTheme(themeId) {

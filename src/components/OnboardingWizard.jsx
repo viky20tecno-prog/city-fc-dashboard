@@ -330,23 +330,20 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
               {/* Fondo */}
               <div>
                 <label style={lbl}>Fondo de la aplicación</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                   {THEMES.map(t => {
                     const isActive = selectedTheme === t.id;
                     return (
                       <button key={t.id} onClick={() => { setSelectedTheme(t.id); applyTheme(t.id); }}
                         style={{
-                          padding: '8px 6px', borderRadius: 10, border: `2px solid ${isActive ? c : 'rgba(255,255,255,0.1)'}`,
-                          background: isActive ? `${c}12` : 'rgba(255,255,255,0.03)',
-                          cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                          padding: '6px', borderRadius: 10,
+                          border: `2px solid ${isActive ? c : 'rgba(255,255,255,0.08)'}`,
+                          background: isActive ? `${c}10` : 'rgba(255,255,255,0.02)',
+                          cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 5,
                           transition: 'border-color 0.2s, background 0.2s',
                         }}>
-                        <div style={{ display: 'flex', gap: 2, borderRadius: 6, overflow: 'hidden', width: '100%', height: 24 }}>
-                          {t.preview.map((bg, i) => (
-                            <div key={i} style={{ flex: 1, background: bg }} />
-                          ))}
-                        </div>
-                        <span style={{ fontSize: 10, color: isActive ? c : '#8B95A3', fontWeight: isActive ? 700 : 500, transition: 'color 0.2s' }}>
+                        <DashboardMini theme={t} accent={c} />
+                        <span style={{ fontSize: 10, color: isActive ? c : '#8B95A3', fontWeight: isActive ? 700 : 500, transition: 'color 0.2s', textAlign: 'center' }}>
                           {t.label}
                         </span>
                       </button>
@@ -697,6 +694,56 @@ function InfoBox({ children, icon = 'ℹ️' }) {
     <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
       <span style={{ fontSize: 14, flexShrink: 0 }}>{icon}</span>
       <p style={{ fontSize: 12, color: '#8B95A3', margin: 0, lineHeight: 1.65 }}>{children}</p>
+    </div>
+  );
+}
+
+function DashboardMini({ theme: t, accent }) {
+  const bars = [0.35, 0.55, 0.45, 0.75, 0.6, 1.0];
+  return (
+    <div style={{
+      width: '100%', height: 72, borderRadius: 6, overflow: 'hidden',
+      display: 'flex', background: t.app,
+    }}>
+      {/* Sidebar */}
+      <div style={{ width: 14, background: t.card, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 7, gap: 4, flexShrink: 0 }}>
+        <div style={{ width: 7, height: 7, borderRadius: 2, background: accent }} />
+        {[1,0,0,0,0].map((active, i) => (
+          <div key={i} style={{ width: 6, height: 3, borderRadius: 1, background: active ? accent : `${t.text}20` }} />
+        ))}
+      </div>
+      {/* Main */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, padding: '5px 5px 4px' }}>
+        {/* Topbar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <div style={{ flex: 1, height: 5, borderRadius: 2, background: `${t.text}12` }} />
+          <div style={{ width: 18, height: 5, borderRadius: 2, background: accent, opacity: 0.85 }} />
+        </div>
+        {/* Cards */}
+        <div style={{ display: 'flex', gap: 3 }}>
+          {[accent, '#22C55E', '#EF4444'].map((clr, i) => (
+            <div key={i} style={{
+              flex: 1, height: 18, borderRadius: 3,
+              background: `${clr}12`, border: `1px solid ${clr}28`,
+              display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0 3px 2px',
+            }}>
+              <div style={{ height: 2, borderRadius: 1, background: clr, opacity: 0.7, width: '60%' }} />
+            </div>
+          ))}
+        </div>
+        {/* Chart */}
+        <div style={{
+          flex: 1, borderRadius: 3, background: `${t.text}06`,
+          display: 'flex', alignItems: 'flex-end', padding: '0 3px 2px', gap: 2,
+        }}>
+          {bars.map((h, i) => (
+            <div key={i} style={{
+              flex: 1, height: `${h * 100}%`, borderRadius: '1px 1px 0 0',
+              background: i === bars.length - 1 ? accent : `${accent}45`,
+            }} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -515,7 +515,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
               </div>
 
               <p style={{ fontSize: 12, color: '#8B95A3', margin: 0 }}>
-                Puedes agregar y gestionar torneos en cualquier momento desde el módulo de Arbitraje.
+                Puedes agregar y gestionar torneos en cualquier momento desde el módulo de Torneos.
               </p>
             </div>
           )}

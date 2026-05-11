@@ -1,6 +1,8 @@
 // API REST Config (nuevo)
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 
+export const SUPPORT_WHATSAPP = '573023903192';
+
 // Google Sheets config (deprecado, mantener para compatibilidad)
 export const SHEET_ID = process.env.NEXT_PUBLIC_SHEET_ID || '1LuqQipb1_MD7WoVy0064mZ1vwWgWCg9ikBRUN_-F0-A';
 export const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';

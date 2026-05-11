@@ -29,6 +29,8 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const [torneoForm,        setTorneoForm]         = useState({ nombre: '', fecha: '', valor: '' });
   const [guardando,         setGuardando]          = useState(false);
   const [addCedula,         setAddCedula]          = useState('');
+  const [addNombre,         setAddNombre]          = useState('');
+  const [addBusqueda,       setAddBusqueda]        = useState('');
   const [addLoading,        setAddLoading]         = useState(false);
   const [pagoEdit,          setPagoEdit]           = useState({});
   const [pagandoId,         setPagandoId]          = useState(null);
@@ -110,7 +112,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
         body: JSON.stringify({ cedulas: [addCedula], nombre_torneo: torneoSeleccionado, valor_oficial: def?.valor || 0 }),
       });
       const data = await res.json();
-      if (data.success) { setAddCedula(''); await cargarEnrollments(); }
+      if (data.success) { setAddCedula(''); setAddNombre(''); setAddBusqueda(''); await cargarEnrollments(); }
     } catch (e) { console.error(e); }
     finally { setAddLoading(false); }
   };
@@ -197,6 +199,12 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const inscritosDelTorneo    = torneoSeleccionado ? enrollments.filter(e => e.nombre_torneo === torneoSeleccionado) : [];
   const yaInscritos           = new Set(inscritosDelTorneo.map(e => String(e.cedula)));
   const jugadoresDisponibles  = jugadoresClub.filter(j => !yaInscritos.has(String(j.cedula)));
+  const sugeridos = addBusqueda.length >= 1
+    ? jugadoresDisponibles.filter(j => {
+        const full = `${j.nombre || ''} ${j.apellidos || ''}`.toLowerCase();
+        return full.includes(addBusqueda.toLowerCase()) || String(j.cedula).includes(addBusqueda);
+      }).slice(0, 6)
+    : [];
 
   return (
     <div className="space-y-5">
@@ -376,16 +384,49 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
               <p className="text-xs font-semibold text-[var(--text-sec)] mb-3 flex items-center gap-2">
                 <UserPlus className="w-3.5 h-3.5" /> Añadir jugador al torneo
               </p>
-              <div className="flex gap-2">
-                <select value={addCedula} onChange={e => setAddCedula(e.target.value)}
-                  className="flex-1 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]">
-                  <option value="">— Seleccionar jugador —</option>
-                  {jugadoresDisponibles.map(j => (
-                    <option key={j.cedula} value={j.cedula}>{j.nombre} {j.apellidos} — CC {j.cedula}</option>
-                  ))}
-                </select>
+              <div className="flex gap-2 items-start">
+                <div className="relative flex-1">
+                  {addCedula ? (
+                    <div className="flex items-center gap-2 bg-[var(--bg-app)] border border-[var(--cc)] rounded-xl px-3 py-2">
+                      <span className="text-sm text-[var(--text-pri)] flex-1">
+                        {addNombre} <span className="text-[var(--text-mut)] text-xs">CC {addCedula}</span>
+                      </span>
+                      <button
+                        onClick={() => { setAddCedula(''); setAddNombre(''); setAddBusqueda(''); }}
+                        className="text-[var(--text-mut)] hover:text-red-400 transition">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="search"
+                        value={addBusqueda}
+                        onChange={e => setAddBusqueda(e.target.value)}
+                        placeholder="Buscar por nombre o cédula..."
+                        className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition"
+                      />
+                      {addBusqueda.length >= 1 && (
+                        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl overflow-hidden shadow-xl">
+                          {sugeridos.length === 0 ? (
+                            <p className="px-4 py-3 text-xs text-[var(--text-sec)]">Sin resultados</p>
+                          ) : (
+                            sugeridos.map(j => (
+                              <button key={j.cedula} type="button"
+                                onClick={() => { setAddCedula(String(j.cedula)); setAddNombre(`${j.nombre || ''} ${j.apellidos || ''}`.trim()); setAddBusqueda(''); }}
+                                className="w-full text-left px-4 py-2.5 hover:bg-[var(--bg-surface)] transition border-b border-[var(--cc20)] last:border-0">
+                                <p className="text-sm text-[var(--text-pri)]">{j.nombre} {j.apellidos}</p>
+                                <p className="text-xs text-[var(--text-sec)]">CC {j.cedula}</p>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
                 <button onClick={inscribir} disabled={!addCedula || addLoading}
-                  className="px-4 py-2 rounded-xl bg-[var(--cc)] text-white text-sm font-bold disabled:opacity-40 hover:opacity-90 transition flex items-center gap-2">
+                  className="px-4 py-2 rounded-xl bg-[var(--cc)] text-white text-sm font-bold disabled:opacity-40 hover:opacity-90 transition flex items-center gap-2 shrink-0">
                   {addLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   Inscribir
                 </button>

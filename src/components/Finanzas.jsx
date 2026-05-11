@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp, TrendingDown, Wallet, Plus, Trash2, Loader2,
   Users, ChevronDown, ChevronUp, Download, FileText, X,
-  CheckCircle, AlertCircle, Pencil,
+  CheckCircle, AlertCircle, Pencil, Trophy, ArrowLeft, UserPlus, Save,
 } from 'lucide-react';
 import {
   ComposedChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -111,6 +111,193 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
   const [filtroTipo,   setFiltroTipo]   = useState('todos');
   const [filtroMes,    setFiltroMes]    = useState(mesActual());
 
+  // — Torneos —
+  const [torneosEnrollments, setTorneosEnrollments] = useState([]);
+  const [torneoSeleccionado,  setTorneoSeleccionado]  = useState(null); // nombre del torneo
+  const [showTorneoForm,      setShowTorneoForm]      = useState(false);
+  const [torneoForm,          setTorneoForm]          = useState({ nombre: '', fecha: '', valor: '' });
+  const [torneoGuardando,     setTorneoGuardando]     = useState(false);
+  const [jugadoresClub,       setJugadoresClub]       = useState([]);
+  const [addJugadorCedula,    setAddJugadorCedula]    = useState('');
+  const [addJugandoLoading,   setAddJugandoLoading]   = useState(false);
+  const [pagoEdit,            setPagoEdit]            = useState({}); // {id: valor}
+  const [pagandoId,           setPagandoId]           = useState(null);
+  const [torneoDefEditIdx,    setTorneoDefEditIdx]     = useState(null);
+  const [torneoDefEditForm,   setTorneoDefEditForm]   = useState({ nombre: '', fecha: '', valor: '' });
+
+  const torneosDef = Array.isArray(clubConfig?.torneos_iniciales) ? clubConfig.torneos_iniciales : [];
+
+  const cargarTorneos = useCallback(async () => {
+    try {
+      const res = await authFetch(`${API_BASE}/torneos?club_id=${clubId}`);
+      const data = await res.json();
+      if (data.success) setTorneosEnrollments(data.data || []);
+    } catch (e) { console.error(e); }
+  }, [clubId]);
+
+  const cargarJugadores = useCallback(async () => {
+    try {
+      const res = await authFetch(`${API_BASE}/players?club_id=${clubId}`);
+      const data = await res.json();
+      if (data.success) setJugadoresClub(data.data || []);
+    } catch (e) { console.error(e); }
+  }, [clubId]);
+
+  const guardarTorneoDef = async () => {
+    if (!torneoForm.nombre.trim()) return;
+    setTorneoGuardando(true);
+    const nueva = { nombre: torneoForm.nombre.trim(), fecha: torneoForm.fecha, valor: Number(torneoForm.valor) || 0 };
+    const nuevaLista = [...torneosDef, nueva];
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      await fetch(`${API_BASE}/config?club_id=${clubId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ torneos_iniciales: nuevaLista }),
+      });
+      setTorneoForm({ nombre: '', fecha: '', valor: '' });
+      setShowTorneoForm(false);
+      window.location.reload(); // recarga config
+    } catch (e) { console.error(e); }
+    finally { setTorneoGuardando(false); }
+  };
+
+  const eliminarTorneoDef = async (idx) => {
+    if (!confirm('¿Eliminar este torneo? Los jugadores inscritos seguirán en la base de datos.')) return;
+    const nuevaLista = torneosDef.filter((_, i) => i !== idx);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      await fetch(`${API_BASE}/config?club_id=${clubId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ torneos_iniciales: nuevaLista }),
+      });
+      if (torneoSeleccionado === torneosDef[idx]?.nombre) setTorneoSeleccionado(null);
+      window.location.reload();
+    } catch (e) { console.error(e); }
+  };
+
+  const editarTorneoDef = async () => {
+    if (!torneoDefEditForm.nombre.trim()) return;
+    setTorneoGuardando(true);
+    const nuevaLista = torneosDef.map((t, i) =>
+      i === torneoDefEditIdx
+        ? { nombre: torneoDefEditForm.nombre.trim(), fecha: torneoDefEditForm.fecha, valor: Number(torneoDefEditForm.valor) || 0 }
+        : t
+    );
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      await fetch(`${API_BASE}/config?club_id=${clubId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ torneos_iniciales: nuevaLista }),
+      });
+      setTorneoDefEditIdx(null);
+      window.location.reload();
+    } catch (e) { console.error(e); }
+    finally { setTorneoGuardando(false); }
+  };
+
+  const inscribirJugador = async () => {
+    if (!addJugadorCedula || !torneoSeleccionado) return;
+    const def = torneosDef.find(t => t.nombre === torneoSeleccionado);
+    setAddJugandoLoading(true);
+    try {
+      const res = await authFetch(`${API_BASE}/torneos?club_id=${clubId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cedulas: [addJugadorCedula], nombre_torneo: torneoSeleccionado, valor_oficial: def?.valor || 0 }),
+      });
+      const data = await res.json();
+      if (data.success) { setAddJugadorCedula(''); await cargarTorneos(); }
+    } catch (e) { console.error(e); }
+    finally { setAddJugandoLoading(false); }
+  };
+
+  const quitarInscripcion = async (id) => {
+    if (!confirm('¿Quitar este jugador del torneo?')) return;
+    try {
+      await authFetch(`${API_BASE}/torneos/${id}?club_id=${clubId}`, { method: 'DELETE' });
+      await cargarTorneos();
+    } catch (e) { console.error(e); }
+  };
+
+  const registrarPago = async (id) => {
+    const monto = Number(pagoEdit[id]);
+    if (!monto || monto <= 0) return;
+    setPagandoId(id);
+    try {
+      const res = await authFetch(`${API_BASE}/torneos/${id}?club_id=${clubId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valor_pagado: monto }),
+      });
+      const data = await res.json();
+      if (data.success) { setPagoEdit(p => ({ ...p, [id]: '' })); await cargarTorneos(); }
+    } catch (e) { console.error(e); }
+    finally { setPagandoId(null); }
+  };
+
+  const exportarPDFTorneo = () => {
+    if (!torneoSeleccionado) return;
+    const def = torneosDef.find(t => t.nombre === torneoSeleccionado);
+    const inscritos = torneosEnrollments.filter(e => e.nombre_torneo === torneoSeleccionado);
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = doc.internal.pageSize.getWidth();
+    const M = 14;
+    const fecha = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+    doc.setFillColor(6, 12, 24); doc.rect(0, 0, W, 22, 'F');
+    doc.setFillColor(0, 170, 255); doc.rect(0, 22, W, 1, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(255, 255, 255);
+    doc.text(`${clubNombre}  —  ${torneoSeleccionado}`, M, 14);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(130, 160, 200);
+    doc.text(`Generado: ${fecha}`, W - M, 14, { align: 'right' });
+    if (def?.fecha) doc.text(`Fecha torneo: ${def.fecha}`, M, 20);
+    let y = 32;
+    // Resumen
+    const pagados = inscritos.filter(e => e.estado === 'AL_DIA').length;
+    const abonos  = inscritos.filter(e => e.estado === 'ABONO').length;
+    const pendientes = inscritos.filter(e => e.estado === 'PENDIENTE').length;
+    const totalRecaudado = inscritos.reduce((s, e) => s + parseFloat(e.valor_pagado || 0), 0);
+    doc.setFillColor(15, 31, 54); doc.rect(M, y, W - M * 2, 20, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(0, 170, 255);
+    doc.text(`Total inscritos: ${inscritos.length}`, M + 4, y + 7);
+    doc.setTextColor(34, 197, 94);  doc.text(`Al día: ${pagados}`, M + 52, y + 7);
+    doc.setTextColor(245, 166, 35); doc.text(`Abono: ${abonos}`, M + 82, y + 7);
+    doc.setTextColor(239, 68, 68);  doc.text(`Pendiente: ${pendientes}`, M + 110, y + 7);
+    doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'normal');
+    doc.text(`Recaudado: $${totalRecaudado.toLocaleString('es-CO')}`, M + 4, y + 15);
+    if (def?.valor) doc.text(`Valor inscripción: $${Number(def.valor).toLocaleString('es-CO')}`, M + 60, y + 15);
+    y += 26;
+    // Cabecera tabla
+    doc.setFillColor(10, 22, 40); doc.rect(M, y, W - M * 2, 7, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(100, 130, 160);
+    doc.text('CÉDULA', M + 2, y + 5); doc.text('NOMBRE', M + 28, y + 5);
+    doc.text('PAGADO', M + 108, y + 5); doc.text('SALDO', M + 130, y + 5); doc.text('ESTADO', M + 150, y + 5);
+    y += 7;
+    inscritos.forEach((e, i) => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFillColor(i % 2 === 0 ? 8 : 14, i % 2 === 0 ? 18 : 26, i % 2 === 0 ? 34 : 46);
+      doc.rect(M, y, W - M * 2, 8, 'F');
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(190, 210, 230);
+      doc.text(String(e.cedula || ''), M + 2, y + 5.5);
+      const jugador = jugadoresClub.find(j => String(j.cedula) === String(e.cedula));
+      const nombre = jugador ? `${jugador.nombre || ''} ${jugador.apellidos || ''}`.trim() : String(e.cedula);
+      doc.text(nombre.slice(0, 32), M + 28, y + 5.5);
+      doc.text(`$${parseFloat(e.valor_pagado || 0).toLocaleString('es-CO')}`, M + 108, y + 5.5);
+      doc.text(`$${parseFloat(e.saldo_pendiente || 0).toLocaleString('es-CO')}`, M + 130, y + 5.5);
+      const estadoColor = e.estado === 'AL_DIA' ? [34, 197, 94] : e.estado === 'ABONO' ? [245, 166, 35] : [239, 68, 68];
+      doc.setTextColor(...estadoColor); doc.setFont('helvetica', 'bold');
+      doc.text(e.estado === 'AL_DIA' ? 'AL DÍA' : e.estado || 'PENDIENTE', M + 150, y + 5.5);
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(190, 210, 230);
+      y += 8;
+    });
+    doc.save(`${torneoSeleccionado.toLowerCase().replace(/\s+/g, '-')}-inscritos.pdf`);
+  };
+
   const cargar = useCallback(async () => {
     setLoading(true);
     try {
@@ -128,6 +315,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
   }, [clubId, mesVista]);
 
   useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => { cargarTorneos(); cargarJugadores(); }, [cargarTorneos, cargarJugadores]);
 
   /* ── Guardar movimiento ───────────────────────────────── */
   const guardarMovimiento = async (e) => {
@@ -397,8 +585,8 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2">
-        {[['balance','Balance'],['movimientos','Movimientos'],['nomina','Nómina']].map(([id,label]) => (
+      <div className="flex gap-2 flex-wrap">
+        {[['balance','Balance'],['movimientos','Movimientos'],['nomina','Nómina'],['torneos','Torneos']].map(([id,label]) => (
           <button key={id} onClick={() => setTab(id)} className={tabBtn(tab === id)}>{label}</button>
         ))}
       </div>
@@ -785,6 +973,298 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
           </div>
         </div>
       )}
+
+      {/* ══════════════════════════════════════════
+          TAB TORNEOS
+      ══════════════════════════════════════════ */}
+      {tab === 'torneos' && (() => {
+        const fmtCOP = (n) => `$${parseFloat(n || 0).toLocaleString('es-CO')}`;
+        const inscritosDelTorneo = torneoSeleccionado
+          ? torneosEnrollments.filter(e => e.nombre_torneo === torneoSeleccionado)
+          : [];
+        const yaInscritos = new Set(inscritosDelTorneo.map(e => String(e.cedula)));
+        const jugadoresDisponibles = jugadoresClub.filter(j => !yaInscritos.has(String(j.cedula)));
+        const chipEstado = (estado) => {
+          if (estado === 'AL_DIA')   return 'px-2 py-0.5 rounded-lg text-[10px] font-bold bg-green-500/15 text-green-400 border border-green-500/20';
+          if (estado === 'ABONO')    return 'px-2 py-0.5 rounded-lg text-[10px] font-bold bg-yellow-500/15 text-yellow-400 border border-yellow-500/20';
+          return 'px-2 py-0.5 rounded-lg text-[10px] font-bold bg-red-500/15 text-red-400 border border-red-500/20';
+        };
+        const labelEstado = (e) => e.estado === 'AL_DIA' ? 'Al día' : e.estado === 'ABONO' ? 'Abono' : 'Pendiente';
+
+        return (
+          <div className="space-y-5">
+
+            {/* Vista: lista de torneos */}
+            {!torneoSeleccionado && (
+              <div className="space-y-4">
+
+                {/* Header + botón crear */}
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <h3 className="text-base font-bold text-[var(--text-pri)] flex items-center gap-2">
+                      <Trophy className="w-4 h-4 text-[var(--cc)]" /> Torneos
+                    </h3>
+                    <p className="text-xs text-[var(--text-sec)] mt-0.5">Gestiona torneos y la inscripción de jugadores</p>
+                  </div>
+                  <button onClick={() => setShowTorneoForm(v => !v)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--cc)] text-white text-sm font-semibold hover:opacity-90 transition">
+                    <Plus className="w-4 h-4" /> Nuevo torneo
+                  </button>
+                </div>
+
+                {/* Formulario crear torneo */}
+                {showTorneoForm && (
+                  <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl p-5 space-y-4">
+                    <h4 className="text-sm font-bold text-[var(--text-pri)]">Nuevo torneo</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <input value={torneoForm.nombre} onChange={e => setTorneoForm(f => ({ ...f, nombre: e.target.value }))}
+                        placeholder="Nombre del torneo *"
+                        className="bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition" />
+                      <input type="date" value={torneoForm.fecha} onChange={e => setTorneoForm(f => ({ ...f, fecha: e.target.value }))}
+                        className="bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition" style={{ colorScheme: 'dark' }} />
+                      <input type="number" value={torneoForm.valor} onChange={e => setTorneoForm(f => ({ ...f, valor: e.target.value }))}
+                        placeholder="Valor inscripción" min={0}
+                        className="bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition" />
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                      <button onClick={() => { setShowTorneoForm(false); setTorneoForm({ nombre: '', fecha: '', valor: '' }); }}
+                        className="px-4 py-2 rounded-xl border border-[var(--cc20)] text-[var(--text-sec)] text-sm hover:text-[var(--text-pri)] transition">
+                        Cancelar
+                      </button>
+                      <button onClick={guardarTorneoDef} disabled={!torneoForm.nombre.trim() || torneoGuardando}
+                        className="px-4 py-2 rounded-xl bg-[var(--cc)] text-white text-sm font-semibold disabled:opacity-40 hover:opacity-90 transition">
+                        {torneoGuardando ? 'Guardando…' : 'Crear torneo'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Lista de torneos definidos */}
+                {torneosDef.length === 0 ? (
+                  <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl p-10 text-center">
+                    <Trophy className="w-10 h-10 text-[var(--text-mut)] mx-auto mb-3" />
+                    <p className="text-sm text-[var(--text-sec)]">No hay torneos creados aún.</p>
+                    <p className="text-xs text-[var(--text-mut)] mt-1">Crea tu primer torneo con el botón de arriba.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {torneosDef.map((t, idx) => {
+                      const inscritos = torneosEnrollments.filter(e => e.nombre_torneo === t.nombre);
+                      const pagados   = inscritos.filter(e => e.estado === 'AL_DIA').length;
+                      const abonos    = inscritos.filter(e => e.estado === 'ABONO').length;
+                      const pendientes = inscritos.filter(e => e.estado === 'PENDIENTE').length;
+                      const editando  = torneoDefEditIdx === idx;
+                      return (
+                        <div key={idx} className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl p-5 space-y-3">
+                          {editando ? (
+                            <div className="space-y-3">
+                              <input value={torneoDefEditForm.nombre} onChange={e => setTorneoDefEditForm(f => ({ ...f, nombre: e.target.value }))}
+                                className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]" />
+                              <div className="grid grid-cols-2 gap-2">
+                                <input type="date" value={torneoDefEditForm.fecha} onChange={e => setTorneoDefEditForm(f => ({ ...f, fecha: e.target.value }))}
+                                  className="bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)]" style={{ colorScheme: 'dark' }} />
+                                <input type="number" value={torneoDefEditForm.valor} onChange={e => setTorneoDefEditForm(f => ({ ...f, valor: e.target.value }))}
+                                  placeholder="Valor" className="bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)]" />
+                              </div>
+                              <div className="flex gap-2">
+                                <button onClick={() => setTorneoDefEditIdx(null)} className="flex-1 py-2 rounded-xl border border-[var(--cc20)] text-[var(--text-sec)] text-xs">Cancelar</button>
+                                <button onClick={editarTorneoDef} disabled={torneoGuardando} className="flex-1 py-2 rounded-xl bg-[var(--cc)] text-white text-xs font-bold disabled:opacity-40">
+                                  {torneoGuardando ? '…' : 'Guardar'}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <p className="text-sm font-bold text-[var(--text-pri)]">{t.nombre}</p>
+                                  <p className="text-xs text-[var(--text-sec)] mt-0.5">
+                                    {t.fecha ? `📅 ${t.fecha}` : 'Sin fecha'}
+                                    {t.valor > 0 ? `  ·  ${fmtCOP(t.valor)}` : ''}
+                                  </p>
+                                </div>
+                                <div className="flex gap-1.5 flex-shrink-0">
+                                  <button onClick={() => { setTorneoDefEditIdx(idx); setTorneoDefEditForm({ nombre: t.nombre, fecha: t.fecha || '', valor: String(t.valor || '') }); }}
+                                    className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition">
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button onClick={() => eliminarTorneoDef(idx)}
+                                    className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-red-400 hover:bg-red-500/10 transition">
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                              {/* Resumen pagos */}
+                              <div className="flex gap-2 flex-wrap">
+                                <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-[var(--bg-surface)] text-[var(--text-sec)]">{inscritos.length} inscritos</span>
+                                {pagados > 0   && <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-green-500/12 text-green-400">{pagados} al día</span>}
+                                {abonos > 0    && <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-yellow-500/12 text-yellow-400">{abonos} abono</span>}
+                                {pendientes > 0 && <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-500/12 text-red-400">{pendientes} pendiente</span>}
+                              </div>
+                              <button onClick={() => setTorneoSeleccionado(t.nombre)}
+                                className="w-full py-2 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] text-xs font-semibold hover:bg-[var(--cc20)] transition">
+                                Ver inscritos →
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Vista: detalle de torneo seleccionado */}
+            {torneoSeleccionado && (() => {
+              const def = torneosDef.find(t => t.nombre === torneoSeleccionado);
+              const pagados    = inscritosDelTorneo.filter(e => e.estado === 'AL_DIA').length;
+              const abonos     = inscritosDelTorneo.filter(e => e.estado === 'ABONO').length;
+              const pendientes = inscritosDelTorneo.filter(e => e.estado === 'PENDIENTE').length;
+              const totalRecaudado = inscritosDelTorneo.reduce((s, e) => s + parseFloat(e.valor_pagado || 0), 0);
+
+              return (
+                <div className="space-y-4">
+                  {/* Cabecera detalle */}
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => setTorneoSeleccionado(null)}
+                        className="p-2 rounded-xl border border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--cc)] transition">
+                        <ArrowLeft className="w-4 h-4" />
+                      </button>
+                      <div>
+                        <h3 className="text-base font-bold text-[var(--text-pri)] flex items-center gap-2">
+                          <Trophy className="w-4 h-4 text-[var(--cc)]" /> {torneoSeleccionado}
+                        </h3>
+                        <p className="text-xs text-[var(--text-sec)]">
+                          {def?.fecha ? `📅 ${def.fecha}` : ''}
+                          {def?.valor > 0 ? `  ·  Inscripción: ${fmtCOP(def.valor)}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <button onClick={exportarPDFTorneo}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] text-sm font-semibold hover:bg-[var(--cc20)] transition">
+                      <Download className="w-4 h-4" /> PDF
+                    </button>
+                  </div>
+
+                  {/* KPIs */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl p-4">
+                      <p className="text-xs text-[var(--text-sec)]">Inscritos</p>
+                      <p className="text-2xl font-bold text-[var(--text-pri)] mt-1">{inscritosDelTorneo.length}</p>
+                    </div>
+                    <div className="bg-[var(--bg-card)] border border-green-500/20 rounded-xl p-4">
+                      <p className="text-xs text-green-400">Al día</p>
+                      <p className="text-2xl font-bold text-green-400 mt-1">{pagados}</p>
+                    </div>
+                    <div className="bg-[var(--bg-card)] border border-yellow-500/20 rounded-xl p-4">
+                      <p className="text-xs text-yellow-400">Abono</p>
+                      <p className="text-2xl font-bold text-yellow-400 mt-1">{abonos}</p>
+                    </div>
+                    <div className="bg-[var(--bg-card)] border border-red-500/20 rounded-xl p-4">
+                      <p className="text-xs text-red-400">Pendiente</p>
+                      <p className="text-2xl font-bold text-red-400 mt-1">{pendientes}</p>
+                    </div>
+                  </div>
+                  <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl px-5 py-3 flex items-center gap-3">
+                    <p className="text-xs text-[var(--text-sec)] flex-1">Total recaudado</p>
+                    <p className="text-lg font-bold text-[var(--cc)]">{fmtCOP(totalRecaudado)}</p>
+                  </div>
+
+                  {/* Añadir jugador */}
+                  <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl p-4">
+                    <p className="text-xs font-semibold text-[var(--text-sec)] mb-3 flex items-center gap-2">
+                      <UserPlus className="w-3.5 h-3.5" /> Añadir jugador al torneo
+                    </p>
+                    <div className="flex gap-2">
+                      <select value={addJugadorCedula} onChange={e => setAddJugadorCedula(e.target.value)}
+                        className="flex-1 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]">
+                        <option value="">— Seleccionar jugador —</option>
+                        {jugadoresDisponibles.map(j => (
+                          <option key={j.cedula} value={j.cedula}>
+                            {j.nombre} {j.apellidos} — CC {j.cedula}
+                          </option>
+                        ))}
+                      </select>
+                      <button onClick={inscribirJugador} disabled={!addJugadorCedula || addJugandoLoading}
+                        className="px-4 py-2 rounded-xl bg-[var(--cc)] text-white text-sm font-bold disabled:opacity-40 hover:opacity-90 transition flex items-center gap-2">
+                        {addJugandoLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                        Inscribir
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Lista de inscritos */}
+                  {inscritosDelTorneo.length === 0 ? (
+                    <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl p-10 text-center">
+                      <Users className="w-8 h-8 text-[var(--text-mut)] mx-auto mb-2" />
+                      <p className="text-sm text-[var(--text-sec)]">Ningún jugador inscrito aún.</p>
+                    </div>
+                  ) : (
+                    <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-[var(--cc20)]">
+                              {['Jugador','Estado','Oficial','Pagado','Saldo','Pago',''].map(h => (
+                                <th key={h} className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium">{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {inscritosDelTorneo.map(e => {
+                              const jugador = jugadoresClub.find(j => String(j.cedula) === String(e.cedula));
+                              const nombre  = jugador ? `${jugador.nombre} ${jugador.apellidos || ''}`.trim() : `CC ${e.cedula}`;
+                              return (
+                                <tr key={e.id} className="border-b border-[var(--cc20)] hover:bg-[var(--bg-surface)] transition">
+                                  <td className="py-2.5 px-4">
+                                    <p className="font-medium text-[var(--text-pri)] text-xs">{nombre}</p>
+                                    <p className="text-[var(--text-mut)] text-[10px]">CC {e.cedula}</p>
+                                  </td>
+                                  <td className="py-2.5 px-4">
+                                    <span className={chipEstado(e.estado)}>{labelEstado(e)}</span>
+                                  </td>
+                                  <td className="py-2.5 px-4 text-[var(--text-sec)] text-xs">{fmtCOP(e.valor_oficial)}</td>
+                                  <td className="py-2.5 px-4 text-green-400 font-semibold text-xs">{fmtCOP(e.valor_pagado)}</td>
+                                  <td className="py-2.5 px-4 text-red-400 text-xs">{fmtCOP(e.saldo_pendiente)}</td>
+                                  <td className="py-2.5 px-4">
+                                    {e.estado !== 'AL_DIA' && (
+                                      <div className="flex items-center gap-1.5">
+                                        <input
+                                          type="number" min={0}
+                                          value={pagoEdit[e.id] || ''}
+                                          onChange={ev => setPagoEdit(p => ({ ...p, [e.id]: ev.target.value }))}
+                                          placeholder={`Total pagado`}
+                                          className="w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-lg px-2 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
+                                        />
+                                        <button onClick={() => registrarPago(e.id)} disabled={!pagoEdit[e.id] || pagandoId === e.id}
+                                          className="p-1.5 rounded-lg bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] hover:bg-[var(--cc20)] transition disabled:opacity-40">
+                                          {pagandoId === e.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                                        </button>
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="py-2.5 px-4">
+                                    <button onClick={() => quitarInscripcion(e.id)}
+                                      className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-red-400 hover:bg-red-500/10 transition">
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        );
+      })()}
 
     </div>
   );

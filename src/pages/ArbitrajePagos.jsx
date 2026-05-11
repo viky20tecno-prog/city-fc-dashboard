@@ -29,9 +29,9 @@ export default function ArbitrajePagos({ color = 'var(--cc)' }) {
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-[var(--text-pri)]">Pago de Árbitros</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-pri)]">Pago de Arbitraje</h1>
           <p className="text-gray-400 text-sm mt-1">
-            Gestiona los partidos y los pagos a árbitros del club
+            Gestiona los partidos y el pago de arbitraje del club
           </p>
         </div>
 

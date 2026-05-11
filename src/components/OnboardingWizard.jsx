@@ -1,14 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { CheckCircle, ChevronRight, DollarSign, Shirt, Trophy, X, Phone, Palette, Building2, ChevronDown } from 'lucide-react';
+import { CheckCircle, ChevronRight, DollarSign, Trophy, X, Phone, Palette, Building2, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
 import { applyTheme, getStoredTheme, THEMES } from './ThemeSelector';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
-
-const PRENDAS_DEFAULT = [
-  'Camiseta titular', 'Camiseta visitante', 'Pantaloneta', 'Medias', 'Chaqueta', 'Guayos',
-];
 
 const PAISES_LIST = [
   { codigo: '57',  bandera: '🇨🇴', nombre: 'Colombia',       moneda: 'COP' },
@@ -54,13 +50,12 @@ const COLORES_PRESET = [
 ];
 
 const STEPS = [
-  { id: 'club',        Icon: Building2,   label: 'Tu club'       },
-  { id: 'visual',      Icon: Palette,     label: 'Identidad'     },
-  { id: 'mensualidad', Icon: DollarSign,  label: 'Mensualidad'   },
-  { id: 'whatsapp',    Icon: Phone,       label: 'WhatsApp'      },
-  { id: 'uniformes',   Icon: Shirt,       label: 'Equipamiento'  },
-  { id: 'torneos',     Icon: Trophy,      label: 'Torneos'       },
-  { id: 'done',        Icon: CheckCircle, label: 'Listo'         },
+  { id: 'club',        Icon: Building2,   label: 'Tu club'     },
+  { id: 'visual',      Icon: Palette,     label: 'Identidad'   },
+  { id: 'mensualidad', Icon: DollarSign,  label: 'Mensualidad' },
+  { id: 'whatsapp',    Icon: Phone,       label: 'WhatsApp'    },
+  { id: 'torneos',     Icon: Trophy,      label: 'Torneos'     },
+  { id: 'done',        Icon: CheckCircle, label: 'Listo'       },
 ];
 
 const CONTENT_STEPS = STEPS.length - 1; // sin 'done'
@@ -103,15 +98,6 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
     youtube:   clubConfig?.redes_sociales?.youtube   || '',
     web:       clubConfig?.redes_sociales?.web        || '',
   });
-
-  const [prendas,    setPrendas]  = useState(() => {
-    const raw = clubConfig?.prendas_uniforme;
-    if (!Array.isArray(raw) || raw.length === 0) return PRENDAS_DEFAULT;
-    // Normaliza por si los items son objetos {nombre, precio} de versiones antiguas
-    const strings = raw.map(p => (typeof p === 'string' ? p : p?.nombre)).filter(Boolean);
-    return strings.length > 0 ? strings : PRENDAS_DEFAULT;
-  });
-  const [nuevaPrenda, setNuevaP] = useState('');
 
   const [torneos,    setTorneos]  = useState(
     Array.isArray(clubConfig?.torneos_iniciales) ? clubConfig.torneos_iniciales : [],
@@ -156,12 +142,6 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
         penalidad_mora:       mensualidad.penalidad,
         whatsapp,
         redes_sociales:       redes,
-        prendas_uniforme:     prendas.map(nombre => {
-          const existing = (clubConfig?.prendas_uniforme || []).find(p =>
-            (typeof p === 'object' ? p.nombre : p) === nombre
-          );
-          return typeof existing === 'object' ? existing : { nombre, precio: 0 };
-        }),
         torneos_iniciales:    torneos,
         onboarding_completed: true,
       }),
@@ -184,10 +164,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
 
   const back = () => { if (step > 0 && step < CONTENT_STEPS) setStep(s => s - 1); };
 
-  const skip = async () => {
-    try { await saveToApi(); } catch (_) {}
-    onComplete();
-  };
+  const skip = () => { onComplete(); };
 
   /* ── Estilos base ─────────────────────────────────────────── */
   const overlay = {
@@ -498,36 +475,8 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
             </div>
           )}
 
-          {/* PASO 5 — EQUIPAMIENTO */}
+          {/* PASO 5 — TORNEOS */}
           {step === 4 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <StepBadge color={c} icon="👕" title="Equipamiento" desc="Prendas disponibles para pedidos de uniformes" />
-
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {prendas.map(p => (
-                  <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 6, background: `${c}14`, border: `1px solid ${c}30`, borderRadius: 20, padding: '5px 12px' }}>
-                    <span style={{ fontSize: 13, color: '#fff' }}>{p}</span>
-                    <button onClick={() => setPrendas(ps => ps.filter(x => x !== p))}
-                      style={{ background: 'none', border: 'none', color: `${c}70`, cursor: 'pointer', padding: 0, lineHeight: 1, fontSize: 16 }}>×</button>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input value={nuevaPrenda} onChange={e => setNuevaP(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && nuevaPrenda.trim()) { setPrendas(ps => [...ps, nuevaPrenda.trim()]); setNuevaP(''); } }}
-                  placeholder="Agregar prenda… (Enter para confirmar)" style={{ ...inp, flex: 1 }} />
-                <button
-                  onClick={() => { if (nuevaPrenda.trim()) { setPrendas(ps => [...ps, nuevaPrenda.trim()]); setNuevaP(''); } }}
-                  style={{ padding: '10px 16px', background: c, border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 15, cursor: 'pointer', flexShrink: 0 }}>+</button>
-              </div>
-
-              <InfoBox>Estas prendas aparecen al crear pedidos de uniformes. Puedes editarlas en Uniformes → Catálogo.</InfoBox>
-            </div>
-          )}
-
-          {/* PASO 6 — TORNEOS */}
-          {step === 5 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <StepBadge color={c} icon="🏆" title="Torneos y competencias" desc="Opcional — puedes agregar más en cualquier momento" />
 
@@ -596,7 +545,6 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                   { label: 'Mensualidad', val: `${paisActual.moneda} ${mensualidad.valor.toLocaleString()}` },
                   { label: 'Mora',       val: `${mensualidad.dias_gracia} días gracia · ${paisActual.moneda} ${mensualidad.penalidad.toLocaleString()}` },
                   { label: 'WhatsApp',   val: whatsapp ? `+${whatsapp}` : 'No configurado' },
-                  { label: 'Prendas',    val: `${prendas.length} items en catálogo` },
                   { label: 'Torneos',    val: torneos.length ? `${torneos.length} torneo(s) registrados` : 'Ninguno aún' },
                 ].map(({ label, val }) => (
                   <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)', gap: 12 }}>

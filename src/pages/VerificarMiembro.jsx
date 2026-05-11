@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { API_BASE_URL } from '../config';
 
 export default function VerificarMiembro() {
   const { clubSlug, cedula } = useParams();
@@ -22,27 +21,32 @@ export default function VerificarMiembro() {
 
     async function cargar() {
       try {
-        // 1. Club config (público via Supabase anon)
+        // 1. Club config + id (público via Supabase anon)
         const { data: clubData } = await supabase
           .from('clubs')
-          .select('config')
+          .select('id, config')
           .eq('slug', clubSlug)
           .single();
         if (clubData?.config) setClubConfig(clubData.config);
 
-        // 2. Datos del jugador (intento sin auth)
-        const res = await fetch(
-          `${API_BASE_URL}/players/${cedula}?club_id=${clubSlug}`
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setJugador(data);
-          setEstado('ok');
-        } else {
-          // Fallback: mostrar datos del QR
-          setJugador({ cedula, nombre: fallbackNombre, posicion: fallbackPos, numero: fallbackNum, categoria: fallbackCat });
-          setEstado('ok');
+        // 2. Datos del jugador via Supabase anon (no requiere auth)
+        if (clubData?.id) {
+          const { data: playerData } = await supabase
+            .from('players')
+            .select('cedula, "nombre(s)", "apellido(s)", nombre, apellidos, posicion, numero, categoria, foto_url')
+            .eq('club_id', clubData.id)
+            .eq('cedula', cedula)
+            .single();
+          if (playerData) {
+            setJugador(playerData);
+            setEstado('ok');
+            return;
+          }
         }
+
+        // 3. Fallback: mostrar datos del QR
+        setJugador({ cedula, nombre: fallbackNombre, posicion: fallbackPos, numero: fallbackNum, categoria: fallbackCat });
+        setEstado('ok');
       } catch {
         setJugador({ cedula, nombre: fallbackNombre, posicion: fallbackPos, numero: fallbackNum, categoria: fallbackCat });
         setEstado('ok');

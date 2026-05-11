@@ -93,6 +93,86 @@
   --text-mut:    #64748B;
   --border-sub:  rgba(0,0,0,0.12);
 }
+[data-theme="smoke"] {
+  --bg-app:      #141416;
+  --bg-card:     #1E1E22;
+  --bg-surface:  #2A2A30;
+  --bg-input:    #18181E;
+  --text-pri:    #F0EFF5;
+  --text-sec:    #9898A8;
+  --text-mut:    #525260;
+  --border-sub:  rgba(255,255,255,0.07);
+}
+[data-theme="dusk"] {
+  --bg-app:      #17141E;
+  --bg-card:     #211C2C;
+  --bg-surface:  #2C2538;
+  --bg-input:    #1C1826;
+  --text-pri:    #EEE8F5;
+  --text-sec:    #9A8CB5;
+  --text-mut:    #524870;
+  --border-sub:  rgba(180,150,255,0.08);
+}
+[data-theme="indigo"] {
+  --bg-app:      #0E1428;
+  --bg-card:     #161E3C;
+  --bg-surface:  #1E2850;
+  --bg-input:    #121A32;
+  --text-pri:    #E6E8F8;
+  --text-sec:    #7A88C8;
+  --text-mut:    #3C4880;
+  --border-sub:  rgba(100,120,255,0.08);
+}
+[data-theme="petrol"] {
+  --bg-app:      #0A1C20;
+  --bg-card:     #122830;
+  --bg-surface:  #1A3640;
+  --bg-input:    #0E2028;
+  --text-pri:    #E0EEF0;
+  --text-sec:    #6899A0;
+  --text-mut:    #345868;
+  --border-sub:  rgba(80,170,190,0.08);
+}
+[data-theme="khaki"] {
+  --bg-app:      #14140E;
+  --bg-card:     #1E1E16;
+  --bg-surface:  #28281E;
+  --bg-input:    #181812;
+  --text-pri:    #EEEDE0;
+  --text-sec:    #989880;
+  --text-mut:    #565640;
+  --border-sub:  rgba(200,200,150,0.08);
+}
+[data-theme="sienna"] {
+  --bg-app:      #1E1208;
+  --bg-card:     #2C1C10;
+  --bg-surface:  #3A2618;
+  --bg-input:    #221408;
+  --text-pri:    #F2E8E0;
+  --text-sec:    #B08878;
+  --text-mut:    #705048;
+  --border-sub:  rgba(200,140,100,0.08);
+}
+[data-theme="mineral"] {
+  --bg-app:      #0E1612;
+  --bg-card:     #16201C;
+  --bg-surface:  #1E2E26;
+  --bg-input:    #121C18;
+  --text-pri:    #E4EEE8;
+  --text-sec:    #72948A;
+  --text-mut:    #385850;
+  --border-sub:  rgba(100,180,160,0.08);
+}
+[data-theme="plum"] {
+  --bg-app:      #18101A;
+  --bg-card:     #241628;
+  --bg-surface:  #301E36;
+  --bg-input:    #1C1220;
+  --text-pri:    #F0E8F2;
+  --text-sec:    #A07AAA;
+  --text-mut:    #604870;
+  --border-sub:  rgba(180,120,200,0.08);
+}
 
 :root {
   /* Brand / legacy aliases */

@@ -17,15 +17,29 @@ export const PALETA = [
 ];
 
 export const THEMES = [
-  { id: 'dark',     label: 'Negro',      app: '#0A0A0A', card: '#111111', surface: '#1A1A1A', text: '#FFFFFF',  preview: ['#0A0A0A', '#111111', '#1A1A1A'] },
-  { id: 'carbon',   label: 'Carbón',     app: '#0D1117', card: '#161B22', surface: '#21262D', text: '#E6EDF3', preview: ['#0D1117', '#161B22', '#21262D'] },
-  { id: 'slate',    label: 'Pizarra',    app: '#0F172A', card: '#1E293B', surface: '#2A3A52', text: '#F1F5F9', preview: ['#0F172A', '#1E293B', '#2A3A52'] },
-  { id: 'graphite', label: 'Grafito',    app: '#18181B', card: '#27272A', surface: '#3F3F46', text: '#FAFAFA', preview: ['#18181B', '#27272A', '#3F3F46'] },
-  { id: 'navy',     label: 'Marina',     app: '#040C1A', card: '#0A1628', surface: '#142240', text: '#E2E8F4', preview: ['#040C1A', '#0A1628', '#142240'] },
-  { id: 'midnight', label: 'Medianoche', app: '#0C0820', card: '#160E38', surface: '#1E1450', text: '#E8E2F8', preview: ['#0C0820', '#160E38', '#1E1450'] },
-  { id: 'forest',   label: 'Bosque',     app: '#071810', card: '#0E2818', surface: '#163820', text: '#E2F0E6', preview: ['#071810', '#0E2818', '#163820'] },
-  { id: 'coffee',   label: 'Café',       app: '#18100A', card: '#26180E', surface: '#34220E', text: '#F0EAE2', preview: ['#18100A', '#26180E', '#34220E'] },
-  { id: 'light',    label: 'Claro',      app: '#F1F5F9', card: '#FFFFFF', surface: '#E9EFF6', text: '#0F172A', preview: ['#F1F5F9', '#FFFFFF', '#E9EFF6'] },
+  // — Neutrales —
+  { id: 'dark',     label: 'Negro',      group: 'Neutral',  app: '#0A0A0A', card: '#111111', surface: '#1A1A1A', text: '#FFFFFF',  preview: ['#0A0A0A', '#111111', '#1A1A1A'] },
+  { id: 'carbon',   label: 'Carbón',     group: 'Neutral',  app: '#0D1117', card: '#161B22', surface: '#21262D', text: '#E6EDF3', preview: ['#0D1117', '#161B22', '#21262D'] },
+  { id: 'smoke',    label: 'Humo',       group: 'Neutral',  app: '#141416', card: '#1E1E22', surface: '#2A2A30', text: '#F0EFF5', preview: ['#141416', '#1E1E22', '#2A2A30'] },
+  { id: 'graphite', label: 'Grafito',    group: 'Neutral',  app: '#18181B', card: '#27272A', surface: '#3F3F46', text: '#FAFAFA', preview: ['#18181B', '#27272A', '#3F3F46'] },
+  // — Azules —
+  { id: 'slate',    label: 'Pizarra',    group: 'Azul',     app: '#0F172A', card: '#1E293B', surface: '#2A3A52', text: '#F1F5F9', preview: ['#0F172A', '#1E293B', '#2A3A52'] },
+  { id: 'navy',     label: 'Marina',     group: 'Azul',     app: '#040C1A', card: '#0A1628', surface: '#142240', text: '#E2E8F4', preview: ['#040C1A', '#0A1628', '#142240'] },
+  { id: 'indigo',   label: 'Índigo',     group: 'Azul',     app: '#0E1428', card: '#161E3C', surface: '#1E2850', text: '#E6E8F8', preview: ['#0E1428', '#161E3C', '#1E2850'] },
+  // — Morados —
+  { id: 'midnight', label: 'Medianoche', group: 'Morado',   app: '#0C0820', card: '#160E38', surface: '#1E1450', text: '#E8E2F8', preview: ['#0C0820', '#160E38', '#1E1450'] },
+  { id: 'dusk',     label: 'Crepúsculo', group: 'Morado',   app: '#17141E', card: '#211C2C', surface: '#2C2538', text: '#EEE8F5', preview: ['#17141E', '#211C2C', '#2C2538'] },
+  { id: 'plum',     label: 'Ciruelo',    group: 'Morado',   app: '#18101A', card: '#241628', surface: '#301E36', text: '#F0E8F2', preview: ['#18101A', '#241628', '#301E36'] },
+  // — Verdes —
+  { id: 'petrol',   label: 'Petróleo',   group: 'Verde',    app: '#0A1C20', card: '#122830', surface: '#1A3640', text: '#E0EEF0', preview: ['#0A1C20', '#122830', '#1A3640'] },
+  { id: 'forest',   label: 'Bosque',     group: 'Verde',    app: '#071810', card: '#0E2818', surface: '#163820', text: '#E2F0E6', preview: ['#071810', '#0E2818', '#163820'] },
+  { id: 'mineral',  label: 'Mineral',    group: 'Verde',    app: '#0E1612', card: '#16201C', surface: '#1E2E26', text: '#E4EEE8', preview: ['#0E1612', '#16201C', '#1E2E26'] },
+  // — Cálidos —
+  { id: 'khaki',    label: 'Caqui',      group: 'Cálido',   app: '#14140E', card: '#1E1E16', surface: '#28281E', text: '#EEEDE0', preview: ['#14140E', '#1E1E16', '#28281E'] },
+  { id: 'coffee',   label: 'Café',       group: 'Cálido',   app: '#18100A', card: '#26180E', surface: '#34220E', text: '#F0EAE2', preview: ['#18100A', '#26180E', '#34220E'] },
+  { id: 'sienna',   label: 'Siena',      group: 'Cálido',   app: '#1E1208', card: '#2C1C10', surface: '#3A2618', text: '#F2E8E0', preview: ['#1E1208', '#2C1C10', '#3A2618'] },
+  // — Claro —
+  { id: 'light',    label: 'Claro',      group: 'Claro',    app: '#F1F5F9', card: '#FFFFFF', surface: '#E9EFF6', text: '#0F172A', preview: ['#F1F5F9', '#FFFFFF', '#E9EFF6'] },
 ];
 
 export function applyTheme(themeId) {
@@ -141,38 +155,45 @@ export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig
       <div style={{ height: 1, background: 'var(--border-sub)', marginBottom: 14 }} />
 
       {/* ── Fondo ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <Monitor size={14} color="var(--text-sec)" />
         <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--text-sec)' }}>
           Fondo
         </span>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        {THEMES.map(t => {
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, maxHeight: 320, overflowY: 'auto', paddingRight: 2 }}>
+        {THEMES.map((t, idx) => {
           const isActive = activeTheme === t.id;
+          const prevGroup = idx > 0 ? THEMES[idx - 1].group : null;
           return (
-            <button
-              key={t.id}
-              onClick={() => selectTheme(t.id)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 12, width: '100%',
-                padding: '8px 10px', borderRadius: 10,
-                border: isActive ? `1px solid ${color}60` : '1px solid transparent',
-                background: isActive ? `${color}10` : 'transparent',
-                cursor: 'pointer', transition: 'all 0.18s',
-              }}
-            >
-              <div style={{ display: 'flex', borderRadius: 6, overflow: 'hidden', flexShrink: 0, boxShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
-                {t.preview.map((c, i) => (
-                  <div key={i} style={{ width: 13, height: 22, background: c }} />
-                ))}
-              </div>
-              <span style={{ fontSize: 13, fontWeight: isActive ? 700 : 400, color: isActive ? color : 'var(--text-pri)', flex: 1, textAlign: 'left' }}>
-                {t.label}
-              </span>
-              {isActive && <div style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0 }} />}
-            </button>
+            <div key={t.id}>
+              {t.group && t.group !== prevGroup && (
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--text-mut)', padding: '6px 10px 3px', userSelect: 'none' }}>
+                  {t.group}
+                </div>
+              )}
+              <button
+                onClick={() => selectTheme(t.id)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                  padding: '7px 10px', borderRadius: 9,
+                  border: isActive ? `1px solid ${color}60` : '1px solid transparent',
+                  background: isActive ? `${color}10` : 'transparent',
+                  cursor: 'pointer', transition: 'all 0.18s',
+                }}
+              >
+                <div style={{ display: 'flex', borderRadius: 5, overflow: 'hidden', flexShrink: 0, boxShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
+                  {t.preview.map((c, i) => (
+                    <div key={i} style={{ width: 12, height: 20, background: c }} />
+                  ))}
+                </div>
+                <span style={{ fontSize: 12.5, fontWeight: isActive ? 700 : 400, color: isActive ? color : 'var(--text-pri)', flex: 1, textAlign: 'left' }}>
+                  {t.label}
+                </span>
+                {isActive && <div style={{ width: 5, height: 5, borderRadius: '50%', background: color, flexShrink: 0 }} />}
+              </button>
+            </div>
           );
         })}
       </div>

@@ -6,14 +6,16 @@ export default function VerificarMiembro() {
   const { clubSlug, cedula } = useParams();
   const [searchParams] = useSearchParams();
 
-  const fallbackNombre = searchParams.get('n')  || '';
-  const fallbackPos    = searchParams.get('pos') || '';
-  const fallbackNum    = searchParams.get('num') || '';
-  const fallbackCat    = searchParams.get('cat') || '';
-  const fallbackColor  = searchParams.get('color') || '#00AAFF';
+  // Datos que vienen codificados en el QR (fuente principal — no requieren auth)
+  const qrNombre  = searchParams.get('n')    || '';
+  const qrPos     = searchParams.get('pos')  || '';
+  const qrNum     = searchParams.get('num')  || '';
+  const qrCat     = searchParams.get('cat')  || '';
+  const qrColor   = searchParams.get('color') || '#00AAFF';
+  const qrFoto    = searchParams.get('foto') || null;
+  const qrLogo    = searchParams.get('logo') || null;
 
-  const [estado, setEstado] = useState('cargando'); // cargando | ok | error
-  const [jugador, setJugador] = useState(null);
+  const [estado, setEstado] = useState('cargando');
   const [clubConfig, setClubConfig] = useState(null);
 
   useEffect(() => {
@@ -21,55 +23,37 @@ export default function VerificarMiembro() {
 
     async function cargar() {
       try {
-        // 1. Club config + id (público via Supabase anon)
+        // Solo pedimos config del club (nombre, color, subtítulo) — no datos del jugador (RLS lo bloquea)
         const { data: clubData } = await supabase
           .from('clubs')
-          .select('id, config')
+          .select('config')
           .eq('slug', clubSlug)
           .single();
         if (clubData?.config) setClubConfig(clubData.config);
-
-        // 2. Datos del jugador via Supabase anon (no requiere auth)
-        if (clubData?.id) {
-          const { data: playerData } = await supabase
-            .from('players')
-            .select('cedula, "nombre(s)", "apellido(s)", nombre, apellidos, posicion, numero, categoria, foto_url')
-            .eq('club_id', clubData.id)
-            .eq('cedula', cedula)
-            .single();
-          if (playerData) {
-            setJugador(playerData);
-            setEstado('ok');
-            return;
-          }
-        }
-
-        // 3. Fallback: mostrar datos del QR
-        setJugador({ cedula, nombre: fallbackNombre, posicion: fallbackPos, numero: fallbackNum, categoria: fallbackCat });
-        setEstado('ok');
       } catch {
-        setJugador({ cedula, nombre: fallbackNombre, posicion: fallbackPos, numero: fallbackNum, categoria: fallbackCat });
+        // Si falla, usamos datos del QR — no es crítico
+      } finally {
         setEstado('ok');
       }
     }
 
-    if (clubSlug && cedula) cargar();
-  }, [clubSlug, cedula]);
+    if (clubSlug) cargar();
+    else setEstado('ok');
+  }, [clubSlug]);
 
-  const color      = clubConfig?.color    || fallbackColor;
-  const clubNombre = clubConfig?.nombre   || clubSlug || 'Club Deportivo';
-  const clubSub    = clubConfig?.subtitulo || '';
-  const logoUrl    = clubConfig?.logo_url || null;
+  // Foto y logo: primero del QR (siempre disponible), luego del config del club
+  const color      = clubConfig?.color      || qrColor;
+  const clubNombre = clubConfig?.nombre     || clubSlug || 'Club Deportivo';
+  const clubSub    = clubConfig?.subtitulo  || '';
+  const logoUrl    = qrLogo || clubConfig?.logo_url || null;
   const initials   = clubNombre.split(' ').slice(0, 3).map(w => w[0]).join('').toUpperCase().slice(0, 3) || 'FC';
 
-  const nombre   = jugador?.['nombre(s)'] || jugador?.nombre    || fallbackNombre || '—';
-  const apellidos= jugador?.['apellido(s)'] || jugador?.apellidos || '';
-  const nombreCompleto = apellidos ? `${nombre} ${apellidos}`.trim() : nombre;
-  const posicion = jugador?.posicion  || fallbackPos || '';
-  const numero   = jugador?.numero    || fallbackNum || '';
-  const categoria= jugador?.categoria || fallbackCat || '';
-  const fotoUrl  = jugador?.foto_url  || null;
-  const temporada= new Date().getFullYear();
+  const nombreCompleto = qrNombre || '—';
+  const posicion       = qrPos;
+  const numero         = qrNum;
+  const categoria      = qrCat;
+  const fotoUrl        = qrFoto;
+  const temporada      = new Date().getFullYear();
 
   if (estado === 'cargando') {
     return (

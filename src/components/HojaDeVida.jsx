@@ -430,6 +430,8 @@ function TabCarnet({ jugador, clubConfig = {} }) {
     num: jugador.numero    || '',
     cat: jugador.categoria || '',
     color: clubColor,
+    ...(jugador.foto_url && { foto: jugador.foto_url }),
+    ...(logoUrl           && { logo: logoUrl }),
   });
   const verifyUrl = jugador.cedula
     ? `${verifyBase}/verificar/${getClubId()}/${jugador.cedula}?${verifyParams.toString()}`

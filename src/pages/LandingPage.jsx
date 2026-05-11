@@ -320,6 +320,34 @@ function MercadoPagoBtn({ href }) {
   );
 }
 
+/* ── FAQ Item ──────────────────────────────────────────────────────────────── */
+function FaqItem({ q, a, delay }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Reveal delay={delay}>
+      <div
+        onClick={() => setOpen(o => !o)}
+        style={{
+          background: open ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.025)',
+          border: `1px solid ${open ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.07)'}`,
+          borderRadius: 14, padding: '18px 22px', cursor: 'pointer',
+          transition: 'all 0.2s',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: open ? '#fff' : 'rgba(255,255,255,0.8)', lineHeight: 1.4 }}>{q}</span>
+          <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'transform 0.2s', transform: open ? 'rotate(45deg)' : 'none' }}>
+            <span style={{ fontSize: 16, lineHeight: 1, color: 'rgba(255,255,255,0.6)', fontWeight: 300 }}>+</span>
+          </div>
+        </div>
+        {open && (
+          <p style={{ margin: '14px 0 0', fontSize: 13.5, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7 }}>{a}</p>
+        )}
+      </div>
+    </Reveal>
+  );
+}
+
 /* ══════════════════════════════════════════════════════════════════════════ */
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -419,12 +447,12 @@ export default function LandingPage() {
 
           {/* Headline */}
           <h1 className="hero-h1" style={{
-            fontSize: 'clamp(36px, 6.5vw, 66px)',
+            fontSize: 'clamp(34px, 6vw, 62px)',
             fontWeight: 900, lineHeight: 1.05,
             letterSpacing: '-2px', marginBottom: 24,
             animation: 'slide-up 0.6s ease 0.2s both',
           }}>
-            La forma moderna de{' '}
+            Reduce{' '}
             <span style={{
               background: `linear-gradient(90deg, ${previewColor}, ${previewColor}cc, #00D084)`,
               backgroundSize: '200% auto',
@@ -432,9 +460,9 @@ export default function LandingPage() {
               backgroundClip: 'text',
               animation: 'shimmer 4s linear infinite',
             }}>
-              gestionar inscripciones
+              95% del trabajo manual
             </span>{' '}
-            deportivas.
+            en inscripciones y pagos deportivos.
           </h1>
 
           {/* Subheadline */}
@@ -443,7 +471,7 @@ export default function LandingPage() {
             maxWidth: 580, margin: '0 auto 40px',
             animation: 'slide-up 0.6s ease 0.3s both',
           }}>
-            Centraliza jugadores, registros, pagos y comunicación. Automatiza validaciones y cobros. Todo desde una experiencia profesional y rápida.
+            Automatiza cobros, validaciones y comunicación con jugadores. Recupera más de 15 horas semanales y elimina la mora desde el día uno.
           </p>
 
           {/* CTAs */}
@@ -462,7 +490,7 @@ export default function LandingPage() {
                 boxShadow: `0 8px 32px ${previewColor}50`,
               }}
             >
-              Probar gratis <ArrowRight size={16} />
+              Comenzar mi prueba de 5 días gratis <ArrowRight size={16} />
             </button>
             <button
               className="btn-ghost"
@@ -473,7 +501,7 @@ export default function LandingPage() {
                 color: '#fff', fontSize: 15, borderRadius: 12, padding: '15px 28px', cursor: 'pointer',
               }}
             >
-              Ver demo
+              Ver cómo funciona en 2 min
             </button>
           </div>
 
@@ -554,12 +582,12 @@ export default function LandingPage() {
         </Reveal>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
           {[
-            { icon: FileText,      label: 'Formularios manuales en papel o Excel'     },
-            { icon: MessageCircle, label: 'Pagos recibidos por WhatsApp sin registro'  },
-            { icon: AlertTriangle, label: 'Información desordenada o perdida'          },
-            { icon: Users,         label: 'Inscripciones sin validación centralizada'  },
-            { icon: Smartphone,    label: 'Mala experiencia desde celular'             },
-            { icon: BarChart2,     label: 'Sin visibilidad del estado de pagos'        },
+            { icon: FileText,      label: 'Pierdes horas en formularios manuales en papel o Excel'          },
+            { icon: MessageCircle, label: 'Gastas 3 horas diarias persiguiendo pagos por WhatsApp'          },
+            { icon: AlertTriangle, label: 'Pierdes $500.000+ al mes por pagos no registrados o cupos fantasma' },
+            { icon: Users,         label: 'Inscripciones sin validación — cualquiera dice que pagó'          },
+            { icon: Smartphone,    label: 'Tus jugadores tienen mala experiencia desde el celular'           },
+            { icon: BarChart2,     label: 'No sabes quién pagó, quién debe o quién está activo hoy'         },
           ].map(({ icon: Icon, label }, i) => (
             <Reveal key={label} delay={i * 60}>
               <div className="card-hover" style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'rgba(255,94,94,0.035)', border: '1px solid rgba(255,94,94,0.12)', borderRadius: 14, padding: '16px 18px' }}>
@@ -873,10 +901,56 @@ export default function LandingPage() {
 
         </div>
         <Reveal>
-          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13, marginTop: 28 }}>
-            Todos los planes incluyen soporte por WhatsApp · Cancela cuando quieras · Sin costos ocultos
-          </p>
+          <div style={{ textAlign: 'center', marginTop: 32 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(0,208,132,0.07)', border: '1px solid rgba(0,208,132,0.18)', borderRadius: 12, padding: '12px 24px', marginBottom: 14 }}>
+              <TrendingUp size={16} color="#00D084" />
+              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)' }}>
+                Recuperas la inversión con <strong style={{ color: '#00D084' }}>solo 2 inscripciones adicionales</strong> al mes
+              </span>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13, margin: 0 }}>
+              Todos los planes incluyen soporte por WhatsApp · Cancela cuando quieras · Sin costos ocultos
+            </p>
+          </div>
         </Reveal>
+      </section>
+
+      {/* ── FAQ ─────────────────────────────────────────────────────────── */}
+      <section style={{ padding: '0 24px 88px', maxWidth: 760, margin: '0 auto' }}>
+        <Reveal style={{ textAlign: 'center', marginBottom: 48 }}>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Preguntas frecuentes</p>
+          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 34px)', fontWeight: 800, letterSpacing: '-0.5px' }}>Todo lo que necesitas saber.</h2>
+        </Reveal>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {[
+            {
+              q: '¿Necesito conocimientos técnicos para usar ZenSports?',
+              a: 'No. ZenSports está diseñado para directores de club, no para ingenieros. El onboarding toma menos de 10 minutos y tienes soporte por WhatsApp incluido.',
+            },
+            {
+              q: '¿Mis datos de jugadores están seguros?',
+              a: 'Sí. Los datos están almacenados en servidores seguros con cifrado. Solo tú y los administradores de tu club tienen acceso. No compartimos información con terceros.',
+            },
+            {
+              q: '¿Puedo cancelar en cualquier momento?',
+              a: 'Absolutamente. Sin permanencia, sin letra pequeña. Si decides cancelar, tus datos siguen disponibles por 30 días para que puedas exportarlos.',
+            },
+            {
+              q: '¿Funciona para deportes distintos al fútbol?',
+              a: 'Sí. ZenSports funciona para cualquier organización con miembros: escuelas de natación, gimnasios, academias de artes marciales, clubes de tenis y más.',
+            },
+            {
+              q: '¿Qué pasa al terminar los 5 días de prueba?',
+              a: 'Te avisamos con anticipación y puedes elegir un plan. Si decides no continuar, no se cobra nada. No pedimos tarjeta de crédito para la prueba.',
+            },
+            {
+              q: '¿El bot de WhatsApp reemplaza a mi administrador?',
+              a: 'Lo complementa. El bot maneja tareas repetitivas: cobros, confirmaciones y recordatorios. Tu equipo se enfoca en decisiones importantes, no en mensajes manuales.',
+            },
+          ].map(({ q, a }, i) => (
+            <FaqItem key={i} q={q} a={a} delay={i * 50} />
+          ))}
+        </div>
       </section>
 
       {/* ── CTA FINAL ────────────────────────────────────────────────────── */}
@@ -975,6 +1049,28 @@ export default function LandingPage() {
           .hide-mobile { display: none !important; }
         }
       `}</style>
+
+      {/* ── WHATSAPP FLOTANTE ─────────────────────────────────────────── */}
+      <a
+        href="https://wa.me/573023903192?text=Hola%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20ZenSports"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Chatea con nosotros por WhatsApp"
+        style={{
+          position: 'fixed', bottom: 24, right: 24, zIndex: 400,
+          width: 56, height: 56, borderRadius: '50%',
+          background: 'linear-gradient(135deg, #25D366, #128C7E)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 20px rgba(37,211,102,0.45), 0 2px 8px rgba(0,0,0,0.3)',
+          textDecoration: 'none', transition: 'transform 0.2s, box-shadow 0.2s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(37,211,102,0.6), 0 2px 8px rgba(0,0,0,0.3)'; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(37,211,102,0.45), 0 2px 8px rgba(0,0,0,0.3)'; }}
+      >
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
     </div>
   );
 }

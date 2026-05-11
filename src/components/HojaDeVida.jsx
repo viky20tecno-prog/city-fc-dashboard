@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import QRCodeLib from 'qrcode';
 import { createPortal } from 'react-dom';
 import {
   X, User, DollarSign, CreditCard, Camera, Save,
@@ -421,10 +422,7 @@ function TabCarnet({ jugador, clubConfig = {} }) {
     : { bgCard: 'linear-gradient(155deg,#FFFFFF 0%,#F5F5F5 100%)', textPri: '#111111', textSec: '#444444', textMut: '#888888',
         border: `${clubColor}50`, borderImg: `${clubColor}60`, divider: '#EBEBEB', photoBg: '#E0E0E0' };
 
-  const bgHex = dark ? '0D0D0D' : 'FFFFFF';
-  const fgHex = dark ? 'F0F0F0' : '111111';
-  const verifyBase = typeof window !== 'undefined' ? window.location.origin : 'https://zensports.app';
-  // Solo params ligeros — las URLs de foto y logo se reconstruyen en la página de verificación
+  const verifyBase = typeof window !== 'undefined' ? window.location.origin : 'https://zensports.vercel.app';
   const verifyParams = new URLSearchParams({
     n:   `${nombre} ${apellidos}`.trim(),
     pos: jugador.posicion  || '',
@@ -435,10 +433,21 @@ function TabCarnet({ jugador, clubConfig = {} }) {
   const verifyUrl = jugador.cedula
     ? `${verifyBase}/verificar/${getClubId()}/${jugador.cedula}?${verifyParams.toString()}`
     : null;
-  // 300px para que el QR tenga celdas grandes y sea fácil de escanear incluso en pantalla
-  const qrUrl = verifyUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&ecc=M&data=${encodeURIComponent(verifyUrl)}&bgcolor=${bgHex}&color=${fgHex}&margin=8`
-    : null;
+
+  // QR generado localmente — sin dependencia de API externa
+  const [qrDataUrl, setQrDataUrl] = useState(null);
+  useEffect(() => {
+    if (!verifyUrl) { setQrDataUrl(null); return; }
+    QRCodeLib.toDataURL(verifyUrl, {
+      width: 280,
+      margin: 2,
+      errorCorrectionLevel: 'M',
+      color: {
+        dark:  dark ? '#F0F0F0FF' : '#111111FF',
+        light: dark ? '#111111FF' : '#FFFFFFFF',
+      },
+    }).then(setQrDataUrl).catch(() => setQrDataUrl(null));
+  }, [verifyUrl, dark]);
 
   const fmtFecha = (f) => {
     if (!f) return '—';
@@ -643,11 +652,13 @@ function TabCarnet({ jugador, clubConfig = {} }) {
                 </div>
               ))}
             </div>
-            {qrUrl && (
+            {verifyUrl && (
               <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                {/* QR limpio — sin overlay para garantizar escaneo */}
-                <div style={{ width: '88px', height: '88px', borderRadius: '8px', overflow: 'hidden', border: `1.5px solid ${th.border}`, background: dark ? '#111' : '#F9F9F9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src={qrUrl} alt="QR" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <div style={{ width: '90px', height: '90px', borderRadius: '8px', overflow: 'hidden', border: `1.5px solid ${th.border}`, background: dark ? '#111111' : '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {qrDataUrl
+                    ? <img src={qrDataUrl} alt="QR" style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated' }} />
+                    : <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${clubColor}`, borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+                  }
                 </div>
                 {/* Sello holográfico con logo del club */}
                 <SelloHolograma color={clubColor} initials={initials} logoUrl={logoUrl} dark={dark} />

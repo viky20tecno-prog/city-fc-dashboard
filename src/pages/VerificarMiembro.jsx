@@ -50,10 +50,11 @@ export default function VerificarMiembro() {
   const categoria      = qrCat;
   const temporada      = new Date().getFullYear();
 
-  // Foto: bucket player-photos es público — path predecible {clubId}/{cedula}.jpg
-  const fotoUrl = clubId
-    ? supabase.storage.from('player-photos').getPublicUrl(`${clubId}/${cedula}.jpg`).data?.publicUrl
-    : null;
+  // Foto: bucket player-photos es público — path predecible {clubSlug}/{cedula}.jpg
+  // (el clubSlug es el mismo valor que getClubId() usa al subir la foto)
+  const fotoUrl = supabase.storage
+    .from('player-photos')
+    .getPublicUrl(`${clubSlug}/${cedula}.jpg`).data?.publicUrl ?? null;
 
   if (estado === 'cargando') {
     return (

@@ -96,6 +96,14 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
 
   const [whatsapp, setWhatsapp] = useState(clubConfig?.whatsapp || '');
 
+  const [redes, setRedes] = useState({
+    instagram: clubConfig?.redes_sociales?.instagram || '',
+    facebook:  clubConfig?.redes_sociales?.facebook  || '',
+    tiktok:    clubConfig?.redes_sociales?.tiktok    || '',
+    youtube:   clubConfig?.redes_sociales?.youtube   || '',
+    web:       clubConfig?.redes_sociales?.web        || '',
+  });
+
   const [prendas,    setPrendas]  = useState(() => {
     const raw = clubConfig?.prendas_uniforme;
     if (!Array.isArray(raw) || raw.length === 0) return PRENDAS_DEFAULT;
@@ -147,6 +155,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
         dias_gracia_mora:     mensualidad.dias_gracia,
         penalidad_mora:       mensualidad.penalidad,
         whatsapp,
+        redes_sociales:       redes,
         prendas_uniforme:     prendas,
         torneos_iniciales:    torneos,
         onboarding_completed: true,
@@ -454,6 +463,33 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
               <p style={{ fontSize: 12, color: '#8B95A3', margin: 0 }}>
                 Este paso es opcional — puedes configurarlo luego desde el módulo de WhatsApp.
               </p>
+
+              {/* Redes sociales */}
+              <div style={{ marginTop: 4 }}>
+                <label style={{ ...lbl, marginBottom: 10 }}>REDES SOCIALES DEL CLUB (opcional)</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[
+                    { key: 'instagram', icon: '📷', label: 'Instagram', placeholder: '@tuclub' },
+                    { key: 'facebook',  icon: '👥', label: 'Facebook',  placeholder: 'facebook.com/tuclub' },
+                    { key: 'tiktok',    icon: '🎵', label: 'TikTok',    placeholder: '@tuclub' },
+                    { key: 'youtube',   icon: '▶️', label: 'YouTube',   placeholder: 'youtube.com/@tuclub' },
+                    { key: 'web',       icon: '🌐', label: 'Sitio web', placeholder: 'www.tuclub.com' },
+                  ].map(({ key, icon, label, placeholder }) => (
+                    <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: `${c}14`, border: `1px solid ${c}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0 }}>
+                        {icon}
+                      </div>
+                      <input
+                        value={redes[key]}
+                        onChange={e => setRedes(r => ({ ...r, [key]: e.target.value }))}
+                        placeholder={placeholder}
+                        style={{ ...inp, flex: 1 }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <InfoBox>Estas redes se muestran en la pantalla de bienvenida del formulario de inscripción, para que los jugadores te empiecen a seguir.</InfoBox>
+              </div>
             </div>
           )}
 

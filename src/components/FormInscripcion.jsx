@@ -251,6 +251,36 @@ export default function FormInscripcion() {
               </div>
             ))}
           </div>
+          {/* Redes sociales del club */}
+          {(() => {
+            const rs = clubConfig?.redes_sociales || {};
+            const links = [
+              { key: 'instagram', icon: '📷', label: 'Instagram', base: 'https://instagram.com/' },
+              { key: 'facebook',  icon: '👥', label: 'Facebook',  base: 'https://facebook.com/' },
+              { key: 'tiktok',    icon: '🎵', label: 'TikTok',    base: 'https://tiktok.com/'   },
+              { key: 'youtube',   icon: '▶️', label: 'YouTube',   base: ''                       },
+              { key: 'web',       icon: '🌐', label: 'Sitio web', base: ''                       },
+            ].filter(({ key }) => rs[key]);
+            if (!links.length) return null;
+            return (
+              <div style={{ marginBottom: 14, padding: '14px 16px', background: `${c}0C`, border: `1px solid ${c}25`, borderRadius: 12 }}>
+                <p style={{ color: '#fff', fontWeight: 700, fontSize: 13, margin: '0 0 10px' }}>📲 Síguenos en redes</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {links.map(({ key, icon, label, base }) => {
+                    const val = rs[key];
+                    const href = val.startsWith('http') ? val : base + val.replace(/^@/, '');
+                    return (
+                      <a key={key} href={href} target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, background: `${c}16`, border: `1px solid ${c}30`, color: c, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
+                        {icon} {label}
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* PDF */}
           <button
             onClick={generarFichaPDF}

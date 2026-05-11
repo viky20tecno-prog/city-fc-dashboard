@@ -13,6 +13,7 @@ export default function VerificarMiembro() {
   const qrCat    = searchParams.get('cat')   || '';
   const qrColor  = searchParams.get('color') || '#00AAFF';
   const qrClub   = searchParams.get('club')  || '';
+  const qrLogo   = searchParams.get('logo')  || '';
 
   const [estado, setEstado] = useState('cargando');
   const [clubConfig, setClubConfig] = useState(null);
@@ -42,7 +43,7 @@ export default function VerificarMiembro() {
   const color      = clubConfig?.color     || qrColor;
   const clubNombre = clubConfig?.nombre    || qrClub || clubSlug || 'Club Deportivo';
   const clubSub    = clubConfig?.subtitulo || '';
-  const logoUrl    = clubConfig?.logo_url  || null;
+  const logoUrl    = clubConfig?.logo_url  || qrLogo || null;
   const initials   = clubNombre.split(' ').slice(0, 3).map(w => w[0]).join('').toUpperCase().slice(0, 3) || 'FC';
 
   const nombreCompleto = qrNombre || '—';

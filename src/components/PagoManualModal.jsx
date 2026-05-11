@@ -105,7 +105,7 @@ export default function PagoManualModal({ jugadores, catalogoUniformes = [], onC
       const data = await res.json();
 
       if (data.success) {
-        setUltimoPago({ nombre: nombreJugador, concepto: form.concepto, monto: form.monto, conceptoLabel });
+        setUltimoPago({ nombre: nombreJugador, concepto: form.concepto, monto: form.monto, conceptoLabel, conceptoAplicado: data.concepto_aplicado !== false });
         setStatus('success');
         if (onSuccess) onSuccess();
       } else {
@@ -140,7 +140,13 @@ export default function PagoManualModal({ jugadores, catalogoUniformes = [], onC
           <p className="text-[var(--text-pri)] font-medium mt-1">
             {ultimoPago.concepto}{ultimoPago.conceptoLabel !== ultimoPago.concepto ? ` — ${ultimoPago.conceptoLabel}` : ''} · {formatCOP(ultimoPago.monto)}
           </p>
-          <p className="text-xs text-[var(--text-sec)] mt-3 mb-6">El estado del jugador se actualizó automáticamente</p>
+          {ultimoPago.conceptoAplicado ? (
+            <p className="text-xs text-[var(--text-sec)] mt-3 mb-6">El estado del jugador se actualizó automáticamente</p>
+          ) : (
+            <p className="text-xs mt-3 mb-6 px-4 py-2.5 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-400">
+              ⚠️ Pago guardado en historial pero no se encontraron conceptos pendientes de <strong>{ultimoPago.concepto}</strong> para este jugador. Verifica que el ciclo de cobro haya generado los conceptos.
+            </p>
+          )}
 
           {/* ✅ Pregunta: ¿registrar otro pago? */}
           <div className="flex gap-3">

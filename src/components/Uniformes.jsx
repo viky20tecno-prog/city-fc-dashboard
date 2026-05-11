@@ -429,7 +429,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
         body: JSON.stringify({
           prendas: editForm.prendas.map(p => p.nombre).join(', '),
           talla: editForm.talla,
-          numero: numeroPadded,
+          numero: editForm.numero.padStart(3, '0'),
           nombre_estampar: editForm.nombre_estampar,
           total: totalEdit,
         }),

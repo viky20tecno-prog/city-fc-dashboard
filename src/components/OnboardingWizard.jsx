@@ -156,7 +156,12 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
         penalidad_mora:       mensualidad.penalidad,
         whatsapp,
         redes_sociales:       redes,
-        prendas_uniforme:     prendas,
+        prendas_uniforme:     prendas.map(nombre => {
+          const existing = (clubConfig?.prendas_uniforme || []).find(p =>
+            (typeof p === 'object' ? p.nombre : p) === nombre
+          );
+          return typeof existing === 'object' ? existing : { nombre, precio: 0 };
+        }),
         torneos_iniciales:    torneos,
         onboarding_completed: true,
       }),

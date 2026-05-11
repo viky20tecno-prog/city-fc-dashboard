@@ -285,7 +285,7 @@ export default function LandingPage() {
         </div>
         <h1 style={{ fontSize: 'clamp(30px, 6vw, 58px)', fontWeight: 800, lineHeight: 1.08, marginBottom: 22, letterSpacing: '-1.5px' }}>
           La plataforma moderna para{' '}
-          <span style={{ color: 'var(--cc)' }}>inscripción deportiva</span>{' '}
+          <span style={{ color: 'var(--cc)' }}>gestión deportiva</span>{' '}
           y pagos
         </h1>
         <p style={{ fontSize: 18, color: 'var(--text-sec)', lineHeight: 1.65, marginBottom: 38, maxWidth: 560, margin: '0 auto 38px' }}>

@@ -423,8 +423,18 @@ function TabCarnet({ jugador, clubConfig = {} }) {
 
   const bgHex = dark ? '0D0D0D' : 'FFFFFF';
   const fgHex = dark ? 'F0F0F0' : '111111';
-  const qrUrl = jugador.cedula
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(`CC:${jugador.cedula}`)}&bgcolor=${bgHex}&color=${fgHex}&margin=5`
+  const qrData = jugador.cedula
+    ? [
+        `MIEMBRO VERIFICADO`,
+        `${nombre} ${apellidos}`.trim() || '—',
+        `CC: ${jugador.cedula}`,
+        `Club: ${clubNombre}`,
+        `Temporada: ${new Date().getFullYear()}`,
+        jugador.posicion ? `Posición: ${jugador.posicion}` : '',
+      ].filter(Boolean).join('\n')
+    : null;
+  const qrUrl = qrData
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=160x160&ecc=H&data=${encodeURIComponent(qrData)}&bgcolor=${bgHex}&color=${fgHex}&margin=6`
     : null;
 
   const fmtFecha = (f) => {

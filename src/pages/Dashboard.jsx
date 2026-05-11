@@ -444,6 +444,7 @@ export default function Dashboard() {
                 morosos={morosos}
                 onRefresh={handleRefresh}
                 categoriasJugadores={clubConfig?.categorias_jugadores || []}
+                clubConfig={clubConfig}
               />
             )}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} />}

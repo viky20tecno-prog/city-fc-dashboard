@@ -30,17 +30,19 @@ function Seccion({ titulo, children }) {
   );
 }
 
-function EscudoSVG({ size = 32 }) {
+function EscudoSVG({ size = 32, color = '#E14924', initials = 'FC' }) {
   const h = Math.round(size * 44 / 38);
   return (
     <svg width={size} height={h} viewBox="0 0 38 44" fill="none">
       <path d="M19 2L3 8.5V22C3 32.8 10 40.5 19 43C28 40.5 35 32.8 35 22V8.5L19 2Z"
-            fill="#1A0A04" stroke="#E14924" strokeWidth="1.4" />
+            fill="#1A0A04" stroke={color} strokeWidth="1.4" />
       <path d="M19 5L6 10.8V22C6 31.4 11.5 38.2 19 40.5C26.5 38.2 32 31.4 32 22V10.8L19 5Z"
-            fill="rgba(225,73,36,0.07)" stroke="rgba(225,73,36,0.18)" strokeWidth="0.8" />
-      <line x1="6" y1="21" x2="32" y2="21" stroke="#E14924" strokeWidth="0.7" opacity="0.4" />
-      <text x="19" y="18.5" textAnchor="middle" fill="#E14924"
-            fontFamily="Bebas Neue, sans-serif" fontSize="9.5" letterSpacing="1.5">CFC</text>
+            fill={`${color}12`} stroke={`${color}30`} strokeWidth="0.8" />
+      <line x1="6" y1="21" x2="32" y2="21" stroke={color} strokeWidth="0.7" opacity="0.4" />
+      <text x="19" y="19" textAnchor="middle" fill={color}
+            fontFamily="Bebas Neue, sans-serif" fontSize={initials.length > 2 ? '8' : '9.5'} letterSpacing="1.5">
+        {initials.slice(0, 3)}
+      </text>
       <line x1="13" y1="24" x2="25" y2="24" stroke="#B68631" strokeWidth="0.8" opacity="0.6" />
       <text x="19" y="35" textAnchor="middle" fill="#B68631" fontFamily="Arial" fontSize="6.5" letterSpacing="1">★ ★ ★</text>
     </svg>
@@ -363,12 +365,17 @@ function TabPerfil({ jugador, onFotoUpdate, categoriasJugadores = [] }) {
 
 /* ── Tab Carnet ── */
 
-function TabCarnet({ jugador }) {
-  const nombre    = (jugador['nombre(s)']  || jugador.nombre    || '').trim();
-  const apellidos = (jugador['apellido(s)'] || jugador.apellidos || '').trim();
+function TabCarnet({ jugador, clubConfig = {} }) {
+  const nombre     = (jugador['nombre(s)']  || jugador.nombre    || '').trim();
+  const apellidos  = (jugador['apellido(s)'] || jugador.apellidos || '').trim();
+  const clubColor  = clubConfig?.color    || '#E14924';
+  const clubNombre = clubConfig?.nombre   || 'Mi Club';
+  const clubSub    = clubConfig?.subtitulo || '';
+  const logoUrl    = clubConfig?.logo_url  || null;
+  const initials   = clubNombre.split(' ').slice(0, 3).map(w => w[0]).join('').toUpperCase().slice(0, 3) || 'FC';
 
   const imprimir = () => {
-    const el = document.getElementById('city-fc-carnet');
+    const el = document.getElementById('zs-carnet');
     const w  = window.open('', '_blank');
     w.document.write(`
       <html>
@@ -379,6 +386,12 @@ function TabCarnet({ jugador }) {
             * { box-sizing: border-box; margin: 0; padding: 0; }
             body { background: #fff; display: flex; justify-content: center; padding: 24px; font-family: Inter, sans-serif; }
             @media print { body { padding: 0; } }
+            :root {
+              --text-pri: #F0F0F0;
+              --text-sec: #A0A0B0;
+              --text-mut: #606070;
+              --bg-surface: #1E1E2A;
+            }
           </style>
         </head>
         <body>${el.outerHTML}</body>
@@ -390,7 +403,7 @@ function TabCarnet({ jugador }) {
   };
 
   const stats = [
-    { label: 'CAMISETA', value: jugador.numero_camiseta ? `#${jugador.numero_camiseta}` : '—', color: '#E14924' },
+    { label: 'CAMISETA', value: jugador.numero_camiseta ? `#${jugador.numero_camiseta}` : '—', color: clubColor },
     { label: 'POSICIÓN',  value: jugador.posicion || '—',   color: '#B68631' },
     { label: 'SANGRE',    value: jugador.tipo_sangre || '—', color: '#EF4444' },
   ];
@@ -399,34 +412,40 @@ function TabCarnet({ jugador }) {
     <div className="space-y-5">
       {/* Card preview */}
       <div
-        id="city-fc-carnet"
+        id="zs-carnet"
         style={{
           width: '320px', margin: '0 auto',
-          background: 'linear-gradient(160deg, #1A0804 0%, #0E0E0E 55%, #0A0A0A 100%)',
+          background: 'linear-gradient(160deg, #0E0E0E 0%, #111111 55%, #0A0A0A 100%)',
           borderRadius: '16px',
-          border: '1px solid rgba(225,73,36,0.25)',
+          border: `1px solid ${clubColor}40`,
           overflow: 'hidden',
-          boxShadow: '0 0 40px rgba(225,73,36,0.06)',
+          boxShadow: `0 0 40px ${clubColor}10`,
           fontFamily: 'Inter, sans-serif',
         }}
       >
-        {/* Barra superior naranja→dorada */}
-        <div style={{ height: '4px', background: 'linear-gradient(90deg, #E14924, #B68631)' }} />
+        {/* Barra superior con color del club */}
+        <div style={{ height: '4px', background: `linear-gradient(90deg, ${clubColor}, #B68631)` }} />
 
         {/* Cabecera del club */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
           padding: '14px 20px 10px',
-          borderBottom: '1px solid rgba(225,73,36,0.12)',
+          borderBottom: `1px solid ${clubColor}20`,
         }}>
-          <EscudoSVG size={28} />
+          {logoUrl ? (
+            <img src={logoUrl} alt="logo" style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '4px' }} />
+          ) : (
+            <EscudoSVG size={28} color={clubColor} initials={initials} />
+          )}
           <div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '18px', letterSpacing: '3px', color: 'var(--text-pri)', lineHeight: 1 }}>
-              CITY F.C. <span style={{ color: '#B68631', fontSize: '11px' }}>★</span>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '18px', letterSpacing: '3px', color: '#F0F0F0', lineHeight: 1 }}>
+              {clubNombre} <span style={{ color: '#B68631', fontSize: '11px' }}>★</span>
             </div>
-            <div style={{ fontSize: '8px', letterSpacing: '3px', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
-              Lo Hacemos Diferente
-            </div>
+            {clubSub && (
+              <div style={{ fontSize: '8px', letterSpacing: '3px', color: '#606070', textTransform: 'uppercase' }}>
+                {clubSub}
+              </div>
+            )}
           </div>
         </div>
 
@@ -434,8 +453,8 @@ function TabCarnet({ jugador }) {
         <div style={{ display: 'flex', gap: '16px', padding: '16px 20px 12px', alignItems: 'flex-start' }}>
           <div style={{
             width: '82px', height: '82px', borderRadius: '10px', flexShrink: 0,
-            overflow: 'hidden', background: 'var(--bg-surface)',
-            border: '1.5px solid rgba(225,73,36,0.35)',
+            overflow: 'hidden', background: '#1E1E2A',
+            border: `1.5px solid ${clubColor}59`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             {jugador.foto_url ? (
@@ -448,23 +467,23 @@ function TabCarnet({ jugador }) {
             )}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '22px', color: 'var(--text-pri)', lineHeight: 1, letterSpacing: '1.5px' }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '22px', color: '#F0F0F0', lineHeight: 1, letterSpacing: '1.5px' }}>
               {nombre}
             </div>
-            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '18px', color: '#E14924', lineHeight: 1.1, letterSpacing: '1px' }}>
+            <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '18px', color: clubColor, lineHeight: 1.1, letterSpacing: '1px' }}>
               {apellidos}
             </div>
-            <div style={{ fontSize: '10px', color: 'var(--text-mut)', marginTop: '6px', letterSpacing: '0.5px' }}>
+            <div style={{ fontSize: '10px', color: '#606070', marginTop: '6px', letterSpacing: '0.5px' }}>
               CC {jugador.cedula}
             </div>
-            <div style={{ fontSize: '9px', letterSpacing: '2px', color: 'var(--text-mut)', textTransform: 'uppercase', marginTop: '2px' }}>
+            <div style={{ fontSize: '9px', letterSpacing: '2px', color: '#606070', textTransform: 'uppercase', marginTop: '2px' }}>
               JUGADOR
             </div>
           </div>
         </div>
 
         {/* Divisor */}
-        <div style={{ height: '1px', margin: '0 20px', background: 'linear-gradient(90deg, rgba(225,73,36,0.35), rgba(182,134,49,0.25), transparent)' }} />
+        <div style={{ height: '1px', margin: '0 20px', background: `linear-gradient(90deg, ${clubColor}59, rgba(182,134,49,0.25), transparent)` }} />
 
         {/* Stats */}
         <div style={{ display: 'flex', padding: '12px 20px' }}>
@@ -477,7 +496,7 @@ function TabCarnet({ jugador }) {
               <div style={{ fontSize: '15px', fontWeight: 700, color: item.color, fontFamily: "'Bebas Neue', cursive", letterSpacing: '1px' }}>
                 {item.value}
               </div>
-              <div style={{ fontSize: '7.5px', color: 'var(--text-mut)', letterSpacing: '1.5px', textTransform: 'uppercase', marginTop: '2px' }}>
+              <div style={{ fontSize: '7.5px', color: '#606070', letterSpacing: '1.5px', textTransform: 'uppercase', marginTop: '2px' }}>
                 {item.label}
               </div>
             </div>
@@ -485,15 +504,15 @@ function TabCarnet({ jugador }) {
         </div>
 
         {/* Divisor */}
-        <div style={{ height: '1px', margin: '0 20px', background: 'var(--bg-surface)' }} />
+        <div style={{ height: '1px', margin: '0 20px', background: '#1E1E2A' }} />
 
         {/* Emergencia */}
         {(jugador.familiar_emergencia || jugador.celular_contacto) && (
           <div style={{ padding: '10px 20px 14px' }}>
-            <div style={{ fontSize: '7.5px', color: 'var(--text-mut)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '4px' }}>
+            <div style={{ fontSize: '7.5px', color: '#606070', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '4px' }}>
               Contacto de Emergencia
             </div>
-            <div style={{ fontSize: '10px', color: 'var(--text-sec)' }}>
+            <div style={{ fontSize: '10px', color: '#A0A0B0' }}>
               {jugador.familiar_emergencia || '—'} · {jugador.celular_contacto || '—'}
             </div>
           </div>
@@ -511,9 +530,10 @@ function TabCarnet({ jugador }) {
 
       <button
         onClick={imprimir}
-        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-sub)] text-sm font-semibold text-[var(--text-pri)] hover:border-[#E14924]/40 hover:bg-[#E14924]/5 transition"
+        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-sub)] text-sm font-semibold text-[var(--text-pri)] hover:opacity-90 transition"
+        style={{ borderColor: `${clubColor}40` }}
       >
-        <Printer className="w-4 h-4 text-[#E14924]" />
+        <Printer className="w-4 h-4" style={{ color: clubColor }} />
         Imprimir Carnet
       </button>
     </div>
@@ -528,7 +548,7 @@ const TABS = [
   { key: 'carnet',     label: 'Carnet',     icon: CreditCard },
 ];
 
-export default function HojaDeVida({ jugador, mensualidades, torneos, suspensiones, onClose, onRefresh, initialTab = 'perfil', visibleTabs, categoriasJugadores = [] }) {
+export default function HojaDeVida({ jugador, mensualidades, torneos, suspensiones, onClose, onRefresh, initialTab = 'perfil', visibleTabs, categoriasJugadores = [], clubConfig }) {
   const tabsToShow = visibleTabs
     ? TABS.filter(t => visibleTabs.includes(t.key))
     : TABS;
@@ -610,7 +630,7 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
             />
           )}
           {tab === 'carnet' && (
-            <TabCarnet jugador={jugadorLocal} />
+            <TabCarnet jugador={jugadorLocal} clubConfig={clubConfig} />
           )}
         </div>
       </div>

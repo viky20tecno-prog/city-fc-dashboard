@@ -74,7 +74,7 @@ function EstadoBadge({ estado }) {
 }
 
 /* ── componente principal ── */
-export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, suspensiones = [], morosos = [], onRefresh, categoriasJugadores = [] }) {
+export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, suspensiones = [], morosos = [], onRefresh, categoriasJugadores = [], clubConfig }) {
   const [search, setSearch]               = useState('');
   const [filtroEstado, setFiltroEstado]   = useState('TODOS');
   const [sortField, setSortField]         = useState('nombreCompleto');
@@ -436,6 +436,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           onClose={() => setJugadorDetalle(null)}
           onRefresh={onRefresh}
           categoriasJugadores={categoriasJugadores}
+          clubConfig={clubConfig}
         />
       )}
 

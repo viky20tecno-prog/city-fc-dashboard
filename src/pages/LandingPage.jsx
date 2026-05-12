@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bot, BarChart2, CreditCard, Shield, ChevronRight, CheckCircle,
@@ -28,7 +28,7 @@ function Reveal({ children, delay = 0, style = {} }) {
     <div ref={ref} style={{
       opacity: visible ? 1 : 0,
       transform: visible ? 'translateY(0)' : 'translateY(28px)',
-      transition: `opacity 0.7s ease ${delay}ms, transform 0.7s ease ${delay}ms`,
+      transition: `opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`,
       ...style,
     }}>
       {children}
@@ -113,7 +113,7 @@ function ActivityFeed() {
 function GridBg({ color }) {
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-      <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, opacity: 0.045 }}>
+      <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, opacity: 0.038 }}>
         <defs>
           <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
             <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="0.5" />
@@ -121,9 +121,76 @@ function GridBg({ color }) {
         </defs>
         <rect width="100%" height="100%" fill="url(#grid)" />
       </svg>
-      <div style={{ position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, background: `radial-gradient(ellipse at center, ${color}18 0%, transparent 70%)`, filter: 'blur(40px)' }} />
-      <div style={{ position: 'absolute', top: '5%', right: '-10%', width: 400, height: 400, background: 'radial-gradient(ellipse, rgba(0,208,132,0.06) 0%, transparent 70%)' }} />
-      <div style={{ position: 'absolute', bottom: '10%', left: '-5%', width: 350, height: 350, background: `radial-gradient(ellipse, ${color}08 0%, transparent 70%)` }} />
+      {/* Glow central — respira */}
+      <div style={{ position: 'absolute', top: '5%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 620, background: `radial-gradient(ellipse at center, ${color}14 0%, transparent 65%)`, filter: 'blur(48px)', animation: 'glow-pulse 6s ease-in-out infinite', transition: 'background 0.5s' }} />
+      {/* Glow secundario derecho */}
+      <div style={{ position: 'absolute', top: '5%', right: '-10%', width: 450, height: 450, background: 'radial-gradient(ellipse, rgba(0,208,132,0.07) 0%, transparent 70%)', filter: 'blur(24px)', animation: 'glow-pulse 8s ease-in-out 2s infinite' }} />
+      {/* Glow izquierdo inferior */}
+      <div style={{ position: 'absolute', bottom: '10%', left: '-5%', width: 380, height: 380, background: `radial-gradient(ellipse, ${color}07 0%, transparent 70%)`, filter: 'blur(24px)', animation: 'glow-pulse 7s ease-in-out 4s infinite', transition: 'background 0.5s' }} />
+      {/* Línea horizontal sutil */}
+      <div style={{ position: 'absolute', top: '48%', left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent 0%, ${color}10 25%, ${color}06 50%, ${color}10 75%, transparent 100%)`, transition: 'background 0.5s' }} />
+    </div>
+  );
+}
+
+/* ── Particle Field ──────────────────────────────────────────────────────── */
+function ParticleField({ color }) {
+  const particles = useMemo(() =>
+    Array.from({ length: 26 }, (_, i) => ({
+      id: i,
+      left: `${6 + (i * 37 + 13) % 86}%`,
+      top: `${6 + (i * 53 + 7) % 86}%`,
+      size: ((i * 17 + 5) % 25) / 10 + 1,
+      delay: `${((i * 1.3) % 7).toFixed(1)}s`,
+      duration: `${(((i * 2.1) % 5) + 5).toFixed(1)}s`,
+      opacity: (((i * 7 + 3) % 35) / 100 + 0.08).toFixed(2),
+    })), []);
+  return (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+      {particles.map(p => (
+        <div key={p.id} style={{
+          position: 'absolute',
+          left: p.left, top: p.top,
+          width: p.size, height: p.size,
+          borderRadius: '50%',
+          background: color,
+          opacity: p.opacity,
+          animation: `particle-float ${p.duration} ease-in-out ${p.delay} infinite`,
+          boxShadow: `0 0 ${parseFloat(p.size) * 3}px ${color}`,
+          transition: 'background 0.5s, box-shadow 0.5s',
+        }} />
+      ))}
+    </div>
+  );
+}
+
+/* ── Floating Card ────────────────────────────────────────────────────────── */
+const FLOAT_CARDS = [
+  { emoji: '✅', text: 'Pago confirmado — $60.000', color: '#22C55E', pos: { top: '12%', right: '2%' },   delay: '0s',   dur: '7s'   },
+  { emoji: '👤', text: 'Nuevo jugador inscrito',    color: '#00AAFF', pos: { top: '52%', right: '-2%' },  delay: '1.8s', dur: '8s'   },
+  { emoji: '🪪', text: 'Carnet QR generado',        color: '#F5A623', pos: { top: '28%', left: '1%'  },  delay: '2.4s', dur: '7.5s' },
+  { emoji: '💬', text: 'WhatsApp enviado × 8',      color: '#25D366', pos: { bottom: '18%', left: '2%' }, delay: '0.9s', dur: '6.5s' },
+];
+
+function FloatingCard({ emoji, text, color, pos, delay, dur }) {
+  return (
+    <div className="float-badge" style={{
+      position: 'absolute', ...pos,
+      background: 'rgba(6,8,20,0.88)',
+      backdropFilter: 'blur(16px)',
+      border: `1px solid ${color}30`,
+      borderRadius: 12,
+      padding: '9px 14px',
+      alignItems: 'center',
+      gap: 8,
+      boxShadow: `0 8px 32px rgba(0,0,0,0.45), 0 0 24px ${color}08`,
+      animation: `float-card ${dur} ease-in-out ${delay} infinite`,
+      zIndex: 3,
+      whiteSpace: 'nowrap',
+    }}>
+      <span style={{ fontSize: 13 }}>{emoji}</span>
+      <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.78)' }}>{text}</span>
+      <div style={{ width: 6, height: 6, borderRadius: '50%', background: color, boxShadow: `0 0 8px ${color}`, flexShrink: 0, animation: 'pulse-dot 2s ease-in-out infinite' }} />
     </div>
   );
 }
@@ -286,6 +353,174 @@ const TESTIMONIALS = [
   },
 ];
 
+/* ── Casos de éxito ──────────────────────────────────────────────────────── */
+const CASOS = [
+  {
+    club: 'Escuela Deportiva Barranquilla Sur',
+    deporte: 'Fútbol',
+    color: '#00AAFF',
+    avatar: 'EB',
+    problema: 'El director pasaba 4 horas diarias revisando pagos en WhatsApp y actualizando hojas de cálculo. Cada mes perdían entre 2 y 4 cupos por pagos no registrados.',
+    solucion: 'Implementaron ZenSports en 20 minutos. El bot de WhatsApp comenzó a confirmar pagos automáticamente desde el primer día y el carnet QR eliminó los cobros duplicados.',
+    quote: 'En la primera semana recuperamos dos inscripciones que antes se perdían. El bot trabaja mientras yo duermo.',
+    persona: 'Alejandro R. · Director Técnico',
+    antes: [
+      { label: 'Horas/día en cobros', val: '4 h' },
+      { label: 'Mora promedio',        val: '38%' },
+      { label: 'Cupos perdidos/mes',   val: '3'   },
+    ],
+    despues: [
+      { label: 'Horas/día en cobros', val: '20 min' },
+      { label: 'Mora promedio',        val: '7%'    },
+      { label: 'Cupos perdidos/mes',   val: '0'     },
+    ],
+  },
+  {
+    club: 'Club Atlético Medellín Central',
+    deporte: 'Fútbol · Natación',
+    color: '#00D084',
+    avatar: 'AM',
+    problema: 'No tenían forma de verificar si un jugador estaba al día antes de un partido. Los padres discutían con los coordinadores en la cancha cada fin de semana.',
+    solucion: 'El carnet digital QR resolvió la verificación en segundos. Cualquier coordinador confirma el estado de un jugador desde el celular sin llamar a nadie.',
+    quote: 'La primera vez que usamos el QR en un partido, los padres quedaron impresionados. Fue un cambio inmediato de imagen del club.',
+    persona: 'Valentina M. · Coordinadora',
+    antes: [
+      { label: 'Tiempo verificación', val: '10 min'  },
+      { label: 'Conflictos de pago',  val: 'Semanal' },
+      { label: 'Imagen del club',     val: 'Baja'    },
+    ],
+    despues: [
+      { label: 'Tiempo verificación', val: '5 seg' },
+      { label: 'Conflictos de pago',  val: 'Cero'  },
+      { label: 'Imagen del club',     val: 'Alta'  },
+    ],
+  },
+  {
+    club: 'Academia Deportiva Norte',
+    deporte: 'Múltiples disciplinas',
+    color: '#F5A623',
+    avatar: 'AN',
+    problema: 'Con 80 inscritos, la mora superaba el 40% mensual. El administrador enviaba más de 60 mensajes manuales por semana y muchos aún ignoraban los cobros.',
+    solucion: 'El ciclo de cobro automático disparó recordatorios en los días 27, 1, 4 y 7. Los jugadores con mora recibieron suspensión automática hasta regularizar su estado.',
+    quote: 'Los cobros automáticos se pagaron solos en el primer mes. Nunca pensé que fuera tan fácil reducir la mora al 8%.',
+    persona: 'Sebastián T. · Administrador',
+    antes: [
+      { label: 'Mora mensual',         val: '42%'     },
+      { label: 'Mensajes manuales',    val: '+60/mes' },
+      { label: 'Tiempo admin. cobros', val: '6 h/sem' },
+    ],
+    despues: [
+      { label: 'Mora mensual',         val: '8%'      },
+      { label: 'Mensajes manuales',    val: '0'       },
+      { label: 'Tiempo admin. cobros', val: '30 min'  },
+    ],
+  },
+];
+
+function CasoExito({ caso, delay }) {
+  return (
+    <Reveal delay={delay}>
+      <div className="card-hover" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, overflow: 'hidden' }}>
+        <div style={{ height: 3, background: `linear-gradient(90deg, ${caso.color}, ${caso.color}60, transparent)` }} />
+        <div style={{ padding: '28px 32px', display: 'flex', flexWrap: 'wrap', gap: 32, alignItems: 'flex-start' }}>
+          <div style={{ flex: 1, minWidth: 260 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+              <div style={{ width: 46, height: 46, borderRadius: 13, background: `${caso.color}16`, border: `1px solid ${caso.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: caso.color, flexShrink: 0 }}>
+                {caso.avatar}
+              </div>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700 }}>{caso.club}</div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{caso.deporte}</div>
+              </div>
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: '#FF5E5E', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>El problema</p>
+              <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, margin: 0 }}>{caso.problema}</p>
+            </div>
+            <div style={{ marginBottom: 18 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: caso.color, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>Con ZenSports</p>
+              <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, margin: 0 }}>{caso.solucion}</p>
+            </div>
+            <div style={{ background: `${caso.color}08`, border: `1px solid ${caso.color}20`, borderRadius: 12, padding: '14px 18px' }}>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', fontStyle: 'italic', lineHeight: 1.65, margin: '0 0 10px' }}>"{caso.quote}"</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: 0 }}>{caso.persona}</p>
+            </div>
+          </div>
+          <div style={{ flexShrink: 0, minWidth: 280 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,94,94,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' }}>Antes</p>
+                {caso.antes.map(m => (
+                  <div key={m.label} style={{ textAlign: 'center', marginBottom: 10, background: 'rgba(255,94,94,0.05)', border: '1px solid rgba(255,94,94,0.14)', borderRadius: 12, padding: '13px 8px' }}>
+                    <div style={{ fontSize: 20, fontWeight: 800, color: '#FF5E5E', marginBottom: 4 }}>{m.val}</div>
+                    <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.35)', lineHeight: 1.3 }}>{m.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p style={{ fontSize: 10, fontWeight: 700, color: '#00D084', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' }}>Después</p>
+                {caso.despues.map(m => (
+                  <div key={m.label} style={{ textAlign: 'center', marginBottom: 10, background: 'rgba(0,208,132,0.05)', border: '1px solid rgba(0,208,132,0.20)', borderRadius: 12, padding: '13px 8px' }}>
+                    <div style={{ fontSize: 20, fontWeight: 800, color: '#00D084', marginBottom: 4 }}>{m.val}</div>
+                    <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.35)', lineHeight: 1.3 }}>{m.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+/* ── Trust Logos ─────────────────────────────────────────────────────────── */
+const CLUB_LOGOS = [
+  { name: 'FC Barranquilla Norte', abbr: 'FCBN', color: '#0088EE' },
+  { name: 'Academia Medellín',     abbr: 'ACM',  color: '#00D084' },
+  { name: 'Deportivo Cali Sur',    abbr: 'DCS',  color: '#F5A623' },
+  { name: 'Liga Bogotá FC',        abbr: 'LBFC', color: '#C678FF' },
+  { name: 'Club Santa Fe',         abbr: 'CSF',  color: '#FF5E5E' },
+  { name: 'Escuela Norte',         abbr: 'EN',   color: '#00AAFF' },
+  { name: 'Atlético Verde',        abbr: 'ATV',  color: '#22C55E' },
+  { name: 'Deportivo Andes',       abbr: 'DA',   color: '#F59E0B' },
+];
+
+function TrustLogos() {
+  return (
+    <section style={{ padding: '0 24px 72px', maxWidth: 960, margin: '0 auto' }}>
+      <Reveal>
+        <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.18)', fontSize: 11, fontWeight: 700, letterSpacing: 3.5, textTransform: 'uppercase', marginBottom: 28 }}>
+          Organizaciones que ya confían en ZenSports
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', alignItems: 'center' }}>
+          {CLUB_LOGOS.map((club, i) => (
+            <Reveal key={club.abbr} delay={i * 50}>
+              <div className="card-hover" style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.055)',
+                borderRadius: 12, padding: '10px 18px',
+              }}>
+                <div style={{
+                  width: 30, height: 30, borderRadius: 7,
+                  background: `${club.color}16`,
+                  border: `1px solid ${club.color}30`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 8, fontWeight: 900, color: club.color, letterSpacing: 0.3, flexShrink: 0,
+                }}>
+                  {club.abbr}
+                </div>
+                <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.38)', whiteSpace: 'nowrap', fontWeight: 500 }}>{club.name}</span>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
 /* ── Payment helpers ──────────────────────────────────────────────────────── */
 const PAYMENT_LINKS = {
   starter: { wompi: 'https://checkout.wompi.co/l/STARTER_REF', mp: 'https://mpago.la/STARTER_REF' },
@@ -363,20 +598,36 @@ export default function LandingPage() {
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#060810', minHeight: '100vh', color: '#fff', overflowX: 'hidden' }}>
 
       <style>{`
+        :root {
+          --dur-fast: 150ms;
+          --dur-med: 250ms;
+          --dur-slow: 400ms;
+          --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+          --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+        }
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.85)} }
-        @keyframes slide-up { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes float-card { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+        @keyframes slide-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         @keyframes shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
         @keyframes spin { to{transform:rotate(360deg)} }
-        @keyframes glow-pulse { 0%,100%{opacity:0.4} 50%{opacity:0.75} }
-        .btn-primary:hover { opacity:0.92; transform:translateY(-1px); }
-        .btn-primary { transition:all 0.2s; }
-        .btn-ghost:hover { background:rgba(255,255,255,0.08) !important; }
-        .btn-ghost { transition:background 0.2s; }
-        .card-hover:hover { border-color:rgba(255,255,255,0.16) !important; transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,0.4); }
-        .card-hover { transition:all 0.25s; }
-        .color-swatch:hover { transform:scale(1.15) !important; }
-        .color-swatch { transition:all 0.2s !important; }
+        @keyframes glow-pulse { 0%,100%{opacity:0.4;transform:scale(1)} 50%{opacity:0.8;transform:scale(1.08)} }
+        @keyframes particle-float {
+          0%,100%{transform:translateY(0) translateX(0)}
+          33%{transform:translateY(-18px) translateX(8px)}
+          66%{transform:translateY(-8px) translateX(-12px)}
+        }
+        @keyframes border-breathe { 0%,100%{opacity:0.3} 50%{opacity:0.7} }
+        .btn-primary:hover { opacity:0.9; transform:translateY(-2px); box-shadow: 0 12px 36px rgba(0,0,0,0.4); }
+        .btn-primary { transition:all var(--dur-med) var(--ease-out); }
+        .btn-ghost:hover { background:rgba(255,255,255,0.09) !important; }
+        .btn-ghost { transition:background var(--dur-fast); }
+        .card-hover:hover { border-color:rgba(255,255,255,0.14) !important; transform:translateY(-4px); box-shadow:0 20px 48px rgba(0,0,0,0.5); }
+        .card-hover { transition:all 0.3s var(--ease-out); }
+        .color-swatch:hover { transform:scale(1.18) !important; box-shadow: 0 0 0 3px rgba(255,255,255,0.2) !important; }
+        .color-swatch { transition:all 0.2s var(--ease-out) !important; }
+        .float-badge { display:flex; }
+        @media(max-width:768px){ .float-badge { display:none !important; } }
         @media(max-width:640px){.hero-h1{font-size:32px!important;letter-spacing:-1px!important;}.hide-mobile{display:none!important;}.pricing-grid{grid-template-columns:1fr!important;}}
       `}</style>
 
@@ -417,6 +668,7 @@ export default function LandingPage() {
         style={{ position: 'relative', padding: '96px 24px 80px', overflow: 'hidden', minHeight: 600 }}
       >
         <GridBg color={previewColor} />
+        <ParticleField color={previewColor} />
 
         {/* Mouse-reactive glow — DOM directo, sin re-render */}
         <div ref={glowRef} style={{
@@ -431,14 +683,15 @@ export default function LandingPage() {
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
 
           {/* Badge animado */}
-          <div style={{ animation: 'slide-up 0.6s ease 0.1s both', marginBottom: 28 }}>
+          <div style={{ animation: 'slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both', marginBottom: 28 }}>
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: `linear-gradient(90deg, ${previewColor}15, rgba(0,208,132,0.10))`,
-              border: `1px solid ${previewColor}35`,
-              borderRadius: 999, padding: '5px 18px',
+              background: `linear-gradient(90deg, ${previewColor}12, rgba(0,208,132,0.08), ${previewColor}12)`,
+              border: `1px solid ${previewColor}38`,
+              borderRadius: 999, padding: '6px 20px',
               fontSize: 12, color: previewColor, fontWeight: 600, letterSpacing: 0.5,
               transition: 'all 0.4s',
+              boxShadow: `0 0 20px ${previewColor}12, inset 0 1px 0 ${previewColor}20`,
             }}>
               <Sparkles size={13} />
               Plataforma líder en gestión deportiva digital · 5 días gratis
@@ -450,7 +703,7 @@ export default function LandingPage() {
             fontSize: 'clamp(34px, 6vw, 62px)',
             fontWeight: 900, lineHeight: 1.05,
             letterSpacing: '-2px', marginBottom: 24,
-            animation: 'slide-up 0.6s ease 0.2s both',
+            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both',
           }}>
             Reduce{' '}
             <span style={{
@@ -469,7 +722,7 @@ export default function LandingPage() {
           <p style={{
             fontSize: 18, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7,
             maxWidth: 580, margin: '0 auto 40px',
-            animation: 'slide-up 0.6s ease 0.3s both',
+            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both',
           }}>
             Automatiza cobros, validaciones y comunicación con jugadores. Recupera más de 15 horas semanales y elimina la mora desde el día uno.
           </p>
@@ -477,7 +730,7 @@ export default function LandingPage() {
           {/* CTAs */}
           <div style={{
             display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap',
-            animation: 'slide-up 0.6s ease 0.4s both', marginBottom: 36,
+            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both', marginBottom: 36,
           }}>
             <button
               className="btn-primary"
@@ -512,9 +765,14 @@ export default function LandingPage() {
         </div>
 
         {/* Hero dashboard mockup */}
-        <div style={{ maxWidth: 940, margin: '64px auto 0', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 1, animation: 'slide-up 0.8s ease 0.6s both' }}>
-          <div style={{ position: 'relative', animation: 'float 6s ease-in-out infinite' }}>
-            <div style={{ position: 'absolute', inset: -2, borderRadius: 18, background: `linear-gradient(135deg, ${previewColor}30, transparent, rgba(0,208,132,0.15))`, filter: 'blur(1px)' }} />
+        <div style={{ maxWidth: 940, margin: '64px auto 0', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 1, animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both' }}>
+          {/* Floating notification cards */}
+          {FLOAT_CARDS.map(c => <FloatingCard key={c.text} {...c} />)}
+          <div style={{ position: 'relative', animation: 'float 7s ease-in-out infinite' }}>
+            {/* Gradient border glow */}
+            <div style={{ position: 'absolute', inset: -2, borderRadius: 18, background: `linear-gradient(135deg, ${previewColor}35, transparent 50%, rgba(0,208,132,0.18))`, filter: 'blur(1px)', animation: 'border-breathe 5s ease-in-out infinite', transition: 'background 0.5s' }} />
+            {/* Bottom shadow glow */}
+            <div style={{ position: 'absolute', bottom: -40, left: '10%', right: '10%', height: 60, background: `radial-gradient(ellipse at center, ${previewColor}25 0%, transparent 70%)`, filter: 'blur(20px)', transition: 'background 0.5s' }} />
             <DashboardMockup color={previewColor} />
           </div>
         </div>
@@ -556,20 +814,25 @@ export default function LandingPage() {
               { target: '120',  prefix: '+', suffix: '', label: 'organizaciones activas', color: '#C678FF',   icon: Shield },
             ].map((s, i) => (
               <Reveal key={s.label} delay={i * 80}>
-                <div style={{ textAlign: 'center', padding: '40px 20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 16 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: `${s.color}12`, border: `1px solid ${s.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                    <s.icon size={18} color={s.color} />
+                <div className="card-hover" style={{ textAlign: 'center', padding: '40px 24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.055)', borderRadius: 18, position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${s.color}50, transparent)`, animation: 'border-breathe 4s ease-in-out infinite' }} />
+                  <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 80, height: 80, background: `radial-gradient(circle, ${s.color}08 0%, transparent 70%)`, pointerEvents: 'none' }} />
+                  <div style={{ width: 44, height: 44, borderRadius: 13, background: `${s.color}12`, border: `1px solid ${s.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px', boxShadow: `0 0 20px ${s.color}10` }}>
+                    <s.icon size={19} color={s.color} />
                   </div>
-                  <div style={{ fontSize: 'clamp(38px, 5vw, 52px)', fontWeight: 900, color: s.color, lineHeight: 1, marginBottom: 10, letterSpacing: '-1px' }}>
+                  <div style={{ fontSize: 'clamp(40px, 5vw, 54px)', fontWeight: 900, color: s.color, lineHeight: 1, marginBottom: 10, letterSpacing: '-1.5px', textShadow: `0 0 30px ${s.color}30` }}>
                     <Counter target={s.target} prefix={s.prefix} suffix={s.suffix} />
                   </div>
-                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>{s.label}</div>
+                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{s.label}</div>
                 </div>
               </Reveal>
             ))}
           </div>
         </Reveal>
       </section>
+
+      {/* ── TRUST LOGOS ─────────────────────────────────────────────────── */}
+      <TrustLogos />
 
       {/* ── PROBLEMA ─────────────────────────────────────────────────────── */}
       <section style={{ padding: '0 24px 88px', maxWidth: 900, margin: '0 auto' }}>
@@ -739,24 +1002,39 @@ export default function LandingPage() {
                 border: `1px solid rgba(255,255,255,0.07)`,
                 position: 'relative', overflow: 'hidden',
               }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${t.color}45, transparent)` }} />
-                <div style={{ display: 'flex', gap: 4, marginBottom: 18 }}>
-                  {Array(t.stars).fill(0).map((_, si) => <Star key={si} size={14} fill="#F5A623" color="#F5A623" />)}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${t.color}55, transparent)`, animation: 'border-breathe 5s ease-in-out infinite' }} />
+                <div style={{ position: 'absolute', top: 0, right: 0, width: 120, height: 120, background: `radial-gradient(circle, ${t.color}05 0%, transparent 70%)`, pointerEvents: 'none' }} />
+                <div style={{ display: 'flex', gap: 3, marginBottom: 18 }}>
+                  {Array(t.stars).fill(0).map((_, si) => <Star key={si} size={13} fill="#F5A623" color="#F5A623" />)}
                 </div>
-                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.65)', lineHeight: 1.75, marginBottom: 20, fontStyle: 'italic' }}>
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.68)', lineHeight: 1.8, marginBottom: 22, fontStyle: 'italic', letterSpacing: 0.1 }}>
                   "{t.text}"
                 </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: `${t.color}18`, border: `1px solid ${t.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13, color: t.color, flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: `linear-gradient(135deg, ${t.color}22, ${t.color}08)`, border: `1.5px solid ${t.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 12, color: t.color, flexShrink: 0, boxShadow: `0 0 16px ${t.color}15` }}>
                     {t.avatar}
                   </div>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 700 }}>{t.name}</div>
-                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{t.role} · {t.club}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>{t.name}</div>
+                    <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.38)' }}>{t.role} · {t.club}</div>
                   </div>
                 </div>
               </div>
             </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ── CASOS DE ÉXITO ──────────────────────────────────────────────── */}
+      <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
+        <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Casos de éxito</p>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Resultados reales de clubes reales.</h2>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>Antes y después de implementar ZenSports.</p>
+        </Reveal>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {CASOS.map((caso, i) => (
+            <CasoExito key={caso.club} caso={caso} delay={i * 100} />
           ))}
         </div>
       </section>
@@ -794,6 +1072,62 @@ export default function LandingPage() {
                 Conocer ZCUP <ChevronRight size={14} />
               </button>
             </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ── QUIÉNES SOMOS ───────────────────────────────────────────────── */}
+      <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
+        <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Quiénes somos</p>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 16, letterSpacing: '-0.8px' }}>Construido por personas del deporte.</h2>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: '0 auto', maxWidth: 600, lineHeight: 1.75 }}>
+            ZenSports nació de la frustración de administrar un club deportivo con hojas de cálculo y grupos de WhatsApp. Somos el equipo de <strong style={{ color: '#fff' }}>Zenpra</strong>, combinando tecnología e ingeniería de software con experiencia deportiva real para construir la plataforma de gestión más completa de Latinoamérica.
+          </p>
+        </Reveal>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 48 }}>
+          {[
+            {
+              avatar: 'ZP',
+              nombre: 'Equipo Zenpra',
+              rol: 'Tecnología & Producto',
+              desc: 'Ingenieros especializados en IA, automatización y UX. Construyen y mejoran ZenSports de forma continua con foco en velocidad y confiabilidad.',
+              color: previewColor,
+            },
+            {
+              avatar: '⚽',
+              nombre: 'ADN Deportivo',
+              rol: 'Experiencia de campo',
+              desc: 'Cada función de ZenSports fue diseñada entendiendo el día a día de clubes reales. Conocemos los problemas porque los vivimos.',
+              color: '#00D084',
+            },
+            {
+              avatar: '🤝',
+              nombre: 'Soporte Dedicado',
+              rol: 'Customer Success',
+              desc: 'Te acompañamos desde el onboarding hasta la operación diaria. Respuesta en minutos por WhatsApp. Sin tickets, sin esperas.',
+              color: '#F5A623',
+            },
+          ].map((m, i) => (
+            <Reveal key={m.nombre} delay={i * 100}>
+              <div className="card-hover" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '26px 22px', textAlign: 'center' }}>
+                <div style={{ width: 64, height: 64, borderRadius: '50%', background: `${m.color}18`, border: `2px solid ${m.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: typeof m.avatar === 'string' && m.avatar.length <= 2 ? 22 : 28, fontWeight: 900, color: m.color }}>
+                  {m.avatar}
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{m.nombre}</div>
+                <div style={{ fontSize: 11, color: m.color, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>{m.rol}</div>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, margin: 0 }}>{m.desc}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal>
+          <div style={{ borderRadius: 18, padding: '36px 40px', background: `linear-gradient(135deg, ${previewColor}07 0%, rgba(0,208,132,0.04) 100%)`, border: `1px solid ${previewColor}1A`, textAlign: 'center', maxWidth: 720, margin: '0 auto', transition: 'all 0.4s' }}>
+            <div style={{ fontSize: 28, marginBottom: 16 }}>🎯</div>
+            <p style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.85)', lineHeight: 1.7, margin: '0 0 12px' }}>
+              "Nuestra misión es que ningún club deportivo en Latinoamérica pierda tiempo, dinero o talento por falta de herramientas digitales."
+            </p>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', margin: 0, letterSpacing: 1.5, textTransform: 'uppercase' }}>Equipo Zenpra · 2026</p>
           </div>
         </Reveal>
       </section>

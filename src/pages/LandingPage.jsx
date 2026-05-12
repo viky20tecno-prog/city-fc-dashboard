@@ -954,37 +954,90 @@ export default function LandingPage() {
       </section>
 
       {/* ── PERSONALIZACIÓN ──────────────────────────────────────────────── */}
-      <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
-        <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Personalización</p>
-          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>La interfaz con los colores de tu club.</h2>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>Elige tu color al registrarte. Toda la app adopta tu identidad visual.</p>
-        </Reveal>
-        <div style={{ display: 'flex', gap: 56, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Reveal delay={0} style={{ display: 'flex', flexDirection: 'column', gap: 24, flexShrink: 0 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 46px)', gap: 10 }}>
-              {PALETA.map(p => (
-                <button key={p.hex} className="color-swatch" onClick={() => setPreviewColor(p.hex)} title={p.nombre} style={{
-                  width: 46, height: 46, borderRadius: 12, background: p.hex,
-                  border: previewColor === p.hex ? '2.5px solid #fff' : '2.5px solid transparent',
-                  boxShadow: previewColor === p.hex ? `0 0 0 2px ${p.hex}, 0 0 20px ${p.hex}80` : `0 2px 8px ${p.hex}40`,
-                  cursor: 'pointer',
-                  transform: previewColor === p.hex ? 'scale(1.12)' : 'scale(1)',
-                }} />
-              ))}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 9, background: previewColor, boxShadow: `0 0 16px ${previewColor}70`, transition: 'all 0.3s', flexShrink: 0 }} />
-              <div style={{ fontSize: 15, fontWeight: 700, color: previewColor, transition: 'color 0.3s' }}>{colorActivo.nombre}</div>
-            </div>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, lineHeight: 1.65, maxWidth: 290, margin: 0 }}>
-              El color se aplica al escudo, barras, indicadores y acentos.<br />
-              Puedes cambiarlo desde configuración en cualquier momento.
-            </p>
+      <section style={{
+        background: `linear-gradient(135deg, ${previewColor}14 0%, rgba(6,8,16,0) 45%, ${previewColor}09 100%)`,
+        borderTop: `1px solid ${previewColor}22`,
+        borderBottom: `1px solid ${previewColor}18`,
+        transition: 'background 0.55s cubic-bezier(0.16,1,0.3,1), border-color 0.55s',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Glow de fondo reactivo */}
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 700, height: 400,
+          background: `radial-gradient(ellipse, ${previewColor}0A 0%, transparent 70%)`,
+          filter: 'blur(48px)', pointerEvents: 'none',
+          transition: 'background 0.55s',
+        }} />
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '80px 24px 96px', position: 'relative', zIndex: 1 }}>
+          <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Personalización</p>
+            <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>La interfaz con los colores de tu club.</h2>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>Prueba los colores aquí mismo — así se verá tu app al registrarte.</p>
           </Reveal>
-          <Reveal delay={100}>
-            <DashboardMockup color={previewColor} />
+
+          {/* Botones de color */}
+          <Reveal style={{ marginBottom: 40 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+              {PALETA.map(p => {
+                const active = previewColor === p.hex;
+                return (
+                  <button
+                    key={p.hex}
+                    onClick={() => setPreviewColor(p.hex)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      background: active ? `${p.hex}1E` : 'rgba(255,255,255,0.04)',
+                      border: active ? `1.5px solid ${p.hex}70` : '1.5px solid rgba(255,255,255,0.08)',
+                      borderRadius: 10, padding: '8px 14px', cursor: 'pointer',
+                      transform: active ? 'scale(1.06)' : 'scale(1)',
+                      boxShadow: active ? `0 0 18px ${p.hex}30` : 'none',
+                      transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
+                    }}
+                  >
+                    <div style={{
+                      width: 14, height: 14, borderRadius: 4, background: p.hex, flexShrink: 0,
+                      boxShadow: active ? `0 0 8px ${p.hex}` : 'none',
+                      transition: 'box-shadow 0.25s',
+                    }} />
+                    <span style={{
+                      fontSize: 12, fontWeight: active ? 700 : 500,
+                      color: active ? p.hex : 'rgba(255,255,255,0.45)',
+                      whiteSpace: 'nowrap', transition: 'color 0.25s',
+                    }}>
+                      {p.nombre}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </Reveal>
+
+          <div style={{ display: 'flex', gap: 56, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Reveal delay={0} style={{ display: 'flex', flexDirection: 'column', gap: 20, flexShrink: 0, maxWidth: 290 }}>
+              {/* Indicador color activo */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                background: `${previewColor}0E`, border: `1px solid ${previewColor}30`,
+                borderRadius: 12, padding: '12px 18px',
+                transition: 'all 0.35s',
+              }}>
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: previewColor, boxShadow: `0 0 14px ${previewColor}80`, transition: 'all 0.35s', flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: previewColor, transition: 'color 0.35s' }}>{colorActivo.nombre}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>Color activo del club</div>
+                </div>
+              </div>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, lineHeight: 1.7, margin: 0 }}>
+                El color se aplica al escudo, barras, indicadores y acentos de toda la plataforma.<br />
+                Puedes cambiarlo desde configuración en cualquier momento.
+              </p>
+            </Reveal>
+            <Reveal delay={100}>
+              <DashboardMockup color={previewColor} />
+            </Reveal>
+          </div>
         </div>
       </section>
 

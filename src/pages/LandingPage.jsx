@@ -202,12 +202,13 @@ function DashboardMockup({ color }) {
       width: '100%', maxWidth: 460,
       borderRadius: 16, overflow: 'hidden',
       border: `1px solid ${color}40`,
-      boxShadow: `0 32px 80px rgba(0,0,0,0.6), 0 0 60px ${color}15`,
-      background: '#0A0A0A', flexShrink: 0,
-      transition: 'border-color 0.4s, box-shadow 0.4s',
+      boxShadow: `0 32px 80px rgba(0,0,0,0.6), 0 0 60px ${color}22`,
+      background: `linear-gradient(160deg, ${color}20 0%, #080808 50%, ${color}10 100%)`,
+      flexShrink: 0,
+      transition: 'background 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s, box-shadow 0.4s',
     }}>
       {/* Barra superior */}
-      <div style={{ height: 48, background: 'rgba(16,16,16,0.98)', borderBottom: `1px solid ${color}30`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10, position: 'relative' }}>
+      <div style={{ height: 48, background: `linear-gradient(90deg, ${color}18, rgba(12,12,12,0.97))`, borderBottom: `1px solid ${color}30`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10, position: 'relative', transition: 'background 0.5s' }}>
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${color}60, transparent)` }} />
         <div style={{ display: 'flex', gap: 5 }}>
           {['#FF5F57', '#FFBD2E', '#28C840'].map(c => (
@@ -219,14 +220,14 @@ function DashboardMockup({ color }) {
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
           <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', letterSpacing: 1 }}>EN VIVO</span>
         </div>
-        <div style={{ width: 24, height: 24, borderRadius: 7, background: `${color}18`, border: `1px solid ${color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.4s' }}>
+        <div style={{ width: 24, height: 24, borderRadius: 7, background: `${color}28`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.4s' }}>
           <Zap size={12} color={color} />
         </div>
       </div>
       {/* Contenido */}
       <div style={{ display: 'flex', height: 260 }}>
         {/* Sidebar */}
-        <div style={{ width: 44, background: 'rgba(12,12,12,0.99)', borderRight: `1px solid ${color}15`, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0', gap: 6 }}>
+        <div style={{ width: 44, background: `linear-gradient(180deg, ${color}14, rgba(8,8,8,0.98))`, borderRight: `1px solid ${color}20`, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0', gap: 6, transition: 'background 0.5s' }}>
           {[true, false, false, false, false].map((active, i) => (
             <div key={i} style={{ width: 30, height: 30, borderRadius: 8, background: active ? `${color}18` : 'transparent', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.4s' }}>
               {active && <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 2.5, height: 16, background: color, borderRadius: '0 3px 3px 0', boxShadow: `0 0 10px ${color}` }} />}

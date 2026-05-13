@@ -23,6 +23,7 @@ import TorneosPage from '../components/TorneosPage';
 import PagoManualModal from '../components/PagoManualModal';
 import OnboardingWizard from '../components/OnboardingWizard';
 import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSelector';
+import CategoriasJugadoresModal from '../components/CategoriasJugadoresModal';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 const NAV = [
@@ -87,9 +88,17 @@ export default function Dashboard() {
   const [refreshing,      setRefreshing]      = useState(false);
   const [linkCopied,      setLinkCopied]      = useState(false);
   const [showPagoModal,   setShowPagoModal]   = useState(false);
-  const [showOnboarding,  setShowOnboarding]  = useState(false);
-  const [showTheme,       setShowTheme]       = useState(false);
-  const [colorOverride,   setColorOverride]   = useState(null);
+  const [showOnboarding,   setShowOnboarding]   = useState(false);
+  const [showTheme,        setShowTheme]        = useState(false);
+  const [showCategorias,   setShowCategorias]   = useState(false);
+  const [colorOverride,    setColorOverride]    = useState(null);
+
+  // ── Trial ──
+  const trialActivo    = clubConfig?.plan === 'trial' && clubConfig?.trial_ends_at;
+  const trialDaysLeft  = trialActivo
+    ? Math.ceil((new Date(clubConfig.trial_ends_at) - new Date()) / 86400000)
+    : null;
+  const trialExpirado  = trialActivo && trialDaysLeft <= 0;
 
   // Mostrar onboarding solo cuando el config ya cargó y no está completado
   useEffect(() => {
@@ -325,6 +334,22 @@ export default function Dashboard() {
 
         <div style={S.sep} />
 
+        {/* Indicador de Trial */}
+        {trialActivo && !trialExpirado && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '5px',
+            padding: '3px 10px', borderRadius: '20px',
+            background: trialDaysLeft <= 2 ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
+            border: `1px solid ${trialDaysLeft <= 2 ? 'rgba(239,68,68,0.35)' : 'rgba(245,158,11,0.35)'}`,
+            fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px',
+            color: trialDaysLeft <= 2 ? '#EF4444' : '#F59E0B',
+            flexShrink: 0,
+            textTransform: 'uppercase',
+          }}>
+            ⏳ Trial: {trialDaysLeft}d
+          </div>
+        )}
+
         {/* Pago Manual */}
         <button style={S.actionBtn(true)} onClick={() => setShowPagoModal(true)}>
           PAGO MANUAL
@@ -384,8 +409,91 @@ export default function Dashboard() {
         </button>
       </nav>
 
+      {/* ───── TRIAL EXPIRADO — overlay bloqueante ───── */}
+      {trialExpirado && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          background: 'rgba(0,0,0,0.92)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '24px',
+        }}>
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid rgba(239,68,68,0.35)',
+            borderRadius: '20px',
+            padding: '40px 36px',
+            maxWidth: '440px', width: '100%',
+            textAlign: 'center',
+            display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center',
+          }}>
+            <div style={{ fontSize: '48px', lineHeight: 1 }}>⏰</div>
+            <div>
+              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '28px', letterSpacing: '3px', color: 'var(--text-pri)', marginBottom: '8px' }}>
+                Tu período de prueba terminó
+              </div>
+              <div style={{ color: 'var(--text-sec)', fontSize: '14px', lineHeight: 1.6 }}>
+                El trial de <strong style={{ color: 'var(--text-pri)' }}>{clubConfig?.nombre}</strong> venció.
+                Activa un plan para seguir usando la plataforma.
+              </div>
+            </div>
+            <div style={{
+              background: 'var(--bg-card)', borderRadius: '12px', padding: '16px 20px',
+              border: '1px solid var(--border-sub)', width: '100%', textAlign: 'left',
+              display: 'flex', flexDirection: 'column', gap: '6px',
+            }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-mut)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>¿Qué hacer ahora?</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-sec)' }}>1. Elige un plan en zensports.vercel.app</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-sec)' }}>2. Envíanos tu comprobante de pago</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-sec)' }}>3. Activamos tu cuenta en minutos</div>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+              <button
+                onClick={handleLogout}
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid var(--border-sub)', background: 'var(--bg-card)', color: 'var(--text-sec)', fontSize: '13px', cursor: 'pointer' }}
+              >
+                Cerrar sesión
+              </button>
+              <a
+                href="https://wa.me/573000000000?text=Quiero%20activar%20mi%20plan%20de%20ZenSports"
+                target="_blank"
+                rel="noreferrer"
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid rgba(34,197,94,0.35)', background: 'rgba(34,197,94,0.12)', color: '#22C55E', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                Contactar ventas
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ───── MAIN ───── */}
       <main style={S.main}>
+        {/* Banner trial próximo a vencer (≤3 días, no expirado) */}
+        {trialActivo && !trialExpirado && trialDaysLeft <= 3 && (
+          <div style={{
+            marginBottom: '14px',
+            padding: '10px 16px',
+            borderRadius: '12px',
+            background: trialDaysLeft <= 1 ? 'rgba(239,68,68,0.08)' : 'rgba(245,158,11,0.08)',
+            border: `1px solid ${trialDaysLeft <= 1 ? 'rgba(239,68,68,0.30)' : 'rgba(245,158,11,0.30)'}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+            flexWrap: 'wrap',
+          }}>
+            <div style={{ fontSize: '13px', color: trialDaysLeft <= 1 ? '#EF4444' : '#F59E0B', fontWeight: 500 }}>
+              ⚠️ Tu período de prueba vence {trialDaysLeft === 0 ? 'hoy' : `en ${trialDaysLeft} día${trialDaysLeft !== 1 ? 's' : ''}`}.
+              Activa un plan para no perder el acceso.
+            </div>
+            <a
+              href="https://zensports.vercel.app#precios"
+              target="_blank"
+              rel="noreferrer"
+              style={{ fontSize: '12px', fontWeight: 600, color: trialDaysLeft <= 1 ? '#EF4444' : '#F59E0B', textDecoration: 'underline', whiteSpace: 'nowrap' }}
+            >
+              Ver planes →
+            </a>
+          </div>
+        )}
+
         {clubConfig?.logo_url && (
           <div style={{
             position: 'fixed',
@@ -484,7 +592,16 @@ export default function Dashboard() {
           color={c}
           onClose={() => setShowTheme(false)}
           onOpenConfig={() => { setShowTheme(false); setShowOnboarding(true); }}
+          onOpenCategorias={() => { setShowTheme(false); setShowCategorias(true); }}
           onColorChange={handleColorChange}
+        />
+      )}
+
+      {showCategorias && (
+        <CategoriasJugadoresModal
+          categorias={clubConfig?.categorias_jugadores || []}
+          onClose={() => setShowCategorias(false)}
+          onSaved={() => refetchConfig()}
         />
       )}
     </div>

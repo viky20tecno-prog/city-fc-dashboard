@@ -1,8 +1,9 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload } from 'lucide-react';
 import { ESTADO_COLORS } from '../config';
 import HojaDeVida from './HojaDeVida';
 import SuspensionModal from './SuspensionModal';
+import ImportarJugadoresModal from './ImportarJugadoresModal';
 import { deletePlayer } from '../services/api';
 
 /* ── colores de cada estado para el dropdown ── */
@@ -84,6 +85,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const [jugadorSuspension, setJugadorSuspension] = useState(null);
   const [jugadorAEliminar, setJugadorAEliminar]   = useState(null);
   const [eliminando, setEliminando]               = useState(false);
+  const [showImportar, setShowImportar]           = useState(false);
 
   const abrirHoja = (j, tab = 'perfil') => { setJugadorDetalle(j); setJugadorDetalleTab(tab); };
 
@@ -189,6 +191,29 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
   const estados = ['TODOS', 'AL_DIA', 'PENDIENTE', 'PARCIAL', 'MORA'];
 
+  const exportarCSV = () => {
+    const headers = ['Nombre', 'Cédula', 'Celular', 'Estado', 'Pagado', 'Pendiente', 'Activo'];
+    const rows = filtered.map(j => [
+      j.nombreCompleto,
+      j.cedula,
+      j.celular || '',
+      j.estadoPago,
+      j.totalPagado,
+      j.saldoPendiente,
+      j.activo ? 'SI' : 'NO',
+    ]);
+    const csv = [headers, ...rows]
+      .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `jugadores_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-sub)', borderRadius: '16px', overflow: 'hidden' }}>
@@ -216,6 +241,32 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
               {/* Filtro de estado — dropdown custom */}
               <FiltroDropdown value={filtroEstado} onChange={setFiltroEstado} opciones={estados} />
+
+              {/* Exportar CSV */}
+              <button
+                onClick={exportarCSV}
+                title="Exportar jugadores a CSV"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
+                style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', color: '#22C55E', whiteSpace: 'nowrap', flexShrink: 0 }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.18)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,197,94,0.08)'}
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">CSV</span>
+              </button>
+
+              {/* Importar Excel */}
+              <button
+                onClick={() => setShowImportar(true)}
+                title="Importar jugadores desde Excel"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
+                style={{ background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.25)', color: '#60A5FA', whiteSpace: 'nowrap', flexShrink: 0 }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(96,165,250,0.18)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(96,165,250,0.08)'}
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Importar</span>
+              </button>
             </div>
           </div>
         </div>
@@ -423,6 +474,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           {filtered.length} de {jugadores.length} jugadores
         </div>
       </div>
+
+      {/* MODAL IMPORTAR EXCEL */}
+      {showImportar && (
+        <ImportarJugadoresModal
+          onClose={() => setShowImportar(false)}
+          onSuccess={() => { setShowImportar(false); onRefresh(); }}
+        />
+      )}
 
       {/* DRAWER HOJA DE VIDA */}
       {jugadorDetalle && (

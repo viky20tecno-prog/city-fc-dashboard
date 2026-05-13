@@ -124,6 +124,18 @@ export async function fetchClubConfig() {
   return await res.json();
 }
 
+export async function importarJugadoresBulk(jugadores) {
+  const url = `${API_BASE_URL}/players/bulk?club_id=${getClubId()}`;
+  const authHeaders = await getAuthHeaders();
+  const res = await fetch(url, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders },
+    body:    JSON.stringify({ jugadores }),
+  });
+  if (!res.ok) throw new Error(`Import failed: ${res.status}`);
+  return await res.json();
+}
+
 export async function registerPayment(paymentData) {
   const url = `${API_BASE_URL}/payments?club_id=${getClubId()}`;
   try {

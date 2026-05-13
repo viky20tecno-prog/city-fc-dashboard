@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Bot, BarChart2, CreditCard, Shield, ChevronRight, CheckCircle,
   Users, FileText, Smartphone, AlertTriangle, Zap, MessageCircle,
-  ArrowRight, Sparkles, TrendingUp, Star,
+  ArrowRight, Sparkles, TrendingUp, Star, Sun, Moon,
 } from 'lucide-react';
 import { PALETA } from '../components/ThemeSelector';
 
@@ -196,19 +196,39 @@ function FloatingCard({ emoji, text, color, pos, delay, dur }) {
 }
 
 /* ── Dashboard Mockup ─────────────────────────────────────────────────────── */
-function DashboardMockup({ color }) {
+function DashboardMockup({ color, modo = 'dark' }) {
+  const dark = modo !== 'light';
+  const T = dark ? {
+    bg:      `linear-gradient(160deg, ${color}20 0%, #080808 50%, ${color}10 100%)`,
+    topbar:  `linear-gradient(90deg, ${color}18, rgba(12,12,12,0.97))`,
+    sidebar: `linear-gradient(180deg, ${color}14, rgba(8,8,8,0.98))`,
+    card:    'rgba(255,255,255,0.025)', cardBdr: 'rgba(255,255,255,0.06)',
+    subTxt:  'rgba(255,255,255,0.4)',   rowTxt:  'rgba(255,255,255,0.55)',
+    rowBdr:  'rgba(255,255,255,0.03)',  navDot:  '#282828',
+    liveBg:  'rgba(255,255,255,0.05)', liveBdr: 'rgba(255,255,255,0.08)',
+    liveTxt: 'rgba(255,255,255,0.5)',  barFill: 'rgba(255,255,255,0.08)',
+  } : {
+    bg:      `linear-gradient(160deg, ${color}15 0%, #F8FAFC 50%, ${color}08 100%)`,
+    topbar:  `linear-gradient(90deg, ${color}12, rgba(248,250,252,0.97))`,
+    sidebar: `linear-gradient(180deg, ${color}10, rgba(242,246,252,0.98))`,
+    card:    'rgba(0,0,0,0.03)',        cardBdr: 'rgba(0,0,0,0.07)',
+    subTxt:  'rgba(0,0,0,0.38)',        rowTxt:  'rgba(0,0,0,0.55)',
+    rowBdr:  'rgba(0,0,0,0.04)',        navDot:  '#CBD5E1',
+    liveBg:  'rgba(0,0,0,0.04)',        liveBdr: 'rgba(0,0,0,0.08)',
+    liveTxt: 'rgba(0,0,0,0.45)',        barFill: 'rgba(0,0,0,0.08)',
+  };
+
   return (
     <div style={{
       width: '100%', maxWidth: 460,
       borderRadius: 16, overflow: 'hidden',
       border: `1px solid ${color}40`,
       boxShadow: `0 32px 80px rgba(0,0,0,0.6), 0 0 60px ${color}22`,
-      background: `linear-gradient(160deg, ${color}20 0%, #080808 50%, ${color}10 100%)`,
-      flexShrink: 0,
+      background: T.bg, flexShrink: 0,
       transition: 'background 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s, box-shadow 0.4s',
     }}>
-      {/* Barra superior */}
-      <div style={{ height: 48, background: `linear-gradient(90deg, ${color}18, rgba(12,12,12,0.97))`, borderBottom: `1px solid ${color}30`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10, position: 'relative', transition: 'background 0.5s' }}>
+      {/* Topbar */}
+      <div style={{ height: 48, background: T.topbar, borderBottom: `1px solid ${color}30`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10, position: 'relative', transition: 'background 0.5s' }}>
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${color}60, transparent)` }} />
         <div style={{ display: 'flex', gap: 5 }}>
           {['#FF5F57', '#FFBD2E', '#28C840'].map(c => (
@@ -216,22 +236,22 @@ function DashboardMockup({ color }) {
           ))}
         </div>
         <div style={{ flex: 1 }} />
-        <div style={{ height: 22, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6 }}>
+        <div style={{ height: 22, background: T.liveBg, border: `1px solid ${T.liveBdr}`, borderRadius: 6, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6 }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
-          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', letterSpacing: 1 }}>EN VIVO</span>
+          <span style={{ fontSize: 9, color: T.liveTxt, letterSpacing: 1 }}>EN VIVO</span>
         </div>
         <div style={{ width: 24, height: 24, borderRadius: 7, background: `${color}28`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.4s' }}>
           <Zap size={12} color={color} />
         </div>
       </div>
-      {/* Contenido */}
+      {/* Cuerpo */}
       <div style={{ display: 'flex', height: 260 }}>
         {/* Sidebar */}
-        <div style={{ width: 44, background: `linear-gradient(180deg, ${color}14, rgba(8,8,8,0.98))`, borderRight: `1px solid ${color}20`, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0', gap: 6, transition: 'background 0.5s' }}>
+        <div style={{ width: 44, background: T.sidebar, borderRight: `1px solid ${color}20`, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0', gap: 6, transition: 'background 0.5s' }}>
           {[true, false, false, false, false].map((active, i) => (
             <div key={i} style={{ width: 30, height: 30, borderRadius: 8, background: active ? `${color}18` : 'transparent', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.4s' }}>
               {active && <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 2.5, height: 16, background: color, borderRadius: '0 3px 3px 0', boxShadow: `0 0 10px ${color}` }} />}
-              <div style={{ width: 12, height: 12, borderRadius: 3, background: active ? color : '#282828', transition: 'background 0.4s' }} />
+              <div style={{ width: 12, height: 12, borderRadius: 3, background: active ? color : T.navDot, transition: 'background 0.4s' }} />
             </div>
           ))}
         </div>
@@ -244,15 +264,15 @@ function DashboardMockup({ color }) {
               { label: 'Pendiente', val: '6',  c: '#FF5E5E' },
             ].map(s => (
               <div key={s.label} style={{ background: `${s.c}09`, border: `1px solid ${s.c}25`, borderRadius: 9, padding: '8px 10px', transition: 'all 0.4s' }}>
-                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)', marginBottom: 4, letterSpacing: 0.5 }}>{s.label}</div>
+                <div style={{ fontSize: 8, color: T.subTxt, marginBottom: 4, letterSpacing: 0.5 }}>{s.label}</div>
                 <div style={{ fontSize: 20, fontWeight: 800, color: s.c, lineHeight: 1, transition: 'color 0.4s' }}>{s.val}</div>
               </div>
             ))}
           </div>
-          <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 9, overflow: 'hidden', flex: 1 }}>
+          <div style={{ background: T.card, border: `1px solid ${T.cardBdr}`, borderRadius: 9, overflow: 'hidden', flex: 1 }}>
             <div style={{ height: 26, background: `${color}0A`, borderBottom: `1px solid ${color}18`, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ width: 60, height: 5, borderRadius: 3, background: `${color}45` }} />
-              <div style={{ width: 40, height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.08)' }} />
+              <div style={{ width: 40, height: 5, borderRadius: 3, background: T.barFill }} />
               <div style={{ flex: 1 }} />
               <div style={{ padding: '1px 8px', background: `${color}15`, border: `1px solid ${color}30`, borderRadius: 4, fontSize: 7, color, fontWeight: 700, letterSpacing: 0.5 }}>HOY</div>
             </div>
@@ -262,11 +282,11 @@ function DashboardMockup({ color }) {
               { badge: '#FF5E5E', text: 'VENCIDO',    name: 'Juan P.'   },
               { badge: color,     text: 'PENDIENTE',  name: 'Ana R.'    },
             ].map((row, i) => (
-              <div key={i} style={{ height: 28, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+              <div key={i} style={{ height: 28, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: `1px solid ${T.rowBdr}` }}>
                 <div style={{ width: 18, height: 18, borderRadius: '50%', background: `${row.badge}15`, border: `1px solid ${row.badge}40`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: row.badge }} />
                 </div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', flex: 1 }}>{row.name}</div>
+                <div style={{ fontSize: 9, color: T.rowTxt, flex: 1 }}>{row.name}</div>
                 <div style={{ padding: '2px 7px', borderRadius: 4, background: `${row.badge}15`, border: `1px solid ${row.badge}35`, fontSize: 7, color: row.badge, fontWeight: 700, letterSpacing: 0.5 }}>{row.text}</div>
               </div>
             ))}
@@ -588,6 +608,7 @@ function FaqItem({ q, a, delay }) {
 export default function LandingPage() {
   const navigate = useNavigate();
   const [previewColor, setPreviewColor] = useState(PALETA[0].hex);
+  const [previewModo,  setPreviewModo]  = useState('dark');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { glowRef, onMove, onLeave } = useMouseGlow();
 
@@ -1036,7 +1057,31 @@ export default function LandingPage() {
               </p>
             </Reveal>
             <Reveal delay={100}>
-              <DashboardMockup color={previewColor} />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+                {/* Toggle Oscuro / Claro */}
+                <div style={{ display: 'flex', gap: 3, background: 'rgba(255,255,255,0.07)', borderRadius: 20, padding: 3, border: '1px solid rgba(255,255,255,0.10)' }}>
+                  {[
+                    { id: 'dark',  Icon: Moon, label: 'Oscuro' },
+                    { id: 'light', Icon: Sun,  label: 'Claro'  },
+                  ].map(({ id, Icon, label }) => (
+                    <button
+                      key={id}
+                      onClick={() => setPreviewModo(id)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 5,
+                        padding: '5px 14px', borderRadius: 16, border: 'none',
+                        background: previewModo === id ? 'rgba(255,255,255,0.15)' : 'transparent',
+                        color: previewModo === id ? '#fff' : 'rgba(255,255,255,0.38)',
+                        fontSize: 11, fontWeight: previewModo === id ? 700 : 400,
+                        cursor: 'pointer', transition: 'all 0.2s',
+                      }}
+                    >
+                      <Icon size={11} /> {label}
+                    </button>
+                  ))}
+                </div>
+                <DashboardMockup color={previewColor} modo={previewModo} />
+              </div>
             </Reveal>
           </div>
         </div>

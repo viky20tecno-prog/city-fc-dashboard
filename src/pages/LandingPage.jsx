@@ -201,34 +201,43 @@ function DashboardMockup({ color, modo = 'dark' }) {
   const T = dark ? {
     bg:      `linear-gradient(160deg, ${color}20 0%, #080808 50%, ${color}10 100%)`,
     topbar:  `linear-gradient(90deg, ${color}18, rgba(12,12,12,0.97))`,
+    topBdr:  `${color}30`,
     sidebar: `linear-gradient(180deg, ${color}14, rgba(8,8,8,0.98))`,
+    sideBdr: `${color}20`,
     card:    'rgba(255,255,255,0.025)', cardBdr: 'rgba(255,255,255,0.06)',
     subTxt:  'rgba(255,255,255,0.4)',   rowTxt:  'rgba(255,255,255,0.55)',
     rowBdr:  'rgba(255,255,255,0.03)',  navDot:  '#282828',
     liveBg:  'rgba(255,255,255,0.05)', liveBdr: 'rgba(255,255,255,0.08)',
     liveTxt: 'rgba(255,255,255,0.5)',  barFill: 'rgba(255,255,255,0.08)',
+    border:  `${color}40`,
+    shadow:  `0 32px 80px rgba(0,0,0,0.6), 0 0 60px ${color}22`,
   } : {
-    bg:      `linear-gradient(160deg, ${color}15 0%, #F8FAFC 50%, ${color}08 100%)`,
-    topbar:  `linear-gradient(90deg, ${color}12, rgba(248,250,252,0.97))`,
-    sidebar: `linear-gradient(180deg, ${color}10, rgba(242,246,252,0.98))`,
-    card:    'rgba(0,0,0,0.03)',        cardBdr: 'rgba(0,0,0,0.07)',
-    subTxt:  'rgba(0,0,0,0.38)',        rowTxt:  'rgba(0,0,0,0.55)',
-    rowBdr:  'rgba(0,0,0,0.04)',        navDot:  '#CBD5E1',
-    liveBg:  'rgba(0,0,0,0.04)',        liveBdr: 'rgba(0,0,0,0.08)',
-    liveTxt: 'rgba(0,0,0,0.45)',        barFill: 'rgba(0,0,0,0.08)',
+    // Fondo azul-gris medio — topbar y cards en blanco crean la profundidad (estilo Apple/Linear)
+    bg:      `linear-gradient(160deg, ${color}22 0%, #C8D8EC 50%, ${color}15 100%)`,
+    topbar:  'rgba(255,255,255,0.97)',
+    topBdr:  'rgba(0,20,80,0.10)',
+    sidebar: 'rgba(236,244,255,0.95)',
+    sideBdr: 'rgba(0,20,80,0.08)',
+    card:    'rgba(255,255,255,0.90)',  cardBdr: 'rgba(0,20,80,0.11)',
+    subTxt:  'rgba(0,20,60,0.46)',     rowTxt:  'rgba(0,20,60,0.72)',
+    rowBdr:  'rgba(0,20,80,0.06)',     navDot:  '#B0C4DA',
+    liveBg:  'rgba(255,255,255,0.80)', liveBdr: 'rgba(0,20,80,0.12)',
+    liveTxt: 'rgba(0,20,60,0.52)',     barFill: 'rgba(0,20,80,0.09)',
+    border:  `${color}55`,
+    shadow:  `0 24px 60px rgba(0,30,80,0.18), 0 0 40px ${color}25`,
   };
 
   return (
     <div style={{
       width: '100%', maxWidth: 460,
       borderRadius: 16, overflow: 'hidden',
-      border: `1px solid ${color}40`,
-      boxShadow: `0 32px 80px rgba(0,0,0,0.6), 0 0 60px ${color}22`,
+      border: `1px solid ${T.border}`,
+      boxShadow: T.shadow,
       background: T.bg, flexShrink: 0,
       transition: 'background 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s, box-shadow 0.4s',
     }}>
       {/* Topbar */}
-      <div style={{ height: 48, background: T.topbar, borderBottom: `1px solid ${color}30`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10, position: 'relative', transition: 'background 0.5s' }}>
+      <div style={{ height: 48, background: T.topbar, borderBottom: `1px solid ${T.topBdr}`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10, position: 'relative', transition: 'background 0.5s' }}>
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${color}60, transparent)` }} />
         <div style={{ display: 'flex', gap: 5 }}>
           {['#FF5F57', '#FFBD2E', '#28C840'].map(c => (
@@ -247,7 +256,7 @@ function DashboardMockup({ color, modo = 'dark' }) {
       {/* Cuerpo */}
       <div style={{ display: 'flex', height: 260 }}>
         {/* Sidebar */}
-        <div style={{ width: 44, background: T.sidebar, borderRight: `1px solid ${color}20`, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0', gap: 6, transition: 'background 0.5s' }}>
+        <div style={{ width: 44, background: T.sidebar, borderRight: `1px solid ${T.sideBdr}`, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0', gap: 6, transition: 'background 0.5s' }}>
           {[true, false, false, false, false].map((active, i) => (
             <div key={i} style={{ width: 30, height: 30, borderRadius: 8, background: active ? `${color}18` : 'transparent', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.4s' }}>
               {active && <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 2.5, height: 16, background: color, borderRadius: '0 3px 3px 0', boxShadow: `0 0 10px ${color}` }} />}

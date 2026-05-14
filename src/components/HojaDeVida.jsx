@@ -250,6 +250,22 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
         <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-[#EF4444]">{error}</div>
       )}
 
+      {/* Botón guardar — arriba */}
+      <button
+        onClick={guardar}
+        disabled={guardando || guardado}
+        className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition ${
+          guardado
+            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+            : 'bg-[#E14924] hover:bg-[#C9381A] text-white disabled:opacity-60'
+        }`}
+      >
+        {guardando ? <Loader2 className="w-4 h-4 animate-spin" />
+          : guardado ? <CheckCircle className="w-4 h-4" />
+          : <Save className="w-4 h-4" />}
+        {guardado ? 'Guardado' : guardando ? 'Guardando...' : 'Guardar todos los cambios'}
+      </button>
+
       {/* Datos deportivos */}
       <Seccion titulo="Datos Deportivos">
         <div className="grid grid-cols-2 gap-3">

@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { ESTADO_COLORS } from '../config';
@@ -18,8 +18,8 @@ const ESTADO_DOT = {
   MORA:     '#EF4444',
 };
 
-/* ── dropdown custom (reemplaza <select> nativo) ── */
-function FiltroDropdown({ value, onChange, opciones }) {
+/* ── dropdown para filtro de estado de pago ── */
+function FiltroEstadoDropdown({ value, onChange, opciones }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -33,12 +33,12 @@ function FiltroDropdown({ value, onChange, opciones }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)', minWidth: '140px' }}
+        style={{ background: 'var(--bg-surface)', border: `1px solid ${value !== 'TODOS' ? 'rgba(225,73,36,0.5)' : 'var(--border-sub)'}`, minWidth: '140px' }}
         className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-[var(--text-pri)] hover:border-[#E14924]/50 transition"
       >
         <span className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ESTADO_DOT[value] || '#6A6A6A' }} />
-          {value}
+          {value === 'TODOS' ? 'Estado' : value}
         </span>
         <ChevronDown className={`w-4 h-4 text-[var(--text-sec)] transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -52,11 +52,67 @@ function FiltroDropdown({ value, onChange, opciones }) {
             <button
               key={opt}
               onClick={() => { onChange(opt); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition hover:bg-[var(--bg-surface)] text-left"
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition hover:bg-[var(--bg-card)] text-left"
               style={{ color: value === opt ? '#E14924' : '#F5F5F5' }}
             >
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ESTADO_DOT[opt] || '#6A6A6A' }} />
-              <span className="flex-1">{opt}</span>
+              <span className="flex-1">{opt === 'TODOS' ? 'Todos los estados' : opt}</span>
+              {value === opt && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── dropdown para filtro de categoría / equipo ── */
+function FiltroCategoriaDropdown({ value, onChange, opciones }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const activo = value !== 'TODOS';
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          background: activo ? 'rgba(225,73,36,0.08)' : 'var(--bg-surface)',
+          border: `1px solid ${activo ? 'rgba(225,73,36,0.5)' : 'var(--border-sub)'}`,
+          minWidth: '140px',
+        }}
+        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-[var(--text-pri)] hover:border-[#E14924]/50 transition"
+      >
+        <span className="flex items-center gap-2">
+          <Tag className={`w-3.5 h-3.5 flex-shrink-0 ${activo ? 'text-[#E14924]' : 'text-[var(--text-mut)]'}`} />
+          <span className={activo ? 'text-[#E14924] font-semibold' : ''}>
+            {activo ? value : 'Categoría'}
+          </span>
+        </span>
+        <ChevronDown className={`w-4 h-4 text-[var(--text-sec)] transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 rounded-xl overflow-hidden z-30 shadow-2xl"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)', minWidth: '180px', maxHeight: '280px', overflowY: 'auto' }}
+        >
+          {opciones.map(opt => (
+            <button
+              key={opt}
+              onClick={() => { onChange(opt); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition hover:bg-[var(--bg-card)] text-left"
+              style={{ color: value === opt ? '#E14924' : '#F5F5F5' }}
+            >
+              <Tag className="w-3 h-3 flex-shrink-0 opacity-50" />
+              <span className="flex-1">{opt === 'TODOS' ? 'Todos los grupos' : opt}</span>
               {value === opt && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
             </button>
           ))}
@@ -189,7 +245,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         const cmp = (a[sortField] || '').toString().localeCompare((b[sortField] || '').toString(), 'es', { numeric: true });
         return sortDir === 'asc' ? cmp : -cmp;
       });
-  }, [jugadoresConPago, search, filtroEstado, sortField, sortDir]);
+  }, [jugadoresConPago, search, filtroEstado, filtroCategoria, sortField, sortDir]);
 
   const toggleSort = (field) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -302,72 +358,116 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
         {/* HEADER */}
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-sub)' }}>
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-            <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '22px', letterSpacing: '2px', color: 'var(--text-pri)' }}>
-              Jugadores
-            </h2>
+          <div className="flex flex-col gap-3">
+            {/* Fila 1: título + acciones */}
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+              <h2 style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '22px', letterSpacing: '2px', color: 'var(--text-pri)' }}>
+                Jugadores
+              </h2>
 
-            <div className="flex gap-2 w-full sm:w-auto">
-              {/* Buscador */}
-              <div className="relative flex-1 sm:flex-initial">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-sec)]" />
-                <input
-                  type="text"
-                  placeholder="Buscar nombre o cédula..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)' }}
-                  className="w-full sm:w-60 pl-10 pr-4 py-2 rounded-xl text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[#E14924]/50 transition"
-                />
+              <div className="flex gap-2 w-full sm:w-auto flex-wrap">
+                {/* Buscador */}
+                <div className="relative flex-1 sm:flex-initial">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-sec)]" />
+                  <input
+                    type="text"
+                    placeholder="Buscar nombre o cédula..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)' }}
+                    className="w-full sm:w-60 pl-10 pr-4 py-2 rounded-xl text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[#E14924]/50 transition"
+                  />
+                </div>
+
+                {/* Filtro de estado */}
+                <FiltroEstadoDropdown value={filtroEstado} onChange={setFiltroEstado} opciones={estados} />
+
+                {/* Filtro de categoría / equipo */}
+                {opcionesCategoria.length > 1 && (
+                  <FiltroCategoriaDropdown value={filtroCategoria} onChange={setFiltroCategoria} opciones={opcionesCategoria} />
+                )}
+
+                {/* Exportar CSV */}
+                <button
+                  onClick={exportarCSV}
+                  title={`Exportar ${filtered.length} jugadores a CSV`}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
+                  style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', color: '#22C55E', whiteSpace: 'nowrap', flexShrink: 0 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.18)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,197,94,0.08)'}
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">CSV</span>
+                </button>
+
+                {/* Exportar PDF */}
+                <button
+                  onClick={exportarPDF}
+                  title={`Exportar ${filtered.length} jugadores a PDF`}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
+                  style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.25)', color: '#A855F7', whiteSpace: 'nowrap', flexShrink: 0 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(168,85,247,0.18)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(168,85,247,0.08)'}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">PDF</span>
+                </button>
+
+                {/* Importar Excel */}
+                <button
+                  onClick={() => setShowImportar(true)}
+                  title="Importar jugadores desde Excel"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
+                  style={{ background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.25)', color: '#60A5FA', whiteSpace: 'nowrap', flexShrink: 0 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(96,165,250,0.18)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(96,165,250,0.08)'}
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Importar</span>
+                </button>
               </div>
-
-              {/* Filtro de estado — dropdown custom */}
-              <FiltroDropdown value={filtroEstado} onChange={setFiltroEstado} opciones={estados} />
-
-              {/* Filtro de categoría / equipo */}
-              {opcionesCategoria.length > 1 && (
-                <FiltroDropdown value={filtroCategoria} onChange={setFiltroCategoria} opciones={opcionesCategoria} />
-              )}
-
-              {/* Exportar CSV */}
-              <button
-                onClick={exportarCSV}
-                title="Exportar jugadores a CSV"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', color: '#22C55E', whiteSpace: 'nowrap', flexShrink: 0 }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.18)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,197,94,0.08)'}
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">CSV</span>
-              </button>
-
-              {/* Exportar PDF */}
-              <button
-                onClick={exportarPDF}
-                title="Exportar listado a PDF"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.25)', color: '#A855F7', whiteSpace: 'nowrap', flexShrink: 0 }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(168,85,247,0.18)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(168,85,247,0.08)'}
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">PDF</span>
-              </button>
-
-              {/* Importar Excel */}
-              <button
-                onClick={() => setShowImportar(true)}
-                title="Importar jugadores desde Excel"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                style={{ background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.25)', color: '#60A5FA', whiteSpace: 'nowrap', flexShrink: 0 }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(96,165,250,0.18)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(96,165,250,0.08)'}
-              >
-                <Upload className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Importar</span>
-              </button>
             </div>
+
+            {/* Fila 2: chips de filtros activos */}
+            {(filtroEstado !== 'TODOS' || filtroCategoria !== 'TODOS' || search) && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-[var(--text-mut)]">Filtros activos:</span>
+                {filtroCategoria !== 'TODOS' && (
+                  <span
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition hover:opacity-80"
+                    style={{ background: 'rgba(225,73,36,0.12)', border: '1px solid rgba(225,73,36,0.35)', color: '#E14924' }}
+                    onClick={() => setFiltroCategoria('TODOS')}
+                  >
+                    <Tag className="w-3 h-3" />
+                    {filtroCategoria}
+                    <X className="w-3 h-3" />
+                  </span>
+                )}
+                {filtroEstado !== 'TODOS' && (
+                  <span
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition hover:opacity-80"
+                    style={{ background: `${ESTADO_DOT[filtroEstado]}20`, border: `1px solid ${ESTADO_DOT[filtroEstado]}50`, color: ESTADO_DOT[filtroEstado] }}
+                    onClick={() => setFiltroEstado('TODOS')}
+                  >
+                    <span className="w-2 h-2 rounded-full" style={{ background: ESTADO_DOT[filtroEstado] }} />
+                    {filtroEstado}
+                    <X className="w-3 h-3" />
+                  </span>
+                )}
+                {search && (
+                  <span
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition hover:opacity-80"
+                    style={{ background: 'rgba(96,165,250,0.10)', border: '1px solid rgba(96,165,250,0.30)', color: '#60A5FA' }}
+                    onClick={() => setSearch('')}
+                  >
+                    <Search className="w-3 h-3" />
+                    "{search}"
+                    <X className="w-3 h-3" />
+                  </span>
+                )}
+                <span className="text-xs text-[var(--text-mut)]">— {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -563,15 +663,44 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           </table>
 
           {filtered.length === 0 && (
-            <div className="text-center py-12 text-[var(--text-sec)] text-sm">
-              No se encontraron jugadores
+            <div className="text-center py-14 px-6">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4" style={{ background: 'rgba(225,73,36,0.08)', border: '1px solid rgba(225,73,36,0.15)' }}>
+                <Users className="w-5 h-5 text-[var(--text-mut)]" />
+              </div>
+              <p className="text-[var(--text-sec)] text-sm font-medium mb-1">
+                {filtroCategoria !== 'TODOS'
+                  ? `No hay jugadores en "${filtroCategoria}"`
+                  : filtroEstado !== 'TODOS'
+                  ? `No hay jugadores con estado ${filtroEstado}`
+                  : search
+                  ? `No se encontró "${search}"`
+                  : 'No hay jugadores registrados'}
+              </p>
+              {(filtroCategoria !== 'TODOS' || filtroEstado !== 'TODOS' || search) && (
+                <button
+                  onClick={() => { setFiltroCategoria('TODOS'); setFiltroEstado('TODOS'); setSearch(''); }}
+                  className="mt-3 text-xs text-[#E14924] hover:underline"
+                >
+                  Limpiar todos los filtros
+                </button>
+              )}
             </div>
           )}
         </div>
 
         {/* FOOTER */}
-        <div style={{ padding: '12px 24px', borderTop: '1px solid var(--border-sub)', color: 'var(--text-mut)', fontSize: '13px' }}>
-          {filtered.length} de {jugadores.length} jugadores
+        <div style={{ padding: '12px 24px', borderTop: '1px solid var(--border-sub)', color: 'var(--text-mut)', fontSize: '13px' }} className="flex items-center justify-between flex-wrap gap-2">
+          <span>
+            {filtered.length !== jugadores.length
+              ? <><strong style={{ color: 'var(--text-sec)' }}>{filtered.length}</strong> de {jugadores.length} jugadores</>
+              : <>{jugadores.length} jugadores</>}
+          </span>
+          {filtroCategoria !== 'TODOS' && (
+            <span className="flex items-center gap-1.5 text-xs" style={{ color: '#E14924' }}>
+              <Tag className="w-3 h-3" />
+              Listado: {filtroCategoria} · CSV y PDF exportan este grupo
+            </span>
+          )}
         </div>
       </div>
 

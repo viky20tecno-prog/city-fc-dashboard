@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, Users, Eye, RefreshCw } from 'lucide-react';
+import { Calendar, Clock, Users, Eye, RefreshCw, Pencil, Trash2, X, Check, Loader2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
-import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 
 const fmt = (n) =>
   Number(n).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
@@ -13,10 +12,96 @@ const fmtFecha = (fecha) => {
   return `${d}/${m}/${y}`;
 };
 
+const INPUT_CLS = 'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-3 py-2 text-sm outline-none transition-colors';
+const DATE_CLS  = INPUT_CLS + ' [color-scheme:dark]';
+
+function EditForm({ partido, clubId, onSaved, onCancel }) {
+  const [form, setForm] = useState({
+    titulo:  partido.titulo  || '',
+    fecha:   partido.fecha   || '',
+    hora:    partido.hora    || '',
+    equipoA: partido.equipoA || '',
+    equipoB: partido.equipoB || '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [error,  setError]  = useState(null);
+
+  const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const save = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await authFetch(
+        `${API_BASE_URL}/arbitrage/partidos/${partido.id}?club_id=${clubId}`,
+        { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) },
+      );
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Error al guardar');
+      onSaved();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3 pt-3 border-t border-[var(--cc20)]">
+      <div>
+        <label className="block text-xs text-gray-400 mb-1">Título</label>
+        <input type="text" value={form.titulo} onChange={set('titulo')} className={INPUT_CLS} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Fecha</label>
+          <input type="date" value={form.fecha} onChange={set('fecha')} className={DATE_CLS} />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Hora</label>
+          <input type="time" value={form.hora} onChange={set('hora')} className={DATE_CLS} />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Equipo A</label>
+          <input type="text" value={form.equipoA} onChange={set('equipoA')} className={INPUT_CLS} />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">Equipo B</label>
+          <input type="text" value={form.equipoB} onChange={set('equipoB')} className={INPUT_CLS} />
+        </div>
+      </div>
+      {error && <p className="text-xs text-red-400">{error}</p>}
+      <div className="flex gap-2">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[var(--cc)] text-white text-sm font-semibold disabled:opacity-50 transition-colors"
+        >
+          {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+          Guardar
+        </button>
+        <button
+          onClick={onCancel}
+          disabled={saving}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-sec)] text-sm font-semibold transition-colors"
+        >
+          <X size={14} />
+          Cancelar
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
-  const [partidos, setPartidos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [partidos,    setPartidos]    = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState(null);
+  const [editandoId,  setEditandoId]  = useState(null);
+  const [borrandoId,  setBorrandoId]  = useState(null);
+  const [confirmId,   setConfirmId]   = useState(null);
 
   const fetchPartidos = async () => {
     setLoading(true);
@@ -35,6 +120,24 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
   };
 
   useEffect(() => { fetchPartidos(); }, [clubId]);
+
+  const handleDelete = async (id) => {
+    setBorrandoId(id);
+    try {
+      const res = await authFetch(
+        `${API_BASE_URL}/arbitrage/partidos/${id}?club_id=${clubId}`,
+        { method: 'DELETE' },
+      );
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Error al eliminar');
+      setConfirmId(null);
+      fetchPartidos();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setBorrandoId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -101,7 +204,7 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
         {partidos.map((partido) => (
           <div
             key={partido.id}
-            className="bg-[var(--bg-card)] border border-[var(--cc20)] hover:border-[var(--cc20)] rounded-xl p-5 transition-all duration-200"
+            className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl p-5 transition-all duration-200"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
@@ -127,14 +230,33 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
-                <div className="text-right">
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="text-right mr-1">
                   <p className="text-xs text-gray-500 mb-0.5">Monto total</p>
                   <p className="text-[var(--cc)] font-bold">{fmt(partido.montoTotal)}</p>
                 </div>
+
+                {/* Editar */}
+                <button
+                  onClick={() => { setEditandoId(editandoId === partido.id ? null : partido.id); setConfirmId(null); }}
+                  title="Editar partido"
+                  className={`p-2 rounded-lg transition-colors ${editandoId === partido.id ? 'bg-[var(--cc)]/20 text-[var(--cc)]' : 'bg-[var(--bg-surface)] text-gray-400 hover:text-[var(--cc)]'}`}
+                >
+                  <Pencil size={14} />
+                </button>
+
+                {/* Borrar */}
+                <button
+                  onClick={() => { setConfirmId(confirmId === partido.id ? null : partido.id); setEditandoId(null); }}
+                  title="Eliminar partido"
+                  className={`p-2 rounded-lg transition-colors ${confirmId === partido.id ? 'bg-red-500/20 text-red-400' : 'bg-[var(--bg-surface)] text-gray-400 hover:text-red-400'}`}
+                >
+                  <Trash2 size={14} />
+                </button>
+
                 <button
                   onClick={() => onViewPagos(partido.id)}
-                  className="flex items-center gap-2 px-4 py-2 bg-[var(--cc)] hover:bg-[var(--cc)] text-white rounded-lg text-sm font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-[var(--cc)] text-white rounded-lg text-sm font-medium transition-colors"
                 >
                   <Eye size={14} />
                   Ver pagos
@@ -142,6 +264,41 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
               </div>
 
             </div>
+
+            {/* Confirmación borrar */}
+            {confirmId === partido.id && (
+              <div className="mt-4 pt-3 border-t border-red-500/20 flex items-center justify-between gap-3">
+                <p className="text-sm text-red-300">
+                  ¿Eliminar <strong>{partido.titulo}</strong> y todos sus pagos?
+                </p>
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    onClick={() => handleDelete(partido.id)}
+                    disabled={borrandoId === partido.id}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs font-semibold disabled:opacity-50 transition-colors"
+                  >
+                    {borrandoId === partido.id ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                    Eliminar
+                  </button>
+                  <button
+                    onClick={() => setConfirmId(null)}
+                    className="px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] text-gray-400 text-xs font-semibold transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Form editar inline */}
+            {editandoId === partido.id && (
+              <EditForm
+                partido={partido}
+                clubId={clubId}
+                onSaved={() => { setEditandoId(null); fetchPartidos(); }}
+                onCancel={() => setEditandoId(null)}
+              />
+            )}
           </div>
         ))}
       </div>

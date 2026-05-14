@@ -78,7 +78,7 @@ function EstadoBadge({ estado }) {
 }
 
 /* ── componente principal ── */
-export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, suspensiones = [], morosos = [], onRefresh, categoriasJugadores = [], clubConfig }) {
+export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, suspensiones = [], morosos = [], onRefresh, categoriasJugadores = [], clubConfig, color }) {
   const [search, setSearch]               = useState('');
   const [filtroEstado, setFiltroEstado]   = useState('TODOS');
   const [filtroCategoria, setFiltroCategoria] = useState('TODOS');
@@ -229,7 +229,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const exportarPDF = async () => {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const W = 297; const H = 210; const M = 12;
-    const accentRgb = hexToRgb(clubConfig?.color);
+    const accentRgb = hexToRgb(color || clubConfig?.color);
     const clubName  = clubConfig?.nombre || 'Mi Club';
     const fecha     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
     const titulo    = filtroCategoria !== 'TODOS' ? `Jugadores — ${filtroCategoria}` : 'Listado de Jugadores';

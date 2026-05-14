@@ -554,6 +554,7 @@ export default function Dashboard() {
                 onRefresh={handleRefresh}
                 categoriasJugadores={clubConfig?.categorias_jugadores || []}
                 clubConfig={clubConfig}
+                color={c}
               />
             )}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}

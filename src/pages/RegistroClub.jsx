@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, SUPPORT_WHATSAPP } from '../config';
 import {
   Loader2, CheckCircle, AlertCircle, Check,
   Lock, Mail, User, Phone, Building2, MapPin, ChevronLeft,
+  MessageCircle, ArrowRight,
 } from 'lucide-react';
 import { PALETA } from '../components/ThemeSelector';
 
@@ -98,11 +99,11 @@ export default function RegistroClub() {
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
         body: JSON.stringify({
-          nombre_club:   form.nombre_club.trim(),
-          ciudad:        form.ciudad.trim(),
-          nombre_admin:  form.nombre_admin.trim(),
+          nombre_club:   form.nombre_club.trim().toUpperCase(),
+          ciudad:        form.ciudad.trim().toUpperCase(),
+          nombre_admin:  form.nombre_admin.trim().toUpperCase(),
           celular_admin: form.celular_admin.trim(),
-          email:         form.email.trim(),
+          email:         form.email.trim().toLowerCase(),
           password:      form.password,
           color,
           codigo_pais:   pais.codigo,
@@ -269,172 +270,81 @@ export default function RegistroClub() {
         {/* Divisor vertical */}
         <div style={{ background: `${ac}22`, transition: 'background 0.5s' }} />
 
-        {/* ── PANEL DER: formulario scrollable ── */}
-        <div style={{ padding: '36px 36px', overflowY: 'auto', maxHeight: '94vh' }}>
+        {/* ── PANEL DER: contacto WhatsApp ── */}
+        <div style={{ padding: '36px 36px', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 480 }}>
 
-          <div style={{ marginBottom: 22 }}>
-            <button
-              onClick={() => navigate('/login')}
-              style={{ background: 'none', border: 'none', color: 'var(--text-sec)', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 14, padding: 0 }}
-            >
-              <ChevronLeft size={15} /> Volver al inicio
-            </button>
-            <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 800, margin: '0 0 4px' }}>Crear cuenta</h3>
-            <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: 0 }}>Completa los datos de tu club deportivo</p>
+          <button
+            onClick={() => navigate('/login')}
+            style={{ background: 'none', border: 'none', color: 'var(--text-sec)', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 28, padding: 0, alignSelf: 'flex-start' }}
+          >
+            <ChevronLeft size={15} /> Volver al inicio
+          </button>
+
+          <div style={{ marginBottom: 28 }}>
+            <h3 style={{ color: '#fff', fontSize: 22, fontWeight: 800, margin: '0 0 8px', lineHeight: 1.25 }}>
+              ¿Quieres registrar<br />tu club?
+            </h3>
+            <p style={{ color: 'var(--text-sec)', fontSize: 14, margin: 0, lineHeight: 1.65 }}>
+              Antes de crear tu cuenta te hago una demostración personalizada,
+              te explico todo en menos de 10 minutos y te asigno tus credenciales.
+            </p>
           </div>
 
-          {error && (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'rgba(255,94,94,0.1)', border: '1px solid rgba(255,94,94,0.25)', borderRadius: 12, padding: '11px 14px', marginBottom: 20 }}>
-              <AlertCircle size={15} color="#FF5E5E" style={{ flexShrink: 0, marginTop: 1 }} />
-              <p style={{ color: '#FF7070', fontSize: 13, margin: 0 }}>{error}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-
-            <SecLabel text="Datos del club" color={ac} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 22 }}>
-              <Campo label="Nombre del club *" icon={<Building2 size={15} color="var(--text-sec)" />}
-                value={form.nombre_club} onChange={v => set('nombre_club', v)}
-                placeholder="Ej: Atlético Central FC" required />
-              <Campo label="Ciudad" icon={<MapPin size={15} color="var(--text-sec)" />}
-                value={form.ciudad} onChange={v => set('ciudad', v)}
-                placeholder="Ej: Bogotá, Buenos Aires, Lima…" />
-            </div>
-
-            <SecLabel text="País" color={ac} />
-            <div style={{ marginBottom: 22 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-                {PAISES.map(p => {
-                  const activo = pais.codigo === p.codigo;
-                  return (
-                    <button
-                      key={p.codigo}
-                      type="button"
-                      onClick={() => setPais(p)}
-                      style={{
-                        background: activo ? `${ac}20` : 'rgba(255,255,255,0.04)',
-                        border: `1px solid ${activo ? ac : 'rgba(255,255,255,0.08)'}`,
-                        borderRadius: 8,
-                        padding: '7px 8px',
-                        cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', gap: 6,
-                        transition: 'all 0.2s',
-                        boxShadow: activo ? `0 0 8px ${ac}44` : 'none',
-                      }}
-                    >
-                      <span style={{ fontSize: 14, lineHeight: 1 }}>{p.bandera}</span>
-                      <span style={{ color: activo ? '#fff' : '#9CA3AF', fontSize: 11, fontWeight: activo ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {p.nombre}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-              <p style={{ color: 'var(--text-sec)', fontSize: 11, margin: '6px 0 0' }}>
-                Código WhatsApp: <strong style={{ color: ac, transition: 'color 0.5s' }}>+{pais.codigo}</strong>
-              </p>
-            </div>
-
-            <SecLabel text="Administrador" color={ac} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 22 }}>
-              <Campo label="Tu nombre *" icon={<User size={15} color="var(--text-sec)" />}
-                value={form.nombre_admin} onChange={v => set('nombre_admin', v)}
-                placeholder="Ej: Juan García" required />
-              <Campo label="Celular (WhatsApp)" icon={<Phone size={15} color="var(--text-sec)" />}
-                value={form.celular_admin} onChange={v => set('celular_admin', v)}
-                placeholder={`+${pais.codigo} 300 1234567`} type="tel" />
-              <Campo label="Email *" icon={<Mail size={15} color="var(--text-sec)" />}
-                value={form.email} onChange={v => set('email', v)}
-                placeholder="tu@email.com" type="email" required />
-            </div>
-
-            <SecLabel text="Contraseña" color={ac} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 22 }}>
-              <Campo label="Contraseña * (mínimo 8 caracteres)" icon={<Lock size={15} color="var(--text-sec)" />}
-                value={form.password} onChange={v => set('password', v)}
-                type="password" required />
-              <Campo label="Confirmar contraseña *" icon={<Lock size={15} color="var(--text-sec)" />}
-                value={form.confirmacion} onChange={v => set('confirmacion', v)}
-                type="password" required />
-            </div>
-
-            <SecLabel text="Color del club" color={ac} />
-            <div style={{ marginBottom: 26 }}>
-              <p style={{ color: 'var(--text-sec)', fontSize: 12, marginBottom: 12 }}>
-                Aparecerá en tu dashboard y comunicaciones.
-              </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-                {PALETA.map(p => (
-                  <button
-                    key={p.hex}
-                    type="button"
-                    title={p.nombre}
-                    onClick={() => setColor(p.hex)}
-                    style={{
-                      width: 30, height: 30,
-                      borderRadius: 8, background: p.hex,
-                      border: color === p.hex ? '2px solid #fff' : '2px solid transparent',
-                      boxShadow: color === p.hex ? `0 0 0 2px ${p.hex}, 0 0 10px ${p.hex}99` : 'none',
-                      cursor: 'pointer', flexShrink: 0,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      transition: 'all 0.15s', padding: 0,
-                    }}
-                  >
-                    {color === p.hex && <Check size={11} color="#fff" strokeWidth={3} />}
-                  </button>
-                ))}
-              </div>
-              {/* Preview del color seleccionado */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                background: `${color}12`,
-                border: `1px solid ${color}40`,
-                borderRadius: 10, padding: '10px 14px',
-                transition: 'all 0.3s',
-              }}>
-                <div style={{ width: 28, height: 28, borderRadius: 7, background: color, flexShrink: 0, boxShadow: `0 0 12px ${color}88` }} />
-                <div>
-                  <p style={{ color: '#fff', fontSize: 13, fontWeight: 600, margin: 0 }}>{colorActivo.nombre}</p>
-                  <p style={{ color: 'var(--text-sec)', fontSize: 11, margin: 0 }}>Color principal del dashboard</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
+            {[
+              { icon: '⚡', text: 'Demo en vivo de la plataforma' },
+              { icon: '🎨', text: 'Personalizamos el color y logo de tu club' },
+              { icon: '🔒', text: 'Credenciales seguras asignadas por nosotros' },
+              { icon: '🆓', text: '14 días de prueba gratuita sin tarjeta' },
+            ].map(f => (
+              <div key={f.icon} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+                  background: `${ac}18`, border: `1px solid ${ac}33`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+                  transition: 'all 0.7s',
+                }}>
+                  {f.icon}
                 </div>
+                <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{f.text}</span>
               </div>
-            </div>
+            ))}
+          </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%', padding: '13px',
-                background: loading ? 'rgba(255,255,255,0.07)' : ac,
-                border: 'none', borderRadius: 12,
-                color: '#fff', fontSize: 15, fontWeight: 700,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                transition: 'background 0.5s, box-shadow 0.5s',
-                boxShadow: loading ? 'none' : `0 4px 24px ${ac}55`,
-                marginBottom: slowHint ? 8 : 16,
-              }}
-            >
-              {loading
-                ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Creando tu club…</>
-                : 'Crear mi club gratis'}
+          <a
+            href={`https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent('Hola, quiero registrar mi club en ZenSports 🏆')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              padding: '14px 24px',
+              background: '#25D366',
+              borderRadius: 14,
+              color: '#fff', fontSize: 15, fontWeight: 700,
+              textDecoration: 'none',
+              boxShadow: '0 4px 24px rgba(37,211,102,0.4)',
+              transition: 'opacity 0.2s, box-shadow 0.2s',
+              marginBottom: 14,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+          >
+            <MessageCircle size={20} />
+            Hablar con Diego por WhatsApp
+            <ArrowRight size={16} />
+          </a>
+
+          <p style={{ textAlign: 'center', color: 'var(--text-mut)', fontSize: 12, margin: '0 0 20px', lineHeight: 1.5 }}>
+            Respuesta en minutos · Lunes a sábado · Sin compromiso
+          </p>
+
+          <p style={{ textAlign: 'center', color: 'var(--text-mut)', fontSize: 13, margin: 0 }}>
+            ¿Ya tienes cuenta?{' '}
+            <button onClick={() => navigate('/login')}
+              style={{ background: 'none', border: 'none', color: ac, cursor: 'pointer', fontSize: 13, fontWeight: 600, padding: 0, transition: 'color 0.5s' }}>
+              Ingresar
             </button>
-
-            {slowHint && (
-              <p style={{ textAlign: 'center', color: 'var(--text-sec)', fontSize: 12, margin: '0 0 14px', lineHeight: 1.5 }}>
-                El servidor está despertando, puede tardar unos segundos más…
-              </p>
-            )}
-
-            <p style={{ textAlign: 'center', color: 'var(--text-mut)', fontSize: 13 }}>
-              ¿Ya tienes cuenta?{' '}
-              <button onClick={() => navigate('/login')}
-                style={{ background: 'none', border: 'none', color: ac, cursor: 'pointer', fontSize: 13, fontWeight: 600, padding: 0, transition: 'color 0.5s' }}>
-                Ingresar
-              </button>
-            </p>
-          </form>
+          </p>
         </div>
       </div>
 

@@ -9,6 +9,8 @@ import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
 import { API_BASE_URL } from '../config';
 import { getClubId } from '../services/api';
+import { PAISES_NACIMIENTO } from '../lib/paises';
+import { normalizarCategorias } from '../lib/categorias';
 import FinancieroContent from './FinancieroContent';
 
 const POSICIONES = [
@@ -88,6 +90,7 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
     celular:             jugador.celular             || '',
     correo_electronico:  jugador.correo_electronico  || '',
     instagram:           jugador.instagram           || '',
+    pais_nacimiento:     jugador.pais_nacimiento     || '',
     lugar_de_nacimiento: jugador.lugar_de_nacimiento || '',
     fecha_nacimiento:    jugador.fecha_nacimiento    || '',
     tipo_sangre:         jugador.tipo_sangre         || '',
@@ -101,6 +104,7 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
     celular_contacto:    jugador.celular_contacto    || '',
     notas:               jugador.notas               || '',
     categoria:           jugador.categoria           || '',
+    equipo:              jugador.equipo              || '',
   });
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
@@ -144,9 +148,19 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
   const guardar = async () => {
     setGuardando(true);
     setError('');
+    const up = v => typeof v === 'string' ? v.trim().toUpperCase() : v;
     try {
       const payload = {
         ...form,
+        nombre:              up(form.nombre),
+        apellidos:           up(form.apellidos),
+        lugar_de_nacimiento: up(form.lugar_de_nacimiento),
+        eps:                 up(form.eps),
+        municipio:           up(form.municipio),
+        barrio:              up(form.barrio),
+        direccion:           up(form.direccion),
+        familiar_emergencia: up(form.familiar_emergencia),
+        correo_electronico:  form.correo_electronico?.trim().toLowerCase(),
         numero_camiseta: form.numero_camiseta ? parseInt(form.numero_camiseta)  : null,
         estatura:        form.estatura        ? parseFloat(form.estatura)        : null,
         peso:            form.peso            ? parseFloat(form.peso)            : null,
@@ -251,17 +265,44 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
             onChange={set('numero_camiseta')}
             placeholder="Ej: 10"
           />
-          {categoriasJugadores.length > 0 && (
-            <div className="space-y-1 col-span-2">
-              <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Categoría del jugador</label>
-              <select value={form.categoria} onChange={set('categoria')} className={INPUT_CLS}>
-                <option value="">— Sin categoría —</option>
-                {categoriasJugadores.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-          )}
+          {categoriasJugadores.length > 0 && (() => {
+            const cats = normalizarCategorias(categoriasJugadores);
+            const catSeleccionada = cats.find(c => c.nombre === form.categoria);
+            return (
+              <>
+                <div className="space-y-1">
+                  <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Categoría</label>
+                  <select
+                    value={form.categoria}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setForm(f => ({ ...f, categoria: val, equipo: '' }));
+                    }}
+                    className={INPUT_CLS + ' cursor-pointer'}
+                  >
+                    <option value="">— Sin categoría —</option>
+                    {cats.map(c => (
+                      <option key={c.nombre} value={c.nombre}>{c.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Equipo</label>
+                  <select
+                    value={form.equipo}
+                    onChange={set('equipo')}
+                    className={INPUT_CLS + ' cursor-pointer'}
+                    disabled={!catSeleccionada}
+                  >
+                    <option value="">— Sin equipo —</option>
+                    {catSeleccionada?.equipos.map(eq => (
+                      <option key={eq} value={eq}>{eq}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            );
+          })()}
         </div>
       </Seccion>
 
@@ -290,7 +331,24 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
       {/* Datos médicos */}
       <Seccion titulo="Datos Médicos">
         <div className="grid grid-cols-2 gap-3">
-          <CampoEdit label="Lugar de nacimiento" value={form.lugar_de_nacimiento} onChange={set('lugar_de_nacimiento')} placeholder="Ciudad" />
+          {/* País de nacimiento */}
+          <div className="space-y-1">
+            <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">País de nacimiento</label>
+            <select
+              value={form.pais_nacimiento}
+              onChange={set('pais_nacimiento')}
+              className={INPUT_CLS + ' cursor-pointer'}
+              style={{ appearance: 'none', WebkitAppearance: 'none' }}
+            >
+              <option value="">— Seleccionar —</option>
+              {PAISES_NACIMIENTO.map(p => (
+                <option key={p.codigo + p.nombre} value={p.nombre}>
+                  {p.bandera} {p.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <CampoEdit label="Ciudad de nacimiento" value={form.lugar_de_nacimiento} onChange={set('lugar_de_nacimiento')} placeholder="Ciudad" />
           <CampoEdit label="Fecha de nacimiento" value={form.fecha_nacimiento}    onChange={set('fecha_nacimiento')}    type="date" />
           <CampoEdit label="Tipo de sangre"      value={form.tipo_sangre}         onChange={set('tipo_sangre')}         placeholder="O+, A-, B+…" />
           <CampoEdit label="EPS"                 value={form.eps}                 onChange={set('eps')}                 placeholder="Nombre EPS" />

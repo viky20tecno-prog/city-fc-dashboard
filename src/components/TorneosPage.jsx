@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Trophy, Plus, ArrowLeft, UserPlus, Save,
-  Loader2, Pencil, Trash2, X, Users, Download,
+  Loader2, Pencil, Trash2, X, Users, Download, AlertTriangle,
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { authFetch } from '../lib/authFetch';
@@ -196,6 +196,24 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     doc.save(`${torneoSeleccionado.toLowerCase().replace(/\s+/g, '-')}-inscritos.pdf`);
   };
 
+  const torneoNombresActivos   = torneosDef.map(t => t.nombre);
+  const enrollmentsHuerfanos  = enrollments.filter(e => !torneoNombresActivos.includes(e.nombre_torneo));
+  const [eliminandoHuerfanos, setEliminandoHuerfanos] = useState(false);
+
+  const eliminarHuerfanos = async () => {
+    if (!confirm(`¿Eliminar ${enrollmentsHuerfanos.length} inscripciones huérfanas? Esta acción no se puede deshacer.`)) return;
+    setEliminandoHuerfanos(true);
+    try {
+      await Promise.all(
+        enrollmentsHuerfanos.map(e =>
+          authFetch(`${API_BASE}/torneos/${e.id}?club_id=${clubId}`, { method: 'DELETE' })
+        )
+      );
+      await cargarEnrollments();
+    } catch (e) { console.error(e); }
+    finally { setEliminandoHuerfanos(false); }
+  };
+
   const inscritosDelTorneo    = torneoSeleccionado ? enrollments.filter(e => e.nombre_torneo === torneoSeleccionado) : [];
   const yaInscritos           = new Set(inscritosDelTorneo.map(e => String(e.cedula)));
   const jugadoresDisponibles  = jugadoresClub.filter(j => !yaInscritos.has(String(j.cedula)));
@@ -320,6 +338,40 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {/* ── Inscripciones huérfanas ── */}
+          {enrollmentsHuerfanos.length > 0 && (
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-5">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-yellow-300 mb-1">
+                    {enrollmentsHuerfanos.length} inscripción{enrollmentsHuerfanos.length !== 1 ? 'es' : ''} huérfana{enrollmentsHuerfanos.length !== 1 ? 's' : ''} detectada{enrollmentsHuerfanos.length !== 1 ? 's' : ''}
+                  </p>
+                  <p className="text-xs text-yellow-200/70 mb-3">
+                    Estos jugadores tienen inscripción en torneos que ya no existen en la configuración del club:
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {[...new Set(enrollmentsHuerfanos.map(e => e.nombre_torneo))].map(nombre => (
+                      <span key={nombre} className="px-2 py-1 rounded-lg text-xs bg-yellow-500/15 text-yellow-300 border border-yellow-500/20">
+                        {nombre} ({enrollmentsHuerfanos.filter(e => e.nombre_torneo === nombre).length} jugador{enrollmentsHuerfanos.filter(e => e.nombre_torneo === nombre).length !== 1 ? 'es' : ''})
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    onClick={eliminarHuerfanos}
+                    disabled={eliminandoHuerfanos}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 text-sm font-semibold hover:bg-yellow-500/30 transition disabled:opacity-50"
+                  >
+                    {eliminandoHuerfanos
+                      ? <><Loader2 className="w-4 h-4 animate-spin" /> Eliminando…</>
+                      : <><Trash2 className="w-4 h-4" /> Eliminar inscripciones huérfanas</>
+                    }
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

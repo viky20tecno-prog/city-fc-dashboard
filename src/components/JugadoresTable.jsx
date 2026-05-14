@@ -1,10 +1,12 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users } from 'lucide-react';
+import jsPDF from 'jspdf';
 import { ESTADO_COLORS } from '../config';
 import HojaDeVida from './HojaDeVida';
 import SuspensionModal from './SuspensionModal';
 import ImportarJugadoresModal from './ImportarJugadoresModal';
 import { deletePlayer } from '../services/api';
+import { normalizarCategorias, listarEquipos } from '../lib/categorias';
 
 /* ── colores de cada estado para el dropdown ── */
 const ESTADO_DOT = {
@@ -78,6 +80,7 @@ function EstadoBadge({ estado }) {
 export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, suspensiones = [], morosos = [], onRefresh, categoriasJugadores = [], clubConfig }) {
   const [search, setSearch]               = useState('');
   const [filtroEstado, setFiltroEstado]   = useState('TODOS');
+  const [filtroCategoria, setFiltroCategoria] = useState('TODOS');
   const [sortField, setSortField]         = useState('nombreCompleto');
   const [sortDir, setSortDir]             = useState('asc');
   const [jugadorDetalle, setJugadorDetalle]       = useState(null);
@@ -163,12 +166,18 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     });
   }, [jugadores, mensualidades, cedulasMorosos]);
 
+  const opcionesCategoria = useMemo(() => {
+    const equipos = listarEquipos(categoriasJugadores);
+    return ['TODOS', ...equipos];
+  }, [categoriasJugadores]);
+
   const filtered = useMemo(() => {
     return jugadoresConPago
       .filter(j => {
-        const matchSearch  = search === '' || j.nombreCompleto?.toLowerCase().includes(search.toLowerCase()) || j.cedula?.includes(search);
-        const matchEstado  = filtroEstado === 'TODOS' || j.estadoPago === filtroEstado;
-        return matchSearch && matchEstado;
+        const matchSearch    = search === '' || j.nombreCompleto?.toLowerCase().includes(search.toLowerCase()) || j.cedula?.includes(search);
+        const matchEstado    = filtroEstado === 'TODOS' || j.estadoPago === filtroEstado;
+        const matchCategoria = filtroCategoria === 'TODOS' || j.equipo === filtroCategoria || j.categoria === filtroCategoria;
+        return matchSearch && matchEstado && matchCategoria;
       })
       .sort((a, b) => {
         const cmp = (a[sortField] || '').toString().localeCompare((b[sortField] || '').toString(), 'es', { numeric: true });
@@ -192,12 +201,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const estados = ['TODOS', 'AL_DIA', 'PENDIENTE', 'PARCIAL', 'MORA'];
 
   const exportarCSV = () => {
-    const headers = ['Nombre', 'Cédula', 'Celular', 'Estado', 'Pagado', 'Pendiente', 'Activo'];
+    const headers = ['Nombre', 'Cédula', 'Celular', 'Estado', 'Categoría', 'Equipo', 'Pagado', 'Pendiente', 'Activo'];
     const rows = filtered.map(j => [
       j.nombreCompleto,
       j.cedula,
       j.celular || '',
       j.estadoPago,
+      j.categoria || '',
+      j.equipo || '',
       j.totalPagado,
       j.saldoPendiente,
       j.activo ? 'SI' : 'NO',
@@ -212,6 +223,69 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     a.download = `jugadores_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const exportarPDF = () => {
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const W = 297;
+    const M = 12;
+    const fecha = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+    const titulo = filtroCategoria !== 'TODOS' ? `Jugadores — ${filtroCategoria}` : 'Listado de Jugadores';
+
+    doc.setFillColor(6, 12, 24);
+    doc.rect(0, 0, W, 20, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(255, 255, 255);
+    doc.text(titulo, M, 13);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(130, 160, 200);
+    doc.text(`Generado: ${fecha}  ·  ${filtered.length} jugadores`, W - M, 13, { align: 'right' });
+
+    const cols = [
+      { label: 'Nombre',    x: M,       w: 60 },
+      { label: 'Cédula',    x: M + 62,  w: 32 },
+      { label: 'Celular',   x: M + 96,  w: 30 },
+      { label: 'Categoría', x: M + 128, w: 30 },
+      { label: 'Equipo',    x: M + 160, w: 35 },
+      { label: 'Estado',    x: M + 197, w: 28 },
+      { label: 'Pagado',    x: M + 227, w: 28 },
+    ];
+
+    let y = 28;
+    doc.setFillColor(10, 22, 40);
+    doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(100, 130, 160);
+    cols.forEach(col => doc.text(col.label, col.x, y));
+    y += 7;
+
+    filtered.forEach((j, i) => {
+      if (y > 190) { doc.addPage(); y = 20; }
+      doc.setFillColor(i % 2 === 0 ? 8 : 14, i % 2 === 0 ? 18 : 26, i % 2 === 0 ? 34 : 46);
+      doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.8);
+      doc.setTextColor(190, 210, 230);
+      doc.text((j.nombreCompleto || '').slice(0, 28),    cols[0].x, y);
+      doc.text(String(j.cedula || ''),                   cols[1].x, y);
+      doc.text(String(j.celular || ''),                  cols[2].x, y);
+      doc.text((j.categoria || '—').slice(0, 14),        cols[3].x, y);
+      doc.text((j.equipo || '—').slice(0, 16),           cols[4].x, y);
+      const estadoColor = j.estadoPago === 'AL_DIA' ? [34, 197, 94] : j.estadoPago === 'MORA' ? [239, 68, 68] : [245, 166, 35];
+      doc.setTextColor(...estadoColor);
+      doc.setFont('helvetica', 'bold');
+      doc.text(j.estadoPago || '',                       cols[5].x, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(190, 210, 230);
+      doc.text(formatCOP(j.totalPagado),                 cols[6].x, y);
+      y += 8;
+    });
+
+    const filtroLabel = filtroCategoria !== 'TODOS' ? `-${filtroCategoria.toLowerCase().replace(/\s+/g, '-')}` : '';
+    doc.save(`jugadores${filtroLabel}-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   return (
@@ -242,6 +316,11 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               {/* Filtro de estado — dropdown custom */}
               <FiltroDropdown value={filtroEstado} onChange={setFiltroEstado} opciones={estados} />
 
+              {/* Filtro de categoría / equipo */}
+              {opcionesCategoria.length > 1 && (
+                <FiltroDropdown value={filtroCategoria} onChange={setFiltroCategoria} opciones={opcionesCategoria} />
+              )}
+
               {/* Exportar CSV */}
               <button
                 onClick={exportarCSV}
@@ -253,6 +332,19 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               >
                 <Download className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">CSV</span>
+              </button>
+
+              {/* Exportar PDF */}
+              <button
+                onClick={exportarPDF}
+                title="Exportar listado a PDF"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
+                style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.25)', color: '#A855F7', whiteSpace: 'nowrap', flexShrink: 0 }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(168,85,247,0.18)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(168,85,247,0.08)'}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">PDF</span>
               </button>
 
               {/* Importar Excel */}

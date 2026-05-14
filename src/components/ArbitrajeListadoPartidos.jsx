@@ -64,9 +64,17 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
     return (
       <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl p-12 text-center">
         <div className="text-5xl mb-4">🏟️</div>
-        <h3 className="text-white font-semibold text-lg mb-2">Sin partidos registrados</h3>
-        <p className="text-gray-400 text-sm">
-          Ve a la pestaña <span className="text-[var(--cc)] font-medium">Registrar Partido</span> para agregar el primero.
+        <h3 className="text-white font-semibold text-lg mb-2">Aún no hay partidos registrados</h3>
+        <p className="text-gray-400 text-sm mb-4">
+          Los partidos de arbitraje se crean manualmente por el administrador del club.
+        </p>
+        <div className="inline-flex items-center gap-2 bg-[var(--cc)]/10 border border-[var(--cc)]/20 rounded-lg px-4 py-2">
+          <span className="text-[var(--cc)] text-sm font-medium">
+            👆 Usa la pestaña <strong>Registrar Partido</strong> para crear el primero
+          </span>
+        </div>
+        <p className="text-gray-500 text-xs mt-4">
+          Cada partido registrado permite gestionar los pagos de arbitraje de forma independiente.
         </p>
       </div>
     );

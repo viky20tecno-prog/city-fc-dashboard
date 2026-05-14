@@ -197,7 +197,92 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
         descripcion: `Pago nómina ${mesVista} — ${empleado.nombre}`,
         monto, fecha: hoy(), created_at: new Date().toISOString(),
       }, ...m]);
+      generarComprobantePago(empleado, monto, mesVista);
     } catch (e) { console.error(e); }
+  };
+
+  /* ── Comprobante PDF de nómina ──────────────────────── */
+  const generarComprobantePago = async (empleado, monto, mes) => {
+    const acHex = (typeof color === 'string' && color.startsWith('#')) ? color : '#E14924';
+    const cr = parseInt(acHex.slice(1, 3), 16);
+    const cg = parseInt(acHex.slice(3, 5), 16);
+    const cb = parseInt(acHex.slice(5, 7), 16);
+
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [105, 148] }); // A6
+    const W = 105;
+    const M = 10;
+    const ahora = new Date();
+    const fechaStr = ahora.toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+    const horaStr  = ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+
+    const drawHeader = () => {
+      doc.setFillColor(cr, cg, cb);
+      doc.rect(0, 0, W, 22, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(255, 255, 255);
+      doc.text(clubNombre || 'Mi Club', M, 10);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(255, 255, 255, 0.8);
+      doc.text('COMPROBANTE DE PAGO DE NÓMINA', M, 16);
+      doc.setFillColor(255, 255, 255, 0.15);
+      doc.rect(0, 22, W, 0.5, 'F');
+    };
+
+    const drawRow = (label, value, y, shade) => {
+      if (shade) { doc.setFillColor(245, 247, 252); doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F'); }
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 110, 130);
+      doc.text(label, M, y);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(20, 30, 50);
+      doc.text(String(value || '—'), W - M, y, { align: 'right' });
+    };
+
+    drawHeader();
+
+    // Cargo logo si existe
+    if (clubConfig?.logo_url) {
+      try {
+        await new Promise(resolve => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width; canvas.height = img.height;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            doc.addImage(canvas.toDataURL('image/png'), 'PNG', W - M - 12, 4, 12, 12);
+            resolve();
+          };
+          img.onerror = resolve;
+          img.src = clubConfig.logo_url;
+        });
+      } catch (_) {}
+    }
+
+    let y = 32;
+    drawRow('Empleado',   empleado.nombre,             y, false); y += 10;
+    drawRow('Cargo',      empleado.cargo || '—',       y, true);  y += 10;
+    drawRow('Mes pagado', mesLabel(mes),                y, false); y += 10;
+    drawRow('Monto',      fmt(monto),                  y, true);  y += 10;
+    drawRow('Fecha',      fechaStr,                    y, false); y += 10;
+    drawRow('Hora',       horaStr,                     y, true);  y += 10;
+    drawRow('Método',     'Nómina',                    y, false); y += 14;
+
+    doc.setDrawColor(cr, cg, cb);
+    doc.setLineWidth(0.4);
+    doc.line(M, y, W - M, y);
+    y += 6;
+
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(7);
+    doc.setTextColor(150, 160, 180);
+    doc.text('Generado por ZenSports · zensports.vercel.app', W / 2, y, { align: 'center' });
+
+    const nombreArchivo = `comprobante-nomina-${(empleado.nombre || 'empleado').replace(/\s+/g, '-').toLowerCase()}-${mes}.pdf`;
+    doc.save(nombreArchivo);
   };
 
   /* ── Exportar PDF ────────────────────────────────────── */

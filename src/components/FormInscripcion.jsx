@@ -9,6 +9,9 @@ import {
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { useClubConfigPublic } from '../hooks/useClubConfigPublic';
+import PoliticaPrivacidadModal from './PoliticaPrivacidadModal';
+import { PAISES_NACIMIENTO } from '../lib/paises';
+import { normalizarCategorias } from '../lib/categorias';
 
 const CAMPOS = [
   { key: 'tipo_id',           label: 'Tipo de documento',             type: 'select',  required: true,  section: 'personal',   icon: CreditCard,   options: ['Cédula de Ciudadanía', 'Tarjeta de Identidad', 'Cédula de Extranjería', 'Pasaporte', 'NIT'] },
@@ -18,7 +21,8 @@ const CAMPOS = [
   { key: 'celular',           label: 'Celular (WhatsApp)',            type: 'tel',     required: true,  section: 'contacto',   icon: Phone,        placeholder: '3001234567 (sin código de país)' },
   { key: 'correo_electronico',label: 'Correo electrónico',           type: 'email',   required: true,  section: 'contacto',   icon: Mail,         placeholder: 'correo@ejemplo.com' },
   { key: 'instagram',         label: 'Instagram (opcional)',          type: 'text',    required: false, section: 'contacto',   icon: Instagram,    placeholder: '@tucuenta' },
-  { key: 'lugar_de_nacimiento',label:'Lugar de nacimiento',          type: 'text',    required: true,  section: 'adicional',  icon: MapPin,       placeholder: 'Ciudad de México, Lima, Bogotá…' },
+  { key: 'pais_nacimiento',    label: 'País de nacimiento',           type: 'pais',    required: false, section: 'adicional',  icon: MapPin },
+  { key: 'lugar_de_nacimiento',label:'Ciudad de nacimiento',         type: 'text',    required: true,  section: 'adicional',  icon: MapPin,       placeholder: 'Ciudad de México, Lima, Bogotá…' },
   { key: 'fecha_nacimiento',  label: 'Fecha de nacimiento',          type: 'date',    required: true,  section: 'adicional',  icon: Calendar },
   { key: 'tipo_sangre',       label: 'Tipo de sangre',               type: 'select',  required: true,  section: 'adicional',  icon: Droplets,     options: ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'] },
   { key: 'eps',               label: 'EPS / Seguro médico',          type: 'text',    required: true,  section: 'adicional',  icon: Building2,    placeholder: 'Ej: Sura, Nueva EPS, Sanitas…' },
@@ -42,7 +46,7 @@ const SECCIONES = [
 const GRID_2 = {
   personal:   [['tipo_id','cedula'],['nombre','apellidos']],
   contacto:   [['celular','correo_electronico'],['instagram']],
-  adicional:  [['lugar_de_nacimiento','fecha_nacimiento'],['tipo_sangre','eps'],['estatura','peso']],
+  adicional:  [['pais_nacimiento','lugar_de_nacimiento'],['fecha_nacimiento','tipo_sangre'],['eps'],['estatura','peso']],
   residencia: [['municipio','direccion'],['barrio']],
   emergencia: [['familiar_emergencia','celular_contacto']],
 };
@@ -60,6 +64,8 @@ export default function FormInscripcion() {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [photoDragging, setPhotoDragging] = useState(false);
   const [savedForm, setSavedForm]     = useState(null);
+  const [aceptaPrivacidad, setAceptaPrivacidad] = useState(false);
+  const [showPolitica, setShowPolitica]         = useState(false);
   const photoInputRef = useRef(null);
 
   const c        = clubConfig?.color  || '#E88C2A';
@@ -101,11 +107,26 @@ export default function FormInscripcion() {
     if (!/^\d{7,15}$/.test(form.cedula.trim())) {
       setStatus('error'); setError('El documento debe tener entre 7 y 15 dígitos.'); return;
     }
-    if (!/^\d{6,15}$/.test(form.celular.trim())) {
-      setStatus('error'); setError('El celular debe tener entre 6 y 15 dígitos.'); return;
+    if (!/^\d{7,15}$/.test(form.celular.trim())) {
+      setStatus('error'); setError('El celular debe tener entre 7 y 15 dígitos.'); return;
+    }
+    if (form.nombre && !/^[A-ZÁÉÍÓÚÑa-záéíóúñ\s'\-]{2,60}$/.test(form.nombre.trim())) {
+      setStatus('error'); setError('El nombre solo puede contener letras (mínimo 2 caracteres).'); return;
+    }
+    if (form.apellidos && !/^[A-ZÁÉÍÓÚÑa-záéíóúñ\s'\-]{2,60}$/.test(form.apellidos.trim())) {
+      setStatus('error'); setError('Los apellidos solo pueden contener letras (mínimo 2 caracteres).'); return;
+    }
+    if (form.eps && form.eps.trim().length < 2) {
+      setStatus('error'); setError('El nombre de la EPS debe tener al menos 2 caracteres.'); return;
+    }
+    if (form.direccion && form.direccion.trim().length > 0 && form.direccion.trim().length < 5) {
+      setStatus('error'); setError('La dirección debe tener al menos 5 caracteres.'); return;
     }
     if (form.celular_contacto && form.celular_contacto.trim() === form.celular.trim()) {
       setStatus('error'); setError('El celular de emergencia debe ser diferente al tuyo.'); return;
+    }
+    if (!aceptaPrivacidad) {
+      setStatus('error'); setError('Debes aceptar la Política de Tratamiento de Datos Personales.'); return;
     }
 
     let foto_url = null;
@@ -123,13 +144,26 @@ export default function FormInscripcion() {
       } catch (_) { /* foto no crítica — seguimos sin ella */ }
     }
 
+    const up = v => typeof v === 'string' ? v.trim().toUpperCase() : v;
+
     try {
       const res = await fetch(`${API_BASE_URL}/inscripcion?club_id=${clubId}`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
+          nombre:              up(form.nombre),
+          apellidos:           up(form.apellidos),
+          lugar_de_nacimiento: up(form.lugar_de_nacimiento),
+          eps:                 up(form.eps),
+          municipio:           up(form.municipio),
+          direccion:           up(form.direccion),
+          barrio:              up(form.barrio),
+          familiar_emergencia: up(form.familiar_emergencia),
+          correo_electronico:  form.correo_electronico?.trim().toLowerCase(),
           ...(foto_url ? { foto_url } : {}),
+          ...(form.categoria ? { categoria: form.categoria } : {}),
+          ...(form.equipo    ? { equipo:    form.equipo    } : {}),
           activo:            'SI',
           tipo_descuento:    'NA',
           fecha_inscripcion: new Date().toISOString().split('T')[0],
@@ -379,6 +413,7 @@ export default function FormInscripcion() {
   /* ── FORMULARIO ────────────────────────────────────────────────────── */
   return (
     <div style={S.page}>
+      {showPolitica && <PoliticaPrivacidadModal onClose={() => setShowPolitica(false)} />}
       <style>{`
         .fi { width:100%; box-sizing:border-box; padding:10px 12px 10px 36px;
               font-size:14px; background:rgba(255,255,255,0.05);
@@ -531,6 +566,84 @@ export default function FormInscripcion() {
               );
             })}
 
+            {/* Sección categoría y equipo (si el club tiene categorías) */}
+            {clubConfig?.categorias_jugadores?.length > 0 && (() => {
+              const cats = normalizarCategorias(clubConfig.categorias_jugadores);
+              const catSel = cats.find(c => c.nombre === form.categoria);
+              return (
+                <div style={S.card}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                    <div style={{ width: 3, height: 16, background: c, borderRadius: 2, flexShrink: 0 }} />
+                    <span style={{ color: 'var(--text-sec)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+                      Categoría
+                    </span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, color: 'var(--text-sec)', marginBottom: 5, fontWeight: 500 }}>
+                        Categoría
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <select
+                          value={form.categoria || ''}
+                          onChange={e => setForm(f => ({ ...f, categoria: e.target.value, equipo: '' }))}
+                          className="fi fi-sel"
+                        >
+                          <option value="">— Sin categoría —</option>
+                          {cats.map(cat => (
+                            <option key={cat.nombre} value={cat.nombre}>{cat.nombre}</option>
+                          ))}
+                        </select>
+                        <ChevronDown size={13} color="var(--text-mut)" style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, color: 'var(--text-sec)', marginBottom: 5, fontWeight: 500 }}>
+                        Equipo
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <select
+                          value={form.equipo || ''}
+                          onChange={e => setForm(f => ({ ...f, equipo: e.target.value }))}
+                          className="fi fi-sel"
+                          disabled={!catSel}
+                          style={!catSel ? { opacity: 0.5 } : {}}
+                        >
+                          <option value="">— Sin equipo —</option>
+                          {catSel?.equipos.map(eq => (
+                            <option key={eq} value={eq}>{eq}</option>
+                          ))}
+                        </select>
+                        <ChevronDown size={13} color="var(--text-mut)" style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Aceptación política de privacidad */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10 }}>
+              <input
+                type="checkbox"
+                id="privacidad-check"
+                checked={aceptaPrivacidad}
+                onChange={e => setAceptaPrivacidad(e.target.checked)}
+                style={{ marginTop: 3, flexShrink: 0, cursor: 'pointer', accentColor: c }}
+              />
+              <label htmlFor="privacidad-check" style={{ fontSize: 12, color: 'var(--text-sec)', lineHeight: 1.55, cursor: 'pointer' }}>
+                He leído y acepto la{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowPolitica(true)}
+                  style={{ background: 'none', border: 'none', color: c, cursor: 'pointer', fontSize: 12, fontWeight: 600, padding: 0, textDecoration: 'underline' }}
+                >
+                  Política de Tratamiento de Datos Personales
+                </button>
+                {' '}de conformidad con la Ley 1581 de 2012.
+              </label>
+            </div>
+
             {status === 'error' && (
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '11px 14px', background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, fontSize: 13, color: '#F87171', animation: 'fadein .3s ease' }}>
                 <AlertCircle size={15} style={{ flexShrink: 0, marginTop: 1 }} />
@@ -571,6 +684,7 @@ export default function FormInscripcion() {
 function FieldBox({ campo, form, onChange, c }) {
   const Icon = campo.icon;
   const isSelect = campo.type === 'select';
+  const isPais   = campo.type === 'pais';
 
   const labelEl = (
     <label style={{ display: 'block', fontSize: 12, color: 'var(--text-sec)', marginBottom: 5, fontWeight: 500 }}>
@@ -587,6 +701,30 @@ function FieldBox({ campo, form, onChange, c }) {
       style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
     />
   ) : null;
+
+  if (isPais) {
+    return (
+      <div>
+        {labelEl}
+        <div style={wrapStyle}>
+          {iconEl}
+          <select
+            value={form[campo.key] || ''}
+            onChange={e => onChange(campo.key, e.target.value)}
+            className="fi fi-sel"
+          >
+            <option value="">— Seleccionar país —</option>
+            {PAISES_NACIMIENTO.map(p => (
+              <option key={p.codigo + p.nombre} value={p.nombre}>
+                {p.bandera} {p.nombre}
+              </option>
+            ))}
+          </select>
+          <ChevronDown size={13} color="var(--text-mut)" style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+        </div>
+      </div>
+    );
+  }
 
   if (isSelect) {
     return (

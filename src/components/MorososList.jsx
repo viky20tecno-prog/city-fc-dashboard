@@ -5,15 +5,20 @@ const formatCOP = (n) => new Intl.NumberFormat('es-CO', {
   style: 'currency', currency: 'COP', maximumFractionDigits: 0,
 }).format(parseInt(n) || 0);
 
-function exportarPDF(morosos, clubNombre = 'Mi Club') {
-  const fecha     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
-  const mesActual = new Date().toLocaleString('es-CO', { month: 'long', year: 'numeric' });
+function exportarPDF(morosos, clubNombre = 'Mi Club', color = '#E14924', logoUrl = '') {
+  const fecha      = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+  const mesActual  = new Date().toLocaleString('es-CO', { month: 'long', year: 'numeric' });
   const totalSaldo = morosos.reduce((sum, m) => sum + (parseInt(m.saldo_total) || 0), 0);
+  const c          = (typeof color === 'string' && color.startsWith('#')) ? color : '#E14924';
+
+  const logoHtml = logoUrl
+    ? `<img src="${logoUrl}" alt="" style="height:44px;width:44px;object-fit:contain;border-radius:8px;margin-right:14px;flex-shrink:0" />`
+    : '';
 
   const filas = morosos.map((m, i) => `
     <tr style="background:${i % 2 === 0 ? '#f9fafb' : '#ffffff'}">
-      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px">${i + 1}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600">${m.nombre}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${i + 1}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#111">${m.nombre}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${m.cedula}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${m.celular || '—'}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;text-align:center">
@@ -41,70 +46,76 @@ function exportarPDF(morosos, clubNombre = 'Mi Club') {
   <title>Reporte Morosos — ${clubNombre}</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: Arial, sans-serif; color: #111; background: #fff; padding: 32px; }
-    @media print {
-      body { padding: 16px; }
-      .no-print { display: none !important; }
-    }
+    body { font-family: Arial, sans-serif; color: #111; background: #fff; }
+    @media print { .no-print { display: none !important; } }
   </style>
 </head>
 <body>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #E14924">
-    <div>
-      <h1 style="font-size:22px;font-weight:800;color:#111">⚽ ${clubNombre}</h1>
-      <p style="font-size:13px;color:#6b7280;margin-top:2px">Agente Contable — Sistema de Gestión</p>
+  <!-- Header banda color club -->
+  <div style="background:${c};padding:18px 32px;display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center">
+      ${logoHtml}
+      <div>
+        <p style="font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.3px">${clubNombre}</p>
+        <p style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px">ZenSports — Gestión deportiva</p>
+      </div>
     </div>
     <div style="text-align:right">
-      <p style="font-size:14px;font-weight:700;color:#dc2626">Reporte de Morosos</p>
-      <p style="font-size:12px;color:#6b7280">${mesActual}</p>
-      <p style="font-size:12px;color:#6b7280">Generado: ${fecha}</p>
+      <p style="font-size:13px;font-weight:700;color:#fff">Reporte de Morosos</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px">${mesActual} · Generado: ${fecha}</p>
     </div>
   </div>
 
-  <div style="display:flex;gap:16px;margin-bottom:24px">
-    <div style="flex:1;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:16px;text-align:center">
-      <p style="font-size:12px;color:#dc2626;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Jugadores en mora</p>
-      <p style="font-size:32px;font-weight:800;color:#dc2626;margin-top:4px">${morosos.length}</p>
+  <!-- Cuerpo -->
+  <div style="padding:28px 32px">
+    <!-- Resumen -->
+    <div style="display:flex;gap:14px;margin-bottom:24px">
+      <div style="flex:1;border:1px solid #e5e7eb;border-radius:10px;padding:16px;text-align:center;border-top:3px solid #dc2626">
+        <p style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">En mora</p>
+        <p style="font-size:30px;font-weight:800;color:#dc2626">${morosos.length}</p>
+      </div>
+      <div style="flex:1;border:1px solid #e5e7eb;border-radius:10px;padding:16px;text-align:center;border-top:3px solid ${c}">
+        <p style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Total a cobrar</p>
+        <p style="font-size:26px;font-weight:800;color:${c}">${formatCOP(totalSaldo)}</p>
+      </div>
+      <div style="flex:1;border:1px solid #e5e7eb;border-radius:10px;padding:16px;text-align:center;border-top:3px solid #16a34a">
+        <p style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Promedio/jugador</p>
+        <p style="font-size:26px;font-weight:800;color:#16a34a">${formatCOP(morosos.length ? Math.round(totalSaldo / morosos.length) : 0)}</p>
+      </div>
     </div>
-    <div style="flex:1;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:16px;text-align:center">
-      <p style="font-size:12px;color:#ea580c;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Total en mora</p>
-      <p style="font-size:28px;font-weight:800;color:#ea580c;margin-top:4px">${formatCOP(totalSaldo)}</p>
-    </div>
-    <div style="flex:1;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px;text-align:center">
-      <p style="font-size:12px;color:#16a34a;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Promedio por jugador</p>
-      <p style="font-size:28px;font-weight:800;color:#16a34a;margin-top:4px">${formatCOP(morosos.length ? Math.round(totalSaldo / morosos.length) : 0)}</p>
+
+    <!-- Tabla -->
+    <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
+      <thead>
+        <tr style="background:#f3f4f6">
+          <th style="padding:10px 12px;text-align:left;font-size:11px;color:${c};font-weight:700;border-bottom:2px solid #e5e7eb">#</th>
+          <th style="padding:10px 12px;text-align:left;font-size:11px;color:${c};font-weight:700;border-bottom:2px solid #e5e7eb">Jugador</th>
+          <th style="padding:10px 12px;text-align:left;font-size:11px;color:${c};font-weight:700;border-bottom:2px solid #e5e7eb">Cédula</th>
+          <th style="padding:10px 12px;text-align:left;font-size:11px;color:${c};font-weight:700;border-bottom:2px solid #e5e7eb">Celular</th>
+          <th style="padding:10px 12px;text-align:center;font-size:11px;color:${c};font-weight:700;border-bottom:2px solid #e5e7eb">Meses</th>
+          <th style="padding:10px 12px;text-align:left;font-size:11px;color:${c};font-weight:700;border-bottom:2px solid #e5e7eb">Detalle</th>
+          <th style="padding:10px 12px;text-align:right;font-size:11px;color:${c};font-weight:700;border-bottom:2px solid #e5e7eb">Saldo</th>
+        </tr>
+      </thead>
+      <tbody>${filas}</tbody>
+      <tfoot>
+        <tr style="background:#f9fafb">
+          <td colspan="6" style="padding:12px;font-size:13px;font-weight:700;text-align:right;border-top:2px solid #e5e7eb;color:#374151">Total a cobrar</td>
+          <td style="padding:12px;font-size:14px;font-weight:800;color:#dc2626;text-align:right;border-top:2px solid #e5e7eb">${formatCOP(totalSaldo)}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- Footer -->
+    <div style="margin-top:20px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
+      <p style="font-size:10px;color:#9ca3af">${clubNombre} · Documento confidencial — no compartir públicamente</p>
+      <p style="font-size:10px;color:#9ca3af">zensports.vercel.app</p>
     </div>
   </div>
 
-  <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
-    <thead>
-      <tr style="background:#111827">
-        <th style="padding:12px;text-align:left;font-size:12px;color:#9ca3af;font-weight:600">#</th>
-        <th style="padding:12px;text-align:left;font-size:12px;color:#9ca3af;font-weight:600">JUGADOR</th>
-        <th style="padding:12px;text-align:left;font-size:12px;color:#9ca3af;font-weight:600">CÉDULA</th>
-        <th style="padding:12px;text-align:left;font-size:12px;color:#9ca3af;font-weight:600">CELULAR</th>
-        <th style="padding:12px;text-align:center;font-size:12px;color:#9ca3af;font-weight:600">MESES</th>
-        <th style="padding:12px;text-align:left;font-size:12px;color:#9ca3af;font-weight:600">DETALLE</th>
-        <th style="padding:12px;text-align:right;font-size:12px;color:#9ca3af;font-weight:600">SALDO</th>
-      </tr>
-    </thead>
-    <tbody>${filas}</tbody>
-    <tfoot>
-      <tr style="background:#f9fafb">
-        <td colspan="6" style="padding:12px;font-size:14px;font-weight:700;text-align:right;border-top:2px solid #e5e7eb">TOTAL A COBRAR</td>
-        <td style="padding:12px;font-size:14px;font-weight:800;color:#dc2626;text-align:right;border-top:2px solid #e5e7eb">${formatCOP(totalSaldo)}</td>
-      </tr>
-    </tfoot>
-  </table>
-
-  <div style="margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
-    <p style="font-size:11px;color:#9ca3af">ZenSports — Documento confidencial · No compartir públicamente</p>
-    <p style="font-size:11px;color:#9ca3af">zensports.vercel.app</p>
-  </div>
-
-  <div class="no-print" style="margin-top:24px;text-align:center">
-    <button onclick="window.print()" style="background:#E14924;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
-      🖨️ Imprimir / Guardar PDF
+  <div class="no-print" style="padding:0 32px 28px;text-align:center">
+    <button onclick="window.print()" style="background:${c};color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
+      Imprimir / Guardar PDF
     </button>
   </div>
 </body>
@@ -116,7 +127,7 @@ function exportarPDF(morosos, clubNombre = 'Mi Club') {
   ventana.focus();
 }
 
-export default function MorososList({ morosos, codigoPais = '57', clubNombre = 'Mi Club' }) {
+export default function MorososList({ morosos, codigoPais = '57', clubNombre = 'Mi Club', color = '#E14924', logoUrl = '' }) {
   if (!morosos || morosos.length === 0) {
     return (
       <div style={{
@@ -171,7 +182,7 @@ export default function MorososList({ morosos, codigoPais = '57', clubNombre = '
           </span>
         </div>
         <button
-          onClick={() => exportarPDF(morosos, clubNombre)}
+          onClick={() => exportarPDF(morosos, clubNombre, color, logoUrl)}
           style={{
             display: 'flex', alignItems: 'center', gap: '6px',
             padding: '6px 12px', borderRadius: '8px', cursor: 'pointer',

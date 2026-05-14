@@ -4,6 +4,7 @@ import {
   Loader2, Pencil, Trash2, X, Users, Download, AlertTriangle,
 } from 'lucide-react';
 import jsPDF from 'jspdf';
+import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfSectionLabel, drawPdfTableHead } from '../lib/pdfHelpers';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { supabase } from '../lib/supabase';
@@ -141,58 +142,81 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     finally { setPagandoId(null); }
   };
 
-  const exportarPDF = () => {
+  const exportarPDF = async () => {
     if (!torneoSeleccionado) return;
-    const def      = torneosDef.find(t => t.nombre === torneoSeleccionado);
+    const def       = torneosDef.find(t => t.nombre === torneoSeleccionado);
     const inscritos = enrollments.filter(e => e.nombre_torneo === torneoSeleccionado);
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const W = doc.internal.pageSize.getWidth();
-    const M = 14;
-    const fecha = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
-    doc.setFillColor(6, 12, 24); doc.rect(0, 0, W, 22, 'F');
-    doc.setFillColor(0, 170, 255); doc.rect(0, 22, W, 1, 'F');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(255, 255, 255);
-    doc.text(`${clubNombre}  —  ${torneoSeleccionado}`, M, 14);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(130, 160, 200);
-    doc.text(`Generado: ${fecha}`, W - M, 14, { align: 'right' });
-    if (def?.fecha) doc.text(`Fecha torneo: ${def.fecha}`, M, 20);
-    let y = 32;
+    const doc       = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = 210; const H = 297; const M = 14;
+    const accentRgb = hexToRgb(color);
+    const fecha     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    const logoData  = await loadLogoDataUrl(clubConfig?.logo_url);
+    let y = drawPdfHeader(doc, {
+      W, M, clubName: clubNombre, title: torneoSeleccionado,
+      date: fecha + (def?.fecha ? `  ·  Fecha torneo: ${def.fecha}` : ''),
+      logoData, accentRgb,
+    });
+
+    // Resumen en caja
     const pagados    = inscritos.filter(e => e.estado === 'AL_DIA').length;
     const abonos     = inscritos.filter(e => e.estado === 'ABONO').length;
     const pendientes = inscritos.filter(e => e.estado === 'PENDIENTE').length;
     const totalRec   = inscritos.reduce((s, e) => s + parseFloat(e.valor_pagado || 0), 0);
-    doc.setFillColor(15, 31, 54); doc.rect(M, y, W - M * 2, 20, 'F');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(0, 170, 255);
-    doc.text(`Total inscritos: ${inscritos.length}`, M + 4, y + 7);
-    doc.setTextColor(34, 197, 94);  doc.text(`Al día: ${pagados}`, M + 52, y + 7);
-    doc.setTextColor(245, 166, 35); doc.text(`Abono: ${abonos}`, M + 82, y + 7);
-    doc.setTextColor(239, 68, 68);  doc.text(`Pendiente: ${pendientes}`, M + 110, y + 7);
-    doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'normal');
-    doc.text(`Recaudado: $${totalRec.toLocaleString('es-CO')}`, M + 4, y + 15);
-    if (def?.valor) doc.text(`Valor inscripción: $${Number(def.valor).toLocaleString('es-CO')}`, M + 60, y + 15);
-    y += 26;
-    doc.setFillColor(10, 22, 40); doc.rect(M, y, W - M * 2, 7, 'F');
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(100, 130, 160);
-    doc.text('CÉDULA', M + 2, y + 5); doc.text('NOMBRE', M + 28, y + 5);
-    doc.text('PAGADO', M + 108, y + 5); doc.text('SALDO', M + 130, y + 5); doc.text('ESTADO', M + 150, y + 5);
-    y += 7;
+
+    doc.setFillColor(245, 246, 248); doc.rect(M, y, W - M * 2, 18, 'F');
+    const [r, g, b] = accentRgb;
+    doc.setFillColor(r, g, b); doc.rect(M, y, 3, 18, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(r, g, b);
+    doc.text(`${inscritos.length} inscritos`, M + 6, y + 7);
+    doc.setTextColor(34, 197, 94);  doc.text(`Al día: ${pagados}`,       M + 38, y + 7);
+    doc.setTextColor(245, 166, 35); doc.text(`Abono: ${abonos}`,         M + 72, y + 7);
+    doc.setTextColor(239, 68, 68);  doc.text(`Pendiente: ${pendientes}`, M + 106, y + 7);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(80, 80, 80);
+    doc.text(`Recaudado: $${totalRec.toLocaleString('es-CO')}`, M + 6, y + 14);
+    if (def?.valor) doc.text(`Valor inscripción: $${Number(def.valor).toLocaleString('es-CO')}`, M + 70, y + 14);
+    y += 24;
+
+    const cols = [
+      { label: 'Cédula',  x: M + 2 },
+      { label: 'Nombre',  x: M + 28 },
+      { label: 'Pagado',  x: M + 108 },
+      { label: 'Saldo',   x: M + 132 },
+      { label: 'Estado',  x: M + 155 },
+    ];
+
+    const drawHead = () => drawPdfTableHead(doc, { W, M, y, columns: cols, accentRgb });
+    y = drawHead();
+
     inscritos.forEach((e, i) => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      doc.setFillColor(i % 2 === 0 ? 8 : 14, i % 2 === 0 ? 18 : 26, i % 2 === 0 ? 34 : 46);
-      doc.rect(M, y, W - M * 2, 8, 'F');
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(190, 210, 230);
-      doc.text(String(e.cedula || ''), M + 2, y + 5.5);
+      if (y > H - 20) { doc.addPage(); y = 20; y = drawHead(); }
+      if (i % 2 === 0) { doc.setFillColor(248, 249, 250); doc.rect(M, y - 4, W - M * 2, 8, 'F'); }
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(30, 40, 50);
+      doc.text(String(e.cedula || ''), cols[0].x, y + 1.5);
       const jugador = jugadoresClub.find(j => String(j.cedula) === String(e.cedula));
       const nombre  = jugador ? `${jugador.nombre || ''} ${jugador.apellidos || ''}`.trim() : String(e.cedula);
-      doc.text(nombre.slice(0, 32), M + 28, y + 5.5);
-      doc.text(`$${parseFloat(e.valor_pagado || 0).toLocaleString('es-CO')}`, M + 108, y + 5.5);
-      doc.text(`$${parseFloat(e.saldo_pendiente || 0).toLocaleString('es-CO')}`, M + 130, y + 5.5);
+      doc.text(nombre.slice(0, 32), cols[1].x, y + 1.5);
+      doc.setTextColor(34, 197, 94);
+      doc.text(`$${parseFloat(e.valor_pagado || 0).toLocaleString('es-CO')}`, cols[2].x, y + 1.5);
+      doc.setTextColor(239, 68, 68);
+      doc.text(`$${parseFloat(e.saldo_pendiente || 0).toLocaleString('es-CO')}`, cols[3].x, y + 1.5);
       const estadoColor = e.estado === 'AL_DIA' ? [34, 197, 94] : e.estado === 'ABONO' ? [245, 166, 35] : [239, 68, 68];
       doc.setTextColor(...estadoColor); doc.setFont('helvetica', 'bold');
-      doc.text(e.estado === 'AL_DIA' ? 'AL DÍA' : e.estado || 'PENDIENTE', M + 150, y + 5.5);
-      doc.setFont('helvetica', 'normal'); doc.setTextColor(190, 210, 230);
+      doc.text(e.estado === 'AL_DIA' ? 'Al día' : e.estado === 'ABONO' ? 'Abono' : 'Pendiente', cols[4].x, y + 1.5);
       y += 8;
     });
+
+    if (!inscritos.length) {
+      doc.setTextColor(150, 150, 150); doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+      doc.text('No hay inscritos en este torneo.', M, y + 4);
+    }
+
+    const pages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= pages; p++) {
+      doc.setPage(p);
+      drawPdfFooter(doc, { W, H, M, clubName: clubNombre, pageNum: p, totalPages: pages });
+    }
+
     doc.save(`${torneoSeleccionado.toLowerCase().replace(/\s+/g, '-')}-inscritos.pdf`);
   };
 

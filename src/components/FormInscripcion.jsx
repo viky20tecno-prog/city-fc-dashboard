@@ -195,19 +195,29 @@ export default function FormInscripcion() {
       ? `<img src="${f.fotoPreview}" alt="Foto" style="width:90px;height:90px;object-fit:cover;border-radius:50%;border:3px solid ${c};float:right;margin-left:16px" />`
       : '';
 
+    const logoUrl   = clubConfig?.logo_url || '';
+    const logoHtml  = logoUrl
+      ? `<img src="${logoUrl}" alt="" style="height:40px;width:40px;object-fit:contain;border-radius:6px;margin-right:12px;flex-shrink:0" />`
+      : '';
+
     const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
 <title>Ficha — ${f.nombre} ${f.apellidos}</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;background:#fff;padding:32px}@media print{body{padding:16px}.no-print{display:none!important}}</style>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;background:#fff;}@media print{.no-print{display:none!important}}</style>
 </head><body>
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid ${c}">
-  <div>
-    <h1 style="font-size:20px;font-weight:800;color:#111">⚽ ${clubName}</h1>
-    <p style="font-size:13px;color:#6b7280;margin-top:2px">Ficha de Inscripción</p>
+<!-- Header banda color club -->
+<div style="background:${c};padding:16px 28px;display:flex;align-items:center;justify-content:space-between">
+  <div style="display:flex;align-items:center">${logoHtml}
+    <div>
+      <p style="font-size:16px;font-weight:800;color:#fff">${clubName}</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:1px">ZenSports — Gestión deportiva</p>
+    </div>
   </div>
   <div style="text-align:right">
-    <p style="font-size:12px;color:#6b7280">Registrado: ${fecha}</p>
+    <p style="font-size:12px;font-weight:700;color:#fff">Ficha de Inscripción</p>
+    <p style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px">Registrado: ${fecha}</p>
   </div>
 </div>
+<div style="padding:24px 28px">
 <div style="clearfix:both;margin-bottom:20px">
   ${fotoHtml}
   <h2 style="font-size:18px;font-weight:800;margin-bottom:4px">${f.nombre || ''} ${f.apellidos || ''}</h2>
@@ -248,11 +258,12 @@ export default function FormInscripcion() {
     ${fila('Celular emergencia', f.celular_contacto)}
   </tbody>
 </table>
-<div style="margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
-  <p style="font-size:11px;color:#9ca3af">ZenSports — Documento confidencial</p>
-  <p style="font-size:11px;color:#9ca3af">zensports.vercel.app</p>
+<div style="margin-top:20px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
+  <p style="font-size:10px;color:#9ca3af">${clubName} · Documento confidencial</p>
+  <p style="font-size:10px;color:#9ca3af">zensports.vercel.app</p>
 </div>
-<div class="no-print" style="margin-top:24px;text-align:center">
+</div>
+<div class="no-print" style="padding:0 28px 24px;text-align:center">
   <button onclick="window.print()" style="background:${c};color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
     Imprimir / Guardar PDF
   </button>

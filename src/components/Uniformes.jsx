@@ -3,6 +3,7 @@ import { Shirt, CheckCircle, AlertCircle, Search, Loader, X, Pencil, Save, Downl
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import jsPDF from 'jspdf';
+import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfSectionLabel, drawPdfTableHead } from '../lib/pdfHelpers';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
 
@@ -13,7 +14,7 @@ const normalizarCatalogo = (raw) =>
       : { nombre: String(p.nombre || ''), precio: Number(p.precio) || 0 }
   );
 
-export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' }) {
+export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club', clubConfig }) {
   const [tabPrincipal, setTabPrincipal] = useState('pedido');
 
   // — Pedido form —
@@ -233,114 +234,107 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club' 
   };
 
   // — PDF —
-  const generarPDF = () => {
+  const generarPDF = async () => {
     setGenerandoPDF(true);
     try {
-      const doc   = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      const W     = doc.internal.pageSize.getWidth();
-      const H     = doc.internal.pageSize.getHeight();
-      const M     = 12;
-      const COL_W = W - M * 2;
-      const fmtCOP  = (n) => `$${parseFloat(n || 0).toLocaleString('es-CO')}`;
-      const fecha   = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
-      const trunc   = (s, max) => (s.length > max ? s.slice(0, max - 2) + '..' : s);
+      const doc      = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const W        = doc.internal.pageSize.getWidth();
+      const H        = doc.internal.pageSize.getHeight();
+      const M        = 12;
+      const accentRgb = hexToRgb(color);
+      const fecha    = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+      const trunc    = (s, max) => (s.length > max ? s.slice(0, max - 2) + '..' : s);
+      const fmtCOP   = (n) => `$${parseFloat(n || 0).toLocaleString('es-CO')}`;
+      const logoData = await loadLogoDataUrl(clubConfig?.logo_url);
+
       const pendientes = pedidos.filter(p => p.estado === 'PENDIENTE');
       const pagados    = pedidos.filter(p => p.estado === 'PAGADO');
       const entregados = pedidos.filter(p => p.estado === 'ENTREGADO');
       const getPrendas = (p) => String(p.prendas || p.prenda || p.tipo_uniforme || p.tipo || '—');
+
       const C = {
         cedula: M, nombre: M + 22, prendas: M + 72,
         talla: M + 154, numero: M + 168, estampa: M + 186, total: M + 216,
       };
 
-      const drawHeader = () => {
-        doc.setFillColor(6, 12, 24);
-        doc.rect(0, 0, W, 20, 'F');
-        doc.setFillColor(0, 170, 255);
-        doc.rect(0, 20, W, 1, 'F');
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(255, 255, 255);
-        doc.text(`${clubNombre}  --  Pedido de Uniformes`, M, 13);
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(130, 160, 200);
-        doc.text(`Generado: ${fecha}`, W - M, 13, { align: 'right' });
+      const cols = [
+        { label: 'Cédula',   x: C.cedula },
+        { label: 'Nombre',   x: C.nombre },
+        { label: 'Prendas',  x: C.prendas },
+        { label: 'Talla',    x: C.talla },
+        { label: 'Núm.',     x: C.numero },
+        { label: 'Estampa',  x: C.estampa },
+        { label: 'Total',    x: C.total },
+      ];
+
+      const drawPageHeader = () =>
+        drawPdfHeader(doc, { W, M, clubName: clubNombre, title: 'Pedido de Uniformes', date: fecha, logoData, accentRgb });
+
+      const drawSectionHead = (lista, titulo, y) => {
+        const sectionColors = {
+          PENDIENTES: [180, 100, 0],
+          PAGADOS:    [22, 163, 74],
+          ENTREGADOS: [37, 99, 235],
+        };
+        return drawPdfSectionLabel(doc, { W, M, y, label: titulo, count: lista.length, accentRgb: sectionColors[titulo] || accentRgb });
       };
 
-      const drawSection = (label, count, y, rgb) => {
-        doc.setFillColor(...rgb); doc.rect(M, y, COL_W, 9, 'F');
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(255, 255, 255);
-        doc.text(`${label}  (${count})`, M + 3, y + 6.2);
-        return y + 13;
-      };
-
-      const drawTableHead = (y) => {
-        doc.setFillColor(15, 31, 54); doc.rect(M, y, COL_W, 6.5, 'F');
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(100, 130, 160);
-        [
-          [C.cedula, 'CEDULA'], [C.nombre, 'NOMBRE'], [C.prendas, 'PRENDAS'],
-          [C.talla, 'TALLA'], [C.numero, 'NUM.'], [C.estampa, 'ESTAMPA'], [C.total, 'TOTAL'],
-        ].forEach(([x, h]) => doc.text(h, x, y + 4.5));
-        return y + 6.5;
-      };
+      const drawTableHead = (y) => drawPdfTableHead(doc, { W, M, y, columns: cols, accentRgb });
 
       const drawRow = (p, y, odd) => {
         const rH = 8.5;
-        doc.setFillColor(odd ? 10 : 16, odd ? 21 : 30, odd ? 38 : 52);
-        doc.rect(M, y, COL_W, rH, 'F');
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(190, 210, 230);
+        if (odd) { doc.setFillColor(248, 249, 250); doc.rect(M, y, W - M * 2, rH, 'F'); }
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(30, 40, 50);
         const mid = y + 5.8;
         doc.text(trunc(String(p.cedula || ''), 14), C.cedula, mid);
         const esFamiliar = p.tipo && p.tipo !== 'Jugador';
         const nombrePDF  = trunc(String(p.nombre || '—'), esFamiliar ? 19 : 26);
         doc.text(nombrePDF, C.nombre, mid);
         if (esFamiliar) {
-          doc.setTextColor(198, 120, 255); doc.setFontSize(6.5);
+          doc.setTextColor(147, 51, 234); doc.setFontSize(6.5);
           doc.text(trunc(p.tipo, 14), C.nombre + doc.getTextWidth(nombrePDF) + 1.5, mid);
-          doc.setFontSize(7.8); doc.setTextColor(190, 210, 230);
+          doc.setFontSize(7.8); doc.setTextColor(30, 40, 50);
         }
         doc.text(trunc(getPrendas(p), 44), C.prendas, mid);
         doc.text(String(p.talla || '—'), C.talla, mid);
         doc.text(String(p.numero_estampar || '—'), C.numero, mid);
         doc.text(trunc(String(p.nombre_estampar || '—'), 16), C.estampa, mid);
-        doc.setTextColor(0, 170, 255); doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...accentRgb); doc.setFont('helvetica', 'bold');
         doc.text(fmtCOP(p.total), C.total, mid);
-        doc.setFont('helvetica', 'normal'); doc.setTextColor(190, 210, 230);
         return y + rH;
       };
 
-      const drawFoot = (lista, y) => {
+      const drawSubtotal = (lista, y) => {
         const tot = lista.reduce((s, p) => s + parseFloat(p.total || 0), 0);
-        doc.setFillColor(6, 12, 24); doc.rect(M, y, COL_W, 7, 'F');
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(0, 170, 255);
-        doc.text(`TOTAL: ${fmtCOP(tot)}`, C.total, y + 5);
+        doc.setFillColor(245, 246, 248); doc.rect(M, y, W - M * 2, 7, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(...accentRgb);
+        doc.text(`Subtotal: ${fmtCOP(tot)}`, C.total, y + 5, { align: 'left' });
         return y + 10;
       };
 
-      const drawBlock = (lista, titulo, yStart, rgb, emptyMsg) => {
-        if (lista.length === 0) return yStart;
+      const drawBlock = (lista, titulo, yStart) => {
+        if (!lista.length) return yStart;
         let y = yStart;
-        if (y > H - 60) { doc.addPage(); drawHeader(); y = 28; }
-        y = drawSection(titulo, lista.length, y, rgb);
+        if (y > H - 60) { doc.addPage(); y = drawPageHeader(); }
+        y = drawSectionHead(lista, titulo, y);
         y = drawTableHead(y);
         lista.forEach((p, i) => {
-          if (y > H - 20) { doc.addPage(); drawHeader(); y = 28; y = drawTableHead(y); }
+          if (y > H - 20) { doc.addPage(); y = drawPageHeader(); y = drawTableHead(y); }
           y = drawRow(p, y, i % 2 === 0);
         });
-        y = drawFoot(lista, y);
-        return y + 6;
+        y = drawSubtotal(lista, y);
+        return y + 4;
       };
 
-      drawHeader();
-      let y = 28;
-      y = drawBlock(pendientes,  'PENDIENTES',  y, [180, 100, 0],   'Sin pedidos pendientes.');
-      y = drawBlock(pagados,     'PAGADOS',     y, [20, 120, 60],   'Sin pedidos pagados.');
-      y = drawBlock(entregados,  'ENTREGADOS',  y, [0, 100, 180],   'Sin pedidos entregados aun.');
+      let y = drawPageHeader();
+      y = drawBlock(pendientes,  'PENDIENTES',  y);
+      y = drawBlock(pagados,     'PAGADOS',     y);
+      y = drawBlock(entregados,  'ENTREGADOS',  y);
 
       const pages = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pages; i++) {
         doc.setPage(i);
-        doc.setFillColor(6, 12, 24); doc.rect(0, H - 7, W, 7, 'F');
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(70, 95, 130);
-        doc.text(`${clubNombre}  --  ZenSports`, M, H - 2.2);
-        doc.text(`Pag. ${i} / ${pages}`, W - M, H - 2.2, { align: 'right' });
+        drawPdfFooter(doc, { W, H, M, clubName: clubNombre, pageNum: i, totalPages: pages, note: `${pedidos.length} pedidos` });
       }
 
       doc.save(`${clubNombre.toLowerCase().replace(/\s+/g, '-')}-uniformes-${new Date().toISOString().slice(0, 10)}.pdf`);

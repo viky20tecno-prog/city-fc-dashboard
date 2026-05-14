@@ -74,7 +74,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
 }
 
 /* ── componente principal ── */
-export default function DashboardOverview({ jugadores, mensualidades, morosos, codigoPais = '57', color = '#60A5FA', clubNombre = 'Mi Club' }) {
+export default function DashboardOverview({ jugadores, mensualidades, morosos, codigoPais = '57', color = '#60A5FA', clubNombre = 'Mi Club', logoUrl = '' }) {
   const mesActual = new Date().getMonth() + 1;
 
   const activos = useMemo(
@@ -147,7 +147,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
         alignItems: 'start',
       }}>
         <RecaudacionChart mensualidades={mensualidades} />
-        <MorososList morosos={morosos} codigoPais={codigoPais} clubNombre={clubNombre} />
+        <MorososList morosos={morosos} codigoPais={codigoPais} clubNombre={clubNombre} color={color} logoUrl={logoUrl} />
       </div>
 
     </div>

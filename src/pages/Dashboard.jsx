@@ -539,6 +539,7 @@ export default function Dashboard() {
                 codigoPais={clubConfig?.codigo_pais || '57'}
                 color={c}
                 clubNombre={clubConfig?.nombre}
+                logoUrl={clubConfig?.logo_url}
               />
             )}
             {activeTab === 'jugadores' && (
@@ -555,7 +556,7 @@ export default function Dashboard() {
                 clubConfig={clubConfig}
               />
             )}
-            {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} />}
+            {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'torneos'      && <TorneosPage  color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'arbitraje'    && <ArbitrajePagos color={c} />}
             {activeTab === 'cobro'        && <TimelineCobro  color={c} />}

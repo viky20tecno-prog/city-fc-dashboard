@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users } from 'lucide-react';
 import jsPDF from 'jspdf';
+import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { ESTADO_COLORS } from '../config';
 import HojaDeVida from './HojaDeVida';
 import SuspensionModal from './SuspensionModal';
@@ -225,64 +226,66 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     URL.revokeObjectURL(url);
   };
 
-  const exportarPDF = () => {
+  const exportarPDF = async () => {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    const W = 297;
-    const M = 12;
-    const fecha = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
-    const titulo = filtroCategoria !== 'TODOS' ? `Jugadores — ${filtroCategoria}` : 'Listado de Jugadores';
+    const W = 297; const H = 210; const M = 12;
+    const accentRgb = hexToRgb(clubConfig?.color);
+    const clubName  = clubConfig?.nombre || 'Mi Club';
+    const fecha     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+    const titulo    = filtroCategoria !== 'TODOS' ? `Jugadores — ${filtroCategoria}` : 'Listado de Jugadores';
 
-    doc.setFillColor(6, 12, 24);
-    doc.rect(0, 0, W, 20, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(13);
-    doc.setTextColor(255, 255, 255);
-    doc.text(titulo, M, 13);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(130, 160, 200);
-    doc.text(`Generado: ${fecha}  ·  ${filtered.length} jugadores`, W - M, 13, { align: 'right' });
+    const logoData = await loadLogoDataUrl(clubConfig?.logo_url);
 
     const cols = [
-      { label: 'Nombre',    x: M,       w: 60 },
-      { label: 'Cédula',    x: M + 62,  w: 32 },
-      { label: 'Celular',   x: M + 96,  w: 30 },
-      { label: 'Categoría', x: M + 128, w: 30 },
-      { label: 'Equipo',    x: M + 160, w: 35 },
-      { label: 'Estado',    x: M + 197, w: 28 },
-      { label: 'Pagado',    x: M + 227, w: 28 },
+      { label: 'Nombre',    x: M },
+      { label: 'Cédula',    x: M + 62 },
+      { label: 'Celular',   x: M + 96 },
+      { label: 'Categoría', x: M + 128 },
+      { label: 'Equipo',    x: M + 160 },
+      { label: 'Estado',    x: M + 197 },
+      { label: 'Pagado',    x: M + 227 },
     ];
 
-    let y = 28;
-    doc.setFillColor(10, 22, 40);
-    doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.5);
-    doc.setTextColor(100, 130, 160);
-    cols.forEach(col => doc.text(col.label, col.x, y));
-    y += 7;
+    const drawPageHeader = () => {
+      const y0 = drawPdfHeader(doc, { W, M, clubName, title: titulo, date: `${fecha} · ${filtered.length} jugadores`, logoData, accentRgb });
+      return drawPdfTableHead(doc, { W, M, y: y0, columns: cols, accentRgb });
+    };
+
+    let y = drawPageHeader();
 
     filtered.forEach((j, i) => {
-      if (y > 190) { doc.addPage(); y = 20; }
-      doc.setFillColor(i % 2 === 0 ? 8 : 14, i % 2 === 0 ? 18 : 26, i % 2 === 0 ? 34 : 46);
-      doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F');
+      if (y > H - 20) { doc.addPage(); y = drawPageHeader(); }
+      if (i % 2 === 0) { doc.setFillColor(248, 249, 250); doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F'); }
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.8);
-      doc.setTextColor(190, 210, 230);
-      doc.text((j.nombreCompleto || '').slice(0, 28),    cols[0].x, y);
-      doc.text(String(j.cedula || ''),                   cols[1].x, y);
-      doc.text(String(j.celular || ''),                  cols[2].x, y);
-      doc.text((j.categoria || '—').slice(0, 14),        cols[3].x, y);
-      doc.text((j.equipo || '—').slice(0, 16),           cols[4].x, y);
+      doc.setTextColor(30, 40, 50);
+      doc.text((j.nombreCompleto || '').slice(0, 28),  cols[0].x, y);
+      doc.text(String(j.cedula || ''),                 cols[1].x, y);
+      doc.text(String(j.celular || ''),                cols[2].x, y);
+      doc.text((j.categoria || '—').slice(0, 14),      cols[3].x, y);
+      doc.text((j.equipo || '—').slice(0, 16),         cols[4].x, y);
       const estadoColor = j.estadoPago === 'AL_DIA' ? [34, 197, 94] : j.estadoPago === 'MORA' ? [239, 68, 68] : [245, 166, 35];
       doc.setTextColor(...estadoColor);
       doc.setFont('helvetica', 'bold');
-      doc.text(j.estadoPago || '',                       cols[5].x, y);
+      doc.text(j.estadoPago === 'AL_DIA' ? 'Al día' : j.estadoPago === 'MORA' ? 'En mora' : 'Pendiente', cols[5].x, y);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(190, 210, 230);
-      doc.text(formatCOP(j.totalPagado),                 cols[6].x, y);
+      doc.setTextColor(30, 40, 50);
+      doc.text(formatCOP(j.totalPagado), cols[6].x, y);
       y += 8;
     });
+
+    if (!filtered.length) {
+      doc.setTextColor(150, 150, 150);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text('No hay jugadores en este listado.', M, y + 4);
+    }
+
+    const pages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= pages; p++) {
+      doc.setPage(p);
+      drawPdfFooter(doc, { W, H, M, clubName, pageNum: p, totalPages: pages, note: `${filtered.length} jugadores` });
+    }
 
     const filtroLabel = filtroCategoria !== 'TODOS' ? `-${filtroCategoria.toLowerCase().replace(/\s+/g, '-')}` : '';
     doc.save(`jugadores${filtroLabel}-${new Date().toISOString().split('T')[0]}.pdf`);

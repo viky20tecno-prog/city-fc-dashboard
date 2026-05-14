@@ -177,7 +177,12 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       .filter(j => {
         const matchSearch    = search === '' || j.nombreCompleto?.toLowerCase().includes(search.toLowerCase()) || j.cedula?.includes(search);
         const matchEstado    = filtroEstado === 'TODOS' || j.estadoPago === filtroEstado;
-        const matchCategoria = filtroCategoria === 'TODOS' || j.equipo === filtroCategoria || j.categoria === filtroCategoria;
+        const matchCategoria = filtroCategoria === 'TODOS'
+          || j.categoria === filtroCategoria
+          || j.equipo    === filtroCategoria
+          || (Array.isArray(j.categorias) && j.categorias.some(
+              c => c.categoria === filtroCategoria || c.equipo === filtroCategoria
+            ));
         return matchSearch && matchEstado && matchCategoria;
       })
       .sort((a, b) => {

@@ -80,6 +80,8 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
   const [guardando, setGuardando] = useState(false);
   const [guardado,  setGuardado]  = useState(false);
   const [error,     setError]     = useState('');
+  const [addingCat, setAddingCat] = useState(false);
+  const [newCat,    setNewCat]    = useState({ categoria: '', equipo: '' });
 
   const [form, setForm] = useState({
     posicion:            jugador.posicion            || '',
@@ -103,8 +105,9 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
     familiar_emergencia: jugador.familiar_emergencia || '',
     celular_contacto:    jugador.celular_contacto    || '',
     notas:               jugador.notas               || '',
-    categoria:           jugador.categoria           || '',
-    equipo:              jugador.equipo              || '',
+    categorias: Array.isArray(jugador.categorias) && jugador.categorias.length
+      ? jugador.categorias
+      : (jugador.categoria ? [{ categoria: jugador.categoria, equipo: jugador.equipo || '' }] : []),
   });
 
   const set = (key) => (e) => setForm(f => ({ ...f, [key]: e.target.value }));
@@ -165,6 +168,9 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
         estatura:        form.estatura        ? parseFloat(form.estatura)        : null,
         peso:            form.peso            ? parseFloat(form.peso)            : null,
         fecha_nacimiento: form.fecha_nacimiento || null,
+        categorias: form.categorias,
+        categoria:  form.categorias[0]?.categoria || '',
+        equipo:     form.categorias[0]?.equipo    || '',
       };
       const res  = await authFetch(
         `${API_BASE_URL}/players/${jugador.cedula}?club_id=${getClubId()}`,
@@ -267,40 +273,98 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
           />
           {categoriasJugadores.length > 0 && (() => {
             const cats = normalizarCategorias(categoriasJugadores);
-            const catSeleccionada = cats.find(c => c.nombre === form.categoria);
+            const newCatSel = cats.find(c => c.nombre === newCat.categoria);
+
+            const quitarCat = (idx) =>
+              setForm(f => ({ ...f, categorias: f.categorias.filter((_, i) => i !== idx) }));
+
+            const confirmarAgregar = () => {
+              if (!newCat.categoria) return;
+              setForm(f => ({ ...f, categorias: [...f.categorias, { ...newCat }] }));
+              setNewCat({ categoria: '', equipo: '' });
+              setAddingCat(false);
+            };
+
             return (
-              <>
-                <div className="space-y-1">
-                  <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Categoría</label>
-                  <select
-                    value={form.categoria}
-                    onChange={e => {
-                      const val = e.target.value;
-                      setForm(f => ({ ...f, categoria: val, equipo: '' }));
-                    }}
-                    className={INPUT_CLS + ' cursor-pointer'}
+              <div className="col-span-2 space-y-2">
+                <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Categorías</label>
+
+                {/* Lista de categorías actuales */}
+                {form.categorias.length === 0 && (
+                  <p className="text-xs italic" style={{ color: 'var(--text-mut)' }}>Sin categoría asignada</p>
+                )}
+                {form.categorias.map((c, idx) => (
+                  <div key={idx} className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)' }}>
+                    <span className="text-sm font-medium" style={{ color: 'var(--text-pri)' }}>
+                      {c.categoria}{c.equipo ? <span style={{ color: 'var(--text-mut)' }}> — {c.equipo}</span> : ''}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => quitarCat(idx)}
+                      className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition hover:bg-red-500/20"
+                      style={{ color: 'var(--text-mut)' }}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+
+                {/* Mini-form agregar */}
+                {addingCat ? (
+                  <div className="space-y-2 p-3 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)' }}>
+                    <select
+                      value={newCat.categoria}
+                      onChange={e => setNewCat(n => ({ ...n, categoria: e.target.value, equipo: '' }))}
+                      className={INPUT_CLS + ' cursor-pointer'}
+                    >
+                      <option value="">— Seleccionar categoría —</option>
+                      {cats.map(c => (
+                        <option key={c.nombre} value={c.nombre}>{c.nombre}</option>
+                      ))}
+                    </select>
+                    {newCatSel && newCatSel.equipos.length > 0 && !(newCatSel.equipos.length === 1 && newCatSel.equipos[0] === newCatSel.nombre) && (
+                      <select
+                        value={newCat.equipo}
+                        onChange={e => setNewCat(n => ({ ...n, equipo: e.target.value }))}
+                        className={INPUT_CLS + ' cursor-pointer'}
+                      >
+                        <option value="">— Sin equipo específico —</option>
+                        {newCatSel.equipos.map(eq => (
+                          <option key={eq} value={eq}>{eq}</option>
+                        ))}
+                      </select>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={confirmarAgregar}
+                        disabled={!newCat.categoria}
+                        className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition"
+                        style={{ background: 'var(--cc)', color: '#fff', opacity: newCat.categoria ? 1 : 0.4 }}
+                      >
+                        Agregar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setAddingCat(false); setNewCat({ categoria: '', equipo: '' }); }}
+                        className="flex-1 py-1.5 rounded-lg text-xs font-semibold transition"
+                        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)', color: 'var(--text-sec)' }}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setAddingCat(true)}
+                    className="w-full py-1.5 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1"
+                    style={{ border: '1px dashed var(--border-sub)', color: 'var(--text-mut)' }}
                   >
-                    <option value="">— Sin categoría —</option>
-                    {cats.map(c => (
-                      <option key={c.nombre} value={c.nombre}>{c.nombre}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Equipo</label>
-                  <select
-                    value={form.equipo}
-                    onChange={set('equipo')}
-                    className={INPUT_CLS + ' cursor-pointer'}
-                    disabled={!catSeleccionada}
-                  >
-                    <option value="">— Sin equipo —</option>
-                    {catSeleccionada?.equipos.map(eq => (
-                      <option key={eq} value={eq}>{eq}</option>
-                    ))}
-                  </select>
-                </div>
-              </>
+                    <span style={{ fontSize: '16px', lineHeight: 1 }}>+</span> Agregar categoría
+                  </button>
+                )}
+              </div>
             );
           })()}
         </div>

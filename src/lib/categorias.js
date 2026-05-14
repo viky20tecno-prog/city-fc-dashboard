@@ -12,14 +12,16 @@ export function normalizarCategorias(raw) {
 }
 
 /**
- * Devuelve la lista plana de todos los equipos para usar en filtros.
- * Si una categoría tiene un único equipo igual al nombre de la categoría, lo devuelve como una sola entrada.
+ * Devuelve la lista plana de opciones para el filtro:
+ * - Si la categoría tiene un solo equipo con el mismo nombre → una sola entrada
+ * - Si tiene sub-equipos → incluye el nombre de la categoría padre (filtra todos)
+ *   y cada sub-equipo (filtra específicamente)
  */
 export function listarEquipos(cats) {
   const normalized = normalizarCategorias(cats);
   return normalized.flatMap(c =>
     c.equipos.length === 1 && c.equipos[0] === c.nombre
       ? [c.nombre]
-      : c.equipos
+      : [c.nombre, ...c.equipos]
   );
 }

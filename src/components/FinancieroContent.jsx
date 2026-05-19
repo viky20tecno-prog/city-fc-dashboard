@@ -16,14 +16,14 @@ const formatCOP = (n) =>
 const ESTADO_ICON = {
   AL_DIA:    { icon: CheckCircle,   color: 'text-green-400',  bg: 'bg-green-400/10 border border-green-400/20'   },
   PENDIENTE: { icon: Clock,         color: 'text-[#F59E0B]',  bg: 'bg-yellow-500/10 border border-yellow-500/20' },
-  PARCIAL:   { icon: AlertTriangle, color: 'text-[#E14924]',  bg: 'bg-[#E14924]/10 border border-[#E14924]/20'   },
+  PARCIAL:   { icon: AlertTriangle, color: 'text-[var(--cc)]',  bg: 'bg-[var(--cc)]/10 border border-[var(--cc)]/20'   },
   MORA:      { icon: XCircle,       color: 'text-[#EF4444]',  bg: 'bg-red-500/10 border border-red-500/20'       },
 };
 
 const ESTADO_PEDIDO = {
   PENDIENTE: { color: 'text-[#F59E0B]', bg: 'bg-yellow-500/10 border border-yellow-500/20', label: 'Pendiente de pago' },
   PAGADO:    { color: 'text-green-400', bg: 'bg-green-400/10 border border-green-400/20',   label: 'Pagado'           },
-  ENTREGADO: { color: 'text-[#E14924]', bg: 'bg-[#E14924]/10 border border-[#E14924]/20',  label: 'Entregado'        },
+  ENTREGADO: { color: 'text-[var(--cc)]', bg: 'bg-[var(--cc)]/10 border border-[var(--cc)]/20',  label: 'Entregado'        },
 };
 
 const MOTIVO_LABEL = {
@@ -98,7 +98,7 @@ function SeccionMensualidades({ datos, suspensiones = [] }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
-        <Calendar className="w-5 h-5 text-[#E14924]" />
+        <Calendar className="w-5 h-5 text-[var(--cc)]" />
         <h3 className="text-base font-semibold text-[var(--text-pri)]">Mensualidades 2026</h3>
         {totalSusp > 0 && (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
@@ -107,9 +107,9 @@ function SeccionMensualidades({ datos, suspensiones = [] }) {
         )}
       </div>
       <div className="grid grid-cols-2 gap-2 mb-3">
-        <div className="bg-[rgba(225,73,36,0.08)] rounded-xl p-3 border border-[#E14924]/20">
+        <div className="bg-[var(--cc12)] rounded-xl p-3 border border-[var(--cc)]/20">
           <p className="text-xs text-[var(--text-sec)]">Total pagado</p>
-          <p className="text-lg font-bold text-[#E14924]">{formatCOP(totalPagado)}</p>
+          <p className="text-lg font-bold text-[var(--cc)]">{formatCOP(totalPagado)}</p>
         </div>
         <div className="bg-[rgba(245,158,11,0.08)] rounded-xl p-3 border border-yellow-500/20">
           <p className="text-xs text-[var(--text-sec)]">Saldo pendiente</p>
@@ -176,7 +176,7 @@ function SeccionPedidoUniforme({ cedula }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
-        <Shirt className="w-5 h-5 text-[#E14924]" />
+        <Shirt className="w-5 h-5 text-[var(--cc)]" />
         <h3 className="text-base font-semibold text-[var(--text-pri)]">Uniforme</h3>
       </div>
       {cargando ? (
@@ -195,7 +195,7 @@ function SeccionPedidoUniforme({ cedula }) {
               {pedido.estado === 'ENTREGADO' && <Package className="w-3 h-3" />}
               {cfg.label}
             </span>
-            <span className="text-sm font-bold text-[#E14924]">{formatCOP(pedido.total)}</span>
+            <span className="text-sm font-bold text-[var(--cc)]">{formatCOP(pedido.total)}</span>
           </div>
           {prendas.length > 0 && (
             <div>
@@ -307,11 +307,11 @@ function SeccionHistorialLazy({ cedula }) {
     <div>
       <button
         onClick={cargarHistorial}
-        className="w-full flex items-center justify-between p-4 rounded-xl bg-[rgba(225,73,36,0.06)] border border-[#E14924]/20 hover:bg-[rgba(225,73,36,0.10)] transition-colors"
+        className="w-full flex items-center justify-between p-4 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/20 hover:bg-[var(--cc12)] transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[rgba(225,73,36,0.10)] flex items-center justify-center">
-            <FileText className="w-4 h-4 text-[#E14924]" />
+          <div className="w-8 h-8 rounded-lg bg-[var(--cc12)] flex items-center justify-center">
+            <FileText className="w-4 h-4 text-[var(--cc)]" />
           </div>
           <div className="text-left">
             <p className="text-sm font-semibold text-[var(--text-pri)]">Historial de transacciones</p>
@@ -320,9 +320,9 @@ function SeccionHistorialLazy({ cedula }) {
             </p>
           </div>
         </div>
-        {cargando  ? <Loader2 className="w-4 h-4 text-[#E14924] animate-spin" />
-          : visible ? <EyeOff className="w-4 h-4 text-[#E14924]" />
-          :           <Eye    className="w-4 h-4 text-[#E14924]" />}
+        {cargando  ? <Loader2 className="w-4 h-4 text-[var(--cc)] animate-spin" />
+          : visible ? <EyeOff className="w-4 h-4 text-[var(--cc)]" />
+          :           <Eye    className="w-4 h-4 text-[var(--cc)]" />}
       </button>
 
       {visible && (
@@ -358,10 +358,10 @@ function SeccionHistorialLazy({ cedula }) {
                 <OrigenBadge origen={p.tipo_origen} />
               </div>
               {p.referencia && <p className="text-xs text-[var(--text-sec)]">Ref: {p.referencia}</p>}
-              {p.mensaje_alerta && <p className="text-xs text-[#E14924] mt-1 italic">📝 {p.mensaje_alerta}</p>}
+              {p.mensaje_alerta && <p className="text-xs text-[var(--cc)] mt-1 italic">📝 {p.mensaje_alerta}</p>}
               {p.url_comprobante && (
                 <a href={p.url_comprobante} target="_blank" rel="noopener noreferrer"
-                   className="text-xs text-[#E14924] hover:underline mt-1 inline-block">
+                   className="text-xs text-[var(--cc)] hover:underline mt-1 inline-block">
                   📎 Ver comprobante
                 </a>
               )}

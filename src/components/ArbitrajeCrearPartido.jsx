@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, X, CheckSquare, Square, Loader2, Search, Calendar } from 'lucide-react';
+import { Plus, X, CheckSquare, Square, Loader2, Search, Calendar, CheckCircle2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
@@ -120,7 +120,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
   if (success) {
     return (
       <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl p-12 text-center">
-        <div className="text-5xl mb-4">✅</div>
+        <CheckCircle2 size={48} className="text-[var(--cc)] mb-4" />
         <h3 className="text-[var(--cc)] font-semibold text-lg mb-2">Partido registrado con éxito</h3>
         <p className="text-gray-400 text-sm">Redirigiendo al listado...</p>
       </div>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { CheckCircle, ChevronRight, DollarSign, Trophy, X, Phone, Palette, Building2, ChevronDown } from 'lucide-react';
+import { CheckCircle, ChevronRight, DollarSign, Trophy, X, Phone, Palette, Building2, ChevronDown, Camera, Loader2, AlertTriangle, Info, MessageCircle, Instagram, Facebook, Youtube, Globe, Music } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
 import { applyTheme, getStoredTheme, THEMES } from './ThemeSelector';
@@ -168,7 +168,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
 
   /* ── Estilos base ─────────────────────────────────────────── */
   const overlay = {
-    position: 'fixed', inset: 0, zIndex: 9999,
+    position: 'fixed', inset: 0, zIndex: 500,
     background: 'rgba(4,6,12,0.88)', backdropFilter: 'blur(10px)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     padding: '16px',
@@ -236,7 +236,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
           {/* PASO 1 — TU CLUB */}
           {step === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <StepBadge color={c} icon="🏟️" title="Información básica" desc="Aparecerá en toda la aplicación y en los recibos" />
+              <StepBadge color={c} Icon={Building2} title="Información básica" desc="Aparecerá en toda la aplicación y en los recibos" />
 
               <div>
                 <label style={lbl}>Nombre del club *</label>
@@ -277,7 +277,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
           {/* PASO 2 — IDENTIDAD VISUAL */}
           {step === 1 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              <StepBadge color={c} icon="🎨" title="Identidad visual" desc="Personaliza los colores y el logo de tu club" />
+              <StepBadge color={c} Icon={Palette} title="Identidad visual" desc="Personaliza los colores y el logo de tu club" />
 
               {/* Color */}
               <div>
@@ -307,7 +307,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                 </div>
 
                 {/* Preview color */}
-                <div style={{ padding: '12px 16px', borderRadius: 12, background: `${c}12`, border: `1px solid ${c}35`, display: 'flex', alignItems: 'center', gap: 12, transition: 'all 0.4s' }}>
+                <div style={{ padding: '12px 16px', borderRadius: 12, background: `${c}12`, border: `1px solid ${c}35`, display: 'flex', alignItems: 'center', gap: 12, transition: 'background-color 0.4s, border-color 0.4s' }}>
                   <div style={{ width: 38, height: 38, borderRadius: '50%', background: c, flexShrink: 0, transition: 'background 0.4s' }} />
                   <div>
                     <p style={{ color: '#fff', fontWeight: 700, margin: 0, fontSize: 14 }}>{club.nombre || 'Mi Club'}</p>
@@ -353,17 +353,19 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                       width: 76, height: 76, borderRadius: 14, flexShrink: 0, overflow: 'hidden', cursor: 'pointer',
                       background: logoUrl ? 'transparent' : `${c}10`,
                       border: `2px dashed ${c}40`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                     {logoUrl
                       ? <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={() => setLogoUrl('')} />
-                      : uploadingLogo ? '⏳' : '📷'}
+                      : uploadingLogo
+                        ? <Loader2 size={26} color={c} style={{ animation: 'spin 1s linear infinite' }} />
+                        : <Camera size={26} color={`${c}80`} strokeWidth={1.5} />}
                   </div>
 
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <button onClick={() => logoRef.current?.click()} disabled={uploadingLogo}
                       style={{ padding: '9px 14px', background: `${c}18`, border: `1px solid ${c}35`, borderRadius: 10, color: c, fontWeight: 600, fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
-                      {uploadingLogo ? '⏳ Subiendo…' : '📁 Subir imagen'}
+                      {uploadingLogo ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> Subiendo…</> : <><Camera size={13} /> Subir imagen</>}
                     </button>
                     <input value={logoUrl} onChange={e => setLogoUrl(e.target.value)}
                       placeholder="O pega un URL de imagen"
@@ -380,7 +382,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
           {/* PASO 3 — MENSUALIDADES */}
           {step === 2 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <StepBadge color={c} icon="💰" title="Mensualidades y mora" desc="Define cuánto y cuándo cobrar a los jugadores" />
+              <StepBadge color={c} Icon={DollarSign} title="Mensualidades y mora" desc="Define cuánto y cuándo cobrar a los jugadores" />
 
               <div>
                 <label style={lbl}>Valor de la cuota mensual ({paisActual.moneda})</label>
@@ -401,7 +403,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                 </div>
               </div>
 
-              <InfoBox icon="⚠️">
+              <InfoBox warn>
                 La mora se aplica automáticamente cuando un jugador supera los días de gracia sin pagar. Puedes ajustar estos valores en cualquier momento.
               </InfoBox>
             </div>
@@ -410,7 +412,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
           {/* PASO 4 — WHATSAPP */}
           {step === 3 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <StepBadge color={c} icon="💬" title="WhatsApp" desc="Número desde el que se envían mensajes automáticos de cobro" />
+              <StepBadge color={c} Icon={MessageCircle} title="WhatsApp" desc="Número desde el que se envían mensajes automáticos de cobro" />
 
               <div>
                 <label style={lbl}>Número de WhatsApp (con código de país, sin + ni espacios)</label>
@@ -451,15 +453,15 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                 <label style={{ ...lbl, marginBottom: 10 }}>REDES SOCIALES DEL CLUB (opcional)</label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {[
-                    { key: 'instagram', icon: '📷', label: 'Instagram', placeholder: '@tuclub' },
-                    { key: 'facebook',  icon: '👥', label: 'Facebook',  placeholder: 'facebook.com/tuclub' },
-                    { key: 'tiktok',    icon: '🎵', label: 'TikTok',    placeholder: '@tuclub' },
-                    { key: 'youtube',   icon: '▶️', label: 'YouTube',   placeholder: 'youtube.com/@tuclub' },
-                    { key: 'web',       icon: '🌐', label: 'Sitio web', placeholder: 'www.tuclub.com' },
-                  ].map(({ key, icon, label, placeholder }) => (
+                    { key: 'instagram', Icon: Instagram, label: 'Instagram', placeholder: '@tuclub' },
+                    { key: 'facebook',  Icon: Facebook,  label: 'Facebook',  placeholder: 'facebook.com/tuclub' },
+                    { key: 'tiktok',    Icon: Music,     label: 'TikTok',    placeholder: '@tuclub' },
+                    { key: 'youtube',   Icon: Youtube,   label: 'YouTube',   placeholder: 'youtube.com/@tuclub' },
+                    { key: 'web',       Icon: Globe,     label: 'Sitio web', placeholder: 'www.tuclub.com' },
+                  ].map(({ key, Icon, label, placeholder }) => (
                     <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 8, background: `${c}14`, border: `1px solid ${c}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0 }}>
-                        {icon}
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: `${c}14`, border: `1px solid ${c}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Icon size={15} color={c} strokeWidth={1.8} />
                       </div>
                       <input
                         value={redes[key]}
@@ -478,7 +480,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
           {/* PASO 5 — TORNEOS */}
           {step === 4 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <StepBadge color={c} icon="🏆" title="Torneos y competencias" desc="Opcional — puedes agregar más en cualquier momento" />
+              <StepBadge color={c} Icon={Trophy} title="Torneos y competencias" desc="Opcional — puedes agregar más en cualquier momento" />
 
               {torneos.map((t, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -666,10 +668,12 @@ function PaisDropdown({ value, onChange, inp, c }) {
   );
 }
 
-function StepBadge({ color, icon, title, desc }) {
+function StepBadge({ color, Icon, title, desc }) {
   return (
     <div style={{ padding: '12px 16px', background: `${color}0E`, borderRadius: 12, border: `1px solid ${color}25`, display: 'flex', alignItems: 'center', gap: 12 }}>
-      <span style={{ fontSize: 22, flexShrink: 0 }}>{icon}</span>
+      <div style={{ width: 32, height: 32, borderRadius: 8, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Icon size={17} color={color} strokeWidth={1.8} />
+      </div>
       <div>
         <p style={{ color: '#fff', fontSize: 14, fontWeight: 700, margin: 0 }}>{title}</p>
         <p style={{ color: '#8B95A3', fontSize: 12, margin: '2px 0 0' }}>{desc}</p>
@@ -678,10 +682,12 @@ function StepBadge({ color, icon, title, desc }) {
   );
 }
 
-function InfoBox({ children, icon = 'ℹ️' }) {
+function InfoBox({ children, warn = false }) {
   return (
-    <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-      <span style={{ fontSize: 14, flexShrink: 0 }}>{icon}</span>
+    <div style={{ padding: '10px 14px', background: warn ? 'rgba(245,158,11,0.06)' : 'rgba(255,255,255,0.04)', borderRadius: 10, border: warn ? '1px solid rgba(245,158,11,0.2)' : '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+      {warn
+        ? <AlertTriangle size={14} color="#F59E0B" style={{ flexShrink: 0, marginTop: 1 }} />
+        : <Info size={14} color="#8B95A3" style={{ flexShrink: 0, marginTop: 1 }} />}
       <p style={{ fontSize: 12, color: '#8B95A3', margin: 0, lineHeight: 1.65 }}>{children}</p>
     </div>
   );

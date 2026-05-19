@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   ChevronLeft, ChevronRight, Plus, Edit2, Trash2,
-  X, Loader2, MapPin, Clock, CalendarDays, List,
+  X, Loader2, MapPin, Clock, CalendarDays, List, Users,
+  CheckCircle2, XCircle, AlertCircle, ChevronDown,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
@@ -18,11 +19,18 @@ const TIPOS = {
   EVENTO:        { label: 'Evento',        color: '#F59E0B',    bg: '#F59E0B20'    },
 };
 
+const ESTADOS = {
+  PRESENTE:    { label: 'Presente',    color: '#22C55E', bg: '#22C55E20', Icon: CheckCircle2 },
+  AUSENTE:     { label: 'Ausente',     color: '#EF4444', bg: '#EF444420', Icon: XCircle      },
+  JUSTIFICADO: { label: 'Justificado', color: '#F59E0B', bg: '#F59E0B20', Icon: AlertCircle  },
+  PENDIENTE:   { label: 'Pendiente',   color: 'var(--text-mut)', bg: 'transparent', Icon: null },
+};
+
 const FORM_EMPTY = {
   tipo: 'ENTRENAMIENTO', titulo: '',
   fecha: '', hora: '08:00',
   fecha_fin: '', hora_fin: '',
-  lugar: '', descripcion: '',
+  lugar: '', descripcion: '', equipo: '',
 };
 
 const INPUT = 'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-3 py-2 text-sm outline-none transition-colors';
@@ -73,14 +81,14 @@ function getCalendarCells(year, month) {
 
 // ── EventCard — scope de módulo para identidad estable ────────────────────────
 
-function EventCard({ ev, onEdit, onDelete, deleting }) {
+function EventCard({ ev, onEdit, onDelete, onAsistencia, deleting }) {
   const t = TIPOS[ev.tipo] || TIPOS.EVENTO;
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)] group">
       <div className="w-1 self-stretch rounded-full shrink-0" style={{ background: t.color }} />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-[var(--text-pri)] truncate">{ev.titulo}</p>
-        <div className="flex gap-3 mt-0.5">
+        <div className="flex flex-wrap gap-3 mt-0.5">
           <span className="flex items-center gap-1 text-xs text-[var(--text-sec)]">
             <Clock size={10} />{formatTime(ev.fecha_inicio)}
             {ev.fecha_fin ? ` – ${formatTime(ev.fecha_fin)}` : ''}
@@ -90,9 +98,18 @@ function EventCard({ ev, onEdit, onDelete, deleting }) {
               <MapPin size={10} />{ev.lugar}
             </span>
           )}
+          {ev.equipo && (
+            <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: t.color }}>
+              <Users size={10} />{ev.equipo}
+            </span>
+          )}
         </div>
       </div>
       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <button onClick={() => onAsistencia(ev)} title="Pasar asistencia"
+          className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-green-400 hover:bg-green-500/10 transition-colors">
+          <Users size={13} />
+        </button>
         <button onClick={() => onEdit(ev)}
           className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">
           <Edit2 size={13} />
@@ -112,17 +129,24 @@ export default function Calendario({ color, clubId }) {
   const today    = new Date();
   const todayStr = localDateStr(today);
 
-  const [view,         setView]         = useState('mes');
-  const [year,         setYear]         = useState(today.getFullYear());
-  const [month,        setMonth]        = useState(today.getMonth());
-  const [events,       setEvents]       = useState([]);
-  const [loading,      setLoading]      = useState(true);
-  const [selectedDate, setSelectedDate] = useState(todayStr);
-  const [showForm,     setShowForm]     = useState(false);
-  const [editEvent,    setEditEvent]    = useState(null);
-  const [form,         setForm]         = useState(FORM_EMPTY);
-  const [saving,       setSaving]       = useState(false);
-  const [deleting,     setDeleting]     = useState(null);
+  const [view,           setView]           = useState('mes');
+  const [year,           setYear]           = useState(today.getFullYear());
+  const [month,          setMonth]          = useState(today.getMonth());
+  const [events,         setEvents]         = useState([]);
+  const [loading,        setLoading]        = useState(true);
+  const [selectedDate,   setSelectedDate]   = useState(todayStr);
+  const [showForm,       setShowForm]       = useState(false);
+  const [editEvent,      setEditEvent]      = useState(null);
+  const [form,           setForm]           = useState(FORM_EMPTY);
+  const [saving,         setSaving]         = useState(false);
+  const [deleting,       setDeleting]       = useState(null);
+
+  // Asistencia state
+  const [asistEvento,    setAsistEvento]    = useState(null);   // evento activo
+  const [asistPlayers,   setAsistPlayers]   = useState([]);
+  const [asistLoading,   setAsistLoading]   = useState(false);
+  const [asistSaving,    setAsistSaving]    = useState({});     // { cedula: true }
+  const [asistSearch,    setAsistSearch]    = useState('');
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -180,12 +204,13 @@ export default function Calendario({ color, clubId }) {
     setForm({
       tipo:        ev.tipo        || 'ENTRENAMIENTO',
       titulo:      ev.titulo      || '',
-      fecha:       start ? localDateStr(start)                                    : '',
+      fecha:       start ? localDateStr(start)                                     : '',
       hora:        start ? `${pad2(start.getHours())}:${pad2(start.getMinutes())}` : '',
-      fecha_fin:   end   ? localDateStr(end)                                      : '',
-      hora_fin:    end   ? `${pad2(end.getHours())}:${pad2(end.getMinutes())}`    : '',
+      fecha_fin:   end   ? localDateStr(end)                                       : '',
+      hora_fin:    end   ? `${pad2(end.getHours())}:${pad2(end.getMinutes())}`     : '',
       lugar:       ev.lugar       || '',
       descripcion: ev.descripcion || '',
+      equipo:      ev.equipo      || '',
     });
     setEditEvent(ev);
     setShowForm(true);
@@ -205,9 +230,10 @@ export default function Calendario({ color, clubId }) {
         fecha_fin:    form.fecha_fin
           ? new Date(`${form.fecha_fin}T${form.hora_fin || '00:00'}`).toISOString()
           : null,
-        lugar: form.lugar || null,
+        lugar:  form.lugar  || null,
+        equipo: form.equipo || null,
       };
-      const url    = editEvent
+      const url  = editEvent
         ? `${API_BASE_URL}/calendario/${editEvent.id}?club_id=${clubId}`
         : `${API_BASE_URL}/calendario?club_id=${clubId}`;
       const res  = await authFetch(url, {
@@ -233,8 +259,63 @@ export default function Calendario({ color, clubId }) {
     finally     { setDeleting(null); }
   };
 
-  const cells    = getCalendarCells(year, month);
-  const dayEvs   = eventsByDay[selectedDate] || [];
+  // ── Asistencia ────────────────────────────────────────────────────────────
+
+  const openAsistencia = async (ev) => {
+    setAsistEvento(ev);
+    setAsistPlayers([]);
+    setAsistSearch('');
+    setAsistLoading(true);
+    try {
+      const res  = await authFetch(`${API_BASE_URL}/asistencia/${ev.id}?club_id=${clubId}`);
+      const data = await res.json();
+      setAsistPlayers(data.data || []);
+    } catch (e) { console.error(e); }
+    finally     { setAsistLoading(false); }
+  };
+
+  const closeAsistencia = () => { setAsistEvento(null); setAsistPlayers([]); setAsistSaving({}); };
+
+  const markAsistencia = async (cedula, estado) => {
+    setAsistSaving(s => ({ ...s, [cedula]: true }));
+    // optimistic update
+    setAsistPlayers(prev =>
+      prev.map(p => p.cedula === cedula ? { ...p, estado } : p)
+    );
+    try {
+      await authFetch(`${API_BASE_URL}/asistencia/${asistEvento.id}/${cedula}?club_id=${clubId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado }),
+      });
+    } catch (e) {
+      console.error(e);
+      // revert on error
+      setAsistPlayers(prev =>
+        prev.map(p => p.cedula === cedula ? { ...p, estado: 'PENDIENTE' } : p)
+      );
+    } finally {
+      setAsistSaving(s => { const n = { ...s }; delete n[cedula]; return n; });
+    }
+  };
+
+  const asistFiltered = useMemo(() => {
+    if (!asistSearch.trim()) return asistPlayers;
+    const q = asistSearch.toLowerCase();
+    return asistPlayers.filter(p =>
+      `${p.nombre} ${p.apellidos}`.toLowerCase().includes(q) ||
+      String(p.cedula).includes(q)
+    );
+  }, [asistPlayers, asistSearch]);
+
+  const asistStats = useMemo(() => {
+    const counts = { PRESENTE: 0, AUSENTE: 0, JUSTIFICADO: 0, PENDIENTE: 0 };
+    asistPlayers.forEach(p => { counts[p.estado] = (counts[p.estado] || 0) + 1; });
+    return counts;
+  }, [asistPlayers]);
+
+  const cells       = getCalendarCells(year, month);
+  const dayEvs      = eventsByDay[selectedDate] || [];
   const tomorrowStr = localDateStr(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1));
 
   // ── MonthView (función, no componente) ────────────────────────────────────
@@ -334,7 +415,8 @@ export default function Calendario({ color, clubId }) {
             </p>
           ) : (
             dayEvs.map(ev => (
-              <EventCard key={ev.id} ev={ev} onEdit={openEdit} onDelete={handleDelete} deleting={deleting} />
+              <EventCard key={ev.id} ev={ev} onEdit={openEdit} onDelete={handleDelete}
+                onAsistencia={openAsistencia} deleting={deleting} />
             ))
           )}
         </div>
@@ -365,7 +447,8 @@ export default function Calendario({ color, clubId }) {
               </div>
               <div className="space-y-2">
                 {agendaEvents[ds].map(ev => (
-                  <EventCard key={ev.id} ev={ev} onEdit={openEdit} onDelete={handleDelete} deleting={deleting} />
+                  <EventCard key={ev.id} ev={ev} onEdit={openEdit} onDelete={handleDelete}
+                    onAsistencia={openAsistencia} deleting={deleting} />
                 ))}
               </div>
             </div>
@@ -379,7 +462,7 @@ export default function Calendario({ color, clubId }) {
 
   const EventForm = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-md shadow-2xl">
+      <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
 
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--cc20)]">
           <h2 className="text-[var(--text-pri)] font-bold">{editEvent ? 'Editar evento' : 'Nuevo evento'}</h2>
@@ -434,6 +517,12 @@ export default function Calendario({ color, clubId }) {
             onChange={e => setForm(f => ({ ...f, lugar: e.target.value }))}
             placeholder="Lugar (opcional)" className={INPUT} />
 
+          {/* Equipo */}
+          <input type="text" value={form.equipo}
+            onChange={e => setForm(f => ({ ...f, equipo: e.target.value }))}
+            placeholder={form.tipo === 'PARTIDO' ? 'Equipo (filtra asistencia)' : 'Equipo (opcional)'}
+            className={INPUT} />
+
           {/* Descripción */}
           <textarea value={form.descripcion}
             onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))}
@@ -456,6 +545,150 @@ export default function Calendario({ color, clubId }) {
       </div>
     </div>
   );
+
+  // ── AsistenciaPanel ────────────────────────────────────────────────────────
+
+  const AsistenciaPanel = () => {
+    if (!asistEvento) return null;
+    const t = TIPOS[asistEvento.tipo] || TIPOS.EVENTO;
+    const total = asistPlayers.length;
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm">
+        <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg shadow-2xl flex flex-col max-h-[92vh]">
+
+          {/* Header */}
+          <div className="flex items-start justify-between px-5 py-4 border-b border-[var(--cc20)] shrink-0">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                  style={{ background: t.bg, color: t.color }}>{t.label}</span>
+                {asistEvento.equipo && (
+                  <span className="text-xs font-semibold text-[var(--text-sec)]">
+                    · {asistEvento.equipo}
+                  </span>
+                )}
+              </div>
+              <p className="text-base font-bold text-[var(--text-pri)] mt-1 truncate">{asistEvento.titulo}</p>
+              <p className="text-xs text-[var(--text-sec)] mt-0.5">
+                {formatDateLong(toDateStr(asistEvento.fecha_inicio))}
+                {' · '}{formatTime(asistEvento.fecha_inicio)}
+              </p>
+            </div>
+            <button onClick={closeAsistencia}
+              className="ml-3 p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--text-pri)] hover:bg-[var(--bg-surface)] transition-colors shrink-0">
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Stats */}
+          {!asistLoading && total > 0 && (
+            <div className="grid grid-cols-4 gap-2 px-5 py-3 border-b border-[var(--cc20)] shrink-0">
+              {[
+                { key: 'PRESENTE',    label: 'Presentes',    color: '#22C55E' },
+                { key: 'AUSENTE',     label: 'Ausentes',     color: '#EF4444' },
+                { key: 'JUSTIFICADO', label: 'Justific.',    color: '#F59E0B' },
+                { key: 'PENDIENTE',   label: 'Pendientes',   color: 'var(--text-mut)' },
+              ].map(({ key, label, color: c }) => (
+                <div key={key} className="text-center">
+                  <p className="text-lg font-bold" style={{ color: c }}>{asistStats[key] || 0}</p>
+                  <p className="text-[10px] text-[var(--text-mut)]">{label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Search */}
+          {!asistLoading && total > 4 && (
+            <div className="px-5 py-3 border-b border-[var(--cc20)] shrink-0">
+              <input
+                type="text"
+                value={asistSearch}
+                onChange={e => setAsistSearch(e.target.value)}
+                placeholder="Buscar jugador…"
+                className={INPUT}
+              />
+            </div>
+          )}
+
+          {/* Lista */}
+          <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2">
+            {asistLoading ? (
+              <div className="flex items-center justify-center py-12 gap-2 text-[var(--text-sec)]">
+                <Loader2 size={18} className="animate-spin" style={{ color }} />
+                <span className="text-sm">Cargando jugadores…</span>
+              </div>
+            ) : total === 0 ? (
+              <div className="text-center py-12">
+                <Users size={36} className="mx-auto mb-3 opacity-20 text-[var(--text-sec)]" />
+                <p className="text-sm text-[var(--text-sec)]">
+                  {asistEvento.tipo === 'PARTIDO' && asistEvento.equipo
+                    ? `No hay jugadores en el equipo "${asistEvento.equipo}"`
+                    : 'No hay jugadores activos en el club'}
+                </p>
+              </div>
+            ) : asistFiltered.length === 0 ? (
+              <p className="text-center text-sm text-[var(--text-sec)] py-8">Sin resultados para "{asistSearch}"</p>
+            ) : (
+              asistFiltered.map(p => {
+                const est     = ESTADOS[p.estado] || ESTADOS.PENDIENTE;
+                const isSaving = asistSaving[p.cedula];
+                return (
+                  <div key={p.cedula}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)]">
+
+                    {/* Avatar */}
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                      style={{ background: est.bg || 'var(--cc12)', color: est.color || 'var(--cc)' }}>
+                      {(p.nombre?.[0] || '?').toUpperCase()}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-[var(--text-pri)] truncate">
+                        {p.nombre} {p.apellidos}
+                      </p>
+                      <p className="text-xs text-[var(--text-sec)]">CC {p.cedula}</p>
+                    </div>
+
+                    {/* Botones estado */}
+                    {isSaving ? (
+                      <Loader2 size={16} className="animate-spin text-[var(--text-sec)]" />
+                    ) : (
+                      <div className="flex gap-1 shrink-0">
+                        {['PRESENTE', 'AUSENTE', 'JUSTIFICADO'].map(e => {
+                          const es    = ESTADOS[e];
+                          const activo = p.estado === e;
+                          return (
+                            <button key={e} onClick={() => markAsistencia(p.cedula, e)}
+                              title={es.label}
+                              style={activo ? { background: es.bg, color: es.color, borderColor: es.color } : {}}
+                              className={`p-1.5 rounded-lg border text-xs font-bold transition-all
+                                ${activo ? '' : 'border-[var(--cc20)] text-[var(--text-mut)] hover:border-[var(--cc20)] hover:bg-[var(--bg-card)]'}`}>
+                              <es.Icon size={14} />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Footer */}
+          {!asistLoading && total > 0 && (
+            <div className="px-5 py-3 border-t border-[var(--cc20)] shrink-0">
+              <p className="text-xs text-center text-[var(--text-sec)]">
+                {asistStats.PRESENTE} de {total} jugadores marcados como presentes
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   // ── Render principal ──────────────────────────────────────────────────────
 
@@ -502,6 +735,7 @@ export default function Calendario({ color, clubId }) {
       </div>
 
       {showForm && EventForm()}
+      {asistEvento && AsistenciaPanel()}
     </div>
   );
 }

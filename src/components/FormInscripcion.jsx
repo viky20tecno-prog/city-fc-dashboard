@@ -673,7 +673,7 @@ export default function FormInscripcion() {
                 color: '#fff', fontSize: 15, fontWeight: 700,
                 cursor: status === 'loading' ? 'not-allowed' : 'pointer',
                 boxShadow: status === 'loading' ? 'none' : `0 4px 24px ${c}44`,
-                transition: 'all 0.3s',
+                transition: 'background-color 0.2s, box-shadow 0.2s',
               }}
             >
               {status === 'loading'

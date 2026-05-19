@@ -249,7 +249,7 @@ function DashboardMockup({ color, modo = 'dark' }) {
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
           <span style={{ fontSize: 9, color: T.liveTxt, letterSpacing: 1 }}>EN VIVO</span>
         </div>
-        <div style={{ width: 24, height: 24, borderRadius: 7, background: `${color}28`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.4s' }}>
+        <div style={{ width: 24, height: 24, borderRadius: 7, background: `${color}28`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s' }}>
           <Zap size={12} color={color} />
         </div>
       </div>
@@ -272,7 +272,7 @@ function DashboardMockup({ color, modo = 'dark' }) {
               { label: 'Al día',    val: '18', c: '#22C55E' },
               { label: 'Pendiente', val: '6',  c: '#FF5E5E' },
             ].map(s => (
-              <div key={s.label} style={{ background: `${s.c}09`, border: `1px solid ${s.c}25`, borderRadius: 9, padding: '8px 10px', transition: 'all 0.4s' }}>
+              <div key={s.label} style={{ background: `${s.c}09`, border: `1px solid ${s.c}25`, borderRadius: 9, padding: '8px 10px', transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s' }}>
                 <div style={{ fontSize: 8, color: T.subTxt, marginBottom: 4, letterSpacing: 0.5 }}>{s.label}</div>
                 <div style={{ fontSize: 20, fontWeight: 800, color: s.c, lineHeight: 1, transition: 'color 0.4s' }}>{s.val}</div>
               </div>
@@ -596,7 +596,7 @@ function FaqItem({ q, a, delay }) {
           background: open ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.025)',
           border: `1px solid ${open ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.07)'}`,
           borderRadius: 14, padding: '18px 22px', cursor: 'pointer',
-          transition: 'all 0.2s',
+          transition: 'background-color 0.2s, border-color 0.2s',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
@@ -671,7 +671,7 @@ export default function LandingPage() {
       }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 9, background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 16px ${previewColor}50`, transition: 'all 0.3s', flexShrink: 0 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 9, background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 16px ${previewColor}50`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s', flexShrink: 0 }}>
               <Zap size={16} color="#fff" />
             </div>
             <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.5px' }}>ZenSports</span>
@@ -685,7 +685,7 @@ export default function LandingPage() {
             <button className="btn-ghost" onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 14, cursor: 'pointer', padding: '7px 14px', borderRadius: 8 }}>
               Iniciar sesión
             </button>
-            <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 9, padding: '8px 18px', cursor: 'pointer', boxShadow: `0 0 20px ${previewColor}40`, transition: 'all 0.3s' }}>
+            <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 9, padding: '8px 18px', cursor: 'pointer', boxShadow: `0 0 20px ${previewColor}40`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
               Registrar club
             </button>
           </div>
@@ -721,7 +721,7 @@ export default function LandingPage() {
               border: `1px solid ${previewColor}38`,
               borderRadius: 999, padding: '6px 20px',
               fontSize: 12, color: previewColor, fontWeight: 600, letterSpacing: 0.5,
-              transition: 'all 0.4s',
+              transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s',
               boxShadow: `0 0 20px ${previewColor}12, inset 0 1px 0 ${previewColor}20`,
             }}>
               <Sparkles size={13} />
@@ -827,7 +827,7 @@ export default function LandingPage() {
                 <span>{d.emoji}</span>{d.label}
               </div>
             ))}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: `${previewColor}10`, border: `1px solid ${previewColor}25`, borderRadius: 999, padding: '6px 14px', fontSize: 13, color: previewColor, transition: 'all 0.3s' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: `${previewColor}10`, border: `1px solid ${previewColor}25`, borderRadius: 999, padding: '6px 14px', fontSize: 13, color: previewColor, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
               + cualquier deporte con afiliados
             </div>
           </div>
@@ -1024,7 +1024,7 @@ export default function LandingPage() {
                       borderRadius: 10, padding: '8px 14px', cursor: 'pointer',
                       transform: active ? 'scale(1.06)' : 'scale(1)',
                       boxShadow: active ? `0 0 18px ${p.hex}30` : 'none',
-                      transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
+                      transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1)',
                     }}
                   >
                     <div style={{
@@ -1052,9 +1052,9 @@ export default function LandingPage() {
                 display: 'flex', alignItems: 'center', gap: 12,
                 background: `${previewColor}0E`, border: `1px solid ${previewColor}30`,
                 borderRadius: 12, padding: '12px 18px',
-                transition: 'all 0.35s',
+                transition: 'background-color 0.35s, box-shadow 0.35s',
               }}>
-                <div style={{ width: 28, height: 28, borderRadius: 8, background: previewColor, boxShadow: `0 0 14px ${previewColor}80`, transition: 'all 0.35s', flexShrink: 0 }} />
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: previewColor, boxShadow: `0 0 14px ${previewColor}80`, transition: 'background-color 0.35s, box-shadow 0.35s', flexShrink: 0 }} />
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: previewColor, transition: 'color 0.35s' }}>{colorActivo.nombre}</div>
                   <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>Color activo del club</div>
@@ -1082,7 +1082,7 @@ export default function LandingPage() {
                         background: previewModo === id ? 'rgba(255,255,255,0.15)' : 'transparent',
                         color: previewModo === id ? '#fff' : 'rgba(255,255,255,0.38)',
                         fontSize: 11, fontWeight: previewModo === id ? 700 : 400,
-                        cursor: 'pointer', transition: 'all 0.2s',
+                        cursor: 'pointer', transition: 'background-color 0.2s, border-color 0.2s',
                       }}
                     >
                       <Icon size={11} /> {label}
@@ -1230,7 +1230,7 @@ export default function LandingPage() {
           ))}
         </div>
         <Reveal>
-          <div style={{ borderRadius: 18, padding: '36px 40px', background: `linear-gradient(135deg, ${previewColor}07 0%, rgba(0,208,132,0.04) 100%)`, border: `1px solid ${previewColor}1A`, textAlign: 'center', maxWidth: 720, margin: '0 auto', transition: 'all 0.4s' }}>
+          <div style={{ borderRadius: 18, padding: '36px 40px', background: `linear-gradient(135deg, ${previewColor}07 0%, rgba(0,208,132,0.04) 100%)`, border: `1px solid ${previewColor}1A`, textAlign: 'center', maxWidth: 720, margin: '0 auto', transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s' }}>
             <div style={{ fontSize: 28, marginBottom: 16 }}>🎯</div>
             <p style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.85)', lineHeight: 1.7, margin: '0 0 12px' }}>
               "Nuestra misión es que ningún club deportivo en Latinoamérica pierda tiempo, dinero o talento por falta de herramientas digitales."
@@ -1283,7 +1283,7 @@ export default function LandingPage() {
           {/* PRO */}
           <Reveal delay={80}>
             <div className="card-hover" style={{ background: `${previewColor}07`, border: `2px solid ${previewColor}35`, borderRadius: 22, padding: '30px 26px', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: previewColor, color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 16px', letterSpacing: 1, whiteSpace: 'nowrap', boxShadow: `0 4px 16px ${previewColor}60`, transition: 'all 0.3s' }}>
+              <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: previewColor, color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 16px', letterSpacing: 1, whiteSpace: 'nowrap', boxShadow: `0 4px 16px ${previewColor}60`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
                 ★ MÁS POPULAR
               </div>
               <p style={{ color: previewColor, fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8, transition: 'color 0.3s' }}>Pro</p>
@@ -1297,7 +1297,7 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', boxShadow: `0 4px 24px ${previewColor}55`, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, transition: 'all 0.3s' }}>
+              <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', boxShadow: `0 4px 24px ${previewColor}55`, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
                 Probar 5 días gratis <ChevronRight size={15} />
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 14px' }}>
@@ -1403,10 +1403,10 @@ export default function LandingPage() {
             background: `linear-gradient(135deg, ${previewColor}09 0%, rgba(0,208,132,0.06) 100%)`,
             border: `1px solid ${previewColor}22`,
             position: 'relative', overflow: 'hidden',
-            transition: 'all 0.4s',
+            transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s',
           }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${previewColor}55, rgba(0,208,132,0.4), transparent)`, transition: 'background 0.4s' }} />
-            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 500, height: 300, background: `radial-gradient(ellipse, ${previewColor}06 0%, transparent 70%)`, pointerEvents: 'none', transition: 'all 0.4s' }} />
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 500, height: 300, background: `radial-gradient(ellipse, ${previewColor}06 0%, transparent 70%)`, pointerEvents: 'none', transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s' }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
               <h2 style={{ fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 900, lineHeight: 1.15, marginBottom: 18, letterSpacing: '-1px' }}>
                 Moderniza la experiencia<br />deportiva de tu organización.
@@ -1418,7 +1418,7 @@ export default function LandingPage() {
                 <button
                   className="btn-primary"
                   onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 9, background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`, border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '15px 36px', cursor: 'pointer', boxShadow: `0 8px 32px ${previewColor}50`, transition: 'all 0.3s' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 9, background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`, border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '15px 36px', cursor: 'pointer', boxShadow: `0 8px 32px ${previewColor}50`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}
                 >
                   Solicitar Demo <ArrowRight size={16} />
                 </button>
@@ -1440,7 +1440,7 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 32, justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: previewColor, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 12px ${previewColor}50`, transition: 'all 0.3s' }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: previewColor, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 12px ${previewColor}50`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
                 <Zap size={14} color="#fff" />
               </div>
               <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-0.3px' }}>ZenSports</span>
@@ -1479,7 +1479,7 @@ export default function LandingPage() {
         <button
           className="btn-primary"
           onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)}
-          style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '15px', cursor: 'pointer', boxShadow: `0 4px 20px ${previewColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, transition: 'all 0.3s' }}
+          style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '15px', cursor: 'pointer', boxShadow: `0 4px 20px ${previewColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}
         >
           Probar gratis · 5 días <ArrowRight size={16} />
         </button>

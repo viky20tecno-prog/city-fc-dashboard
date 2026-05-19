@@ -19,3 +19,7 @@ supabase/.temp/
 documentacion_plataforma.md
 plan_tecnico_clubcontable.md
 "public/Tony tech.jpg"
+.vercel
+.env*.local
+.github/prompts/
+.kiro/

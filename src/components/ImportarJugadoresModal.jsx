@@ -99,7 +99,7 @@ export default function ImportarJugadoresModal({ onClose, onSuccess }) {
 
   return (
     <div
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.80)', zIndex: 300,
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.80)', zIndex: 100,
                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
       onClick={fase !== 'importing' ? onClose : undefined}
     >
@@ -145,7 +145,7 @@ export default function ImportarJugadoresModal({ onClose, onSuccess }) {
                   textAlign: 'center',
                   cursor: 'pointer',
                   background: dragOver ? 'rgba(34,197,94,0.05)' : 'var(--bg-card)',
-                  transition: 'all 0.2s',
+                  transition: 'background-color 0.2s, border-color 0.2s',
                 }}
               >
                 <Upload size={36} color="var(--text-sec)" style={{ margin: '0 auto 12px' }} />

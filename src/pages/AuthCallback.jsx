@@ -46,7 +46,7 @@ export default function AuthCallback() {
         <p style={{ color: '#EF4444', fontSize: 14 }}>{error}</p>
         <button
           onClick={() => navigate('/login')}
-          style={{ padding: '10px 24px', borderRadius: 10, background: '#E14924', border: 'none', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+          style={{ padding: '10px 24px', borderRadius: 10, background: 'var(--cc)', border: 'none', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
         >
           Volver al login
         </button>
@@ -60,7 +60,7 @@ export default function AuthCallback() {
       background: 'var(--bg-app)', flexDirection: 'column', gap: 12,
       fontFamily: "'Inter', system-ui, sans-serif",
     }}>
-      <Loader2 size={32} color="#E14924" style={{ animation: 'spin 1s linear infinite' }} />
+      <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: 'var(--cc, #E14924)' }} />
       <p style={{ color: 'var(--text-sec)', fontSize: 14 }}>Verificando cuenta…</p>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>

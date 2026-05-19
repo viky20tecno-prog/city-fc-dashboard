@@ -223,7 +223,7 @@ export default function CategoriasJugadoresModal({ categorias: inicial = [], onC
                   <button
                     key={s}
                     onClick={() => agregarCategoria(s)}
-                    style={{ padding: '4px 10px', borderRadius: 16, background: 'var(--bg-card)', border: '1px solid var(--border-sub)', color: 'var(--text-sec)', fontSize: 11, cursor: 'pointer', transition: 'all 0.15s' }}
+                    style={{ padding: '4px 10px', borderRadius: 16, background: 'var(--bg-card)', border: '1px solid var(--border-sub)', color: 'var(--text-sec)', fontSize: 11, cursor: 'pointer', transition: 'border-color 0.15s, color 0.15s' }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--cc30)'; e.currentTarget.style.color = 'var(--cc)'; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-sub)'; e.currentTarget.style.color = 'var(--text-sec)'; }}
                   >
@@ -246,7 +246,7 @@ export default function CategoriasJugadoresModal({ categorias: inicial = [], onC
           <button
             onClick={guardar}
             disabled={guardando}
-            style={{ padding: '8px 20px', borderRadius: 10, border: `1px solid ${guardado ? 'rgba(34,197,94,0.35)' : 'var(--cc30)'}`, background: guardado ? 'rgba(34,197,94,0.12)' : 'var(--cc12)', color: guardado ? '#22C55E' : 'var(--cc)', fontSize: 13, fontWeight: 600, cursor: guardando ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s', opacity: guardando ? 0.7 : 1 }}
+            style={{ padding: '8px 20px', borderRadius: 10, border: `1px solid ${guardado ? 'rgba(34,197,94,0.35)' : 'var(--cc30)'}`, background: guardado ? 'rgba(34,197,94,0.12)' : 'var(--cc12)', color: guardado ? '#22C55E' : 'var(--cc)', fontSize: 13, fontWeight: 600, cursor: guardando ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'background-color 0.2s, border-color 0.2s, color 0.2s', opacity: guardando ? 0.7 : 1 }}
           >
             {guardado ? <><Check size={14} /> Guardado</> : guardando ? 'Guardando…' : 'Guardar cambios'}
           </button>

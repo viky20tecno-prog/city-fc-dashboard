@@ -33,8 +33,8 @@ function FiltroEstadoDropdown({ value, onChange, opciones }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ background: 'var(--bg-surface)', border: `1px solid ${value !== 'TODOS' ? 'rgba(225,73,36,0.5)' : 'var(--border-sub)'}`, minWidth: '140px' }}
-        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-[var(--text-pri)] hover:border-[#E14924]/50 transition"
+        style={{ background: 'var(--bg-surface)', border: `1px solid ${value !== 'TODOS' ? 'var(--cc50)' : 'var(--border-sub)'}`, minWidth: '140px' }}
+        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-[var(--text-pri)] hover:border-[var(--cc)]/50 transition"
       >
         <span className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ESTADO_DOT[value] || '#6A6A6A' }} />
@@ -53,7 +53,7 @@ function FiltroEstadoDropdown({ value, onChange, opciones }) {
               key={opt}
               onClick={() => { onChange(opt); setOpen(false); }}
               className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition hover:bg-[var(--bg-card)] text-left"
-              style={{ color: value === opt ? '#E14924' : '#F5F5F5' }}
+              style={{ color: value === opt ? 'var(--cc)' : 'var(--text-pri)' }}
             >
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ESTADO_DOT[opt] || '#6A6A6A' }} />
               <span className="flex-1">{opt === 'TODOS' ? 'Todos los estados' : opt}</span>
@@ -84,15 +84,15 @@ function FiltroCategoriaDropdown({ value, onChange, opciones }) {
       <button
         onClick={() => setOpen(o => !o)}
         style={{
-          background: activo ? 'rgba(225,73,36,0.08)' : 'var(--bg-surface)',
-          border: `1px solid ${activo ? 'rgba(225,73,36,0.5)' : 'var(--border-sub)'}`,
+          background: activo ? 'var(--cc12)' : 'var(--bg-surface)',
+          border: `1px solid ${activo ? 'var(--cc50)' : 'var(--border-sub)'}`,
           minWidth: '140px',
         }}
-        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-[var(--text-pri)] hover:border-[#E14924]/50 transition"
+        className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm text-[var(--text-pri)] hover:border-[var(--cc)]/50 transition"
       >
         <span className="flex items-center gap-2">
-          <Tag className={`w-3.5 h-3.5 flex-shrink-0 ${activo ? 'text-[#E14924]' : 'text-[var(--text-mut)]'}`} />
-          <span className={activo ? 'text-[#E14924] font-semibold' : ''}>
+          <Tag className={`w-3.5 h-3.5 flex-shrink-0 ${activo ? 'text-[var(--cc)]' : 'text-[var(--text-mut)]'}`} />
+          <span className={activo ? 'text-[var(--cc)] font-semibold' : ''}>
             {activo ? value : 'Categoría'}
           </span>
         </span>
@@ -109,7 +109,7 @@ function FiltroCategoriaDropdown({ value, onChange, opciones }) {
               key={opt}
               onClick={() => { onChange(opt); setOpen(false); }}
               className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition hover:bg-[var(--bg-card)] text-left"
-              style={{ color: value === opt ? '#E14924' : '#F5F5F5' }}
+              style={{ color: value === opt ? 'var(--cc)' : 'var(--text-pri)' }}
             >
               <Tag className="w-3 h-3 flex-shrink-0 opacity-50" />
               <span className="flex-1">{opt === 'TODOS' ? 'Todos los grupos' : opt}</span>
@@ -375,7 +375,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)' }}
-                    className="w-full sm:w-60 pl-10 pr-4 py-2 rounded-xl text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[#E14924]/50 transition"
+                    className="w-full sm:w-60 pl-10 pr-4 py-2 rounded-xl text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)]/50 transition"
                   />
                 </div>
 
@@ -435,7 +435,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 {filtroCategoria !== 'TODOS' && (
                   <span
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition hover:opacity-80"
-                    style={{ background: 'rgba(225,73,36,0.12)', border: '1px solid rgba(225,73,36,0.35)', color: '#E14924' }}
+                    style={{ background: 'var(--cc12)', border: '1px solid var(--cc30)', color: 'var(--cc)' }}
                     onClick={() => setFiltroCategoria('TODOS')}
                   >
                     <Tag className="w-3 h-3" />
@@ -490,7 +490,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                     key={col.key}
                     onClick={() => !['acciones','uniforme'].includes(col.key) && toggleSort(col.key)}
                     className="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider cursor-pointer transition"
-                    style={{ color: sortField === col.key ? '#E14924' : '#6A6A6A' }}
+                    style={{ color: sortField === col.key ? 'var(--cc)' : 'var(--text-mut)' }}
                   >
                     <span className="inline-flex items-center gap-1">
                       {col.label}
@@ -516,9 +516,9 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                         onClick={() => abrirHoja(j, 'perfil')}
                         title="Hoja de vida"
                         className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition"
-                        style={{ background: 'rgba(225,73,36,0.10)', border: '1px solid rgba(225,73,36,0.25)', color: '#E14924' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(225,73,36,0.22)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(225,73,36,0.10)'}
+                        style={{ background: 'var(--cc12)', border: '1px solid var(--cc30)', color: 'var(--cc)' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--cc20)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'var(--cc12)'}
                       >
                         <BookOpen className="w-3.5 h-3.5" />
                       </button>
@@ -664,7 +664,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
           {filtered.length === 0 && (
             <div className="text-center py-14 px-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4" style={{ background: 'rgba(225,73,36,0.08)', border: '1px solid rgba(225,73,36,0.15)' }}>
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4" style={{ background: 'var(--cc12)', border: '1px solid var(--cc20)' }}>
                 <Users className="w-5 h-5 text-[var(--text-mut)]" />
               </div>
               <p className="text-[var(--text-sec)] text-sm font-medium mb-1">
@@ -679,7 +679,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               {(filtroCategoria !== 'TODOS' || filtroEstado !== 'TODOS' || search) && (
                 <button
                   onClick={() => { setFiltroCategoria('TODOS'); setFiltroEstado('TODOS'); setSearch(''); }}
-                  className="mt-3 text-xs text-[#E14924] hover:underline"
+                  className="mt-3 text-xs text-[var(--cc)] hover:underline"
                 >
                   Limpiar todos los filtros
                 </button>
@@ -696,7 +696,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               : <>{jugadores.length} jugadores</>}
           </span>
           {filtroCategoria !== 'TODOS' && (
-            <span className="flex items-center gap-1.5 text-xs" style={{ color: '#E14924' }}>
+            <span className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--cc)' }}>
               <Tag className="w-3 h-3" />
               Listado: {filtroCategoria} · CSV y PDF exportan este grupo
             </span>

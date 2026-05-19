@@ -212,7 +212,7 @@ export default function RegistroClub() {
               width: 40, height: 40, borderRadius: 12,
               background: `${ac}22`, border: `1px solid ${ac}44`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.7s',
+              transition: 'background-color 0.7s, border-color 0.7s',
             }}>
               <img src="/10894351.png" alt="Logo" style={{ width: 24, height: 24, objectFit: 'contain' }}
                 onError={e => { e.target.style.display = 'none'; }} />
@@ -243,7 +243,7 @@ export default function RegistroClub() {
                   background: `${ac}18`, border: `1px solid ${ac}33`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 15, flexShrink: 0,
-                  transition: 'all 0.7s',
+                  transition: 'background-color 0.7s, border-color 0.7s',
                 }}>
                   {f.icon}
                 </div>
@@ -302,7 +302,7 @@ export default function RegistroClub() {
                   width: 30, height: 30, borderRadius: 8, flexShrink: 0,
                   background: `${ac}18`, border: `1px solid ${ac}33`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
-                  transition: 'all 0.7s',
+                  transition: 'background-color 0.7s, border-color 0.7s',
                 }}>
                   {f.icon}
                 </div>

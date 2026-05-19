@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import {
   Loader2, Eye, EyeOff, Mail, Lock, CheckCircle, KeyRound,
-  ArrowLeft, MessageCircle,
+  ArrowLeft, MessageCircle, Zap, BarChart2, Globe, Medal, AlertTriangle,
 } from 'lucide-react';
 
 const WHATSAPP_SOPORTE = '573023903192';
@@ -11,10 +11,10 @@ const WHATSAPP_SOPORTE = '573023903192';
 const CYCLE_COLORS = ['#10B981', '#00AAFF', '#8B5CF6', '#06B6D4', '#F97316'];
 
 const FEATURES = [
-  { icon: '⚡', text: 'Cobros automáticos por WhatsApp' },
-  { icon: '📊', text: 'Dashboard en tiempo real' },
-  { icon: '🌎', text: 'Disponible en toda América Latina' },
-  { icon: '🏅', text: 'Fútbol, basket, gimnasio y más' },
+  { Icon: Zap,       text: 'Cobros automáticos por WhatsApp' },
+  { Icon: BarChart2, text: 'Dashboard en tiempo real' },
+  { Icon: Globe,     text: 'Disponible en toda América Latina' },
+  { Icon: Medal,     text: 'Fútbol, basket, gimnasio y más' },
 ];
 
 export default function Login() {
@@ -203,7 +203,7 @@ export default function Login() {
               width: 40, height: 40, borderRadius: 12,
               background: `${color}22`, border: `1px solid ${color}44`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.7s',
+              transition: 'background-color 0.7s, border-color 0.7s',
             }}>
               <img src="/10894351.png" alt="Logo" style={{ width: 24, height: 24, objectFit: 'contain' }}
                 onError={e => { e.target.style.display = 'none'; }} />
@@ -230,15 +230,15 @@ export default function Login() {
           {/* Features */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
             {FEATURES.map(f => (
-              <div key={f.icon} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div key={f.text} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{
                   width: 32, height: 32, borderRadius: 8,
                   background: `${color}18`, border: `1px solid ${color}33`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 15, flexShrink: 0,
-                  transition: 'all 0.7s',
+                  flexShrink: 0,
+                  transition: 'background-color 0.7s, border-color 0.7s',
                 }}>
-                  {f.icon}
+                  <f.Icon size={15} color={color} strokeWidth={1.8} style={{ transition: 'color 0.7s' }} />
                 </div>
                 <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{f.text}</span>
               </div>
@@ -306,7 +306,7 @@ export default function Login() {
               borderRadius: 12, padding: '11px 14px', marginBottom: 18,
               display: 'flex', gap: 10, alignItems: 'flex-start',
             }}>
-              <span style={{ fontSize: 15, flexShrink: 0 }}>⚠️</span>
+              <AlertTriangle size={15} color="#FF7070" style={{ flexShrink: 0, marginTop: 1 }} />
               <p style={{ color: '#FF7070', fontSize: 13, margin: 0, lineHeight: 1.5 }}>{error}</p>
             </div>
           )}
@@ -460,7 +460,7 @@ export default function Login() {
           {vista === 'nueva_clave' && (
             <>
               <div style={{ textAlign: 'center', marginBottom: 22 }}>
-                <KeyRound size={34} color={color} style={{ marginBottom: 8, filter: `drop-shadow(0 0 8px ${color})`, transition: 'all 0.5s' }} />
+                <KeyRound size={34} color={color} style={{ marginBottom: 8, filter: `drop-shadow(0 0 8px ${color})`, transition: 'filter 0.5s, color 0.5s' }} />
                 <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>Nueva contraseña</h3>
                 <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: 0 }}>Mínimo 8 caracteres</p>
               </div>
@@ -494,7 +494,7 @@ export default function Login() {
           {/* ══ ACTUALIZADA ══ */}
           {vista === 'actualizada' && (
             <div style={{ textAlign: 'center' }}>
-              <CheckCircle size={50} color={color} style={{ marginBottom: 14, filter: `drop-shadow(0 0 12px ${color})`, transition: 'all 0.5s' }} />
+              <CheckCircle size={50} color={color} style={{ marginBottom: 14, filter: `drop-shadow(0 0 12px ${color})`, transition: 'filter 0.5s, color 0.5s' }} />
               <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 700, margin: '0 0 10px' }}>¡Contraseña actualizada!</h3>
               <p style={{ color: 'var(--text-sec)', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
                 Ya puedes ingresar al dashboard con tu nueva contraseña.

@@ -290,7 +290,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
     const doc   = new jsPDF();
     const W     = 210;
     const M     = 14;
-    const acHex = color || '#E14924';
+    const acHex = (typeof color === 'string' && color.startsWith('#')) ? color : '#E14924';
     const cr    = parseInt(acHex.slice(1,3), 16);
     const cg    = parseInt(acHex.slice(3,5), 16);
     const cb_   = parseInt(acHex.slice(5,7), 16);

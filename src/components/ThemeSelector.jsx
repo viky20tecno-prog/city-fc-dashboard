@@ -134,7 +134,7 @@ export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig
                   : `0 2px 6px ${p.hex}50`,
                 cursor: saving ? 'wait' : 'pointer',
                 transform: isActive ? 'scale(1.12)' : 'scale(1)',
-                transition: 'all 0.2s',
+                transition: 'background-color 0.2s, border-color 0.2s',
                 position: 'relative',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
@@ -180,7 +180,7 @@ export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig
                   padding: '7px 10px', borderRadius: 9,
                   border: isActive ? `1px solid ${color}60` : '1px solid transparent',
                   background: isActive ? `${color}10` : 'transparent',
-                  cursor: 'pointer', transition: 'all 0.18s',
+                  cursor: 'pointer', transition: 'background-color 0.18s, border-color 0.18s',
                 }}
               >
                 <div style={{ display: 'flex', borderRadius: 5, overflow: 'hidden', flexShrink: 0, boxShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
@@ -206,7 +206,7 @@ export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '9px 10px', borderRadius: 10,
             border: '1px solid var(--border-sub)',
-            background: 'transparent', cursor: 'pointer', transition: 'all 0.18s',
+            background: 'transparent', cursor: 'pointer', transition: 'background-color 0.18s, border-color 0.18s',
           }}
         >
           <Tag size={14} color="var(--text-sec)" />
@@ -222,7 +222,7 @@ export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '9px 10px', borderRadius: 10,
             border: '1px solid var(--border-sub)',
-            background: 'transparent', cursor: 'pointer', transition: 'all 0.18s',
+            background: 'transparent', cursor: 'pointer', transition: 'background-color 0.18s, border-color 0.18s',
           }}
         >
           <Users size={14} color="var(--text-sec)" />
@@ -238,7 +238,7 @@ export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '9px 10px', borderRadius: 10,
             border: '1px solid var(--border-sub)',
-            background: 'transparent', cursor: 'pointer', transition: 'all 0.18s',
+            background: 'transparent', cursor: 'pointer', transition: 'background-color 0.18s, border-color 0.18s',
           }}
         >
           <SlidersHorizontal size={14} color="var(--text-sec)" />

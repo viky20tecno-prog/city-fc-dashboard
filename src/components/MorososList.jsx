@@ -5,7 +5,7 @@ const formatCOP = (n) => new Intl.NumberFormat('es-CO', {
   style: 'currency', currency: 'COP', maximumFractionDigits: 0,
 }).format(parseInt(n) || 0);
 
-function exportarPDF(morosos, clubNombre = 'Mi Club', color = '#E14924', logoUrl = '') {
+function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoUrl = '') {
   const fecha      = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
   const mesActual  = new Date().toLocaleString('es-CO', { month: 'long', year: 'numeric' });
   const totalSaldo = morosos.reduce((sum, m) => sum + (parseInt(m.saldo_total) || 0), 0);
@@ -127,17 +127,17 @@ function exportarPDF(morosos, clubNombre = 'Mi Club', color = '#E14924', logoUrl
   ventana.focus();
 }
 
-export default function MorososList({ morosos, codigoPais = '57', clubNombre = 'Mi Club', color = '#E14924', logoUrl = '' }) {
+export default function MorososList({ morosos, codigoPais = '57', clubNombre = 'Mi Club', color = 'var(--cc)', logoUrl = '' }) {
   if (!morosos || morosos.length === 0) {
     return (
       <div style={{
         background: 'var(--bg-card)', borderRadius: '16px',
-        border: '1px solid rgba(225,73,36,0.22)', padding: '24px',
+        border: '1px solid var(--cc20)', padding: '24px',
         position: 'relative', overflow: 'hidden',
       }}>
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-          background: 'linear-gradient(90deg, transparent, rgba(225,73,36,0.45), transparent)',
+          background: 'linear-gradient(90deg, transparent, var(--cc50), transparent)',
           pointerEvents: 'none',
         }} />
         <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-pri)', marginBottom: '16px' }}>Morosos</h2>
@@ -154,13 +154,13 @@ export default function MorososList({ morosos, codigoPais = '57', clubNombre = '
   return (
     <div style={{
       background: 'var(--bg-card)', borderRadius: '16px',
-      border: '1px solid rgba(225,73,36,0.22)', padding: '24px',
+      border: '1px solid var(--cc20)', padding: '24px',
       position: 'relative', overflow: 'hidden',
     }}>
       {/* top accent line */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-        background: 'linear-gradient(90deg, transparent, rgba(225,73,36,0.45), transparent)',
+        background: 'linear-gradient(90deg, transparent, var(--cc50), transparent)',
         pointerEvents: 'none',
       }} />
       {/* ambient glow */}
@@ -186,9 +186,9 @@ export default function MorososList({ morosos, codigoPais = '57', clubNombre = '
           style={{
             display: 'flex', alignItems: 'center', gap: '6px',
             padding: '6px 12px', borderRadius: '8px', cursor: 'pointer',
-            border: '1px solid rgba(225,73,36,0.3)', background: 'rgba(225,73,36,0.08)',
-            color: '#E14924', fontSize: '11px', fontWeight: 500, letterSpacing: '0.5px',
-            transition: 'all 0.2s',
+            border: '1px solid var(--cc30)', background: 'var(--cc12)',
+            color: 'var(--cc)', fontSize: '11px', fontWeight: 500, letterSpacing: '0.5px',
+            transition: 'background-color 0.2s, border-color 0.2s',
           }}
         >
           <FileDown size={13} />
@@ -203,8 +203,8 @@ export default function MorososList({ morosos, codigoPais = '57', clubNombre = '
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '12px 14px', borderRadius: '10px',
             background: 'rgba(239,68,68,0.04)',
-            border: '1px solid rgba(225,73,36,0.15)',
-            transition: 'all 0.2s',
+            border: '1px solid var(--cc20)',
+            transition: 'background-color 0.2s',
           }}>
             <div>
               <p style={{ fontWeight: 600, color: 'var(--text-pri)', fontSize: '13px' }}>{m.nombre}</p>
@@ -235,7 +235,7 @@ export default function MorososList({ morosos, codigoPais = '57', clubNombre = '
       {/* Total */}
       <div style={{
         marginTop: '16px', paddingTop: '12px',
-        borderTop: '1px solid rgba(225,73,36,0.15)',
+        borderTop: '1px solid var(--cc20)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         position: 'relative',
       }}>

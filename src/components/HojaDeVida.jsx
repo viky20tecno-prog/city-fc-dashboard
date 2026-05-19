@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import {
   X, User, DollarSign, CreditCard, Camera, Save,
   Loader2, Printer, CheckCircle, ClipboardList, ZoomIn,
+  Instagram, Facebook, Youtube, Globe, Music, Link,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -25,7 +26,7 @@ function Seccion({ titulo, children }) {
   return (
     <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-sub)] p-4">
       <p className="text-xs text-[var(--text-mut)] uppercase tracking-wider mb-3 flex items-center gap-2">
-        <span className="w-3 h-0.5 bg-[#E14924] inline-block rounded" />
+        <span className="w-3 h-0.5 bg-[var(--cc)] inline-block rounded" />
         {titulo}
       </p>
       {children}
@@ -33,7 +34,7 @@ function Seccion({ titulo, children }) {
   );
 }
 
-function EscudoSVG({ size = 32, color = '#E14924', initials = 'FC' }) {
+function EscudoSVG({ size = 32, color = 'var(--cc)', initials = 'FC' }) {
   const h = Math.round(size * 44 / 38);
   return (
     <svg width={size} height={h} viewBox="0 0 38 44" fill="none">
@@ -54,7 +55,7 @@ function EscudoSVG({ size = 32, color = '#E14924', initials = 'FC' }) {
 
 /* ── Tab Perfil ── */
 
-const INPUT_CLS = "w-full px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] focus:outline-none focus:border-[#E14924]/50 placeholder-[var(--text-mut)]";
+const INPUT_CLS = "w-full px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]/50 placeholder-[var(--text-mut)]";
 
 function CampoEdit({ label, value, onChange, type = 'text', placeholder = '', ...rest }) {
   return (
@@ -199,7 +200,7 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
           {/* Foto — clic abre lightbox */}
           <div
             onClick={() => fotoUrl && setLightbox(true)}
-            className={`w-20 h-20 rounded-full bg-[var(--bg-surface)] border-2 border-[#E14924]/30 overflow-hidden flex items-center justify-center transition ${fotoUrl ? 'cursor-zoom-in hover:border-[#E14924]/70' : 'cursor-default'}`}
+            className={`w-20 h-20 rounded-full bg-[var(--bg-surface)] border-2 border-[var(--cc)]/30 overflow-hidden flex items-center justify-center transition ${fotoUrl ? 'cursor-zoom-in hover:border-[var(--cc)]/70' : 'cursor-default'}`}
           >
             {fotoUrl
               ? <img src={fotoUrl} alt={nombreDisplay} className="w-full h-full object-cover" />
@@ -209,7 +210,7 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
           <button
             onClick={() => !uploading && fileRef.current?.click()}
             title="Cambiar foto"
-            className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#E14924] flex items-center justify-center shadow-lg hover:bg-[#C9381A] transition"
+            className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[var(--cc)] flex items-center justify-center shadow-lg hover:opacity-90 transition"
           >
             {uploading
               ? <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
@@ -257,7 +258,7 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
         className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition ${
           guardado
             ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-            : 'bg-[#E14924] hover:bg-[#C9381A] text-white disabled:opacity-60'
+            : 'bg-[var(--cc)] hover:opacity-90 text-white disabled:opacity-60'
         }`}
       >
         {guardando ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -459,7 +460,7 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
       {/* Observaciones / Notas médicas */}
       <div className="rounded-xl border border-[var(--border-sub)] p-4" style={{ background: 'var(--bg-surface)' }}>
         <p className="text-xs text-[var(--text-mut)] uppercase tracking-wider mb-3 flex items-center gap-2">
-          <ClipboardList className="w-3 h-3 text-[#E14924]" />
+          <ClipboardList className="w-3 h-3 text-[var(--cc)]" />
           Observaciones y notas
         </p>
         <p className="text-xs text-[var(--text-mut)] mb-2 leading-relaxed">
@@ -479,7 +480,7 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
             lineHeight: 1.6,
             transition: 'border-color .2s',
           }}
-          onFocus={e => e.target.style.borderColor = '#E14924'}
+          onFocus={e => e.target.style.borderColor = 'var(--cc)'}
           onBlur={e  => e.target.style.borderColor = 'var(--border-sub)'}
         />
       </div>
@@ -491,7 +492,7 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
         className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition ${
           guardado
             ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-            : 'bg-[#E14924] hover:bg-[#C9381A] text-white disabled:opacity-60'
+            : 'bg-[var(--cc)] hover:opacity-90 text-white disabled:opacity-60'
         }`}
       >
         {guardando ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -597,7 +598,8 @@ function TabCarnet({ jugador, clubConfig = {} }) {
   };
 
   const redesEntries = Object.entries(redes || {}).filter(([, v]) => v);
-  const redIcon = (r) => ({ instagram: '📸', facebook: '📘', youtube: '▶️', twitter: '𝕏', tiktok: '🎵', web: '🌐' }[r] || '🔗');
+  const RED_ICONS = { instagram: Instagram, facebook: Facebook, youtube: Youtube, twitter: Globe, tiktok: Music, web: Globe };
+  const RedIcon = ({ red }) => { const Ic = RED_ICONS[red] || Link; return <Ic size={9} />; };
 
   const cardBase = {
     width: '320px',
@@ -816,7 +818,7 @@ function TabCarnet({ jugador, clubConfig = {} }) {
             <div style={{ padding: '7px 16px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               {redesEntries.slice(0, 4).map(([red, val]) => (
                 <div key={red} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                  <span style={{ fontSize: '9px' }}>{redIcon(red)}</span>
+                  <RedIcon red={red} />
                   <span style={{ fontSize: '8px', color: th.textSec }}>
                     {val.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
                   </span>
@@ -903,10 +905,10 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-sub)] flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-full bg-[#E14924]/10 border border-[#E14924]/20 overflow-hidden flex-shrink-0 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-[var(--cc)]/10 border border-[var(--cc)]/20 overflow-hidden flex-shrink-0 flex items-center justify-center">
               {jugadorLocal.foto_url
                 ? <img src={jugadorLocal.foto_url} alt="" className="w-full h-full object-cover" />
-                : <User className="w-4 h-4 text-[#E14924]" />}
+                : <User className="w-4 h-4 text-[var(--cc)]" />}
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-[var(--text-pri)] truncate">{nombre}</p>
@@ -928,13 +930,13 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-semibold transition relative ${
-                  active ? 'text-[#E14924]' : 'text-[var(--text-mut)] hover:text-[var(--text-pri)]'
+                  active ? 'text-[var(--cc)]' : 'text-[var(--text-mut)] hover:text-[var(--text-pri)]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 {t.label}
                 {active && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E14924] rounded-t" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--cc)] rounded-t" />
                 )}
               </button>
             );

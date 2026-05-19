@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Loader2, Copy, Check, UserCheck, ShieldOff } from 'lucide-react';
+import { X, Plus, Trash2, Loader2, Copy, Check, UserCheck, ShieldOff, AlertTriangle } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 
@@ -126,7 +126,7 @@ export default function MiEquipoModal({ clubId, onClose }) {
                   </div>
                 </div>
               </div>
-              <p className="text-[10px] text-yellow-400">⚠️ Muéstrale la contraseña ahora — no se podrá ver de nuevo</p>
+              <p className="flex items-center gap-1 text-[10px] text-yellow-400"><AlertTriangle size={10} /> Muéstrale la contraseña ahora — no se podrá ver de nuevo</p>
               <button onClick={() => setCreated(null)} className="text-xs text-[var(--text-sec)] hover:text-[var(--text-pri)] underline underline-offset-2">
                 Cerrar aviso
               </button>

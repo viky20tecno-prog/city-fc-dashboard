@@ -53,7 +53,7 @@ function NavBtn({ id, Icon, title, active, color, onClick }) {
         border: 'none',
         background: active ? `${color}1F` : 'transparent',
         position: 'relative',
-        transition: 'all 0.3s',
+        transition: 'background-color 0.2s',
         flexShrink: 0,
       }}
       onClick={() => onClick(id)}
@@ -71,7 +71,7 @@ function NavBtn({ id, Icon, title, active, color, onClick }) {
       )}
       <Icon
         size={18}
-        color={active ? color : '#7A7A7A'}
+        color={active ? color : 'var(--text-mut)'}
         style={active ? { filter: `drop-shadow(0 0 5px ${color}E6)`, transition: 'filter 0.3s' } : {}}
         strokeWidth={1.7}
       />
@@ -227,7 +227,7 @@ export default function Dashboard() {
       border: 'none',
       background: active ? `${c}1F` : 'transparent',
       position: 'relative',
-      transition: 'all 0.2s',
+      transition: 'background-color 0.2s',
       flexShrink: 0,
     }),
     actionBtn: (primary) => ({
@@ -238,7 +238,7 @@ export default function Dashboard() {
       color: primary ? c : '#B68631',
       fontSize: '11px', letterSpacing: '1px',
       cursor: 'pointer',
-      transition: 'all 0.3s',
+      transition: 'background-color 0.2s, border-color 0.2s, color 0.2s',
       whiteSpace: 'nowrap',
       flexShrink: 0,
     }),
@@ -251,7 +251,7 @@ export default function Dashboard() {
       cursor: 'pointer',
       position: 'relative',
       flexShrink: 0,
-      transition: 'all 0.3s',
+      transition: 'background-color 0.2s, border-color 0.2s',
     },
   };
 
@@ -355,7 +355,8 @@ export default function Dashboard() {
             flexShrink: 0,
             textTransform: 'uppercase',
           }}>
-            ⏳ Trial: {trialDaysLeft}d
+            <Clock size={10} />
+            Trial: {trialDaysLeft}d
           </div>
         )}
 
@@ -435,7 +436,7 @@ export default function Dashboard() {
             textAlign: 'center',
             display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center',
           }}>
-            <div style={{ fontSize: '48px', lineHeight: 1 }}>⏰</div>
+            <div style={{ lineHeight: 1 }}><Clock size={48} color="#EF4444" strokeWidth={1.5} /></div>
             <div>
               <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '28px', letterSpacing: '3px', color: 'var(--text-pri)', marginBottom: '8px' }}>
                 Tu período de prueba terminó
@@ -488,8 +489,9 @@ export default function Dashboard() {
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
             flexWrap: 'wrap',
           }}>
-            <div style={{ fontSize: '13px', color: trialDaysLeft <= 1 ? '#EF4444' : '#F59E0B', fontWeight: 500 }}>
-              ⚠️ Tu período de prueba vence {trialDaysLeft === 0 ? 'hoy' : `en ${trialDaysLeft} día${trialDaysLeft !== 1 ? 's' : ''}`}.
+            <div style={{ fontSize: '13px', color: trialDaysLeft <= 1 ? '#EF4444' : '#F59E0B', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <AlertTriangle size={13} />
+              Tu período de prueba vence {trialDaysLeft === 0 ? 'hoy' : `en ${trialDaysLeft} día${trialDaysLeft !== 1 ? 's' : ''}`}.
               Activa un plan para no perder el acceso.
             </div>
             <a

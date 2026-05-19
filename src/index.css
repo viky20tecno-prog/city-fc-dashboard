@@ -175,6 +175,15 @@
 }
 
 :root {
+  /* ── Z-index scale ────────────────────────────────────────
+     z-10   content layers (watermark, avatars)
+     z-30   dropdowns, tooltips
+     z-50   topbar / sticky nav
+     z-100  modals, drawers
+     z-200  nested modals, lightboxes
+     z-500  blocking overlays (trial expired, onboarding)
+  ──────────────────────────────────────────────────────── */
+
   /* Brand / legacy aliases */
   --primary:      #E14924;
   --bg:           var(--bg-app);
@@ -230,11 +239,30 @@ body {
 [data-theme="light"] main .bg-white\/\[0\.04\],
 [data-theme="light"] main [class*="bg-white/0"] { background-color: var(--bg-surface) !important; }
 
+/* Tema claro — correcciones adicionales de contraste */
+[data-theme="light"] .text-gray-700,
+[data-theme="light"] .text-gray-800,
+[data-theme="light"] .text-gray-900 { color: var(--text-pri) !important; }
+
+[data-theme="light"] [class*="bg-black/"] { background-color: rgba(0,0,0,0.04) !important; }
+
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  color-scheme: light;
+  background-color: var(--bg-input) !important;
+  color: var(--text-pri) !important;
+  border-color: var(--border-sub) !important;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder { color: var(--text-mut) !important; }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(225,73,36,0.25); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(225,73,36,0.5); }
+::-webkit-scrollbar-thumb { background: var(--cc30, rgba(225,73,36,0.25)); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cc50, rgba(225,73,36,0.5)); }
 
 /* Animations */
 @keyframes pulse-green {

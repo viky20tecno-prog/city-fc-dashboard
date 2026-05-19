@@ -31,7 +31,7 @@ export default class ErrorBoundary extends Component {
               {this.state.error.message}
             </pre>
             <button onClick={() => this.setState({ error: null })}
-              style={{ marginTop: 16, padding: '8px 20px', background: '#E14924', border: 'none', borderRadius: 8, color: '#fff', cursor: 'pointer', fontWeight: 700 }}>
+              style={{ marginTop: 16, padding: '8px 20px', background: 'var(--cc)', border: 'none', borderRadius: 8, color: '#fff', cursor: 'pointer', fontWeight: 700 }}>
               Reintentar
             </button>
           </div>

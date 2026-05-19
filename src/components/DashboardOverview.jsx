@@ -33,7 +33,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
       position: 'relative',
       overflow: 'hidden',
       animation: `kpi-in 0.45s ease ${delay}s both`,
-      transition: 'all 0.25s',
+      transition: 'border-color 0.25s, box-shadow 0.25s, transform 0.25s',
       gridColumn: wide ? 'span 2' : undefined,
     }}>
       {/* Top accent line */}

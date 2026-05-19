@@ -242,7 +242,7 @@ export default function Calendario({ color, clubId }) {
   const MonthView = () => (
     <div>
       {/* Navegación mes */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--cc20)]">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--cc20)] bg-[var(--bg-card)]">
         <button onClick={prevMonth}
           className="p-2 rounded-lg hover:bg-[var(--bg-surface)] text-[var(--text-sec)] hover:text-[var(--cc)] transition-colors">
           <ChevronLeft size={18} />
@@ -255,7 +255,7 @@ export default function Calendario({ color, clubId }) {
       </div>
 
       {/* Cabecera días */}
-      <div className="grid grid-cols-7 px-4 pt-3 pb-1">
+      <div className="grid grid-cols-7 px-4 pt-3 pb-1 bg-[var(--bg-card)]">
         {DIAS.map(d => (
           <div key={d} className="text-center text-[10px] font-bold text-[var(--text-mut)] uppercase tracking-wider">
             {d}
@@ -278,12 +278,12 @@ export default function Calendario({ color, clubId }) {
               key={idx}
               onClick={() => setSelectedDate(ds)}
               style={isSelected ? { background: color, boxShadow: `0 4px 14px ${color}50` }
-                    : isToday   ? { background: `${color}15`, border: `1.5px solid ${color}40` }
+                    : isToday   ? { background: `${color}20`, border: `1.5px solid ${color}60` }
                                 : {}}
               className={`
                 min-h-[68px] rounded-xl p-2 flex flex-col gap-0.5 text-left transition-all
                 ${!cell.current ? 'opacity-20 pointer-events-none' : ''}
-                ${isSelected ? '' : isToday ? '' : 'border border-[var(--cc20)] hover:border-[var(--cc)] hover:bg-[var(--bg-surface)]'}
+                ${isSelected ? '' : isToday ? '' : 'bg-[var(--bg-surface)] border border-[var(--cc20)] hover:border-[var(--cc)]'}
               `}
             >
               <span className="text-xs font-bold leading-none"
@@ -318,7 +318,7 @@ export default function Calendario({ color, clubId }) {
       </div>
 
       {/* Panel día seleccionado */}
-      <div className="border-t border-[var(--cc20)]">
+      <div className="border-t border-[var(--cc20)] bg-[var(--bg-card)]">
         <div className="flex items-center justify-between px-5 py-3">
           <p className="text-sm font-bold text-[var(--text-pri)]">{formatDateLong(selectedDate)}</p>
           <button onClick={() => openCreate(selectedDate)}
@@ -490,7 +490,7 @@ export default function Calendario({ color, clubId }) {
         </div>
 
         {/* Card principal */}
-        <div className="w-full max-w-2xl bg-[var(--bg-card)] rounded-2xl border border-[var(--cc20)] shadow-xl overflow-hidden">
+        <div className="w-full max-w-2xl bg-[var(--bg-app)] rounded-2xl border border-[var(--cc20)] shadow-xl overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20 gap-2 text-[var(--text-sec)]">
               <Loader2 size={18} className="animate-spin" style={{ color }} />

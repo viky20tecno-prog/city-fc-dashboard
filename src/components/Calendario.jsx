@@ -460,7 +460,7 @@ export default function Calendario({ color, clubId }) {
   // ── Render principal ──────────────────────────────────────────────────────
 
   return (
-    <div className="h-full overflow-y-auto bg-[var(--bg-app)]">
+    <div className="h-full overflow-y-auto bg-[var(--bg-app)] relative z-[1]">
       <div className="min-h-full p-6 flex flex-col items-center">
 
         {/* Título + controles */}

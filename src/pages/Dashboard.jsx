@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
   Clock, MessageSquare, ClipboardCheck, Settings,
-  Copy, Check, Bell, LogOut, TrendingUp, Trophy,
+  Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -26,11 +26,13 @@ import OnboardingWizard from '../components/OnboardingWizard';
 import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSelector';
 import CategoriasJugadoresModal from '../components/CategoriasJugadoresModal';
 import MiEquipoModal from '../components/MiEquipoModal';
+import Calendario from '../components/Calendario';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 const NAV = [
   { id: 'dashboard',    Icon: LayoutDashboard, title: 'Dashboard'     },
   { id: 'jugadores',    Icon: Users,            title: 'Jugadores'     },
+  { id: 'calendario',   Icon: CalendarDays,     title: 'Calendario'    },
   { id: 'uniformes',    Icon: Shirt,            title: 'Uniformes'     },
   { id: 'torneos',      Icon: Trophy,           title: 'Torneos'       },
   { id: 'arbitraje',    Icon: Activity,         title: 'Pago Arbitraje'},
@@ -564,6 +566,7 @@ export default function Dashboard() {
                 color={c}
               />
             )}
+            {activeTab === 'calendario'   && <Calendario    color={c} clubId={getClubId()} />}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'torneos'      && <TorneosPage  color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'arbitraje'    && <ArbitrajePagos color={c} />}

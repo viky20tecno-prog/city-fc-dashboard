@@ -66,9 +66,16 @@ function EventCard({ ev, compact = false, onEdit, onDelete, deleting }) {
 
 // ── Utilidades ───────────────────────────────────────────────────────────────
 
+const pad2 = n => String(n).padStart(2, '0');
+
 function toDateStr(ts) {
-  // '2026-05-20T10:00:00+00:00' → '2026-05-20'
-  return ts ? ts.slice(0, 10) : '';
+  if (!ts) return '';
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function localDateStr(d = new Date()) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 
 function formatTime(ts) {
@@ -118,7 +125,7 @@ function localDatetimeValue(ts) {
 export default function Calendario({ color, clubId }) {
   const { isAdmin } = useRole();
   const today       = new Date();
-  const todayStr    = today.toISOString().slice(0, 10);
+  const todayStr    = localDateStr(today);
 
   const [view,         setView]         = useState('mes');
   const [year,         setYear]         = useState(today.getFullYear());
@@ -290,7 +297,7 @@ export default function Calendario({ color, clubId }) {
         {/* Celdas */}
         <div className="grid grid-cols-7">
           {cells.map((cell, idx) => {
-            const ds         = cell.date.toISOString().slice(0, 10);
+            const ds         = localDateStr(cell.date);
             const isToday    = ds === todayStr;
             const isSelected = ds === selectedDate;
             const evs        = eventsByDay[ds] || [];
@@ -371,8 +378,7 @@ export default function Calendario({ color, clubId }) {
       ) : (
         agendaDates.map(ds => {
           const isToday = ds === todayStr;
-          const isTmw   = ds === new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
-                            .toISOString().slice(0, 10);
+          const isTmw   = ds === localDateStr(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1));
           const label   = isToday ? 'Hoy' : isTmw ? 'Mañana' : formatDateLong(ds);
           return (
             <div key={ds}>

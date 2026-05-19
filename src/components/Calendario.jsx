@@ -23,6 +23,47 @@ const INPUT = 'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:b
 
 const FORM_EMPTY = { tipo: 'ENTRENAMIENTO', titulo: '', fecha_inicio: '', fecha_fin: '', lugar: '', descripcion: '', equipo: '' };
 
+// ── EventCard — scope de módulo para identidad estable entre renders ──────────
+
+function EventCard({ ev, compact = false, onEdit, onDelete, deleting }) {
+  const t = TIPOS[ev.tipo] || TIPOS.EVENTO;
+  return (
+    <div className={`flex items-start gap-3 p-3 rounded-xl border border-[var(--cc20)] bg-[var(--bg-surface)] ${compact ? 'py-2' : ''}`}>
+      <div className="shrink-0 mt-0.5">
+        <span style={{ background: t.bg, color: t.color }}
+          className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold">{t.label}</span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-[var(--text-pri)] truncate">{ev.titulo}</p>
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
+          <span className="flex items-center gap-1 text-xs text-[var(--text-sec)]">
+            <Clock size={11} /> {formatTime(ev.fecha_inicio)}
+            {ev.fecha_fin ? ` – ${formatTime(ev.fecha_fin)}` : ''}
+          </span>
+          {ev.lugar && (
+            <span className="flex items-center gap-1 text-xs text-[var(--text-sec)]">
+              <MapPin size={11} /> {ev.lugar}
+            </span>
+          )}
+        </div>
+        {ev.descripcion && !compact && (
+          <p className="text-xs text-[var(--text-mut)] mt-1 line-clamp-2">{ev.descripcion}</p>
+        )}
+      </div>
+      <div className="flex items-center gap-1 shrink-0">
+        <button onClick={() => onEdit(ev)}
+          className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">
+          <Edit2 size={13} />
+        </button>
+        <button onClick={() => onDelete(ev.id)} disabled={deleting === ev.id}
+          className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-red-400 hover:bg-red-500/10 transition-colors">
+          {deleting === ev.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Utilidades ───────────────────────────────────────────────────────────────
 
 function toDateStr(ts) {
@@ -213,47 +254,6 @@ export default function Calendario({ color, clubId }) {
     }
   };
 
-  // ── Render: tarjeta de evento ──────────────────────────────────────────────
-
-  const EventCard = ({ ev, compact = false }) => {
-    const t = TIPOS[ev.tipo] || TIPOS.EVENTO;
-    return (
-      <div className={`flex items-start gap-3 p-3 rounded-xl border border-[var(--cc20)] bg-[var(--bg-surface)] ${compact ? 'py-2' : ''}`}>
-        <div className="shrink-0 mt-0.5">
-          <span style={{ background: t.bg, color: t.color }}
-            className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold">{t.label}</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-[var(--text-pri)] truncate">{ev.titulo}</p>
-          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
-            <span className="flex items-center gap-1 text-xs text-[var(--text-sec)]">
-              <Clock size={11} /> {formatTime(ev.fecha_inicio)}
-              {ev.fecha_fin ? ` – ${formatTime(ev.fecha_fin)}` : ''}
-            </span>
-            {ev.lugar && (
-              <span className="flex items-center gap-1 text-xs text-[var(--text-sec)]">
-                <MapPin size={11} /> {ev.lugar}
-              </span>
-            )}
-          </div>
-          {ev.descripcion && !compact && (
-            <p className="text-xs text-[var(--text-mut)] mt-1 line-clamp-2">{ev.descripcion}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-1 shrink-0">
-          <button onClick={() => openEdit(ev)}
-            className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">
-            <Edit2 size={13} />
-          </button>
-          <button onClick={() => handleDelete(ev.id)} disabled={deleting === ev.id}
-            className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-red-400 hover:bg-red-500/10 transition-colors">
-            {deleting === ev.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
-          </button>
-        </div>
-      </div>
-    );
-  };
-
   // ── Render: vista mes ──────────────────────────────────────────────────────
 
   const cells       = getCalendarCells(year, month);
@@ -352,7 +352,7 @@ export default function Calendario({ color, clubId }) {
               Sin eventos este día
             </p>
           ) : (
-            dayEvents.map(ev => <EventCard key={ev.id} ev={ev} compact />)
+            dayEvents.map(ev => <EventCard key={ev.id} ev={ev} compact onEdit={openEdit} onDelete={handleDelete} deleting={deleting} />)
           )}
         </div>
       </div>
@@ -382,7 +382,7 @@ export default function Calendario({ color, clubId }) {
                 <div className="flex-1 h-px bg-[var(--cc20)]" />
               </div>
               <div className="space-y-2">
-                {agendaEvents[ds].map(ev => <EventCard key={ev.id} ev={ev} />)}
+                {agendaEvents[ds].map(ev => <EventCard key={ev.id} ev={ev} onEdit={openEdit} onDelete={handleDelete} deleting={deleting} />)}
               </div>
             </div>
           );
@@ -514,13 +514,13 @@ export default function Calendario({ color, clubId }) {
             <span className="text-sm">Cargando eventos…</span>
           </div>
         ) : view === 'mes' ? (
-          <MonthView />
+          MonthView()
         ) : (
-          <AgendaView />
+          AgendaView()
         )}
       </div>
 
-      {showForm && <EventForm />}
+      {showForm && EventForm()}
     </div>
   );
 }

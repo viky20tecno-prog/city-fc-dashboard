@@ -60,7 +60,7 @@ export default function RegistroClub() {
     ? decodeURIComponent(colorFromLanding)
     : PALETA[0].hex;
 
-  useEffect(() => { document.title = 'ClubContable — Registrar club'; }, []);
+  useEffect(() => { document.title = 'ZenSports — Registrar tu club'; }, []);
   const [form, setForm]         = useState(INITIAL);
   const [color, setColor]       = useState(initialColor);
   const [pais, setPais]         = useState(PAISES[0]);

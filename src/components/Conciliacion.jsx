@@ -303,9 +303,9 @@ export default function Conciliacion({ color = 'var(--cc)' }) {
 
   useEffect(() => { cargarPagos(); }, [cargarPagos]);
 
-  const showToast = (msg, type = 'ok') => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), type === 'warn' ? 6000 : 3500);
+  const showToast = (msg, type = 'ok', title = null) => {
+    setToast({ msg, type, title });
+    setTimeout(() => setToast(null), type === 'warn' ? 6000 : 4000);
   };
 
   const handleAction = async (pagoId, accion) => {
@@ -322,11 +322,16 @@ export default function Conciliacion({ color = 'var(--cc)' }) {
       if (accion === 'aprobar') {
         if (data.excedente > 0 && !data.wa_enviado) {
           showToast(
-            `Aprobado ✓ — Saldo a favor $${Number(data.excedente).toLocaleString('es-CO')} guardado. Notifica al jugador manualmente por WhatsApp.`,
+            `Saldo a favor $${Number(data.excedente).toLocaleString('es-CO')} guardado. Notifica al jugador manualmente por WhatsApp.`,
             'warn',
+            '¡Transacción exitosa!',
           );
         } else {
-          showToast('Pago aprobado y registrado ✓' + (data.wa_enviado ? ' — Jugador notificado por WhatsApp' : ''));
+          showToast(
+            data.wa_enviado ? 'Jugador notificado por WhatsApp ✓' : 'Pago aprobado y registrado',
+            'ok',
+            '¡Transacción exitosa!',
+          );
         }
       } else {
         showToast('Pago rechazado' + (data.wa_enviado ? ' — Jugador notificado por WhatsApp' : ''), 'error');
@@ -454,17 +459,24 @@ export default function Conciliacion({ color = 'var(--cc)' }) {
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-start gap-2 px-4 py-3 rounded-xl shadow-2xl text-sm font-medium transition-all max-w-sm ${
+        <div className={`fixed bottom-6 right-6 z-50 flex items-start gap-3 px-5 py-4 rounded-2xl shadow-2xl max-w-sm animate-toast-in ${
           toast.type === 'ok'
-            ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+            ? 'bg-green-500/15 border border-green-500/40 text-green-300'
             : toast.type === 'warn'
-            ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
-            : 'bg-red-500/20 border border-red-500/30 text-red-400'
+            ? 'bg-yellow-500/15 border border-yellow-500/40 text-yellow-300'
+            : 'bg-red-500/15 border border-red-500/40 text-red-300'
         }`}>
-          {toast.type === 'ok'   && <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />}
-          {toast.type === 'warn' && <AlertCircle  className="w-4 h-4 mt-0.5 shrink-0" />}
-          {toast.type === 'error'&& <XCircle      className="w-4 h-4 mt-0.5 shrink-0" />}
-          <span>{toast.msg}</span>
+          <div className="animate-check-pop shrink-0 mt-0.5">
+            {toast.type === 'ok'    && <CheckCircle className="w-6 h-6" />}
+            {toast.type === 'warn'  && <AlertCircle  className="w-6 h-6" />}
+            {toast.type === 'error' && <XCircle      className="w-6 h-6" />}
+          </div>
+          <div>
+            {toast.title && (
+              <p className="font-bold text-sm text-white">{toast.title}</p>
+            )}
+            <p className={`text-sm ${toast.title ? 'text-gray-300 mt-0.5' : 'font-medium'}`}>{toast.msg}</p>
+          </div>
         </div>
       )}
     </div>

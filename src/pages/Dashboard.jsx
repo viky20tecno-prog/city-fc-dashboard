@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
 import { useSheetData } from '../hooks/useSheetData';
 import { useClubConfig } from '../hooks/useClubConfig';
+import { useRole } from '../hooks/useRole';
 import { getClubId } from '../services/api';
 import { API_BASE_URL } from '../config';
 import DashboardOverview from '../components/DashboardOverview';
@@ -24,6 +25,7 @@ import PagoManualModal from '../components/PagoManualModal';
 import OnboardingWizard from '../components/OnboardingWizard';
 import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSelector';
 import CategoriasJugadoresModal from '../components/CategoriasJugadoresModal';
+import MiEquipoModal from '../components/MiEquipoModal';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 const NAV = [
@@ -91,6 +93,7 @@ export default function Dashboard() {
   const [showOnboarding,   setShowOnboarding]   = useState(false);
   const [showTheme,        setShowTheme]        = useState(false);
   const [showCategorias,   setShowCategorias]   = useState(false);
+  const [showEquipo,       setShowEquipo]       = useState(false);
   const [colorOverride,    setColorOverride]    = useState(null);
 
   // ── Trial ──
@@ -150,14 +153,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     document.title = clubConfig?.nombre
-      ? `${clubConfig.nombre} — App`
-      : 'ClubContable — App';
+      ? `${clubConfig.nombre} — ZenSports`
+      : 'ZenSports — App';
   }, [clubConfig?.nombre]);
 
-  // Filtra el nav según los módulos habilitados en el plan del club.
-  // Sin config (clubs existentes o trial) → todos visibles.
+  const { isAdmin } = useRole();
+
+  // Filtra el nav según los módulos habilitados en el plan del club y el rol del usuario.
+  const ADMIN_ONLY_TABS = new Set(['cobro', 'conciliacion', 'finanzas']);
   const modulos = clubConfig?.modulos;
   const navVisible = NAV.filter(({ id }) => {
+    if (!isAdmin && ADMIN_ONLY_TABS.has(id)) return false;
     if (id === 'dashboard' || id === 'jugadores') return true;
     if (!modulos) return true;
     return modulos[id] !== false;
@@ -250,6 +256,7 @@ export default function Dashboard() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem('clubId');
+    localStorage.removeItem('userRole');
     navigate('/login');
   };
 
@@ -595,6 +602,7 @@ export default function Dashboard() {
           onClose={() => setShowTheme(false)}
           onOpenConfig={() => { setShowTheme(false); setShowOnboarding(true); }}
           onOpenCategorias={() => { setShowTheme(false); setShowCategorias(true); }}
+          onOpenEquipo={isAdmin ? () => { setShowTheme(false); setShowEquipo(true); } : undefined}
           onColorChange={handleColorChange}
         />
       )}
@@ -604,6 +612,13 @@ export default function Dashboard() {
           categorias={clubConfig?.categorias_jugadores || []}
           onClose={() => setShowCategorias(false)}
           onSaved={() => refetchConfig()}
+        />
+      )}
+
+      {showEquipo && (
+        <MiEquipoModal
+          clubId={clubId}
+          onClose={() => setShowEquipo(false)}
         />
       )}
     </div>

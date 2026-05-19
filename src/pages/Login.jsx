@@ -21,7 +21,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [colorIdx, setColorIdx]   = useState(0);
 
-  useEffect(() => { document.title = 'ClubContable — Iniciar sesión'; }, []);
+  useEffect(() => { document.title = 'ZenSports — Iniciar sesión'; }, []);
   const [vista, setVista]         = useState('login');
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
@@ -77,18 +77,41 @@ export default function Login() {
     }
     const userId = data?.user?.id;
     let clubId = null;
+    let userRole = 'ADMIN';
+
     if (userId) {
+      // 1. Intento: dueño del club
       const { data: ownedClub } = await supabase
         .from('clubs').select('slug').eq('owner_user_id', userId).single();
-      if (ownedClub?.slug) clubId = ownedClub.slug;
+      if (ownedClub?.slug) {
+        clubId   = ownedClub.slug;
+        userRole = 'ADMIN';
+      }
+
+      // 2. Intento: miembro con rol (entrenador, etc.)
+      if (!clubId) {
+        const { data: membership } = await supabase
+          .from('club_members')
+          .select('club_id, role, activo')
+          .eq('user_id', userId)
+          .eq('activo', true)
+          .single();
+        if (membership?.club_id) {
+          clubId   = membership.club_id;
+          userRole = membership.role || 'ENTRENADOR';
+        }
+      }
     }
+
     if (!clubId) {
       setError('No se encontró un club asociado a esta cuenta.');
       await supabase.auth.signOut();
       setLoading(false);
       return;
     }
+
     localStorage.setItem('clubId', clubId);
+    localStorage.setItem('userRole', userRole);
     navigate('/app');
   };
 

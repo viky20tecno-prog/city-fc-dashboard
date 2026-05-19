@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, Users, Eye, RefreshCw, Pencil, Trash2, X, Check, Loader2 } from 'lucide-react';
+
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 
@@ -16,12 +17,15 @@ const INPUT_CLS = 'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] foc
 const DATE_CLS  = INPUT_CLS + ' [color-scheme:dark]';
 
 function EditForm({ partido, clubId, onSaved, onCancel }) {
+  const initFechaHora = partido.fecha && partido.hora
+    ? `${partido.fecha}T${partido.hora}`
+    : partido.fecha || '';
+
   const [form, setForm] = useState({
-    titulo:  partido.titulo  || '',
-    fecha:   partido.fecha   || '',
-    hora:    partido.hora    || '',
-    equipoA: partido.equipoA || '',
-    equipoB: partido.equipoB || '',
+    titulo:    partido.titulo  || '',
+    fechaHora: initFechaHora,
+    equipoA:   partido.equipoA || '',
+    equipoB:   partido.equipoB || '',
   });
   const [saving, setSaving] = useState(false);
   const [error,  setError]  = useState(null);
@@ -32,9 +36,17 @@ function EditForm({ partido, clubId, onSaved, onCancel }) {
     setSaving(true);
     setError(null);
     try {
+      const [fechaPart, horaPart] = form.fechaHora.split('T');
+      const payload = {
+        titulo:  form.titulo,
+        fecha:   fechaPart,
+        hora:    horaPart || '00:00',
+        equipoA: form.equipoA,
+        equipoB: form.equipoB,
+      };
       const res = await authFetch(
         `${API_BASE_URL}/arbitrage/partidos/${partido.id}?club_id=${clubId}`,
-        { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) },
+        { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) },
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Error al guardar');
@@ -52,15 +64,9 @@ function EditForm({ partido, clubId, onSaved, onCancel }) {
         <label className="block text-xs text-gray-400 mb-1">Título</label>
         <input type="text" value={form.titulo} onChange={set('titulo')} className={INPUT_CLS} />
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">Fecha</label>
-          <input type="date" value={form.fecha} onChange={set('fecha')} className={DATE_CLS} />
-        </div>
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">Hora</label>
-          <input type="time" value={form.hora} onChange={set('hora')} className={DATE_CLS} />
-        </div>
+      <div>
+        <label className="block text-xs text-gray-400 mb-1">Fecha y hora</label>
+        <input type="datetime-local" value={form.fechaHora} onChange={set('fechaHora')} className={DATE_CLS} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>

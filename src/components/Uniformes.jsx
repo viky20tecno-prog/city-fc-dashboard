@@ -730,6 +730,22 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           { key: 'ENTREGADO', label: 'Entregados', count: entregados.length, activeClass: 'bg-[var(--cc12)] text-[var(--cc)] border-[var(--cc)]/30' },
         ];
 
+        // Resumen por jugador agrupado por cédula y tipo
+        const resumenMap = {};
+        pedidos.forEach(p => {
+          const key = p.cedula;
+          if (!resumenMap[key]) resumenMap[key] = { nombre: p.nombre, cedula: p.cedula, tipos: {}, total: 0 };
+          const tipo = p.tipo || 'Jugador';
+          resumenMap[key].tipos[tipo] = (resumenMap[key].tipos[tipo] || 0) + Number(p.total || 0);
+          resumenMap[key].total += Number(p.total || 0);
+        });
+        const resumenLista = Object.values(resumenMap).sort((a, b) => b.total - a.total);
+        const TIPO_STYLE = {
+          'Jugador':           { label: 'Jugador',    color: 'text-[var(--cc)]',  bg: 'bg-[var(--cc12)]' },
+          'Familiar - Hombre': { label: 'Familiar ♂', color: 'text-blue-400',     bg: 'bg-blue-400/10'   },
+          'Familiar - Mujer':  { label: 'Familiar ♀', color: 'text-pink-400',     bg: 'bg-pink-400/10'   },
+        };
+
         return (
           <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--cc20)] p-6">
             <div className="flex items-center gap-2 mb-5 flex-wrap">
@@ -752,6 +768,43 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 </button>
               </div>
             </div>
+
+            {/* Resumen por jugador */}
+            {resumenLista.length > 0 && (
+              <details className="mb-5 group">
+                <summary className="cursor-pointer flex items-center gap-2 text-xs text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors select-none list-none mb-0">
+                  <span className="w-4 h-4 flex items-center justify-center rounded border border-[var(--cc20)] text-[10px] group-open:rotate-90 transition-transform">▶</span>
+                  <span className="font-medium">Resumen por jugador</span>
+                  <span className="text-[10px] text-[var(--text-mut)]">({resumenLista.length} jugador{resumenLista.length !== 1 ? 'es' : ''})</span>
+                  <span className="ml-auto text-[var(--cc)] font-semibold">
+                    Total: ${pedidos.reduce((s, p) => s + Number(p.total || 0), 0).toLocaleString('es-CO')}
+                  </span>
+                </summary>
+                <div className="mt-3 space-y-2">
+                  {resumenLista.map(j => (
+                    <div key={j.cedula} className="bg-[var(--bg-surface)] rounded-xl px-4 py-3 border border-[var(--cc20)]">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <span className="text-sm font-semibold text-[var(--text-pri)]">{j.nombre}</span>
+                          <span className="text-xs text-[var(--text-sec)] ml-2">CC {j.cedula}</span>
+                        </div>
+                        <span className="text-sm font-bold text-[var(--cc)]">${j.total.toLocaleString('es-CO')}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(j.tipos).map(([tipo, valor]) => {
+                          const s = TIPO_STYLE[tipo] || { label: tipo, color: 'text-gray-400', bg: 'bg-gray-400/10' };
+                          return (
+                            <span key={tipo} className={`px-2.5 py-1 rounded-lg text-xs font-medium border border-white/5 ${s.bg} ${s.color}`}>
+                              {s.label}: <span className="font-bold">${valor.toLocaleString('es-CO')}</span>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
 
             {pedidos.length === 0 ? (
               <p className="text-center text-sm text-[var(--text-sec)] py-8">Aún no hay pedidos registrados</p>

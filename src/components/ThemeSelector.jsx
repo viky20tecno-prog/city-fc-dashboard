@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Monitor, SlidersHorizontal, Palette, Check, Tag } from 'lucide-react';
+import { Monitor, SlidersHorizontal, Palette, Check, Tag, Users } from 'lucide-react';
 
 export const PALETA = [
   { hex: '#E14924', nombre: 'Naranja Ciudad'  },
@@ -51,7 +51,7 @@ export function getStoredTheme() {
   return localStorage.getItem('dashboardTheme') || 'dark';
 }
 
-export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig, onOpenCategorias, onColorChange }) {
+export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig, onOpenCategorias, onOpenEquipo, onColorChange }) {
   const [activeTheme, setActiveTheme] = useState(getStoredTheme);
   const [saving, setSaving] = useState(false);
   const panelRef = useRef(null);
@@ -211,6 +211,22 @@ export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig
         >
           <Tag size={14} color="var(--text-sec)" />
           <span style={{ fontSize: 13, color: 'var(--text-sec)' }}>Categorías de jugadores</span>
+        </button>
+      )}
+
+      {onOpenEquipo && (
+        <button
+          onClick={onOpenEquipo}
+          style={{
+            width: '100%', marginTop: 4,
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '9px 10px', borderRadius: 10,
+            border: '1px solid var(--border-sub)',
+            background: 'transparent', cursor: 'pointer', transition: 'all 0.18s',
+          }}
+        >
+          <Users size={14} color="var(--text-sec)" />
+          <span style={{ fontSize: 13, color: 'var(--text-sec)' }}>Mi equipo (entrenadores)</span>
         </button>
       )}
 

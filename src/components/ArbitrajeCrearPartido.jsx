@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, X, CheckSquare, Square, Loader2, Search, Calendar, Clock } from 'lucide-react';
+import { Plus, X, CheckSquare, Square, Loader2, Search, Calendar } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
@@ -14,8 +14,7 @@ const darkPickerClass =
 export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
   const [formData, setFormData] = useState({
     titulo: '',
-    fecha: '',
-    hora: '',
+    fechaHora: '',
     equipoA: '',
     equipoB: '',
     montoPorJugador: '',
@@ -79,7 +78,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
     setError(null);
     setSuccess(false);
 
-    if (!formData.titulo || !formData.fecha || !formData.hora ||
+    if (!formData.titulo || !formData.fechaHora ||
         !formData.equipoA || !formData.equipoB || !formData.montoPorJugador) {
       return setError('Completa todos los campos del formulario.');
     }
@@ -89,11 +88,16 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
 
     setLoading(true);
     try {
+      const [fechaPart, horaPart] = formData.fechaHora.split('T');
       const res = await authFetch(`${API_BASE_URL}/arbitrage/partidos?club_id=${clubId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
+          titulo: formData.titulo,
+          fecha: fechaPart,
+          hora: horaPart || '00:00',
+          equipoA: formData.equipoA,
+          equipoB: formData.equipoB,
           montoPorJugador: parseInt(formData.montoPorJugador),
           jugadoresCedulas: selectedJugadores,
         }),
@@ -102,7 +106,7 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
       if (!data.success) throw new Error(data.error || 'Error al crear el partido');
 
       setSuccess(true);
-      setFormData({ titulo: '', fecha: '', hora: '', equipoA: '', equipoB: '', montoPorJugador: '' });
+      setFormData({ titulo: '', fechaHora: '', equipoA: '', equipoB: '', montoPorJugador: '' });
       setSelectedJugadores([]);
       setBusqueda('');
       setTimeout(() => { setSuccess(false); onCreated(); }, 1800);
@@ -143,37 +147,20 @@ export default function ArbitrajeCrearPartido({ clubId, onCreated }) {
         </div>
 
         {/* Fecha y Hora */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm text-gray-400 mb-1.5">
-              <span className="inline-flex items-center gap-1.5">
-                <Calendar size={13} className="text-green-500" />
-                Fecha
-              </span>
-            </label>
-            <input
-              type="date"
-              name="fecha"
-              value={formData.fecha}
-              onChange={handleInputChange}
-              className={darkPickerClass}
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-400 mb-1.5">
-              <span className="inline-flex items-center gap-1.5">
-                <Clock size={13} className="text-green-500" />
-                Hora
-              </span>
-            </label>
-            <input
-              type="time"
-              name="hora"
-              value={formData.hora}
-              onChange={handleInputChange}
-              className={darkPickerClass}
-            />
-          </div>
+        <div>
+          <label className="block text-sm text-gray-400 mb-1.5">
+            <span className="inline-flex items-center gap-1.5">
+              <Calendar size={13} className="text-green-500" />
+              Fecha y hora del partido
+            </span>
+          </label>
+          <input
+            type="datetime-local"
+            name="fechaHora"
+            value={formData.fechaHora}
+            onChange={handleInputChange}
+            className={darkPickerClass}
+          />
         </div>
 
         {/* Equipos */}

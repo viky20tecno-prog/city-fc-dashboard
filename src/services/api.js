@@ -50,11 +50,11 @@ export async function fetchAllData() {
       suspensionesRes,
     ] = await Promise.all([
       apiCall(`/players?club_id=${getClubId()}`),
-      apiCallSafe(`/invoices?club_id=${getClubId()}&anio=2026`),
-      apiCallSafe(`/payments?club_id=${getClubId()}&limit=100`),
+      apiCall(`/invoices?club_id=${getClubId()}&anio=2026`),
+      apiCall(`/payments?club_id=${getClubId()}&limit=100`),
       apiCallSafe(`/reports/summary?club_id=${getClubId()}`, {}),
-      apiCallSafe(`/invoices/uniformes?club_id=${getClubId()}`),
-      apiCallSafe(`/invoices/torneos?club_id=${getClubId()}`),
+      apiCall(`/invoices/uniformes?club_id=${getClubId()}`),
+      apiCall(`/invoices/torneos?club_id=${getClubId()}`),
       apiCall(`/suspensiones?club_id=${getClubId()}`),
     ]);
 

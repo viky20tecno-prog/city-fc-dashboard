@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
-  Clock, MessageSquare, ClipboardCheck, Settings,
+  Clock, ClipboardCheck, Settings,
   Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -17,7 +17,6 @@ import JugadoresTable from '../components/JugadoresTable';
 import Uniformes from '../components/Uniformes';
 import ArbitrajePagos from './ArbitrajePagos';
 import TimelineCobro from '../components/TimelineCobro';
-import WhatsAppMockup from '../components/WhatsAppMockup';
 import Conciliacion from '../components/Conciliacion';
 import Finanzas from '../components/Finanzas';
 import TorneosPage from '../components/TorneosPage';
@@ -37,7 +36,6 @@ const NAV = [
   { id: 'torneos',      Icon: Trophy,           title: 'Torneos'       },
   { id: 'arbitraje',    Icon: Activity,         title: 'Pago Arbitraje'},
   { id: 'cobro',        Icon: Clock,            title: 'Ciclo de Cobro'},
-  { id: 'whatsapp',     Icon: MessageSquare,    title: 'WhatsApp Bot'  },
   { id: 'conciliacion', Icon: ClipboardCheck,   title: 'Conciliación'  },
   { id: 'finanzas',     Icon: TrendingUp,       title: 'Finanzas'      },
 ];
@@ -573,7 +571,6 @@ export default function Dashboard() {
             {activeTab === 'torneos'      && <TorneosPage  color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'arbitraje'    && <ArbitrajePagos color={c} />}
             {activeTab === 'cobro'        && <TimelineCobro  color={c} />}
-            {activeTab === 'whatsapp'     && <WhatsAppMockup color={c} clubNombre={clubConfig?.nombre} />}
             {activeTab === 'conciliacion' && <Conciliacion   color={c} />}
             {activeTab === 'finanzas'     && <Finanzas color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
           </>

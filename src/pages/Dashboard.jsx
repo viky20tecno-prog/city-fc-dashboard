@@ -464,7 +464,7 @@ export default function Dashboard() {
                 Cerrar sesión
               </button>
               <a
-                href="https://wa.me/573000000000?text=Quiero%20activar%20mi%20plan%20de%20ZenSports"
+                href="https://wa.me/573204409015?text=Quiero%20activar%20mi%20plan%20de%20ZenSports"
                 target="_blank"
                 rel="noreferrer"
                 style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid rgba(34,197,94,0.35)', background: 'rgba(34,197,94,0.12)', color: '#22C55E', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}

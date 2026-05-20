@@ -50,7 +50,7 @@ export async function fetchAllData() {
       suspensionesRes,
     ] = await Promise.all([
       apiCall(`/players?club_id=${getClubId()}`),
-      apiCall(`/invoices?club_id=${getClubId()}&anio=2026`),
+      apiCall(`/invoices?club_id=${getClubId()}&anio=${new Date().getFullYear()}`),
       apiCall(`/payments?club_id=${getClubId()}&limit=100`),
       apiCallSafe(`/reports/summary?club_id=${getClubId()}`, {}),
       apiCall(`/invoices/uniformes?club_id=${getClubId()}`),
@@ -107,7 +107,7 @@ export async function fetchSummary(mes, anio) {
   return apiCall(url);
 }
 
-export async function fetchDefaulters(anio = 2026) {
+export async function fetchDefaulters(anio = new Date().getFullYear()) {
   return apiCall(`/reports/defaulters?club_id=${getClubId()}&anio=${anio}`);
 }
 

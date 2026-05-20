@@ -76,7 +76,7 @@ function SeccionMensualidades({ datos, suspensiones = [] }) {
     <div>
       <div className="flex items-center gap-2 mb-3">
         <Calendar className="w-5 h-5 text-[var(--cc)]" />
-        <h3 className="text-base font-semibold text-[var(--text-pri)]">Mensualidades 2026</h3>
+        <h3 className="text-base font-semibold text-[var(--text-pri)]">Mensualidades {new Date().getFullYear()}</h3>
         {totalSuspendidos > 0 && (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
             <PauseCircle className="w-3 h-3" />

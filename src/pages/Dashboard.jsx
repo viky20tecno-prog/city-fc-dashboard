@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
-import { useSheetData } from '../hooks/useSheetData';
+import { useAppData } from '../hooks/useAppData';
 import { useClubConfig } from '../hooks/useClubConfig';
 import { useRole } from '../hooks/useRole';
 import { getClubId } from '../services/api';
@@ -84,7 +84,7 @@ export default function Dashboard() {
     jugadores, mensualidades, uniformes, torneos,
     registroPagos, morosos, suspensiones,
     loading, error, refresh,
-  } = useSheetData();
+  } = useAppData();
 
   const [activeTab,       setActiveTab]       = useState('dashboard');
   const [refreshing,      setRefreshing]      = useState(false);

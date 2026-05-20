@@ -8,4 +8,20 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
   },
+  build: {
+    chunkSizeWarningLimit: 750,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor':  ['react', 'react-dom', 'react-router-dom'],
+          'charts':        ['recharts'],
+          'pdf':           ['jspdf', 'html2canvas'],
+          'dompurify':     ['dompurify'],
+          'lucide':        ['lucide-react'],
+          'supabase':      ['@supabase/supabase-js'],
+          'xlsx':          ['xlsx'],
+        },
+      },
+    },
+  },
 })

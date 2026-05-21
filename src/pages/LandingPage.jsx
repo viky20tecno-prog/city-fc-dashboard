@@ -552,35 +552,23 @@ function TrustLogos() {
 }
 
 /* ── Payment helpers ──────────────────────────────────────────────────────── */
-const PAYMENT_LINKS = {
-  starter: { wompi: 'https://checkout.wompi.co/l/STARTER_REF', mp: 'https://mpago.la/STARTER_REF' },
-  pro:     { wompi: 'https://checkout.wompi.co/l/PRO_REF',     mp: 'https://mpago.la/PRO_REF'     },
-  total:   { wompi: 'https://checkout.wompi.co/l/TOTAL_REF',   mp: 'https://mpago.la/TOTAL_REF'   },
+const WA_NUMBER = '573204409015';
+const WA_PAYMENT_MSG = {
+  starter: encodeURIComponent('Hola, quiero pagar el plan Starter de ZenSports ($149.000/mes). ¿Me puedes enviar los datos de pago por Bancolombia?'),
+  pro:     encodeURIComponent('Hola, quiero pagar el plan Pro de ZenSports ($399.000/mes). ¿Me puedes enviar los datos de pago por Bancolombia?'),
+  total:   encodeURIComponent('Hola, quiero pagar el plan Total de ZenSports ($799.000/mes). ¿Me puedes enviar los datos de pago por Bancolombia?'),
 };
-const isPlaceholder = (href) => !href || href.includes('_REF') || href.includes('STARTER') || href.includes('PRO_REF') || href.includes('TOTAL');
 
-function WompiBtn({ href }) {
-  if (isPlaceholder(href)) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 0', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.2)', fontSize: 13, fontWeight: 700 }}>
-      Wompi — Próximamente
-    </div>
-  );
+function WhatsAppPayBtn({ plan }) {
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 0', borderRadius: 10, background: 'rgba(255,94,37,0.10)', border: '1px solid rgba(255,94,37,0.35)', color: '#FF5E25', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
-      Wompi
-    </a>
-  );
-}
-
-function MercadoPagoBtn({ href }) {
-  if (isPlaceholder(href)) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 0', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.2)', fontSize: 13, fontWeight: 700 }}>
-      Mercado Pago — Próximamente
-    </div>
-  );
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 0', borderRadius: 10, background: 'rgba(0,158,227,0.10)', border: '1px solid rgba(0,158,227,0.35)', color: '#009EE3', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
-      Mercado Pago
+    <a
+      href={`https://wa.me/${WA_NUMBER}?text=${WA_PAYMENT_MSG[plan]}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '11px 0', borderRadius: 10, background: 'rgba(37,211,102,0.10)', border: '1px solid rgba(37,211,102,0.35)', color: '#25D366', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}
+    >
+      <MessageCircle size={15} />
+      Pagar por WhatsApp
     </a>
   );
 }
@@ -1280,15 +1268,7 @@ export default function LandingPage() {
               <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', fontSize: 14, fontWeight: 600, borderRadius: 11, padding: '13px 0', cursor: 'pointer', marginBottom: 12 }}>
                 Probar 5 días gratis
               </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 14px' }}>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', letterSpacing: 1, whiteSpace: 'nowrap' }}>O PAGA DIRECTAMENTE</span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <WompiBtn href={PAYMENT_LINKS.starter.wompi} />
-                <MercadoPagoBtn href={PAYMENT_LINKS.starter.mp} />
-              </div>
+              <WhatsAppPayBtn plan="starter" />
             </div>
           </Reveal>
 
@@ -1312,15 +1292,7 @@ export default function LandingPage() {
               <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', boxShadow: `0 4px 24px ${previewColor}55`, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
                 Probar 5 días gratis <ChevronRight size={15} />
               </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 14px' }}>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', letterSpacing: 1, whiteSpace: 'nowrap' }}>O PAGA DIRECTAMENTE</span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <WompiBtn href={PAYMENT_LINKS.pro.wompi} />
-                <MercadoPagoBtn href={PAYMENT_LINKS.pro.mp} />
-              </div>
+              <WhatsAppPayBtn plan="pro" />
             </div>
           </Reveal>
 
@@ -1341,15 +1313,7 @@ export default function LandingPage() {
               <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(198,120,255,0.10)', border: '1px solid rgba(198,120,255,0.30)', color: '#C678FF', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', marginBottom: 12 }}>
                 Probar 5 días gratis
               </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 14px' }}>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', letterSpacing: 1, whiteSpace: 'nowrap' }}>O PAGA DIRECTAMENTE</span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <WompiBtn href={PAYMENT_LINKS.total.wompi} />
-                <MercadoPagoBtn href={PAYMENT_LINKS.total.mp} />
-              </div>
+              <WhatsAppPayBtn plan="total" />
             </div>
           </Reveal>
 
@@ -1500,7 +1464,7 @@ export default function LandingPage() {
 
       {/* ── WHATSAPP FLOTANTE ─────────────────────────────────────────── */}
       <a
-        href="https://wa.me/573023903192?text=Hola%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20ZenSports"
+        href="https://wa.me/573204409015?text=Hola%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20ZenSports"
         target="_blank"
         rel="noopener noreferrer"
         title="Chatea con nosotros por WhatsApp"

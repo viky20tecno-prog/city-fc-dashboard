@@ -6,7 +6,7 @@ import {
   ArrowLeft, MessageCircle, Zap, BarChart2, Globe, Medal, AlertTriangle,
 } from 'lucide-react';
 
-const WHATSAPP_SOPORTE = '573023903192';
+const WHATSAPP_SOPORTE = '573204409015';
 
 const CYCLE_COLORS = ['#10B981', '#00AAFF', '#8B5CF6', '#06B6D4', '#F97316'];
 

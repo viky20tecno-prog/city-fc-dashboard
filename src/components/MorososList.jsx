@@ -5,6 +5,11 @@ const formatCOP = (n) => new Intl.NumberFormat('es-CO', {
   style: 'currency', currency: 'COP', maximumFractionDigits: 0,
 }).format(parseInt(n) || 0);
 
+function esc(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoUrl = '') {
   const fecha      = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
   const mesActual  = new Date().toLocaleString('es-CO', { month: 'long', year: 'numeric' });
@@ -18,9 +23,9 @@ function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoU
   const filas = morosos.map((m, i) => `
     <tr style="background:${i % 2 === 0 ? '#f9fafb' : '#ffffff'}">
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${i + 1}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#111">${m.nombre}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${m.cedula}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${m.celular || '—'}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#111">${esc(m.nombre)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${esc(m.cedula)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${esc(m.celular) || '—'}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;text-align:center">
         <span style="background:#fee2e2;color:#dc2626;padding:2px 8px;border-radius:9999px;font-size:12px;font-weight:600">
           ${m.meses_mora} mes${m.meses_mora !== 1 ? 'es' : ''}
@@ -29,7 +34,7 @@ function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoU
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:12px;color:#dc2626;line-height:1.5">
         ${m.meses_detalle
           ? m.meses_detalle.split(' · ').map(mes =>
-              `<span style="display:inline-block;background:#fef2f2;border:1px solid #fecaca;border-radius:4px;padding:1px 6px;margin:1px 2px;font-size:11px;white-space:nowrap">${mes}</span>`
+              `<span style="display:inline-block;background:#fef2f2;border:1px solid #fecaca;border-radius:4px;padding:1px 6px;margin:1px 2px;font-size:11px;white-space:nowrap">${esc(mes)}</span>`
             ).join('')
           : '<span style="color:#9ca3af">—</span>'
         }
@@ -43,7 +48,7 @@ function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoU
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
-  <title>Reporte Morosos — ${clubNombre}</title>
+  <title>Reporte Morosos — ${esc(clubNombre)}</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: Arial, sans-serif; color: #111; background: #fff; }
@@ -56,7 +61,7 @@ function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoU
     <div style="display:flex;align-items:center">
       ${logoHtml}
       <div>
-        <p style="font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.3px">${clubNombre}</p>
+        <p style="font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.3px">${esc(clubNombre)}</p>
         <p style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:2px">ZenSports — Gestión deportiva</p>
       </div>
     </div>

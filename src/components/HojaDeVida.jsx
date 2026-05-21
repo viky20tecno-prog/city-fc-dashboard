@@ -1,4 +1,9 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+
+function esc(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 import QRCodeLib from 'qrcode';
 import { createPortal } from 'react-dom';
 import {
@@ -619,7 +624,7 @@ function TabCarnet({ jugador, clubConfig = {} }) {
       ? '--text-pri:#F0F0F0;--text-sec:#AAAAAA;--text-mut:#666666;--bg-surface:#1A1A2A;'
       : '--text-pri:#111111;--text-sec:#444444;--text-mut:#888888;--bg-surface:#F5F5F5;';
     w.document.write(`<!DOCTYPE html><html><head>
-      <title>Carnet — ${nombre} ${apellidos}</title>
+      <title>Carnet — ${esc(nombre)} ${esc(apellidos)}</title>
       <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
       <style>*{box-sizing:border-box;margin:0;padding:0;}:root{${cssVars}}
       body{background:${dark ? '#111' : '#fff'};display:flex;justify-content:center;padding:32px;font-family:Inter,sans-serif;}

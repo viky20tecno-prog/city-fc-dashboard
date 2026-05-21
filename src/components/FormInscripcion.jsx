@@ -1,6 +1,11 @@
 import { useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+
+function esc(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 import {
   ClipboardList, CheckCircle, AlertCircle, Loader2,
   Upload, User, CreditCard, Phone, Mail, Instagram,
@@ -188,7 +193,7 @@ export default function FormInscripcion() {
     const f    = savedForm || {};
     const fecha = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
     const fila  = (label, value) => value
-      ? `<tr><td style="padding:6px 10px;font-size:12px;color:#6b7280;width:45%">${label}</td><td style="padding:6px 10px;font-size:12px;font-weight:600;color:#111">${value}</td></tr>`
+      ? `<tr><td style="padding:6px 10px;font-size:12px;color:#6b7280;width:45%">${esc(label)}</td><td style="padding:6px 10px;font-size:12px;font-weight:600;color:#111">${esc(value)}</td></tr>`
       : '';
 
     const fotoHtml = f.fotoPreview
@@ -201,14 +206,14 @@ export default function FormInscripcion() {
       : '';
 
     const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
-<title>Ficha — ${f.nombre} ${f.apellidos}</title>
+<title>Ficha — ${esc(f.nombre)} ${esc(f.apellidos)}</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;background:#fff;}@media print{.no-print{display:none!important}}</style>
 </head><body>
 <!-- Header banda color club -->
 <div style="background:${c};padding:16px 28px;display:flex;align-items:center;justify-content:space-between">
   <div style="display:flex;align-items:center">${logoHtml}
     <div>
-      <p style="font-size:16px;font-weight:800;color:#fff">${clubName}</p>
+      <p style="font-size:16px;font-weight:800;color:#fff">${esc(clubName)}</p>
       <p style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:1px">ZenSports — Gestión deportiva</p>
     </div>
   </div>
@@ -220,8 +225,8 @@ export default function FormInscripcion() {
 <div style="padding:24px 28px">
 <div style="clearfix:both;margin-bottom:20px">
   ${fotoHtml}
-  <h2 style="font-size:18px;font-weight:800;margin-bottom:4px">${f.nombre || ''} ${f.apellidos || ''}</h2>
-  <p style="font-size:13px;color:#6b7280">${f.tipo_id || 'Documento'}: ${f.cedula || ''}</p>
+  <h2 style="font-size:18px;font-weight:800;margin-bottom:4px">${esc(f.nombre)} ${esc(f.apellidos)}</h2>
+  <p style="font-size:13px;color:#6b7280">${esc(f.tipo_id || 'Documento')}: ${esc(f.cedula)}</p>
   <div style="clear:both"></div>
 </div>
 <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:16px">

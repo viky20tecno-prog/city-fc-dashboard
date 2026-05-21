@@ -57,9 +57,14 @@ export default function PortalAtleta() {
       }
       setDatos(json);
       if (!club) setClub(json.club);
-      // Foto desde bucket público
-      const { data } = supabase.storage.from('player-photos').getPublicUrl(`${clubSlug}/${id}.jpg`);
-      if (data?.publicUrl) setFotoUrl(data.publicUrl);
+      // Foto desde el registro del jugador (guardada en foto_url al subir)
+      if (json.atleta?.foto_url) {
+        setFotoUrl(json.atleta.foto_url);
+      } else {
+        // Fallback: intentar path estándar del bucket
+        const { data } = supabase.storage.from('player-photos').getPublicUrl(`${clubSlug}/${id}.jpg`);
+        if (data?.publicUrl) setFotoUrl(data.publicUrl);
+      }
     } catch {
       setError('No se pudo conectar. Verifica tu conexión e intenta de nuevo.');
     } finally {

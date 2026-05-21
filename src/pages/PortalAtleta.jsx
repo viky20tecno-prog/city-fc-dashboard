@@ -235,7 +235,7 @@ function Resultado({ datos, fotoUrl, color, onNuevaBusqueda }) {
             {mensualidades.map((m, i) => (
               <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 12px', background:'rgba(255,255,255,0.03)', border:`1px solid ${color}14`, borderRadius:12 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:10, flex:1, minWidth:0 }}>
-                  <span style={{ fontSize:13, fontWeight:600, color:'rgba(255,255,255,0.75)', width:52, flexShrink:0 }}>{m.mes}</span>
+                  <span style={{ fontSize:13, fontWeight:600, color:'rgba(255,255,255,0.75)', minWidth:90, flexShrink:0 }}>{m.mes}</span>
                   <EstadoBadge estado={m.estado} />
                 </div>
                 <div style={{ flexShrink:0, textAlign:'right' }}>

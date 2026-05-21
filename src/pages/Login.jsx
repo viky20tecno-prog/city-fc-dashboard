@@ -156,26 +156,46 @@ export default function Login() {
       padding: '24px 16px',
     }}>
 
-      {/* ── FONDO ANIMADO ── */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', background: 'var(--bg-app)' }}>
-        <img
-          src="/Tony tech.jpg"
-          alt=""
-          style={{
-            position: 'absolute',
-            top: '50%', left: '50%',
-            width: '200vmax', height: '200vmax',
-            objectFit: 'cover',
-            animation: 'rotate-bg 90s linear infinite',
-          }}
-        />
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(4, 6, 12, 0.80)' }} />
+      {/* ── FONDO MODERNO ── */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', background: '#03050D' }}>
+        {/* Blob 1 — top right */}
+        <div style={{
+          position: 'absolute', top: '-20%', right: '-10%',
+          width: '55vw', height: '55vw',
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${color}18 0%, transparent 70%)`,
+          filter: 'blur(60px)',
+          transition: 'background 0.8s ease',
+          animation: 'blob-drift-1 18s ease-in-out infinite',
+        }} />
+        {/* Blob 2 — bottom left */}
+        <div style={{
+          position: 'absolute', bottom: '-15%', left: '-10%',
+          width: '50vw', height: '50vw',
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${color}12 0%, transparent 70%)`,
+          filter: 'blur(80px)',
+          transition: 'background 0.8s ease',
+          animation: 'blob-drift-2 22s ease-in-out infinite',
+        }} />
+        {/* Blob 3 — center subtle */}
+        <div style={{
+          position: 'absolute', top: '40%', left: '40%',
+          width: '30vw', height: '30vw',
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${color}08 0%, transparent 70%)`,
+          filter: 'blur(40px)',
+          transition: 'background 0.8s ease',
+          animation: 'blob-drift-3 14s ease-in-out infinite',
+        }} />
+        {/* Grid overlay sutil */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: `radial-gradient(ellipse at 60% 50%, ${color}12 0%, transparent 60%)`,
-          transition: 'background 0.7s ease',
-          pointerEvents: 'none',
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)`,
+          backgroundSize: '48px 48px',
         }} />
+        {/* Noise vignette */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.6) 100%)' }} />
       </div>
 
       {/* ── CARD SPLIT ── */}
@@ -209,8 +229,8 @@ export default function Login() {
                 onError={e => { e.target.style.display = 'none'; }} />
             </div>
             <div>
-              <p style={{ color: '#fff', fontWeight: 800, fontSize: 15, margin: 0, letterSpacing: '-0.2px' }}>ClubContable</p>
-              <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0 }}>Para toda América Latina</p>
+              <p style={{ color: '#fff', fontWeight: 800, fontSize: 15, margin: 0, letterSpacing: '-0.2px' }}>ZenSports</p>
+              <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0 }}>Sistema operativo deportivo</p>
             </div>
           </div>
 
@@ -425,7 +445,7 @@ export default function Login() {
               </form>
               <div style={{ marginTop: 18, padding: '13px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12 }}>
                 <p style={{ color: 'var(--text-sec)', fontSize: 12, margin: '0 0 9px' }}>¿No recuerdas el correo?</p>
-                <a href={`https://wa.me/${WHATSAPP_SOPORTE}?text=Hola, necesito ayuda para recuperar el acceso a mi club en ClubContable`}
+                <a href={`https://wa.me/${WHATSAPP_SOPORTE}?text=Hola, necesito ayuda para recuperar el acceso a mi club en ZenSports`}
                   target="_blank" rel="noopener noreferrer"
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#25D366', color: '#fff', padding: '9px 14px', borderRadius: 10, fontSize: 12, fontWeight: 700, textDecoration: 'none' }}>
                   <MessageCircle size={13} /> Soporte por WhatsApp
@@ -444,7 +464,7 @@ export default function Login() {
               <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 16px', marginBottom: 18, textAlign: 'left' }}>
                 <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: 0, lineHeight: 1.8 }}>
                   <strong style={{ color: '#fff' }}>Pasos:</strong><br />
-                  1. Abre el correo de ClubContable<br />
+                  1. Abre el correo de ZenSports<br />
                   2. Clic en "Restablecer contraseña"<br />
                   3. Escribe tu nueva contraseña<br />
                   4. Listo — ingresa al dashboard
@@ -507,9 +527,19 @@ export default function Login() {
       </div>
 
       <style>{`
-        @keyframes rotate-bg {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to   { transform: translate(-50%, -50%) rotate(360deg); }
+        @keyframes blob-drift-1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33%       { transform: translate(-4%, 6%) scale(1.06); }
+          66%       { transform: translate(5%, -3%) scale(0.96); }
+        }
+        @keyframes blob-drift-2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33%       { transform: translate(5%, -5%) scale(1.08); }
+          66%       { transform: translate(-3%, 4%) scale(0.94); }
+        }
+        @keyframes blob-drift-3 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50%       { transform: translate(-6%, 6%) scale(1.12); }
         }
         @keyframes spin {
           from { transform: rotate(0deg); }

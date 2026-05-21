@@ -440,7 +440,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                   join &lt;palabra-del-sandbox&gt;
                 </code>
                 <p style={{ color: '#8B95A3', fontSize: 11, margin: '8px 0 0', lineHeight: 1.5 }}>
-                  Tu administrador de ClubContable te dará la palabra exacta.
+                  Tu administrador de ZenSports te dará la palabra exacta.
                 </p>
               </div>
 

@@ -20,6 +20,7 @@ export default function App() {
         <Route path="/auth/callback"   element={<AuthCallback />} />
         <Route path="/inscripcion"     element={<FormInscripcion />} />
         <Route path="/verificar/:clubSlug/:cedula" element={<VerificarMiembro />} />
+        <Route path="/p/:clubSlug"                    element={<PortalAtleta />} />
         <Route path="/p/:clubSlug/:cedula"          element={<PortalAtleta />} />
 
         {/* Rutas protegidas */}

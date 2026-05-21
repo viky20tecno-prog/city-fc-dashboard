@@ -737,7 +737,7 @@ export default function LandingPage() {
             letterSpacing: '-2.5px', marginBottom: 20,
             animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both',
           }}>
-            The{' '}
+            El sistema operativo{' '}
             <span style={{
               background: `linear-gradient(90deg, ${previewColor}, ${previewColor}cc, #00D084)`,
               backgroundSize: '200% auto',
@@ -745,9 +745,8 @@ export default function LandingPage() {
               backgroundClip: 'text',
               animation: 'shimmer 4s linear infinite',
             }}>
-              Sports Operating
-            </span>{' '}
-            System
+              para tu club deportivo
+            </span>
           </h1>
 
           {/* Subheadline */}

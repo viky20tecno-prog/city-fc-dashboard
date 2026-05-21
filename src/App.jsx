@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage';
 import RegistroClub from './pages/RegistroClub';
 import FormInscripcion from './components/FormInscripcion';
 import VerificarMiembro from './pages/VerificarMiembro';
+import PortalAtleta from './pages/PortalAtleta';
 import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/auth/callback"   element={<AuthCallback />} />
         <Route path="/inscripcion"     element={<FormInscripcion />} />
         <Route path="/verificar/:clubSlug/:cedula" element={<VerificarMiembro />} />
+        <Route path="/p/:clubSlug/:cedula"          element={<PortalAtleta />} />
 
         {/* Rutas protegidas */}
         <Route path="/app/*" element={

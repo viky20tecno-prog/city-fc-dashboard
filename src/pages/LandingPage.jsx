@@ -1267,7 +1267,7 @@ export default function LandingPage() {
           <Reveal delay={0}>
             <div className="card-hover" style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '30px 26px' }}>
               <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Starter</p>
-              <div style={{ fontSize: 38, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$59.000<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
+              <div style={{ fontSize: 38, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$149.000<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 26 }}>Para clubes que están empezando a organizarse</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 26 }}>
                 {[[true,'Dashboard y reportes'],[true,'Gestión de miembros'],[true,'Pagos manuales y mora'],[true,'Carnet digital'],[false,'WhatsApp Bot automático'],[false,'Inscripciones digitales'],[false,'Uniformes y equipamiento'],[false,'Estadísticas avanzadas']].map(([on, label]) => (
@@ -1278,7 +1278,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', fontSize: 14, fontWeight: 600, borderRadius: 11, padding: '13px 0', cursor: 'pointer', marginBottom: 12 }}>
-                Probar 5 días gratis
+                Probar 14 días gratis
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 14px' }}>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
@@ -1299,7 +1299,7 @@ export default function LandingPage() {
                 ★ MÁS POPULAR
               </div>
               <p style={{ color: previewColor, fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8, transition: 'color 0.3s' }}>Pro</p>
-              <div style={{ fontSize: 38, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$99.000<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
+              <div style={{ fontSize: 38, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$399.000<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 26 }}>Automatización completa de inscripciones y pagos</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 26 }}>
                 {[[true,'Dashboard y reportes'],[true,'Gestión de miembros'],[true,'Pagos manuales y mora'],[true,'Carnet digital'],[true,'WhatsApp Bot automático'],[true,'Inscripciones digitales'],[false,'Uniformes y equipamiento'],[false,'Estadísticas avanzadas']].map(([on, label]) => (
@@ -1310,7 +1310,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', boxShadow: `0 4px 24px ${previewColor}55`, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
-                Probar 5 días gratis <ChevronRight size={15} />
+                Probar 14 días gratis <ChevronRight size={15} />
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 14px' }}>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
@@ -1328,7 +1328,7 @@ export default function LandingPage() {
           <Reveal delay={160}>
             <div className="card-hover" style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '30px 26px' }}>
               <p style={{ color: '#C678FF', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Total</p>
-              <div style={{ fontSize: 38, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$149.000<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
+              <div style={{ fontSize: 38, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$799.000<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 26 }}>Acceso completo a todos los módulos</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 26 }}>
                 {['Dashboard y reportes','Gestión de miembros','Pagos manuales y mora','Carnet digital','WhatsApp Bot automático','Inscripciones digitales','Uniformes y equipamiento','Estadísticas avanzadas','Finanzas — Ingresos, gastos y nómina'].map(label => (
@@ -1339,7 +1339,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(198,120,255,0.10)', border: '1px solid rgba(198,120,255,0.30)', color: '#C678FF', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', marginBottom: 12 }}>
-                Probar 5 días gratis
+                Probar 14 días gratis
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 14px' }}>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
@@ -1394,7 +1394,7 @@ export default function LandingPage() {
               a: 'Sí. ZenSports funciona para cualquier organización con miembros: escuelas de natación, gimnasios, academias de artes marciales, clubes de tenis y más.',
             },
             {
-              q: '¿Qué pasa al terminar los 5 días de prueba?',
+              q: '¿Qué pasa al terminar los 14 días de prueba?',
               a: 'Te avisamos con anticipación y puedes elegir un plan. Si decides no continuar, no se cobra nada. No pedimos tarjeta de crédito para la prueba.',
             },
             {
@@ -1493,7 +1493,7 @@ export default function LandingPage() {
           onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)}
           style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '15px', cursor: 'pointer', boxShadow: `0 4px 20px ${previewColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}
         >
-          Probar gratis · 5 días <ArrowRight size={16} />
+          Probar gratis · 14 días <ArrowRight size={16} />
         </button>
       </div>
 

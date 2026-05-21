@@ -6,6 +6,8 @@ import {
   Loader2, CheckCircle, AlertCircle, Check,
   Lock, Mail, User, Phone, Building2, MapPin, ChevronLeft,
   MessageCircle, ArrowRight,
+  Timer, Palette, Globe, ShieldCheck,
+  MonitorPlay, Paintbrush, KeyRound, Gift,
 } from 'lucide-react';
 import { PALETA } from '../components/ThemeSelector';
 
@@ -33,10 +35,10 @@ const PAISES = [
 ];
 
 const FEATURES = [
-  { icon: '⚡', text: 'Listo en menos de 5 minutos' },
-  { icon: '🎨', text: 'Elige el color de tu club' },
-  { icon: '🌎', text: 'Para toda América Latina' },
-  { icon: '🔒', text: 'Datos seguros y aislados por club' },
+  { Icon: Timer,       color: '#FFC107', text: 'Listo en menos de 5 minutos'       },
+  { Icon: Palette,     color: '#A78BFA', text: 'Elige el color de tu club'          },
+  { Icon: Globe,       color: '#38BDF8', text: 'Para toda América Latina'           },
+  { Icon: ShieldCheck, color: '#34D399', text: 'Datos seguros y aislados por club'  },
 ];
 
 const INITIAL = {
@@ -141,18 +143,15 @@ export default function RegistroClub() {
 
   if (exito) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-app)', fontFamily: "'Inter', system-ui, sans-serif", position: 'relative', overflow: 'hidden' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#03050D', fontFamily: "'Inter', system-ui, sans-serif", position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
-          <img src="/Tony tech.jpg" alt="" style={{ position: 'absolute', top: '50%', left: '50%', width: '200vmax', height: '200vmax', objectFit: 'cover', animation: 'rotate-bg 90s linear infinite' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(4,6,12,0.88)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse at 50% 50%, ${ac}10 0%, transparent 60%)`, transition: 'background 0.7s' }} />
+          <div style={{ position: 'absolute', top: '20%', left: '30%', width: '40vw', height: '40vw', borderRadius: '50%', background: 'radial-gradient(circle, #00D08422 0%, transparent 70%)', filter: 'blur(60px)' }} />
         </div>
-        <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '48px 56px', background: 'rgba(8,10,20,0.72)', backdropFilter: 'blur(32px)', borderRadius: 24, border: `1px solid ${ac}30`, boxShadow: `0 0 60px ${ac}15` }}>
+        <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '48px 56px', background: 'rgba(8,10,20,0.72)', backdropFilter: 'blur(32px)', borderRadius: 24, border: '1px solid rgba(0,208,132,0.25)', boxShadow: '0 0 60px rgba(0,208,132,0.1)' }}>
           <CheckCircle size={60} color="#00D084" style={{ marginBottom: 20, filter: 'drop-shadow(0 0 16px #00D08488)' }} />
           <h2 style={{ color: '#fff', fontSize: 24, fontWeight: 800, marginBottom: 10 }}>¡Club registrado con éxito!</h2>
           <p style={{ color: 'var(--text-sec)', fontSize: 15 }}>Redirigiendo a tu dashboard…</p>
         </div>
-        <style>{`@keyframes rotate-bg { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }`}</style>
       </div>
     );
   }
@@ -166,26 +165,28 @@ export default function RegistroClub() {
       padding: '24px 16px',
     }}>
 
-      {/* ── FONDO ANIMADO ── */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', background: 'var(--bg-app)' }}>
-        <img
-          src="/Tony tech.jpg"
-          alt=""
-          style={{
-            position: 'absolute',
-            top: '50%', left: '50%',
-            width: '200vmax', height: '200vmax',
-            objectFit: 'cover',
-            animation: 'rotate-bg 90s linear infinite',
-          }}
-        />
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(4, 6, 12, 0.80)' }} />
+      {/* ── FONDO MODERNO ── */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', background: '#03050D' }}>
+        <div style={{
+          position: 'absolute', top: '-20%', left: '-10%',
+          width: '55vw', height: '55vw', borderRadius: '50%',
+          background: `radial-gradient(circle, ${ac}18 0%, transparent 70%)`,
+          filter: 'blur(60px)', transition: 'background 0.8s',
+          animation: 'blob-drift-1 18s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '-15%', right: '-10%',
+          width: '50vw', height: '50vw', borderRadius: '50%',
+          background: `radial-gradient(circle, ${ac}12 0%, transparent 70%)`,
+          filter: 'blur(80px)', transition: 'background 0.8s',
+          animation: 'blob-drift-2 22s ease-in-out infinite',
+        }} />
         <div style={{
           position: 'absolute', inset: 0,
-          background: `radial-gradient(ellipse at 40% 50%, ${ac}12 0%, transparent 60%)`,
-          transition: 'background 0.7s ease',
-          pointerEvents: 'none',
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)`,
+          backgroundSize: '48px 48px',
         }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%)' }} />
       </div>
 
       {/* ── CARD SPLIT ── */}
@@ -236,18 +237,17 @@ export default function RegistroClub() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
-            {FEATURES.map(f => (
-              <div key={f.icon} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {FEATURES.map(({ Icon, color: ic, text }) => (
+              <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{
                   width: 32, height: 32, borderRadius: 8,
-                  background: `${ac}18`, border: `1px solid ${ac}33`,
+                  background: `${ic}18`, border: `1px solid ${ic}44`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 15, flexShrink: 0,
-                  transition: 'background-color 0.7s, border-color 0.7s',
+                  flexShrink: 0,
                 }}>
-                  {f.icon}
+                  <Icon size={15} color={ic} strokeWidth={1.8} />
                 </div>
-                <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{f.text}</span>
+                <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{text}</span>
               </div>
             ))}
           </div>
@@ -292,21 +292,20 @@ export default function RegistroClub() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
             {[
-              { icon: '⚡', text: 'Demo en vivo de la plataforma' },
-              { icon: '🎨', text: 'Personalizamos el color y logo de tu club' },
-              { icon: '🔒', text: 'Credenciales seguras asignadas por nosotros' },
-              { icon: '🆓', text: '14 días de prueba gratuita sin tarjeta' },
-            ].map(f => (
-              <div key={f.icon} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              { Icon: MonitorPlay, color: '#00D084', text: 'Demo en vivo de la plataforma'            },
+              { Icon: Paintbrush,  color: '#E14924', text: 'Personalizamos el color y logo de tu club' },
+              { Icon: KeyRound,    color: '#FBBF24', text: 'Credenciales seguras asignadas por nosotros'},
+              { Icon: Gift,        color: '#67E8F9', text: '14 días de prueba gratuita sin tarjeta'    },
+            ].map(({ Icon, color: ic, text }) => (
+              <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{
                   width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-                  background: `${ac}18`, border: `1px solid ${ac}33`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
-                  transition: 'background-color 0.7s, border-color 0.7s',
+                  background: `${ic}18`, border: `1px solid ${ic}44`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  {f.icon}
+                  <Icon size={14} color={ic} strokeWidth={1.8} />
                 </div>
-                <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{f.text}</span>
+                <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>{text}</span>
               </div>
             ))}
           </div>
@@ -349,9 +348,15 @@ export default function RegistroClub() {
       </div>
 
       <style>{`
-        @keyframes rotate-bg {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to   { transform: translate(-50%, -50%) rotate(360deg); }
+        @keyframes blob-drift-1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33%       { transform: translate(4%, 6%) scale(1.06); }
+          66%       { transform: translate(-3%, -4%) scale(0.96); }
+        }
+        @keyframes blob-drift-2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33%       { transform: translate(-5%, -4%) scale(1.08); }
+          66%       { transform: translate(3%, 5%) scale(0.94); }
         }
         @keyframes spin {
           from { transform: rotate(0deg); }

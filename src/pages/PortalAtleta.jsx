@@ -170,12 +170,12 @@ export default function PortalAtleta() {
   );
 }
 
+const fmt = (n) => new Intl.NumberFormat('es-CO', { style:'currency', currency:'COP', maximumFractionDigits:0 }).format(parseFloat(n) || 0);
+
 function Resultado({ datos, fotoUrl, color, onNuevaBusqueda }) {
-  const { atleta, mensualidades, saldo_pendiente, meses_pendientes } = datos;
+  const { atleta, mensualidades, saldo_pendiente, total_pagado, meses_pendientes } = datos;
   const [imgError, setImgError] = useState(false);
   const nombreCompleto = `${atleta.nombre} ${atleta.apellidos || ''}`.trim();
-  const anioActual = new Date().getFullYear();
-  const mesActual = mensualidades.find(m => m.anio === anioActual && m.mes === new Date().getMonth() + 1);
   const alDia = saldo_pendiente === 0;
 
   return (
@@ -199,67 +199,57 @@ function Resultado({ datos, fotoUrl, color, onNuevaBusqueda }) {
             <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
               {atleta.categoria && <Chip label={atleta.categoria} />}
               {atleta.equipo    && <Chip label={atleta.equipo} />}
+              {atleta.posicion  && <Chip label={atleta.posicion} />}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Resumen saldo */}
-      <div className="fade-up" style={{ animationDelay:'.07s', display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-        <div style={{ background: alDia ? 'rgba(0,208,132,0.07)' : 'rgba(245,158,11,0.07)', border:`1px solid ${alDia ? 'rgba(0,208,132,0.22)' : 'rgba(245,158,11,0.22)'}`, borderRadius:14, padding:'14px 16px' }}>
-          <div style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.3)', letterSpacing:1.5, textTransform:'uppercase', marginBottom:6 }}>Saldo pendiente</div>
-          <div style={{ fontSize:24, fontWeight:900, color: alDia ? '#00D084' : '#F59E0B', letterSpacing:'-0.5px', lineHeight:1 }}>
-            {alDia ? '✓ Al día' : `$${saldo_pendiente.toLocaleString('es-CO')}`}
-          </div>
-          <div style={{ fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:4 }}>
-            {alDia ? 'Sin pagos pendientes' : `${meses_pendientes} mes${meses_pendientes !== 1 ? 'es' : ''} sin pagar`}
-          </div>
+      {/* Resumen financiero — igual que EstadoCuenta */}
+      <div className="fade-up" style={{ animationDelay:'.06s', display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+        <div style={{ background:`${color}0D`, border:`1px solid ${color}28`, borderRadius:14, padding:'14px 16px' }}>
+          <div style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.35)', letterSpacing:1.5, textTransform:'uppercase', marginBottom:6 }}>Total pagado</div>
+          <div style={{ fontSize:20, fontWeight:900, color, letterSpacing:'-0.5px', lineHeight:1 }}>{fmt(total_pagado)}</div>
         </div>
-        <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:'14px 16px' }}>
-          <div style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.3)', letterSpacing:1.5, textTransform:'uppercase', marginBottom:6 }}>Mes actual</div>
-          {mesActual
-            ? <>
-                <EstadoBadge estado={mesActual.estado} />
-                <div style={{ fontSize:11, color:'rgba(255,255,255,0.25)', marginTop:6 }}>{MESES_CORTO[(mesActual.mes||1)-1]} {mesActual.anio}</div>
-              </>
-            : <div style={{ fontSize:13, color:'rgba(255,255,255,0.25)', marginTop:4 }}>Sin registro</div>
-          }
+        <div style={{ background: alDia ? 'rgba(0,208,132,0.07)' : 'rgba(245,158,11,0.07)', border:`1px solid ${alDia ? 'rgba(0,208,132,0.22)' : 'rgba(245,158,11,0.22)'}`, borderRadius:14, padding:'14px 16px' }}>
+          <div style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.35)', letterSpacing:1.5, textTransform:'uppercase', marginBottom:6 }}>Saldo pendiente</div>
+          <div style={{ fontSize:20, fontWeight:900, color: alDia ? '#00D084' : '#F59E0B', letterSpacing:'-0.5px', lineHeight:1 }}>
+            {alDia ? '✓ Al día' : fmt(saldo_pendiente)}
+          </div>
+          {!alDia && <div style={{ fontSize:11, color:'rgba(255,255,255,0.3)', marginTop:4 }}>{meses_pendientes} mes{meses_pendientes !== 1 ? 'es' : ''} pendiente{meses_pendientes !== 1 ? 's' : ''}</div>}
         </div>
       </div>
 
-      {/* Grilla de meses */}
+      {/* Mensualidades — misma vista que EstadoCuenta */}
       {mensualidades.length > 0 && (
-        <div className="fade-up" style={{ animationDelay:'.13s', background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:'16px' }}>
-          <div style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.3)', letterSpacing:1.5, textTransform:'uppercase', marginBottom:12 }}>Historial de mensualidades</div>
-          <div className="mes-grid" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:7 }}>
-            {mensualidades.map((m,i) => <MesChip key={i} {...m} />)}
+        <div className="fade-up" style={{ animationDelay:'.12s', background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:'16px' }}>
+          <div style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.3)', letterSpacing:1.5, textTransform:'uppercase', marginBottom:12 }}>
+            Mensualidades {new Date().getFullYear()}
           </div>
-        </div>
-      )}
-
-      {/* Pendientes detallados */}
-      {meses_pendientes > 0 && (
-        <div className="fade-up" style={{ animationDelay:'.18s', background:'rgba(245,158,11,0.04)', border:'1px solid rgba(245,158,11,0.14)', borderRadius:16, padding:'16px' }}>
-          <div style={{ fontSize:10, fontWeight:700, color:'#F59E0B', letterSpacing:1.5, textTransform:'uppercase', marginBottom:10 }}>Detalle de pagos pendientes</div>
-          <div style={{ display:'flex', flexDirection:'column', gap:7 }}>
-            {mensualidades.filter(m => m.estado !== 'pagado').map((m,i) => (
-              <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 12px', background:'rgba(255,255,255,0.03)', borderRadius:10 }}>
-                <span style={{ fontSize:13, color:'rgba(255,255,255,0.65)', fontWeight:500 }}>{m.mes_nombre} {m.anio}</span>
-                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                  {m.valor > 0 && <span style={{ fontSize:13, fontWeight:700 }}>${m.valor.toLocaleString('es-CO')}</span>}
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {mensualidades.map((m, i) => (
+              <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 12px', background:'rgba(255,255,255,0.03)', border:`1px solid ${color}14`, borderRadius:12 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10, flex:1, minWidth:0 }}>
+                  <span style={{ fontSize:13, fontWeight:600, color:'rgba(255,255,255,0.75)', width:52, flexShrink:0 }}>{m.mes}</span>
                   <EstadoBadge estado={m.estado} />
+                </div>
+                <div style={{ flexShrink:0, textAlign:'right' }}>
+                  <span style={{ fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.85)' }}>{fmt(m.valor_pagado)}</span>
+                  <span style={{ fontSize:12, color:'rgba(255,255,255,0.3)' }}> / {fmt(m.valor_oficial)}</span>
                 </div>
               </div>
             ))}
           </div>
-          <div style={{ marginTop:12, padding:'10px', background:'rgba(255,255,255,0.03)', borderRadius:10, textAlign:'center', fontSize:12, color:'rgba(255,255,255,0.35)' }}>
-            Comunícate con tu club para regularizar tus pagos
-          </div>
+          {!alDia && (
+            <div style={{ marginTop:12, padding:'10px 14px', background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.18)', borderRadius:10, textAlign:'center', fontSize:12, color:'rgba(245,158,11,0.8)' }}>
+              Comunícate con tu club para regularizar tus pagos
+            </div>
+          )}
         </div>
       )}
 
       {/* Botón nueva consulta */}
-      <div className="fade-up" style={{ animationDelay:'.22s' }}>
+      <div className="fade-up" style={{ animationDelay:'.18s' }}>
         <button onClick={onNuevaBusqueda} style={{ width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.09)', borderRadius:12, padding:'12px', color:'rgba(255,255,255,0.45)', fontSize:13, fontWeight:600, cursor:'pointer' }}>
           ← Consultar otra cédula
         </button>
@@ -286,21 +276,6 @@ function EstadoBadge({ estado }) {
   );
 }
 
-function MesChip({ mes_nombre, anio, estado, valor }) {
-  const c = ESTADO_CFG[estado]
-    ? { bg: ESTADO_CFG[estado].bg, border: ESTADO_CFG[estado].border, dot: ESTADO_CFG[estado].color }
-    : { bg:'rgba(255,255,255,0.03)', border:'rgba(255,255,255,0.07)', dot:'rgba(255,255,255,0.2)' };
-  return (
-    <div className="mes-chip" style={{ background:c.bg, border:`1px solid ${c.border}`, borderRadius:10, padding:'9px 10px' }}>
-      <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:3 }}>
-        <span style={{ width:5, height:5, borderRadius:'50%', background:c.dot, flexShrink:0 }} />
-        <span style={{ fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.65)' }}>{mes_nombre}</span>
-        <span style={{ fontSize:9, color:'rgba(255,255,255,0.2)', marginLeft:'auto' }}>{anio}</span>
-      </div>
-      {valor > 0 && <div style={{ fontSize:11, fontWeight:600, color:c.dot, paddingLeft:10 }}>${valor.toLocaleString('es-CO')}</div>}
-    </div>
-  );
-}
 
 function Chip({ label }) {
   return <span style={{ fontSize:11, fontWeight:600, color:'rgba(255,255,255,0.45)', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.09)', borderRadius:999, padding:'2px 9px' }}>{label}</span>;

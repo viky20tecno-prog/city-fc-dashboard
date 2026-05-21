@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import {
   Bot, BarChart2, CreditCard, Shield, ChevronRight, CheckCircle,
   Users, FileText, Smartphone, AlertTriangle, Zap, MessageCircle,
-  ArrowRight, Sparkles, TrendingUp, Star, Sun, Moon,
+  ArrowRight, Sparkles, TrendingUp, Star, Sun, Moon, X, Loader2,
 } from 'lucide-react';
 import { PALETA } from '../components/ThemeSelector';
+import { API_BASE_URL } from '../config';
 
 /* ── Scroll Reveal Hook ─────────────────────────────────────────────────── */
 function useReveal() {
@@ -602,13 +603,88 @@ function FaqItem({ q, a, delay }) {
   );
 }
 
+/* ── Lead Capture Modal ─────────────────────────────────────────────────── */
+function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
+  const navigate = useNavigate();
+  const [form, setForm]     = useState({ nombre: '', whatsapp: '', nombre_club: '', ciudad: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError]   = useState('');
+
+  if (!open) return null;
+
+  const planLabel = { free: 'gratis', starter: 'Starter', pro: 'Pro', scale: 'Scale', enterprise: 'Enterprise' }[plan] || plan;
+
+  const handle = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!form.nombre.trim() || !form.whatsapp.trim()) { setError('Nombre y WhatsApp son requeridos'); return; }
+    setLoading(true); setError('');
+    try {
+      await fetch(`${API_BASE_URL}/api/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, plan_interes: plan, fuente: 'landing' }),
+      });
+    } catch (_) { /* continúa aunque falle */ }
+    setLoading(false);
+    navigate(`/registro?color=${encodeURIComponent(color)}&plan=${plan}&nombre=${encodeURIComponent(form.nombre_club)}&wa=${encodeURIComponent(form.whatsapp)}`);
+  };
+
+  const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: '11px 14px', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+      onClick={onClose}>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }} />
+      <div style={{ position: 'relative', background: '#0F1219', border: `1px solid ${color}30`, borderRadius: 22, padding: '32px 28px', width: '100%', maxWidth: 420, boxShadow: `0 0 60px ${color}20, 0 24px 60px rgba(0,0,0,0.6)` }}
+        onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)' }}>
+          <X size={18} />
+        </button>
+
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ display: 'inline-block', background: `${color}18`, border: `1px solid ${color}35`, borderRadius: 999, padding: '4px 14px', fontSize: 11, fontWeight: 700, color, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>
+            Plan {planLabel}
+          </div>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 6 }}>Un paso para empezar</h2>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>
+            Ingresa tus datos y en segundos tienes acceso. Sin tarjeta de crédito.
+          </p>
+        </div>
+
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <input name="nombre" placeholder="Tu nombre *" value={form.nombre} onChange={handle} style={inp} required />
+          <input name="whatsapp" placeholder="WhatsApp (ej: 3001234567) *" value={form.whatsapp} onChange={handle} style={inp} required inputMode="tel" />
+          <input name="nombre_club" placeholder="Nombre de tu club" value={form.nombre_club} onChange={handle} style={inp} />
+          <input name="ciudad" placeholder="Ciudad" value={form.ciudad} onChange={handle} style={inp} />
+
+          {error && <p style={{ color: '#EF4444', fontSize: 12, margin: 0 }}>{error}</p>}
+
+          <button type="submit" disabled={loading} style={{ marginTop: 4, padding: '13px 0', background: `linear-gradient(135deg, ${color}, ${color}cc)`, border: 'none', borderRadius: 11, color: '#fff', fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: `0 6px 24px ${color}50`, opacity: loading ? 0.7 : 1 }}>
+            {loading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : null}
+            {loading ? 'Procesando…' : 'Comenzar ahora →'}
+          </button>
+
+          <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.28)', margin: 0 }}>
+            5 días gratis · Sin permanencia · Cancela cuando quieras
+          </p>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 /* ══════════════════════════════════════════════════════════════════════════ */
 export default function LandingPage() {
   const navigate = useNavigate();
   const [previewColor, setPreviewColor] = useState(PALETA[0].hex);
   const [previewModo,  setPreviewModo]  = useState('dark');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [leadModal, setLeadModal]       = useState({ open: false, plan: 'free' });
   const { glowRef, onMove, onLeave } = useMouseGlow();
+
+  const openLead = useCallback((plan) => setLeadModal({ open: true, plan }), []);
 
   useEffect(() => { document.title = 'ZenSports — Gestión Deportiva Inteligente'; }, []);
 
@@ -616,6 +692,13 @@ export default function LandingPage() {
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#060810', minHeight: '100vh', color: '#fff', overflowX: 'hidden' }}>
+
+      <LeadModal
+        open={leadModal.open}
+        plan={leadModal.plan}
+        color={previewColor}
+        onClose={() => setLeadModal(m => ({ ...m, open: false }))}
+      />
 
       <style>{`
         :root {
@@ -772,7 +855,7 @@ export default function LandingPage() {
           }}>
             <button
               className="btn-primary"
-              onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)}
+              onClick={() => openLead('free')}
               style={{
                 display: 'flex', alignItems: 'center', gap: 9,
                 background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`,
@@ -1278,7 +1361,7 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer' }}>
+              <button className="btn-ghost" onClick={() => openLead('free')} style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer' }}>
                 Comenzar gratis
               </button>
             </div>
@@ -1303,7 +1386,7 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 10 }}>
+              <button className="btn-ghost" onClick={() => openLead('starter')} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 10 }}>
                 Activar Starter
               </button>
               <WhatsAppPayBtn plan="starter" />
@@ -1332,7 +1415,7 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`, border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', boxShadow: `0 6px 28px ${previewColor}60`, marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, transition: 'background 0.3s, box-shadow 0.3s' }}>
+              <button className="btn-primary" onClick={() => openLead('pro')} style={{ width: '100%', background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`, border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', boxShadow: `0 6px 28px ${previewColor}60`, marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, transition: 'background 0.3s, box-shadow 0.3s' }}>
                 Escalar mi club <ChevronRight size={15} />
               </button>
               <WhatsAppPayBtn plan="pro" />
@@ -1358,7 +1441,7 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(198,120,255,0.08)', border: '1px solid rgba(198,120,255,0.28)', color: '#C678FF', fontSize: 13, fontWeight: 700, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 10 }}>
+              <button className="btn-ghost" onClick={() => openLead('scale')} style={{ width: '100%', background: 'rgba(198,120,255,0.08)', border: '1px solid rgba(198,120,255,0.28)', color: '#C678FF', fontSize: 13, fontWeight: 700, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 10 }}>
                 Probar 5 días gratis
               </button>
               <WhatsAppPayBtn plan="scale" />

@@ -677,8 +677,20 @@ export default function LandingPage() {
             <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.5px' }}>ZenSports</span>
           </div>
           <div className="hide-mobile" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            {['Producto', 'Automatización', 'Precios', 'ZCUP'].map(label => (
-              <button key={label} className="btn-ghost" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', fontSize: 14, cursor: 'pointer', padding: '7px 14px', borderRadius: 8 }}>{label}</button>
+            {[
+              { label: 'Producto',       anchor: 'producto'       },
+              { label: 'Automatización', anchor: 'automatizacion' },
+              { label: 'Precios',        anchor: 'precios'        },
+              { label: 'ZCUP',           anchor: 'zcup'           },
+            ].map(({ label, anchor }) => (
+              <button
+                key={label}
+                className="btn-ghost"
+                onClick={() => document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', fontSize: 14, cursor: 'pointer', padding: '7px 14px', borderRadius: 8 }}
+              >
+                {label}
+              </button>
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -725,7 +737,7 @@ export default function LandingPage() {
               boxShadow: `0 0 20px ${previewColor}12, inset 0 1px 0 ${previewColor}20`,
             }}>
               <Sparkles size={13} />
-              Plataforma líder en gestión deportiva digital · 5 días gratis
+              Plataforma líder en gestión deportiva digital · 14 días gratis
             </span>
           </div>
 
@@ -774,7 +786,7 @@ export default function LandingPage() {
                 boxShadow: `0 8px 32px ${previewColor}50`,
               }}
             >
-              Comenzar mi prueba de 5 días gratis <ArrowRight size={16} />
+              Comenzar mi prueba gratuita de 14 días <ArrowRight size={16} />
             </button>
             <button
               className="btn-ghost"
@@ -896,7 +908,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────────────── */}
-      <section style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto' }}>
+      <section id="producto" style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto' }}>
         <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>La solución</p>
           <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>
@@ -951,7 +963,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── IA / WHATSAPP ─────────────────────────────────────────────────── */}
-      <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
+      <section id="automatizacion" style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ display: 'flex', gap: 56, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
           <Reveal delay={0}>
             <WhatsAppMockup />
@@ -1148,7 +1160,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── ZCUP ─────────────────────────────────────────────────────────── */}
-      <section style={{ padding: '0 24px 88px', maxWidth: 900, margin: '0 auto' }}>
+      <section id="zcup" style={{ padding: '0 24px 88px', maxWidth: 900, margin: '0 auto' }}>
         <Reveal>
           <div style={{
             borderRadius: 22, padding: '44px 44px',
@@ -1241,12 +1253,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
-      <section style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto' }}>
+      <section id="precios" style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto' }}>
         <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Planes</p>
           <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Activa solo lo que necesitas.</h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>
-            3 planes modulares · 5 días gratis · Sin permanencia
+            3 planes modulares · 14 días gratis · Sin permanencia
           </p>
         </Reveal>
         <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, alignItems: 'start' }}>

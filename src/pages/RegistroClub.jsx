@@ -218,8 +218,8 @@ export default function RegistroClub() {
                 onError={e => { e.target.style.display = 'none'; }} />
             </div>
             <div>
-              <p style={{ color: '#fff', fontWeight: 800, fontSize: 15, margin: 0, letterSpacing: '-0.2px' }}>ClubContable</p>
-              <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0 }}>Para toda América Latina</p>
+              <p style={{ color: '#fff', fontWeight: 800, fontSize: 15, margin: 0, letterSpacing: '-0.2px' }}>ZenSports</p>
+              <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0 }}>Sistema operativo deportivo</p>
             </div>
           </div>
 
@@ -263,7 +263,7 @@ export default function RegistroClub() {
           }} />
 
           <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0 }}>
-            Sistema de gestión deportiva © 2026
+            ZenSports · ZENPRA © 2026
           </p>
         </div>
 
@@ -285,8 +285,8 @@ export default function RegistroClub() {
               ¿Quieres registrar<br />tu club?
             </h3>
             <p style={{ color: 'var(--text-sec)', fontSize: 14, margin: 0, lineHeight: 1.65 }}>
-              Antes de crear tu cuenta te hago una demostración personalizada,
-              te explico todo en menos de 10 minutos y te asigno tus credenciales.
+              Antes de crear tu cuenta un Consultor ZenSports te hace una demostración personalizada,
+              te explica todo en menos de 10 minutos y te asigna tus credenciales.
             </p>
           </div>
 
@@ -330,7 +330,7 @@ export default function RegistroClub() {
             onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
           >
             <MessageCircle size={20} />
-            Hablar con Diego por WhatsApp
+            Hablar con un Consultor ZenSports
             <ArrowRight size={16} />
           </a>
 

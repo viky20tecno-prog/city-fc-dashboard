@@ -737,7 +737,7 @@ export default function LandingPage() {
               boxShadow: `0 0 20px ${previewColor}12, inset 0 1px 0 ${previewColor}20`,
             }}>
               <Sparkles size={13} />
-              Plataforma líder en gestión deportiva digital · 14 días gratis
+              Plataforma líder en gestión deportiva digital · 5 días gratis
             </span>
           </div>
 
@@ -786,7 +786,7 @@ export default function LandingPage() {
                 boxShadow: `0 8px 32px ${previewColor}50`,
               }}
             >
-              Comenzar mi prueba gratuita de 14 días <ArrowRight size={16} />
+              Comenzar mi prueba gratuita de 5 días <ArrowRight size={16} />
             </button>
             <button
               className="btn-ghost"
@@ -1258,7 +1258,7 @@ export default function LandingPage() {
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Planes</p>
           <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Activa solo lo que necesitas.</h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>
-            3 planes modulares · 14 días gratis · Sin permanencia
+            3 planes modulares · 5 días gratis · Sin permanencia
           </p>
         </Reveal>
         <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, alignItems: 'start' }}>
@@ -1278,7 +1278,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', fontSize: 14, fontWeight: 600, borderRadius: 11, padding: '13px 0', cursor: 'pointer', marginBottom: 12 }}>
-                Probar 14 días gratis
+                Probar 5 días gratis
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 14px' }}>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
@@ -1310,7 +1310,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', boxShadow: `0 4px 24px ${previewColor}55`, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
-                Probar 14 días gratis <ChevronRight size={15} />
+                Probar 5 días gratis <ChevronRight size={15} />
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 14px' }}>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
@@ -1339,7 +1339,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(198,120,255,0.10)', border: '1px solid rgba(198,120,255,0.30)', color: '#C678FF', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', marginBottom: 12 }}>
-                Probar 14 días gratis
+                Probar 5 días gratis
               </button>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 14px' }}>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
@@ -1388,7 +1388,7 @@ export default function LandingPage() {
               a: 'Sí. ZenSports funciona para cualquier organización con miembros: escuelas de natación, gimnasios, academias de artes marciales, clubes de tenis y más.',
             },
             {
-              q: '¿Qué pasa al terminar los 14 días de prueba?',
+              q: '¿Qué pasa al terminar los 5 días de prueba?',
               a: 'Te avisamos con anticipación y puedes elegir un plan. Si decides no continuar, no se cobra nada. No pedimos tarjeta de crédito para la prueba.',
             },
             {
@@ -1487,7 +1487,7 @@ export default function LandingPage() {
           onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)}
           style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '15px', cursor: 'pointer', boxShadow: `0 4px 20px ${previewColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}
         >
-          Probar gratis · 14 días <ArrowRight size={16} />
+          Probar gratis · 5 días <ArrowRight size={16} />
         </button>
       </div>
 

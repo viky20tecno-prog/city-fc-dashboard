@@ -295,7 +295,7 @@ export default function RegistroClub() {
               { Icon: MonitorPlay, color: '#00D084', text: 'Demo en vivo de la plataforma'            },
               { Icon: Paintbrush,  color: '#E14924', text: 'Personalizamos el color y logo de tu club' },
               { Icon: KeyRound,    color: '#FBBF24', text: 'Credenciales seguras asignadas por nosotros'},
-              { Icon: Gift,        color: '#67E8F9', text: '14 días de prueba gratuita sin tarjeta'    },
+              { Icon: Gift,        color: '#67E8F9', text: '5 días de prueba gratuita sin tarjeta'    },
             ].map(({ Icon, color: ic, text }) => (
               <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{

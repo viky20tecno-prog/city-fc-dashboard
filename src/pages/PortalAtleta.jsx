@@ -268,12 +268,16 @@ function Resultado({ datos, fotoUrl, color, onNuevaBusqueda }) {
   );
 }
 
+const ESTADO_CFG = {
+  pagado:      { bg:'rgba(0,208,132,0.12)',  border:'rgba(0,208,132,0.28)',   color:'#00D084', label:'Al día'       },
+  pendiente:   { bg:'rgba(245,158,11,0.12)', border:'rgba(245,158,11,0.28)',  color:'#F59E0B', label:'Pendiente'    },
+  vencido:     { bg:'rgba(239,68,68,0.12)',  border:'rgba(239,68,68,0.28)',   color:'#EF4444', label:'Vencido'      },
+  parcial:     { bg:'rgba(74,158,255,0.12)', border:'rgba(74,158,255,0.28)',  color:'#4A9EFF', label:'Parcial'      },
+  por_validar: { bg:'rgba(192,120,255,0.12)',border:'rgba(192,120,255,0.28)', color:'#C678FF', label:'Por validar'  },
+};
+
 function EstadoBadge({ estado }) {
-  const cfg = {
-    pagado:   { bg:'rgba(0,208,132,0.12)',  border:'rgba(0,208,132,0.28)',  color:'#00D084', label:'Pagado'    },
-    pendiente:{ bg:'rgba(245,158,11,0.12)', border:'rgba(245,158,11,0.28)', color:'#F59E0B', label:'Pendiente' },
-    vencido:  { bg:'rgba(239,68,68,0.12)',  border:'rgba(239,68,68,0.28)',  color:'#EF4444', label:'Vencido'   },
-  }[estado] || { bg:'rgba(255,255,255,0.05)', border:'rgba(255,255,255,0.10)', color:'rgba(255,255,255,0.3)', label: estado };
+  const cfg = ESTADO_CFG[estado] || { bg:'rgba(255,255,255,0.05)', border:'rgba(255,255,255,0.10)', color:'rgba(255,255,255,0.3)', label: estado };
   return (
     <span style={{ display:'inline-flex', alignItems:'center', gap:5, background:cfg.bg, border:`1px solid ${cfg.border}`, borderRadius:999, padding:'3px 9px', fontSize:11, fontWeight:700, color:cfg.color, letterSpacing:0.4, textTransform:'uppercase' }}>
       <span style={{ width:5, height:5, borderRadius:'50%', background:cfg.color }} />
@@ -283,11 +287,9 @@ function EstadoBadge({ estado }) {
 }
 
 function MesChip({ mes_nombre, anio, estado, valor }) {
-  const c = {
-    pagado:   { bg:'rgba(0,208,132,0.09)',  border:'rgba(0,208,132,0.25)',  dot:'#00D084' },
-    pendiente:{ bg:'rgba(245,158,11,0.07)', border:'rgba(245,158,11,0.22)', dot:'#F59E0B' },
-    vencido:  { bg:'rgba(239,68,68,0.09)',  border:'rgba(239,68,68,0.22)',  dot:'#EF4444' },
-  }[estado] || { bg:'rgba(255,255,255,0.03)', border:'rgba(255,255,255,0.07)', dot:'rgba(255,255,255,0.2)' };
+  const c = ESTADO_CFG[estado]
+    ? { bg: ESTADO_CFG[estado].bg, border: ESTADO_CFG[estado].border, dot: ESTADO_CFG[estado].color }
+    : { bg:'rgba(255,255,255,0.03)', border:'rgba(255,255,255,0.07)', dot:'rgba(255,255,255,0.2)' };
   return (
     <div className="mes-chip" style={{ background:c.bg, border:`1px solid ${c.border}`, borderRadius:10, padding:'9px 10px' }}>
       <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:3 }}>

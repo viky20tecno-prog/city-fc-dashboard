@@ -89,6 +89,7 @@ export default function Dashboard() {
   const [activeTab,       setActiveTab]       = useState('dashboard');
   const [refreshing,      setRefreshing]      = useState(false);
   const [linkCopied,      setLinkCopied]      = useState(false);
+  const [portalCopied,    setPortalCopied]    = useState(false);
   const [showPagoModal,   setShowPagoModal]   = useState(false);
   const [showOnboarding,   setShowOnboarding]   = useState(false);
   const [showTheme,        setShowTheme]        = useState(false);
@@ -268,11 +269,18 @@ export default function Dashboard() {
 
   const clubId = localStorage.getItem('clubId') || 'city-fc';
   const inscripcionUrl = `${window.location.origin}/inscripcion?club_id=${clubId}`;
+  const portalUrl = `${window.location.origin}/p/${clubId}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(inscripcionUrl);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const handleCopyPortal = () => {
+    navigator.clipboard.writeText(portalUrl);
+    setPortalCopied(true);
+    setTimeout(() => setPortalCopied(false), 2000);
   };
 
   const nowStr = new Date()
@@ -368,11 +376,23 @@ export default function Dashboard() {
           INSCRIPCIÓN
         </button>
 
-        {/* Copiar link */}
+        {/* Copiar link de inscripción */}
         <div style={S.roundBtn} onClick={handleCopyLink} title="Copiar link de inscripción">
           {linkCopied
             ? <Check size={14} color="#22C55E" />
             : <Copy size={14} color="var(--text-sec)" />}
+        </div>
+
+        {/* Portal Atleta */}
+        <button style={{ ...S.actionBtn(false), background: 'rgba(0,170,255,0.08)', border: '1px solid rgba(0,170,255,0.25)', color: '#4A9EFF' }} onClick={() => window.open(portalUrl, '_blank')} title="Abrir portal del atleta">
+          PORTAL
+        </button>
+
+        {/* Copiar link del portal */}
+        <div style={S.roundBtn} onClick={handleCopyPortal} title="Copiar link del Portal Atleta">
+          {portalCopied
+            ? <Check size={14} color="#22C55E" />
+            : <Copy size={14} color="#4A9EFF" />}
         </div>
 
         {/* Refresh */}

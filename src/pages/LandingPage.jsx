@@ -554,9 +554,10 @@ function TrustLogos() {
 /* ── Payment helpers ──────────────────────────────────────────────────────── */
 const WA_NUMBER = '573204409015';
 const WA_PAYMENT_MSG = {
-  starter: encodeURIComponent('Hola, quiero pagar el plan Starter de ZenSports ($149.000/mes). ¿Me puedes enviar los datos de pago por Bancolombia?'),
-  pro:     encodeURIComponent('Hola, quiero pagar el plan Pro de ZenSports ($399.000/mes). ¿Me puedes enviar los datos de pago por Bancolombia?'),
-  total:   encodeURIComponent('Hola, quiero pagar el plan Total de ZenSports ($799.000/mes). ¿Me puedes enviar los datos de pago por Bancolombia?'),
+  starter: encodeURIComponent('Hola, quiero activar el plan Starter de ZenSports ($149.000/mes). ¿Me puedes enviar los datos de pago?'),
+  pro:     encodeURIComponent('Hola, quiero escalar mi club con el plan Pro de ZenSports ($399.000/mes). ¿Me puedes enviar los datos de pago?'),
+  scale:   encodeURIComponent('Hola, quiero el plan Scale de ZenSports ($799.000/mes). ¿Me puedes enviar los datos de pago?'),
+  enterprise: encodeURIComponent('Hola, quiero hablar sobre el plan Enterprise de ZenSports para mi organización.'),
 };
 
 function WhatsAppPayBtn({ plan }) {
@@ -731,12 +732,12 @@ export default function LandingPage() {
 
           {/* Headline */}
           <h1 className="hero-h1" style={{
-            fontSize: 'clamp(34px, 6vw, 62px)',
-            fontWeight: 900, lineHeight: 1.05,
-            letterSpacing: '-2px', marginBottom: 24,
+            fontSize: 'clamp(34px, 6vw, 68px)',
+            fontWeight: 900, lineHeight: 1.0,
+            letterSpacing: '-2.5px', marginBottom: 20,
             animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both',
           }}>
-            Reduce{' '}
+            The{' '}
             <span style={{
               background: `linear-gradient(90deg, ${previewColor}, ${previewColor}cc, #00D084)`,
               backgroundSize: '200% auto',
@@ -744,18 +745,25 @@ export default function LandingPage() {
               backgroundClip: 'text',
               animation: 'shimmer 4s linear infinite',
             }}>
-              95% del trabajo manual
+              Sports Operating
             </span>{' '}
-            en inscripciones y pagos deportivos.
+            System
           </h1>
 
           {/* Subheadline */}
           <p style={{
             fontSize: 18, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7,
-            maxWidth: 580, margin: '0 auto 40px',
+            maxWidth: 560, margin: '0 auto 16px',
             animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both',
           }}>
-            Automatiza cobros, validaciones y comunicación con jugadores. Recupera más de 15 horas semanales y elimina la mora desde el día uno.
+            Automatiza pagos, jugadores, comunicación y operación desde una sola plataforma.
+          </p>
+          <p style={{
+            fontSize: 15, color: 'rgba(255,255,255,0.35)', lineHeight: 1.5,
+            maxWidth: 440, margin: '0 auto 36px',
+            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both',
+          }}>
+            Deja de perseguir pagos por WhatsApp.
           </p>
 
           {/* CTAs */}
@@ -1241,88 +1249,150 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
-      <section id="precios" style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto' }}>
+      <section id="precios" style={{ padding: '0 24px 88px', maxWidth: 1200, margin: '0 auto' }}>
         <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Planes</p>
-          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Activa solo lo que necesitas.</h2>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Un plan para cada etapa.</h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>
-            3 planes modulares · 5 días gratis · Sin permanencia
+            Free · Starter · Pro · Scale · 5 días gratis · Sin permanencia
           </p>
         </Reveal>
-        <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, alignItems: 'start' }}>
 
-          {/* STARTER */}
+        <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 18, alignItems: 'start' }}>
+
+          {/* FREE */}
           <Reveal delay={0}>
-            <div className="card-hover" style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '30px 26px' }}>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Starter</p>
-              <div style={{ fontSize: 38, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$149.000<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 26 }}>Para clubes que están empezando a organizarse</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 26 }}>
-                {[[true,'Dashboard y reportes'],[true,'Gestión de miembros'],[true,'Pagos manuales y mora'],[true,'Carnet digital'],[false,'WhatsApp Bot automático'],[false,'Inscripciones digitales'],[false,'Uniformes y equipamiento'],[false,'Estadísticas avanzadas']].map(([on, label]) => (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: on ? 1 : 0.3 }}>
-                    <CheckCircle size={14} color={on ? '#00D084' : '#4B5563'} style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: 13, color: on ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)' }}>{label}</span>
+            <div className="card-hover" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 22, padding: '28px 22px' }}>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Free</p>
+              <div style={{ fontSize: 36, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$0<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}>/mes</span></div>
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, marginBottom: 14 }}>Para clubes pequeños que están empezando</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
+                {['30 jugadores','1 admin','1 equipo','100 msg WA/mes'].map(l => (
+                  <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.45)' }}>{l}</span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
+                {[[true,'Dashboard básico'],[true,'Gestión de jugadores'],[true,'Asistencia'],[true,'Carnet digital básico'],[false,'Cobranza automática WA'],[false,'Finanzas'],[false,'Automatizaciones']].map(([on, label]) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9, opacity: on ? 1 : 0.28 }}>
+                    <CheckCircle size={13} color={on ? '#00D084' : '#4B5563'} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: on ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.35)' }}>{label}</span>
                   </div>
                 ))}
               </div>
-              <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', fontSize: 14, fontWeight: 600, borderRadius: 11, padding: '13px 0', cursor: 'pointer', marginBottom: 12 }}>
-                Probar 5 días gratis
+              <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer' }}>
+                Comenzar gratis
+              </button>
+            </div>
+          </Reveal>
+
+          {/* STARTER */}
+          <Reveal delay={60}>
+            <div className="card-hover" style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '28px 22px' }}>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Starter</p>
+              <div style={{ fontSize: 36, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$149.000<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginBottom: 14 }}>Clubes que empiezan a profesionalizarse</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
+                {['120 jugadores','3 admins','5 entrenadores','1.500 msg WA/mes'].map(l => (
+                  <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.55)' }}>{l}</span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
+                {[[true,'Dashboard completo'],[true,'Gestión de jugadores'],[true,'Pagos manuales y mora'],[true,'Carnet digital'],[true,'Inscripciones digitales'],[true,'Exportación CSV/PDF'],[false,'Cobranza automática WA'],[false,'Finanzas y estadísticas']].map(([on, label]) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9, opacity: on ? 1 : 0.28 }}>
+                    <CheckCircle size={13} color={on ? '#00D084' : '#4B5563'} style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: on ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.35)' }}>{label}</span>
+                  </div>
+                ))}
+              </div>
+              <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 10 }}>
+                Activar Starter
               </button>
               <WhatsAppPayBtn plan="starter" />
             </div>
           </Reveal>
 
-          {/* PRO */}
-          <Reveal delay={80}>
-            <div className="card-hover" style={{ background: `${previewColor}07`, border: `2px solid ${previewColor}35`, borderRadius: 22, padding: '30px 26px', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: previewColor, color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 16px', letterSpacing: 1, whiteSpace: 'nowrap', boxShadow: `0 4px 16px ${previewColor}60`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
-                ★ MÁS POPULAR
+          {/* PRO ⭐ MOST POPULAR */}
+          <Reveal delay={120}>
+            <div className="card-hover" style={{ background: `linear-gradient(160deg, ${previewColor}10 0%, ${previewColor}06 100%)`, border: `2px solid ${previewColor}45`, borderRadius: 22, padding: '32px 22px', position: 'relative', boxShadow: `0 0 40px ${previewColor}20, 0 8px 32px rgba(0,0,0,0.4)`, transform: 'scale(1.03)', transition: 'background 0.4s, border-color 0.4s, box-shadow 0.4s, transform 0.4s' }}>
+              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: `linear-gradient(90deg, ${previewColor}, ${previewColor}cc)`, color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 999, padding: '5px 18px', letterSpacing: 1.5, whiteSpace: 'nowrap', boxShadow: `0 4px 20px ${previewColor}70`, transition: 'background 0.3s, box-shadow 0.3s' }}>
+                ⭐ MOST POPULAR
               </div>
-              <p style={{ color: previewColor, fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8, transition: 'color 0.3s' }}>Pro</p>
-              <div style={{ fontSize: 38, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$399.000<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 26 }}>Automatización completa de inscripciones y pagos</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 26 }}>
-                {[[true,'Dashboard y reportes'],[true,'Gestión de miembros'],[true,'Pagos manuales y mora'],[true,'Carnet digital'],[true,'WhatsApp Bot automático'],[true,'Inscripciones digitales'],[false,'Uniformes y equipamiento'],[false,'Estadísticas avanzadas']].map(([on, label]) => (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: on ? 1 : 0.3 }}>
-                    <CheckCircle size={14} color={on ? '#00D084' : '#4B5563'} style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: 13, color: on ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)' }}>{label}</span>
+              <p style={{ color: previewColor, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8, transition: 'color 0.3s' }}>Pro</p>
+              <div style={{ fontSize: 40, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$399.000<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 14 }}>Academias competitivas y clubes serios</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
+                {['350 jugadores','10 admins','20 entrenadores','8.000 msg WA/mes'].map(l => (
+                  <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: `${previewColor}15`, border: `1px solid ${previewColor}30`, color: previewColor, transition: 'background 0.3s, border-color 0.3s, color 0.3s' }}>{l}</span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
+                {[[true,'Todo Starter'],[true,'Cobranza automática WhatsApp'],[true,'Finanzas e ingresos/gastos'],[true,'Uniformes y equipamiento'],[true,'Estadísticas avanzadas'],[true,'Automatizaciones'],[true,'Reportes ejecutivos'],[true,'Soporte prioritario']].map(([on, label]) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                    <CheckCircle size={13} color="#00D084" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)' }}>{label}</span>
                   </div>
                 ))}
               </div>
-              <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', boxShadow: `0 4px 24px ${previewColor}55`, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
-                Probar 5 días gratis <ChevronRight size={15} />
+              <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`, border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', boxShadow: `0 6px 28px ${previewColor}60`, marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, transition: 'background 0.3s, box-shadow 0.3s' }}>
+                Escalar mi club <ChevronRight size={15} />
               </button>
               <WhatsAppPayBtn plan="pro" />
             </div>
           </Reveal>
 
-          {/* TOTAL */}
-          <Reveal delay={160}>
-            <div className="card-hover" style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '30px 26px' }}>
-              <p style={{ color: '#C678FF', fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Total</p>
-              <div style={{ fontSize: 38, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$799.000<span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 26 }}>Acceso completo a todos los módulos</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 26 }}>
-                {['Dashboard y reportes','Gestión de miembros','Pagos manuales y mora','Carnet digital','WhatsApp Bot automático','Inscripciones digitales','Uniformes y equipamiento','Estadísticas avanzadas','Finanzas — Ingresos, gastos y nómina'].map(label => (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <CheckCircle size={14} color="#00D084" style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>{label}</span>
+          {/* SCALE */}
+          <Reveal delay={180}>
+            <div className="card-hover" style={{ background: 'rgba(198,120,255,0.04)', border: '1px solid rgba(198,120,255,0.18)', borderRadius: 22, padding: '28px 22px' }}>
+              <p style={{ color: '#C678FF', fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Scale</p>
+              <div style={{ fontSize: 36, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$799.000<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginBottom: 14 }}>Academias premium y multi sede</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
+                {['1.000 jugadores','Admins ilimitados','Entrenadores ilimitados','25.000 msg WA/mes'].map(l => (
+                  <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: 'rgba(198,120,255,0.08)', border: '1px solid rgba(198,120,255,0.22)', color: '#C678FF' }}>{l}</span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
+                {['Todo Pro','IA WhatsApp avanzada','Analytics premium','Multi sede','Roles avanzados','Soporte VIP','Capacitación premium','Acceso beta features'].map(label => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                    <CheckCircle size={13} color="#00D084" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>{label}</span>
                   </div>
                 ))}
               </div>
-              <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(198,120,255,0.10)', border: '1px solid rgba(198,120,255,0.30)', color: '#C678FF', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', marginBottom: 12 }}>
+              <button className="btn-ghost" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ width: '100%', background: 'rgba(198,120,255,0.08)', border: '1px solid rgba(198,120,255,0.28)', color: '#C678FF', fontSize: 13, fontWeight: 700, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 10 }}>
                 Probar 5 días gratis
               </button>
-              <WhatsAppPayBtn plan="total" />
+              <WhatsAppPayBtn plan="scale" />
             </div>
           </Reveal>
 
         </div>
+
+        {/* ENTERPRISE */}
+        <Reveal delay={240}>
+          <div style={{ marginTop: 20, borderRadius: 22, padding: '32px 40px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
+            <div>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Enterprise</p>
+              <p style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>Custom Pricing</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, margin: 0 }}>Para ligas, federaciones, franquicias y organizaciones globales</p>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, flex: 1, justifyContent: 'center' }}>
+              {['Infraestructura dedicada','SLA enterprise','Multi región','Soporte dedicado','Integraciones custom','API'].map(f => (
+                <span key={f} style={{ fontSize: 12, padding: '5px 14px', borderRadius: 999, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.55)' }}>{f}</span>
+              ))}
+            </div>
+            <a href={`https://wa.me/${WA_NUMBER}?text=${WA_PAYMENT_MSG.enterprise}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '13px 28px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 14, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              <MessageCircle size={15} /> Hablar con ventas
+            </a>
+          </div>
+        </Reveal>
+
+        {/* Trust badges */}
         <Reveal>
-          <div style={{ textAlign: 'center', marginTop: 32 }}>
-            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13, margin: 0 }}>
-              Todos los planes incluyen soporte por WhatsApp · Cancela cuando quieras · Sin costos ocultos
-            </p>
+          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 24, marginTop: 36 }}>
+            {['✅ Setup gratuito','✅ Migración incluida','✅ Soporte por WhatsApp','✅ Sin permanencia','✅ Activa tu club en 24 horas'].map(b => (
+              <span key={b} style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', letterSpacing: 0.3 }}>{b}</span>
+            ))}
           </div>
         </Reveal>
       </section>

@@ -1356,12 +1356,6 @@ export default function LandingPage() {
         </div>
         <Reveal>
           <div style={{ textAlign: 'center', marginTop: 32 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(0,208,132,0.07)', border: '1px solid rgba(0,208,132,0.18)', borderRadius: 12, padding: '12px 24px', marginBottom: 14 }}>
-              <TrendingUp size={16} color="#00D084" />
-              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)' }}>
-                Recuperas la inversión con <strong style={{ color: '#00D084' }}>solo 2 inscripciones adicionales</strong> al mes
-              </span>
-            </div>
             <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13, margin: 0 }}>
               Todos los planes incluyen soporte por WhatsApp · Cancela cuando quieras · Sin costos ocultos
             </p>

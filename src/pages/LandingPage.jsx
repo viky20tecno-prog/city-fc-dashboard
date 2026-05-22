@@ -617,7 +617,7 @@ function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
     if (!form.nombre.trim() || !form.whatsapp.trim()) { setError('Nombre y WhatsApp son requeridos'); return; }
     setLoading(true); setError('');
     try {
-      await fetch(`${API_BASE_URL}/api/leads`, {
+      await fetch(`${API_BASE_URL}/leads`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, plan_interes: plan, fuente: 'landing' }),

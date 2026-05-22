@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { CheckCircle, ChevronRight, DollarSign, Trophy, X, Phone, Palette, Building2, ChevronDown, Camera, Loader2, AlertTriangle, Info, MessageCircle, Instagram, Facebook, Youtube, Globe, Music } from 'lucide-react';
+import { CheckCircle, ChevronRight, DollarSign, X, Phone, Palette, Building2, ChevronDown, Camera, Loader2, AlertTriangle, Info, MessageCircle, Instagram, Facebook, Youtube, Globe, Music } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
 import { applyTheme, getStoredTheme, THEMES } from './ThemeSelector';
@@ -54,7 +54,6 @@ const STEPS = [
   { id: 'visual',      Icon: Palette,     label: 'Identidad'   },
   { id: 'mensualidad', Icon: DollarSign,  label: 'Mensualidad' },
   { id: 'whatsapp',    Icon: Phone,       label: 'WhatsApp'    },
-  { id: 'torneos',     Icon: Trophy,      label: 'Torneos'     },
   { id: 'done',        Icon: CheckCircle, label: 'Listo'       },
 ];
 
@@ -99,11 +98,6 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
     web:       clubConfig?.redes_sociales?.web        || '',
   });
 
-  const [torneos,    setTorneos]  = useState(
-    Array.isArray(clubConfig?.torneos_iniciales) ? clubConfig.torneos_iniciales : [],
-  );
-  const [nuevoTorneo, setNuevoT] = useState({ nombre: '', fecha: '', valor: '' });
-
   /* ── Helpers ──────────────────────────────────────────────── */
   const c        = colorClub || color;
   const paisActual = PAISES_LIST.find(p => p.codigo === club.codigo_pais) || PAISES_LIST[0];
@@ -142,7 +136,6 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
         penalidad_mora:       mensualidad.penalidad,
         whatsapp,
         redes_sociales:       redes,
-        torneos_iniciales:    torneos,
         onboarding_completed: true,
       }),
     });
@@ -477,51 +470,6 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
             </div>
           )}
 
-          {/* PASO 5 — TORNEOS */}
-          {step === 4 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <StepBadge color={c} Icon={Trophy} title="Torneos y competencias" desc="Opcional — puedes agregar más en cualquier momento" />
-
-              {torneos.map((t, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <span style={{ flex: 1, fontSize: 13, color: '#CBD5E1' }}>🏆 {t.nombre}</span>
-                  {t.fecha && <span style={{ fontSize: 11, color: '#8B95A3' }}>{t.fecha}</span>}
-                  {t.valor > 0 && <span style={{ fontSize: 11, color: c }}>${t.valor.toLocaleString('es-CO')}</span>}
-                  <button onClick={() => setTorneos(ts => ts.filter((_, j) => j !== i))}
-                    style={{ background: 'none', border: 'none', color: '#8B95A3', cursor: 'pointer', padding: 0 }}>
-                    <X size={14} />
-                  </button>
-                </div>
-              ))}
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '14px', background: 'rgba(255,255,255,0.03)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.07)' }}>
-                <input value={nuevoTorneo.nombre} onChange={e => setNuevoT(t => ({ ...t, nombre: e.target.value }))}
-                  placeholder="Nombre del torneo *" style={inp} />
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <input type="date" value={nuevoTorneo.fecha}
-                    onChange={e => setNuevoT(t => ({ ...t, fecha: e.target.value }))}
-                    style={{ ...inp, colorScheme: 'dark' }} />
-                  <input type="number" value={nuevoTorneo.valor}
-                    onChange={e => setNuevoT(t => ({ ...t, valor: e.target.value }))}
-                    placeholder={`Inscripción (${paisActual.moneda})`} style={inp} min={0} />
-                </div>
-                <button
-                  onClick={() => {
-                    if (!nuevoTorneo.nombre.trim()) return;
-                    setTorneos(ts => [...ts, { nombre: nuevoTorneo.nombre.trim(), fecha: nuevoTorneo.fecha, valor: +nuevoTorneo.valor || 0 }]);
-                    setNuevoT({ nombre: '', fecha: '', valor: '' });
-                  }}
-                  style={{ padding: '9px', background: `${c}18`, border: `1px solid ${c}35`, borderRadius: 10, color: c, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
-                  + Agregar torneo
-                </button>
-              </div>
-
-              <p style={{ fontSize: 12, color: '#8B95A3', margin: 0 }}>
-                Puedes agregar y gestionar torneos en cualquier momento desde el módulo de Torneos.
-              </p>
-            </div>
-          )}
-
           {/* DONE */}
           {step === CONTENT_STEPS && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22, padding: '8px 0' }}>
@@ -547,7 +495,6 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                   { label: 'Mensualidad', val: `${paisActual.moneda} ${mensualidad.valor.toLocaleString()}` },
                   { label: 'Mora',       val: `${mensualidad.dias_gracia} días gracia · ${paisActual.moneda} ${mensualidad.penalidad.toLocaleString()}` },
                   { label: 'WhatsApp',   val: whatsapp ? `+${whatsapp}` : 'No configurado' },
-                  { label: 'Torneos',    val: torneos.length ? `${torneos.length} torneo(s) registrados` : 'Ninguno aún' },
                 ].map(({ label, val }) => (
                   <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)', gap: 12 }}>
                     <span style={{ fontSize: 12, color: '#8B95A3', flexShrink: 0 }}>{label}</span>

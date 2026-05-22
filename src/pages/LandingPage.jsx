@@ -1628,7 +1628,7 @@ export default function LandingPage() {
 
       {/* ── WHATSAPP FLOTANTE ─────────────────────────────────────────── */}
       <a
-        href="https://wa.me/573204409015?text=Hola%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20ZenSports"
+        href={`https://wa.me/573204409015?text=${encodeURIComponent('¡Hola ZenSports! 👋 Vi la plataforma y me interesa registrar mi club. ¿Me pueden guiar para empezar el trial de 5 días? 🚀')}`}
         target="_blank"
         rel="noopener noreferrer"
         title="Chatea con nosotros por WhatsApp"

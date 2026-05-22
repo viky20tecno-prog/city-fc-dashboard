@@ -315,7 +315,7 @@ export default function RegistroClub() {
           </div>
 
           <a
-            href={`https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent('Hola, quiero registrar mi club en ZenSports 🏆')}`}
+            href={`https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent('¡Hola ZenSports! 🏆 Estoy en el proceso de registro y necesito ayuda. ¿Me pueden acompañar? Quiero que mi club esté listo hoy 🚀')}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{

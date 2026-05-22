@@ -5,7 +5,7 @@ import { API_BASE_URL, SUPPORT_WHATSAPP } from '../config';
 import {
   Loader2, CheckCircle, AlertCircle, Check,
   Lock, Mail, User, Phone, Building2, MapPin, ChevronLeft,
-  MessageCircle, ArrowRight,
+  MessageCircle, ArrowRight, Eye, EyeOff,
   Timer, Palette, Globe, ShieldCheck,
   MonitorPlay, Paintbrush, KeyRound, Gift,
 } from 'lucide-react';
@@ -74,6 +74,8 @@ export default function RegistroClub() {
   const [slowHint, setSlowHint] = useState(false);
   const [error, setError]       = useState('');
   const [exito, setExito]       = useState(false);
+  const [showPwd, setShowPwd]   = useState(false);
+  const [showConf, setShowConf] = useState(false);
 
   const ac = CYCLE_COLORS[colorIdx];
 
@@ -326,13 +328,40 @@ export default function RegistroClub() {
                 </div>
 
                 <Campo label="Email" icon={<Mail size={15} color="rgba(255,255,255,0.3)" />}
-                  type="email" value={form.email} onChange={v => set('email', v)} placeholder="diego@cityfc.com" required />
+                  type="email" value={form.email} onChange={v => set('email', v)} placeholder="correo@tuclub.com" required />
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Campo label="Contraseña" icon={<Lock size={15} color="rgba(255,255,255,0.3)" />}
-                    type="password" value={form.password} onChange={v => set('password', v)} placeholder="Mín. 8 caracteres" required />
-                  <Campo label="Confirmar contraseña" icon={<Lock size={15} color="rgba(255,255,255,0.3)" />}
-                    type="password" value={form.confirmacion} onChange={v => set('confirmacion', v)} placeholder="Repetir contraseña" required />
+                  {/* Contraseña con ojito */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-sec)', marginBottom: 7 }}>Contraseña</label>
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><Lock size={15} color="rgba(255,255,255,0.3)" /></span>
+                      <input type={showPwd ? 'text' : 'password'} value={form.password} onChange={e => set('password', e.target.value)}
+                        placeholder="Mín. 8 caracteres" required
+                        style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.10)', borderRadius: 12, padding: '12px 40px 12px 40px', fontSize: 14, color: '#fff', outline: 'none', transition: 'border-color 0.2s, box-shadow 0.2s' }} />
+                      <button type="button" onClick={() => setShowPwd(v => !v)}
+                        style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', padding: 0, display: 'flex' }}>
+                        {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
+                      </button>
+                    </div>
+                  </div>
+                  {/* Confirmar con ojito */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-sec)', marginBottom: 7 }}>Confirmar contraseña</label>
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><Lock size={15} color="rgba(255,255,255,0.3)" /></span>
+                      <input type={showConf ? 'text' : 'password'} value={form.confirmacion} onChange={e => set('confirmacion', e.target.value)}
+                        placeholder="Repetir contraseña" required
+                        style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.06)', border: `1.5px solid ${form.confirmacion && form.confirmacion !== form.password ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.10)'}`, borderRadius: 12, padding: '12px 40px 12px 40px', fontSize: 14, color: '#fff', outline: 'none', transition: 'border-color 0.2s' }} />
+                      <button type="button" onClick={() => setShowConf(v => !v)}
+                        style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', padding: 0, display: 'flex' }}>
+                        {showConf ? <EyeOff size={15} /> : <Eye size={15} />}
+                      </button>
+                    </div>
+                    {form.confirmacion && form.confirmacion !== form.password && (
+                      <p style={{ color: '#EF4444', fontSize: 11, margin: '4px 0 0' }}>Las contraseñas no coinciden</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Color del club */}

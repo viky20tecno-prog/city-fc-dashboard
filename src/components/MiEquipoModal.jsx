@@ -84,7 +84,7 @@ export default function MiEquipoModal({ clubId, onClose }) {
   };
 
   const copyPassword = () => {
-    navigator.clipboard.writeText(created?.password || '');
+    navigator.clipboard.writeText(created?.temp_password || '');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -119,7 +119,7 @@ export default function MiEquipoModal({ clubId, onClose }) {
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs text-[var(--text-sec)]">Contraseña temporal:</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-[var(--cc)] font-mono font-bold">{created.password}</span>
+                    <span className="text-xs text-[var(--cc)] font-mono font-bold">{created.temp_password}</span>
                     <button onClick={copyPassword} className="text-[var(--text-sec)] hover:text-[var(--cc)] transition-colors">
                       {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
                     </button>

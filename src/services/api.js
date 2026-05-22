@@ -140,7 +140,10 @@ export async function importarJugadoresBulk(jugadores) {
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body:    JSON.stringify({ jugadores }),
   });
-  if (!res.ok) throw new Error(`Import failed: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Import failed: ${res.status}`);
+  }
   return await res.json();
 }
 

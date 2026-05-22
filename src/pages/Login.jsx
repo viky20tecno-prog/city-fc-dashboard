@@ -13,7 +13,7 @@ const CYCLE_COLORS = ['#10B981', '#00AAFF', '#8B5CF6', '#06B6D4', '#F97316'];
 const FEATURES = [
   { Icon: Zap,       text: 'Cobros automáticos por WhatsApp' },
   { Icon: BarChart2, text: 'Dashboard en tiempo real' },
-  { Icon: Globe,     text: 'Disponible en toda América Latina' },
+  { Icon: Globe,     text: 'Disponible en todo el mundo' },
   { Icon: Medal,     text: 'Fútbol, basket, gimnasio y más' },
 ];
 

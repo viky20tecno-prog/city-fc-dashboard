@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Calendar, Shirt, Trophy, FileText, CheckCircle, Clock,
   AlertTriangle, XCircle, Eye, EyeOff, Loader2, PauseCircle, Package,
-  MessageCircle, Wallet, Pencil,
+  MessageCircle, Wallet, Pencil, Check, X,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
@@ -79,13 +79,118 @@ function SuspendidoBadge({ motivo, detalle, cancelada }) {
   );
 }
 
-function SeccionMensualidades({ datos, suspensiones = [] }) {
-  if (!datos || datos.length === 0) return <EmptySection texto="Sin datos de mensualidades" />;
+function FilaMensualidad({ m, susp, onUpdated }) {
+  const [editando, setEditando] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+  const [form, setForm] = useState({});
 
-  const sorted = [...datos].sort((a, b) => (parseInt(a.numero_mes) || 0) - (parseInt(b.numero_mes) || 0));
-  const totalPagado    = sorted.reduce((s, m) => s + (parseFloat(m.valor_pagado)    || 0), 0);
-  const totalPendiente = sorted.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
-  const totalSusp = sorted.filter(m => {
+  const penalidad  = parseFloat(m.penalidad) || 0;
+  const totalDeuda = (parseFloat(m.valor_oficial) || 0) + penalidad;
+
+  const abrirEdit = () => {
+    setForm({
+      valor_oficial: parseFloat(m.valor_oficial) || 0,
+      valor_pagado:  parseFloat(m.valor_pagado)  || 0,
+      estado:        m.estado || 'PENDIENTE',
+    });
+    setEditando(true);
+  };
+
+  const guardar = async () => {
+    setGuardando(true);
+    try {
+      const res  = await authFetch(`${API_BASE_URL}/invoices/mensualidad/${m.id}?club_id=${getClubId()}`, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (data.success) { setEditando(false); onUpdated(data.data); }
+    } catch (e) { console.error(e); }
+    finally { setGuardando(false); }
+  };
+
+  const INPUT_SM = 'w-full bg-[var(--bg-card)] border border-[var(--cc20)] text-[var(--text-pri)] rounded-lg px-2 py-1.5 text-xs outline-none focus:border-[var(--cc)]';
+
+  return (
+    <div className={`p-3 rounded-xl border ${susp ? 'bg-yellow-400/5 border-yellow-400/20' : 'bg-[var(--bg-surface)] border-[var(--bg-surface)]'}`}>
+      {!editando ? (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <span className="text-sm font-medium text-[var(--text-pri)] w-16 flex-shrink-0">{m.mes}</span>
+            {susp
+              ? <SuspendidoBadge motivo={susp.motivo} detalle={susp.detalle} cancelada={!susp.activa} />
+              : <EstadoBadge estado={m.estado} />}
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+            <p className="text-sm font-medium text-[var(--text-pri)]">
+              {formatCOP(m.valor_pagado)}<span className="text-[var(--text-sec)]"> / {formatCOP(totalDeuda)}</span>
+            </p>
+            {!susp && (
+              <button onClick={abrirEdit} className="p-1 rounded-lg text-[var(--text-mut)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">
+                <Pencil className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-[var(--text-pri)]">{m.mes} — Editar</p>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-[10px] text-[var(--text-sec)] mb-1">Valor oficial</label>
+              <input type="number" className={INPUT_SM} value={form.valor_oficial}
+                onChange={e => setForm(f => ({ ...f, valor_oficial: parseFloat(e.target.value) || 0 }))} />
+            </div>
+            <div>
+              <label className="block text-[10px] text-[var(--text-sec)] mb-1">Valor pagado</label>
+              <input type="number" className={INPUT_SM} value={form.valor_pagado}
+                onChange={e => setForm(f => ({ ...f, valor_pagado: parseFloat(e.target.value) || 0 }))} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[10px] text-[var(--text-sec)] mb-1">Estado</label>
+            <select className={INPUT_SM} value={form.estado} onChange={e => setForm(f => ({ ...f, estado: e.target.value }))}>
+              <option value="AL_DIA">AL_DIA</option>
+              <option value="PENDIENTE">PENDIENTE</option>
+              <option value="PARCIAL">PARCIAL</option>
+              <option value="MORA">MORA</option>
+            </select>
+          </div>
+          <div className="flex gap-2 pt-1">
+            <button onClick={guardar} disabled={guardando}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--cc)] text-white text-xs font-semibold rounded-lg disabled:opacity-50">
+              {guardando ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Guardar
+            </button>
+            <button onClick={() => setEditando(false)}
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-[var(--cc20)] text-[var(--text-sec)] text-xs rounded-lg">
+              <X className="w-3 h-3" /> Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+      {penalidad > 0 && !editando && (
+        <div className="flex items-center gap-1.5 mt-1.5 ml-[76px]">
+          <AlertTriangle className="w-3 h-3 text-[#EF4444] flex-shrink-0" />
+          <span className="text-xs text-[#EF4444]">Penalidad por mora: {formatCOP(penalidad)}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated }) {
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    setItems([...(datos || [])].sort((a, b) => (parseInt(a.numero_mes) || 0) - (parseInt(b.numero_mes) || 0)));
+  }, [datos]);
+
+  if (!items.length) return <EmptySection texto="Sin datos de mensualidades" />;
+
+  const totalPagado    = items.reduce((s, m) => s + (parseFloat(m.valor_pagado)    || 0), 0);
+  const totalPendiente = items.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
+  const totalSusp = items.filter(m => {
     const n = parseInt(m.numero_mes);
     return suspensiones.some(s => s.mes_inicio <= n && n <= s.mes_fin);
   }).length;
@@ -93,6 +198,11 @@ function SeccionMensualidades({ datos, suspensiones = [] }) {
   const getSuspension = (numero_mes) => {
     const n = parseInt(numero_mes);
     return suspensiones.find(s => s.mes_inicio <= n && n <= s.mes_fin) || null;
+  };
+
+  const handleUpdated = (updated) => {
+    setItems(prev => prev.map(m => m.id === updated.id ? { ...m, ...updated } : m));
+    onMensualidadUpdated?.();
   };
 
   return (
@@ -117,35 +227,9 @@ function SeccionMensualidades({ datos, suspensiones = [] }) {
         </div>
       </div>
       <div className="space-y-2">
-        {sorted.map((m, i) => {
-          const susp      = getSuspension(m.numero_mes);
-          const penalidad = parseFloat(m.penalidad) || 0;
-          const totalDeuda = (parseFloat(m.valor_oficial) || 0) + penalidad;
-          return (
-            <div key={i} className={`p-3 rounded-xl border ${
-              susp ? 'bg-yellow-400/5 border-yellow-400/20' : 'bg-[var(--bg-surface)] border-[var(--bg-surface)]'
-            }`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <span className="text-sm font-medium text-[var(--text-pri)] w-16 flex-shrink-0">{m.mes}</span>
-                  {susp
-                    ? <SuspendidoBadge motivo={susp.motivo} detalle={susp.detalle} cancelada={!susp.activa} />
-                    : <EstadoBadge estado={m.estado} />}
-                </div>
-                <p className="text-sm font-medium text-[var(--text-pri)] flex-shrink-0 ml-2">
-                  {formatCOP(m.valor_pagado)}
-                  <span className="text-[var(--text-sec)]"> / {formatCOP(totalDeuda)}</span>
-                </p>
-              </div>
-              {penalidad > 0 && (
-                <div className="flex items-center gap-1.5 mt-1.5 ml-[76px]">
-                  <AlertTriangle className="w-3 h-3 text-[#EF4444] flex-shrink-0" />
-                  <span className="text-xs text-[#EF4444]">Penalidad por mora: {formatCOP(penalidad)}</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {items.map((m, i) => (
+          <FilaMensualidad key={m.id || i} m={m} susp={getSuspension(m.numero_mes)} onUpdated={handleUpdated} />
+        ))}
       </div>
     </div>
   );
@@ -373,14 +457,14 @@ function SeccionHistorialLazy({ cedula }) {
   );
 }
 
-export default function FinancieroContent({ cedula, mensualidades = [], torneos = [], suspensiones = [] }) {
+export default function FinancieroContent({ cedula, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated }) {
   const misMensualidades = mensualidades.filter(m => (m.cedula || m.jugador_id) === cedula);
   const misTorneos       = torneos.filter(t => t.cedula === cedula);
   const misSuspensiones  = suspensiones.filter(s => s.cedula === String(cedula));
 
   return (
     <div className="space-y-8">
-      <SeccionMensualidades datos={misMensualidades} suspensiones={misSuspensiones} />
+      <SeccionMensualidades datos={misMensualidades} suspensiones={misSuspensiones} onMensualidadUpdated={onMensualidadUpdated} />
       <SeccionPedidoUniforme cedula={cedula} />
       <SeccionTorneos datos={misTorneos} />
       <SeccionHistorialLazy cedula={cedula} />

@@ -305,7 +305,7 @@ export default function RegistroClub() {
                   <Campo label="Ciudad" icon={<MapPin size={15} color="rgba(255,255,255,0.3)" />}
                     value={form.ciudad} onChange={v => set('ciudad', v)} placeholder="Medellín" required />
                   <Campo label="Tu nombre" icon={<User size={15} color="rgba(255,255,255,0.3)" />}
-                    value={form.nombre_admin} onChange={v => set('nombre_admin', v)} placeholder="Diego Escobar" required />
+                    value={form.nombre_admin} onChange={v => set('nombre_admin', v)} placeholder="Nombre completo" required />
                 </div>
 
                 {/* País + Celular */}

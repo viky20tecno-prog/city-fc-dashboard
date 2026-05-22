@@ -3,8 +3,8 @@ import * as XLSX from 'xlsx';
 import { X, Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Download, Loader2 } from 'lucide-react';
 import { importarJugadoresBulk } from '../services/api';
 
-const PLANTILLA_HEADERS = 'cedula,nombre,apellidos,celular,correo_electronico,posicion,numero_camiseta';
-const PLANTILLA_EJEMPLO = '12345678,Carlos,Mendoza Torres,3001234567,carlos@email.com,Delantero,10';
+const PLANTILLA_HEADERS = 'cedula,nombre,apellidos,celular,correo_electronico,fecha_nacimiento,lugar_de_nacimiento,tipo_sangre,eps,familiar_emergencia,celular_contacto,municipio,direccion,barrio,estatura,peso,posicion,numero_camiseta,categoria,equipo,instagram';
+const PLANTILLA_EJEMPLO = '12345678,Carlos,Mendoza Torres,3001234567,carlos@email.com,1998-06-15,Medellín,O+,Sura,María Torres,3009876543,Medellín,Cra 45 #67-89,El Poblado,1.75,68,Delantero,10,Sub-20,Equipo A,@carlos';
 
 function normalizeKey(k) {
   return k
@@ -18,13 +18,27 @@ function mapRow(rawObj) {
   Object.entries(rawObj).forEach(([k, v]) => { n[normalizeKey(k)] = String(v ?? '').trim(); });
 
   return {
-    cedula:            n.cedula || n.documento || n.cc || '',
-    nombre:            n.nombre || n.nombres || n['nombre_s_'] || '',
-    apellidos:         n.apellidos || n.apellido || n['apellido_s_'] || '',
-    celular:           n.celular || n.telefono || n.movil || n.cel || '',
-    correo_electronico: n.correo_electronico || n.correo || n.email || '',
-    posicion:          n.posicion || '',
-    numero_camiseta:   n.numero_camiseta || n.camiseta || n.numero || '',
+    cedula:               n.cedula || n.documento || n.cc || '',
+    nombre:               n.nombre || n.nombres || n['nombre_s_'] || '',
+    apellidos:            n.apellidos || n.apellido || n['apellido_s_'] || '',
+    celular:              n.celular || n.telefono || n.movil || n.cel || '',
+    correo_electronico:   n.correo_electronico || n.correo || n.email || '',
+    fecha_nacimiento:     n.fecha_nacimiento || n.fecha_nac || n.nacimiento || '',
+    lugar_de_nacimiento:  n.lugar_de_nacimiento || n.lugar_nacimiento || n.ciudad_nacimiento || '',
+    tipo_sangre:          n.tipo_sangre || n.sangre || n.grupo_sanguineo || '',
+    eps:                  n.eps || n.seguro || n.eps_seguro || '',
+    familiar_emergencia:  n.familiar_emergencia || n.contacto_emergencia || n.emergencia || '',
+    celular_contacto:     n.celular_contacto || n.tel_emergencia || n.telefono_emergencia || '',
+    municipio:            n.municipio || n.ciudad || '',
+    direccion:            n.direccion || n.direccion_ || '',
+    barrio:               n.barrio || '',
+    estatura:             n.estatura || n.talla || '',
+    peso:                 n.peso || '',
+    posicion:             n.posicion || '',
+    numero_camiseta:      n.numero_camiseta || n.camiseta || n.numero || '',
+    categoria:            n.categoria || n.categoria_ || '',
+    equipo:               n.equipo || '',
+    instagram:            n.instagram || '',
   };
 }
 
@@ -186,9 +200,9 @@ export default function ImportarJugadoresModal({ onClose, onSuccess }) {
               </button>
 
               <div style={{ background: 'var(--bg-card)', borderRadius: '10px', padding: '12px 14px', fontSize: '12px', color: 'var(--text-mut)', lineHeight: 1.6 }}>
-                <strong style={{ color: 'var(--text-sec)' }}>Columnas requeridas:</strong> cedula, nombre, apellidos
+                <strong style={{ color: 'var(--text-sec)' }}>Requeridas:</strong> cedula, nombre, apellidos
                 <br />
-                <strong style={{ color: 'var(--text-sec)' }}>Opcionales:</strong> celular, correo_electronico, posicion, numero_camiseta
+                <strong style={{ color: 'var(--text-sec)' }}>Opcionales:</strong> celular, correo_electronico, fecha_nacimiento, lugar_de_nacimiento, tipo_sangre, eps, familiar_emergencia, celular_contacto, municipio, direccion, barrio, estatura, peso, posicion, numero_camiseta, categoria, equipo, instagram
               </div>
             </div>
           )}

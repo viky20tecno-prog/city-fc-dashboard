@@ -832,15 +832,9 @@ export default function LandingPage() {
           }}>
             El sistema operativo{' '}
             <span style={{
-              display: 'inline-block',
-              background: `linear-gradient(90deg, ${previewColor}, #ffffff, ${previewColor}bb)`,
-              backgroundSize: '200% auto',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              color: 'transparent',
-              animation: 'shimmer 4s linear infinite',
-              transition: 'background 0.4s',
+              color: previewColor,
+              transition: 'color 0.4s',
+              textShadow: `0 0 40px ${previewColor}70`,
             }}>
               para tu club deportivo
             </span>

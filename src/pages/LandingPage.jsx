@@ -678,13 +678,13 @@ function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
 /* ══════════════════════════════════════════════════════════════════════════ */
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [previewColor, setPreviewColor] = useState(PALETA[0].hex);
+  const [previewColor, setPreviewColor] = useState(PALETA[4].hex); // Violeta Real por defecto
   const [previewModo,  setPreviewModo]  = useState('dark');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [leadModal, setLeadModal]       = useState({ open: false, plan: 'free' });
   const { glowRef, onMove, onLeave } = useMouseGlow();
 
-  const openLead = useCallback((plan) => setLeadModal({ open: true, plan }), []);
+  const openLead = useCallback((plan) => setLeadModal({ open: true, plan, color: previewColor }), [previewColor]);
 
   useEffect(() => { document.title = 'ZenSports — Gestión Deportiva Inteligente'; }, []);
 
@@ -813,6 +813,21 @@ export default function LandingPage() {
             </span>
           </div>
 
+          {/* Brand label */}
+          <div style={{ marginBottom: 10, animation: 'slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both' }}>
+            <span style={{
+              fontSize: 'clamp(12px, 1.5vw, 14px)',
+              fontWeight: 900,
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              color: previewColor,
+              opacity: 0.85,
+              transition: 'color 0.4s',
+            }}>
+              ZenSports
+            </span>
+          </div>
+
           {/* Headline */}
           <h1 className="hero-h1" style={{
             fontSize: 'clamp(34px, 6vw, 68px)',
@@ -822,11 +837,15 @@ export default function LandingPage() {
           }}>
             El sistema operativo{' '}
             <span style={{
-              background: `linear-gradient(90deg, ${previewColor}, ${previewColor}cc, #00D084)`,
+              display: 'inline-block',
+              background: `linear-gradient(90deg, ${previewColor}, #ffffff, ${previewColor}bb)`,
               backgroundSize: '200% auto',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
+              color: 'transparent',
               animation: 'shimmer 4s linear infinite',
+              transition: 'background 0.4s',
             }}>
               para tu club deportivo
             </span>

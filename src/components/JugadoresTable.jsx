@@ -396,7 +396,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.18)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,197,94,0.08)'}
                 >
-                  <Download className="w-3.5 h-3.5" />
+                  <Upload className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">CSV</span>
                 </button>
 
@@ -422,7 +422,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(96,165,250,0.18)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'rgba(96,165,250,0.08)'}
                 >
-                  <Upload className="w-3.5 h-3.5" />
+                  <Download className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Importar</span>
                 </button>
               </div>

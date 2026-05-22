@@ -602,7 +602,7 @@ function FaqItem({ q, a, delay }) {
 /* ── Lead Capture Modal ─────────────────────────────────────────────────── */
 function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
   const navigate = useNavigate();
-  const [form, setForm]     = useState({ nombre: '', whatsapp: '', nombre_club: '', ciudad: '' });
+  const [form, setForm]     = useState({ nombre: '', whatsapp: '', email: '', nombre_club: '', ciudad: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError]   = useState('');
 
@@ -615,6 +615,7 @@ function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
   const submit = async (e) => {
     e.preventDefault();
     if (!form.nombre.trim() || !form.whatsapp.trim()) { setError('Nombre y WhatsApp son requeridos'); return; }
+    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) { setError('Email inválido'); return; }
     setLoading(true); setError('');
     try {
       await fetch(`${API_BASE_URL}/leads`, {
@@ -652,6 +653,7 @@ function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <input name="nombre" placeholder="Tu nombre *" value={form.nombre} onChange={handle} style={inp} required />
           <input name="whatsapp" placeholder="WhatsApp (ej: 3001234567) *" value={form.whatsapp} onChange={handle} style={inp} required inputMode="tel" />
+          <input name="email" placeholder="Email (opcional)" value={form.email} onChange={handle} style={inp} inputMode="email" />
           <input name="nombre_club" placeholder="Nombre de tu club" value={form.nombre_club} onChange={handle} style={inp} />
           <input name="ciudad" placeholder="Ciudad" value={form.ciudad} onChange={handle} style={inp} />
 

@@ -43,12 +43,8 @@ function useMouseGlow() {
   const onMove = useCallback(e => {
     const el = glowRef.current;
     if (!el) return;
-    const rect = el.parentElement?.getBoundingClientRect();
-    if (!rect) return;
-    const x = e.clientX - rect.left - 200;
-    const y = e.clientY - rect.top - 200;
-    el.style.left = `${x}px`;
-    el.style.top = `${y}px`;
+    el.style.left = `${e.clientX - 200}px`;
+    el.style.top = `${e.clientY - 200}px`;
     el.style.opacity = '1';
   }, []);
   const onLeave = useCallback(() => {
@@ -691,7 +687,16 @@ export default function LandingPage() {
   const colorActivo = PALETA.find(p => p.hex === previewColor) || PALETA[0];
 
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#060810', minHeight: '100vh', color: '#fff', overflowX: 'hidden' }}>
+    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#060810', minHeight: '100vh', color: '#fff', overflowX: 'hidden' }} onMouseMove={onMove} onMouseLeave={onLeave}>
+      {/* Mouse-reactive glow — sigue al cursor en toda la página */}
+      <div ref={glowRef} style={{
+        position: 'fixed', pointerEvents: 'none', zIndex: 0,
+        left: -9999, top: -9999, opacity: 0,
+        width: 400, height: 400,
+        background: `radial-gradient(circle, ${previewColor}18 0%, transparent 70%)`,
+        filter: 'blur(40px)',
+        transition: 'opacity 0.3s ease',
+      }} />
 
       <LeadModal
         open={leadModal.open}
@@ -778,22 +783,10 @@ export default function LandingPage() {
 
       {/* ── HERO ────────────────────────────────────────────────────────── */}
       <section
-        onMouseMove={onMove}
-        onMouseLeave={onLeave}
         style={{ position: 'relative', padding: '96px 24px 80px', overflow: 'hidden', minHeight: 600 }}
       >
         <GridBg color={previewColor} />
         <ParticleField color={previewColor} />
-
-        {/* Mouse-reactive glow — DOM directo, sin re-render */}
-        <div ref={glowRef} style={{
-          position: 'absolute', pointerEvents: 'none', zIndex: 0,
-          left: -9999, top: -9999, opacity: 0,
-          width: 400, height: 400,
-          background: `radial-gradient(circle, ${previewColor}20 0%, transparent 70%)`,
-          filter: 'blur(40px)',
-          transition: 'opacity 0.3s ease',
-        }} />
 
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
 
@@ -1586,26 +1579,26 @@ export default function LandingPage() {
               </div>
               <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-0.3px' }}>ZenSports</span>
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, margin: '0 0 6px' }}>Gestión deportiva para toda América Latina 🏅</p>
-            <p style={{ color: 'rgba(255,255,255,0.15)', fontSize: 12, margin: 0 }}>Creado por <span style={{ color: '#3B82F6', fontWeight: 700 }}>Zenpra</span></p>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, margin: '0 0 6px' }}>Gestión deportiva para cualquier club del mundo 🌍</p>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, margin: 0 }}>Creado por <span style={{ color: '#3B82F6', fontWeight: 700 }}>Zenpra</span></p>
           </div>
           <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
             <div>
-              <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>Producto</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>Producto</p>
               {['Iniciar sesión', 'Registrar club', 'Ver precios'].map(l => (
-                <button key={l} className="btn-ghost" onClick={() => navigate(l === 'Iniciar sesión' ? '/login' : `/registro?color=${encodeURIComponent(previewColor)}`)} style={{ display: 'block', background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', fontSize: 13, cursor: 'pointer', padding: '4px 0', borderRadius: 4, textAlign: 'left' }}>{l}</button>
+                <button key={l} className="btn-ghost" onClick={() => navigate(l === 'Iniciar sesión' ? '/login' : `/registro?color=${encodeURIComponent(previewColor)}`)} style={{ display: 'block', background: 'none', border: 'none', color: 'rgba(255,255,255,0.65)', fontSize: 13, cursor: 'pointer', padding: '4px 0', borderRadius: 4, textAlign: 'left' }}>{l}</button>
               ))}
             </div>
             <div>
-              <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>Plataformas</p>
+              <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>Plataformas</p>
               {['ZenSports', 'ZCUP'].map(l => (
-                <p key={l} style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, margin: '0 0 8px' }}>{l}</p>
+                <p key={l} style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13, margin: '0 0 8px' }}>{l}</p>
               ))}
             </div>
           </div>
         </div>
         <div style={{ maxWidth: 1100, margin: '32px auto 0', paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-          <p style={{ color: 'rgba(255,255,255,0.18)', fontSize: 12, margin: 0 }}>© 2026 ZenSports. Todos los derechos reservados.</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, margin: 0 }}>© 2026 ZenSports. Todos los derechos reservados.</p>
         </div>
       </footer>
 

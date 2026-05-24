@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import * as XLSX from 'xlsx';
 import {
   TrendingUp, TrendingDown, Wallet, Plus, Trash2, Loader2,
   Users, ChevronDown, ChevronUp, Download, FileText, X,
@@ -48,16 +49,14 @@ function rangoMes(ym) {
 }
 
 function exportCSV(rows, filename) {
-  const headers = ['Fecha','Tipo','Categoría','Descripción','Monto'];
-  const lines = [
-    headers.join(','),
-    ...rows.map(r => [r.fecha, r.tipo, r.categoria, `"${r.descripcion}"`, r.monto].join(',')),
-  ];
-  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
+  const headers = ['Fecha', 'Tipo', 'Categoría', 'Descripción', 'Monto'];
+  const data = rows.map(r => [r.fecha, r.tipo, r.categoria, r.descripcion, r.monto]);
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+  ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 18 }, { wch: 35 }, { wch: 14 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Finanzas');
+  XLSX.writeFile(wb, filename.replace('.csv', '.xlsx'));
 }
 
 export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', clubConfig }) {
@@ -545,7 +544,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
               </button>
               <button onClick={() => exportCSV(movFiltrados, `finanzas-${filtroMes}.csv`)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-sub)] text-sm font-semibold text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition">
-                <Download className="w-4 h-4" /> CSV
+                <Download className="w-4 h-4" /> Excel
               </button>
             </div>
           </div>
@@ -582,7 +581,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
               </button>
               <button onClick={() => exportCSV(movFiltrados, `finanzas-${filtroMes}.csv`)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-sub)] text-xs font-semibold text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition">
-                <Download className="w-3.5 h-3.5" /> CSV
+                <Download className="w-3.5 h-3.5" /> Excel
               </button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
@@ -275,16 +276,15 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       j.saldoPendiente,
       j.activo ? 'SI' : 'NO',
     ]);
-    const csv = [headers, ...rows]
-      .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url;
-    a.download = `jugadores_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    ws['!cols'] = [
+      { wch: 28 }, { wch: 14 }, { wch: 14 }, { wch: 12 },
+      { wch: 16 }, { wch: 16 }, { wch: 12 }, { wch: 12 }, { wch: 8 },
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Jugadores');
+    XLSX.writeFile(wb, `jugadores_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const exportarPDF = async () => {
@@ -387,17 +387,17 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   <FiltroCategoriaDropdown value={filtroCategoria} onChange={setFiltroCategoria} opciones={opcionesCategoria} />
                 )}
 
-                {/* Exportar CSV */}
+                {/* Exportar Excel */}
                 <button
                   onClick={exportarCSV}
-                  title={`Exportar ${filtered.length} jugadores a CSV`}
+                  title={`Exportar ${filtered.length} jugadores a Excel`}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
                   style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', color: '#22C55E', whiteSpace: 'nowrap', flexShrink: 0 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.18)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,197,94,0.08)'}
                 >
                   <Upload className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">CSV</span>
+                  <span className="hidden sm:inline">Excel</span>
                 </button>
 
                 {/* Exportar PDF */}

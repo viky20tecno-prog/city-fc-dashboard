@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import * as XLSX from 'xlsx';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { ESTADO_COLORS } from '../config';
@@ -67,6 +67,79 @@ function FiltroEstadoDropdown({ value, onChange, opciones }) {
   );
 }
 
+const SIN_EQUIPO = 'SIN_EQUIPO';
+
+/* ── resumen de equipos con conteos ── */
+function ResumenEquipos({ jugadores, categoriasJugadores, filtroActivo, onSelect }) {
+  const equipos = useMemo(() => listarEquipos(categoriasJugadores), [categoriasJugadores]);
+
+  const conteos = useMemo(() => {
+    const map = {};
+    equipos.forEach(e => { map[e] = 0; });
+    jugadores.forEach(j => {
+      if (j.equipo && map[j.equipo] !== undefined) map[j.equipo]++;
+      else if (j.categoria && map[j.categoria] !== undefined && !j.equipo) map[j.categoria]++;
+    });
+    return map;
+  }, [jugadores, equipos]);
+
+  const sinEquipo = useMemo(
+    () => jugadores.filter(j => !j.equipo && !j.categoria).length,
+    [jugadores]
+  );
+
+  if (!equipos.length) return null;
+
+  return (
+    <div className="flex flex-wrap gap-2 px-6 py-3" style={{ borderBottom: '1px solid var(--border-sub)' }}>
+      {equipos.map(eq => {
+        const activo = filtroActivo === eq;
+        return (
+          <button
+            key={eq}
+            onClick={() => onSelect(activo ? 'TODOS' : eq)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+            style={{
+              background: activo ? 'var(--cc12)' : 'var(--bg-surface)',
+              border: `1px solid ${activo ? 'var(--cc50)' : 'var(--border-sub)'}`,
+              color: activo ? 'var(--cc)' : 'var(--text-sec)',
+            }}
+          >
+            <Users className="w-3 h-3" />
+            <span>{eq}</span>
+            <span
+              className="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+              style={{ background: activo ? 'var(--cc30)' : 'rgba(255,255,255,0.08)', color: activo ? 'var(--cc)' : 'var(--text-mut)' }}
+            >
+              {conteos[eq] ?? 0}
+            </span>
+          </button>
+        );
+      })}
+      {sinEquipo > 0 && (
+        <button
+          onClick={() => onSelect(filtroActivo === SIN_EQUIPO ? 'TODOS' : SIN_EQUIPO)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+          style={{
+            background: filtroActivo === SIN_EQUIPO ? 'rgba(245,158,11,0.12)' : 'var(--bg-surface)',
+            border: `1px solid ${filtroActivo === SIN_EQUIPO ? 'rgba(245,158,11,0.5)' : 'var(--border-sub)'}`,
+            color: filtroActivo === SIN_EQUIPO ? '#F59E0B' : 'var(--text-sec)',
+          }}
+        >
+          <UserX className="w-3 h-3" />
+          <span>Sin equipo</span>
+          <span
+            className="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+            style={{ background: filtroActivo === SIN_EQUIPO ? 'rgba(245,158,11,0.25)' : 'rgba(255,255,255,0.08)', color: filtroActivo === SIN_EQUIPO ? '#F59E0B' : 'var(--text-mut)' }}
+          >
+            {sinEquipo}
+          </span>
+        </button>
+      )}
+    </div>
+  );
+}
+
 /* ── dropdown para filtro de categoría / equipo ── */
 function FiltroCategoriaDropdown({ value, onChange, opciones }) {
   const [open, setOpen] = useState(false);
@@ -110,10 +183,14 @@ function FiltroCategoriaDropdown({ value, onChange, opciones }) {
               key={opt}
               onClick={() => { onChange(opt); setOpen(false); }}
               className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition hover:bg-[var(--bg-card)] text-left"
-              style={{ color: value === opt ? 'var(--cc)' : 'var(--text-pri)' }}
+              style={{ color: value === opt ? (opt === SIN_EQUIPO ? '#F59E0B' : 'var(--cc)') : 'var(--text-pri)' }}
             >
-              <Tag className="w-3 h-3 flex-shrink-0 opacity-50" />
-              <span className="flex-1">{opt === 'TODOS' ? 'Todos los grupos' : opt}</span>
+              {opt === SIN_EQUIPO
+                ? <UserX className="w-3 h-3 flex-shrink-0 opacity-70" />
+                : <Tag className="w-3 h-3 flex-shrink-0 opacity-50" />}
+              <span className="flex-1">
+                {opt === 'TODOS' ? 'Todos los grupos' : opt === SIN_EQUIPO ? 'Sin equipo' : opt}
+              </span>
               {value === opt && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
             </button>
           ))}
@@ -234,7 +311,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
   const opcionesCategoria = useMemo(() => {
     const equipos = listarEquipos(categoriasJugadores);
-    return ['TODOS', ...equipos];
+    return ['TODOS', ...equipos, SIN_EQUIPO];
   }, [categoriasJugadores]);
 
   const filtered = useMemo(() => {
@@ -243,6 +320,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         const matchSearch    = search === '' || j.nombreCompleto?.toLowerCase().includes(search.toLowerCase()) || j.cedula?.includes(search);
         const matchEstado    = filtroEstado === 'TODOS' || j.estadoPago === filtroEstado;
         const matchCategoria = filtroCategoria === 'TODOS'
+          || (filtroCategoria === SIN_EQUIPO && !j.equipo && !j.categoria)
           || j.categoria === filtroCategoria
           || j.equipo    === filtroCategoria
           || (Array.isArray(j.categorias) && j.categorias.some(
@@ -301,7 +379,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     const accentRgb = hexToRgb(color || clubConfig?.color);
     const clubName  = clubConfig?.nombre || 'Mi Club';
     const fecha     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
-    const titulo    = filtroCategoria !== 'TODOS' ? `Jugadores — ${filtroCategoria}` : 'Listado de Jugadores';
+    const titulo    = filtroCategoria === SIN_EQUIPO ? 'Jugadores — Sin equipo' : filtroCategoria !== 'TODOS' ? `Jugadores — ${filtroCategoria}` : 'Listado de Jugadores';
 
     const logoData = await loadLogoDataUrl(clubConfig?.logo_url);
 
@@ -356,7 +434,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       drawPdfFooter(doc, { W, H, M, clubName, pageNum: p, totalPages: pages, note: `${filtered.length} jugadores` });
     }
 
-    const filtroLabel = filtroCategoria !== 'TODOS' ? `-${filtroCategoria.toLowerCase().replace(/\s+/g, '-')}` : '';
+    const filtroLabel = filtroCategoria === SIN_EQUIPO ? '-sin-equipo' : filtroCategoria !== 'TODOS' ? `-${filtroCategoria.toLowerCase().replace(/\s+/g, '-')}` : '';
     doc.save(`jugadores${filtroLabel}-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
@@ -443,11 +521,13 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 {filtroCategoria !== 'TODOS' && (
                   <span
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition hover:opacity-80"
-                    style={{ background: 'var(--cc12)', border: '1px solid var(--cc30)', color: 'var(--cc)' }}
+                    style={filtroCategoria === SIN_EQUIPO
+                      ? { background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)', color: '#F59E0B' }
+                      : { background: 'var(--cc12)', border: '1px solid var(--cc30)', color: 'var(--cc)' }}
                     onClick={() => setFiltroCategoria('TODOS')}
                   >
-                    <Tag className="w-3 h-3" />
-                    {filtroCategoria}
+                    {filtroCategoria === SIN_EQUIPO ? <UserX className="w-3 h-3" /> : <Tag className="w-3 h-3" />}
+                    {filtroCategoria === SIN_EQUIPO ? 'Sin equipo' : filtroCategoria}
                     <X className="w-3 h-3" />
                   </span>
                 )}
@@ -478,6 +558,16 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
             )}
           </div>
         </div>
+
+        {/* RESUMEN EQUIPOS */}
+        {categoriasJugadores.length > 0 && (
+          <ResumenEquipos
+            jugadores={jugadoresConPago}
+            categoriasJugadores={categoriasJugadores}
+            filtroActivo={filtroCategoria}
+            onSelect={setFiltroCategoria}
+          />
+        )}
 
         {/* TABLE */}
         <div className="overflow-x-auto">
@@ -676,7 +766,9 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 <Users className="w-5 h-5 text-[var(--text-mut)]" />
               </div>
               <p className="text-[var(--text-sec)] text-sm font-medium mb-1">
-                {filtroCategoria !== 'TODOS'
+                {filtroCategoria === SIN_EQUIPO
+                  ? 'Todos los jugadores tienen equipo asignado'
+                  : filtroCategoria !== 'TODOS'
                   ? `No hay jugadores en "${filtroCategoria}"`
                   : filtroEstado !== 'TODOS'
                   ? `No hay jugadores con estado ${filtroEstado}`
@@ -704,9 +796,9 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               : <>{jugadores.length} jugadores</>}
           </span>
           {filtroCategoria !== 'TODOS' && (
-            <span className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--cc)' }}>
-              <Tag className="w-3 h-3" />
-              Listado: {filtroCategoria} · CSV y PDF exportan este grupo
+            <span className="flex items-center gap-1.5 text-xs" style={{ color: filtroCategoria === SIN_EQUIPO ? '#F59E0B' : 'var(--cc)' }}>
+              {filtroCategoria === SIN_EQUIPO ? <UserX className="w-3 h-3" /> : <Tag className="w-3 h-3" />}
+              Listado: {filtroCategoria === SIN_EQUIPO ? 'Sin equipo' : filtroCategoria} · CSV y PDF exportan este grupo
             </span>
           )}
         </div>

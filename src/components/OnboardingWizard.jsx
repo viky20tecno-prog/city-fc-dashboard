@@ -88,7 +88,11 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
     penalidad:   clubConfig?.penalidad_mora    || 5000,
   });
 
-  const [whatsapp, setWhatsapp] = useState(clubConfig?.whatsapp || '');
+  const [whatsapp,   setWhatsapp]   = useState(clubConfig?.whatsapp    || '');
+  const [llavePago,  setLlavePago]  = useState(clubConfig?.llave_pago  || '');
+  const [qrPagoUrl,  setQrPagoUrl]  = useState(clubConfig?.qr_pago_url || '');
+  const [uploadingQR, setUploadingQR] = useState(false);
+  const qrRef = useRef(null);
 
   const [redes, setRedes] = useState({
     instagram: clubConfig?.redes_sociales?.instagram || '',
@@ -118,6 +122,22 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
     }
   };
 
+  const uploadQR = async (file) => {
+    setUploadingQR(true);
+    try {
+      const ext  = file.name.split('.').pop();
+      const path = `clubs/${getClubId()}/qr-pago.${ext}`;
+      const { error } = await supabase.storage.from('club-assets').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('club-assets').getPublicUrl(path);
+      setQrPagoUrl(publicUrl);
+    } catch (err) {
+      console.error('Error subiendo QR:', err);
+    } finally {
+      setUploadingQR(false);
+    }
+  };
+
   const saveToApi = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
@@ -135,6 +155,8 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
         dias_gracia_mora:     mensualidad.dias_gracia,
         penalidad_mora:       mensualidad.penalidad,
         whatsapp,
+        llave_pago:           llavePago  || null,
+        qr_pago_url:          qrPagoUrl  || null,
         redes_sociales:       redes,
         onboarding_completed: true,
       }),
@@ -402,44 +424,93 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
             </div>
           )}
 
-          {/* PASO 4 — WHATSAPP */}
+          {/* PASO 4 — COBROS POR WHATSAPP */}
           {step === 3 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <StepBadge color={c} Icon={MessageCircle} title="WhatsApp" desc="Número desde el que se envían mensajes automáticos de cobro" />
+              <StepBadge color={c} Icon={MessageCircle} title="Cobro automático por WhatsApp" desc="ZenSports envía recordatorios de pago a tus jugadores automáticamente" />
 
+              {/* Cómo funciona */}
+              <div style={{ padding: '14px 16px', background: `${c}08`, borderRadius: 12, border: `1px solid ${c}20` }}>
+                <p style={{ color: '#fff', fontSize: 12, fontWeight: 700, margin: '0 0 8px' }}>⚡ ¿Cómo funciona?</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {[
+                    { dia: 'Día 27', msg: 'Aviso preventivo — se acerca la cuota del próximo mes' },
+                    { dia: 'Día 1',  msg: 'Cuota activa — valor exacto y fecha límite de pago' },
+                    { dia: 'Día 4',  msg: 'Recordatorio — quedan 3 días para pagar sin penalidad' },
+                    { dia: 'Día 7',  msg: 'Último aviso — hoy vence el plazo' },
+                    { dia: 'Día 8',  msg: 'Mora aplicada — se notifica al jugador y al admin' },
+                  ].map(({ dia, msg }) => (
+                    <div key={dia} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: c, background: `${c}18`, padding: '2px 8px', borderRadius: 6, flexShrink: 0, marginTop: 1 }}>{dia}</span>
+                      <span style={{ fontSize: 12, color: '#8B95A3', lineHeight: 1.5 }}>{msg}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Número WA del admin */}
               <div>
-                <label style={lbl}>Número de WhatsApp (con código de país, sin + ni espacios)</label>
+                <label style={lbl}>Tu número de WhatsApp (recibe alertas de mora)</label>
                 <input
                   value={whatsapp}
                   onChange={e => setWhatsapp(e.target.value.replace(/\D/g, ''))}
                   placeholder={`Ej: ${club.codigo_pais}3001234567`}
                   style={inp} type="tel"
                 />
-                <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 6, marginBottom: 0 }}>
-                  Incluye el código de país (+{club.codigo_pais}) sin el símbolo +.
+                <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 5, marginBottom: 0 }}>
+                  Con código de país (+{club.codigo_pais}), sin el símbolo +. Recibirás el reporte de morosos cada mes.
                 </p>
               </div>
 
-              <InfoBox>
-                Este número recibirá y enviará recordatorios de cobro, confirmaciones de pago y avisos de mora automáticamente.
-              </InfoBox>
-
-              <div style={{ padding: '14px 16px', background: 'rgba(245,158,11,0.08)', borderRadius: 12, border: '1px solid rgba(245,158,11,0.22)' }}>
-                <p style={{ color: '#F59E0B', fontSize: 12, fontWeight: 700, margin: '0 0 8px' }}>⚡ Durante el período de prueba</p>
-                <p style={{ color: '#8B95A3', fontSize: 12, margin: '0 0 10px', lineHeight: 1.65 }}>
-                  WhatsApp funciona en modo sandbox. El número debe enviar este mensaje al <strong style={{ color: '#CBD5E1' }}>+1 415 523 8886</strong> de Twilio:
-                </p>
-                <code style={{ display: 'block', background: 'rgba(245,158,11,0.14)', padding: '8px 12px', borderRadius: 8, color: '#F5C542', fontSize: 13, fontWeight: 700 }}>
-                  join &lt;palabra-del-sandbox&gt;
-                </code>
-                <p style={{ color: '#8B95A3', fontSize: 11, margin: '8px 0 0', lineHeight: 1.5 }}>
-                  Tu administrador de ZenSports te dará la palabra exacta.
+              {/* Llave de pago */}
+              <div>
+                <label style={lbl}>Llave de pago (Nequi / Bancolombia / PSE)</label>
+                <input
+                  value={llavePago}
+                  onChange={e => setLlavePago(e.target.value.trim())}
+                  placeholder="Ej: 0087276387 o 3001234567"
+                  style={inp}
+                />
+                <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 5, marginBottom: 0 }}>
+                  Se incluye en cada mensaje de cobro para que el jugador pague directo.
                 </p>
               </div>
 
-              <p style={{ fontSize: 12, color: '#8B95A3', margin: 0 }}>
-                Este paso es opcional — puedes configurarlo luego desde el módulo de WhatsApp.
-              </p>
+              {/* QR de pago */}
+              <div>
+                <label style={lbl}>QR de pago (opcional)</label>
+                <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                  <div onClick={() => qrRef.current?.click()}
+                    style={{
+                      width: 76, height: 76, borderRadius: 14, flexShrink: 0, overflow: 'hidden', cursor: 'pointer',
+                      background: qrPagoUrl ? 'transparent' : `${c}10`,
+                      border: `2px dashed ${c}40`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                    {qrPagoUrl
+                      ? <img src={qrPagoUrl} alt="QR pago" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={() => setQrPagoUrl('')} />
+                      : uploadingQR
+                        ? <Loader2 size={26} color={c} style={{ animation: 'spin 1s linear infinite' }} />
+                        : <Camera size={26} color={`${c}80`} strokeWidth={1.5} />}
+                  </div>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <button onClick={() => qrRef.current?.click()} disabled={uploadingQR}
+                      style={{ padding: '9px 14px', background: `${c}18`, border: `1px solid ${c}35`, borderRadius: 10, color: c, fontWeight: 600, fontSize: 13, cursor: 'pointer', textAlign: 'left' }}>
+                      {uploadingQR ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> Subiendo…</> : <><Camera size={13} /> Subir QR</>}
+                    </button>
+                    <input value={qrPagoUrl} onChange={e => setQrPagoUrl(e.target.value)}
+                      placeholder="O pega un URL del QR"
+                      style={{ ...inp, padding: '9px 12px', fontSize: 12 }} />
+                  </div>
+                </div>
+                <input ref={qrRef} type="file" accept="image/*" style={{ display: 'none' }}
+                  onChange={e => e.target.files?.[0] && uploadQR(e.target.files[0])} />
+                <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 8, marginBottom: 0 }}>
+                  Si subes el QR de Nequi o Bancolombia, se adjunta automáticamente a los mensajes de cobro.
+                </p>
+              </div>
+
+              <InfoBox>Todos estos campos son opcionales — puedes completarlos luego desde Configuración. Cuantos más datos configures, más completos serán los mensajes automáticos.</InfoBox>
 
               {/* Redes sociales */}
               <div style={{ marginTop: 4 }}>
@@ -494,7 +565,9 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                   { label: 'País',       val: `${paisActual.bandera} ${paisActual.nombre} · ${paisActual.moneda}` },
                   { label: 'Mensualidad', val: `${paisActual.moneda} ${mensualidad.valor.toLocaleString()}` },
                   { label: 'Mora',       val: `${mensualidad.dias_gracia} días gracia · ${paisActual.moneda} ${mensualidad.penalidad.toLocaleString()}` },
-                  { label: 'WhatsApp',   val: whatsapp ? `+${whatsapp}` : 'No configurado' },
+                  { label: 'WhatsApp',   val: whatsapp  ? `+${whatsapp}`  : 'No configurado' },
+                  { label: 'Llave pago', val: llavePago ? llavePago       : 'No configurada' },
+                  { label: 'QR pago',    val: qrPagoUrl ? '✓ Subido'      : 'No configurado' },
                 ].map(({ label, val }) => (
                   <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)', gap: 12 }}>
                     <span style={{ fontSize: 12, color: '#8B95A3', flexShrink: 0 }}>{label}</span>

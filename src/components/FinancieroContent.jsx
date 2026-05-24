@@ -457,13 +457,24 @@ function SeccionHistorialLazy({ cedula }) {
   );
 }
 
-export default function FinancieroContent({ cedula, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated }) {
+export default function FinancieroContent({ cedula, jugador, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated }) {
   const misMensualidades = mensualidades.filter(m => (m.cedula || m.jugador_id) === cedula);
   const misTorneos       = torneos.filter(t => t.cedula === cedula);
   const misSuspensiones  = suspensiones.filter(s => s.cedula === String(cedula));
 
+  const descuento    = Number(jugador?.descuento_pct ?? 0);
+  const tipoLabel    = { BECA_DEPORTIVA: 'Beca Deportiva', BECA_SOCIAL: 'Beca Social', CONDICION_ESPECIAL: 'Condición Especial' };
+  const tipoTexto    = tipoLabel[jugador?.tipo_descuento] ?? '';
+
   return (
     <div className="space-y-8">
+      {descuento > 0 && tipoTexto && (
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium"
+          style={{ background: 'var(--cc)1a', border: '1px solid var(--cc)33', color: 'var(--cc)' }}>
+          <span>🎓</span>
+          <span>{tipoTexto} · {descuento}% de descuento aplicado</span>
+        </div>
+      )}
       <SeccionMensualidades datos={misMensualidades} suspensiones={misSuspensiones} onMensualidadUpdated={onMensualidadUpdated} />
       <SeccionPedidoUniforme cedula={cedula} />
       <SeccionTorneos datos={misTorneos} />

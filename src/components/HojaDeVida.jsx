@@ -111,6 +111,8 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
     familiar_emergencia: jugador.familiar_emergencia || '',
     celular_contacto:    jugador.celular_contacto    || '',
     notas:               jugador.notas               || '',
+    tipo_descuento:      jugador.tipo_descuento      || 'NA',
+    descuento_pct:       jugador.descuento_pct       ?? 0,
     categorias: Array.isArray(jugador.categorias) && jugador.categorias.length
       ? jugador.categorias
       : (jugador.categoria ? [{ categoria: jugador.categoria, equipo: jugador.equipo || '' }] : []),
@@ -174,9 +176,11 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
         estatura:        form.estatura        ? parseFloat(form.estatura)        : null,
         peso:            form.peso            ? parseFloat(form.peso)            : null,
         fecha_nacimiento: form.fecha_nacimiento || null,
-        categorias: form.categorias,
-        categoria:  form.categorias[0]?.categoria || '',
-        equipo:     form.categorias[0]?.equipo    || '',
+        categorias:     form.categorias,
+        categoria:      form.categorias[0]?.categoria || '',
+        equipo:         form.categorias[0]?.equipo    || '',
+        tipo_descuento: form.tipo_descuento,
+        descuento_pct:  form.tipo_descuento === 'NA' ? 0 : Math.max(0, Math.min(100, Number(form.descuento_pct) || 0)),
       };
       const res  = await authFetch(
         `${API_BASE_URL}/players/${jugador.cedula}?club_id=${getClubId()}`,
@@ -460,6 +464,48 @@ function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }
           <CampoEdit label="Familiar / Contacto"  value={form.familiar_emergencia} onChange={set('familiar_emergencia')} placeholder="Nombre completo" />
           <CampoEdit label="Celular de contacto"  value={form.celular_contacto}    onChange={set('celular_contacto')}    placeholder="3001234567" />
         </div>
+      </Seccion>
+
+      {/* Beca / Descuento */}
+      <Seccion titulo="Beca / Descuento">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Tipo</label>
+            <select
+              value={form.tipo_descuento}
+              onChange={e => {
+                const tipo = e.target.value;
+                setForm(f => ({ ...f, tipo_descuento: tipo, descuento_pct: tipo === 'NA' ? 0 : f.descuento_pct }));
+              }}
+              className={INPUT_CLS}
+            >
+              <option value="NA">Sin descuento</option>
+              <option value="BECA_DEPORTIVA">Beca Deportiva</option>
+              <option value="BECA_SOCIAL">Beca Social</option>
+              <option value="CONDICION_ESPECIAL">Condición Especial</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">
+              Descuento (%)
+            </label>
+            <input
+              type="number"
+              min="0" max="100" step="1"
+              value={form.descuento_pct}
+              onChange={set('descuento_pct')}
+              disabled={form.tipo_descuento === 'NA'}
+              placeholder="0"
+              className={INPUT_CLS}
+              style={{ opacity: form.tipo_descuento === 'NA' ? 0.4 : 1 }}
+            />
+          </div>
+        </div>
+        {form.tipo_descuento !== 'NA' && Number(form.descuento_pct) > 0 && (
+          <p className="text-xs mt-2" style={{ color: 'var(--text-mut)' }}>
+            Al guardar se ajustará la mensualidad del mes actual si aún no está pagada.
+          </p>
+        )}
       </Seccion>
 
       {/* Observaciones / Notas médicas */}
@@ -956,6 +1002,7 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
           {tab === 'financiero' && (
             <FinancieroContent
               cedula={jugadorLocal.cedula}
+              jugador={jugadorLocal}
               mensualidades={mensualidades}
               torneos={torneos}
               suspensiones={suspensiones}

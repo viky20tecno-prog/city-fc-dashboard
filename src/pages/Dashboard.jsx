@@ -26,6 +26,7 @@ import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSe
 import CategoriasJugadoresModal from '../components/CategoriasJugadoresModal';
 import MiEquipoModal from '../components/MiEquipoModal';
 import Calendario from '../components/Calendario';
+import CobroConfigModal from '../components/CobroConfigModal';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 const NAV = [
@@ -95,6 +96,7 @@ export default function Dashboard() {
   const [showTheme,        setShowTheme]        = useState(false);
   const [showCategorias,   setShowCategorias]   = useState(false);
   const [showEquipo,       setShowEquipo]       = useState(false);
+  const [showCobro,        setShowCobro]        = useState(false);
   const [colorOverride,    setColorOverride]    = useState(null);
 
   // ── Trial ──
@@ -625,6 +627,7 @@ export default function Dashboard() {
           onOpenConfig={() => { setShowTheme(false); setShowOnboarding(true); }}
           onOpenCategorias={() => { setShowTheme(false); setShowCategorias(true); }}
           onOpenEquipo={isAdmin ? () => { setShowTheme(false); setShowEquipo(true); } : undefined}
+          onOpenCobro={() => { setShowTheme(false); setShowCobro(true); }}
           onColorChange={handleColorChange}
         />
       )}
@@ -641,6 +644,15 @@ export default function Dashboard() {
         <MiEquipoModal
           clubId={clubId}
           onClose={() => setShowEquipo(false)}
+        />
+      )}
+
+      {showCobro && (
+        <CobroConfigModal
+          color={c}
+          clubConfig={clubConfig}
+          onClose={() => setShowCobro(false)}
+          onSaved={() => { refetchConfig(); setShowCobro(false); }}
         />
       )}
     </div>

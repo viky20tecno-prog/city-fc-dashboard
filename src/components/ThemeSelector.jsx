@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Monitor, SlidersHorizontal, Palette, Check, Tag, Users } from 'lucide-react';
+import { Monitor, SlidersHorizontal, Palette, Check, Tag, Users, MessageCircle } from 'lucide-react';
 
 export const PALETA = [
   { hex: '#E14924', nombre: 'Naranja Ciudad'  },
@@ -51,7 +51,7 @@ export function getStoredTheme() {
   return localStorage.getItem('dashboardTheme') || 'dark';
 }
 
-export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig, onOpenCategorias, onOpenEquipo, onColorChange }) {
+export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig, onOpenCategorias, onOpenEquipo, onOpenCobro, onColorChange }) {
   const [activeTheme, setActiveTheme] = useState(getStoredTheme);
   const [saving, setSaving] = useState(false);
   const panelRef = useRef(null);
@@ -197,6 +197,22 @@ export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig
           );
         })}
       </div>
+
+      {onOpenCobro && (
+        <button
+          onClick={onOpenCobro}
+          style={{
+            width: '100%', marginTop: 10,
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '9px 10px', borderRadius: 10,
+            border: `1px solid ${color}30`,
+            background: `${color}08`, cursor: 'pointer', transition: 'background-color 0.18s, border-color 0.18s',
+          }}
+        >
+          <MessageCircle size={14} color={color} />
+          <span style={{ fontSize: 13, color, fontWeight: 600 }}>Cobro automático WA</span>
+        </button>
+      )}
 
       {onOpenCategorias && (
         <button

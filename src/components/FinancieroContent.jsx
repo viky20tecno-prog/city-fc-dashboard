@@ -185,7 +185,7 @@ function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated }
   useEffect(() => {
     setItems(
       [...(datos || [])]
-        .filter(m => parseInt(m.numero_mes) >= 1 && parseInt(m.numero_mes) <= 12)
+        .filter(m => m.mes && parseInt(m.numero_mes) >= 1 && parseInt(m.numero_mes) <= 12)
         .sort((a, b) => parseInt(a.numero_mes) - parseInt(b.numero_mes))
     );
   }, [datos]);

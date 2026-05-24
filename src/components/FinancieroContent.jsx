@@ -183,7 +183,11 @@ function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated }
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    setItems([...(datos || [])].sort((a, b) => (parseInt(a.numero_mes) || 0) - (parseInt(b.numero_mes) || 0)));
+    setItems(
+      [...(datos || [])]
+        .filter(m => parseInt(m.numero_mes) >= 1 && parseInt(m.numero_mes) <= 12)
+        .sort((a, b) => parseInt(a.numero_mes) - parseInt(b.numero_mes))
+    );
   }, [datos]);
 
   if (!items.length) return <EmptySection texto="Sin datos de mensualidades" />;
@@ -458,7 +462,7 @@ function SeccionHistorialLazy({ cedula }) {
 }
 
 export default function FinancieroContent({ cedula, jugador, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated }) {
-  const misMensualidades = mensualidades.filter(m => (m.cedula || m.jugador_id) === cedula);
+  const misMensualidades = mensualidades.filter(m => String(m.cedula || m.player_id || '') === String(cedula));
   const misTorneos       = torneos.filter(t => t.cedula === cedula);
   const misSuspensiones  = suspensiones.filter(s => s.cedula === String(cedula));
 

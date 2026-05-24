@@ -175,15 +175,23 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     return () => document.removeEventListener('click', close, true);
   }, [uniformePopover]);
 
-  const uniformeData = (cedula) =>
-    (uniformes || []).find(u => String(u.cedula) === String(cedula)) || null;
+  const uniformeData = (cedula) => {
+    const pedidos = (uniformes || []).filter(u => String(u.cedula) === String(cedula));
+    if (!pedidos.length) return null;
+    // Retornar el peor estado: PENDIENTE > PAGADO > ENTREGADO
+    if (pedidos.some(u => u.estado === 'PENDIENTE' || u.estado === 'MORA' || u.estado === 'PARCIAL'))
+      return pedidos.find(u => u.estado === 'PENDIENTE' || u.estado === 'MORA' || u.estado === 'PARCIAL');
+    if (pedidos.some(u => u.estado === 'PAGADO'))
+      return pedidos.find(u => u.estado === 'PAGADO');
+    return pedidos[0];
+  };
 
   const uniformeStatus = (cedula) => {
     const u = uniformeData(cedula);
     if (!u) return null;
-    if (u.estado === 'AL_DIA')                              return 'entregado';
-    if (u.estado === 'MORA')                                return 'mora';
-    if (u.estado === 'PENDIENTE' || u.estado === 'PARCIAL') return 'pendiente';
+    if (u.estado === 'ENTREGADO' || u.estado === 'AL_DIA') return 'entregado';
+    if (u.estado === 'MORA')                               return 'mora';
+    if (u.estado === 'PAGADO')                             return 'entregado';
     return 'pendiente';
   };
 

@@ -53,7 +53,7 @@ export async function fetchAllData() {
       apiCall(`/invoices?club_id=${getClubId()}&anio=${new Date().getFullYear()}`),
       apiCall(`/payments?club_id=${getClubId()}&limit=100`),
       apiCallSafe(`/reports/summary?club_id=${getClubId()}`, {}),
-      apiCall(`/invoices/uniformes?club_id=${getClubId()}`),
+      apiCall(`/uniforms?club_id=${getClubId()}`),
       apiCall(`/invoices/torneos?club_id=${getClubId()}`),
       apiCall(`/suspensiones?club_id=${getClubId()}`),
     ]);

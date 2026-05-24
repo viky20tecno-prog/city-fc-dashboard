@@ -79,11 +79,14 @@ function SuspendidoBadge({ motivo, detalle, cancelada }) {
   );
 }
 
+const MESES_LABEL = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
 function FilaMensualidad({ m, susp, onUpdated }) {
   const [editando, setEditando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [form, setForm] = useState({});
 
+  const nombreMes  = m.mes || MESES_LABEL[parseInt(m.numero_mes)] || '';
   const penalidad  = parseFloat(m.penalidad) || 0;
   const totalDeuda = (parseFloat(m.valor_oficial) || 0) + penalidad;
 
@@ -117,7 +120,7 @@ function FilaMensualidad({ m, susp, onUpdated }) {
       {!editando ? (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <span className="text-sm font-medium text-[var(--text-pri)] w-16 flex-shrink-0">{m.mes}</span>
+            <span className="text-sm font-medium text-[var(--text-pri)] w-16 flex-shrink-0">{nombreMes}</span>
             {susp
               ? <SuspendidoBadge motivo={susp.motivo} detalle={susp.detalle} cancelada={!susp.activa} />
               : <EstadoBadge estado={m.estado} />}
@@ -135,7 +138,7 @@ function FilaMensualidad({ m, susp, onUpdated }) {
         </div>
       ) : (
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[var(--text-pri)]">{m.mes} — Editar</p>
+          <p className="text-xs font-semibold text-[var(--text-pri)]">{nombreMes} — Editar</p>
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-[10px] text-[var(--text-sec)] mb-1">Valor oficial</label>
@@ -185,7 +188,7 @@ function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated }
   useEffect(() => {
     setItems(
       [...(datos || [])]
-        .filter(m => m.mes && parseInt(m.numero_mes) >= 1 && parseInt(m.numero_mes) <= 12)
+        .filter(m => parseInt(m.numero_mes) >= 1 && parseInt(m.numero_mes) <= 12)
         .sort((a, b) => parseInt(a.numero_mes) - parseInt(b.numero_mes))
     );
   }, [datos]);

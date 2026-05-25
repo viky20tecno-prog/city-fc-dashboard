@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
   Clock, ClipboardCheck, Settings, AlertTriangle,
-  Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays,
+  Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays, Shield,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -24,6 +24,7 @@ import PagoManualModal from '../components/PagoManualModal';
 import OnboardingWizard from '../components/OnboardingWizard';
 import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSelector';
 import CategoriasJugadoresModal from '../components/CategoriasJugadoresModal';
+import EquiposPage from '../components/EquiposPage';
 import MiEquipoModal from '../components/MiEquipoModal';
 import Calendario from '../components/Calendario';
 import CobroConfigModal from '../components/CobroConfigModal';
@@ -33,6 +34,7 @@ const NAV = [
   { id: 'dashboard',    Icon: LayoutDashboard, title: 'Dashboard'     },
   { id: 'jugadores',    Icon: Users,            title: 'Jugadores'     },
   { id: 'calendario',   Icon: CalendarDays,     title: 'Calendario'    },
+  { id: 'equipos',      Icon: Shield,           title: 'Equipos'       },
   { id: 'uniformes',    Icon: Shirt,            title: 'Uniformes'     },
   { id: 'torneos',      Icon: Trophy,           title: 'Torneos'       },
   { id: 'arbitraje',    Icon: Activity,         title: 'Pago Arbitraje'},
@@ -94,7 +96,6 @@ export default function Dashboard() {
   const [showPagoModal,   setShowPagoModal]   = useState(false);
   const [showOnboarding,   setShowOnboarding]   = useState(false);
   const [showTheme,        setShowTheme]        = useState(false);
-  const [showCategorias,   setShowCategorias]   = useState(false);
   const [showEquipo,       setShowEquipo]       = useState(false);
   const [showCobro,        setShowCobro]        = useState(false);
   const [colorOverride,    setColorOverride]    = useState(null);
@@ -589,6 +590,7 @@ export default function Dashboard() {
               />
             )}
             {activeTab === 'calendario'   && <Calendario    color={c} clubId={getClubId()} />}
+            {activeTab === 'equipos'      && <EquiposPage  color={c} clubConfig={clubConfig} onConfigSaved={() => refetchConfig()} />}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'torneos'      && <TorneosPage  color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'arbitraje'    && <ArbitrajePagos color={c} />}
@@ -625,22 +627,13 @@ export default function Dashboard() {
           color={c}
           onClose={() => setShowTheme(false)}
           onOpenConfig={() => { setShowTheme(false); setShowOnboarding(true); }}
-          onOpenCategorias={() => { setShowTheme(false); setShowCategorias(true); }}
           onOpenEquipo={isAdmin ? () => { setShowTheme(false); setShowEquipo(true); } : undefined}
           onOpenCobro={() => { setShowTheme(false); setShowCobro(true); }}
           onColorChange={handleColorChange}
         />
       )}
 
-      {showCategorias && (
-        <CategoriasJugadoresModal
-          categorias={clubConfig?.categorias_jugadores || []}
-          onClose={() => setShowCategorias(false)}
-          onSaved={() => refetchConfig()}
-        />
-      )}
-
-      {showEquipo && (
+{showEquipo && (
         <MiEquipoModal
           clubId={clubId}
           onClose={() => setShowEquipo(false)}

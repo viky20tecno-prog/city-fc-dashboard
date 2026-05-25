@@ -26,7 +26,6 @@ export default function AuthCallback() {
 
       if (club?.slug) {
         localStorage.setItem('clubId', club.slug);
-        localStorage.setItem('userRole', 'ADMIN');
         navigate('/app', { replace: true });
       } else {
         // Usuario nuevo con Google — aún no tiene club

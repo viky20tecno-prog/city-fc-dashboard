@@ -233,6 +233,26 @@
   --text-mut:    #4A7A96;
   --border-sub:  rgba(99,218,252,0.10);
 }
+[data-theme="titanio"] {
+  --bg-app:      #1C1D22;
+  --bg-card:     #252A30;
+  --bg-surface:  #313B44;
+  --bg-input:    #20242A;
+  --text-pri:    #E8E6EA;
+  --text-sec:    #E62815;
+  --text-mut:    #606467;
+  --border-sub:  rgba(230,40,21,0.10);
+}
+[data-theme="escarlata"] {
+  --bg-app:      #181E22;
+  --bg-card:     #222B31;
+  --bg-surface:  #2E3C45;
+  --bg-input:    #1C252C;
+  --text-pri:    #F0EEF0;
+  --text-sec:    #E22227;
+  --text-mut:    #55666E;
+  --border-sub:  rgba(226,34,39,0.12);
+}
 
 :root {
   /* ── Z-index scale ────────────────────────────────────────

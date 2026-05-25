@@ -47,6 +47,8 @@ export const THEMES = [
   { id: 'corsario', label: 'Corsario',   group: 'Oceánico', app: '#030F19', card: '#0A1E2E', surface: '#122E42', text: '#EEE8E0', preview: ['#030F19', '#0A1E2E', '#122E42'] },
   { id: 'mareas',   label: 'Mareas',     group: 'Oceánico', app: '#0F2C33', card: '#163C45', surface: '#21616A', text: '#E6D1B4', preview: ['#0F2C33', '#163C45', '#21616A'] },
   { id: 'helio',    label: 'Helio',      group: 'Oceánico', app: '#020008', card: '#0E1A26', surface: '#2C394C', text: '#E8F4FC', preview: ['#020008', '#0E1A26', '#2C394C'] },
+  { id: 'titanio',  label: 'Titanio',    group: 'Oceánico', app: '#1C1D22', card: '#252A30', surface: '#313B44', text: '#E8E6EA', preview: ['#1C1D22', '#252A30', '#313B44'] },
+  { id: 'escarlata',label: 'Escarlata',  group: 'Oceánico', app: '#181E22', card: '#222B31', surface: '#2E3C45', text: '#F0EEF0', preview: ['#181E22', '#222B31', '#2E3C45'] },
 ];
 
 export function applyTheme(themeId) {

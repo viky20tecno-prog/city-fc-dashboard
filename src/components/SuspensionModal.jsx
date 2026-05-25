@@ -101,10 +101,10 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 bg-[var(--bg-app)]/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#161B22] rounded-2xl border border-[#30363D] w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-sub)] w-full max-w-lg max-h-[90vh] overflow-y-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#30363D]">
+        <div className="flex items-center justify-between p-6 border-b border-[var(--border-sub)]">
           <div>
             <h2 className="text-lg font-bold text-[var(--text-pri)]">Gestión de Suspensión</h2>
             <p className="text-sm text-[var(--text-sec)]">{jugador.nombreCompleto} · CC {jugador.cedula}</p>
@@ -128,7 +128,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                     ? MESES[s.mes_inicio - 1]
                     : `${MESES[s.mes_inicio - 1]} – ${MESES[s.mes_fin - 1]}`;
                   return (
-                    <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-app)] border border-[#30363D]">
+                    <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-app)] border border-[var(--border-sub)]">
                       <Icon className={`w-4 h-4 flex-shrink-0 ${motivo?.color || 'text-gray-400'}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-[var(--text-pri)]">{motivo?.label || s.motivo}</p>
@@ -178,7 +178,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                       key={m.valor}
                       onClick={() => setForm(f => ({ ...f, motivo: m.valor }))}
                       className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
-                        seleccionado ? m.bg + ' ' + m.color : 'bg-[var(--bg-app)] border-[#30363D] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
+                        seleccionado ? m.bg + ' ' + m.color : 'bg-[var(--bg-app)] border-[var(--border-sub)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
                       }`}
                     >
                       <Icon className="w-4 h-4 flex-shrink-0" />
@@ -196,7 +196,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                 <select
                   value={form.mes_inicio}
                   onChange={e => setForm(f => ({ ...f, mes_inicio: parseInt(e.target.value) }))}
-                  className="w-full bg-[var(--bg-app)] border border-[#30363D] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[#00D084]"
+                  className="w-full bg-[var(--bg-app)] border border-[var(--border-sub)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[#00D084]"
                 >
                   {MESES.map((m, i) => (
                     <option key={i} value={i + 1}>{m}</option>
@@ -208,7 +208,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                 <select
                   value={form.mes_fin}
                   onChange={e => setForm(f => ({ ...f, mes_fin: parseInt(e.target.value) }))}
-                  className="w-full bg-[var(--bg-app)] border border-[#30363D] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[#00D084]"
+                  className="w-full bg-[var(--bg-app)] border border-[var(--border-sub)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[#00D084]"
                 >
                   {MESES.map((m, i) => (
                     <option key={i} value={i + 1} disabled={i + 1 < form.mes_inicio}>{m}</option>
@@ -221,7 +221,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                   type="number"
                   value={form.anio}
                   onChange={e => setForm(f => ({ ...f, anio: parseInt(e.target.value) }))}
-                  className="w-full bg-[var(--bg-app)] border border-[#30363D] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[#00D084]"
+                  className="w-full bg-[var(--bg-app)] border border-[var(--border-sub)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[#00D084]"
                 />
               </div>
             </div>
@@ -234,7 +234,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                 value={form.detalle}
                 onChange={e => setForm(f => ({ ...f, detalle: e.target.value }))}
                 placeholder="Ej: Fractura tobillo derecho, cirugía prevista..."
-                className="w-full bg-[var(--bg-app)] border border-[#30363D] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-sec)] focus:outline-none focus:border-[#00D084] transition-colors"
+                className="w-full bg-[var(--bg-app)] border border-[var(--border-sub)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-sec)] focus:outline-none focus:border-[#00D084] transition-colors"
               />
             </div>
 
@@ -259,7 +259,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                     ? MESES[s.mes_inicio - 1]
                     : `${MESES[s.mes_inicio - 1]} – ${MESES[s.mes_fin - 1]}`;
                   return (
-                    <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-app)] border border-[#30363D]/50 opacity-60">
+                    <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-app)] border border-[var(--border-sub)]/50 opacity-60">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-[var(--text-sec)]">{motivo?.label || s.motivo} · {mesesTexto} {s.anio}</p>
                         {s.detalle && <p className="text-xs text-[var(--text-sec)]">{s.detalle}</p>}

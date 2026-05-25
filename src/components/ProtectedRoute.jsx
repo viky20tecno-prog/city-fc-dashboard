@@ -23,7 +23,7 @@ export default function ProtectedRoute({ children }) {
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-app)] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#00D084] border-t-transparent rounded-full animate-spin" />
       </div>
     );

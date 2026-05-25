@@ -545,7 +545,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                         <button
                           key={j.cedula}
                           onClick={() => seleccionarJugador(j)}
-                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#2D3748] transition-colors text-left border-b border-[var(--cc20)] last:border-0"
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--bg-surface)] transition-colors text-left border-b border-[var(--cc20)] last:border-0"
                         >
                           <div className="w-8 h-8 rounded-full bg-[var(--cc12)] flex items-center justify-center flex-shrink-0">
                             <span className="text-xs font-bold text-[var(--cc)]">{(j.nombre || '?')[0].toUpperCase()}</span>

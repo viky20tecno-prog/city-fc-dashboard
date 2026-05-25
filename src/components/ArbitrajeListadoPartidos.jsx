@@ -198,7 +198,7 @@ export default function ArbitrajeListadoPartidos({ clubId, onViewPagos }) {
         </span>
         <button
           onClick={fetchPartidos}
-          className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-surface)] hover:bg-[#152945] text-gray-300 rounded-lg text-sm transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-surface)] hover:bg-[var(--bg-surface)] text-gray-300 rounded-lg text-sm transition-colors"
         >
           <RefreshCw size={13} />
           Actualizar

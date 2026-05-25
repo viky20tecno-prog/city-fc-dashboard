@@ -107,7 +107,7 @@ function EditModal({ pago, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-[#0D1117] border border-[var(--cc20)] rounded-2xl w-full max-w-md shadow-2xl">
+      <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-md shadow-2xl">
         <div className="flex items-center justify-between p-5 border-b border-[var(--cc20)]">
           <h3 className="text-white font-semibold">Editar pago</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition">✕</button>
@@ -129,7 +129,7 @@ function EditModal({ pago, onClose, onSaved }) {
             <select
               value={form.concepto}
               onChange={e => setForm(f => ({ ...f, concepto: e.target.value }))}
-              className="w-full bg-[#0A0A0A] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
+              className="w-full bg-[var(--bg-input)] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
             >
               {CONCEPTOS.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
             </select>
@@ -142,7 +142,7 @@ function EditModal({ pago, onClose, onSaved }) {
               type="number"
               value={form.monto}
               onChange={e => setForm(f => ({ ...f, monto: parseInt(e.target.value) || 0 }))}
-              className="w-full bg-[#0A0A0A] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
+              className="w-full bg-[var(--bg-input)] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
             />
           </div>
 
@@ -153,7 +153,7 @@ function EditModal({ pago, onClose, onSaved }) {
               list="bancos-list"
               value={form.banco}
               onChange={e => setForm(f => ({ ...f, banco: e.target.value }))}
-              className="w-full bg-[#0A0A0A] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
+              className="w-full bg-[var(--bg-input)] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
               placeholder="Efectivo, Transferencia..."
             />
             <datalist id="bancos-list">
@@ -168,7 +168,7 @@ function EditModal({ pago, onClose, onSaved }) {
               type="text"
               value={form.referencia}
               onChange={e => setForm(f => ({ ...f, referencia: e.target.value }))}
-              className="w-full bg-[#0A0A0A] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
+              className="w-full bg-[var(--bg-input)] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
               placeholder="123456789"
             />
           </div>
@@ -398,7 +398,7 @@ export default function Conciliacion({ color = 'var(--cc)' }) {
       </div>
 
       {/* Tabla */}
-      <div className="bg-[#0D1117] border border-[var(--cc20)] rounded-2xl overflow-hidden">
+      <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl overflow-hidden">
         {error && (
           <div className="flex items-center gap-2 p-4 text-red-400 text-sm">
             <AlertCircle className="w-4 h-4" /> {error}

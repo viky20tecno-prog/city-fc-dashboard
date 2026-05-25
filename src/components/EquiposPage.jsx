@@ -1,12 +1,14 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   Shield, Plus, X, ChevronRight, ChevronDown, UserX,
-  Pencil, Check, Loader2, Search, UserPlus, Tag, Minus,
+  Pencil, Check, Loader2, Search, UserPlus, Tag, Minus, Download,
 } from 'lucide-react';
+import jsPDF from 'jspdf';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { API_BASE_URL } from '../config';
 import { normalizarCategorias } from '../lib/categorias';
+import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 
 const SUGERENCIAS = ['Benjamín', 'Infantil', 'Pre-juvenil', 'Juvenil', 'Sub-17', 'Sub-20', 'Mayores', 'Veteranos', 'Femenino'];
 
@@ -238,6 +240,69 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
 
   const disponiblesSugerencias = SUGERENCIAS.filter(s => !categorias.some(cat => cat.nombre === s.toUpperCase()));
 
+  /* ── exportar PDF ── */
+  const [exportando, setExportando] = useState(false);
+
+  const exportarPDF = async () => {
+    if (seleccion === '__sin__' || !seleccion) return;
+    const lista = jugadoresEnEquipo;
+    if (!lista.length) return;
+
+    setExportando(true);
+    try {
+      const doc       = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const W = 210; const H = 297; const M = 12;
+      const accentRgb = hexToRgb(color);
+      const clubName  = clubConfig?.nombre || 'Mi Club';
+      const titulo    = seleccion.equipo && seleccion.equipo !== seleccion.categoria
+        ? `${seleccion.categoria} · ${seleccion.equipo}`
+        : seleccion.categoria;
+      const fecha     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+      const logoData  = await loadLogoDataUrl(clubConfig?.logo_url);
+
+      const cols = [
+        { label: '#',          x: M },
+        { label: 'Nombre',     x: M + 10 },
+        { label: 'Cédula',     x: M + 82 },
+        { label: 'Celular',    x: M + 112 },
+        { label: 'Posición',   x: M + 142 },
+        { label: 'Camiseta',   x: M + 168 },
+      ];
+
+      const drawPageHeader = () => {
+        const y0 = drawPdfHeader(doc, { W, M, clubName, title: titulo, date: `${fecha} · ${lista.length} jugadores`, logoData, accentRgb });
+        return drawPdfTableHead(doc, { W, M, y: y0, columns: cols, accentRgb });
+      };
+
+      let y = drawPageHeader();
+
+      lista.forEach((j, i) => {
+        if (y > H - 20) { doc.addPage(); y = drawPageHeader(); }
+        if (i % 2 === 0) { doc.setFillColor(248, 249, 250); doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F'); }
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(30, 40, 50);
+        doc.text(String(i + 1),                                      cols[0].x, y);
+        doc.text(`${j.nombre || ''} ${j.apellidos || ''}`.slice(0, 35), cols[1].x, y);
+        doc.text(String(j.cedula || ''),                             cols[2].x, y);
+        doc.text(String(j.celular || ''),                            cols[3].x, y);
+        doc.text((j.posicion || '—').slice(0, 14),                   cols[4].x, y);
+        doc.text(String(j.numero_camiseta || '—'),                   cols[5].x, y);
+        y += 8;
+      });
+
+      const pages = doc.internal.getNumberOfPages();
+      for (let p = 1; p <= pages; p++) {
+        doc.setPage(p);
+        drawPdfFooter(doc, { W, H, M, clubName, pageNum: p, totalPages: pages, note: `${lista.length} jugadores` });
+      }
+
+      const slug = titulo.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      doc.save(`equipo-${slug}-${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (e) { alert('Error al exportar: ' + e.message); }
+    finally { setExportando(false); }
+  };
+
   return (
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
 
@@ -426,13 +491,25 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
               </div>
 
               {seleccion !== '__sin__' && (
-                <button onClick={() => setShowAsignar(s => !s)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10,
-                    background: showAsignar ? `${c}1F` : 'var(--bg-card)', border: `1px solid ${showAsignar ? c + '50' : 'var(--border-sub)'}`,
-                    color: showAsignar ? c : 'var(--text-sec)', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
-                  <UserPlus size={14} />
-                  Asignar jugadores
-                </button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {jugadoresEnEquipo.length > 0 && (
+                    <button onClick={exportarPDF} disabled={exportando}
+                      title="Exportar lista a PDF"
+                      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10,
+                        background: 'var(--bg-card)', border: '1px solid var(--border-sub)',
+                        color: 'var(--text-sec)', cursor: exportando ? 'wait' : 'pointer', fontSize: 13, fontWeight: 600, opacity: exportando ? 0.7 : 1 }}>
+                      {exportando ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                      PDF
+                    </button>
+                  )}
+                  <button onClick={() => setShowAsignar(s => !s)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10,
+                      background: showAsignar ? `${c}1F` : 'var(--bg-card)', border: `1px solid ${showAsignar ? c + '50' : 'var(--border-sub)'}`,
+                      color: showAsignar ? c : 'var(--text-sec)', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+                    <UserPlus size={14} />
+                    Asignar jugadores
+                  </button>
+                </div>
               )}
             </div>
 

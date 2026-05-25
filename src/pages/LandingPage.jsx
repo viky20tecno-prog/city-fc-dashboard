@@ -731,25 +731,31 @@ export default function LandingPage() {
         @keyframes border-breathe { 0%,100%{opacity:0.3} 50%{opacity:0.7} }
         .btn-primary:hover { opacity:0.9; transform:translateY(-2px); box-shadow: 0 12px 36px rgba(0,0,0,0.4); }
         .btn-primary { transition:all var(--dur-med) var(--ease-out); }
-        .btn-ghost:hover { background:rgba(255,255,255,0.09) !important; }
-        .btn-ghost { transition:background var(--dur-fast); }
-        .card-hover:hover { border-color:rgba(255,255,255,0.14) !important; transform:translateY(-4px); box-shadow:0 20px 48px rgba(0,0,0,0.5); }
+        .btn-ghost:hover { background:rgba(255,255,255,0.09) !important; border-color:rgba(255,255,255,0.22) !important; color:rgba(255,255,255,0.95) !important; }
+        .btn-ghost { transition:background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast); }
+        .card-hover:hover { transform:translateY(-4px); box-shadow:0 20px 48px rgba(0,0,0,0.5); }
         .card-hover { transition:all 0.3s var(--ease-out); }
         .color-swatch:hover { transform:scale(1.18) !important; box-shadow: 0 0 0 3px rgba(255,255,255,0.2) !important; }
         .color-swatch { transition:all 0.2s var(--ease-out) !important; }
         .float-badge { display:flex; }
+        .bento-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:16px; }
+        .bento-wide { grid-column:span 4; }
+        .bento-narrow { grid-column:span 2; }
+        @media(max-width:900px){ .bento-wide,.bento-narrow { grid-column:span 3 !important; } }
         @media(max-width:768px){ .float-badge { display:none !important; } }
-        @media(max-width:640px){.hero-h1{font-size:32px!important;letter-spacing:-1px!important;}.hide-mobile{display:none!important;}.pricing-grid{grid-template-columns:1fr!important;}}
+        @media(max-width:640px){.hero-h1{font-size:32px!important;letter-spacing:-1px!important;}.hide-mobile{display:none!important;}.pricing-grid{grid-template-columns:1fr!important;}.bento-wide,.bento-narrow{grid-column:span 6!important;}}
       `}</style>
 
       {/* ── NAVBAR ──────────────────────────────────────────────────────── */}
       <nav style={{
-        position: 'sticky', top: 0, zIndex: 200,
-        background: 'rgba(6,8,16,0.85)', backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        padding: '0 24px',
+        position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
+        width: 'calc(100% - 48px)', maxWidth: 1100, zIndex: 200,
+        background: 'rgba(6,8,16,0.92)', backdropFilter: 'blur(24px)',
+        border: '1px solid rgba(255,255,255,0.10)',
+        borderRadius: 16, padding: '0 20px',
+        boxShadow: '0 4px 32px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset',
       }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <ZenSportsLogo size="md" variant="full" />
           <div className="hide-mobile" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {[
@@ -781,7 +787,7 @@ export default function LandingPage() {
 
       {/* ── HERO ────────────────────────────────────────────────────────── */}
       <section
-        style={{ position: 'relative', padding: '96px 24px 80px', overflow: 'hidden', minHeight: 600 }}
+        style={{ position: 'relative', padding: '132px 24px 80px', overflow: 'hidden', minHeight: 600 }}
       >
         <GridBg color={previewColor} />
         <ParticleField color={previewColor} />
@@ -1000,7 +1006,7 @@ export default function LandingPage() {
             Desde la inscripción hasta el cobro, sin procesos manuales. Eficiencia desde el día uno.
           </p>
         </Reveal>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 16 }}>
+        <div className="bento-grid">
           {[
             {
               icon: Bot, color: previewColor,
@@ -1027,19 +1033,22 @@ export default function LandingPage() {
               badge: 'Carnet',
             },
           ].map(({ icon: Icon, color, title, desc, badge }, i) => (
-            <Reveal key={title} delay={i * 80}>
-              <div className="card-hover" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '26px 22px', height: '100%', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${color}60, transparent)` }} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}14`, border: `1px solid ${color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Icon size={20} color={color} />
+            <div key={title} className={i === 0 || i === 3 ? 'bento-wide' : 'bento-narrow'}>
+              <Reveal delay={i * 80} style={{ height: '100%' }}>
+                <div style={{ background: `linear-gradient(135deg, ${color}40, rgba(255,255,255,0.06) 55%, ${color}18)`, borderRadius: 19, padding: '1px', height: '100%' }}>
+                  <div className="card-hover" style={{ background: 'rgba(8,8,12,0.97)', borderRadius: 18, padding: '28px 24px', height: '100%', boxSizing: 'border-box', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}14`, border: `1px solid ${color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Icon size={20} color={color} />
+                      </div>
+                      <span style={{ fontSize: 10, fontWeight: 700, color, background: `${color}12`, border: `1px solid ${color}25`, borderRadius: 999, padding: '3px 10px', letterSpacing: 0.5 }}>{badge}</span>
+                    </div>
+                    <h3 style={{ fontSize: i === 0 || i === 3 ? 17 : 15, fontWeight: 700, marginBottom: 10, lineHeight: 1.3 }}>{title}</h3>
+                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, margin: 0 }}>{desc}</p>
                   </div>
-                  <span style={{ fontSize: 10, fontWeight: 700, color, background: `${color}12`, border: `1px solid ${color}25`, borderRadius: 999, padding: '3px 10px', letterSpacing: 0.5 }}>{badge}</span>
                 </div>
-                <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 10, lineHeight: 1.3 }}>{title}</h3>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, margin: 0 }}>{desc}</p>
-              </div>
-            </Reveal>
+              </Reveal>
+            </div>
           ))}
         </div>
       </section>

@@ -23,7 +23,7 @@ function Badge({ n, active, color }) {
 function Checkbox({ checked, onChange, color }) {
   return (
     <button
-      onClick={onChange}
+      onClick={e => { e.stopPropagation(); onChange(); }}
       style={{
         width: 18, height: 18, borderRadius: 5, flexShrink: 0, cursor: 'pointer',
         border: `2px solid ${checked ? color : 'var(--border-sub)'}`,
@@ -473,10 +473,10 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
                   {jugadoresDisponibles.slice(0, 50).map(j => {
                     const checked = selAdd.has(j.cedula);
                     return (
-                      <button key={j.cedula} onClick={() => toggleAdd(j.cedula)}
+                      <div key={j.cedula} onClick={() => toggleAdd(j.cedula)}
                         style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', borderRadius: 9,
                           background: checked ? `${c}0D` : 'var(--bg-app)', border: `1px solid ${checked ? c + '40' : 'var(--border-sub)'}`,
-                          cursor: 'pointer', textAlign: 'left', transition: 'all 0.12s' }}>
+                          cursor: 'pointer', transition: 'all 0.12s' }}>
                         <Checkbox checked={checked} onChange={() => toggleAdd(j.cedula)} color={c} />
                         <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--text-sec)', flexShrink: 0 }}>
                           {(j.nombre?.[0] || '?').toUpperCase()}
@@ -488,7 +488,7 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
                             {j.categoria && <span style={{ color: '#F59E0B', marginLeft: 6 }}>· {j.categoria}{j.equipo ? ` / ${j.equipo}` : ''}</span>}
                           </div>
                         </div>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>

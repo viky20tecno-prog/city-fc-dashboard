@@ -1343,6 +1343,78 @@ export default function LandingPage() {
         </Reveal>
       </section>
 
+      {/* ── COMPARATIVA ──────────────────────────────────────────────────── */}
+      <section style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto' }}>
+        <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Comparación</p>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>
+            ¿Por qué no más Excel ni WhatsApp?
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0, maxWidth: 520, marginLeft: 'auto', marginRight: 'auto' }}>
+            Los clubes que migran a ZenSports recuperan en promedio 8 horas semanales de trabajo administrativo.
+          </p>
+        </Reveal>
+        <Reveal>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderRadius: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px 160px 200px', minWidth: 640 }}>
+
+              {/* ─ Encabezados ─ */}
+              <div style={{ padding: '18px 22px', background: 'rgba(255,255,255,0.025)', borderBottom: '1px solid rgba(255,255,255,0.08)' }} />
+              {[
+                { name: 'Google Sheets', sub: 'Hojas de cálculo' },
+                { name: 'WhatsApp', sub: 'Gestión manual' },
+              ].map(h => (
+                <div key={h.name} style={{ padding: '18px 16px', background: 'rgba(255,255,255,0.025)', borderBottom: '1px solid rgba(255,255,255,0.08)', borderLeft: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.4)' }}>{h.name}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginTop: 3 }}>{h.sub}</div>
+                </div>
+              ))}
+              <div style={{ padding: '18px 16px', background: 'rgba(99,102,241,0.10)', borderBottom: '1px solid rgba(99,102,241,0.28)', borderLeft: '1px solid rgba(99,102,241,0.22)', textAlign: 'center', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #4F46E5, #6366F1, #06B6D4)' }} />
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#fff' }}>ZenSports</div>
+                <div style={{ fontSize: 10, color: '#818CF8', marginTop: 3, fontWeight: 600 }}>The Sports OS</div>
+              </div>
+
+              {/* ─ Filas de datos ─ */}
+              {[
+                { feature: 'Inscripciones digitales',  sheets: { ok: false,     text: 'Manual, sin validación'              }, wa: { ok: false,     text: 'Por mensaje, sin historial'           }, zs: { ok: true, text: 'Formulario + validación automática' } },
+                { feature: 'Cobros automáticos',        sheets: { ok: false,     text: 'No existe'                           }, wa: { ok: 'partial', text: 'Recordatorio manual, copiar/pegar'    }, zs: { ok: true, text: 'Ciclo completo automático por WA'   } },
+                { feature: 'Carnet digital QR',         sheets: { ok: false,     text: 'No disponible'                       }, wa: { ok: false,     text: 'No disponible'                        }, zs: { ok: true, text: 'QR verificable, descarga PDF'       } },
+                { feature: 'Reporte financiero',        sheets: { ok: 'partial', text: 'Manual, propenso a errores'          }, wa: { ok: false,     text: 'No disponible'                        }, zs: { ok: true, text: 'Dashboard en tiempo real'           } },
+                { feature: 'Portal del atleta',         sheets: { ok: false,     text: 'No disponible'                       }, wa: { ok: false,     text: 'No disponible'                        }, zs: { ok: true, text: 'App web + historial + pagos'        } },
+                { feature: 'Control de morosidad',      sheets: { ok: false,     text: 'Sin automatización'                  }, wa: { ok: 'partial', text: 'Depende de recordar cada caso'        }, zs: { ok: true, text: 'Alertas y ciclos automáticos'       } },
+                { feature: 'Multi-equipo / categorías', sheets: { ok: 'partial', text: 'Archivo por categoría, desconectado' }, wa: { ok: false,     text: 'Grupos separados sin control'        }, zs: { ok: true, text: 'Todo centralizado en una plataforma'} },
+                { feature: 'Soporte dedicado',          sheets: { ok: false,     text: 'Solo tú'                             }, wa: { ok: false,     text: 'Solo tú'                              }, zs: { ok: true, text: 'Equipo Zenpra por WA siempre'       } },
+              ].map(({ feature, sheets, wa, zs }, idx, arr) => {
+                const isLast = idx === arr.length - 1;
+                const rowBg = idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.018)';
+                const border = isLast ? 'none' : '1px solid rgba(255,255,255,0.05)';
+                const cell = (s, isZs = false) => {
+                  const Ic = s.ok === true ? CheckCircle : s.ok === 'partial' ? AlertTriangle : X;
+                  const ic = s.ok === true ? '#00D084' : s.ok === 'partial' ? '#F5A623' : 'rgba(239,68,68,0.55)';
+                  return (
+                    <div style={{ padding: '14px 16px', background: isZs ? `rgba(99,102,241,${idx % 2 === 0 ? '0.04' : '0.07'})` : rowBg, borderBottom: border, borderLeft: isZs ? '1px solid rgba(99,102,241,0.15)' : '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, textAlign: 'center' }}>
+                      <Ic size={14} color={ic} strokeWidth={2.5} />
+                      <span style={{ fontSize: 11, color: isZs ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.28)', lineHeight: 1.35 }}>{s.text}</span>
+                    </div>
+                  );
+                };
+                return (
+                  <div key={feature} style={{ display: 'contents' }}>
+                    <div style={{ padding: '14px 22px', background: rowBg, borderBottom: border, display: 'flex', alignItems: 'center' }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.78)' }}>{feature}</span>
+                    </div>
+                    {cell(sheets)}
+                    {cell(wa)}
+                    {cell(zs, true)}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
       <section id="precios" style={{ padding: '0 24px 88px', maxWidth: 1200, margin: '0 auto' }}>
         <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>

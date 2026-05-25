@@ -42,6 +42,11 @@ export const THEMES = [
   { id: 'light',    label: 'Claro',      group: 'Claro',    app: '#F1F5F9', card: '#FFFFFF', surface: '#E9EFF6', text: '#0F172A', preview: ['#F1F5F9', '#FFFFFF', '#E9EFF6'] },
   // — Oceánico —
   { id: 'ocean',    label: 'Océano',     group: 'Oceánico', app: '#0A1931', card: '#122B4A', surface: '#1A3D63', text: '#F6FAFD', preview: ['#0A1931', '#122B4A', '#1A3D63'] },
+  { id: 'matrix',   label: 'Matrix',     group: 'Oceánico', app: '#0F0F0F', card: '#202020', surface: '#2A2A2A', text: '#F8F8F8', preview: ['#0F0F0F', '#202020', '#2A2A2A'] },
+  { id: 'brasa',    label: 'Brasa',      group: 'Oceánico', app: '#1E1A16', card: '#37322E', surface: '#524944', text: '#D8D4D0', preview: ['#1E1A16', '#37322E', '#524944'] },
+  { id: 'corsario', label: 'Corsario',   group: 'Oceánico', app: '#030F19', card: '#0A1E2E', surface: '#122E42', text: '#EEE8E0', preview: ['#030F19', '#0A1E2E', '#122E42'] },
+  { id: 'mareas',   label: 'Mareas',     group: 'Oceánico', app: '#0F2C33', card: '#163C45', surface: '#21616A', text: '#E6D1B4', preview: ['#0F2C33', '#163C45', '#21616A'] },
+  { id: 'helio',    label: 'Helio',      group: 'Oceánico', app: '#020008', card: '#0E1A26', surface: '#2C394C', text: '#E8F4FC', preview: ['#020008', '#0E1A26', '#2C394C'] },
 ];
 
 export function applyTheme(themeId) {

@@ -504,14 +504,14 @@ function CasoExito({ caso, delay }) {
 
 /* ── Trust Logos ─────────────────────────────────────────────────────────── */
 const CLUB_LOGOS = [
-  { name: 'FC Barranquilla Norte', abbr: 'FCBN', color: '#0088EE' },
-  { name: 'Academia Medellín',     abbr: 'ACM',  color: '#00D084' },
-  { name: 'Deportivo Cali Sur',    abbr: 'DCS',  color: '#F5A623' },
-  { name: 'Liga Bogotá FC',        abbr: 'LBFC', color: '#C678FF' },
-  { name: 'Club Santa Fe',         abbr: 'CSF',  color: '#FF5E5E' },
-  { name: 'Escuela Norte',         abbr: 'EN',   color: '#00AAFF' },
-  { name: 'Atlético Verde',        abbr: 'ATV',  color: '#22C55E' },
-  { name: 'Deportivo Andes',       abbr: 'DA',   color: '#F59E0B' },
+  { name: 'City FC',               abbr: 'CFC',  color: '#E14924', real: true  },
+  { name: 'FC Barranquilla Norte', abbr: 'FCBN', color: '#0088EE', real: false },
+  { name: 'Academia Medellín',     abbr: 'ACM',  color: '#00D084', real: false },
+  { name: 'Deportivo Cali Sur',    abbr: 'DCS',  color: '#F5A623', real: false },
+  { name: 'Liga Bogotá FC',        abbr: 'LBFC', color: '#C678FF', real: false },
+  { name: 'Club Santa Fe',         abbr: 'CSF',  color: '#FF5E5E', real: false },
+  { name: 'Escuela Norte',         abbr: 'EN',   color: '#00AAFF', real: false },
+  { name: 'Atlético Verde',        abbr: 'ATV',  color: '#22C55E', real: false },
 ];
 
 function TrustLogos() {
@@ -519,27 +519,33 @@ function TrustLogos() {
     <section style={{ padding: '0 24px 72px', maxWidth: 960, margin: '0 auto' }}>
       <Reveal>
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.18)', fontSize: 11, fontWeight: 700, letterSpacing: 3.5, textTransform: 'uppercase', marginBottom: 28 }}>
-          Organizaciones que ya confían en ZenSports
+          Construido para organizaciones deportivas como
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', alignItems: 'center' }}>
           {CLUB_LOGOS.map((club, i) => (
             <Reveal key={club.abbr} delay={i * 50}>
               <div className="card-hover" style={{
                 display: 'flex', alignItems: 'center', gap: 10,
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.055)',
+                background: club.real ? `${club.color}08` : 'rgba(255,255,255,0.02)',
+                border: club.real ? `1px solid ${club.color}35` : '1px solid rgba(255,255,255,0.055)',
                 borderRadius: 12, padding: '10px 18px',
+                position: 'relative',
               }}>
+                {club.real && (
+                  <div style={{ position: 'absolute', top: -6, right: 8, background: club.color, color: '#fff', fontSize: 8, fontWeight: 800, borderRadius: 999, padding: '2px 7px', letterSpacing: 0.5 }}>
+                    PILOTO
+                  </div>
+                )}
                 <div style={{
                   width: 30, height: 30, borderRadius: 7,
-                  background: `${club.color}16`,
-                  border: `1px solid ${club.color}30`,
+                  background: `${club.color}${club.real ? '22' : '16'}`,
+                  border: `1px solid ${club.color}${club.real ? '45' : '30'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 8, fontWeight: 900, color: club.color, letterSpacing: 0.3, flexShrink: 0,
                 }}>
                   {club.abbr}
                 </div>
-                <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.38)', whiteSpace: 'nowrap', fontWeight: 500 }}>{club.name}</span>
+                <span style={{ fontSize: 12.5, color: club.real ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.38)', whiteSpace: 'nowrap', fontWeight: club.real ? 600 : 500 }}>{club.name}</span>
               </div>
             </Reveal>
           ))}
@@ -939,10 +945,10 @@ export default function LandingPage() {
         <Reveal>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1 }}>
             {[
-              { target: '3000', prefix: '+', suffix: '', label: 'registros procesados', color: previewColor, icon: Users },
-              { target: '850',  prefix: '+', suffix: '', label: 'pagos gestionados',    color: '#00D084',   icon: CreditCard },
-              { target: '95',   prefix: '',  suffix: '%', label: 'menos trabajo manual', color: '#F5A623',   icon: TrendingUp },
-              { target: '120',  prefix: '+', suffix: '', label: 'organizaciones activas', color: '#C678FF',   icon: Shield },
+              { target: '72',  prefix: '+', suffix: '',     label: 'jugadores gestionados en producción', color: previewColor, icon: Users      },
+              { target: '8',   prefix: '',  suffix: 'h',   label: 'ahorradas por semana por club',        color: '#00D084',   icon: TrendingUp  },
+              { target: '100', prefix: '',  suffix: '%',   label: 'cobros con seguimiento automático',    color: '#F5A623',   icon: CreditCard  },
+              { target: '5',   prefix: '',  suffix: ' min',label: 'para configurar e iniciar',            color: '#818CF8',   icon: Zap         },
             ].map((s, i) => (
               <Reveal key={s.label} delay={i * 80}>
                 <div className="card-hover" style={{ textAlign: 'center', padding: '40px 24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.055)', borderRadius: 18, position: 'relative', overflow: 'hidden' }}>

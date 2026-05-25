@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 32" fill="none">
+  <!-- Icon — white outline only -->
+  <rect width="32" height="32" rx="7" fill="rgba(255,255,255,0.15)" stroke="white" stroke-width="1"/>
+  <path d="M8 11H24L8 21H24" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Wordmark white -->
+  <text x="41" y="22" font-family="'Space Grotesk', 'Inter', system-ui, sans-serif" font-size="17" fill="white" letter-spacing="-0.5">
+    <tspan font-weight="500" opacity="0.92">Zen</tspan><tspan font-weight="800">Sports</tspan>
+  </text>
+</svg>

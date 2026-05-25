@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { PALETA } from '../components/ThemeSelector';
 import { API_BASE_URL } from '../config';
+import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 
 /* ── Scroll Reveal Hook ─────────────────────────────────────────────────── */
 function useReveal() {
@@ -749,12 +750,7 @@ export default function LandingPage() {
         padding: '0 24px',
       }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 9, background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 16px ${previewColor}50`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s', flexShrink: 0 }}>
-              <Zap size={16} color="#fff" />
-            </div>
-            <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.5px' }}>ZenSports</span>
-          </div>
+          <ZenSportsLogo size="md" variant="full" />
           <div className="hide-mobile" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {[
               { label: 'Producto',       anchor: 'producto'       },
@@ -796,12 +792,11 @@ export default function LandingPage() {
           <div style={{ animation: 'slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both', marginBottom: 28 }}>
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: `linear-gradient(90deg, ${previewColor}12, rgba(0,208,132,0.08), ${previewColor}12)`,
-              border: `1px solid ${previewColor}38`,
+              background: 'linear-gradient(90deg, rgba(99,102,241,0.10), rgba(6,182,212,0.07), rgba(99,102,241,0.10))',
+              border: '1px solid rgba(99,102,241,0.30)',
               borderRadius: 999, padding: '6px 20px',
-              fontSize: 12, color: previewColor, fontWeight: 600, letterSpacing: 0.5,
-              transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s',
-              boxShadow: `0 0 20px ${previewColor}12, inset 0 1px 0 ${previewColor}20`,
+              fontSize: 12, color: 'var(--brand-secondary, #818CF8)', fontWeight: 600, letterSpacing: 0.5,
+              boxShadow: '0 0 20px rgba(99,102,241,0.10), inset 0 1px 0 rgba(99,102,241,0.15)',
             }}>
               <Sparkles size={13} />
               Plataforma líder en gestión deportiva digital · 5 días gratis
@@ -815,9 +810,10 @@ export default function LandingPage() {
               fontWeight: 900,
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
-              color: previewColor,
-              opacity: 0.85,
-              transition: 'color 0.4s',
+              background: 'var(--brand-gradient, linear-gradient(135deg, #6366F1, #06B6D4))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
             }}>
               ZenSports
             </span>
@@ -1569,11 +1565,8 @@ export default function LandingPage() {
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '40px 24px', background: 'rgba(0,0,0,0.3)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 32, justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: previewColor, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 12px ${previewColor}50`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
-                <Zap size={14} color="#fff" />
-              </div>
-              <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-0.3px' }}>ZenSports</span>
+            <div style={{ marginBottom: 10 }}>
+              <ZenSportsLogo size="sm" variant="full" />
             </div>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, margin: '0 0 6px' }}>Gestión deportiva para cualquier club del mundo 🌍</p>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, margin: 0 }}>Creado por <span style={{ color: '#3B82F6', fontWeight: 700 }}>Zenpra</span></p>

@@ -10,6 +10,7 @@ import {
   MonitorPlay, Paintbrush, KeyRound, Gift,
 } from 'lucide-react';
 import { PALETA } from '../components/ThemeSelector';
+import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 
 const CYCLE_COLORS = ['#10B981', '#00AAFF', '#8B5CF6', '#0D9488', '#F97316'];
 
@@ -214,20 +215,9 @@ export default function RegistroClub() {
         {/* ── PANEL IZQ: brand ── */}
         <div style={{ padding: '40px 30px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28 }}>
-            <div style={{
-              width: 40, height: 40, borderRadius: 12,
-              background: `${ac}22`, border: `1px solid ${ac}44`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'background-color 0.7s, border-color 0.7s',
-            }}>
-              <img src="/10894351.png" alt="Logo" style={{ width: 24, height: 24, objectFit: 'contain' }}
-                onError={e => { e.target.style.display = 'none'; }} />
-            </div>
-            <div>
-              <p style={{ color: '#fff', fontWeight: 800, fontSize: 15, margin: 0, letterSpacing: '-0.2px' }}>ZenSports</p>
-              <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0 }}>Sistema operativo deportivo</p>
-            </div>
+          <div style={{ marginBottom: 28 }}>
+            <ZenSportsLogo size="md" variant="full" style={{ marginBottom: 4 }} />
+            <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: '4px 0 0 38px' }}>Sistema operativo deportivo</p>
           </div>
 
           <div style={{ marginBottom: 24 }}>

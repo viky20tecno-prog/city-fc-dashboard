@@ -196,11 +196,22 @@
   --border-dim:   var(--border-sub);
   --font-display: 'Bebas Neue', cursive;
   --font-body:    'Inter', system-ui, sans-serif;
+  --font-brand:   'Space Grotesk', 'Inter', system-ui, sans-serif;
   --text-primary: var(--text-pri);
   --text-muted:   var(--text-sec);
   --yellow:       #F59E0B;
   --red:          #EF4444;
   --purple:       #C678FF;
+
+  /* ── ZenSports Brand Tokens ──────────────────────────────────────── */
+  /* Identidad de la plataforma — independientes del color del club     */
+  --brand-primary:   #6366F1;
+  --brand-secondary: #818CF8;
+  --brand-accent:    #06B6D4;
+  --brand-gradient:  linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #06B6D4 100%);
+  --brand-glow:      rgba(99, 102, 241, 0.28);
+  --brand-surface:   rgba(99, 102, 241, 0.08);
+  --brand-border:    rgba(99, 102, 241, 0.20);
 }
 
 body {

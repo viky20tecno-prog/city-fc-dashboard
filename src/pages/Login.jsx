@@ -5,6 +5,7 @@ import {
   Loader2, Eye, EyeOff, Mail, Lock, CheckCircle, KeyRound,
   ArrowLeft, MessageCircle, Zap, BarChart2, Globe, Medal, AlertTriangle,
 } from 'lucide-react';
+import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 
 const WHATSAPP_SOPORTE = '573204409015';
 
@@ -218,20 +219,9 @@ export default function Login() {
         <div style={{ padding: '44px 36px', display: 'flex', flexDirection: 'column' }}>
 
           {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
-            <div style={{
-              width: 40, height: 40, borderRadius: 12,
-              background: `${color}22`, border: `1px solid ${color}44`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'background-color 0.7s, border-color 0.7s',
-            }}>
-              <img src="/10894351.png" alt="Logo" style={{ width: 24, height: 24, objectFit: 'contain' }}
-                onError={e => { e.target.style.display = 'none'; }} />
-            </div>
-            <div>
-              <p style={{ color: '#fff', fontWeight: 800, fontSize: 15, margin: 0, letterSpacing: '-0.2px' }}>ZenSports</p>
-              <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0 }}>Sistema operativo deportivo</p>
-            </div>
+          <div style={{ marginBottom: 32 }}>
+            <ZenSportsLogo size="md" variant="full" style={{ marginBottom: 4 }} />
+            <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: '4px 0 0 38px' }}>Sistema operativo deportivo</p>
           </div>
 
           {/* Headline */}

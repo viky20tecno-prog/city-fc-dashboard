@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import * as XLSX from 'xlsx';
 import {
   TrendingUp, TrendingDown, Wallet, Plus, Trash2, Loader2,
   Users, ChevronDown, ChevronUp, Download, FileText, X,
@@ -9,7 +8,6 @@ import {
   ComposedChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
-import jsPDF from 'jspdf';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
@@ -48,7 +46,8 @@ function rangoMes(ym) {
   return { desde, hasta };
 }
 
-function exportCSV(rows, filename) {
+async function exportCSV(rows, filename) {
+  const XLSX = await import('xlsx');
   const headers = ['Fecha', 'Tipo', 'Categoría', 'Descripción', 'Monto'];
   const data = rows.map(r => [r.fecha, r.tipo, r.categoria, r.descripcion, r.monto]);
 
@@ -202,6 +201,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
 
   /* ── Comprobante PDF de nómina ──────────────────────── */
   const generarComprobantePago = async (empleado, monto, mes) => {
+    const { default: jsPDF } = await import('jspdf');
     const acHex = (typeof color === 'string' && color.startsWith('#')) ? color : '#E14924';
     const cr = parseInt(acHex.slice(1, 3), 16);
     const cg = parseInt(acHex.slice(3, 5), 16);
@@ -286,6 +286,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
 
   /* ── Exportar PDF ────────────────────────────────────── */
   const exportarPDF = async () => {
+    const { default: jsPDF } = await import('jspdf');
     const doc   = new jsPDF();
     const W     = 210;
     const M     = 14;

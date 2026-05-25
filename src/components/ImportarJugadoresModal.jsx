@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import * as XLSX from 'xlsx';
 import { X, Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Download, Loader2 } from 'lucide-react';
 import { importarJugadoresBulk } from '../services/api';
 
@@ -59,6 +58,7 @@ export default function ImportarJugadoresModal({ onClose, onSuccess }) {
   const parsearArchivo = async (file) => {
     setParseError(null);
     try {
+      const XLSX = await import('xlsx');
       const data = await file.arrayBuffer();
       const wb   = XLSX.read(data, { type: 'array' });
       const ws   = wb.Sheets[wb.SheetNames[0]];

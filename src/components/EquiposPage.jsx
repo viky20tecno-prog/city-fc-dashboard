@@ -3,7 +3,6 @@ import {
   Shield, Plus, X, ChevronRight, ChevronDown, UserX,
   Pencil, Check, Loader2, Search, UserPlus, Tag, Minus, Download,
 } from 'lucide-react';
-import jsPDF from 'jspdf';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { API_BASE_URL } from '../config';
@@ -252,6 +251,7 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
 
     setExportando(true);
     try {
+      const { default: jsPDF } = await import('jspdf');
       const doc       = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const W = 210; const H = 297; const M = 12;
       const accentRgb = hexToRgb(color);

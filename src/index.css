@@ -303,3 +303,18 @@ body {
   100% { transform: scale(1); }
 }
 .animate-check-pop { animation: check-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+/* ── Accessibility ──────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--brand-primary, #6366F1);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

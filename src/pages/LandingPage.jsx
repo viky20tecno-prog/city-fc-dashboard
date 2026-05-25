@@ -76,11 +76,11 @@ function Counter({ target, prefix = '', suffix = '' }) {
 
 /* ── Live Activity Feed ──────────────────────────────────────────────────── */
 const ACTIVITY = [
-  { icon: '✅', text: 'Pago confirmado — Club Atlético Verde', time: 'hace 2 min' },
-  { icon: '👤', text: 'Nuevo jugador inscrito — FC Medellín Sur', time: 'hace 5 min' },
-  { icon: '🪪', text: 'QR de carnet generado — Deportivo Norte', time: 'hace 8 min' },
-  { icon: '💬', text: 'WhatsApp enviado — Pago pendiente × 3', time: 'hace 11 min' },
-  { icon: '✅', text: 'Inscripción validada — Barranquilla FC', time: 'hace 14 min' },
+  { Icon: CheckCircle,  color: '#22C55E', text: 'Pago confirmado — Club Atlético Verde', time: 'hace 2 min' },
+  { Icon: Users,        color: '#818CF8', text: 'Nuevo jugador inscrito — FC Medellín Sur', time: 'hace 5 min' },
+  { Icon: CreditCard,   color: '#06B6D4', text: 'QR de carnet generado — Deportivo Norte', time: 'hace 8 min' },
+  { Icon: MessageCircle,color: '#25D366', text: 'WhatsApp enviado — Pago pendiente × 3', time: 'hace 11 min' },
+  { Icon: CheckCircle,  color: '#22C55E', text: 'Inscripción validada — Barranquilla FC', time: 'hace 14 min' },
 ];
 
 function ActivityFeed() {
@@ -98,8 +98,8 @@ function ActivityFeed() {
       backdropFilter: 'blur(10px)', maxWidth: '100%',
     }}>
       <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 8px #22C55E', flexShrink: 0 }} />
-      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', lineHeight: 1.4 }}>
-        <span style={{ fontSize: 14, marginRight: 4 }}>{item.icon}</span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'rgba(255,255,255,0.65)', lineHeight: 1.4 }}>
+        <item.Icon size={13} color={item.color} strokeWidth={2.2} style={{ flexShrink: 0 }} />
         {item.text}
       </span>
       <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', flexShrink: 0 }}>{item.time}</span>
@@ -245,7 +245,7 @@ function DashboardMockup({ color, modo = 'dark' }) {
         <div style={{ flex: 1 }} />
         <div style={{ height: 22, background: T.liveBg, border: `1px solid ${T.liveBdr}`, borderRadius: 6, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6 }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
-          <span style={{ fontSize: 9, color: T.liveTxt, letterSpacing: 1 }}>EN VIVO</span>
+          <span style={{ fontSize: 10, color: T.liveTxt, letterSpacing: 1 }}>EN VIVO</span>
         </div>
         <div style={{ width: 24, height: 24, borderRadius: 7, background: `${color}28`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s' }}>
           <Zap size={12} color={color} />
@@ -271,7 +271,7 @@ function DashboardMockup({ color, modo = 'dark' }) {
               { label: 'Pendiente', val: '6',  c: '#FF5E5E' },
             ].map(s => (
               <div key={s.label} style={{ background: `${s.c}09`, border: `1px solid ${s.c}25`, borderRadius: 9, padding: '8px 10px', transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s' }}>
-                <div style={{ fontSize: 8, color: T.subTxt, marginBottom: 4, letterSpacing: 0.5 }}>{s.label}</div>
+                <div style={{ fontSize: 10, color: T.subTxt, marginBottom: 4, letterSpacing: 0.5 }}>{s.label}</div>
                 <div style={{ fontSize: 20, fontWeight: 800, color: s.c, lineHeight: 1, transition: 'color 0.4s' }}>{s.val}</div>
               </div>
             ))}
@@ -281,7 +281,7 @@ function DashboardMockup({ color, modo = 'dark' }) {
               <div style={{ width: 60, height: 5, borderRadius: 3, background: `${color}45` }} />
               <div style={{ width: 40, height: 5, borderRadius: 3, background: T.barFill }} />
               <div style={{ flex: 1 }} />
-              <div style={{ padding: '1px 8px', background: `${color}15`, border: `1px solid ${color}30`, borderRadius: 4, fontSize: 7, color, fontWeight: 700, letterSpacing: 0.5 }}>HOY</div>
+              <div style={{ padding: '1px 8px', background: `${color}15`, border: `1px solid ${color}30`, borderRadius: 4, fontSize: 9, color, fontWeight: 700, letterSpacing: 0.5 }}>HOY</div>
             </div>
             {[
               { badge: '#22C55E', text: 'CONFIRMADO', name: 'Carlos M.' },
@@ -293,8 +293,8 @@ function DashboardMockup({ color, modo = 'dark' }) {
                 <div style={{ width: 18, height: 18, borderRadius: '50%', background: `${row.badge}15`, border: `1px solid ${row.badge}40`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: row.badge }} />
                 </div>
-                <div style={{ fontSize: 9, color: T.rowTxt, flex: 1 }}>{row.name}</div>
-                <div style={{ padding: '2px 7px', borderRadius: 4, background: `${row.badge}15`, border: `1px solid ${row.badge}35`, fontSize: 7, color: row.badge, fontWeight: 700, letterSpacing: 0.5 }}>{row.text}</div>
+                <div style={{ fontSize: 10, color: T.rowTxt, flex: 1 }}>{row.name}</div>
+                <div style={{ padding: '2px 7px', borderRadius: 4, background: `${row.badge}15`, border: `1px solid ${row.badge}35`, fontSize: 9, color: row.badge, fontWeight: 700, letterSpacing: 0.5 }}>{row.text}</div>
               </div>
             ))}
           </div>
@@ -762,17 +762,17 @@ export default function LandingPage() {
                 key={label}
                 className="btn-ghost"
                 onClick={() => document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', fontSize: 14, cursor: 'pointer', padding: '7px 14px', borderRadius: 8 }}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', fontSize: 14, cursor: 'pointer', padding: '10px 16px', borderRadius: 8, minHeight: 44 }}
               >
                 {label}
               </button>
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button className="btn-ghost" onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 14, cursor: 'pointer', padding: '7px 14px', borderRadius: 8 }}>
+            <button className="btn-ghost" onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 14, cursor: 'pointer', padding: '10px 16px', borderRadius: 8, minHeight: 44 }}>
               Iniciar sesión
             </button>
-            <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 9, padding: '8px 18px', cursor: 'pointer', boxShadow: `0 0 20px ${previewColor}40`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}>
+            <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 9, padding: '10px 20px', cursor: 'pointer', boxShadow: `0 0 20px ${previewColor}40`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s', minHeight: 44 }}>
               Registrar club
             </button>
           </div>

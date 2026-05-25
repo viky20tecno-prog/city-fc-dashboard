@@ -173,6 +173,16 @@
   --text-mut:    #604870;
   --border-sub:  rgba(180,120,200,0.08);
 }
+[data-theme="ocean"] {
+  --bg-app:      #0A1931;
+  --bg-card:     #122B4A;
+  --bg-surface:  #1A3D63;
+  --bg-input:    #0D2040;
+  --text-pri:    #F6FAFD;
+  --text-sec:    #B3CFE5;
+  --text-mut:    #5A8AB0;
+  --border-sub:  rgba(74,127,167,0.10);
+}
 
 :root {
   /* ── Z-index scale ────────────────────────────────────────

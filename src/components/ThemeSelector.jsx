@@ -40,6 +40,8 @@ export const THEMES = [
   { id: 'sienna',   label: 'Siena',      group: 'Cálido',   app: '#1E1208', card: '#2C1C10', surface: '#3A2618', text: '#F2E8E0', preview: ['#1E1208', '#2C1C10', '#3A2618'] },
   // — Claro —
   { id: 'light',    label: 'Claro',      group: 'Claro',    app: '#F1F5F9', card: '#FFFFFF', surface: '#E9EFF6', text: '#0F172A', preview: ['#F1F5F9', '#FFFFFF', '#E9EFF6'] },
+  // — Oceánico —
+  { id: 'ocean',    label: 'Océano',     group: 'Oceánico', app: '#0A1931', card: '#122B4A', surface: '#1A3D63', text: '#F6FAFD', preview: ['#0A1931', '#122B4A', '#1A3D63'] },
 ];
 
 export function applyTheme(themeId) {

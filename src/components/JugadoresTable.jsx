@@ -603,7 +603,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               {filtered.map((j, i) => (
                 <tr
                   key={j.cedula || i}
-                  style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                  style={{ borderBottom: '1px solid var(--border-sub)' }}
                   className="hover:bg-white/[0.03] transition-colors"
                 >
                   {/* Nombre — con botón Ver a la izquierda */}

@@ -94,10 +94,12 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
 
   const jugadoresEnEquipo = useMemo(() => {
     if (!seleccion || seleccion === '__sin__') return [];
-    return jugadores.filter(j => {
-      if (seleccion.equipo) return j.equipo === seleccion.equipo && j.categoria === seleccion.categoria;
-      return j.categoria === seleccion.categoria && !j.equipo;
-    });
+    return jugadores
+      .filter(j => {
+        if (seleccion.equipo) return j.equipo === seleccion.equipo && j.categoria === seleccion.categoria;
+        return j.categoria === seleccion.categoria && !j.equipo;
+      })
+      .sort((a, b) => `${a.nombre} ${a.apellidos}`.localeCompare(`${b.nombre} ${b.apellidos}`, 'es'));
   }, [jugadores, seleccion]);
 
   const jugadoresSinEquipo = useMemo(() =>

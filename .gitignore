@@ -23,3 +23,5 @@ plan_tecnico_clubcontable.md
 .env*.local
 .github/prompts/
 .kiro/
+coverage/
+.codegraph/

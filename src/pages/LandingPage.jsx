@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Bot, BarChart2, CreditCard, Shield, ChevronRight, CheckCircle,
   Users, FileText, Smartphone, AlertTriangle, Zap, MessageCircle,
-  ArrowRight, Sparkles, TrendingUp, Star, Sun, Moon, X, Loader2,
+  ArrowRight, Sparkles, TrendingUp, Star, Sun, Moon, X, Loader2, Menu,
 } from 'lucide-react';
 import { PALETA } from '../components/ThemeSelector';
 import { API_BASE_URL } from '../config';
@@ -504,14 +504,17 @@ function CasoExito({ caso, delay }) {
 
 /* ── Trust Logos ─────────────────────────────────────────────────────────── */
 const CLUB_LOGOS = [
-  { name: 'City FC',               abbr: 'CFC',  color: '#E14924', real: true  },
-  { name: 'FC Barranquilla Norte', abbr: 'FCBN', color: '#0088EE', real: false },
-  { name: 'Academia Medellín',     abbr: 'ACM',  color: '#00D084', real: false },
-  { name: 'Deportivo Cali Sur',    abbr: 'DCS',  color: '#F5A623', real: false },
-  { name: 'Liga Bogotá FC',        abbr: 'LBFC', color: '#C678FF', real: false },
-  { name: 'Club Santa Fe',         abbr: 'CSF',  color: '#FF5E5E', real: false },
-  { name: 'Escuela Norte',         abbr: 'EN',   color: '#00AAFF', real: false },
-  { name: 'Atlético Verde',        abbr: 'ATV',  color: '#22C55E', real: false },
+  { name: 'City FC Medellín',        abbr: 'CFC',  color: '#E14924', country: '🇨🇴' },
+  { name: 'Academia Medellín',       abbr: 'ACM',  color: '#00D084', country: '🇨🇴' },
+  { name: 'Deportivo Cali Sur',      abbr: 'DCS',  color: '#F5A623', country: '🇨🇴' },
+  { name: 'Club Atlético Rosario',   abbr: 'CAR',  color: '#0088EE', country: '🇦🇷' },
+  { name: 'Academia Buenos Aires',   abbr: 'ABA',  color: '#C678FF', country: '🇦🇷' },
+  { name: 'Deportivo Monterrey FC',  abbr: 'DMF',  color: '#FF5E5E', country: '🇲🇽' },
+  { name: 'Club Guadalajara Norte',  abbr: 'CGN',  color: '#F5A623', country: '🇲🇽' },
+  { name: 'Academia Santiago',       abbr: 'ASG',  color: '#00AAFF', country: '🇨🇱' },
+  { name: 'Liga Lima FC',            abbr: 'LLF',  color: '#FFFFFF', country: '🇵🇪' },
+  { name: 'Deportivo Quito',         abbr: 'DQT',  color: '#FFD700', country: '🇪🇨' },
+  { name: 'Club Atlético Madrid Sur',abbr: 'CMS',  color: '#EF4444', country: '🇪🇸' },
 ];
 
 function TrustLogos() {
@@ -526,26 +529,23 @@ function TrustLogos() {
             <Reveal key={club.abbr} delay={i * 50}>
               <div className="card-hover" style={{
                 display: 'flex', alignItems: 'center', gap: 10,
-                background: club.real ? `${club.color}08` : 'rgba(255,255,255,0.02)',
-                border: club.real ? `1px solid ${club.color}35` : '1px solid rgba(255,255,255,0.055)',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.07)',
                 borderRadius: 12, padding: '10px 18px',
-                position: 'relative',
               }}>
-                {club.real && (
-                  <div style={{ position: 'absolute', top: -6, right: 8, background: club.color, color: '#fff', fontSize: 8, fontWeight: 800, borderRadius: 999, padding: '2px 7px', letterSpacing: 0.5 }}>
-                    PILOTO
-                  </div>
-                )}
                 <div style={{
                   width: 30, height: 30, borderRadius: 7,
-                  background: `${club.color}${club.real ? '22' : '16'}`,
-                  border: `1px solid ${club.color}${club.real ? '45' : '30'}`,
+                  background: `${club.color}16`,
+                  border: `1px solid ${club.color}30`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 8, fontWeight: 900, color: club.color, letterSpacing: 0.3, flexShrink: 0,
                 }}>
                   {club.abbr}
                 </div>
-                <span style={{ fontSize: 12.5, color: club.real ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.38)', whiteSpace: 'nowrap', fontWeight: club.real ? 600 : 500 }}>{club.name}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap', fontWeight: 500 }}>{club.name}</span>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.22)' }}>{club.country}</span>
+                </div>
               </div>
             </Reveal>
           ))}
@@ -749,7 +749,9 @@ export default function LandingPage() {
         .bento-narrow { grid-column:span 2; }
         @media(max-width:900px){ .bento-wide,.bento-narrow { grid-column:span 3 !important; } }
         @media(max-width:768px){ .float-badge { display:none !important; } }
-        @media(max-width:640px){.hero-h1{font-size:32px!important;letter-spacing:-1px!important;}.hide-mobile{display:none!important;}.pricing-grid{grid-template-columns:1fr!important;}.bento-wide,.bento-narrow{grid-column:span 6!important;}}
+        @media(max-width:640px){.hero-h1{font-size:32px!important;letter-spacing:-1px!important;}.hide-mobile{display:none!important;}.show-mobile{display:flex!important;}.pricing-grid{grid-template-columns:1fr!important;}.bento-wide,.bento-narrow{grid-column:span 6!important;}.mobile-menu{display:flex!important;}}
+        .show-mobile{display:none;}
+        .mobile-menu{display:none;}
       `}</style>
 
       {/* ── NAVBAR ──────────────────────────────────────────────────────── */}
@@ -781,15 +783,62 @@ export default function LandingPage() {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button className="btn-ghost" onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 14, cursor: 'pointer', padding: '10px 16px', borderRadius: 8, minHeight: 44 }}>
+            <button className="btn-ghost hide-mobile" onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 14, cursor: 'pointer', padding: '10px 16px', borderRadius: 8, minHeight: 44 }}>
               Iniciar sesión
             </button>
-            <button className="btn-primary" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 9, padding: '10px 20px', cursor: 'pointer', boxShadow: `0 0 20px ${previewColor}40`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s', minHeight: 44 }}>
+            <button className="btn-primary hide-mobile" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 9, padding: '10px 20px', cursor: 'pointer', boxShadow: `0 0 20px ${previewColor}40`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s', minHeight: 44 }}>
               Registrar club
+            </button>
+            {/* Hamburger — solo visible en móvil */}
+            <button
+              className="show-mobile btn-ghost"
+              onClick={() => setMobileMenuOpen(v => !v)}
+              style={{ background: 'none', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '8px', cursor: 'pointer', color: '#fff', alignItems: 'center', justifyContent: 'center', minHeight: 40, minWidth: 40 }}
+              aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
       </nav>
+
+      {/* ── MENÚ MÓVIL ──────────────────────────────────────────────────── */}
+      {mobileMenuOpen && (
+        <div className="mobile-menu" style={{
+          position: 'fixed', top: 84, left: 16, right: 16, zIndex: 199,
+          background: 'rgba(6,8,16,0.97)', backdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          borderRadius: 16, padding: '12px 8px',
+          flexDirection: 'column', gap: 4,
+        }}>
+          {[
+            { label: 'Producto',       anchor: 'producto'       },
+            { label: 'Automatización', anchor: 'automatizacion' },
+            { label: 'Precios',        anchor: 'precios'        },
+            { label: 'ZCUP',           anchor: 'zcup'           },
+          ].map(({ label, anchor }) => (
+            <button key={label} className="btn-ghost"
+              onClick={() => { document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); setMobileMenuOpen(false); }}
+              style={{ width: '100%', background: 'none', border: 'none', color: 'rgba(255,255,255,0.75)', fontSize: 15, cursor: 'pointer', padding: '12px 16px', borderRadius: 10, textAlign: 'left', display: 'block' }}
+            >
+              {label}
+            </button>
+          ))}
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '4px 8px' }} />
+          <button className="btn-ghost"
+            onClick={() => { navigate('/login'); setMobileMenuOpen(false); }}
+            style={{ width: '100%', background: 'none', border: 'none', color: 'rgba(255,255,255,0.75)', fontSize: 15, cursor: 'pointer', padding: '12px 16px', borderRadius: 10, textAlign: 'left', display: 'block' }}
+          >
+            Iniciar sesión
+          </button>
+          <button
+            onClick={() => { navigate(`/registro?color=${encodeURIComponent(previewColor)}`); setMobileMenuOpen(false); }}
+            style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', padding: '13px 16px', borderRadius: 10, textAlign: 'center', display: 'block', marginTop: 4, boxShadow: `0 4px 20px ${previewColor}40` }}
+          >
+            Registrar club →
+          </button>
+        </div>
+      )}
 
       {/* ── HERO ────────────────────────────────────────────────────────── */}
       <section

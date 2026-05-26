@@ -23,7 +23,6 @@ import TorneosPage from '../components/TorneosPage';
 import PagoManualModal from '../components/PagoManualModal';
 import OnboardingWizard from '../components/OnboardingWizard';
 import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSelector';
-import CategoriasJugadoresModal from '../components/CategoriasJugadoresModal';
 import EquiposPage from '../components/EquiposPage';
 import MiEquipoModal from '../components/MiEquipoModal';
 import Calendario from '../components/Calendario';
@@ -99,6 +98,39 @@ export default function Dashboard() {
   const [showEquipo,       setShowEquipo]       = useState(false);
   const [showCobro,        setShowCobro]        = useState(false);
   const [colorOverride,    setColorOverride]    = useState(null);
+
+  // ── Guard: si no hay clubId en localStorage, cerrar sesión y redirigir ──
+  useEffect(() => {
+    if (!localStorage.getItem('clubId')) {
+      supabase.auth.signOut().then(() => navigate('/login', { replace: true }));
+    }
+  }, [navigate]);
+
+  // ── Revalidar rol desde Supabase al montar (evita manipulación de localStorage) ──
+  useEffect(() => {
+    async function revalidarRol() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) return;
+      const userId = session.user.id;
+
+      const { data: ownedClub } = await supabase
+        .from('clubs').select('slug').eq('owner_user_id', userId).single();
+      if (ownedClub?.slug) {
+        localStorage.setItem('userRole', 'ADMIN');
+        return;
+      }
+      const { data: membership } = await supabase
+        .from('club_members')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('activo', true)
+        .single();
+      if (membership?.role) {
+        localStorage.setItem('userRole', membership.role);
+      }
+    }
+    revalidarRol();
+  }, []);
 
   // ── Trial ──
   const trialActivo    = clubConfig?.plan === 'trial' && clubConfig?.trial_ends_at;
@@ -270,7 +302,7 @@ export default function Dashboard() {
     setRefreshing(false);
   };
 
-  const clubId = localStorage.getItem('clubId') || 'city-fc';
+  const clubId = getClubId();
   const inscripcionUrl = `${window.location.origin}/inscripcion?club_id=${clubId}`;
   const portalUrl = `${window.location.origin}/p/${clubId}`;
 

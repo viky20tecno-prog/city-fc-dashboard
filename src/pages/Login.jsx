@@ -204,6 +204,7 @@ export default function Login() {
           .login-panel-izq { display: none !important; }
           .login-divider    { display: none !important; }
           .login-card       { grid-template-columns: 1fr !important; }
+          .login-panel-der  { padding: 32px 20px !important; }
         }
       `}</style>
 
@@ -316,7 +317,7 @@ export default function Login() {
         <div className="login-divider" style={{ background: `${color}22`, transition: 'background 0.5s' }} />
 
         {/* ── PANEL DER: formulario ── */}
-        <div style={{ padding: '44px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div className="login-panel-der" style={{ padding: '44px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
 
           {error && (
             <div style={{

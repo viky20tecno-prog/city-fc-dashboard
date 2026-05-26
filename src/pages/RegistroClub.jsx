@@ -201,6 +201,7 @@ export default function RegistroClub() {
           .reg-panel-izq { display: none !important; }
           .reg-divider    { display: none !important; }
           .reg-card       { grid-template-columns: 1fr !important; }
+          .reg-panel-der  { padding: 24px 20px !important; min-height: unset !important; }
         }
       `}</style>
 
@@ -275,7 +276,7 @@ export default function RegistroClub() {
         <div className="reg-divider" style={{ background: `${ac}22`, transition: 'background 0.5s' }} />
 
         {/* ── PANEL DER: formulario o contacto ── */}
-        <div style={{ padding: '32px 36px', display: 'flex', flexDirection: 'column', justifyContent: showForm ? 'flex-start' : 'center', minHeight: 480, overflowY: 'auto' }}>
+        <div className="reg-panel-der" style={{ padding: '32px 36px', display: 'flex', flexDirection: 'column', justifyContent: showForm ? 'flex-start' : 'center', minHeight: 480, overflowY: 'auto' }}>
 
           <button
             onClick={() => navigate(showForm ? '/' : '/login')}

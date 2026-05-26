@@ -58,7 +58,7 @@ const GRID_2 = {
 
 export default function FormInscripcion() {
   const [searchParams] = useSearchParams();
-  const clubId = searchParams.get('club_id') || 'city-fc';
+  const clubId = searchParams.get('club_id') || null;
 
   const { config: clubConfig } = useClubConfigPublic(clubId);
   const [form, setForm]     = useState({});
@@ -72,6 +72,22 @@ export default function FormInscripcion() {
   const [aceptaPrivacidad, setAceptaPrivacidad] = useState(false);
   const [showPolitica, setShowPolitica]         = useState(false);
   const photoInputRef = useRef(null);
+
+  if (!clubId) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0D1117', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px', fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 20, padding: '40px 32px', maxWidth: 400, textAlign: 'center' }}>
+          <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h2 style={{ color: '#fff', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Enlace inválido</h2>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+            Este formulario requiere un enlace válido con el código del club.<br />Contacta al administrador para obtener el enlace correcto.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const c        = clubConfig?.color  || '#E88C2A';
   const clubName = clubConfig?.nombre || clubId;

@@ -8,12 +8,33 @@ export default function AuthCallback() {
   const [error, setError]   = useState('');
 
   useEffect(() => {
-    const resolverConSesion = async (session) => {
-      const userId = session.user.id;
+    const resolver = async () => {
+      let session = null;
+
+      // Flujo PKCE (Google OAuth): hay un ?code= en la URL que hay que intercambiar
+      const code = new URLSearchParams(window.location.search).get('code');
+      if (code) {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          setError('No se pudo verificar la sesión. Intenta iniciar sesión de nuevo.');
+          return;
+        }
+        session = data.session;
+      } else {
+        // Flujo implícito (magic link / hash token) o sesión ya activa
+        const { data } = await supabase.auth.getSession();
+        session = data.session;
+      }
+
+      if (!session) {
+        setError('No se pudo verificar la sesión. Intenta iniciar sesión de nuevo.');
+        return;
+      }
+
       const { data: club } = await supabase
         .from('clubs')
         .select('slug')
-        .eq('owner_user_id', userId)
+        .eq('owner_user_id', session.user.id)
         .single();
 
       if (club?.slug) {
@@ -24,23 +45,7 @@ export default function AuthCallback() {
       }
     };
 
-    // Escuchar SIGNED_IN para flujo PKCE (OAuth Google / magic link)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        subscription.unsubscribe();
-        resolverConSesion(session);
-      }
-    });
-
-    // Fallback: si la sesión ya existe (reload o flujo implícito)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        subscription.unsubscribe();
-        resolverConSesion(session);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    resolver();
   }, [navigate]);
 
   if (error) {

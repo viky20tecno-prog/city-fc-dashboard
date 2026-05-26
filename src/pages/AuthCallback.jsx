@@ -8,15 +8,7 @@ export default function AuthCallback() {
   const [error, setError]   = useState('');
 
   useEffect(() => {
-    const resolver = async () => {
-      // Supabase lee el code/hash de la URL y establece la sesión
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-      if (sessionError || !session) {
-        setError('No se pudo verificar la sesión. Intenta iniciar sesión de nuevo.');
-        return;
-      }
-
+    const resolverConSesion = async (session) => {
       const userId = session.user.id;
       const { data: club } = await supabase
         .from('clubs')
@@ -28,12 +20,27 @@ export default function AuthCallback() {
         localStorage.setItem('clubId', club.slug);
         navigate('/app', { replace: true });
       } else {
-        // Usuario nuevo con Google — aún no tiene club
         navigate('/registro', { replace: true });
       }
     };
 
-    resolver();
+    // Escuchar SIGNED_IN para flujo PKCE (OAuth Google / magic link)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        subscription.unsubscribe();
+        resolverConSesion(session);
+      }
+    });
+
+    // Fallback: si la sesión ya existe (reload o flujo implícito)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        subscription.unsubscribe();
+        resolverConSesion(session);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   if (error) {

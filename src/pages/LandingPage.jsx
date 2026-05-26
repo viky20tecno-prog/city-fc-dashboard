@@ -556,7 +556,7 @@ function TrustLogos() {
 }
 
 /* ── Payment helpers ──────────────────────────────────────────────────────── */
-const WA_NUMBER = '573204409015';
+const WA_NUMBER = '573023903192';
 const WA_PAYMENT_MSG = {
   starter: encodeURIComponent('Hola, quiero activar el plan Starter de ZenSports ($149.000/mes). ¿Me puedes enviar los datos de pago?'),
   pro:     encodeURIComponent('Hola, quiero escalar mi club con el plan Pro de ZenSports ($399.000/mes). ¿Me puedes enviar los datos de pago?'),
@@ -1704,7 +1704,7 @@ export default function LandingPage() {
 
       {/* ── WHATSAPP FLOTANTE ─────────────────────────────────────────── */}
       <a
-        href={`https://wa.me/573204409015?text=${encodeURIComponent('¡Hola ZenSports! 👋 Vi la plataforma y me interesa registrar mi club. ¿Me pueden guiar para empezar el trial de 5 días? 🚀')}`}
+        href={`https://wa.me/573023903192?text=${encodeURIComponent('¡Hola ZenSports! 👋 Vi la plataforma y me interesa registrar mi club. ¿Me pueden guiar para empezar el trial de 5 días? 🚀')}`}
         target="_blank"
         rel="noopener noreferrer"
         title="Chatea con nosotros por WhatsApp"

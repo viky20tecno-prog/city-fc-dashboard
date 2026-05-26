@@ -1,7 +1,7 @@
 // API REST Config (nuevo)
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
-export const SUPPORT_WHATSAPP = '573204409015';
+export const SUPPORT_WHATSAPP = '573023903192';
 
 // Google Sheets config (deprecado, mantener para compatibilidad)
 export const SHEET_ID = process.env.NEXT_PUBLIC_SHEET_ID || '1LuqQipb1_MD7WoVy0064mZ1vwWgWCg9ikBRUN_-F0-A';

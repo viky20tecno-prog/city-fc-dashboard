@@ -80,7 +80,7 @@ export function drawPdfFooter(doc, { W, H, M, clubName, pageNum, totalPages, not
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.5);
   doc.setTextColor(160, 160, 160);
-  doc.text(`${clubName || 'ZenSports'} · zensports.vercel.app`, M, footerY + 5);
+  doc.text(`${clubName || 'ZenSports'} · zensports.zenpra.ai`, M, footerY + 5);
 
   if (note) {
     doc.text(note, W / 2, footerY + 5, { align: 'center' });

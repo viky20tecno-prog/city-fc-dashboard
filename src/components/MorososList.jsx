@@ -114,7 +114,7 @@ function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoU
     <!-- Footer -->
     <div style="margin-top:20px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
       <p style="font-size:10px;color:#9ca3af">${clubNombre} · Documento confidencial — no compartir públicamente</p>
-      <p style="font-size:10px;color:#9ca3af">zensports.vercel.app</p>
+      <p style="font-size:10px;color:#9ca3af">zensports.zenpra.ai</p>
     </div>
   </div>
 

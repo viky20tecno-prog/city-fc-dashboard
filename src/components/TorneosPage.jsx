@@ -8,7 +8,7 @@ import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { supabase } from '../lib/supabase';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
 const fmtCOP = (n) => `$${parseFloat(n || 0).toLocaleString('es-CO')}`;
 

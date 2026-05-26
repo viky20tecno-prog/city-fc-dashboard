@@ -613,7 +613,7 @@ function TabCarnet({ jugador, clubConfig = {} }) {
     : { bgCard: 'linear-gradient(155deg,#FFFFFF 0%,#F5F5F5 100%)', textPri: '#111111', textSec: '#444444', textMut: '#888888',
         border: `${clubColor}50`, borderImg: `${clubColor}60`, divider: '#EBEBEB', photoBg: '#E0E0E0' };
 
-  const verifyBase = typeof window !== 'undefined' ? window.location.origin : 'https://zensports.vercel.app';
+  const verifyBase = typeof window !== 'undefined' ? window.location.origin : 'https://zensports.zenpra.ai';
   const verifyParams = new URLSearchParams({
     n:    `${nombre} ${apellidos}`.trim(),
     pos:  jugador.posicion        || '',

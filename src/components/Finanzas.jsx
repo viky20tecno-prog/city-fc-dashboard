@@ -13,7 +13,7 @@ import { getClubId } from '../services/api';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 import { supabase } from '../lib/supabase';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
 const CATEGORIAS_INGRESO_DEFAULT = [
   'Patrocinio / Sponsor', 'Venta de uniformes', 'Evento / Rifa',
@@ -278,7 +278,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
     doc.setFont('helvetica', 'italic');
     doc.setFontSize(7);
     doc.setTextColor(150, 160, 180);
-    doc.text('Generado por ZenSports · zensports.vercel.app', W / 2, y, { align: 'center' });
+    doc.text('Generado por ZenSports · zensports.zenpra.ai', W / 2, y, { align: 'center' });
 
     const nombreArchivo = `comprobante-nomina-${(empleado.nombre || 'empleado').replace(/\s+/g, '-').toLowerCase()}-${mes}.pdf`;
     doc.save(nombreArchivo);

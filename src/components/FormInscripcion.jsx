@@ -266,7 +266,7 @@ export default function FormInscripcion() {
 </table>
 <div style="margin-top:20px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
   <p style="font-size:10px;color:#9ca3af">${clubName} · Documento confidencial</p>
-  <p style="font-size:10px;color:#9ca3af">zensports.vercel.app</p>
+  <p style="font-size:10px;color:#9ca3af">zensports.zenpra.ai</p>
 </div>
 </div>
 <div class="no-print" style="padding:0 28px 24px;text-align:center">

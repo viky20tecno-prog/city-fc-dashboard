@@ -1,5 +1,5 @@
 // API REST Config (nuevo)
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
 export const SUPPORT_WHATSAPP = '573204409015';
 

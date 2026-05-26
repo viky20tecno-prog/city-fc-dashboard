@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
 import { applyTheme, getStoredTheme, THEMES } from './ThemeSelector';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
 const PAISES_LIST = [
   { codigo: '57',  bandera: '🇨🇴', nombre: 'Colombia',       moneda: 'COP' },

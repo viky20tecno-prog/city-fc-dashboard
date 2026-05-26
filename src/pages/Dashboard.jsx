@@ -473,7 +473,7 @@ export default function Dashboard() {
               display: 'flex', flexDirection: 'column', gap: '6px',
             }}>
               <div style={{ fontSize: '11px', color: 'var(--text-mut)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>¿Qué hacer ahora?</div>
-              <div style={{ fontSize: '13px', color: 'var(--text-sec)' }}>1. Elige un plan en zensports.vercel.app</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-sec)' }}>1. Elige un plan en zensports.zenpra.ai</div>
               <div style={{ fontSize: '13px', color: 'var(--text-sec)' }}>2. Envíanos tu comprobante de pago</div>
               <div style={{ fontSize: '13px', color: 'var(--text-sec)' }}>3. Activamos tu cuenta en minutos</div>
             </div>
@@ -516,7 +516,7 @@ export default function Dashboard() {
               Activa un plan para no perder el acceso.
             </div>
             <a
-              href="https://zensports.vercel.app#precios"
+              href="https://zensports.zenpra.ai#precios"
               target="_blank"
               rel="noreferrer"
               style={{ fontSize: '12px', fontWeight: 600, color: trialDaysLeft <= 1 ? '#EF4444' : '#F59E0B', textDecoration: 'underline', whiteSpace: 'nowrap' }}

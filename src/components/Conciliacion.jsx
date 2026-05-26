@@ -3,7 +3,7 @@ import { CheckCircle, XCircle, Pencil, ExternalLink, RefreshCw, Clock, AlertCirc
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
 const CONCEPTOS = ['mensualidad', 'uniforme', 'torneo', 'otro'];
 const BANCOS    = ['Efectivo', 'Transferencia', 'BBVA', 'Santander', 'Scotiabank', 'Bancolombia', 'Nequi', 'Daviplata', 'Davivienda', 'Yape', 'Plin', 'Mercado Pago', 'No especificado', 'Otro'];

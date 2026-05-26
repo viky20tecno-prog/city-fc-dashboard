@@ -3,7 +3,7 @@ import { X, AlertTriangle, Plane, Clock, HelpCircle, CheckCircle, AlertCircle, T
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 

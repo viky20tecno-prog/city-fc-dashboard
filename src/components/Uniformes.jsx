@@ -4,7 +4,7 @@ import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfSectionLabel, drawPdfTableHead } from '../lib/pdfHelpers';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://city-fc-api-v2.vercel.app/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
 const normalizarCatalogo = (raw) =>
   (raw || []).map(p =>

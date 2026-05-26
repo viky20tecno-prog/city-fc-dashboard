@@ -196,8 +196,16 @@ export default function RegistroClub() {
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.55) 100%)' }} />
       </div>
 
+      <style>{`
+        @media (max-width: 640px) {
+          .reg-panel-izq { display: none !important; }
+          .reg-divider    { display: none !important; }
+          .reg-card       { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+
       {/* ── CARD SPLIT ── */}
-      <div style={{
+      <div className="reg-card" style={{
         position: 'relative', zIndex: 10,
         width: '100%', maxWidth: 980,
         display: 'grid', gridTemplateColumns: '320px 1px 1fr',
@@ -213,7 +221,7 @@ export default function RegistroClub() {
       }}>
 
         {/* ── PANEL IZQ: brand ── */}
-        <div style={{ padding: '40px 30px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="reg-panel-izq" style={{ padding: '40px 30px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           <div style={{ marginBottom: 28 }}>
             <ZenSportsLogo size="md" variant="full" style={{ marginBottom: 4 }} />
@@ -264,7 +272,7 @@ export default function RegistroClub() {
         </div>
 
         {/* Divisor vertical */}
-        <div style={{ background: `${ac}22`, transition: 'background 0.5s' }} />
+        <div className="reg-divider" style={{ background: `${ac}22`, transition: 'background 0.5s' }} />
 
         {/* ── PANEL DER: formulario o contacto ── */}
         <div style={{ padding: '32px 36px', display: 'flex', flexDirection: 'column', justifyContent: showForm ? 'flex-start' : 'center', minHeight: 480, overflowY: 'auto' }}>

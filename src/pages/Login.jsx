@@ -199,8 +199,16 @@ export default function Login() {
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,0.6) 100%)' }} />
       </div>
 
+      <style>{`
+        @media (max-width: 640px) {
+          .login-panel-izq { display: none !important; }
+          .login-divider    { display: none !important; }
+          .login-card       { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+
       {/* ── CARD SPLIT ── */}
-      <div style={{
+      <div className="login-card" style={{
         position: 'relative', zIndex: 10,
         width: '100%', maxWidth: 880,
         display: 'grid', gridTemplateColumns: '1fr 1px 1fr',
@@ -216,7 +224,7 @@ export default function Login() {
       }}>
 
         {/* ── PANEL IZQ: brand ── */}
-        <div style={{ padding: '44px 36px', display: 'flex', flexDirection: 'column' }}>
+        <div className="login-panel-izq" style={{ padding: '44px 36px', display: 'flex', flexDirection: 'column' }}>
 
           {/* Logo */}
           <div style={{ marginBottom: 32 }}>
@@ -305,7 +313,7 @@ export default function Login() {
         </div>
 
         {/* Divisor vertical */}
-        <div style={{ background: `${color}22`, transition: 'background 0.5s' }} />
+        <div className="login-divider" style={{ background: `${color}22`, transition: 'background 0.5s' }} />
 
         {/* ── PANEL DER: formulario ── */}
         <div style={{ padding: '44px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>

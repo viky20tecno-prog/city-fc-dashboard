@@ -401,20 +401,20 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
 
               <div>
                 <label style={lbl}>Valor de la cuota mensual ({paisActual.moneda})</label>
-                <input type="number" value={mensualidad.valor} min={0}
-                  onChange={e => setMensualidad(m => ({ ...m, valor: +e.target.value }))} style={inp} />
+                <input type="text" inputMode="numeric" value={mensualidad.valor === 0 ? '' : mensualidad.valor} min={0}
+                  onChange={e => { const v = parseInt(e.target.value.replace(/\D/g,''),10); setMensualidad(m => ({ ...m, valor: isNaN(v) ? 0 : v })); }} style={inp} />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={lbl}>Días de gracia antes de mora</label>
-                  <input type="number" value={mensualidad.dias_gracia} min={0} max={30}
-                    onChange={e => setMensualidad(m => ({ ...m, dias_gracia: +e.target.value }))} style={inp} />
+                  <input type="text" inputMode="numeric" value={mensualidad.dias_gracia === 0 ? '' : mensualidad.dias_gracia} min={0} max={30}
+                    onChange={e => { const v = parseInt(e.target.value.replace(/\D/g,''),10); setMensualidad(m => ({ ...m, dias_gracia: isNaN(v) ? 0 : Math.min(v,30) })); }} style={inp} />
                 </div>
                 <div>
                   <label style={lbl}>Penalidad por mora ({paisActual.moneda})</label>
-                  <input type="number" value={mensualidad.penalidad} min={0}
-                    onChange={e => setMensualidad(m => ({ ...m, penalidad: +e.target.value }))} style={inp} />
+                  <input type="text" inputMode="numeric" value={mensualidad.penalidad === 0 ? '' : mensualidad.penalidad} min={0}
+                    onChange={e => { const v = parseInt(e.target.value.replace(/\D/g,''),10); setMensualidad(m => ({ ...m, penalidad: isNaN(v) ? 0 : v })); }} style={inp} />
                 </div>
               </div>
 

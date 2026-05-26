@@ -41,7 +41,8 @@ export default function AuthCallback() {
         localStorage.setItem('clubId', club.slug);
         navigate('/app', { replace: true });
       } else {
-        navigate('/registro', { replace: true });
+        // Debug temporal — muestra el UUID real que llega del OAuth
+        navigate(`/registro?debug_uid=${session.user.id}&debug_email=${session.user.email}`, { replace: true });
       }
     };
 

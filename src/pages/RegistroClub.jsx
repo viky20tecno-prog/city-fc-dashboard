@@ -65,10 +65,22 @@ export default function RegistroClub() {
 
   useEffect(() => { document.title = 'ZenSports — Registrar tu club'; }, []);
 
-  const nombreFromLanding  = searchParams.get('nombre') ? decodeURIComponent(searchParams.get('nombre')) : '';
-  const whatsappFromLanding = searchParams.get('wa')    ? decodeURIComponent(searchParams.get('wa'))    : '';
+  const dec = (key) => searchParams.get(key) ? decodeURIComponent(searchParams.get(key)) : '';
 
-  const [form, setForm]         = useState({ ...INITIAL, nombre_club: nombreFromLanding, celular_admin: whatsappFromLanding });
+  const nombreFromLanding   = dec('nombre');
+  const whatsappFromLanding = dec('wa');
+  const adminFromLanding    = dec('admin');
+  const emailFromLanding    = dec('email');
+  const ciudadFromLanding   = dec('ciudad');
+
+  const [form, setForm] = useState({
+    ...INITIAL,
+    nombre_club:   nombreFromLanding,
+    celular_admin: whatsappFromLanding,
+    nombre_admin:  adminFromLanding,
+    email:         emailFromLanding,
+    ciudad:        ciudadFromLanding,
+  });
   const [color, setColor]       = useState(initialColor);
   const [pais, setPais]         = useState(PAISES[0]);
   const [loading, setLoading]   = useState(false);

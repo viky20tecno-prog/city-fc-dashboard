@@ -18,12 +18,30 @@ import PoliticaPrivacidadModal from './PoliticaPrivacidadModal';
 import { PAISES_NACIMIENTO } from '../lib/paises';
 import { normalizarCategorias } from '../lib/categorias';
 
+const PAISES_TEL = [
+  { code: '57',  flag: '🇨🇴', label: '+57 Colombia' },
+  { code: '1',   flag: '🇺🇸', label: '+1  EE.UU./CA' },
+  { code: '52',  flag: '🇲🇽', label: '+52 México' },
+  { code: '34',  flag: '🇪🇸', label: '+34 España' },
+  { code: '54',  flag: '🇦🇷', label: '+54 Argentina' },
+  { code: '56',  flag: '🇨🇱', label: '+56 Chile' },
+  { code: '51',  flag: '🇵🇪', label: '+51 Perú' },
+  { code: '593', flag: '🇪🇨', label: '+593 Ecuador' },
+  { code: '58',  flag: '🇻🇪', label: '+58 Venezuela' },
+  { code: '55',  flag: '🇧🇷', label: '+55 Brasil' },
+  { code: '598', flag: '🇺🇾', label: '+598 Uruguay' },
+  { code: '595', flag: '🇵🇾', label: '+595 Paraguay' },
+  { code: '591', flag: '🇧🇴', label: '+591 Bolivia' },
+  { code: '506', flag: '🇨🇷', label: '+506 Costa Rica' },
+  { code: '507', flag: '🇵🇦', label: '+507 Panamá' },
+];
+
 const CAMPOS = [
   { key: 'tipo_id',           label: 'Tipo de documento',             type: 'select',  required: true,  section: 'personal',   icon: CreditCard,   options: ['Cédula de Ciudadanía', 'Tarjeta de Identidad', 'Cédula de Extranjería', 'Pasaporte', 'NIT'] },
   { key: 'cedula',            label: 'Número de documento',           type: 'text',    required: true,  section: 'personal',   icon: CreditCard,   placeholder: 'Ej: 123456789' },
   { key: 'nombre',            label: 'Nombre(s)',                     type: 'text',    required: true,  section: 'personal',   icon: User,         placeholder: 'Ej: Santiago' },
   { key: 'apellidos',         label: 'Apellido(s)',                   type: 'text',    required: true,  section: 'personal',   icon: User,         placeholder: 'Ej: García Salazar' },
-  { key: 'celular',           label: 'Celular (WhatsApp)',            type: 'tel',     required: true,  section: 'contacto',   icon: Phone,        placeholder: '3001234567 (sin código de país)' },
+  { key: 'celular',           label: 'Celular (WhatsApp)',            type: 'tel-intl', codigoPaisKey: 'codigo_pais_celular',   required: true,  section: 'contacto',   icon: Phone,        placeholder: '3001234567' },
   { key: 'correo_electronico',label: 'Correo electrónico',           type: 'email',   required: true,  section: 'contacto',   icon: Mail,         placeholder: 'correo@ejemplo.com' },
   { key: 'instagram',         label: 'Instagram (opcional)',          type: 'text',    required: false, section: 'contacto',   icon: Instagram,    placeholder: '@tucuenta' },
   { key: 'pais_nacimiento',    label: 'País de nacimiento',           type: 'pais',    required: false, section: 'adicional',  icon: MapPin },
@@ -37,7 +55,7 @@ const CAMPOS = [
   { key: 'direccion',         label: 'Dirección',                    type: 'text',    required: false, section: 'residencia', icon: Home,         placeholder: 'Cra 45 #67-89' },
   { key: 'barrio',            label: 'Barrio',                       type: 'text',    required: false, section: 'residencia', icon: Home,         placeholder: 'Ej: Laureles' },
   { key: 'familiar_emergencia',label:'Contacto de emergencia',       type: 'text',    required: true,  section: 'emergencia', icon: User,         placeholder: 'Nombre de un familiar' },
-  { key: 'celular_contacto',  label: 'Celular del contacto',         type: 'tel',     required: true,  section: 'emergencia', icon: Phone,        placeholder: 'Número diferente al tuyo' },
+  { key: 'celular_contacto',  label: 'Celular del contacto',         type: 'tel-intl', codigoPaisKey: 'codigo_pais_contacto', required: true,  section: 'emergencia', icon: Phone,        placeholder: 'Número diferente al tuyo' },
 ];
 
 const SECCIONES = [
@@ -128,8 +146,8 @@ export default function FormInscripcion() {
     if (!/^\d{7,15}$/.test(form.cedula.trim())) {
       setStatus('error'); setError('El documento debe tener entre 7 y 15 dígitos.'); return;
     }
-    if (!/^\d{7,15}$/.test(form.celular.trim())) {
-      setStatus('error'); setError('El celular debe tener entre 7 y 15 dígitos.'); return;
+    if (!/^\d{6,12}$/.test((form.celular || '').replace(/\D/g, ''))) {
+      setStatus('error'); setError('El celular debe tener entre 6 y 12 dígitos (sin código de país).'); return;
     }
     if (form.nombre && !/^[A-ZÁÉÍÓÚÑa-záéíóúñ\s'\-]{2,60}$/.test(form.nombre.trim())) {
       setStatus('error'); setError('El nombre solo puede contener letras (mínimo 2 caracteres).'); return;
@@ -143,7 +161,11 @@ export default function FormInscripcion() {
     if (form.direccion && form.direccion.trim().length > 0 && form.direccion.trim().length < 5) {
       setStatus('error'); setError('La dirección debe tener al menos 5 caracteres.'); return;
     }
-    if (form.celular_contacto && form.celular_contacto.trim() === form.celular.trim()) {
+    const celularFull = `${form.codigo_pais_celular || '57'}${(form.celular || '').replace(/\D/g, '')}`;
+    const contactoFull = form.celular_contacto
+      ? `${form.codigo_pais_contacto || '57'}${form.celular_contacto.replace(/\D/g, '')}`
+      : '';
+    if (contactoFull && contactoFull === celularFull) {
       setStatus('error'); setError('El celular de emergencia debe ser diferente al tuyo.'); return;
     }
     if (!aceptaPrivacidad) {
@@ -183,6 +205,11 @@ export default function FormInscripcion() {
           familiar_emergencia: up(form.familiar_emergencia),
           posicion:            up(form.posicion),
           correo_electronico:  form.correo_electronico?.trim().toLowerCase(),
+          // Números completos con código de país
+          celular:          `${form.codigo_pais_celular || '57'}${(form.celular || '').replace(/\D/g, '')}`,
+          celular_contacto: form.celular_contacto
+            ? `${form.codigo_pais_contacto || '57'}${form.celular_contacto.replace(/\D/g, '')}`
+            : undefined,
           ...(foto_url ? { foto_url } : {}),
           ...(form.categoria ? { categoria: up(form.categoria) } : {}),
           ...(form.equipo    ? { equipo:    up(form.equipo)    } : {}),
@@ -716,8 +743,9 @@ export default function FormInscripcion() {
 /* ── Field con ícono ─────────────────────────────────────────────────── */
 function FieldBox({ campo, form, onChange, c }) {
   const Icon = campo.icon;
-  const isSelect = campo.type === 'select';
-  const isPais   = campo.type === 'pais';
+  const isSelect  = campo.type === 'select';
+  const isPais    = campo.type === 'pais';
+  const isTelIntl = campo.type === 'tel-intl';
 
   const labelEl = (
     <label style={{ display: 'block', fontSize: 12, color: 'var(--text-sec)', marginBottom: 5, fontWeight: 500 }}>
@@ -734,6 +762,38 @@ function FieldBox({ campo, form, onChange, c }) {
       style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
     />
   ) : null;
+
+  if (isTelIntl) {
+    const codeKey = campo.codigoPaisKey;
+    return (
+      <div>
+        {labelEl}
+        <div style={{ display: 'flex', gap: 6 }}>
+          <select
+            value={form[codeKey] || '57'}
+            onChange={e => onChange(codeKey, e.target.value)}
+            className="fi fi-sel"
+            style={{ width: 120, flexShrink: 0 }}
+          >
+            {PAISES_TEL.map(p => (
+              <option key={p.code} value={p.code}>{p.flag} +{p.code}</option>
+            ))}
+          </select>
+          <div style={{ position: 'relative', flex: 1 }}>
+            {iconEl}
+            <input
+              type="tel"
+              placeholder={campo.placeholder}
+              value={form[campo.key] || ''}
+              onChange={e => onChange(campo.key, e.target.value.replace(/\D/g, ''))}
+              required={campo.required}
+              className="fi"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isPais) {
     return (

@@ -30,6 +30,58 @@ function Seccion({ titulo, children }) {
 
 const INPUT_CLS = "w-full px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]/50 placeholder-[var(--text-mut)]";
 
+const PAISES_TEL = [
+  { code: '57',  flag: '🇨🇴', label: '+57' },
+  { code: '1',   flag: '🇺🇸', label: '+1'  },
+  { code: '52',  flag: '🇲🇽', label: '+52' },
+  { code: '34',  flag: '🇪🇸', label: '+34' },
+  { code: '54',  flag: '🇦🇷', label: '+54' },
+  { code: '56',  flag: '🇨🇱', label: '+56' },
+  { code: '51',  flag: '🇵🇪', label: '+51' },
+  { code: '593', flag: '🇪🇨', label: '+593'},
+  { code: '58',  flag: '🇻🇪', label: '+58' },
+  { code: '55',  flag: '🇧🇷', label: '+55' },
+  { code: '598', flag: '🇺🇾', label: '+598'},
+  { code: '595', flag: '🇵🇾', label: '+595'},
+  { code: '591', flag: '🇧🇴', label: '+591'},
+  { code: '506', flag: '🇨🇷', label: '+506'},
+  { code: '507', flag: '🇵🇦', label: '+507'},
+];
+
+function parsePhone(full) {
+  const digits = String(full || '').replace(/\D/g, '');
+  for (const c of [...PAISES_TEL].sort((a, b) => b.code.length - a.code.length)) {
+    if (digits.startsWith(c.code) && digits.length > c.code.length) {
+      return { code: c.code, local: digits.slice(c.code.length) };
+    }
+  }
+  return { code: '57', local: digits };
+}
+
+function CampoTelIntl({ label, value, onChange, placeholder = '3001234567' }) {
+  const parsed = parsePhone(value);
+  const [code, setCode] = useState(parsed.code);
+  const [local, setLocal] = useState(parsed.local);
+  const selCls = "px-2 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]/50 w-[80px]";
+  return (
+    <div className="space-y-1">
+      <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">{label}</label>
+      <div className="flex gap-1.5">
+        <select value={code} onChange={e => { setCode(e.target.value); onChange(e.target.value + local); }} className={selCls}>
+          {PAISES_TEL.map(p => <option key={p.code} value={p.code}>{p.flag} {p.label}</option>)}
+        </select>
+        <input
+          type="tel"
+          value={local}
+          onChange={e => { const d = e.target.value.replace(/\D/g,''); setLocal(d); onChange(code + d); }}
+          placeholder={placeholder}
+          className={INPUT_CLS + ' flex-1'}
+        />
+      </div>
+    </div>
+  );
+}
+
 function CampoEdit({ label, value, onChange, type = 'text', placeholder = '', ...rest }) {
   return (
     <div className="space-y-1">
@@ -351,7 +403,7 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
       {/* Contacto */}
       <Seccion titulo="Contacto">
         <div className="grid grid-cols-2 gap-3">
-          <CampoEdit label="Celular"            value={form.celular}            onChange={set('celular')}            placeholder="Ej: 3001234567" />
+          <CampoTelIntl label="Celular (WhatsApp)" value={form.celular} onChange={v => setForm(f => ({ ...f, celular: v }))} />
           <CampoEdit label="Correo electrónico" value={form.correo_electronico} onChange={set('correo_electronico')} placeholder="correo@email.com" type="email" />
           <CampoEdit label="Instagram"          value={form.instagram}          onChange={set('instagram')}          placeholder="@usuario" />
         </div>
@@ -394,7 +446,7 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
       <Seccion titulo="Contacto de Emergencia">
         <div className="grid grid-cols-2 gap-3">
           <CampoEdit label="Familiar / Contacto"  value={form.familiar_emergencia} onChange={set('familiar_emergencia')} placeholder="Nombre completo" />
-          <CampoEdit label="Celular de contacto"  value={form.celular_contacto}    onChange={set('celular_contacto')}    placeholder="3001234567" />
+          <CampoTelIntl label="Celular de contacto" value={form.celular_contacto} onChange={v => setForm(f => ({ ...f, celular_contacto: v }))} />
         </div>
       </Seccion>
 

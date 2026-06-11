@@ -9,11 +9,22 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zen
 const MESES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
                'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
+function calcDias(form) {
+  const dc = Math.min(25, Math.max(1, Number(form.dia_cobro) || 1));
+  const dg = Math.max(1, Number(form.dias_gracia_mora) || 7);
+  return {
+    preventivo:   dc > 4 ? dc - 4 : 27,
+    cobro:        dc,
+    recordatorio: dc + 3,
+    vencimiento:  dc + dg - 1,
+    mora:         dc + dg,
+  };
+}
+
 function buildMensajes(form, clubNombre) {
   const nombre   = 'Juan Pérez';
   const valor    = Number(form.valor_mensualidad);
   const pen      = Number(form.penalidad_mora);
-  const dias     = Number(form.dias_gracia_mora);
   const llave    = form.llave_pago;
   const club     = clubNombre || 'Tu Club';
   const ahora    = new Date();
@@ -22,29 +33,30 @@ function buildMensajes(form, clubNombre) {
   const anio      = ahora.getFullYear();
   const fmt       = (n) => Number(n).toLocaleString('es-CO');
   const pagLink   = llave ? `📲 Paga con la llave:\n🔑 ${llave}` : '';
+  const d         = calcDias(form);
 
   return [
     {
-      dia: 'Día 27', tipo: 'Preventivo', color: '#8B5CF6',
+      dia: `Día ${d.preventivo}`, tipo: 'Preventivo', color: '#8B5CF6', showQr: false,
       texto:
         `⚽ *${club} te avisa con tiempo*\n\n` +
-        `Hola ${nombre}, tu cuota de *${mesSig} ${anio}* se activará pronto.\n\n` +
+        `Hola ${nombre}, tu cuota de *${mesSig} ${anio}* se activará el día ${d.cobro}.\n\n` +
         `💰 Valor: *$${fmt(valor)}*\n\n` +
         `⏳ Organízate desde ya y evita recargos innecesarios.\n\n` +
         `En ${club} jugamos en equipo… y estar al día es parte del juego 💙⚽`,
     },
     {
-      dia: 'Día 1', tipo: 'Cobro activo', color: '#3B82F6',
+      dia: `Día ${d.cobro}`, tipo: 'Cobro activo', color: '#3B82F6', showQr: true,
       texto:
         `📢⚽ *${club} — Cuota activa*\n\n` +
         `Hola ${nombre}, tu cuota de *${mesActual}* ya está activa.\n\n` +
         `💰 Valor: *$${fmt(valor)}*\n` +
-        `📅 Tienes hasta el *día ${dias}* para pagar sin penalidad\n\n` +
+        `📅 Tienes hasta el *día ${d.vencimiento}* para pagar sin penalidad\n\n` +
         (pagLink ? pagLink + '\n\n' : '') +
         `💪 Paga hoy y juega tranquilo todo el mes ⚽🔥`,
     },
     {
-      dia: 'Día 4', tipo: 'Recordatorio', color: '#F59E0B',
+      dia: `Día ${d.recordatorio}`, tipo: 'Recordatorio', color: '#F59E0B', showQr: true,
       texto:
         `⏰⚽ *${club} te recuerda*\n\n` +
         `Hola ${nombre}, te quedan *3 días* para pagar tu cuota de *${mesActual}*.\n\n` +
@@ -54,7 +66,7 @@ function buildMensajes(form, clubNombre) {
         `🔥 No lo dejes para el último minuto… el equipo cuenta contigo ⚽💪`,
     },
     {
-      dia: 'Día 7', tipo: 'Vencimiento', color: '#EF4444',
+      dia: `Día ${d.vencimiento}`, tipo: 'Vencimiento', color: '#EF4444', showQr: true,
       texto:
         `🚨⚽ *HOY es el último día — ${club}*\n\n` +
         `Hola ${nombre}, hoy vence tu cuota de *${mesActual}*.\n\n` +
@@ -64,7 +76,7 @@ function buildMensajes(form, clubNombre) {
         `⏳ Estás a una jugada de seguir al día… no pierdas este partido ⚽🔥`,
     },
     {
-      dia: 'Día 8', tipo: 'Mora', color: '#EF4444',
+      dia: `Día ${d.mora}`, tipo: 'Mora', color: '#EF4444', showQr: true,
       texto:
         `🚫⚽ *${club} — Estado en mora*\n\n` +
         `Hola ${nombre}, tu cuota de *${mesActual} ${anio}* ya está vencida.\n\n` +
@@ -124,6 +136,7 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
     valor_mensualidad: clubConfig?.valor_mensualidad  ?? 65000,
     penalidad_mora:    clubConfig?.penalidad_mora      ?? 10000,
     dias_gracia_mora:  clubConfig?.dias_gracia_mora    ?? 7,
+    dia_cobro:         clubConfig?.dia_cobro           ?? 1,
     cuenta_banco:      clubConfig?.cuenta_bancaria?.banco  || '',
     cuenta_tipo:       clubConfig?.cuenta_bancaria?.tipo   || '',
     cuenta_numero:     clubConfig?.cuenta_bancaria?.numero || '',
@@ -173,6 +186,7 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
           valor_mensualidad: Number(form.valor_mensualidad),
           penalidad_mora:    Number(form.penalidad_mora),
           dias_gracia_mora:  Number(form.dias_gracia_mora),
+          dia_cobro:         Math.min(25, Math.max(1, Number(form.dia_cobro) || 1)),
           cuenta_bancaria:   (form.cuenta_numero || form.cuenta_banco)
             ? { banco: form.cuenta_banco || null, tipo: form.cuenta_tipo || null, numero: form.cuenta_numero || null }
             : null,
@@ -282,6 +296,45 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
                   onChange={e => set('dias_gracia_mora', e.target.value)} style={inp} />
               </div>
             </div>
+
+            {/* ── Día de cobro ── */}
+            {(() => {
+              const d = calcDias(form);
+              return (
+                <div style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: '#CBD5E1', letterSpacing: 0.3 }}>
+                    📅 Día de cobro mensual
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 100 }}>
+                      <label style={lbl}>Día del mes (1–25)</label>
+                      <input type="number" min={1} max={25} value={form.dia_cobro}
+                        onChange={e => set('dia_cobro', e.target.value)} style={inp} />
+                    </div>
+                    <div style={{ flex: 1, display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                      {[
+                        { label: `Día ${d.preventivo}`, sub: 'Aviso previo', color: '#8B5CF6' },
+                        { label: `Día ${d.cobro}`,        sub: 'Cobro activo', color: '#3B82F6' },
+                        { label: `Día ${d.recordatorio}`, sub: 'Recordatorio', color: '#F59E0B' },
+                        { label: `Día ${d.vencimiento}`,  sub: 'Vencimiento',  color: '#EF4444' },
+                        { label: `Día ${d.mora}`,         sub: 'Mora',         color: '#EF4444' },
+                      ].map((step, i, arr) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: step.color }}>{step.label}</div>
+                            <div style={{ fontSize: 9, color: '#8B95A3' }}>{step.sub}</div>
+                          </div>
+                          {i < arr.length - 1 && <div style={{ color: '#4A5568', fontSize: 10, marginBottom: 8 }}>→</div>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <p style={{ fontSize: 11, color: '#8B95A3', margin: 0 }}>
+                    Define el día del mes en que se activa la cuota. Los mensajes de recordatorio y mora se calculan automáticamente.
+                  </p>
+                </div>
+              );
+            })()}
 
             <div>
               <label style={lbl}>Tu WhatsApp (recibe alertas de mora)</label>
@@ -422,7 +475,7 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
               {/* Burbuja del mensaje */}
               <WaBubble
                 texto={msgActual.texto}
-                qrUrl={form.qr_pago_url && ['Día 1', 'Día 4', 'Día 7', 'Día 8'].includes(msgActual.dia) ? form.qr_pago_url : null}
+                qrUrl={form.qr_pago_url && msgActual.showQr ? form.qr_pago_url : null}
                 color={c}
               />
 

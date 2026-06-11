@@ -124,6 +124,9 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
     valor_mensualidad: clubConfig?.valor_mensualidad  ?? 65000,
     penalidad_mora:    clubConfig?.penalidad_mora      ?? 10000,
     dias_gracia_mora:  clubConfig?.dias_gracia_mora    ?? 7,
+    cuenta_banco:      clubConfig?.cuenta_bancaria?.banco  || '',
+    cuenta_tipo:       clubConfig?.cuenta_bancaria?.tipo   || '',
+    cuenta_numero:     clubConfig?.cuenta_bancaria?.numero || '',
   });
 
   const [saving,      setSaving]      = useState(false);
@@ -170,6 +173,9 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
           valor_mensualidad: Number(form.valor_mensualidad),
           penalidad_mora:    Number(form.penalidad_mora),
           dias_gracia_mora:  Number(form.dias_gracia_mora),
+          cuenta_bancaria:   (form.cuenta_numero || form.cuenta_banco)
+            ? { banco: form.cuenta_banco || null, tipo: form.cuenta_tipo || null, numero: form.cuenta_numero || null }
+            : null,
         }),
       });
       setSaved(true);
@@ -291,6 +297,39 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
                 placeholder="Ej: 3001234567 o 0087276387" style={inp} />
               <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 5, marginBottom: 0 }}>
                 Aparece en cada mensaje de cobro para que el jugador pague directo.
+              </p>
+            </div>
+
+            {/* ── Cuenta bancaria ── */}
+            <div style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: '#CBD5E1', letterSpacing: 0.3 }}>
+                🏦 Cuenta bancaria (transferencia)
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <label style={lbl}>Banco</label>
+                  <input value={form.cuenta_banco}
+                    onChange={e => set('cuenta_banco', e.target.value)}
+                    placeholder="Ej: Bancolombia, BBVA…"
+                    style={inp} />
+                </div>
+                <div>
+                  <label style={lbl}>Tipo de cuenta</label>
+                  <input value={form.cuenta_tipo}
+                    onChange={e => set('cuenta_tipo', e.target.value)}
+                    placeholder="Ahorros / Corriente"
+                    style={inp} />
+                </div>
+              </div>
+              <div>
+                <label style={lbl}>Número de cuenta</label>
+                <input value={form.cuenta_numero}
+                  onChange={e => set('cuenta_numero', e.target.value.replace(/\s/g, ''))}
+                  placeholder="Ej: 12345678901"
+                  style={inp} />
+              </div>
+              <p style={{ fontSize: 11, color: '#8B95A3', margin: 0 }}>
+                El bot mostrará estos datos cuando el jugador pregunte cómo pagar. Funciona para cualquier país.
               </p>
             </div>
 

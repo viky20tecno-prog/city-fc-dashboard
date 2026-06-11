@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
@@ -35,6 +35,65 @@ const PAISES_TEL = [
   { code: '506', flag: '🇨🇷', label: '+506 Costa Rica' },
   { code: '507', flag: '🇵🇦', label: '+507 Panamá' },
 ];
+
+function CountryCodePicker({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const selected = PAISES_TEL.find(p => p.code === value) || PAISES_TEL[0];
+
+  useEffect(() => {
+    if (!open) return;
+    function onDoc(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position: 'relative', width: 120, flexShrink: 0 }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer',
+          background: 'var(--input-bg)', border: '1px solid var(--border)',
+          borderRadius: 10, padding: '9px 10px', color: 'var(--text-pri)', fontSize: 14,
+        }}
+      >
+        <span style={{ fontSize: 18 }}>{selected.flag}</span>
+        <span style={{ color: 'var(--text-sec)', fontSize: 13 }}>+{selected.code}</span>
+        <ChevronDown size={11} color="var(--text-mut)" style={{ marginLeft: 'auto', flexShrink: 0 }} />
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: 99,
+          width: 210, background: '#161b22', border: '1px solid var(--border)',
+          borderRadius: 10, overflow: 'auto', maxHeight: 260,
+          boxShadow: '0 12px 32px rgba(0,0,0,0.6)',
+        }}>
+          {PAISES_TEL.map(p => (
+            <button
+              key={p.code}
+              type="button"
+              onClick={() => { onChange(p.code); setOpen(false); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                padding: '7px 12px', cursor: 'pointer', textAlign: 'left', border: 'none',
+                background: p.code === value ? 'rgba(255,255,255,0.07)' : 'transparent',
+                color: 'var(--text-pri)',
+              }}
+            >
+              <span style={{ fontSize: 18, lineHeight: 1 }}>{p.flag}</span>
+              <span style={{ color: 'var(--text-sec)', fontSize: 12 }}>+{p.code}</span>
+              <span style={{ fontSize: 12, color: 'var(--text-pri)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                {p.label.split(' ').slice(1).join(' ')}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const CAMPOS = [
   { key: 'tipo_id',           label: 'Tipo de documento',             type: 'select',  required: true,  section: 'personal',   icon: CreditCard,   options: ['Cédula de Ciudadanía', 'Tarjeta de Identidad', 'Cédula de Extranjería', 'Pasaporte', 'NIT'] },
@@ -769,16 +828,10 @@ function FieldBox({ campo, form, onChange, c }) {
       <div>
         {labelEl}
         <div style={{ display: 'flex', gap: 6 }}>
-          <select
+          <CountryCodePicker
             value={form[codeKey] || '57'}
-            onChange={e => onChange(codeKey, e.target.value)}
-            className="fi fi-sel"
-            style={{ width: 120, flexShrink: 0 }}
-          >
-            {PAISES_TEL.map(p => (
-              <option key={p.code} value={p.code}>{p.flag} +{p.code}</option>
-            ))}
-          </select>
+            onChange={v => onChange(codeKey, v)}
+          />
           <div style={{ position: 'relative', flex: 1 }}>
             {iconEl}
             <input

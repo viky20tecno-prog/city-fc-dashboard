@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import {
   X, User, Camera, Save, Loader2, CheckCircle, ClipboardList, ZoomIn,
@@ -31,21 +32,21 @@ function Seccion({ titulo, children }) {
 const INPUT_CLS = "w-full px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]/50 placeholder-[var(--text-mut)]";
 
 const PAISES_TEL = [
-  { code: '57',  flag: '🇨🇴', label: '+57' },
-  { code: '1',   flag: '🇺🇸', label: '+1'  },
-  { code: '52',  flag: '🇲🇽', label: '+52' },
-  { code: '34',  flag: '🇪🇸', label: '+34' },
-  { code: '54',  flag: '🇦🇷', label: '+54' },
-  { code: '56',  flag: '🇨🇱', label: '+56' },
-  { code: '51',  flag: '🇵🇪', label: '+51' },
-  { code: '593', flag: '🇪🇨', label: '+593'},
-  { code: '58',  flag: '🇻🇪', label: '+58' },
-  { code: '55',  flag: '🇧🇷', label: '+55' },
-  { code: '598', flag: '🇺🇾', label: '+598'},
-  { code: '595', flag: '🇵🇾', label: '+595'},
-  { code: '591', flag: '🇧🇴', label: '+591'},
-  { code: '506', flag: '🇨🇷', label: '+506'},
-  { code: '507', flag: '🇵🇦', label: '+507'},
+  { code: '57',  flag: '🇨🇴', label: '+57',  nombre: 'Colombia'    },
+  { code: '1',   flag: '🇺🇸', label: '+1',   nombre: 'EE.UU.'      },
+  { code: '52',  flag: '🇲🇽', label: '+52',  nombre: 'México'      },
+  { code: '34',  flag: '🇪🇸', label: '+34',  nombre: 'España'      },
+  { code: '54',  flag: '🇦🇷', label: '+54',  nombre: 'Argentina'   },
+  { code: '56',  flag: '🇨🇱', label: '+56',  nombre: 'Chile'       },
+  { code: '51',  flag: '🇵🇪', label: '+51',  nombre: 'Perú'        },
+  { code: '593', flag: '🇪🇨', label: '+593', nombre: 'Ecuador'     },
+  { code: '58',  flag: '🇻🇪', label: '+58',  nombre: 'Venezuela'   },
+  { code: '55',  flag: '🇧🇷', label: '+55',  nombre: 'Brasil'      },
+  { code: '598', flag: '🇺🇾', label: '+598', nombre: 'Uruguay'     },
+  { code: '595', flag: '🇵🇾', label: '+595', nombre: 'Paraguay'    },
+  { code: '591', flag: '🇧🇴', label: '+591', nombre: 'Bolivia'     },
+  { code: '506', flag: '🇨🇷', label: '+506', nombre: 'Costa Rica'  },
+  { code: '507', flag: '🇵🇦', label: '+507', nombre: 'Panamá'      },
 ];
 
 function parsePhone(full) {
@@ -58,18 +59,59 @@ function parsePhone(full) {
   return { code: '57', local: digits };
 }
 
+function CountryPicker({ code, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const sel = PAISES_TEL.find(p => p.code === code) || PAISES_TEL[0];
+
+  useEffect(() => {
+    if (!open) return;
+    function onDoc(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative shrink-0" style={{ width: 90 }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-1 px-2 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] cursor-pointer"
+      >
+        <span style={{ fontSize: 18, lineHeight: 1 }}>{sel.flag}</span>
+        <span className="text-xs text-[var(--text-mut)]">{sel.label}</span>
+        <ChevronDown size={10} className="ml-auto shrink-0 text-[var(--text-mut)]" />
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 rounded-lg border border-[var(--border-sub)] overflow-auto"
+             style={{ background: 'var(--bg-card)', boxShadow: '0 12px 32px rgba(0,0,0,0.6)', maxHeight: 240, width: 200 }}>
+          {PAISES_TEL.map(p => (
+            <button
+              key={p.code}
+              type="button"
+              onClick={() => { onChange(p.code); setOpen(false); }}
+              className={`flex items-center gap-2 w-full px-3 py-1.5 text-left text-xs border-none cursor-pointer hover:bg-white/5 ${p.code === code ? 'bg-white/10' : 'bg-transparent'}`}
+            >
+              <span style={{ fontSize: 16, lineHeight: 1 }}>{p.flag}</span>
+              <span className="text-[var(--text-mut)] shrink-0">{p.label}</span>
+              <span className="text-[var(--text-sec)] truncate">{p.nombre || ''}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CampoTelIntl({ label, value, onChange, placeholder = '3001234567' }) {
   const parsed = parsePhone(value);
   const [code, setCode] = useState(parsed.code);
   const [local, setLocal] = useState(parsed.local);
-  const selCls = "px-2 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]/50 w-[80px]";
   return (
     <div className="space-y-1">
       <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">{label}</label>
       <div className="flex gap-1.5">
-        <select value={code} onChange={e => { setCode(e.target.value); onChange(e.target.value + local); }} className={selCls}>
-          {PAISES_TEL.map(p => <option key={p.code} value={p.code}>{p.flag} {p.label}</option>)}
-        </select>
+        <CountryPicker code={code} onChange={c => { setCode(c); onChange(c + local); }} />
         <input
           type="tel"
           value={local}

@@ -386,19 +386,26 @@ export default function Dashboard() {
 
         {/* Indicador de Trial */}
         {trialActivo && !trialExpirado && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '5px',
-            padding: '3px 10px', borderRadius: '20px',
-            background: trialDaysLeft <= 2 ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
-            border: `1px solid ${trialDaysLeft <= 2 ? 'rgba(239,68,68,0.35)' : 'rgba(245,158,11,0.35)'}`,
-            fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px',
-            color: trialDaysLeft <= 2 ? '#EF4444' : '#F59E0B',
-            flexShrink: 0,
-            textTransform: 'uppercase',
-          }}>
-            <Clock size={10} />
-            Trial: {trialDaysLeft}d
-          </div>
+          <a
+            href="https://zensports.zenpra.ai#precios"
+            target="_blank"
+            rel="noreferrer"
+            title={`Prueba gratis — vence el ${new Date(clubConfig.trial_ends_at).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })}`}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '5px',
+              padding: '4px 10px', borderRadius: '20px',
+              background: trialDaysLeft <= 2 ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.10)',
+              border: `1px solid ${trialDaysLeft <= 2 ? 'rgba(239,68,68,0.40)' : 'rgba(245,158,11,0.40)'}`,
+              fontSize: '11px', fontWeight: 700, letterSpacing: '0.3px',
+              color: trialDaysLeft <= 2 ? '#EF4444' : '#F59E0B',
+              flexShrink: 0, textDecoration: 'none', cursor: 'pointer',
+            }}
+          >
+            <Clock size={11} />
+            {trialDaysLeft <= 2
+              ? `⚠️ ${trialDaysLeft}d restante${trialDaysLeft !== 1 ? 's' : ''}`
+              : `Prueba — ${trialDaysLeft} días`}
+          </a>
         )}
 
         {/* Pago Manual */}
@@ -531,32 +538,45 @@ export default function Dashboard() {
 
       {/* ───── MAIN ───── */}
       <main style={S.main}>
-        {/* Banner trial próximo a vencer (≤3 días, no expirado) */}
-        {trialActivo && !trialExpirado && trialDaysLeft <= 3 && (
-          <div style={{
-            marginBottom: '14px',
-            padding: '10px 16px',
-            borderRadius: '12px',
-            background: trialDaysLeft <= 1 ? 'rgba(239,68,68,0.08)' : 'rgba(245,158,11,0.08)',
-            border: `1px solid ${trialDaysLeft <= 1 ? 'rgba(239,68,68,0.30)' : 'rgba(245,158,11,0.30)'}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
-            flexWrap: 'wrap',
-          }}>
-            <div style={{ fontSize: '13px', color: trialDaysLeft <= 1 ? '#EF4444' : '#F59E0B', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <AlertTriangle size={13} />
-              Tu período de prueba vence {trialDaysLeft === 0 ? 'hoy' : `en ${trialDaysLeft} día${trialDaysLeft !== 1 ? 's' : ''}`}.
-              Activa un plan para no perder el acceso.
+        {/* Banner trial — visible durante todo el período de prueba */}
+        {trialActivo && !trialExpirado && (() => {
+          const urgente = trialDaysLeft <= 3;
+          const color   = trialDaysLeft <= 1 ? '#EF4444' : urgente ? '#F59E0B' : '#60A5FA';
+          const bg      = trialDaysLeft <= 1 ? 'rgba(239,68,68,0.07)' : urgente ? 'rgba(245,158,11,0.07)' : 'rgba(96,165,250,0.07)';
+          const border  = trialDaysLeft <= 1 ? 'rgba(239,68,68,0.25)' : urgente ? 'rgba(245,158,11,0.25)' : 'rgba(96,165,250,0.20)';
+          const fechaVence = new Date(clubConfig.trial_ends_at).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' });
+          const mensaje = trialDaysLeft <= 0
+            ? 'Tu prueba vence hoy. Activa un plan para no perder el acceso.'
+            : urgente
+            ? `Tu prueba vence en ${trialDaysLeft} día${trialDaysLeft !== 1 ? 's' : ''} (${fechaVence}). Activa un plan para no perder el acceso.`
+            : `Estás en período de prueba gratuita — vence el ${fechaVence}. Explora los planes cuando quieras.`;
+          return (
+            <div style={{
+              marginBottom: '14px', padding: '9px 16px', borderRadius: '12px',
+              background: bg, border: `1px solid ${border}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+              flexWrap: 'wrap',
+            }}>
+              <div style={{ fontSize: '13px', color, fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {urgente ? <AlertTriangle size={13} /> : <Clock size={13} />}
+                {mensaje}
+              </div>
+              <a
+                href="https://zensports.zenpra.ai#precios"
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  fontSize: '12px', fontWeight: 700, color,
+                  textDecoration: 'none', whiteSpace: 'nowrap',
+                  padding: '4px 12px', borderRadius: '8px',
+                  border: `1px solid ${border}`, background: bg,
+                }}
+              >
+                Ver planes →
+              </a>
             </div>
-            <a
-              href="https://zensports.zenpra.ai#precios"
-              target="_blank"
-              rel="noreferrer"
-              style={{ fontSize: '12px', fontWeight: 600, color: trialDaysLeft <= 1 ? '#EF4444' : '#F59E0B', textDecoration: 'underline', whiteSpace: 'nowrap' }}
-            >
-              Ver planes →
-            </a>
-          </div>
-        )}
+          );
+        })()}
 
         {clubConfig?.logo_url && (
           <div style={{

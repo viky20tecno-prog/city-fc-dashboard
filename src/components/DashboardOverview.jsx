@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import RecaudacionChart from './RecaudacionChart';
 import MorososList from './MorososList';
+import PagosPendientesList from './PagosPendientesList';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 
 /* ── formateo ── */
@@ -75,7 +76,8 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
 
 /* ── componente principal ── */
 export default function DashboardOverview({ jugadores, mensualidades, morosos, codigoPais = '57', color = '#60A5FA', clubNombre = 'Mi Club', logoUrl = '' }) {
-  const mesActual = new Date().getMonth() + 1;
+  const mesActual  = new Date().getMonth() + 1;
+  const anioActual = new Date().getFullYear();
 
   const activos = useMemo(
     () => jugadores.filter(j => j.activo === true || (j.activo || '').toString().toUpperCase() === 'SI'),
@@ -105,6 +107,28 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
     const pct = activos.length > 0 ? Math.round((alDia / activos.length) * 100) : 0;
     return { alDia, pendientes, parciales, mora, recaudado, totalEsperado, pct };
   }, [activos, morososSet, mensualidades, mesActual]);
+
+  const pendientesList = useMemo(() => {
+    return activos
+      .map(j => {
+        const mens = mensualidades.find(
+          m => String(m.cedula) === String(j.cedula) &&
+               parseInt(m.numero_mes) === mesActual &&
+               parseInt(m.anio) === anioActual,
+        );
+        if (!mens || ['AL_DIA', 'MORA'].includes(mens.estado)) return null;
+        return {
+          nombre:   `${j.nombre || ''} ${j.apellidos || ''}`.trim(),
+          cedula:   j.cedula,
+          celular:  j.celular,
+          equipo:   j.equipo || '',
+          saldo:    parseFloat(mens.saldo_pendiente) || parseFloat(mens.valor_oficial) || 0,
+          estado:   mens.estado,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.saldo - a.saldo);
+  }, [activos, mensualidades, mesActual, anioActual]);
 
   const clubColor = {
     icon:   color,
@@ -148,6 +172,17 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
       }}>
         <RecaudacionChart mensualidades={mensualidades} />
         <MorososList morosos={morosos} codigoPais={codigoPais} clubNombre={clubNombre} color={color} logoUrl={logoUrl} />
+      </div>
+
+      {/* ── PAGOS PENDIENTES ── */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <PagosPendientesList
+          pendientes={pendientesList}
+          codigoPais={codigoPais}
+          clubNombre={clubNombre}
+          color={color}
+          logoUrl={logoUrl}
+        />
       </div>
 
     </div>

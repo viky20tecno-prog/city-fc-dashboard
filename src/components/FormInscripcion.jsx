@@ -552,9 +552,15 @@ export default function FormInscripcion() {
 
         {/* ── HEADER ── */}
         <div style={S.header}>
-          <div style={{ width: 56, height: 56, borderRadius: 16, background: c, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: `0 8px 24px ${c}55` }}>
-            <ClipboardList size={26} color="#fff" strokeWidth={1.8} />
-          </div>
+          {clubConfig?.logo_url ? (
+            <div style={{ width: 72, height: 72, borderRadius: 18, overflow: 'hidden', margin: '0 auto 14px', border: `2px solid ${c}40`, boxShadow: `0 8px 28px ${c}35`, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src={clubConfig.logo_url} alt={clubName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            </div>
+          ) : (
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: c, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: `0 8px 24px ${c}55` }}>
+              <ClipboardList size={26} color="#fff" strokeWidth={1.8} />
+            </div>
+          )}
           <h1 style={{ color: '#fff', fontSize: 22, fontWeight: 800, margin: '0 0 4px' }}>
             Únete a <span style={{ color: c }}>{clubName}</span>
           </h1>

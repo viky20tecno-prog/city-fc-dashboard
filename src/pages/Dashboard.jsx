@@ -247,7 +247,6 @@ export default function Dashboard() {
       position: 'relative',
       zIndex: 50,
       transition: 'border-color 0.5s',
-      overflow: 'hidden',
     },
     sep: {
       width: '1px', height: '30px',

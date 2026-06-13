@@ -619,9 +619,9 @@ function FlowDiagram() {
       <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
         <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Cómo funciona</p>
         <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>
-          Así funciona ZenSports de principio a fin.
+          Cuatro pasos para que tu club cobre a tiempo.
         </h2>
-        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>Cuatro pasos para que tu club esté 100% digitalizado.</p>
+        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>Y elimine el desorden administrativo de una vez por todas.</p>
       </Reveal>
       <Reveal>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', flexWrap: 'wrap', gap: 0 }}>
@@ -720,6 +720,7 @@ function ImpactTable() {
       <Reveal style={{ textAlign: 'center', marginBottom: 36 }}>
         <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Impacto real</p>
         <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 34px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.5px' }}>Antes y después de ZenSports.</h2>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0, fontStyle: 'italic' }}>Resultados típicos en clubes que migran de Excel + WhatsApp a ZenSports.</p>
       </Reveal>
       <Reveal>
         <div style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
@@ -744,9 +745,10 @@ function ImpactTable() {
 /* ── Mini Comparison Table ───────────────────────────────────────────────── */
 function MiniComparisonTable() {
   const rows = [
-    { need: 'Inscripciones',      old: 'Formularios manuales + papel',            zs: 'Formulario digital + validación automática' },
-    { need: 'Cobros y morosidad', old: 'Mensajes 1 a 1 y recordatorios manuales', zs: 'Cobros automáticos por WhatsApp'            },
-    { need: 'Control en cancha',  old: 'Llamadas, discusiones y papeles',          zs: 'Carnet QR verificado en segundos'           },
+    { need: 'Inscripciones',         old: 'Formularios manuales + papel',            zs: 'Formulario digital + validación automática' },
+    { need: 'Cobros y morosidad',    old: 'Mensajes 1 a 1 y recordatorios manuales', zs: 'Cobros automáticos por WhatsApp'            },
+    { need: 'Control en cancha',     old: 'Llamadas, discusiones y papeles',          zs: 'Carnet QR verificado en segundos'           },
+    { need: 'Dinero perdido al mes', old: 'Hasta $500.000+ en cupos no cobrados',     zs: 'Control en tiempo real · cero cupos fantasma' },
   ];
   return (
     <Reveal style={{ marginBottom: 20 }}>
@@ -812,7 +814,10 @@ function SecuritySection() {
           <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 34px)', fontWeight: 800, marginBottom: 16, letterSpacing: '-0.5px' }}>
             Seguridad y confianza para tu club
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, marginBottom: 36, maxWidth: 520, margin: '0 auto 36px', lineHeight: 1.7 }}>
+          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 15, marginBottom: 12, maxWidth: 580, margin: '0 auto 12px', lineHeight: 1.7 }}>
+            Sabemos que trabajas con datos sensibles de jugadores y familias. Por eso diseñamos ZenSports con seguridad desde el día uno.
+          </p>
+          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, marginBottom: 36, maxWidth: 520, margin: '0 auto 36px', lineHeight: 1.7 }}>
             Diseñado para proteger la información de tu club, tus jugadores y sus familias.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, maxWidth: 760, margin: '0 auto' }}>
@@ -1012,9 +1017,16 @@ export default function LandingPage() {
         boxShadow: '0 4px 32px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset',
       }}>
         <div style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <ZenSportsLogo size="md" variant="full" />
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+            aria-label="Ir al inicio"
+          >
+            <ZenSportsLogo size="md" variant="full" />
+          </button>
           <div className="hide-mobile" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {[
+              { label: 'Inicio',         anchor: null             },
               { label: 'Producto',       anchor: 'producto'       },
               { label: 'Automatización', anchor: 'automatizacion' },
               { label: 'Precios',        anchor: 'precios'        },
@@ -1023,7 +1035,7 @@ export default function LandingPage() {
               <button
                 key={label}
                 className="btn-ghost"
-                onClick={() => document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                onClick={() => anchor ? document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' }) : window.scrollTo({ top: 0, behavior: 'smooth' })}
                 style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', fontSize: 14, cursor: 'pointer', padding: '10px 16px', borderRadius: 8, minHeight: 44 }}
               >
                 {label}
@@ -1060,13 +1072,14 @@ export default function LandingPage() {
           flexDirection: 'column', gap: 4,
         }}>
           {[
+            { label: 'Inicio',         anchor: null             },
             { label: 'Producto',       anchor: 'producto'       },
             { label: 'Automatización', anchor: 'automatizacion' },
             { label: 'Precios',        anchor: 'precios'        },
             { label: 'ZCUP',           anchor: 'zcup'           },
           ].map(({ label, anchor }) => (
             <button key={label} className="btn-ghost"
-              onClick={() => { document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); setMobileMenuOpen(false); }}
+              onClick={() => { anchor ? document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' }) : window.scrollTo({ top: 0, behavior: 'smooth' }); setMobileMenuOpen(false); }}
               style={{ width: '100%', background: 'none', border: 'none', color: 'rgba(255,255,255,0.75)', fontSize: 15, cursor: 'pointer', padding: '12px 16px', borderRadius: 10, textAlign: 'left', display: 'block' }}
             >
               {label}
@@ -1151,23 +1164,23 @@ export default function LandingPage() {
             maxWidth: 560, margin: '0 auto 16px',
             animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both',
           }}>
-            Automatiza pagos, jugadores, comunicación y operación desde una sola plataforma.
-          </p>
-          <p style={{
-            fontSize: 15, color: 'rgba(255,255,255,0.35)', lineHeight: 1.5,
-            maxWidth: 440, margin: '0 auto 16px',
-            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both',
-          }}>
-            Deja de perseguir pagos por WhatsApp.
+            Automatiza pagos, jugadores, comunicación y operación desde una sola plataforma y reduce hasta un 80% la mora mientras recuperas horas administrativas cada semana.
           </p>
 
           {/* Time-to-value */}
           <p style={{
             fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.55, fontStyle: 'italic',
-            maxWidth: 480, margin: '0 auto 24px',
-            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.38s both',
+            maxWidth: 520, margin: '0 auto 8px',
+            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both',
           }}>
             En menos de 20 minutos puedes tener tu club completamente digitalizado, sin hojas de cálculo.
+          </p>
+          <p style={{
+            fontSize: 12, color: 'rgba(255,255,255,0.28)', lineHeight: 1.5,
+            maxWidth: 440, margin: '0 auto 24px',
+            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.38s both',
+          }}>
+            5 días gratis, sin tarjeta. Sin permanencia: puedes cancelar cuando quieras y conservas tus datos.
           </p>
 
           {/* Social proof strip */}
@@ -1206,7 +1219,7 @@ export default function LandingPage() {
             </button>
             <button
               className="btn-ghost"
-              onClick={() => navigate('/login')}
+              onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
                 background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
@@ -1216,6 +1229,12 @@ export default function LandingPage() {
               Ver cómo funciona en 2 min
             </button>
           </div>
+          <p style={{
+            fontSize: 12, color: 'rgba(255,255,255,0.3)',
+            animation: 'slide-up 0.7s cubic-bezier(0.16,1,0.3,1) 0.45s both', marginBottom: 0,
+          }}>
+            Te acompañamos por WhatsApp para dejar tu club listo en minutos.
+          </p>
 
           {/* Live Activity */}
           <div style={{ animation: 'slide-up 0.6s ease 0.5s both' }}>
@@ -1265,6 +1284,9 @@ export default function LandingPage() {
       {/* ── STATS ────────────────────────────────────────────────────────── */}
       <section style={{ padding: '0 24px 88px', maxWidth: 900, margin: '0 auto' }}>
         <Reveal>
+          <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.25)', fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 20 }}>
+            Resultados típicos de clubes que usan ZenSports
+          </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1 }}>
             {[
               { target: String(publicStats.jugadores), prefix: '+', suffix: '', label: 'jugadores gestionados', color: previewColor, icon: Users },
@@ -1322,6 +1344,12 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      <Reveal>
+        <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.3)', fontStyle: 'italic', maxWidth: 560, margin: '-40px auto 56px', lineHeight: 1.6 }}>
+          Eso es más de lo que pagas por ZenSports cada mes en la mayoría de los planes.
+        </p>
+      </Reveal>
 
       {/* ── FEATURES ─────────────────────────────────────────────────────── */}
       <section id="producto" style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto' }}>
@@ -1392,9 +1420,12 @@ export default function LandingPage() {
           </Reveal>
           <Reveal delay={100} style={{ maxWidth: 460, flexShrink: 0 }}>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>IA + Automatización</p>
-            <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, lineHeight: 1.15, marginBottom: 20, letterSpacing: '-0.8px' }}>
+            <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, lineHeight: 1.15, marginBottom: 10, letterSpacing: '-0.8px' }}>
               Tu asistente virtual trabaja 24/7 por ti.
             </h2>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 16, lineHeight: 1.5 }}>
+              Reduce drásticamente el trabajo manual de admins y coordinadores sin contratar más personal.
+            </p>
             <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, marginBottom: 28 }}>
               ZenSports responde preguntas, confirma pagos, valida inscripciones y envía recordatorios automáticamente por WhatsApp. Sin hojas de cálculo. Sin mensajes manuales.
             </p>
@@ -1417,6 +1448,11 @@ export default function LandingPage() {
           </Reveal>
         </div>
         <TechTrust />
+        <Reveal delay={200}>
+          <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.3)', fontStyle: 'italic', maxWidth: 600, margin: '32px auto 0', lineHeight: 1.6 }}>
+            La mayoría de clubes recuperan su inversión en ZenSports en el primer mes solo por reducción de mora y horas administrativas.
+          </p>
+        </Reveal>
       </section>
 
       {/* ── PERSONALIZACIÓN ──────────────────────────────────────────────── */}
@@ -1536,6 +1572,18 @@ export default function LandingPage() {
 
       {/* ── IMPACTO ANTES/DESPUÉS ─────────────────────────────────────────── */}
       <ImpactTable />
+
+      {/* ── MINI HIGHLIGHT MORA ─────────────────────────────────────────── */}
+      <section style={{ padding: '0 24px 56px', maxWidth: 680, margin: '0 auto' }}>
+        <Reveal>
+          <div style={{ background: 'rgba(0,208,132,0.05)', border: '1px solid rgba(0,208,132,0.18)', borderRadius: 16, padding: '24px 28px', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+            <div style={{ fontSize: 28, flexShrink: 0, lineHeight: 1 }}>📉</div>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, margin: 0 }}>
+              <strong style={{ color: '#00D084' }}>Ejemplo real:</strong> una academia con 80 jugadores redujo su mora del 42% al 8% en 30 días usando cobros automáticos por WhatsApp.
+            </p>
+          </div>
+        </Reveal>
+      </section>
 
       {/* ── TESTIMONIOS ──────────────────────────────────────────────────── */}
       <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
@@ -1741,6 +1789,11 @@ export default function LandingPage() {
           </div>
           </Reveal>
         </ExpandableComparison>
+        <Reveal>
+          <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.3)', fontStyle: 'italic', maxWidth: 520, margin: '24px auto 0', lineHeight: 1.6 }}>
+            Muchos clubes recuperan lo que pagan por ZenSports solo con 1–2 jugadores que dejan de "perderse" cada mes.
+          </p>
+        </Reveal>
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
@@ -1749,7 +1802,7 @@ export default function LandingPage() {
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Planes</p>
           <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Un plan para cada etapa.</h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>
-            Free · Starter · Pro · Scale · 5 días gratis · Sin permanencia
+            Trial · Starter · Pro · Scale · 5 días gratis · Sin permanencia
           </p>
         </Reveal>
 
@@ -1807,6 +1860,9 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontStyle: 'italic', marginBottom: 14, lineHeight: 1.5 }}>
+                Con recuperar solo 2 mensualidades atrasadas al mes, este plan se paga solo.
+              </p>
               <button className="btn-ghost" onClick={() => openLead('starter')} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 6 }}>
                 Hablar con asesor · Activar Starter
               </button>
@@ -1817,6 +1873,9 @@ export default function LandingPage() {
 
           {/* PRO ⭐ MOST POPULAR */}
           <Reveal delay={120}>
+            <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: 0.5, marginBottom: 8 }}>
+              La mayoría de clubes competitivos empieza con este plan.
+            </p>
             <div className="card-hover" style={{ background: `linear-gradient(160deg, ${previewColor}10 0%, ${previewColor}06 100%)`, border: `2px solid ${previewColor}45`, borderRadius: 22, padding: '32px 22px', position: 'relative', boxShadow: `0 0 40px ${previewColor}20, 0 8px 32px rgba(0,0,0,0.4)`, transform: 'scale(1.03)', transition: 'background 0.4s, border-color 0.4s, box-shadow 0.4s, transform 0.4s' }}>
               <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: `linear-gradient(90deg, ${previewColor}, ${previewColor}cc)`, color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 999, padding: '5px 18px', letterSpacing: 1, whiteSpace: 'nowrap', boxShadow: `0 4px 20px ${previewColor}70`, transition: 'background 0.3s, box-shadow 0.3s' }}>
                 ⭐ Más elegido · Recomendado para clubes en crecimiento
@@ -1837,6 +1896,9 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontStyle: 'italic', marginBottom: 14, lineHeight: 1.5 }}>
+                Con evitar perder 1 jugador al mes por desorden administrativo, el plan Pro ya es rentable.
+              </p>
               <button className="btn-primary" onClick={() => openLead('pro')} style={{ width: '100%', background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`, border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, borderRadius: 11, padding: '13px 0', cursor: 'pointer', boxShadow: `0 6px 28px ${previewColor}60`, marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, transition: 'background 0.3s, box-shadow 0.3s' }}>
                 Escalar mi club <ChevronRight size={15} />
               </button>
@@ -1863,6 +1925,9 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
+              <p style={{ fontSize: 11, color: 'rgba(198,120,255,0.5)', fontStyle: 'italic', marginBottom: 14, lineHeight: 1.5 }}>
+                Pensado para academias que no quieren perder NI UN jugador ni un peso por falta de control.
+              </p>
               <button className="btn-ghost" onClick={() => openLead('scale')} style={{ width: '100%', background: 'rgba(198,120,255,0.08)', border: '1px solid rgba(198,120,255,0.28)', color: '#C678FF', fontSize: 13, fontWeight: 700, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 10 }}>
                 Probar 5 días gratis
               </button>
@@ -1874,8 +1939,11 @@ export default function LandingPage() {
 
         {/* Value message */}
         <Reveal>
-          <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', margin: '16px 0 0', lineHeight: 1.6 }}>
+          <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', margin: '16px 0 4px', lineHeight: 1.6 }}>
             Por menos de lo que cuesta un balón profesional al mes, tienes tu club 100% organizado y cobrando a tiempo.
+          </p>
+          <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.28)', fontStyle: 'italic', margin: '0 0 0', lineHeight: 1.6 }}>
+            Muchos clubes recuperan la inversión en ZenSports en el primer mes solo por reducción de mora y horas administrativas.
           </p>
         </Reveal>
 
@@ -1905,6 +1973,9 @@ export default function LandingPage() {
               <span key={b} style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', letterSpacing: 0.3 }}>{b}</span>
             ))}
           </div>
+          <p style={{ textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.25)', marginTop: 16 }}>
+            Te guiamos paso a paso por WhatsApp para activar tu plan en minutos, sin contratos ni papeleo.
+          </p>
         </Reveal>
       </section>
 

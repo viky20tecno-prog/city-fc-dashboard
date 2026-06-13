@@ -1,12 +1,12 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, CalendarDays, Loader2 } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, CalendarDays, Loader2, Archive, RotateCcw } from 'lucide-react';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { ESTADO_COLORS, API_BASE_URL } from '../config';
 import HojaDeVida from './HojaDeVida';
 import SuspensionModal from './SuspensionModal';
 import ImportarJugadoresModal from './ImportarJugadoresModal';
 import MensualidadesImportModal from './MensualidadesImportModal';
-import { deletePlayer, getClubId } from '../services/api';
+import { deletePlayer, archivePlayer, getClubId } from '../services/api';
 import { supabase } from '../lib/supabase';
 import { normalizarCategorias, listarEquipos } from '../lib/categorias';
 
@@ -223,6 +223,9 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const [jugadorSuspension, setJugadorSuspension] = useState(null);
   const [jugadorAEliminar, setJugadorAEliminar]   = useState(null);
   const [eliminando, setEliminando]               = useState(false);
+  const [jugadorAArchivar, setJugadorAArchivar]   = useState(null);
+  const [archivando, setArchivando]               = useState(false);
+  const [verArchivados, setVerArchivados]         = useState(false);
   const [showImportar, setShowImportar]           = useState(false);
   const [showImportarMensualidades, setShowImportarMensualidades] = useState(false);
   const [generandoAnio, setGenerandoAnio]         = useState(false);
@@ -263,6 +266,20 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       alert('Error al eliminar jugador: ' + err.message);
     } finally {
       setEliminando(false);
+    }
+  };
+
+  const confirmarArchivar = async (activo) => {
+    if (!jugadorAArchivar) return;
+    setArchivando(true);
+    try {
+      await archivePlayer(jugadorAArchivar.cedula, activo);
+      setJugadorAArchivar(null);
+      onRefresh();
+    } catch (err) {
+      alert('Error al archivar jugador: ' + err.message);
+    } finally {
+      setArchivando(false);
     }
   };
 
@@ -342,6 +359,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const filtered = useMemo(() => {
     return jugadoresConPago
       .filter(j => {
+        if (verArchivados ? j.activo : !j.activo) return false;
         const matchSearch    = search === '' || j.nombreCompleto?.toLowerCase().includes(search.toLowerCase()) || j.cedula?.includes(search);
         const matchEstado    = filtroEstado === 'TODOS' || j.estadoPago === filtroEstado;
         const matchCategoria = filtroCategoria === 'TODOS'
@@ -551,6 +569,17 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 >
                   {generandoAnio ? <Loader2 className="w-3.5 h-3.5" style={{ animation: 'spin 0.8s linear infinite' }} /> : <CalendarDays className="w-3.5 h-3.5" />}
                   <span className="hidden sm:inline">Generar año</span>
+                </button>
+
+                {/* Toggle archivados */}
+                <button
+                  onClick={() => { setVerArchivados(v => !v); setFiltroEstado('TODOS'); setSearch(''); }}
+                  title={verArchivados ? 'Ver jugadores activos' : 'Ver jugadores archivados'}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
+                  style={{ background: verArchivados ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.05)', border: `1px solid ${verArchivados ? 'rgba(239,68,68,0.35)' : 'rgba(255,255,255,0.12)'}`, color: verArchivados ? '#EF4444' : 'var(--text-mut)', whiteSpace: 'nowrap', flexShrink: 0 }}
+                >
+                  <Archive className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{verArchivados ? 'Activos' : 'Archivados'}</span>
                 </button>
 
                 {/* Importar estados mensualidades */}
@@ -799,14 +828,24 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                         <PauseCircle className="w-4 h-4" />
                       </button>
 
-                      {/* Eliminar */}
-                      <button
-                        onClick={() => setJugadorAEliminar(j)}
-                        title="Eliminar jugador"
-                        className="p-1.5 rounded-lg transition text-[var(--text-mut)] hover:text-red-500 hover:bg-red-500/10"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {/* Archivar / Restaurar */}
+                      {verArchivados ? (
+                        <button
+                          onClick={() => setJugadorAArchivar({ ...j, accion: 'restaurar' })}
+                          title="Restaurar jugador"
+                          className="p-1.5 rounded-lg transition text-[var(--text-mut)] hover:text-green-500 hover:bg-green-500/10"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setJugadorAArchivar({ ...j, accion: 'archivar' })}
+                          title="Archivar jugador (desactivar sin borrar)"
+                          className="p-1.5 rounded-lg transition text-[var(--text-mut)] hover:text-orange-400 hover:bg-orange-400/10"
+                        >
+                          <Archive className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -898,6 +937,62 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           onClose={() => setJugadorSuspension(null)}
           onSuccess={onRefresh}
         />
+      )}
+
+      {/* MODAL ARCHIVAR / RESTAURAR */}
+      {jugadorAArchivar && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => !archivando && setJugadorAArchivar(null)}
+        >
+          <div
+            style={{ background: 'var(--bg-surface)', border: jugadorAArchivar.accion === 'archivar' ? '1px solid rgba(251,146,60,0.35)' : '1px solid rgba(34,197,94,0.35)', borderRadius: '16px', padding: '28px 32px', width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '20px' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: jugadorAArchivar.accion === 'archivar' ? 'rgba(251,146,60,0.12)' : 'rgba(34,197,94,0.12)', border: `1px solid ${jugadorAArchivar.accion === 'archivar' ? 'rgba(251,146,60,0.3)' : 'rgba(34,197,94,0.3)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {jugadorAArchivar.accion === 'archivar' ? <Archive size={20} color="#FB923C" /> : <RotateCcw size={20} color="#22C55E" />}
+              </div>
+              <div>
+                <div style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: '15px' }}>
+                  {jugadorAArchivar.accion === 'archivar' ? '¿Archivar jugador?' : '¿Restaurar jugador?'}
+                </div>
+                <div style={{ color: 'var(--text-mut)', fontSize: '12px', marginTop: '2px' }}>
+                  {jugadorAArchivar.accion === 'archivar' ? 'El jugador queda inactivo. Sus datos se conservan.' : 'El jugador vuelve a la lista activa.'}
+                </div>
+              </div>
+            </div>
+            <div style={{ background: 'var(--bg-card)', borderRadius: '10px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: '14px' }}>{jugadorAArchivar.nombreCompleto}</div>
+              <div style={{ color: 'var(--text-mut)', fontSize: '12px', fontFamily: 'monospace' }}>CC {jugadorAArchivar.cedula}</div>
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => setJugadorAArchivar(null)}
+                disabled={archivando}
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid var(--border-sub)', background: 'var(--bg-card)', color: 'var(--text-mut)', fontSize: '13px', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => confirmarArchivar(jugadorAArchivar.accion === 'restaurar')}
+                disabled={archivando}
+                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: `1px solid ${jugadorAArchivar.accion === 'archivar' ? 'rgba(251,146,60,0.4)' : 'rgba(34,197,94,0.4)'}`, background: jugadorAArchivar.accion === 'archivar' ? 'rgba(251,146,60,0.12)' : 'rgba(34,197,94,0.12)', color: jugadorAArchivar.accion === 'archivar' ? '#FB923C' : '#22C55E', fontSize: '13px', fontWeight: 600, cursor: archivando ? 'not-allowed' : 'pointer', opacity: archivando ? 0.6 : 1 }}
+              >
+                {archivando ? (jugadorAArchivar.accion === 'archivar' ? 'Archivando…' : 'Restaurando…') : (jugadorAArchivar.accion === 'archivar' ? 'Sí, archivar' : 'Sí, restaurar')}
+              </button>
+            </div>
+            {/* Eliminar definitivamente (solo desde archivados) */}
+            {jugadorAArchivar.accion === 'restaurar' && (
+              <button
+                onClick={() => { setJugadorAEliminar(jugadorAArchivar); setJugadorAArchivar(null); }}
+                style={{ padding: '8px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.06)', color: 'rgba(239,68,68,0.7)', fontSize: '12px', cursor: 'pointer' }}
+              >
+                Eliminar definitivamente
+              </button>
+            )}
+          </div>
+        </div>
       )}
 
       {/* MODAL CONFIRMAR ELIMINACIÓN */}

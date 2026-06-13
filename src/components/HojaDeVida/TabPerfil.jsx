@@ -11,11 +11,17 @@ import { getClubId } from '../../services/api';
 import { PAISES_NACIMIENTO } from '../../lib/paises';
 import { normalizarCategorias } from '../../lib/categorias';
 
-const POSICIONES = [
-  'Portero', 'Defensa Central', 'Lateral Derecho', 'Lateral Izquierdo',
-  'Mediocampista Defensivo', 'Mediocampista', 'Mediocampista Ofensivo',
-  'Extremo Derecho', 'Extremo Izquierdo', 'Delantero', 'Atacante',
-];
+const POSICIONES_POR_DEPORTE = {
+  futbol:     ['Portero', 'Defensa Central', 'Lateral Derecho', 'Lateral Izquierdo', 'Mediocampista Defensivo', 'Mediocampista', 'Mediocampista Ofensivo', 'Extremo Derecho', 'Extremo Izquierdo', 'Delantero', 'Atacante'],
+  baloncesto: ['Base', 'Escolta', 'Alero', 'Ala-Pívot', 'Pívot'],
+  voleibol:   ['Armador', 'Opuesto', 'Central', 'Receptor', 'Libero'],
+  natacion:   ['Mariposa', 'Espalda', 'Pecho', 'Crol', 'Combinado'],
+  tenis:      ['Sencillos', 'Dobles', 'Dobles Mixtos'],
+  beisbol:    ['Lanzador', 'Receptor', 'Primera Base', 'Segunda Base', 'Tercera Base', 'Shortstop', 'Jardinero Izquierdo', 'Jardinero Central', 'Jardinero Derecho'],
+  ciclismo:   ['Sprinter', 'Rodador', 'Escalador', 'Contrarrelojista', 'Doméstico'],
+  rugby:      ['Pilar', 'Hooker', 'Segunda Línea', 'Flanker', 'Número 8', 'Medio Scrum', 'Apertura', 'Centro', 'Ala', 'Zaguero'],
+  general:    [],
+};
 
 function Seccion({ titulo, children }) {
   return (
@@ -140,7 +146,7 @@ function CampoEdit({ label, value, onChange, type = 'text', placeholder = '', ..
   );
 }
 
-export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [] }) {
+export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJugadores = [], clubConfig }) {
   const fileRef    = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [fotoUrl,   setFotoUrl]   = useState(jugador.foto_url || null);
@@ -345,7 +351,7 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
             <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Posición</label>
             <select value={form.posicion} onChange={set('posicion')} className={INPUT_CLS}>
               <option value="">— Sin asignar —</option>
-              {POSICIONES.map(p => <option key={p} value={p}>{p}</option>)}
+              {(POSICIONES_POR_DEPORTE[clubConfig?.deporte] ?? POSICIONES_POR_DEPORTE.futbol).map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
           <CampoEdit

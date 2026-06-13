@@ -76,6 +76,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
     subtitulo:   clubConfig?.subtitulo   || '',
     ciudad:      clubConfig?.ciudad      || '',
     codigo_pais: clubConfig?.codigo_pais || '57',
+    deporte:     clubConfig?.deporte     || 'futbol',
   });
 
   const [colorClub,      setColorClub]      = useState(clubConfig?.color   || '#E14924');
@@ -149,6 +150,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
         subtitulo:            club.subtitulo,
         ciudad:               club.ciudad,
         codigo_pais:          club.codigo_pais,
+        deporte:              club.deporte || 'futbol',
         color:                colorClub,
         logo_url:             logoUrl || null,
         valor_mensualidad:    mensualidad.valor,
@@ -283,6 +285,21 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                     c={c}
                   />
                 </div>
+              </div>
+
+              <div>
+                <label style={lbl}>Deporte principal</label>
+                <select value={club.deporte} onChange={e => setClub(cl => ({ ...cl, deporte: e.target.value }))} style={inp}>
+                  <option value="futbol">Fútbol</option>
+                  <option value="baloncesto">Baloncesto</option>
+                  <option value="voleibol">Voleibol</option>
+                  <option value="natacion">Natación</option>
+                  <option value="tenis">Tenis</option>
+                  <option value="beisbol">Béisbol</option>
+                  <option value="ciclismo">Ciclismo</option>
+                  <option value="rugby">Rugby</option>
+                  <option value="general">Otro / General</option>
+                </select>
               </div>
 
               <InfoBox>El país define la moneda y el formato de los números en toda la app.</InfoBox>

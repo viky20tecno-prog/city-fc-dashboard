@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
@@ -98,6 +98,18 @@ export default function Dashboard() {
   const [showEquipo,       setShowEquipo]       = useState(false);
   const [showCobro,        setShowCobro]        = useState(false);
   const [colorOverride,    setColorOverride]    = useState(null);
+  const [isMobile,         setIsMobile]         = useState(() => window.innerWidth < 768);
+  const [showBell,         setShowBell]         = useState(false);
+  const bellRef = useRef(null);
+
+  // ── Detectar viewport móvil ──
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    setIsMobile(mq.matches);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   // ── Guard: si no hay clubId en localStorage, cerrar sesión y redirigir ──
   useEffect(() => {
@@ -170,6 +182,14 @@ export default function Dashboard() {
   // Aplica tema guardado al montar
   useEffect(() => { applyTheme(getStoredTheme()); }, []);
 
+  // Cierra el bell dropdown al hacer click afuera
+  useEffect(() => {
+    if (!showBell) return;
+    const h = (e) => { if (bellRef.current && !bellRef.current.contains(e.target)) setShowBell(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, [showBell]);
+
   // Inyecta el color del club como variables CSS globales y persiste codigo_pais
   useEffect(() => {
     document.documentElement.style.setProperty('--cc',   c);
@@ -208,9 +228,9 @@ export default function Dashboard() {
   const S = {
     shell: {
       display: 'grid',
-      gridTemplateRows: '58px 1fr',
-      gridTemplateColumns: '64px 1fr',
-      height: '100vh',
+      gridTemplateRows: isMobile ? '56px 1fr 56px' : '58px 1fr',
+      gridTemplateColumns: isMobile ? '1fr' : '64px 1fr',
+      height: isMobile ? '100dvh' : '100vh',
       overflow: 'hidden',
       fontFamily: "'Inter', system-ui, sans-serif",
       background: 'var(--bg-app)',
@@ -222,11 +242,12 @@ export default function Dashboard() {
       backdropFilter: 'blur(12px)',
       display: 'flex',
       alignItems: 'center',
-      padding: '0 18px 0 16px',
-      gap: '12px',
+      padding: isMobile ? '0 12px' : '0 18px 0 16px',
+      gap: isMobile ? '8px' : '12px',
       position: 'relative',
       zIndex: 50,
       transition: 'border-color 0.5s',
+      overflow: 'hidden',
     },
     sep: {
       width: '1px', height: '30px',
@@ -237,7 +258,7 @@ export default function Dashboard() {
     sidebar: {
       background: 'var(--bg-card)',
       borderRight: `1px solid ${c}26`,
-      display: 'flex',
+      display: isMobile ? 'none' : 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       padding: '14px 0 12px',
@@ -247,11 +268,24 @@ export default function Dashboard() {
       transition: 'border-color 0.5s',
     },
     main: {
+      gridColumn: isMobile ? '1' : '2',
+      gridRow: isMobile ? '2' : '2',
       overflowY: 'auto',
-      padding: '16px 18px 24px',
+      padding: isMobile ? '12px 12px 16px' : '16px 18px 24px',
       background: 'var(--bg-app)',
       scrollbarWidth: 'thin',
       scrollbarColor: `${c}33 transparent`,
+    },
+    bottomNav: {
+      gridColumn: '1',
+      gridRow: '3',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+      background: 'var(--bg-card)',
+      borderTop: `1px solid ${c}26`,
+      padding: '0 4px',
+      zIndex: 50,
     },
     iconBtn: (active) => ({
       width: '42px', height: '42px',
@@ -322,6 +356,26 @@ export default function Dashboard() {
     .toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
     .toUpperCase();
 
+  const cumpleaniosList = useMemo(() => {
+    const hoy = new Date();
+    const lista = [];
+    jugadores.forEach(j => {
+      if (!j.fecha_nacimiento || !(j.activo === true || (j.activo || '').toString().toUpperCase() === 'SI')) return;
+      const [, mesStr, diaStr] = j.fecha_nacimiento.split('-');
+      if (!mesStr || !diaStr) return;
+      const mes = parseInt(mesStr), dia = parseInt(diaStr);
+      for (let offset = 0; offset <= 7; offset++) {
+        const d = new Date(hoy); d.setDate(hoy.getDate() + offset);
+        if (d.getMonth() + 1 === mes && d.getDate() === dia) {
+          const nombre = `${j.nombre || ''} ${j.apellidos || ''}`.trim();
+          lista.push({ nombre, cedula: j.cedula, offset, diaLabel: offset === 0 ? 'Hoy' : offset === 1 ? 'Mañana' : `En ${offset} días` });
+          break;
+        }
+      }
+    });
+    return lista.sort((a, b) => a.offset - b.offset);
+  }, [jugadores]);
+
   return (
     <div style={S.shell}>
 
@@ -357,32 +411,34 @@ export default function Dashboard() {
         )}
 
         {/* Nombre del club */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', flexShrink: 0 }}>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '20px', letterSpacing: '3px', lineHeight: 1, color: 'var(--text-pri)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', flexShrink: 0, minWidth: 0 }}>
+          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? '17px' : '20px', letterSpacing: '3px', lineHeight: 1, color: 'var(--text-pri)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: isMobile ? '130px' : 'none' }}>
             {clubConfig?.nombre || 'Mi Club'}
           </span>
-          <span style={{ fontSize: '9px', letterSpacing: '3.5px', textTransform: 'uppercase', color: 'var(--text-mut)' }}>
-            {clubConfig?.subtitulo || ''}
-          </span>
+          {!isMobile && (
+            <span style={{ fontSize: '9px', letterSpacing: '3.5px', textTransform: 'uppercase', color: 'var(--text-mut)' }}>
+              {clubConfig?.subtitulo || ''}
+            </span>
+          )}
         </div>
 
         <div style={S.sep} />
         <div style={{ flex: 1 }} />
 
-        {/* Indicador en vivo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', letterSpacing: '2px', color: 'var(--text-mut)', textTransform: 'uppercase', flexShrink: 0 }}>
-          <div style={{ width: '6px', height: '6px', background: '#22C55E', borderRadius: '50%', boxShadow: '0 0 6px #22C55E', animation: 'pulse-green 2s ease-in-out infinite' }} />
-          En Vivo
-        </div>
-
-        <div style={S.sep} />
-
-        {/* Fecha */}
-        <div style={{ fontSize: '11px', color: 'var(--text-mut)', letterSpacing: '1px', textTransform: 'uppercase', flexShrink: 0 }}>
-          {nowStr}
-        </div>
-
-        <div style={S.sep} />
+        {/* Indicador en vivo — solo desktop */}
+        {!isMobile && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', letterSpacing: '2px', color: 'var(--text-mut)', textTransform: 'uppercase', flexShrink: 0 }}>
+              <div style={{ width: '6px', height: '6px', background: '#22C55E', borderRadius: '50%', boxShadow: '0 0 6px #22C55E', animation: 'pulse-green 2s ease-in-out infinite' }} />
+              En Vivo
+            </div>
+            <div style={S.sep} />
+            <div style={{ fontSize: '11px', color: 'var(--text-mut)', letterSpacing: '1px', textTransform: 'uppercase', flexShrink: 0 }}>
+              {nowStr}
+            </div>
+            <div style={S.sep} />
+          </>
+        )}
 
         {/* Indicador de Trial */}
         {trialActivo && !trialExpirado && (
@@ -410,32 +466,26 @@ export default function Dashboard() {
 
         {/* Pago Manual */}
         <button style={S.actionBtn(true)} onClick={() => setShowPagoModal(true)}>
-          PAGO MANUAL
+          {isMobile ? '+PAGO' : 'PAGO MANUAL'}
         </button>
 
-        {/* Inscripción */}
-        <button style={S.actionBtn(false)} onClick={() => window.open(inscripcionUrl, '_blank')}>
-          INSCRIPCIÓN
-        </button>
-
-        {/* Copiar link de inscripción */}
-        <div style={S.roundBtn} onClick={handleCopyLink} title="Copiar link de inscripción">
-          {linkCopied
-            ? <Check size={14} color="#22C55E" />
-            : <Copy size={14} color="var(--text-sec)" />}
-        </div>
-
-        {/* Portal Atleta */}
-        <button style={{ ...S.actionBtn(false), background: 'rgba(0,170,255,0.08)', border: '1px solid rgba(0,170,255,0.25)', color: '#4A9EFF' }} onClick={() => window.open(portalUrl, '_blank')} title="Abrir portal del atleta">
-          PORTAL
-        </button>
-
-        {/* Copiar link del portal */}
-        <div style={S.roundBtn} onClick={handleCopyPortal} title="Copiar link del Portal Atleta">
-          {portalCopied
-            ? <Check size={14} color="#22C55E" />
-            : <Copy size={14} color="#4A9EFF" />}
-        </div>
+        {/* Inscripción y Portal — solo desktop */}
+        {!isMobile && (
+          <>
+            <button style={S.actionBtn(false)} onClick={() => window.open(inscripcionUrl, '_blank')}>
+              INSCRIPCIÓN
+            </button>
+            <div style={S.roundBtn} onClick={handleCopyLink} title="Copiar link de inscripción">
+              {linkCopied ? <Check size={14} color="#22C55E" /> : <Copy size={14} color="var(--text-sec)" />}
+            </div>
+            <button style={{ ...S.actionBtn(false), background: 'rgba(0,170,255,0.08)', border: '1px solid rgba(0,170,255,0.25)', color: '#4A9EFF' }} onClick={() => window.open(portalUrl, '_blank')} title="Abrir portal del atleta">
+              PORTAL
+            </button>
+            <div style={S.roundBtn} onClick={handleCopyPortal} title="Copiar link del Portal Atleta">
+              {portalCopied ? <Check size={14} color="#22C55E" /> : <Copy size={14} color="#4A9EFF" />}
+            </div>
+          </>
+        )}
 
         {/* Refresh */}
         <div style={S.roundBtn} onClick={handleRefresh} title="Actualizar datos">
@@ -446,16 +496,64 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Notificaciones */}
-        <div style={S.roundBtn} title="Notificaciones">
-          <Bell size={14} color="var(--text-sec)" />
-          <span style={{
-            position: 'absolute', top: '6px', right: '7px',
-            width: '6px', height: '6px',
-            background: c, borderRadius: '50%',
-            boxShadow: `0 0 6px ${c}`,
-            transition: 'background 0.5s, box-shadow 0.5s',
-          }} />
+        {/* Notificaciones cumpleaños */}
+        <div ref={bellRef} style={{ position: 'relative', flexShrink: 0 }}>
+          <div
+            style={{ ...S.roundBtn, background: showBell ? `${c}1F` : S.roundBtn.background }}
+            onClick={() => setShowBell(v => !v)}
+            title={`Notificaciones${cumpleaniosList.length ? ` · ${cumpleaniosList.length} cumpleaños` : ''}`}
+          >
+            <Bell size={14} color={showBell ? c : 'var(--text-sec)'} />
+            {cumpleaniosList.length > 0 && (
+              <span style={{
+                position: 'absolute', top: '5px', right: '5px',
+                width: cumpleaniosList.length > 9 ? '14px' : '10px', height: '10px',
+                background: '#EF4444', borderRadius: '99px',
+                fontSize: '8px', color: '#fff', fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                lineHeight: 1,
+              }}>
+                {cumpleaniosList.length > 9 ? '9+' : cumpleaniosList.length}
+              </span>
+            )}
+          </div>
+          {showBell && (
+            <div style={{
+              position: 'absolute', top: '42px', right: 0,
+              background: 'var(--bg-surface)', border: `1px solid ${c}33`,
+              borderRadius: '14px', boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              width: '280px', zIndex: 200, overflow: 'hidden',
+            }}>
+              <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid var(--border-sub)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Bell size={13} color={c} />
+                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-pri)' }}>Cumpleaños próximos</span>
+              </div>
+              {cumpleaniosList.length === 0 ? (
+                <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--text-mut)', fontSize: '13px' }}>
+                  Sin cumpleaños en los próximos 7 días
+                </div>
+              ) : (
+                <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                  {cumpleaniosList.map(j => (
+                    <div key={j.cedula} style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid var(--border-sub)' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: j.offset === 0 ? `${c}20` : 'var(--bg-card)', border: `1px solid ${j.offset === 0 ? c : 'var(--border-sub)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '16px' }}>
+                        🎂
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-pri)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nombre}</div>
+                        <div style={{ fontSize: '11px', color: j.offset === 0 ? c : 'var(--text-mut)', fontWeight: j.offset === 0 ? 600 : 400 }}>{j.diaLabel}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {cumpleaniosList.length > 0 && (
+                <div style={{ padding: '10px 16px', fontSize: '11px', color: 'var(--text-mut)', textAlign: 'center', borderTop: '1px solid var(--border-sub)' }}>
+                  Revisa sus perfiles en Jugadores para enviar saludos
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
@@ -478,6 +576,47 @@ export default function Dashboard() {
           <LogOut size={18} color="var(--text-sec)" strokeWidth={1.7} />
         </button>
       </nav>
+
+      {/* ───── BOTTOM NAV (mobile) ───── */}
+      {isMobile && (
+        <nav style={S.bottomNav}>
+          {navVisible.slice(0, 5).map(({ id, Icon, title }) => {
+            const isActive = activeTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                style={{
+                  flex: 1, height: '56px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  gap: '3px', border: 'none', background: 'transparent', cursor: 'pointer',
+                  color: isActive ? c : 'var(--text-mut)',
+                  position: 'relative',
+                }}
+              >
+                {isActive && (
+                  <div style={{ position: 'absolute', top: 0, left: '20%', right: '20%', height: '2px', background: c, borderRadius: '0 0 2px 2px' }} />
+                )}
+                <Icon size={20} strokeWidth={isActive ? 2 : 1.6} style={isActive ? { filter: `drop-shadow(0 0 4px ${c}AA)` } : {}} />
+                <span style={{ fontSize: '9px', letterSpacing: '0.5px', fontWeight: isActive ? 600 : 400 }}>{title.split(' ')[0]}</span>
+              </button>
+            );
+          })}
+          {/* Botón "Más" para tabs extra */}
+          <button
+            onClick={() => setShowTheme(v => !v)}
+            style={{
+              flex: 1, height: '56px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              gap: '3px', border: 'none', background: 'transparent', cursor: 'pointer',
+              color: 'var(--text-mut)',
+            }}
+          >
+            <Settings size={20} strokeWidth={1.6} />
+            <span style={{ fontSize: '9px', letterSpacing: '0.5px' }}>Más</span>
+          </button>
+        </nav>
+      )}
 
       {/* ───── TRIAL EXPIRADO — overlay bloqueante ───── */}
       {trialExpirado && (

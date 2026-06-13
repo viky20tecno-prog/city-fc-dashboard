@@ -81,7 +81,7 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
         {/* Contenido */}
         <div className="flex-1 overflow-y-auto p-6">
           {tab === 'perfil' && (
-            <TabPerfil jugador={jugadorLocal} onFotoUpdate={handleFotoUpdate} onUpdate={handleUpdate} categoriasJugadores={categoriasJugadores} />
+            <TabPerfil jugador={jugadorLocal} onFotoUpdate={handleFotoUpdate} onUpdate={handleUpdate} categoriasJugadores={categoriasJugadores} clubConfig={clubConfig} />
           )}
           {tab === 'financiero' && (
             <FinancieroContent

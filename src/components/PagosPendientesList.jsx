@@ -124,7 +124,7 @@ function exportarPDF(pendientes, clubNombre = 'Mi Club', color = '#E14924', logo
   ventana.focus();
 }
 
-export default function PagosPendientesList({ pendientes, codigoPais = '57', clubNombre = 'Mi Club', color = 'var(--cc)', logoUrl = '' }) {
+export default function PagosPendientesList({ pendientes, codigoPais = '57', clubNombre = 'Mi Club', color = 'var(--cc)', logoUrl = '', filtroLabel = null }) {
   if (!pendientes || pendientes.length === 0) {
     return (
       <div style={{
@@ -133,10 +133,12 @@ export default function PagosPendientesList({ pendientes, codigoPais = '57', clu
         position: 'relative', overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, var(--cc50), transparent)', pointerEvents: 'none' }} />
-        <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-pri)', marginBottom: '16px' }}>Pagos pendientes</h2>
+        <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-pri)', marginBottom: '16px' }}>
+          Pagos pendientes{filtroLabel ? ` · ${filtroLabel}` : ''}
+        </h2>
         <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-mut)' }}>
           <Clock style={{ width: '32px', height: '32px', margin: '0 auto 8px', color: '#22C55E' }} />
-          ¡Todos al día este mes!
+          {filtroLabel ? `Sin jugadores con estado ${filtroLabel} este mes` : '¡Todos al día este mes!'}
         </div>
       </div>
     );
@@ -157,7 +159,9 @@ export default function PagosPendientesList({ pendientes, codigoPais = '57', clu
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-pri)', letterSpacing: '-0.2px' }}>Pagos pendientes</h2>
+          <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-pri)', letterSpacing: '-0.2px' }}>
+            Pagos pendientes{filtroLabel ? <span style={{ color: '#F59E0B' }}> · {filtroLabel}</span> : ''}
+          </h2>
           <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 600, background: 'rgba(245,158,11,0.1)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.2)' }}>
             {pendientes.length} jugadores
           </span>

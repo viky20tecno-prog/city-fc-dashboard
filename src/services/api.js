@@ -52,7 +52,7 @@ export async function fetchAllData() {
     torneosRes,
     suspensionesRes,
   ] = await Promise.all([
-    apiCallSafe(`/players?club_id=${clubId}`,                          { data: [] }),
+    apiCallSafe(`/players?club_id=${clubId}&incluir_archivados=true`,   { data: [] }),
     apiCallSafe(`/invoices?club_id=${clubId}&anio=${anio}`,            { data: [] }),
     apiCallSafe(`/payments?club_id=${clubId}&limit=100`,               { data: [] }),
     apiCallSafe(`/reports/summary?club_id=${clubId}`,                  {}),
@@ -97,6 +97,20 @@ export async function deletePlayer(cedula) {
   const authHeaders = await getAuthHeaders();
   const res = await fetch(url, { method: 'DELETE', headers: authHeaders });
   if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+  return await res.json();
+}
+
+export async function archivePlayer(cedula, activo) {
+  const clubId = getClubId();
+  if (!clubId) throw new Error('No hay club activo en sesión.');
+  const url = `${API_BASE_URL}/players/${cedula}?club_id=${clubId}`;
+  const authHeaders = await getAuthHeaders();
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...authHeaders },
+    body: JSON.stringify({ activo }),
+  });
+  if (!res.ok) throw new Error(`Archive failed: ${res.status}`);
   return await res.json();
 }
 

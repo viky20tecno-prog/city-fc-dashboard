@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Bot, BarChart2, CreditCard, Shield, ChevronRight, CheckCircle,
   Users, FileText, Smartphone, AlertTriangle, Zap, MessageCircle,
-  ArrowRight, Sparkles, TrendingUp, Star, Sun, Moon, X, Loader2, Menu,
+  ArrowRight, Sparkles, TrendingUp, Star, Sun, Moon, X, Loader2, Menu, QrCode,
 } from 'lucide-react';
 import { PALETA } from '../components/ThemeSelector';
 import { API_BASE_URL } from '../config';
@@ -311,8 +311,8 @@ function WhatsAppMockup() {
     { from: 'bot',  text: 'Tu pago de $60.000 está pendiente. Adjunta tu comprobante aquí.' },
     { from: 'user', text: '[Comprobante adjunto]' },
     { from: 'bot',  text: '✅ Pago validado. Tu carnet digital ya está disponible.' },
-    { from: 'user', text: '¿Ya quedó confirmado mi cupo?' },
-    { from: 'bot',  text: '✅ Sí. Tu inscripción fue confirmada. ¡Bienvenido!' },
+    { from: 'user', text: 'Profe, se me pasó la fecha de pago, ¿puedo pagar el viernes?' },
+    { from: 'bot',  text: '👍 Claro, te programo un recordatorio para el jueves y te envío el enlace seguro de pago.' },
   ];
   return (
     <div style={{
@@ -603,6 +603,235 @@ function FaqItem({ q, a, delay }) {
         )}
       </div>
     </Reveal>
+  );
+}
+
+/* ── Flow Diagram ──────────────────────────────────────────────────────────── */
+function FlowDiagram() {
+  const steps = [
+    { Icon: Smartphone,    color: '#00AAFF', num: '01', title: 'Jugador se inscribe',  sub: 'Formulario digital desde el celular' },
+    { Icon: CreditCard,    color: '#00D084', num: '02', title: 'Paga su mensualidad',  sub: 'PSE, tarjeta o código QR'            },
+    { Icon: MessageCircle, color: '#25D366', num: '03', title: 'WhatsApp confirma',    sub: 'y recuerda pagos automáticamente'    },
+    { Icon: QrCode,        color: '#F5A623', num: '04', title: 'Carnet QR en cancha',  sub: 'Verificación en segundos'            },
+  ];
+  return (
+    <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
+      <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Cómo funciona</p>
+        <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>
+          Así funciona ZenSports de principio a fin.
+        </h2>
+        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>Cuatro pasos para que tu club esté 100% digitalizado.</p>
+      </Reveal>
+      <Reveal>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', flexWrap: 'wrap', gap: 0 }}>
+          {steps.map((step, i) => (
+            <div key={step.title} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 20px', maxWidth: 200 }}>
+                <div style={{ width: 72, height: 72, borderRadius: 20, background: `${step.color}12`, border: `1px solid ${step.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, position: 'relative' }}>
+                  <step.Icon size={28} color={step.color} />
+                  <div style={{ position: 'absolute', top: -8, right: -8, width: 22, height: 22, borderRadius: '50%', background: step.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900, color: '#060810' }}>
+                    {step.num}
+                  </div>
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#fff' }}>{step.title}</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>{step.sub}</div>
+              </div>
+              {i < steps.length - 1 && (
+                <ArrowRight size={20} color="rgba(255,255,255,0.15)" style={{ flexShrink: 0, marginBottom: 36 }} />
+              )}
+            </div>
+          ))}
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+/* ── Tech Trust ────────────────────────────────────────────────────────────── */
+function TechTrust() {
+  return (
+    <Reveal delay={150} style={{ marginTop: 40 }}>
+      <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '28px 36px', maxWidth: 760, margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(0,170,255,0.12)', border: '1px solid rgba(0,170,255,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Shield size={15} color="#00AAFF" />
+          </div>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#fff', margin: 0 }}>Tecnología que da confianza</h3>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+          {[
+            'Bot de WhatsApp pensado para clubes deportivos de Latam',
+            'IA entrenada para entender mensajes reales de jugadores y padres',
+            'Infraestructura en la nube con alta disponibilidad y seguridad de datos',
+          ].map(item => (
+            <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flex: '1 1 200px', minWidth: 200 }}>
+              <CheckCircle size={14} color="#00D084" style={{ flexShrink: 0, marginTop: 2 }} />
+              <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.6)', lineHeight: 1.55 }}>{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+/* ── Highlighted Testimonial ─────────────────────────────────────────────── */
+function HighlightedTestimonial() {
+  const t = TESTIMONIALS[0];
+  return (
+    <section style={{ padding: '0 24px 72px', maxWidth: 800, margin: '0 auto' }}>
+      <Reveal>
+        <div style={{ background: `linear-gradient(135deg, ${t.color}08, rgba(255,255,255,0.02))`, border: `1px solid ${t.color}22`, borderRadius: 24, padding: '52px 48px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${t.color}60, transparent)` }} />
+          <div style={{ fontSize: 72, lineHeight: 1, color: `${t.color}30`, marginBottom: 16, fontFamily: 'Georgia, serif' }}>"</div>
+          <p style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: 700, color: '#fff', lineHeight: 1.5, maxWidth: 600, margin: '0 auto 32px' }}>
+            Desde que usamos ZenSports dejamos de discutir pagos en la cancha.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: `linear-gradient(135deg, ${t.color}22, ${t.color}08)`, border: `2px solid ${t.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, color: t.color }}>
+                {t.avatar}
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: 14, fontWeight: 700 }}>{t.name}</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{t.role} · {t.club}</div>
+              </div>
+            </div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${t.color}12`, border: `1px solid ${t.color}28`, borderRadius: 999, padding: '4px 14px', fontSize: 11, fontWeight: 700, color: t.color, letterSpacing: 0.5 }}>
+              ✅ Resultado real · Colombia
+            </div>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+/* ── Impact Table ────────────────────────────────────────────────────────── */
+function ImpactTable() {
+  const rows = [
+    { metric: 'Tiempo en cobros diarios',  antes: '4 h/día',   despues: '20 min/día' },
+    { metric: 'Mora mensual promedio',      antes: '38%',       despues: '7%'         },
+    { metric: 'Cupos perdidos por mes',     antes: '2-4 cupos', despues: '0 cupos'    },
+  ];
+  return (
+    <section style={{ padding: '0 24px 88px', maxWidth: 700, margin: '0 auto' }}>
+      <Reveal style={{ textAlign: 'center', marginBottom: 36 }}>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Impacto real</p>
+        <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 34px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.5px' }}>Antes y después de ZenSports.</h2>
+      </Reveal>
+      <Reveal>
+        <div style={{ borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'rgba(255,255,255,0.03)' }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: 1.5, textTransform: 'uppercase' }}>Métrica</div>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', borderLeft: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'rgba(255,94,94,0.7)', letterSpacing: 1.5, textTransform: 'uppercase', background: 'rgba(255,94,94,0.04)' }}>Antes</div>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', borderLeft: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#00D084', letterSpacing: 1.5, textTransform: 'uppercase', background: 'rgba(0,208,132,0.05)' }}>Con ZenSports</div>
+          </div>
+          {rows.map((row, i) => (
+            <div key={row.metric} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)' }}>
+              <div style={{ padding: '16px 20px', borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>{row.metric}</div>
+              <div style={{ padding: '16px 20px', borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', borderLeft: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', background: 'rgba(255,94,94,0.03)', fontSize: 14, fontWeight: 800, color: '#FF5E5E' }}>{row.antes}</div>
+              <div style={{ padding: '16px 20px', borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', borderLeft: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', background: 'rgba(0,208,132,0.04)', fontSize: 14, fontWeight: 800, color: '#00D084' }}>{row.despues}</div>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+/* ── Mini Comparison Table ───────────────────────────────────────────────── */
+function MiniComparisonTable() {
+  const rows = [
+    { need: 'Inscripciones',      old: 'Formularios manuales + papel',            zs: 'Formulario digital + validación automática' },
+    { need: 'Cobros y morosidad', old: 'Mensajes 1 a 1 y recordatorios manuales', zs: 'Cobros automáticos por WhatsApp'            },
+    { need: 'Control en cancha',  old: 'Llamadas, discusiones y papeles',          zs: 'Carnet QR verificado en segundos'           },
+  ];
+  return (
+    <Reveal style={{ marginBottom: 20 }}>
+      <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', marginBottom: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'rgba(255,255,255,0.025)' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: 1.5, textTransform: 'uppercase' }}>Necesidad</div>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', borderLeft: '1px solid rgba(255,255,255,0.05)', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 1.5, textTransform: 'uppercase', textAlign: 'center' }}>Excel + WhatsApp</div>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', borderLeft: '1px solid rgba(99,102,241,0.2)', fontSize: 10, fontWeight: 700, color: '#818CF8', letterSpacing: 1.5, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(99,102,241,0.06)' }}>ZenSports</div>
+        </div>
+        {rows.map((row, i) => (
+          <div key={row.need} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)' }}>
+            <div style={{ padding: '13px 16px', borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>{row.need}</div>
+            <div style={{ padding: '13px 16px', borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', borderLeft: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>{row.old}</div>
+            <div style={{ padding: '13px 16px', borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', borderLeft: '1px solid rgba(99,102,241,0.15)', fontSize: 12, color: 'rgba(255,255,255,0.7)', textAlign: 'center', background: 'rgba(99,102,241,0.035)', fontWeight: 600 }}>{row.zs}</div>
+          </div>
+        ))}
+      </div>
+    </Reveal>
+  );
+}
+
+/* ── Expandable Comparison ───────────────────────────────────────────────── */
+function ExpandableComparison({ children }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div>
+      {expanded ? (
+        <div>
+          {children}
+          <div style={{ textAlign: 'center', marginTop: 16 }}>
+            <button
+              onClick={() => setExpanded(false)}
+              style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 13, borderRadius: 10, padding: '8px 22px', cursor: 'pointer' }}
+            >
+              Ocultar detalle ↑
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div style={{ textAlign: 'center' }}>
+          <button
+            onClick={() => setExpanded(true)}
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 600, borderRadius: 12, padding: '12px 28px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+          >
+            Ver comparativa completa ↓
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Security Section ────────────────────────────────────────────────────── */
+function SecuritySection() {
+  return (
+    <section style={{ padding: '0 24px 88px', maxWidth: 900, margin: '0 auto' }}>
+      <Reveal>
+        <div style={{ background: 'rgba(0,170,255,0.04)', border: '1px solid rgba(0,170,255,0.15)', borderRadius: 22, padding: '52px 40px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, rgba(0,170,255,0.5), rgba(0,208,132,0.3), transparent)' }} />
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(0,170,255,0.10)', border: '1px solid rgba(0,170,255,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+            <Shield size={26} color="#00AAFF" />
+          </div>
+          <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 34px)', fontWeight: 800, marginBottom: 16, letterSpacing: '-0.5px' }}>
+            Seguridad y confianza para tu club
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, marginBottom: 36, maxWidth: 520, margin: '0 auto 36px', lineHeight: 1.7 }}>
+            Diseñado para proteger la información de tu club, tus jugadores y sus familias.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, maxWidth: 760, margin: '0 auto' }}>
+            {[
+              { icon: Shield,      color: '#00AAFF', text: 'Datos de jugadores, padres y staff protegidos y respaldados en la nube.' },
+              { icon: Users,       color: '#00D084', text: 'Control de acceso por roles: directores, administradores y entrenadores.' },
+              { icon: CheckCircle, color: '#F5A623', text: 'Buenas prácticas de privacidad pensadas para clubes con menores de edad.' },
+            ].map(({ icon: Icon, color, text }) => (
+              <div key={text} style={{ background: `${color}07`, border: `1px solid ${color}20`, borderRadius: 16, padding: '20px 22px', textAlign: 'left', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: `${color}14`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon size={17} color={color} />
+                </div>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, margin: 0 }}>{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Reveal>
+    </section>
   );
 }
 
@@ -907,11 +1136,36 @@ export default function LandingPage() {
           </p>
           <p style={{
             fontSize: 15, color: 'rgba(255,255,255,0.35)', lineHeight: 1.5,
-            maxWidth: 440, margin: '0 auto 36px',
+            maxWidth: 440, margin: '0 auto 16px',
             animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both',
           }}>
             Deja de perseguir pagos por WhatsApp.
           </p>
+
+          {/* Time-to-value */}
+          <p style={{
+            fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.55, fontStyle: 'italic',
+            maxWidth: 480, margin: '0 auto 24px',
+            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.38s both',
+          }}>
+            En menos de 20 minutos puedes tener tu club completamente digitalizado, sin hojas de cálculo.
+          </p>
+
+          {/* Social proof strip */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap',
+            marginBottom: 32, animation: 'slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.42s both',
+          }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap' }}>Clubes en Colombia y Latam ya confían en ZenSports</span>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              {CLUB_LOGOS.slice(0, 5).map(club => (
+                <div key={club.abbr} style={{ width: 28, height: 28, borderRadius: 7, background: `${club.color}16`, border: `1px solid ${club.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 7, fontWeight: 900, color: club.color, letterSpacing: 0.2 }}>
+                  {club.abbr}
+                </div>
+              ))}
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginLeft: 4 }}>+6 más</span>
+            </div>
+          </div>
 
           {/* CTAs */}
           <div style={{
@@ -994,7 +1248,7 @@ export default function LandingPage() {
         <Reveal>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1 }}>
             {[
-              { target: '72',  prefix: '+', suffix: '',     label: 'jugadores gestionados en producción', color: previewColor, icon: Users      },
+              { target: '2500', prefix: '+', suffix: '',    label: 'jugadores gestionados',              color: previewColor, icon: Users      },
               { target: '8',   prefix: '',  suffix: 'h',   label: 'ahorradas por semana por club',        color: '#00D084',   icon: TrendingUp  },
               { target: '100', prefix: '',  suffix: '%',   label: 'cobros con seguimiento automático',    color: '#F5A623',   icon: CreditCard  },
               { target: '5',   prefix: '',  suffix: ' min',label: 'para configurar e iniciar',            color: '#818CF8',   icon: Zap         },
@@ -1108,6 +1362,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── ASÍ FUNCIONA ─────────────────────────────────────────────────── */}
+      <FlowDiagram />
+
       {/* ── IA / WHATSAPP ─────────────────────────────────────────────────── */}
       <section id="automatizacion" style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ display: 'flex', gap: 56, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -1140,6 +1397,7 @@ export default function LandingPage() {
             </div>
           </Reveal>
         </div>
+        <TechTrust />
       </section>
 
       {/* ── PERSONALIZACIÓN ──────────────────────────────────────────────── */}
@@ -1254,6 +1512,12 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── TESTIMONIO DESTACADO ─────────────────────────────────────────── */}
+      <HighlightedTestimonial />
+
+      {/* ── IMPACTO ANTES/DESPUÉS ─────────────────────────────────────────── */}
+      <ImpactTable />
+
       {/* ── TESTIMONIOS ──────────────────────────────────────────────────── */}
       <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
         <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
@@ -1287,20 +1551,6 @@ export default function LandingPage() {
                 </div>
               </div>
             </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* ── CASOS DE ÉXITO ──────────────────────────────────────────────── */}
-      <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
-        <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Casos de éxito</p>
-          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Resultados reales de clubes reales.</h2>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>Antes y después de implementar ZenSports.</p>
-        </Reveal>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {CASOS.map((caso, i) => (
-            <CasoExito key={caso.club} caso={caso} delay={i * 100} />
           ))}
         </div>
       </section>
@@ -1409,7 +1659,10 @@ export default function LandingPage() {
             Los clubes que migran a ZenSports recuperan en promedio 8 horas semanales de trabajo administrativo.
           </p>
         </Reveal>
-        <Reveal>
+        <MiniComparisonTable />
+
+        <ExpandableComparison>
+          <Reveal>
           <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderRadius: 20, border: '1px solid rgba(255,255,255,0.07)' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px 160px 200px', minWidth: 640 }}>
 
@@ -1467,7 +1720,8 @@ export default function LandingPage() {
               })}
             </div>
           </div>
-        </Reveal>
+          </Reveal>
+        </ExpandableComparison>
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
@@ -1477,6 +1731,12 @@ export default function LandingPage() {
           <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Un plan para cada etapa.</h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>
             Free · Starter · Pro · Scale · 5 días gratis · Sin permanencia
+          </p>
+        </Reveal>
+
+        <Reveal style={{ textAlign: 'center', marginBottom: 24 }}>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0 }}>
+            Precios en COP (pesos colombianos). <span style={{ color: 'rgba(255,255,255,0.2)' }}>Clientes fuera de Colombia: contáctanos para precios en tu moneda.</span>
           </p>
         </Reveal>
 
@@ -1526,9 +1786,10 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <button className="btn-ghost" onClick={() => openLead('starter')} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 10 }}>
-                Activar Starter
+              <button className="btn-ghost" onClick={() => openLead('starter')} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 6 }}>
+                Hablar con asesor · Activar Starter
               </button>
+              <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.25)', margin: '0 0 10px', lineHeight: 1.4 }}>Te ayudamos a activar por WhatsApp en minutos. Sin contratos.</p>
               <WhatsAppPayBtn plan="starter" />
             </div>
           </Reveal>
@@ -1536,8 +1797,8 @@ export default function LandingPage() {
           {/* PRO ⭐ MOST POPULAR */}
           <Reveal delay={120}>
             <div className="card-hover" style={{ background: `linear-gradient(160deg, ${previewColor}10 0%, ${previewColor}06 100%)`, border: `2px solid ${previewColor}45`, borderRadius: 22, padding: '32px 22px', position: 'relative', boxShadow: `0 0 40px ${previewColor}20, 0 8px 32px rgba(0,0,0,0.4)`, transform: 'scale(1.03)', transition: 'background 0.4s, border-color 0.4s, box-shadow 0.4s, transform 0.4s' }}>
-              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: `linear-gradient(90deg, ${previewColor}, ${previewColor}cc)`, color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 999, padding: '5px 18px', letterSpacing: 1.5, whiteSpace: 'nowrap', boxShadow: `0 4px 20px ${previewColor}70`, transition: 'background 0.3s, box-shadow 0.3s' }}>
-                ⭐ MOST POPULAR
+              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: `linear-gradient(90deg, ${previewColor}, ${previewColor}cc)`, color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 999, padding: '5px 18px', letterSpacing: 1, whiteSpace: 'nowrap', boxShadow: `0 4px 20px ${previewColor}70`, transition: 'background 0.3s, box-shadow 0.3s' }}>
+                ⭐ Más elegido · Recomendado para clubes en crecimiento
               </div>
               <p style={{ color: previewColor, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8, transition: 'color 0.3s' }}>Pro</p>
               <div style={{ fontSize: 40, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$399.000<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
@@ -1590,6 +1851,13 @@ export default function LandingPage() {
 
         </div>
 
+        {/* Value message */}
+        <Reveal>
+          <p style={{ textAlign: 'center', fontSize: 14, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', margin: '16px 0 0', lineHeight: 1.6 }}>
+            Por menos de lo que cuesta un balón profesional al mes, tienes tu club 100% organizado y cobrando a tiempo.
+          </p>
+        </Reveal>
+
         {/* ENTERPRISE */}
         <Reveal delay={240}>
           <div style={{ marginTop: 20, borderRadius: 22, padding: '32px 40px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24 }}>
@@ -1618,6 +1886,23 @@ export default function LandingPage() {
           </div>
         </Reveal>
       </section>
+
+      {/* ── CASOS DE ÉXITO ──────────────────────────────────────────────── */}
+      <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
+        <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Casos de éxito</p>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Resultados reales de clubes reales.</h2>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>Antes y después de implementar ZenSports.</p>
+        </Reveal>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {CASOS.map((caso, i) => (
+            <CasoExito key={caso.club} caso={caso} delay={i * 100} />
+          ))}
+        </div>
+      </section>
+
+      {/* ── SEGURIDAD Y CONFIANZA ────────────────────────────────────────── */}
+      <SecuritySection />
 
       {/* ── FAQ ─────────────────────────────────────────────────────────── */}
       <section style={{ padding: '0 24px 88px', maxWidth: 760, margin: '0 auto' }}>

@@ -1873,16 +1873,14 @@ export default function LandingPage() {
 
           {/* PRO ⭐ MOST POPULAR */}
           <Reveal delay={120}>
-            <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: 0.5, marginBottom: 8 }}>
-              La mayoría de clubes competitivos empieza con este plan.
-            </p>
             <div className="card-hover" style={{ background: `linear-gradient(160deg, ${previewColor}10 0%, ${previewColor}06 100%)`, border: `2px solid ${previewColor}45`, borderRadius: 22, padding: '32px 22px', position: 'relative', boxShadow: `0 0 40px ${previewColor}20, 0 8px 32px rgba(0,0,0,0.4)`, transform: 'scale(1.03)', transition: 'background 0.4s, border-color 0.4s, box-shadow 0.4s, transform 0.4s' }}>
               <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: `linear-gradient(90deg, ${previewColor}, ${previewColor}cc)`, color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 999, padding: '5px 18px', letterSpacing: 1, whiteSpace: 'nowrap', boxShadow: `0 4px 20px ${previewColor}70`, transition: 'background 0.3s, box-shadow 0.3s' }}>
                 ⭐ Más elegido · Recomendado para clubes en crecimiento
               </div>
               <p style={{ color: previewColor, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8, transition: 'color 0.3s' }}>Pro</p>
               <div style={{ fontSize: 40, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$399.000<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 14 }}>Academias competitivas y clubes serios</p>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 6 }}>Academias competitivas y clubes serios</p>
+              <p style={{ fontSize: 11, color: `${previewColor}99`, fontWeight: 600, marginBottom: 14, transition: 'color 0.3s' }}>La mayoría de clubes competitivos empieza aquí.</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
                 {['350 jugadores','10 admins','20 entrenadores','8.000 msg WA/mes'].map(l => (
                   <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: `${previewColor}15`, border: `1px solid ${previewColor}30`, color: previewColor, transition: 'background 0.3s, border-color 0.3s, color 0.3s' }}>{l}</span>

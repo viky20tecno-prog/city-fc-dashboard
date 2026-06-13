@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import {
   Users, CheckCircle, Clock, XCircle, AlertTriangle, DollarSign, ChevronDown,
 } from 'lucide-react';

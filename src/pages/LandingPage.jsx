@@ -844,7 +844,8 @@ function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
 
   if (!open) return null;
 
-  const planLabel = { free: 'gratis', starter: 'Starter', pro: 'Pro', scale: 'Scale', enterprise: 'Enterprise' }[plan] || plan;
+  const planLabel = { free: 'gratis', starter: 'Starter', pro: 'Pro', scale: 'Scale', enterprise: 'Enterprise', demo: 'Demo gratuita' }[plan] || plan;
+  const isDemo = plan === 'demo';
 
   const handle = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -861,7 +862,13 @@ function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
       });
     } catch (_) { /* continúa aunque falle */ }
     setLoading(false);
-    navigate(`/registro?color=${encodeURIComponent(color)}&plan=${plan}&nombre=${encodeURIComponent(form.nombre_club)}&wa=${encodeURIComponent(form.whatsapp)}`);
+    if (isDemo) {
+      const msg = encodeURIComponent(`¡Hola ZenSports! 👋 Soy ${form.nombre}${form.nombre_club ? ` del ${form.nombre_club}` : ''}${form.ciudad ? ` en ${form.ciudad}` : ''}. Me interesa solicitar una demo gratuita. ¿Cuándo podríamos coordinarla?`);
+      window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+      onClose();
+    } else {
+      navigate(`/registro?color=${encodeURIComponent(color)}&plan=${plan}&nombre=${encodeURIComponent(form.nombre_club)}&wa=${encodeURIComponent(form.whatsapp)}`);
+    }
   };
 
   const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: '11px 14px', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' };
@@ -880,9 +887,13 @@ function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
           <div style={{ display: 'inline-block', background: `${color}18`, border: `1px solid ${color}35`, borderRadius: 999, padding: '4px 14px', fontSize: 11, fontWeight: 700, color, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>
             Plan {planLabel}
           </div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 6 }}>Un paso para empezar</h2>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 6 }}>
+            {isDemo ? 'Agenda tu demo gratuita' : 'Un paso para empezar'}
+          </h2>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>
-            Ingresa tus datos y en segundos tienes acceso. Sin tarjeta de crédito.
+            {isDemo
+              ? 'Te contactamos por WhatsApp para coordinar una demo personalizada de ZenSports con tu equipo.'
+              : 'Ingresa tus datos y en segundos tienes acceso. Sin tarjeta de crédito.'}
           </p>
         </div>
 
@@ -897,7 +908,7 @@ function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
 
           <button type="submit" disabled={loading} style={{ marginTop: 4, padding: '13px 0', background: `linear-gradient(135deg, ${color}, ${color}cc)`, border: 'none', borderRadius: 11, color: '#fff', fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: `0 6px 24px ${color}50`, opacity: loading ? 0.7 : 1 }}>
             {loading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : null}
-            {loading ? 'Procesando…' : 'Comenzar ahora →'}
+            {loading ? 'Procesando…' : isDemo ? 'Solicitar demo por WhatsApp →' : 'Comenzar ahora →'}
           </button>
 
           <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.28)', margin: 0 }}>
@@ -916,6 +927,14 @@ export default function LandingPage() {
   const [previewModo,  setPreviewModo]  = useState('dark');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [leadModal, setLeadModal]       = useState({ open: false, plan: 'free' });
+  const [publicStats, setPublicStats]   = useState({ jugadores: 2500, clubs: 11 });
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/publico/stats`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.jugadores) setPublicStats(data); })
+      .catch(() => {});
+  }, []);
   const { glowRef, onMove, onLeave } = useMouseGlow();
 
   const openLead = useCallback((plan) => setLeadModal({ open: true, plan, color: previewColor }), [previewColor]);
@@ -1248,7 +1267,7 @@ export default function LandingPage() {
         <Reveal>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1 }}>
             {[
-              { target: '2500', prefix: '+', suffix: '',    label: 'jugadores gestionados',              color: previewColor, icon: Users      },
+              { target: String(publicStats.jugadores), prefix: '+', suffix: '', label: 'jugadores gestionados', color: previewColor, icon: Users },
               { target: '8',   prefix: '',  suffix: 'h',   label: 'ahorradas por semana por club',        color: '#00D084',   icon: TrendingUp  },
               { target: '100', prefix: '',  suffix: '%',   label: 'cobros con seguimiento automático',    color: '#F5A623',   icon: CreditCard  },
               { target: '5',   prefix: '',  suffix: ' min',label: 'para configurar e iniciar',            color: '#818CF8',   icon: Zap         },
@@ -1742,28 +1761,30 @@ export default function LandingPage() {
 
         <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 18, alignItems: 'start' }}>
 
-          {/* FREE */}
+          {/* TRIAL */}
           <Reveal delay={0}>
-            <div className="card-hover" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 22, padding: '28px 22px' }}>
-              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Free</p>
-              <div style={{ fontSize: 36, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$0<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}>/mes</span></div>
-              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, marginBottom: 14 }}>Para clubes pequeños que están empezando</p>
+            <div className="card-hover" style={{ background: 'rgba(0,208,132,0.03)', border: '1px solid rgba(0,208,132,0.15)', borderRadius: 22, padding: '28px 22px', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, rgba(0,208,132,0.5), transparent)', borderRadius: '22px 22px 0 0' }} />
+              <p style={{ color: '#00D084', fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Trial</p>
+              <div style={{ fontSize: 36, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$0<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}> / 5 días</span></div>
+              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, marginBottom: 14 }}>Prueba completa de la plataforma, sin tarjeta</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-                {['30 jugadores','1 admin','1 equipo','100 msg WA/mes'].map(l => (
-                  <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.45)' }}>{l}</span>
+                {['5 días gratis','Sin tarjeta','Todos los módulos','Soporte incluido'].map(l => (
+                  <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: 'rgba(0,208,132,0.07)', border: '1px solid rgba(0,208,132,0.18)', color: '#00D084' }}>{l}</span>
                 ))}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {[[true,'Dashboard básico'],[true,'Gestión de jugadores'],[true,'Asistencia'],[true,'Carnet digital básico'],[false,'Cobranza automática WA'],[false,'Finanzas'],[false,'Automatizaciones']].map(([on, label]) => (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9, opacity: on ? 1 : 0.28 }}>
-                    <CheckCircle size={13} color={on ? '#00D084' : '#4B5563'} style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: on ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.35)' }}>{label}</span>
+                {['Dashboard completo','Gestión de jugadores','Cobro automático WA','Carnet digital QR','Inscripciones digitales','Finanzas y estadísticas','Soporte por WhatsApp'].map(label => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                    <CheckCircle size={13} color="#00D084" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)' }}>{label}</span>
                   </div>
                 ))}
               </div>
-              <button className="btn-ghost" onClick={() => openLead('free')} style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer' }}>
-                Comenzar gratis
+              <button className="btn-primary" onClick={() => openLead('free')} style={{ width: '100%', background: 'rgba(0,208,132,0.15)', border: '1px solid rgba(0,208,132,0.35)', color: '#00D084', fontSize: 13, fontWeight: 700, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 8 }}>
+                Comenzar 5 días gratis
               </button>
+              <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.25)', margin: 0 }}>Al finalizar el trial, elige tu plan</p>
             </div>
           </Reveal>
 
@@ -1964,7 +1985,7 @@ export default function LandingPage() {
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button
                   className="btn-primary"
-                  onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)}
+                  onClick={() => openLead('demo')}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`, border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '15px 36px', cursor: 'pointer', boxShadow: `0 8px 32px ${previewColor}50`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}
                 >
                   Solicitar Demo <ArrowRight size={16} />

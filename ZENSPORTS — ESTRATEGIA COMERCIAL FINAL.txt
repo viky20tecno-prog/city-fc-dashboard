@@ -1,0 +1,446 @@
+ZENSPORTS — ESTRATEGIA COMERCIAL Y PRICING GLOBAL
+Documento Final para Implementación en Landing y Sistema Comercial
+VISIÓN COMERCIAL
+
+ZENSPORTS NO debe posicionarse como:
+
+“software deportivo”,
+“app administrativa”,
+“sistema para clubes”.
+
+ZENSPORTS debe posicionarse como:
+
+“The Sports Operating System”
+
+o
+
+“La plataforma operativa para clubes deportivos modernos.”
+OBJETIVO DEL PRICING
+
+El pricing debe:
+
+verse premium,
+sentirse global,
+ser altamente escalable,
+facilitar adquisición,
+aumentar upgrades,
+maximizar retención,
+permitir expansión internacional.
+PRINCIPIOS ESTRATÉGICOS
+1. GLOBAL-FIRST
+
+Aunque LATAM sea el mercado inicial:
+
+la marca,
+la estructura,
+el pricing,
+la UX,
+el naming,
+y el sistema comercial
+
+deben verse:
+
+internacionales.
+2. REGIONAL PRICING
+
+La plataforma debe:
+
+detectar país,
+detectar moneda,
+mostrar pricing regional automáticamente.
+3. PREMIUM PERCEPTION
+
+NO competir por precio.
+
+Competir por:
+
+automatización,
+profesionalización,
+ahorro tiempo,
+reducción mora,
+control operativo.
+4. WHATSAPP-FIRST
+
+El diferenciador principal:
+
+automatización vía WhatsApp.
+
+Esto debe ser:
+
+visible,
+protagonista,
+y repetido constantemente en landing.
+ESTRUCTURA FINAL DE PLANES
+FREE
+Free Forever
+Objetivo
+
+Adquisición masiva global.
+
+Ideal para
+clubes pequeños,
+academias nuevas,
+pruebas iniciales.
+Límites
+Hasta 30 jugadores
+1 administrador
+1 equipo
+100 mensajes WhatsApp/mes
+Incluye
+
+✅ Dashboard básico
+✅ Gestión de jugadores
+✅ Asistencia
+✅ Inscripción online
+✅ Carnet digital básico
+✅ Reportes básicos
+
+Restricciones
+
+❌ Cobranza automática WA
+❌ Finanzas
+❌ Analytics premium
+❌ Automatizaciones
+❌ IA
+
+CTA
+“Comenzar gratis”
+STARTER
+Starting at $29/month
+Pricing regional
+País	Precio
+Colombia	$149.000 COP
+México	MX$790
+Perú	S/149
+Chile	CLP$39.900
+España	€39
+USA	$29
+Ideal para
+
+Clubes que empiezan a profesionalizarse.
+
+Límites
+Hasta 120 jugadores
+3 administradores
+5 entrenadores
+1.500 mensajes WA/mes
+Incluye
+
+✅ Dashboard completo
+✅ Gestión jugadores
+✅ Mora básica
+✅ Pagos manuales
+✅ Carnet digital
+✅ Asistencia
+✅ Inscripciones digitales
+✅ WhatsApp básico
+✅ Exportación CSV/PDF
+
+CTA
+“Activar Starter”
+PRO
+Starting at $99/month
+⭐ MOST POPULAR
+ESTE ES EL PLAN CORE.
+Pricing regional
+País	Precio
+Colombia	$399.000 COP
+México	MX$1.990
+Perú	S/399
+Chile	CLP$99.900
+España	€89
+USA	$99
+Ideal para
+
+Academias competitivas y clubes serios.
+
+Límites
+Hasta 350 jugadores
+10 administradores
+20 entrenadores
+8.000 mensajes WA/mes
+Incluye
+
+✅ Todo Starter
+✅ Cobranza automática WhatsApp
+✅ Finanzas
+✅ Ingresos y gastos
+✅ Uniformes y equipamiento
+✅ Estadísticas avanzadas
+✅ Automatizaciones
+✅ Gestión avanzada pagos
+✅ Multi categorías
+✅ Reportes ejecutivos
+✅ Branding club
+✅ Soporte prioritario
+
+Extras
+jugadores adicionales
+paquetes WA adicionales
+CTA
+“Escalar mi club”
+SCALE
+Starting at $199/month
+Pricing regional
+País	Precio
+Colombia	$799.000 COP
+México	MX$3.990
+Perú	S/799
+Chile	CLP$199.900
+España	€179
+USA	$199
+Ideal para
+academias premium,
+multi sede,
+organizaciones deportivas grandes.
+Límites
+Hasta 1.000 jugadores
+Admins ilimitados
+Entrenadores ilimitados
+25.000 mensajes WA/mes
+Incluye
+
+✅ Todo PRO
+✅ IA WhatsApp avanzada
+✅ Analytics premium
+✅ Multi sede
+✅ Roles avanzados
+✅ Soporte VIP
+✅ Configuración asistida
+✅ Capacitación premium
+✅ Integraciones premium
+✅ API futura
+✅ Acceso beta features
+
+CTA
+“Hablar con ventas”
+ENTERPRISE
+Custom Pricing
+Ideal para
+ligas,
+federaciones,
+franquicias,
+organizaciones globales.
+Incluye
+
+✅ Infraestructura dedicada
+✅ SLA enterprise
+✅ Integraciones personalizadas
+✅ Soporte dedicado
+✅ Arquitectura enterprise
+✅ Multi región
+✅ Personalización avanzada
+
+ESTRATEGIA DE MONETIZACIÓN
+NO COBRAR SOLO POR FEATURES
+
+Cobrar por:
+
+escala,
+automatización,
+complejidad,
+consumo,
+operación.
+ADDONS
+Jugadores adicionales
+COP $1.000–$2.000 por jugador extra
+regionalizado por país
+WhatsApp adicional
+Ejemplo
++5.000 mensajes → $49.000
++10.000 mensajes → $89.000
+IA avanzada futura
+AI Copilot
+Analytics predictivo
+IA administrativa
+Automatización avanzada
+ESTRATEGIA DE LANDING
+HERO PRINCIPAL
+Headline
+“The Sports Operating System”
+Subheadline
+
+“Automatiza pagos, jugadores, comunicación y operación desde una sola plataforma.”
+
+CTA PRINCIPAL
+“Comenzar gratis”
+“Crear mi club”
+“Ver demo”
+HERO SECONDARY
+Mensaje clave
+“Deja de perseguir pagos por WhatsApp.”
+
+Ese mensaje debe repetirse.
+
+Porque:
+ese es el verdadero dolor.
+
+ORDEN VISUAL LANDING
+Hero
+Logos/clientes
+Problema
+Solución
+WhatsApp automation
+Demo visual
+Pricing
+Testimonios
+FAQ
+CTA final
+PRICING SECTION UX
+ORDEN VISUAL
+
+FREE → STARTER → PRO ⭐ → SCALE
+
+REGLAS VISUALES
+PRO
+
+Debe:
+
+ser más grande,
+tener glow,
+badge “Most Popular”,
+CTA más fuerte.
+SCALE
+
+Debe sentirse:
+
+premium,
+enterprise,
+aspiracional.
+ELEMENTOS IMPORTANTES DEBAJO DEL PRICING
+
+✅ Setup gratuito
+✅ Migración incluida
+✅ Soporte por WhatsApp
+✅ Sin permanencia
+✅ Activa tu club en 24 horas
+
+ESTRATEGIA DE CONVERSIÓN
+
+NO empujar:
+“compra inmediata”.
+
+Primero:
+
+trial,
+demo,
+onboarding,
+dependencia.
+
+Luego:
+
+upgrade.
+ESTRATEGIA DE VENTAS
+LO QUE VENDE ZENSPORTS
+
+NO:
+“gestión”.
+
+SÍ:
+
+automatización,
+reducción de mora,
+ahorro tiempo,
+control operativo,
+profesionalización.
+MENSAJES CLAVE
+Principal
+“Profesionaliza tu club.”
+Secundario
+“Automatiza pagos y comunicación desde WhatsApp.”
+Emocional
+“Opera como un club profesional.”
+ESTRATEGIA COMERCIAL
+FASE 1 — ADQUISICIÓN
+
+Objetivo:
+
+muchos clubes,
+trials,
+onboarding rápido.
+FASE 2 — DEPENDENCIA
+
+Objetivo:
+
+automatizaciones,
+pagos,
+WhatsApp,
+padres.
+FASE 3 — EXPANSIÓN
+
+Objetivo:
+
+upgrades,
+addons,
+IA,
+enterprise.
+ESTRATEGIA DE RETENCIÓN
+EL VERDADERO MOAT
+
+Cuando:
+
+cobran con ZENSPORTS,
+operan con ZENSPORTS,
+hablan con padres desde ZENSPORTS,
+manejan mora con ZENSPORTS,
+
+el churn cae muchísimo.
+
+REQUERIMIENTOS TÉCNICOS PARA IMPLEMENTACIÓN
+Pricing System
+feature gating,
+limits,
+usage tracking,
+regional pricing,
+country detection,
+billing engine,
+upgrades,
+trials,
+coupons.
+Landing Requirements
+responsive,
+mobile-first,
+animated pricing cards,
+regional pricing switch,
+sticky CTA,
+comparison tables,
+FAQ dynamic.
+TRACKING Y ANALYTICS
+
+Implementar:
+
+PostHog,
+Meta Pixel,
+TikTok Pixel,
+Google Analytics,
+conversion tracking.
+KPIs COMERCIALES
+Adquisición
+trials,
+demos,
+CAC,
+leads.
+Conversión
+trial → paid,
+onboarding completion,
+WA activation.
+Revenue
+MRR,
+expansion revenue,
+upgrades.
+VISIÓN FINAL
+
+ZENSPORTS debe verse desde HOY como:
+
+una startup SaaS global.
+
+NO:
+una herramienta local.
+
+Y toda la landing,
+pricing,
+copy,
+UX
+y estrategia comercial
+
+deben transmitir exactamente eso.

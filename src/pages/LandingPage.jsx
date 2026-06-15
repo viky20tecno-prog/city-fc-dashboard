@@ -1022,7 +1022,7 @@ export default function LandingPage() {
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
             aria-label="Ir al inicio"
           >
-            <ZenSportsLogo size={28} variant="full" />
+            <ZenSportsLogo size={32} variant="icon" />
           </button>
           <div className="hide-mobile" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {[
@@ -1125,20 +1125,9 @@ export default function LandingPage() {
             </span>
           </div>
 
-          {/* Brand label */}
-          <div style={{ marginBottom: 10, animation: 'slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both' }}>
-            <span style={{
-              fontSize: 'clamp(12px, 1.5vw, 14px)',
-              fontWeight: 900,
-              letterSpacing: '0.3em',
-              textTransform: 'uppercase',
-              background: 'var(--brand-gradient, linear-gradient(135deg, #6A00FF, #AE68FF))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}>
-              ZenSports
-            </span>
+          {/* Logo principal */}
+          <div style={{ marginBottom: 24, animation: 'slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both', display: 'flex', justifyContent: 'center' }}>
+            <ZenSportsLogo size={96} variant="full" />
           </div>
 
           {/* Headline */}

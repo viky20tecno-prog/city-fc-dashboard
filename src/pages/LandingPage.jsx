@@ -1102,16 +1102,14 @@ export default function LandingPage() {
       )}
 
       {/* ── HERO ────────────────────────────────────────────────────────── */}
-      <section
-        style={{ position: 'relative', padding: '132px 24px 80px', overflow: 'hidden', minHeight: 600 }}
-      >
+      <section style={{ position: 'relative', padding: '100px 24px 80px', overflow: 'hidden' }}>
         <GridBg color={previewColor} />
         <ParticleField color={previewColor} />
 
-        <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
 
-          {/* Badge animado */}
-          <div style={{ animation: 'slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both', marginBottom: 28 }}>
+          {/* Badge */}
+          <div style={{ textAlign: 'center', marginBottom: 32, animation: 'slide-up 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both' }}>
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               background: 'linear-gradient(90deg, rgba(106,0,255,0.10), rgba(6,182,212,0.07), rgba(106,0,255,0.10))',
@@ -1125,120 +1123,92 @@ export default function LandingPage() {
             </span>
           </div>
 
-          {/* Logo principal */}
-          <div style={{ marginBottom: 24, animation: 'slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both', display: 'flex', justifyContent: 'center' }}>
-            <ZenSportsLogo size={96} variant="full" />
-          </div>
-
-          {/* Headline */}
-          <h1 className="hero-h1" style={{
-            fontSize: 'clamp(34px, 6vw, 68px)',
-            fontWeight: 900, lineHeight: 1.0,
-            letterSpacing: '-2.5px', marginBottom: 20,
-            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both',
-          }}>
-            El sistema operativo{' '}
-            <span style={{
-              color: previewColor,
-              transition: 'color 0.4s',
-              textShadow: `0 0 40px ${previewColor}70`,
-            }}>
-              para tu club deportivo
-            </span>
-          </h1>
-
-          {/* Subheadline */}
-          <p style={{
-            fontSize: 18, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7,
-            maxWidth: 560, margin: '0 auto 16px',
-            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both',
-          }}>
-            Automatiza pagos, jugadores, comunicación y operación desde una sola plataforma y reduce hasta un 80% la mora mientras recuperas horas administrativas cada semana.
-          </p>
-
-          {/* Time-to-value */}
-          <p style={{
-            fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.55, fontStyle: 'italic',
-            maxWidth: 520, margin: '0 auto 8px',
-            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both',
-          }}>
-            En menos de 20 minutos puedes tener tu club completamente digitalizado, sin hojas de cálculo.
-          </p>
-          <p style={{
-            fontSize: 12, color: 'rgba(255,255,255,0.28)', lineHeight: 1.5,
-            maxWidth: 440, margin: '0 auto 24px',
-            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.38s both',
-          }}>
-            5 días gratis, sin tarjeta. Sin permanencia: puedes cancelar cuando quieras y conservas tus datos.
-          </p>
-
-          {/* Social proof strip */}
+          {/* OG Image hero */}
           <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap',
-            marginBottom: 32, animation: 'slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.42s both',
+            position: 'relative',
+            borderRadius: 20,
+            overflow: 'hidden',
+            animation: 'slide-up 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s both',
+            boxShadow: `0 0 0 1px rgba(106,0,255,0.25), 0 32px 80px rgba(106,0,255,0.30), 0 8px 32px rgba(0,0,0,0.6)`,
           }}>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap' }}>Clubes en Colombia y Latam ya confían en ZenSports</span>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              {CLUB_LOGOS.slice(0, 5).map(club => (
-                <div key={club.abbr} style={{ width: 28, height: 28, borderRadius: 7, background: `${club.color}16`, border: `1px solid ${club.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 7, fontWeight: 900, color: club.color, letterSpacing: 0.2 }}>
-                  {club.abbr}
-                </div>
-              ))}
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginLeft: 4 }}>+6 más</span>
+            <img
+              src="/og-image.png"
+              alt="ZenSports — AI Powering Performance"
+              style={{ width: '100%', display: 'block', borderRadius: 20 }}
+            />
+            {/* Gradient bottom overlay para los CTAs */}
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%',
+              background: 'linear-gradient(to top, rgba(6,8,16,0.95) 0%, rgba(6,8,16,0.6) 50%, transparent 100%)',
+              borderRadius: '0 0 20px 20px',
+            }} />
+
+            {/* CTAs overlaid en la imagen */}
+            <div style={{
+              position: 'absolute', bottom: 32, left: 0, right: 0,
+              display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap',
+              padding: '0 24px',
+            }}>
+              <button
+                className="btn-primary"
+                onClick={() => openLead('free')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 9,
+                  background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`,
+                  border: 'none', color: '#fff', fontSize: 15, fontWeight: 700,
+                  borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
+                  boxShadow: `0 8px 32px ${previewColor}60`,
+                }}
+              >
+                Comenzar prueba gratis de 5 días <ArrowRight size={16} />
+              </button>
+              <button
+                className="btn-ghost"
+                onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.18)',
+                  backdropFilter: 'blur(12px)',
+                  color: '#fff', fontSize: 15, borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
+                }}
+              >
+                Ver cómo funciona en 2 min
+              </button>
             </div>
           </div>
 
-          {/* CTAs */}
-          <div style={{
-            display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap',
-            animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both', marginBottom: 36,
-          }}>
-            <button
-              className="btn-primary"
-              onClick={() => openLead('free')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 9,
-                background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`,
-                border: 'none', color: '#fff', fontSize: 15, fontWeight: 700,
-                borderRadius: 12, padding: '15px 32px', cursor: 'pointer',
-                boxShadow: `0 8px 32px ${previewColor}50`,
-              }}
-            >
-              Comenzar mi prueba gratuita de 5 días <ArrowRight size={16} />
-            </button>
-            <button
-              className="btn-ghost"
-              onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
-                color: '#fff', fontSize: 15, borderRadius: 12, padding: '15px 28px', cursor: 'pointer',
-              }}
-            >
-              Ver cómo funciona en 2 min
-            </button>
+          {/* Sub-texto + social proof */}
+          <div style={{ textAlign: 'center', marginTop: 28, animation: 'slide-up 0.7s cubic-bezier(0.16,1,0.3,1) 0.4s both' }}>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '0 0 6px', fontStyle: 'italic' }}>
+              En menos de 20 minutos tu club completamente digitalizado, sin hojas de cálculo.
+            </p>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', margin: '0 0 20px' }}>
+              5 días gratis · Sin tarjeta · Sin permanencia
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>Clubes en Colombia y Latam ya confían en ZenSports</span>
+              <div style={{ display: 'flex', gap: 5 }}>
+                {CLUB_LOGOS.slice(0, 5).map(club => (
+                  <div key={club.abbr} style={{ width: 26, height: 26, borderRadius: 6, background: `${club.color}16`, border: `1px solid ${club.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 7, fontWeight: 900, color: club.color }}>
+                    {club.abbr}
+                  </div>
+                ))}
+                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.18)', alignSelf: 'center', marginLeft: 3 }}>+6 más</span>
+              </div>
+            </div>
           </div>
-          <p style={{
-            fontSize: 12, color: 'rgba(255,255,255,0.3)',
-            animation: 'slide-up 0.7s cubic-bezier(0.16,1,0.3,1) 0.45s both', marginBottom: 0,
-          }}>
-            Te acompañamos por WhatsApp para dejar tu club listo en minutos.
-          </p>
 
           {/* Live Activity */}
-          <div style={{ animation: 'slide-up 0.6s ease 0.5s both' }}>
+          <div style={{ animation: 'slide-up 0.6s ease 0.5s both', marginTop: 24 }}>
             <ActivityFeed />
           </div>
         </div>
 
         {/* Hero dashboard mockup */}
         <div style={{ maxWidth: 940, margin: '64px auto 0', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 1, animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both' }}>
-          {/* Floating notification cards */}
           {FLOAT_CARDS.map(c => <FloatingCard key={c.text} {...c} />)}
           <div style={{ position: 'relative', animation: 'float 7s ease-in-out infinite' }}>
-            {/* Gradient border glow */}
             <div style={{ position: 'absolute', inset: -2, borderRadius: 18, background: `linear-gradient(135deg, ${previewColor}35, transparent 50%, rgba(0,208,132,0.18))`, filter: 'blur(1px)', animation: 'border-breathe 5s ease-in-out infinite', transition: 'background 0.5s' }} />
-            {/* Bottom shadow glow */}
             <div style={{ position: 'absolute', bottom: -40, left: '10%', right: '10%', height: 60, background: `radial-gradient(ellipse at center, ${previewColor}25 0%, transparent 70%)`, filter: 'blur(20px)', transition: 'background 0.5s' }} />
             <DashboardMockup color={previewColor} />
           </div>

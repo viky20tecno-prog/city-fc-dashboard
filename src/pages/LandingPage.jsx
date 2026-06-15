@@ -2059,12 +2059,13 @@ export default function LandingPage() {
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '40px 24px', background: 'rgba(0,0,0,0.3)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 32, justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <div style={{ marginBottom: 10 }}>
-              <ZenSportsLogo size={24} variant="full" />
+          <div style={{ maxWidth: 260 }}>
+            <div style={{ marginBottom: 12 }}>
+              <ZenSportsLogo size={44} variant="full" />
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, margin: '0 0 6px' }}>Gestión deportiva para cualquier club del mundo 🌍</p>
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, margin: 0 }}>Creado por <span style={{ color: '#3B82F6', fontWeight: 700 }}>Zenpra</span></p>
+            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, margin: '0 0 4px', lineHeight: 1.5 }}>Gestión deportiva para cualquier club del mundo 🌍</p>
+            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12, margin: '0 0 14px' }}>Creado por <span style={{ color: '#6A9FFF', fontWeight: 700 }}>Zenpra</span></p>
+            <p style={{ color: 'rgba(255,255,255,0.18)', fontSize: 11, margin: 0, fontStyle: 'italic' }}>AI Powering Performance</p>
           </div>
           <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
             <div>

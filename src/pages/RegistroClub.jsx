@@ -12,7 +12,7 @@ import {
 import { PALETA } from '../components/ThemeSelector';
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 
-const CYCLE_COLORS = ['#10B981', '#00AAFF', '#8B5CF6', '#0D9488', '#F97316'];
+const CYCLE_COLORS = ['#8B5CF6', '#10B981', '#00AAFF', '#0D9488', '#F97316'];
 
 const PAISES = [
   { codigo: '57',  bandera: '🇨🇴', nombre: 'Colombia'        },
@@ -93,7 +93,7 @@ export default function RegistroClub() {
   const ac = CYCLE_COLORS[colorIdx];
 
   useEffect(() => {
-    const timer = setInterval(() => setColorIdx(i => (i + 1) % CYCLE_COLORS.length), 10000);
+    const timer = setInterval(() => setColorIdx(i => (i + 1) % CYCLE_COLORS.length), 18000);
     return () => clearInterval(timer);
   }, []);
 
@@ -237,8 +237,17 @@ export default function RegistroClub() {
         <div className="reg-panel-izq" style={{ padding: '40px 30px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           <div style={{ marginBottom: 28, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <ZenSportsLogo size={56} variant="full" style={{ marginBottom: 6 }} />
-            <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0, textAlign: 'center' }}>Sistema operativo deportivo</p>
+            <div style={{
+              padding: '12px 20px', borderRadius: 16,
+              background: `${ac}12`,
+              border: `1px solid ${ac}30`,
+              boxShadow: `0 0 32px ${ac}25`,
+              transition: 'background 0.8s, border-color 0.8s, box-shadow 0.8s',
+              marginBottom: 8,
+            }}>
+              <ZenSportsLogo size={72} variant="full" />
+            </div>
+            <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0, textAlign: 'center', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Sistema operativo deportivo</p>
           </div>
 
           <div style={{ marginBottom: 24 }}>

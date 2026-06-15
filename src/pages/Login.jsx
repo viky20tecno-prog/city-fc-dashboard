@@ -228,9 +228,9 @@ export default function Login() {
         <div className="login-panel-izq" style={{ padding: '44px 36px', display: 'flex', flexDirection: 'column' }}>
 
           {/* Logo */}
-          <div style={{ marginBottom: 32 }}>
-            <ZenSportsLogo size={36} variant="full" style={{ marginBottom: 4 }} />
-            <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: '4px 0 0 38px' }}>Sistema operativo deportivo</p>
+          <div style={{ marginBottom: 32, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <ZenSportsLogo size={56} variant="full" style={{ marginBottom: 6 }} />
+            <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0, textAlign: 'center' }}>Sistema operativo deportivo</p>
           </div>
 
           {/* Headline */}

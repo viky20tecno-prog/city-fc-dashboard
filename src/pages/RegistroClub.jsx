@@ -236,9 +236,9 @@ export default function RegistroClub() {
         {/* ── PANEL IZQ: brand ── */}
         <div className="reg-panel-izq" style={{ padding: '40px 30px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          <div style={{ marginBottom: 28 }}>
-            <ZenSportsLogo size={36} variant="full" style={{ marginBottom: 4 }} />
-            <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: '4px 0 0 38px' }}>Sistema operativo deportivo</p>
+          <div style={{ marginBottom: 28, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <ZenSportsLogo size={56} variant="full" style={{ marginBottom: 6 }} />
+            <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0, textAlign: 'center' }}>Sistema operativo deportivo</p>
           </div>
 
           <div style={{ marginBottom: 24 }}>

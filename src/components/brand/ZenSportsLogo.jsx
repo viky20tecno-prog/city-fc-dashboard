@@ -8,12 +8,12 @@ import logoWhiteSvg from '../../assets/brand/logo-white.svg';
  *
  * Props:
  *   variant  — 'full' (Logo_2.png) | 'icon' (Logo_1.png) | 'white' | 'dark'
- *   size     — 'sm' | 'md' | 'lg' | número (px de altura)
+ *   size     — 'sm'(24px) | 'md'(32px) | 'lg'(44px) | número (px de altura)
  *   className — clase CSS adicional
  *   style     — estilos inline adicionales
  */
 export default function ZenSportsLogo({ variant = 'full', size = 'md', className = '', style = {} }) {
-  const HEIGHTS = { sm: 28, md: 36, lg: 48 };
+  const HEIGHTS = { sm: 24, md: 32, lg: 44 };
   const height = typeof size === 'number' ? size : (HEIGHTS[size] || HEIGHTS.md);
 
   const SRC_MAP = {
@@ -30,10 +30,16 @@ export default function ZenSportsLogo({ variant = 'full', size = 'md', className
     <img
       src={src}
       alt="ZenSports"
-      height={height}
-      width={isSquare ? height : undefined}
       className={className}
-      style={{ display: 'inline-block', objectFit: 'contain', ...style }}
+      style={{
+        display: 'inline-block',
+        height: height,
+        width: isSquare ? height : 'auto',
+        maxHeight: height,
+        objectFit: 'contain',
+        flexShrink: 0,
+        ...style,
+      }}
       draggable={false}
     />
   );

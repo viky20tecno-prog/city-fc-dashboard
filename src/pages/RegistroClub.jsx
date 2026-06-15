@@ -237,7 +237,7 @@ export default function RegistroClub() {
         <div className="reg-panel-izq" style={{ padding: '40px 30px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           <div style={{ marginBottom: 28 }}>
-            <ZenSportsLogo size="md" variant="full" style={{ marginBottom: 4 }} />
+            <ZenSportsLogo size={36} variant="full" style={{ marginBottom: 4 }} />
             <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: '4px 0 0 38px' }}>Sistema operativo deportivo</p>
           </div>
 

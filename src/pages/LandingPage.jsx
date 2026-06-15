@@ -77,7 +77,7 @@ function Counter({ target, prefix = '', suffix = '' }) {
 /* ── Live Activity Feed ──────────────────────────────────────────────────── */
 const ACTIVITY = [
   { Icon: CheckCircle,  color: '#22C55E', text: 'Pago confirmado — Club Atlético Verde', time: 'hace 2 min' },
-  { Icon: Users,        color: '#818CF8', text: 'Nuevo jugador inscrito — FC Medellín Sur', time: 'hace 5 min' },
+  { Icon: Users,        color: '#AE68FF', text: 'Nuevo jugador inscrito — FC Medellín Sur', time: 'hace 5 min' },
   { Icon: CreditCard,   color: '#06B6D4', text: 'QR de carnet generado — Deportivo Norte', time: 'hace 8 min' },
   { Icon: MessageCircle,color: '#25D366', text: 'WhatsApp enviado — Pago pendiente × 3', time: 'hace 11 min' },
   { Icon: CheckCircle,  color: '#22C55E', text: 'Inscripción validada — Barranquilla FC', time: 'hace 14 min' },
@@ -756,13 +756,13 @@ function MiniComparisonTable() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'rgba(255,255,255,0.025)' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: 1.5, textTransform: 'uppercase' }}>Necesidad</div>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', borderLeft: '1px solid rgba(255,255,255,0.05)', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 1.5, textTransform: 'uppercase', textAlign: 'center' }}>Excel + WhatsApp</div>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', borderLeft: '1px solid rgba(99,102,241,0.2)', fontSize: 10, fontWeight: 700, color: '#818CF8', letterSpacing: 1.5, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(99,102,241,0.06)' }}>ZenSports</div>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', borderLeft: '1px solid rgba(106,0,255,0.2)', fontSize: 10, fontWeight: 700, color: '#AE68FF', letterSpacing: 1.5, textTransform: 'uppercase', textAlign: 'center', background: 'rgba(106,0,255,0.06)' }}>ZenSports</div>
         </div>
         {rows.map((row, i) => (
           <div key={row.need} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)' }}>
             <div style={{ padding: '13px 16px', borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>{row.need}</div>
             <div style={{ padding: '13px 16px', borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', borderLeft: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>{row.old}</div>
-            <div style={{ padding: '13px 16px', borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', borderLeft: '1px solid rgba(99,102,241,0.15)', fontSize: 12, color: 'rgba(255,255,255,0.7)', textAlign: 'center', background: 'rgba(99,102,241,0.035)', fontWeight: 600 }}>{row.zs}</div>
+            <div style={{ padding: '13px 16px', borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', borderLeft: '1px solid rgba(106,0,255,0.15)', fontSize: 12, color: 'rgba(255,255,255,0.7)', textAlign: 'center', background: 'rgba(106,0,255,0.035)', fontWeight: 600 }}>{row.zs}</div>
           </div>
         ))}
       </div>
@@ -1022,7 +1022,7 @@ export default function LandingPage() {
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
             aria-label="Ir al inicio"
           >
-            <ZenSportsLogo size="md" variant="full" />
+            <ZenSportsLogo size={28} variant="full" />
           </button>
           <div className="hide-mobile" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {[
@@ -1114,11 +1114,11 @@ export default function LandingPage() {
           <div style={{ animation: 'slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both', marginBottom: 28 }}>
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: 'linear-gradient(90deg, rgba(99,102,241,0.10), rgba(6,182,212,0.07), rgba(99,102,241,0.10))',
-              border: '1px solid rgba(99,102,241,0.30)',
+              background: 'linear-gradient(90deg, rgba(106,0,255,0.10), rgba(6,182,212,0.07), rgba(106,0,255,0.10))',
+              border: '1px solid rgba(106,0,255,0.30)',
               borderRadius: 999, padding: '6px 20px',
-              fontSize: 12, color: 'var(--brand-secondary, #818CF8)', fontWeight: 600, letterSpacing: 0.5,
-              boxShadow: '0 0 20px rgba(99,102,241,0.10), inset 0 1px 0 rgba(99,102,241,0.15)',
+              fontSize: 12, color: 'var(--brand-secondary, #AE68FF)', fontWeight: 600, letterSpacing: 0.5,
+              boxShadow: '0 0 20px rgba(106,0,255,0.10), inset 0 1px 0 rgba(106,0,255,0.15)',
             }}>
               <Sparkles size={13} />
               Plataforma líder en gestión deportiva digital · 5 días gratis
@@ -1132,7 +1132,7 @@ export default function LandingPage() {
               fontWeight: 900,
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
-              background: 'var(--brand-gradient, linear-gradient(135deg, #6366F1, #06B6D4))',
+              background: 'var(--brand-gradient, linear-gradient(135deg, #6A00FF, #AE68FF))',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
@@ -1292,7 +1292,7 @@ export default function LandingPage() {
               { target: String(publicStats.jugadores), prefix: '+', suffix: '', label: 'jugadores gestionados', color: previewColor, icon: Users },
               { target: '8',   prefix: '',  suffix: 'h',   label: 'ahorradas por semana por club',        color: '#00D084',   icon: TrendingUp  },
               { target: '100', prefix: '',  suffix: '%',   label: 'cobros con seguimiento automático',    color: '#F5A623',   icon: CreditCard  },
-              { target: '5',   prefix: '',  suffix: ' min',label: 'para configurar e iniciar',            color: '#818CF8',   icon: Zap         },
+              { target: '5',   prefix: '',  suffix: ' min',label: 'para configurar e iniciar',            color: '#AE68FF',   icon: Zap         },
             ].map((s, i) => (
               <Reveal key={s.label} delay={i * 80}>
                 <div className="card-hover" style={{ textAlign: 'center', padding: '40px 24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.055)', borderRadius: 18, position: 'relative', overflow: 'hidden' }}>
@@ -1744,10 +1744,10 @@ export default function LandingPage() {
                   <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginTop: 3 }}>{h.sub}</div>
                 </div>
               ))}
-              <div style={{ padding: '18px 16px', background: 'rgba(99,102,241,0.10)', borderBottom: '1px solid rgba(99,102,241,0.28)', borderLeft: '1px solid rgba(99,102,241,0.22)', textAlign: 'center', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #4F46E5, #6366F1, #06B6D4)' }} />
+              <div style={{ padding: '18px 16px', background: 'rgba(106,0,255,0.10)', borderBottom: '1px solid rgba(106,0,255,0.28)', borderLeft: '1px solid rgba(106,0,255,0.22)', textAlign: 'center', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #6A00FF, #AE68FF)' }} />
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#fff' }}>ZenSports</div>
-                <div style={{ fontSize: 10, color: '#818CF8', marginTop: 3, fontWeight: 600 }}>The Sports OS</div>
+                <div style={{ fontSize: 10, color: '#AE68FF', marginTop: 3, fontWeight: 600 }}>The Sports OS</div>
               </div>
 
               {/* ─ Filas de datos ─ */}
@@ -1768,7 +1768,7 @@ export default function LandingPage() {
                   const Ic = s.ok === true ? CheckCircle : s.ok === 'partial' ? AlertTriangle : X;
                   const ic = s.ok === true ? '#00D084' : s.ok === 'partial' ? '#F5A623' : 'rgba(239,68,68,0.55)';
                   return (
-                    <div style={{ padding: '14px 16px', background: isZs ? `rgba(99,102,241,${idx % 2 === 0 ? '0.04' : '0.07'})` : rowBg, borderBottom: border, borderLeft: isZs ? '1px solid rgba(99,102,241,0.15)' : '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, textAlign: 'center' }}>
+                    <div style={{ padding: '14px 16px', background: isZs ? `rgba(106,0,255,${idx % 2 === 0 ? '0.04' : '0.07'})` : rowBg, borderBottom: border, borderLeft: isZs ? '1px solid rgba(106,0,255,0.15)' : '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, textAlign: 'center' }}>
                       <Ic size={14} color={ic} strokeWidth={2.5} />
                       <span style={{ fontSize: 11, color: isZs ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.28)', lineHeight: 1.35 }}>{s.text}</span>
                     </div>
@@ -2077,7 +2077,7 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 32, justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <div style={{ marginBottom: 10 }}>
-              <ZenSportsLogo size="sm" variant="full" />
+              <ZenSportsLogo size={24} variant="full" />
             </div>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, margin: '0 0 6px' }}>Gestión deportiva para cualquier club del mundo 🌍</p>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12, margin: 0 }}>Creado por <span style={{ color: '#3B82F6', fontWeight: 700 }}>Zenpra</span></p>

@@ -76,8 +76,17 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
     subtitulo:   clubConfig?.subtitulo   || '',
     ciudad:      clubConfig?.ciudad      || '',
     codigo_pais: clubConfig?.codigo_pais || '57',
-    deporte:     clubConfig?.deporte     || 'futbol',
   });
+
+  const [deportesSeleccionados, setDeportesSeleccionados] = useState(() => {
+    if (Array.isArray(clubConfig?.deportes) && clubConfig.deportes.length > 0) return clubConfig.deportes;
+    if (clubConfig?.deporte) return [clubConfig.deporte];
+    return ['futbol'];
+  });
+
+  const toggleDeporte = (d) => setDeportesSeleccionados(prev =>
+    prev.includes(d) ? (prev.length > 1 ? prev.filter(x => x !== d) : prev) : [...prev, d]
+  );
 
   const [colorClub,      setColorClub]      = useState(clubConfig?.color   || '#E14924');
   const [logoUrl,        setLogoUrl]        = useState(clubConfig?.logo_url || '');
@@ -150,7 +159,8 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
         subtitulo:            club.subtitulo,
         ciudad:               club.ciudad,
         codigo_pais:          club.codigo_pais,
-        deporte:              club.deporte || 'futbol',
+        deportes:             deportesSeleccionados,
+        deporte:              deportesSeleccionados[0] || 'futbol',
         color:                colorClub,
         logo_url:             logoUrl || null,
         valor_mensualidad:    mensualidad.valor,
@@ -288,18 +298,37 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
               </div>
 
               <div>
-                <label style={lbl}>Deporte principal</label>
-                <select value={club.deporte} onChange={e => setClub(cl => ({ ...cl, deporte: e.target.value }))} style={inp}>
-                  <option value="futbol">Fútbol</option>
-                  <option value="baloncesto">Baloncesto</option>
-                  <option value="voleibol">Voleibol</option>
-                  <option value="natacion">Natación</option>
-                  <option value="tenis">Tenis</option>
-                  <option value="beisbol">Béisbol</option>
-                  <option value="ciclismo">Ciclismo</option>
-                  <option value="rugby">Rugby</option>
-                  <option value="general">Otro / General</option>
-                </select>
+                <label style={lbl}>Deportes del club (selecciona uno o más)</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {[
+                    { id: 'futbol',     label: 'Fútbol'     },
+                    { id: 'baloncesto', label: 'Baloncesto' },
+                    { id: 'voleibol',   label: 'Voleibol'   },
+                    { id: 'natacion',   label: 'Natación'   },
+                    { id: 'tenis',      label: 'Tenis'      },
+                    { id: 'beisbol',    label: 'Béisbol'    },
+                    { id: 'ciclismo',   label: 'Ciclismo'   },
+                    { id: 'rugby',      label: 'Rugby'      },
+                    { id: 'general',    label: 'Otro'       },
+                  ].map(({ id, label }) => {
+                    const sel = deportesSeleccionados.includes(id);
+                    return (
+                      <button key={id} type="button" onClick={() => toggleDeporte(id)} style={{
+                        padding: '7px 14px', borderRadius: 20, fontSize: 13, cursor: 'pointer',
+                        fontWeight: sel ? 700 : 500,
+                        background: sel ? c : 'rgba(255,255,255,0.07)',
+                        border: `1px solid ${sel ? c : 'rgba(255,255,255,0.12)'}`,
+                        color: sel ? '#fff' : '#8B95A3',
+                        transition: 'background 0.2s, border-color 0.2s, color 0.2s',
+                      }}>
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 7, marginBottom: 0 }}>
+                  Mínimo uno. Para clubs multi-deporte selecciona todos los que practican.
+                </p>
               </div>
 
               <InfoBox>El país define la moneda y el formato de los números en toda la app.</InfoBox>
@@ -578,6 +607,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 7 }}>
                 {[
                   { label: 'Club',       val: club.nombre || '—' },
+                  { label: 'Deportes',   val: deportesSeleccionados.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ') || '—' },
                   { label: 'Ciudad',     val: club.ciudad || '—' },
                   { label: 'País',       val: `${paisActual.bandera} ${paisActual.nombre} · ${paisActual.moneda}` },
                   { label: 'Mensualidad', val: `${paisActual.moneda} ${mensualidad.valor.toLocaleString()}` },

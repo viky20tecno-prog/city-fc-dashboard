@@ -158,6 +158,7 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
   const [newCat,    setNewCat]    = useState({ categoria: '', equipo: '' });
 
   const [form, setForm] = useState({
+    deporte:             jugador.deporte             || clubConfig?.deporte || 'futbol',
     posicion:            jugador.posicion            || '',
     numero_camiseta:     jugador.numero_camiseta     || '',
     tipo_id:             jugador.tipo_id             || '',
@@ -231,6 +232,7 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
     try {
       const payload = {
         ...form,
+        deporte:             form.deporte || null,
         nombre:              up(form.nombre),
         apellidos:           up(form.apellidos),
         lugar_de_nacimiento: up(form.lugar_de_nacimiento),
@@ -347,11 +349,22 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
       {/* Datos deportivos */}
       <Seccion titulo="Datos Deportivos">
         <div className="grid grid-cols-2 gap-3">
+          {/* Deporte del jugador — solo visible si el club tiene más de uno */}
+          {Array.isArray(clubConfig?.deportes) && clubConfig.deportes.length > 1 && (
+            <div className="col-span-2 space-y-1">
+              <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Deporte</label>
+              <select value={form.deporte} onChange={set('deporte')} className={INPUT_CLS}>
+                {clubConfig.deportes.map(d => (
+                  <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="space-y-1">
             <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Posición</label>
             <select value={form.posicion} onChange={set('posicion')} className={INPUT_CLS}>
               <option value="">— Sin asignar —</option>
-              {(POSICIONES_POR_DEPORTE[clubConfig?.deporte] ?? POSICIONES_POR_DEPORTE.futbol).map(p => <option key={p} value={p}>{p}</option>)}
+              {(POSICIONES_POR_DEPORTE[form.deporte] ?? POSICIONES_POR_DEPORTE.futbol).map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
           <CampoEdit

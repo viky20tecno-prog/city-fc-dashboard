@@ -215,6 +215,7 @@ function EstadoBadge({ estado }) {
 export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, suspensiones = [], morosos = [], onRefresh, categoriasJugadores = [], clubConfig, color }) {
   const [search, setSearch]               = useState('');
   const [filtroEstado, setFiltroEstado]   = useState('TODOS');
+  const [filtroDeporte, setFiltroDeporte] = useState('TODOS');
   const [filtroCategoria, setFiltroCategoria] = useState('TODOS');
   const [sortField, setSortField]         = useState('nombreCompleto');
   const [sortDir, setSortDir]             = useState('asc');
@@ -356,6 +357,11 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     return ['TODOS', ...equipos, SIN_EQUIPO];
   }, [categoriasJugadores]);
 
+  const opcionesDeporte = useMemo(() => {
+    const set = new Set(jugadores.map(j => j.deporte).filter(Boolean));
+    return set.size > 1 ? ['TODOS', ...Array.from(set)] : [];
+  }, [jugadores]);
+
   const filtered = useMemo(() => {
     return jugadoresConPago
       .filter(j => {
@@ -369,13 +375,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           || (Array.isArray(j.categorias) && j.categorias.some(
               c => c.categoria === filtroCategoria || c.equipo === filtroCategoria
             ));
-        return matchSearch && matchEstado && matchCategoria;
+        const matchDeporte = filtroDeporte === 'TODOS' || j.deporte === filtroDeporte;
+        return matchSearch && matchEstado && matchCategoria && matchDeporte;
       })
       .sort((a, b) => {
         const cmp = (a[sortField] || '').toString().localeCompare((b[sortField] || '').toString(), 'es', { numeric: true });
         return sortDir === 'asc' ? cmp : -cmp;
       });
-  }, [jugadoresConPago, search, filtroEstado, filtroCategoria, sortField, sortDir]);
+  }, [jugadoresConPago, search, filtroEstado, filtroDeporte, filtroCategoria, sortField, sortDir]);
 
   const toggleSort = (field) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -512,6 +519,11 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
                 {/* Filtro de estado */}
                 <FiltroEstadoDropdown value={filtroEstado} onChange={setFiltroEstado} opciones={estados} />
+
+                {/* Filtro de deporte (solo si hay más de un deporte en el club) */}
+                {opcionesDeporte.length > 0 && (
+                  <FiltroEstadoDropdown value={filtroDeporte} onChange={setFiltroDeporte} opciones={opcionesDeporte} />
+                )}
 
                 {/* Filtro de categoría / equipo */}
                 {opcionesCategoria.length > 1 && (

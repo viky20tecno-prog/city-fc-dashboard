@@ -218,9 +218,15 @@ export default function Dashboard() {
   // Filtra el nav según los módulos habilitados en el plan del club y el rol del usuario.
   const ADMIN_ONLY_TABS = new Set(['cobro', 'conciliacion', 'finanzas']);
   const modulos = clubConfig?.modulos;
+  // Normalizar deportes del club: array nuevo o string legacy
+  const deportesClub = Array.isArray(clubConfig?.deportes) && clubConfig.deportes.length > 0
+    ? clubConfig.deportes
+    : [clubConfig?.deporte || 'futbol'];
   const navVisible = NAV.filter(({ id }) => {
     if (!isAdmin && ADMIN_ONLY_TABS.has(id)) return false;
     if (id === 'dashboard' || id === 'jugadores') return true;
+    // Arbitraje solo aplica a fútbol — ocultar si ningún deporte del club es fútbol
+    if (id === 'arbitraje' && !deportesClub.includes('futbol')) return false;
     if (!modulos) return true;
     return modulos[id] !== false;
   });

@@ -691,6 +691,63 @@ export default function FormInscripcion() {
               );
             })}
 
+            {/* Sección deporte (solo si el club tiene más de uno) */}
+            {(() => {
+              const deportes = Array.isArray(clubConfig?.deportes) && clubConfig.deportes.length > 1
+                ? clubConfig.deportes : [];
+              if (!deportes.length) return null;
+              const EMOJIS = { futbol:'⚽', baloncesto:'🏀', voleibol:'🏐', natacion:'🏊', tenis:'🎾', rugby:'🏉', beisbol:'⚾', ciclismo:'🚴', general:'🏅' };
+              return (
+                <div style={S.card}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                    <div style={{ width: 3, height: 16, background: c, borderRadius: 2, flexShrink: 0 }} />
+                    <span style={{ color: 'var(--text-sec)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+                      Deporte
+                    </span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(deportes.length, 4)}, 1fr)`, gap: 8 }}>
+                    {deportes.map(d => {
+                      const sel = form.deporte === d;
+                      const emoji = EMOJIS[d] || '🏅';
+                      const label = d.charAt(0).toUpperCase() + d.slice(1);
+                      return (
+                        <button key={d} type="button" onClick={() => handleChange('deporte', d)} style={{
+                          position: 'relative',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                          gap: 6, padding: '14px 8px', borderRadius: 12, cursor: 'pointer', outline: 'none',
+                          background: sel ? `${c}18` : 'rgba(255,255,255,0.03)',
+                          border: `1.5px solid ${sel ? c : 'rgba(255,255,255,0.07)'}`,
+                          boxShadow: sel ? `0 0 16px ${c}28` : 'none',
+                          transition: 'all 0.18s ease',
+                        }}>
+                          {sel && (
+                            <span style={{
+                              position: 'absolute', top: 6, right: 7,
+                              width: 15, height: 15, borderRadius: '50%',
+                              background: c, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}>
+                              <svg width="8" height="6" viewBox="0 0 9 7" fill="none">
+                                <path d="M1 3.5L3.5 6L8 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </span>
+                          )}
+                          <span style={{ fontSize: 26, lineHeight: 1 }}>{emoji}</span>
+                          <span style={{ fontSize: 11, fontWeight: sel ? 700 : 500, color: sel ? '#fff' : 'var(--text-sec)', textAlign: 'center', lineHeight: 1.2 }}>
+                            {label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {!form.deporte && (
+                    <p style={{ fontSize: 11, color: 'rgba(239,68,68,0.7)', marginTop: 8, marginBottom: 0 }}>
+                      Selecciona el deporte que practicas en este club.
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+
             {/* Sección categoría y equipo (si el club tiene categorías) */}
             {clubConfig?.categorias_jugadores?.length > 0 && (() => {
               const cats = normalizarCategorias(clubConfig.categorias_jugadores);

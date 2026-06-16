@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/og-image.jpg" />
+    <link rel="apple-touch-icon" href="/og-image.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="ZenSports — Software de gestión deportiva con cobro automático por WhatsApp, inscripciones digitales y control de asistencia para clubs en Colombia y Latam." />
     <meta name="keywords" content="software deportivo, gestión de club, cobro WhatsApp, inscripciones deportivas, club de fútbol Colombia, ZenSports" />
@@ -15,7 +15,7 @@
     <meta property="og:description" content="Cobro automático por WhatsApp, inscripciones digitales y control total de tu club. Prueba 5 días gratis, sin tarjeta." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://zensports.zenpra.ai" />
-    <meta property="og:image" content="https://zensports.zenpra.ai/og-image.jpg" />
+    <meta property="og:image" content="https://zensports.zenpra.ai/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="es_CO" />
@@ -25,7 +25,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="ZenSports — El OS para tu club deportivo" />
     <meta name="twitter:description" content="Cobro automático por WhatsApp, inscripciones digitales y control total de tu club. Prueba 5 días gratis, sin tarjeta." />
-    <meta name="twitter:image" content="https://zensports.zenpra.ai/og-image.jpg" />
+    <meta name="twitter:image" content="https://zensports.zenpra.ai/og-image.png" />
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -74,9 +74,28 @@
     </script>
 
     <title>ZenSports — Gestión deportiva con cobro automático por WhatsApp</title>
+
+    <!-- Fuentes — non-blocking (media print trick) -->
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://api.fontshare.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Clash Display: solo pesos usados (400, 500, 600, 700) -->
+    <link rel="stylesheet"
+      href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap"
+      media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap">
+    </noscript>
+
+    <!-- Space Grotesk: cuerpo de texto -->
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap">
+    </noscript>
   </head>
   <body>
     <div id="root"></div>

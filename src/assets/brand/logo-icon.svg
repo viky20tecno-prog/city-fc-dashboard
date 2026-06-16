@@ -1,10 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#4F46E5"/>
-      <stop offset="100%" stop-color="#6366F1"/>
+    <linearGradient id="zbg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6A00FF"/>
+      <stop offset="100%" stop-color="#AE68FF"/>
     </linearGradient>
+    <filter id="gf" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
-  <rect width="32" height="32" rx="7" fill="url(#bg)"/>
-  <path d="M8 11H24L8 21H24" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="36" height="36" rx="9" fill="url(#zbg)"/>
+  <path filter="url(#gf)" d="M9 12H27L9 24H27" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

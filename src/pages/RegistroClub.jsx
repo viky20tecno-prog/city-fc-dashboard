@@ -245,7 +245,7 @@ export default function RegistroClub() {
               transition: 'background 0.8s, border-color 0.8s, box-shadow 0.8s',
               marginBottom: 8,
             }}>
-              <ZenSportsLogo size={72} variant="full" />
+              <ZenSportsLogo size={64} variant="white" />
             </div>
             <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0, textAlign: 'center', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Sistema operativo deportivo</p>
           </div>

@@ -9,7 +9,8 @@ import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 
 const WHATSAPP_SOPORTE = '573023903192';
 
-const CYCLE_COLORS = ['#10B981', '#00AAFF', '#8B5CF6', '#06B6D4', '#F97316'];
+const CYCLE_COLORS = ['#6A00FF', '#AE68FF', '#8B2AFF', '#C084FF', '#7C3AED'];
+const BTN_COLOR = '#6A00FF';
 
 const FEATURES = [
   { Icon: Zap,       text: 'Cobros automáticos por WhatsApp' },
@@ -229,7 +230,7 @@ export default function Login() {
 
           {/* Logo */}
           <div style={{ marginBottom: 32, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <ZenSportsLogo size={56} variant="full" style={{ marginBottom: 6 }} />
+            <ZenSportsLogo size={52} variant="white" style={{ marginBottom: 6 }} />
             <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0, textAlign: 'center' }}>Sistema operativo deportivo</p>
           </div>
 
@@ -371,7 +372,7 @@ export default function Login() {
                   </button>
                 </div>
 
-                <button type="submit" disabled={loading} style={btn(color, loading)}>
+                <button type="submit" disabled={loading} style={btn(BTN_COLOR, loading)}>
                   {loading
                     ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Ingresando...</>
                     : 'Ingresar al Club'}
@@ -436,7 +437,7 @@ export default function Login() {
                 <Campo label="Correo electrónico" icon={<Mail size={15} color="var(--text-sec)" />}
                   type="email" value={email} onChange={setEmail}
                   placeholder="tu@email.com" autoComplete="email" required />
-                <button type="submit" disabled={loading} style={btn(color, loading)}>
+                <button type="submit" disabled={loading} style={btn(BTN_COLOR, loading)}>
                   {loading
                     ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Enviando...</>
                     : '📧  Enviar enlace de recuperación'}
@@ -501,7 +502,7 @@ export default function Login() {
                 <Campo label="Confirmar contraseña" icon={<Lock size={15} color="var(--text-sec)" />}
                   type="password" value={confirmPw} onChange={setConfirmPw}
                   placeholder="Repite la contraseña" required />
-                <button type="submit" disabled={loading} style={btn(color, loading)}>
+                <button type="submit" disabled={loading} style={btn(BTN_COLOR, loading)}>
                   {loading
                     ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Guardando...</>
                     : '✓  Guardar nueva contraseña'}
@@ -518,7 +519,7 @@ export default function Login() {
               <p style={{ color: 'var(--text-sec)', fontSize: 14, margin: '0 0 24px', lineHeight: 1.6 }}>
                 Ya puedes ingresar al dashboard con tu nueva contraseña.
               </p>
-              <button onClick={irLogin} style={btn(color, false)}>→ Ir al login</button>
+              <button onClick={irLogin} style={btn(BTN_COLOR, false)}>→ Ir al login</button>
             </div>
           )}
 

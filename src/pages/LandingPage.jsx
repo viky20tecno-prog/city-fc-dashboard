@@ -1022,7 +1022,7 @@ export default function LandingPage() {
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
             aria-label="Ir al inicio"
           >
-            <ZenSportsLogo size={32} variant="icon" />
+            <ZenSportsLogo size={32} variant="icon-svg" />
           </button>
           <div className="hide-mobile" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {[
@@ -2061,7 +2061,7 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 32, justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div style={{ maxWidth: 260 }}>
             <div style={{ marginBottom: 12 }}>
-              <ZenSportsLogo size={44} variant="full" />
+              <ZenSportsLogo size={36} variant="white" />
             </div>
             <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, margin: '0 0 4px', lineHeight: 1.5 }}>Gestión deportiva para cualquier club del mundo 🌍</p>
             <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12, margin: '0 0 14px' }}>Creado por <span style={{ color: '#6A9FFF', fontWeight: 700 }}>Zenpra</span></p>

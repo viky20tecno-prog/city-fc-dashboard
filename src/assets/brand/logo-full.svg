@@ -1,15 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 32" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 36" fill="none">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#4F46E5"/>
-      <stop offset="100%" stop-color="#6366F1"/>
+    <linearGradient id="zbg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6A00FF"/>
+      <stop offset="100%" stop-color="#AE68FF"/>
     </linearGradient>
   </defs>
   <!-- Icon -->
-  <rect width="32" height="32" rx="7" fill="url(#bg)"/>
-  <path d="M8 11H24L8 21H24" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="36" height="36" rx="9" fill="url(#zbg)"/>
+  <path d="M9 12H27L9 24H27" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
   <!-- Wordmark -->
-  <text x="41" y="22" font-family="'Space Grotesk', 'Inter', system-ui, sans-serif" font-size="17" fill="white" letter-spacing="-0.5">
-    <tspan font-weight="500" opacity="0.92">Zen</tspan><tspan font-weight="800">Sports</tspan>
+  <text x="46" y="25" font-family="'Clash Display','Space Grotesk','Inter',system-ui,sans-serif" font-size="18" fill="white" letter-spacing="-0.3">
+    <tspan font-weight="400" opacity="0.88">ZEN</tspan><tspan font-weight="600">SPORTS</tspan>
   </text>
 </svg>

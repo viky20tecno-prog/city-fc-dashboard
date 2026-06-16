@@ -236,8 +236,14 @@ export default function RegistroClub() {
         {/* ── PANEL IZQ: brand ── */}
         <div className="reg-panel-izq" style={{ padding: '40px 30px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          <div style={{ marginBottom: 28, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <ZenSportsLogo size={200} variant="full" />
+          <div style={{ marginBottom: 28, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <ZenSportsLogo variant="icon" size={100} />
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 42, letterSpacing: '0.12em', color: '#fff', lineHeight: 1, marginTop: 6 }}>
+              ZenSports
+            </span>
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: '0.22em', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
+              AI Powering Performance
+            </span>
           </div>
 
           <div style={{ marginBottom: 24 }}>

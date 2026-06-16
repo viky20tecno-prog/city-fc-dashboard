@@ -305,7 +305,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                     { id: 'baloncesto', label: 'Baloncesto',  emoji: '🏀' },
                     { id: 'voleibol',   label: 'Voleibol',    emoji: '🏐' },
                     { id: 'natacion',   label: 'Natación',    emoji: '🏊' },
-                    { id: 'tenis',      label: 'Tenis',       emoji: '🎾' },
+                    { id: 'padel',      label: 'Pádel',       emoji: '🎾' },
                     { id: 'rugby',      label: 'Rugby',       emoji: '🏉' },
                     { id: 'beisbol',    label: 'Béisbol',     emoji: '⚾' },
                     { id: 'ciclismo',   label: 'Ciclismo',    emoji: '🚴' },

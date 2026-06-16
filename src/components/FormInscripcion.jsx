@@ -696,7 +696,7 @@ export default function FormInscripcion() {
               const deportes = Array.isArray(clubConfig?.deportes) && clubConfig.deportes.length > 1
                 ? clubConfig.deportes : [];
               if (!deportes.length) return null;
-              const EMOJIS = { futbol:'⚽', baloncesto:'🏀', voleibol:'🏐', natacion:'🏊', tenis:'🎾', rugby:'🏉', beisbol:'⚾', ciclismo:'🚴', general:'🏅' };
+              const EMOJIS = { futbol:'⚽', baloncesto:'🏀', voleibol:'🏐', natacion:'🏊', padel:'🎾', rugby:'🏉', beisbol:'⚾', ciclismo:'🚴', general:'🏅' };
               return (
                 <div style={S.card}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>

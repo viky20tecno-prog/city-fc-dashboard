@@ -16,7 +16,7 @@ const POSICIONES_POR_DEPORTE = {
   baloncesto: ['Base', 'Escolta', 'Alero', 'Ala-Pívot', 'Pívot'],
   voleibol:   ['Armador', 'Opuesto', 'Central', 'Receptor', 'Libero'],
   natacion:   ['Mariposa', 'Espalda', 'Pecho', 'Crol', 'Combinado'],
-  tenis:      ['Sencillos', 'Dobles', 'Dobles Mixtos'],
+  padel:      ['Individual', 'Dobles', 'Dobles Mixtos'],
   beisbol:    ['Lanzador', 'Receptor', 'Primera Base', 'Segunda Base', 'Tercera Base', 'Shortstop', 'Jardinero Izquierdo', 'Jardinero Central', 'Jardinero Derecho'],
   ciclismo:   ['Sprinter', 'Rodador', 'Escalador', 'Contrarrelojista', 'Doméstico'],
   rugby:      ['Pilar', 'Hooker', 'Segunda Línea', 'Flanker', 'Número 8', 'Medio Scrum', 'Apertura', 'Centro', 'Ala', 'Zaguero'],

@@ -230,8 +230,7 @@ export default function Login() {
 
           {/* Logo */}
           <div style={{ marginBottom: 32, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <ZenSportsLogo size={52} variant="white" style={{ marginBottom: 6 }} />
-            <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0, textAlign: 'center' }}>Sistema operativo deportivo</p>
+            <ZenSportsLogo size={96} variant="full" />
           </div>
 
           {/* Headline */}

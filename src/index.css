@@ -4,14 +4,24 @@
    TEMA NEGRO (default)
    ══════════════════════════════════════════════════════ */
 :root, [data-theme="dark"] {
-  --bg-app:      #0A0A0A;
-  --bg-card:     #111111;
-  --bg-surface:  #1A1A1A;
-  --bg-input:    #0E0E0E;
-  --text-pri:    #FFFFFF;
+  --bg-app:      #0B0D1A;
+  --bg-card:     #12152A;
+  --bg-surface:  #1A1F29;
+  --bg-input:    #0E1120;
+  --text-pri:    #EFFFFF;
   --text-sec:    #9CA3AF;
   --text-mut:    #4B5563;
   --border-sub:  rgba(255,255,255,0.07);
+}
+[data-theme="zensports"] {
+  --bg-app:      #0B0D1A;
+  --bg-card:     #12152A;
+  --bg-surface:  #1A1F29;
+  --bg-input:    #0E1120;
+  --text-pri:    #EFFFFF;
+  --text-sec:    #AE68FF;
+  --text-mut:    #4B3D6E;
+  --border-sub:  rgba(106,0,255,0.12);
 }
 [data-theme="carbon"] {
   --bg-app:      #0D1117;
@@ -274,9 +284,9 @@
   --text:         var(--text-pri);
   --muted:        var(--text-sec);
   --border-dim:   var(--border-sub);
-  --font-display: 'Bebas Neue', cursive;
-  --font-body:    'Inter', system-ui, sans-serif;
-  --font-brand:   'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body:    'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-brand:   'Space Grotesk', system-ui, sans-serif;
   --text-primary: var(--text-pri);
   --text-muted:   var(--text-sec);
   --yellow:       #F59E0B;
@@ -285,13 +295,13 @@
 
   /* ── ZenSports Brand Tokens ──────────────────────────────────────── */
   /* Identidad de la plataforma — independientes del color del club     */
-  --brand-primary:   #6366F1;
-  --brand-secondary: #818CF8;
-  --brand-accent:    #06B6D4;
-  --brand-gradient:  linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #06B6D4 100%);
-  --brand-glow:      rgba(99, 102, 241, 0.28);
-  --brand-surface:   rgba(99, 102, 241, 0.08);
-  --brand-border:    rgba(99, 102, 241, 0.20);
+  --brand-primary:   #6A00FF;
+  --brand-secondary: #AE68FF;
+  --brand-accent:    #AE68FF;
+  --brand-gradient:  linear-gradient(135deg, #6A00FF 0%, #AE68FF 100%);
+  --brand-glow:      rgba(106, 0, 255, 0.28);
+  --brand-surface:   rgba(106, 0, 255, 0.08);
+  --brand-border:    rgba(106, 0, 255, 0.20);
 }
 
 body {
@@ -352,8 +362,8 @@ body {
 /* Scrollbar */
 ::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--cc30, rgba(225,73,36,0.25)); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--cc50, rgba(225,73,36,0.5)); }
+::-webkit-scrollbar-thumb { background: rgba(106,0,255,0.25); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(106,0,255,0.5); }
 
 /* Animations */
 @keyframes pulse-green {
@@ -386,7 +396,7 @@ body {
 
 /* ── Accessibility ──────────────────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--brand-primary, #6366F1);
+  outline: 2px solid var(--brand-primary, #6A00FF);
   outline-offset: 2px;
   border-radius: 4px;
 }

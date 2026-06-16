@@ -4,6 +4,7 @@ import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
   Clock, ClipboardCheck, Settings, AlertTriangle,
   Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays, Shield,
+  ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -42,22 +43,29 @@ const NAV = [
   { id: 'finanzas',     Icon: TrendingUp,       title: 'Finanzas'      },
 ];
 
-function NavBtn({ id, Icon, title, active, color, onClick }) {
+function NavBtn({ id, Icon, title, active, color, onClick, collapsed }) {
   return (
     <button
       style={{
-        width: '42px', height: '42px',
-        borderRadius: '10px',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        width: collapsed ? '42px' : '100%',
+        height: '40px',
+        borderRadius: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: collapsed ? 'center' : 'flex-start',
+        gap: collapsed ? 0 : '10px',
+        padding: collapsed ? '0' : '0 12px',
         cursor: 'pointer',
         border: 'none',
         background: active ? `${color}1F` : 'transparent',
         position: 'relative',
         transition: 'background-color 0.2s',
         flexShrink: 0,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
       }}
       onClick={() => onClick(id)}
-      title={title}
+      title={collapsed ? title : undefined}
     >
       {active && (
         <div style={{
@@ -72,9 +80,20 @@ function NavBtn({ id, Icon, title, active, color, onClick }) {
       <Icon
         size={18}
         color={active ? color : 'var(--text-mut)'}
-        style={active ? { filter: `drop-shadow(0 0 5px ${color}E6)`, transition: 'filter 0.3s' } : {}}
+        style={{ flexShrink: 0, ...(active ? { filter: `drop-shadow(0 0 5px ${color}E6)`, transition: 'filter 0.3s' } : {}) }}
         strokeWidth={1.7}
       />
+      {!collapsed && (
+        <span style={{
+          fontSize: '13px',
+          fontWeight: active ? 600 : 400,
+          color: active ? color : 'var(--text-sec)',
+          letterSpacing: '0.2px',
+          transition: 'color 0.2s',
+        }}>
+          {title}
+        </span>
+      )}
     </button>
   );
 }
@@ -100,7 +119,14 @@ export default function Dashboard() {
   const [colorOverride,    setColorOverride]    = useState(null);
   const [isMobile,         setIsMobile]         = useState(() => window.innerWidth < 768);
   const [showBell,         setShowBell]         = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('sidebarCollapsed') === 'true');
   const bellRef = useRef(null);
+
+  const toggleSidebar = () => setSidebarCollapsed(v => {
+    const next = !v;
+    localStorage.setItem('sidebarCollapsed', String(next));
+    return next;
+  });
 
   // ── Detectar viewport móvil ──
   useEffect(() => {
@@ -235,7 +261,7 @@ export default function Dashboard() {
     shell: {
       display: 'grid',
       gridTemplateRows: isMobile ? '56px 1fr 56px' : '58px 1fr',
-      gridTemplateColumns: isMobile ? '1fr' : '64px 1fr',
+      gridTemplateColumns: isMobile ? '1fr' : (sidebarCollapsed ? '64px 1fr' : '200px 1fr'),
       height: isMobile ? '100dvh' : '100vh',
       overflow: 'hidden',
       fontFamily: "'Inter', system-ui, sans-serif",
@@ -265,12 +291,13 @@ export default function Dashboard() {
       borderRight: `1px solid ${c}26`,
       display: isMobile ? 'none' : 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
-      padding: '14px 0 12px',
-      gap: '4px',
+      alignItems: sidebarCollapsed ? 'center' : 'stretch',
+      padding: sidebarCollapsed ? '10px 0 12px' : '10px 8px 12px',
+      gap: '2px',
       overflowY: 'auto',
+      overflowX: 'hidden',
       scrollbarWidth: 'none',
-      transition: 'border-color 0.5s',
+      transition: 'border-color 0.5s, padding 0.25s',
     },
     main: {
       gridColumn: isMobile ? '1' : '2',
@@ -564,21 +591,80 @@ export default function Dashboard() {
 
       {/* ───── SIDEBAR ───── */}
       <nav style={S.sidebar}>
+        {/* Toggle contraer/expandir */}
+        <button
+          onClick={toggleSidebar}
+          title={sidebarCollapsed ? 'Expandir menú' : 'Contraer menú'}
+          style={{
+            alignSelf: sidebarCollapsed ? 'center' : 'flex-end',
+            width: '26px', height: '26px',
+            borderRadius: '6px',
+            border: `1px solid ${c}26`,
+            background: `${c}0F`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer',
+            marginBottom: '6px',
+            flexShrink: 0,
+            transition: 'background 0.2s, border-color 0.2s',
+          }}
+        >
+          {sidebarCollapsed
+            ? <ChevronRight size={13} color="var(--text-mut)" />
+            : <ChevronLeft  size={13} color="var(--text-mut)" />}
+        </button>
+
         {navVisible.map(({ id, Icon, title }) => (
-          <NavBtn key={id} id={id} Icon={Icon} title={title} active={activeTab === id} color={c} onClick={setActiveTab} />
+          <NavBtn key={id} id={id} Icon={Icon} title={title} active={activeTab === id} color={c} onClick={setActiveTab} collapsed={sidebarCollapsed} />
         ))}
 
         <div style={{ flex: 1 }} />
 
+        {/* Configuración */}
         <button
-          style={{ ...S.iconBtn(showTheme), position: 'relative' }}
+          style={{
+            width: sidebarCollapsed ? '42px' : '100%',
+            height: '40px',
+            borderRadius: '8px',
+            display: 'flex', alignItems: 'center',
+            justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+            gap: sidebarCollapsed ? 0 : '10px',
+            padding: sidebarCollapsed ? '0' : '0 12px',
+            border: 'none',
+            background: showTheme ? `${c}1F` : 'transparent',
+            cursor: 'pointer',
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+          }}
           title="Apariencia y configuración"
           onClick={() => setShowTheme(v => !v)}
         >
-          <Settings size={18} color={showTheme ? c : 'var(--text-mut)'} strokeWidth={1.7} />
+          <Settings size={18} color={showTheme ? c : 'var(--text-mut)'} strokeWidth={1.7} style={{ flexShrink: 0 }} />
+          {!sidebarCollapsed && <span style={{ fontSize: '13px', color: showTheme ? c : 'var(--text-sec)' }}>Configuración</span>}
         </button>
-        <button style={S.iconBtn(false)} title="Cerrar sesión" onClick={handleLogout}>
-          <LogOut size={18} color="var(--text-sec)" strokeWidth={1.7} />
+
+        {/* Cerrar sesión */}
+        <button
+          style={{
+            width: sidebarCollapsed ? '42px' : '100%',
+            height: '40px',
+            borderRadius: '8px',
+            display: 'flex', alignItems: 'center',
+            justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+            gap: sidebarCollapsed ? 0 : '10px',
+            padding: sidebarCollapsed ? '0' : '0 12px',
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+          }}
+          title="Cerrar sesión"
+          onClick={handleLogout}
+        >
+          <LogOut size={18} color="var(--text-sec)" strokeWidth={1.7} style={{ flexShrink: 0 }} />
+          {!sidebarCollapsed && <span style={{ fontSize: '13px', color: 'var(--text-sec)' }}>Cerrar sesión</span>}
         </button>
       </nav>
 

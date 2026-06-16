@@ -298,37 +298,62 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
               </div>
 
               <div>
-                <label style={lbl}>Deportes del club (selecciona uno o más)</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <label style={lbl}>Deportes del club</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                   {[
-                    { id: 'futbol',     label: 'Fútbol'     },
-                    { id: 'baloncesto', label: 'Baloncesto' },
-                    { id: 'voleibol',   label: 'Voleibol'   },
-                    { id: 'natacion',   label: 'Natación'   },
-                    { id: 'tenis',      label: 'Tenis'      },
-                    { id: 'beisbol',    label: 'Béisbol'    },
-                    { id: 'ciclismo',   label: 'Ciclismo'   },
-                    { id: 'rugby',      label: 'Rugby'      },
-                    { id: 'general',    label: 'Otro'       },
-                  ].map(({ id, label }) => {
+                    { id: 'futbol',     label: 'Fútbol',      emoji: '⚽' },
+                    { id: 'baloncesto', label: 'Baloncesto',  emoji: '🏀' },
+                    { id: 'voleibol',   label: 'Voleibol',    emoji: '🏐' },
+                    { id: 'natacion',   label: 'Natación',    emoji: '🏊' },
+                    { id: 'tenis',      label: 'Tenis',       emoji: '🎾' },
+                    { id: 'rugby',      label: 'Rugby',       emoji: '🏉' },
+                    { id: 'beisbol',    label: 'Béisbol',     emoji: '⚾' },
+                    { id: 'ciclismo',   label: 'Ciclismo',    emoji: '🚴' },
+                    { id: 'general',    label: 'Otro',        emoji: '🏅' },
+                  ].map(({ id, label, emoji }) => {
                     const sel = deportesSeleccionados.includes(id);
                     return (
                       <button key={id} type="button" onClick={() => toggleDeporte(id)} style={{
-                        padding: '7px 14px', borderRadius: 20, fontSize: 13, cursor: 'pointer',
-                        fontWeight: sel ? 700 : 500,
-                        background: sel ? c : 'rgba(255,255,255,0.07)',
-                        border: `1px solid ${sel ? c : 'rgba(255,255,255,0.12)'}`,
-                        color: sel ? '#fff' : '#8B95A3',
-                        transition: 'background 0.2s, border-color 0.2s, color 0.2s',
+                        position: 'relative',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                        gap: 5, padding: '12px 8px', borderRadius: 14, cursor: 'pointer',
+                        background: sel ? `${c}18` : 'rgba(255,255,255,0.04)',
+                        border: `1.5px solid ${sel ? c : 'rgba(255,255,255,0.08)'}`,
+                        boxShadow: sel ? `0 0 14px ${c}30` : 'none',
+                        transition: 'all 0.18s ease',
+                        outline: 'none',
                       }}>
-                        {label}
+                        {sel && (
+                          <span style={{
+                            position: 'absolute', top: 6, right: 8,
+                            width: 16, height: 16, borderRadius: '50%',
+                            background: c, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                              <path d="M1 3.5L3.5 6L8 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </span>
+                        )}
+                        <span style={{ fontSize: 24, lineHeight: 1 }}>{emoji}</span>
+                        <span style={{
+                          fontSize: 11, fontWeight: sel ? 700 : 500,
+                          color: sel ? '#fff' : '#8B95A3',
+                          letterSpacing: 0.2, textAlign: 'center', lineHeight: 1.2,
+                          transition: 'color 0.18s',
+                        }}>{label}</span>
                       </button>
                     );
                   })}
                 </div>
-                <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 7, marginBottom: 0 }}>
-                  Mínimo uno. Para clubs multi-deporte selecciona todos los que practican.
-                </p>
+                {deportesSeleccionados.length > 1 && (
+                  <div style={{
+                    marginTop: 8, padding: '7px 12px', borderRadius: 8,
+                    background: `${c}10`, border: `1px solid ${c}25`,
+                    fontSize: 11, color: c, fontWeight: 600,
+                  }}>
+                    {deportesSeleccionados.length} deportes seleccionados
+                  </div>
+                )}
               </div>
 
               <InfoBox>El país define la moneda y el formato de los números en toda la app.</InfoBox>

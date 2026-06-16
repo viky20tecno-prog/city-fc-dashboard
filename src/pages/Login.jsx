@@ -230,7 +230,7 @@ export default function Login() {
 
           {/* Logo */}
           <div style={{ marginBottom: 32, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <ZenSportsLogo size={160} variant="full" />
+            <ZenSportsLogo size={200} variant="full" />
           </div>
 
           {/* Headline */}

@@ -284,9 +284,9 @@
   --text:         var(--text-pri);
   --muted:        var(--text-sec);
   --border-dim:   var(--border-sub);
-  --font-display: 'Clash Display', 'Space Grotesk', system-ui, sans-serif;
+  --font-display: 'Bebas Neue', 'Space Grotesk', system-ui, sans-serif;
   --font-body:    'Space Grotesk', 'Inter', system-ui, sans-serif;
-  --font-brand:   'Clash Display', 'Space Grotesk', system-ui, sans-serif;
+  --font-brand:   'Bebas Neue', 'Space Grotesk', system-ui, sans-serif;
   --text-primary: var(--text-pri);
   --text-muted:   var(--text-sec);
   --yellow:       #F59E0B;

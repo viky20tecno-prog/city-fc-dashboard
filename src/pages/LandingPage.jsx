@@ -874,7 +874,7 @@ function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
       window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
       onClose();
     } else {
-      navigate(`/registro?color=${encodeURIComponent(color)}&plan=${plan}&nombre=${encodeURIComponent(form.nombre_club)}&wa=${encodeURIComponent(form.whatsapp)}`);
+      navigate(`/registro?color=${encodeURIComponent(color)}&plan=${plan}&nombre=${encodeURIComponent(form.nombre_club)}&wa=${encodeURIComponent(form.whatsapp)}&admin=${encodeURIComponent(form.nombre)}&email=${encodeURIComponent(form.email)}&ciudad=${encodeURIComponent(form.ciudad)}`);
     }
   };
 
@@ -1047,7 +1047,7 @@ export default function LandingPage() {
             <button className="btn-ghost hide-mobile" onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 14, cursor: 'pointer', padding: '10px 16px', borderRadius: 8, minHeight: 44 }}>
               Iniciar sesión
             </button>
-            <button className="btn-primary hide-mobile" onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 9, padding: '10px 20px', cursor: 'pointer', boxShadow: `0 0 20px ${previewColor}40`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s', minHeight: 44 }}>
+            <button className="btn-primary hide-mobile" onClick={() => openLead('free')} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 9, padding: '10px 20px', cursor: 'pointer', boxShadow: `0 0 20px ${previewColor}40`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s', minHeight: 44 }}>
               Registrar club
             </button>
             {/* Hamburger — solo visible en móvil */}
@@ -1093,7 +1093,7 @@ export default function LandingPage() {
             Iniciar sesión
           </button>
           <button
-            onClick={() => { navigate(`/registro?color=${encodeURIComponent(previewColor)}`); setMobileMenuOpen(false); }}
+            onClick={() => { openLead('free'); setMobileMenuOpen(false); }}
             style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', padding: '13px 16px', borderRadius: 10, textAlign: 'center', display: 'block', marginTop: 4, boxShadow: `0 4px 20px ${previewColor}40` }}
           >
             Registrar club →
@@ -1981,7 +1981,7 @@ export default function LandingPage() {
               <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 18 }}>Producto</p>
               {[
                 { label: 'Iniciar sesión', action: () => navigate('/login') },
-                { label: 'Registrar club', action: () => navigate(`/registro?color=${encodeURIComponent(previewColor)}`) },
+                { label: 'Registrar club', action: () => openLead('free') },
                 { label: 'Ver precios', action: () => document.getElementById('precios')?.scrollIntoView({ behavior: 'smooth' }) },
                 { label: 'Solicitar demo', action: () => openLead('demo') },
               ].map(({ label, action }) => (

@@ -109,10 +109,10 @@ export default function RegistroClub() {
     }
     setLoading(true);
 
-    // Aviso de "tardando" a los 5 s; timeout duro a los 25 s
-    const slowTimer    = setTimeout(() => setSlowHint(true), 5000);
+    // Aviso de "tardando" a los 8 s; timeout duro a los 45 s
+    const slowTimer    = setTimeout(() => setSlowHint(true), 8000);
     const controller   = new AbortController();
-    const timeoutTimer = setTimeout(() => controller.abort(), 25000);
+    const timeoutTimer = setTimeout(() => controller.abort(), 45000);
 
     try {
       const res = await fetch(`${API_BASE_URL}/registro`, {

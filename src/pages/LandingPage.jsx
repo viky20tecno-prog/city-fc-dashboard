@@ -1273,9 +1273,6 @@ export default function LandingPage() {
         </Reveal>
       </section>
 
-      {/* ── TRUST LOGOS ─────────────────────────────────────────────────── */}
-      <TrustLogos />
-
       {/* ── PROBLEMA ─────────────────────────────────────────────────────── */}
       <section style={{ padding: '0 24px 88px', maxWidth: 900, margin: '0 auto' }}>
         <Reveal style={{ textAlign: 'center', marginBottom: 48 }}>
@@ -1528,23 +1525,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── TESTIMONIO DESTACADO ─────────────────────────────────────────── */}
-      <HighlightedTestimonial />
-
       {/* ── IMPACTO ANTES/DESPUÉS ─────────────────────────────────────────── */}
       <ImpactTable />
-
-      {/* ── MINI HIGHLIGHT MORA ─────────────────────────────────────────── */}
-      <section style={{ padding: '0 24px 56px', maxWidth: 680, margin: '0 auto' }}>
-        <Reveal>
-          <div style={{ background: 'rgba(0,208,132,0.05)', border: '1px solid rgba(0,208,132,0.18)', borderRadius: 16, padding: '24px 28px', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-            <div style={{ fontSize: 28, flexShrink: 0, lineHeight: 1 }}>📉</div>
-            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, margin: 0 }}>
-              <strong style={{ color: '#00D084' }}>Ejemplo real:</strong> una academia con 80 jugadores redujo su mora del 42% al 8% en 30 días usando cobros automáticos por WhatsApp.
-            </p>
-          </div>
-        </Reveal>
-      </section>
 
       {/* ── TESTIMONIOS ──────────────────────────────────────────────────── */}
       <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
@@ -1581,99 +1563,6 @@ export default function LandingPage() {
             </Reveal>
           ))}
         </div>
-      </section>
-
-      {/* ── ZCUP ─────────────────────────────────────────────────────────── */}
-      <section id="zcup" style={{ padding: '0 24px 88px', maxWidth: 900, margin: '0 auto' }}>
-        <Reveal>
-          <div style={{
-            borderRadius: 22, padding: '44px 44px',
-            background: 'linear-gradient(135deg, rgba(198,120,255,0.055) 0%, rgba(0,170,255,0.055) 100%)',
-            border: '1px solid rgba(198,120,255,0.2)',
-            display: 'flex', flexWrap: 'wrap', gap: 36, alignItems: 'center', justifyContent: 'space-between',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, rgba(198,120,255,0.6), rgba(0,170,255,0.4), transparent)' }} />
-            <div style={{ maxWidth: 480 }}>
-              <div style={{ display: 'inline-block', background: 'rgba(198,120,255,0.10)', border: '1px solid rgba(198,120,255,0.28)', borderRadius: 999, padding: '3px 14px', fontSize: 11, color: '#C678FF', fontWeight: 700, letterSpacing: 1, marginBottom: 18, textTransform: 'uppercase' }}>
-                Plataforma hermana
-              </div>
-              <h2 style={{ fontSize: 'clamp(20px, 3vw, 30px)', fontWeight: 800, marginBottom: 14, lineHeight: 1.15, letterSpacing: '-0.5px' }}>
-                ¿Necesitas administración completa de torneos?
-              </h2>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, lineHeight: 1.75, marginBottom: 0 }}>
-                <strong style={{ color: '#C678FF' }}>ZCUP</strong> es la plataforma especializada en fixtures, tablas de posiciones, programación de partidos, arbitraje y control competitivo de campeonatos deportivos.
-              </p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
-              {['Fixtures y tablas de posiciones', 'Programación de partidos', 'Control de arbitraje', 'Resultados en tiempo real'].map(f => (
-                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#C678FF', flexShrink: 0, boxShadow: '0 0 6px #C678FF' }} />
-                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>{f}</span>
-                </div>
-              ))}
-              <button className="btn-primary" style={{ marginTop: 10, background: 'rgba(198,120,255,0.12)', border: '1px solid rgba(198,120,255,0.32)', color: '#C678FF', fontSize: 13, fontWeight: 700, borderRadius: 10, padding: '11px 22px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
-                Conocer ZCUP <ChevronRight size={14} />
-              </button>
-            </div>
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ── QUIÉNES SOMOS ───────────────────────────────────────────────── */}
-      <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
-        <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Quiénes somos</p>
-          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 16, letterSpacing: '-0.8px' }}>Construido por personas del deporte.</h2>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: '0 auto', maxWidth: 600, lineHeight: 1.75 }}>
-            ZenSports nació de la frustración de administrar un club deportivo con hojas de cálculo y grupos de WhatsApp. Somos el equipo de <strong style={{ color: '#fff' }}>Zenpra</strong>, combinando tecnología e ingeniería de software con experiencia deportiva real para construir la plataforma de gestión más completa de Latinoamérica.
-          </p>
-        </Reveal>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 48 }}>
-          {[
-            {
-              avatar: 'ZP',
-              nombre: 'Equipo Zenpra',
-              rol: 'Tecnología & Producto',
-              desc: 'Ingenieros especializados en IA, automatización y UX. Construyen y mejoran ZenSports de forma continua con foco en velocidad y confiabilidad.',
-              color: previewColor,
-            },
-            {
-              avatar: '⚽',
-              nombre: 'ADN Deportivo',
-              rol: 'Experiencia de campo',
-              desc: 'Cada función de ZenSports fue diseñada entendiendo el día a día de clubes reales. Conocemos los problemas porque los vivimos.',
-              color: '#00D084',
-            },
-            {
-              avatar: '🤝',
-              nombre: 'Soporte Dedicado',
-              rol: 'Customer Success',
-              desc: 'Te acompañamos desde el onboarding hasta la operación diaria. Respuesta en minutos por WhatsApp. Sin tickets, sin esperas.',
-              color: '#F5A623',
-            },
-          ].map((m, i) => (
-            <Reveal key={m.nombre} delay={i * 100}>
-              <div className="card-hover" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '26px 22px', textAlign: 'center' }}>
-                <div style={{ width: 64, height: 64, borderRadius: '50%', background: `${m.color}18`, border: `2px solid ${m.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: typeof m.avatar === 'string' && m.avatar.length <= 2 ? 22 : 28, fontWeight: 900, color: m.color }}>
-                  {m.avatar}
-                </div>
-                <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{m.nombre}</div>
-                <div style={{ fontSize: 11, color: m.color, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>{m.rol}</div>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, margin: 0 }}>{m.desc}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-        <Reveal>
-          <div style={{ borderRadius: 18, padding: '36px 40px', background: `linear-gradient(135deg, ${previewColor}07 0%, rgba(0,208,132,0.04) 100%)`, border: `1px solid ${previewColor}1A`, textAlign: 'center', maxWidth: 720, margin: '0 auto', transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s' }}>
-            <div style={{ fontSize: 28, marginBottom: 16 }}>🎯</div>
-            <p style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.85)', lineHeight: 1.7, margin: '0 0 12px' }}>
-              "Nuestra misión es que ningún club deportivo en Latinoamérica pierda tiempo, dinero o talento por falta de herramientas digitales."
-            </p>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', margin: 0, letterSpacing: 1.5, textTransform: 'uppercase' }}>Equipo Zenpra · 2026</p>
-          </div>
-        </Reveal>
       </section>
 
       {/* ── COMPARATIVA ──────────────────────────────────────────────────── */}
@@ -1825,7 +1714,7 @@ export default function LandingPage() {
                 Con recuperar solo 2 mensualidades atrasadas al mes, este plan se paga solo.
               </p>
               <button className="btn-ghost" onClick={() => openLead('starter')} style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer', marginBottom: 6 }}>
-                Hablar con asesor · Activar Starter
+                Activar Starter
               </button>
               <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.25)', margin: '0 0 10px', lineHeight: 1.4 }}>Te ayudamos a activar por WhatsApp en minutos. Sin contratos.</p>
               <WhatsAppPayBtn plan="starter" />
@@ -1976,20 +1865,6 @@ export default function LandingPage() {
             Te guiamos paso a paso por WhatsApp para activar tu plan en minutos, sin contratos ni papeleo.
           </p>
         </Reveal>
-      </section>
-
-      {/* ── CASOS DE ÉXITO ──────────────────────────────────────────────── */}
-      <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
-        <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Casos de éxito</p>
-          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Resultados reales de clubes reales.</h2>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>Antes y después de implementar ZenSports.</p>
-        </Reveal>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {CASOS.map((caso, i) => (
-            <CasoExito key={caso.club} caso={caso} delay={i * 100} />
-          ))}
-        </div>
       </section>
 
       {/* ── SEGURIDAD Y CONFIANZA ────────────────────────────────────────── */}

@@ -44,9 +44,9 @@ export default function ZenSportsLogo({ variant = 'white', size = 'md', classNam
           }}
         />
         <span style={{
-          fontFamily: "'Clash Display', 'Space Grotesk', sans-serif",
-          fontSize: height * 0.55,
-          fontWeight: 600,
+          fontFamily: "'Bebas Neue', 'Space Grotesk', sans-serif",
+          fontSize: height * 0.65,
+          fontWeight: 400,
           letterSpacing: '-0.02em',
           color: '#EFFFFF',
           lineHeight: 1,

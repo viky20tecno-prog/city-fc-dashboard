@@ -752,7 +752,8 @@ function MiniComparisonTable() {
   ];
   return (
     <Reveal style={{ marginBottom: 20 }}>
-      <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', marginBottom: 16 }}>
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', marginBottom: 16 }}>
+      <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', minWidth: 480 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', background: 'rgba(255,255,255,0.025)' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: 1.5, textTransform: 'uppercase' }}>Necesidad</div>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', borderLeft: '1px solid rgba(255,255,255,0.05)', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 1.5, textTransform: 'uppercase', textAlign: 'center' }}>Excel + WhatsApp</div>
@@ -765,6 +766,7 @@ function MiniComparisonTable() {
             <div style={{ padding: '13px 16px', borderBottom: i < rows.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', borderLeft: '1px solid rgba(106,0,255,0.15)', fontSize: 12, color: 'rgba(255,255,255,0.7)', textAlign: 'center', background: 'rgba(106,0,255,0.035)', fontWeight: 600 }}>{row.zs}</div>
           </div>
         ))}
+      </div>
       </div>
     </Reveal>
   );
@@ -1002,7 +1004,7 @@ export default function LandingPage() {
         .bento-narrow { grid-column:span 2; }
         @media(max-width:900px){ .bento-wide,.bento-narrow { grid-column:span 3 !important; } }
         @media(max-width:768px){ .float-badge { display:none !important; } }
-        @media(max-width:640px){.hero-h1{font-size:32px!important;letter-spacing:-1px!important;}.hide-mobile{display:none!important;}.show-mobile{display:flex!important;}.pricing-grid{grid-template-columns:1fr!important;}.bento-wide,.bento-narrow{grid-column:span 6!important;}.mobile-menu{display:flex!important;}}
+        @media(max-width:640px){.hero-h1{font-size:32px!important;letter-spacing:-1px!important;}.hide-mobile{display:none!important;}.show-mobile{display:flex!important;}.pricing-grid{grid-template-columns:1fr!important;}.bento-wide,.bento-narrow{grid-column:span 6!important;}.mobile-menu{display:flex!important;}.hero-cta-wrap{bottom:14px!important;gap:8px!important;padding:0 12px!important;}.hero-cta-btn{font-size:12px!important;padding:10px 14px!important;border-radius:10px!important;gap:5px!important;}.site-footer{padding-bottom:100px!important;}.wa-float{bottom:92px!important;right:16px!important;}}
         .show-mobile{display:none;}
         .mobile-menu{display:none;}
       `}</style>
@@ -1022,7 +1024,7 @@ export default function LandingPage() {
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
             aria-label="Ir al inicio"
           >
-            <ZenSportsLogo size={32} variant="icon-svg" />
+            <img src="/favicon.png" alt="ZenSports" style={{ width: 32, height: 32, objectFit: 'contain' }} />
           </button>
           <div className="hide-mobile" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {[
@@ -1132,7 +1134,7 @@ export default function LandingPage() {
             boxShadow: `0 0 0 1px rgba(106,0,255,0.25), 0 32px 80px rgba(106,0,255,0.30), 0 8px 32px rgba(0,0,0,0.6)`,
           }}>
             <img
-              src="/og-image.png"
+              src="/og-image.jpg"
               alt="ZenSports — AI Powering Performance"
               style={{ width: '100%', display: 'block', borderRadius: 20 }}
             />
@@ -1144,13 +1146,13 @@ export default function LandingPage() {
             }} />
 
             {/* CTAs overlaid en la imagen */}
-            <div style={{
+            <div className="hero-cta-wrap" style={{
               position: 'absolute', bottom: 32, left: 0, right: 0,
               display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap',
               padding: '0 24px',
             }}>
               <button
-                className="btn-primary"
+                className="btn-primary hero-cta-btn"
                 onClick={() => openLead('free')}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 9,
@@ -1163,7 +1165,7 @@ export default function LandingPage() {
                 Comenzar prueba gratis de 5 días <ArrowRight size={16} />
               </button>
               <button
-                className="btn-ghost"
+                className="btn-ghost hero-cta-btn"
                 onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 8,
@@ -2057,7 +2059,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '40px 24px', background: 'rgba(0,0,0,0.3)' }}>
+      <footer className="site-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '40px 24px', background: 'rgba(0,0,0,0.3)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 32, justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div style={{ maxWidth: 260 }}>
             <div style={{ marginBottom: 12 }}>
@@ -2117,9 +2119,10 @@ export default function LandingPage() {
         target="_blank"
         rel="noopener noreferrer"
         title="Chatea con nosotros por WhatsApp"
+        className="wa-float"
         style={{
           position: 'fixed', bottom: 24, right: 24, zIndex: 400,
-          width: 56, height: 56, borderRadius: '50%',
+          width: 52, height: 52, borderRadius: '50%',
           background: 'linear-gradient(135deg, #25D366, #128C7E)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 4px 20px rgba(37,211,102,0.45), 0 2px 8px rgba(0,0,0,0.3)',

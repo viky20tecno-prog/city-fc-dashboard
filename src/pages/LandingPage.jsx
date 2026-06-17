@@ -1949,33 +1949,89 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
-      <footer className="site-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '40px 24px', background: 'rgba(0,0,0,0.3)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 32, justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div style={{ maxWidth: 260 }}>
-            <div style={{ marginBottom: 12 }}>
-              <ZenSportsLogo size={36} variant="white" />
-            </div>
-            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, margin: '0 0 4px', lineHeight: 1.5 }}>Gestión deportiva para cualquier club del mundo 🌍</p>
-            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12, margin: '0 0 14px' }}>Creado por <span style={{ color: '#6A9FFF', fontWeight: 700 }}>Zenpra</span></p>
-            <p style={{ color: 'rgba(255,255,255,0.18)', fontSize: 11, margin: 0, fontStyle: 'italic' }}>AI Powering Performance</p>
-          </div>
-          <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
+      <footer className="site-footer" style={{ position: 'relative', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(4,4,12,0.95)', overflow: 'hidden' }}>
+        {/* Glow decorativo */}
+        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 600, height: 1, background: `linear-gradient(90deg, transparent, ${previewColor}60, rgba(0,208,132,0.4), transparent)`, transition: 'background 0.4s' }} />
+        <div style={{ position: 'absolute', top: -120, left: '50%', transform: 'translateX(-50%)', width: 700, height: 300, background: `radial-gradient(ellipse, ${previewColor}07 0%, transparent 70%)`, pointerEvents: 'none', transition: 'background 0.4s' }} />
+
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto', padding: '60px 24px 40px' }}>
+          {/* Fila principal */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr', gap: 40, marginBottom: 48, flexWrap: 'wrap' }}>
+
+            {/* Marca */}
             <div>
-              <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>Producto</p>
-              {['Iniciar sesión', 'Registrar club', 'Ver precios'].map(l => (
-                <button key={l} className="btn-ghost" onClick={() => navigate(l === 'Iniciar sesión' ? '/login' : `/registro?color=${encodeURIComponent(previewColor)}`)} style={{ display: 'block', background: 'none', border: 'none', color: 'rgba(255,255,255,0.65)', fontSize: 13, cursor: 'pointer', padding: '4px 0', borderRadius: 4, textAlign: 'left' }}>{l}</button>
+              <div style={{ marginBottom: 16 }}>
+                <img src="/favicon.png" alt="ZenSports" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+              </div>
+              <p style={{ fontSize: 18, fontFamily: "'Bebas Neue','Space Grotesk',sans-serif", letterSpacing: 3, color: '#fff', margin: '0 0 8px' }}>ZENSPORTS</p>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6, margin: '0 0 20px', maxWidth: 220 }}>
+                La plataforma de gestión deportiva con IA para clubes de toda Latinoamérica.
+              </p>
+              {/* Stats mini */}
+              <div style={{ display: 'flex', gap: 20 }}>
+                {[['5★', 'Valoración'], ['24h', 'Soporte'], ['5d', 'Trial gratis']].map(([v, l]) => (
+                  <div key={l}>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: previewColor, transition: 'color 0.4s' }}>{v}</div>
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: 0.5 }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Producto */}
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 18 }}>Producto</p>
+              {[
+                { label: 'Iniciar sesión', action: () => navigate('/login') },
+                { label: 'Registrar club', action: () => navigate(`/registro?color=${encodeURIComponent(previewColor)}`) },
+                { label: 'Ver precios', action: () => document.getElementById('precios')?.scrollIntoView({ behavior: 'smooth' }) },
+                { label: 'Solicitar demo', action: () => openLead('demo') },
+              ].map(({ label, action }) => (
+                <button key={label} onClick={action} style={{ display: 'block', background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer', padding: '5px 0', textAlign: 'left', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
+                >{label}</button>
               ))}
             </div>
+
+            {/* Plataformas */}
             <div>
-              <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 14 }}>Plataformas</p>
-              {['ZenSports', 'ZCUP'].map(l => (
-                <p key={l} style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13, margin: '0 0 8px' }}>{l}</p>
+              <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 18 }}>Plataformas</p>
+              {[
+                { label: 'ZenSports', sub: 'Gestión de clubes' },
+                { label: 'ZCUP', sub: 'Torneos y fixtures' },
+              ].map(({ label, sub }) => (
+                <div key={label} style={{ marginBottom: 14 }}>
+                  <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13, margin: '0 0 2px', fontWeight: 600 }}>{label}</p>
+                  <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: 11, margin: 0 }}>{sub}</p>
+                </div>
               ))}
             </div>
+
+            {/* Contacto */}
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 18 }}>Contacto</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <a href={`https://wa.me/573023903192`} target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#25D366', fontSize: 13, textDecoration: 'none', fontWeight: 600 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  WhatsApp
+                </a>
+                <a href="mailto:diego31escobar@gmail.com"
+                  style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, textDecoration: 'none' }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.45)'}
+                >diego31escobar@gmail.com</a>
+                <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: 11, margin: 0, lineHeight: 1.5 }}>Respuesta en menos de 24h · Colombia 🇨🇴</p>
+              </div>
+            </div>
           </div>
-        </div>
-        <div style={{ maxWidth: 1100, margin: '32px auto 0', paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, margin: 0 }}>© 2026 ZenSports. Todos los derechos reservados.</p>
+
+          {/* Barra inferior */}
+          <div style={{ paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12, margin: 0 }}>© 2026 ZenSports · <span style={{ color: 'rgba(255,255,255,0.18)' }}>Creado por</span> <span style={{ color: previewColor, fontWeight: 600, transition: 'color 0.4s' }}>Zenpra</span></p>
+            <p style={{ color: 'rgba(255,255,255,0.18)', fontSize: 11, margin: 0, fontStyle: 'italic', letterSpacing: 0.5 }}>AI Powering Performance</p>
+          </div>
         </div>
       </footer>
 

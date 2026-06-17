@@ -573,7 +573,7 @@ function WhatsAppPayBtn({ plan }) {
       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '11px 0', borderRadius: 10, background: 'rgba(37,211,102,0.10)', border: '1px solid rgba(37,211,102,0.35)', color: '#25D366', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}
     >
       <MessageCircle size={15} />
-      Pagar por WhatsApp
+      Activar por WhatsApp
     </a>
   );
 }

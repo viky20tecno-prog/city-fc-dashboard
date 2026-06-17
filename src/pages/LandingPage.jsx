@@ -1032,7 +1032,6 @@ export default function LandingPage() {
               { label: 'Producto',       anchor: 'producto'       },
               { label: 'Automatización', anchor: 'automatizacion' },
               { label: 'Precios',        anchor: 'precios'        },
-              { label: 'ZCUP',           anchor: 'zcup'           },
             ].map(({ label, anchor }) => (
               <button
                 key={label}
@@ -1078,7 +1077,6 @@ export default function LandingPage() {
             { label: 'Producto',       anchor: 'producto'       },
             { label: 'Automatización', anchor: 'automatizacion' },
             { label: 'Precios',        anchor: 'precios'        },
-            { label: 'ZCUP',           anchor: 'zcup'           },
           ].map(({ label, anchor }) => (
             <button key={label} className="btn-ghost"
               onClick={() => { anchor ? document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' }) : window.scrollTo({ top: 0, behavior: 'smooth' }); setMobileMenuOpen(false); }}
@@ -1999,7 +1997,6 @@ export default function LandingPage() {
               <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 18 }}>Plataformas</p>
               {[
                 { label: 'ZenSports', sub: 'Gestión de clubes' },
-                { label: 'ZCUP', sub: 'Torneos y fixtures' },
               ].map(({ label, sub }) => (
                 <div key={label} style={{ marginBottom: 14 }}>
                   <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13, margin: '0 0 2px', fontWeight: 600 }}>{label}</p>

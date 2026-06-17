@@ -1775,31 +1775,6 @@ export default function LandingPage() {
 
         <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 18, alignItems: 'start' }}>
 
-          {/* GRATIS */}
-          <Reveal delay={0}>
-            <div className="card-hover" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 22, padding: '28px 22px', position: 'relative' }}>
-              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>Gratis</p>
-              <div style={{ fontSize: 34, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$0<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}> / siempre</span></div>
-              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, marginBottom: 14 }}>Para clubes pequeños que están comenzando</p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-                {['20 jugadores','1 admin','Sin tarjeta'].map(l => (
-                  <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.4)' }}>{l}</span>
-                ))}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {[[true,'Dashboard básico'],[true,'Gestión de jugadores'],[true,'Carnet digital QR'],[true,'Inscripciones digitales'],[false,'Cobro automático WA'],[false,'Finanzas y estadísticas'],[false,'Soporte prioritario']].map(([on, label]) => (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9, opacity: on ? 1 : 0.28 }}>
-                    <CheckCircle size={13} color={on ? '#6A9FFF' : '#4B5563'} style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: on ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.3)' }}>{label}</span>
-                  </div>
-                ))}
-              </div>
-              <button className="btn-ghost" onClick={() => openLead('free')} style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600, borderRadius: 11, padding: '11px 0', cursor: 'pointer' }}>
-                Crear cuenta gratis
-              </button>
-            </div>
-          </Reveal>
-
           {/* TRIAL */}
           <Reveal delay={0}>
             <div className="card-hover" style={{ background: 'rgba(0,208,132,0.03)', border: '1px solid rgba(0,208,132,0.15)', borderRadius: 22, padding: '28px 22px', position: 'relative' }}>
@@ -1920,6 +1895,46 @@ export default function LandingPage() {
           </Reveal>
 
         </div>
+
+        {/* GRATIS — franja horizontal */}
+        <Reveal delay={0}>
+          <div style={{ marginTop: 14, borderRadius: 18, padding: '20px 28px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
+            {/* Label + precio */}
+            <div style={{ minWidth: 120 }}>
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', margin: '0 0 3px' }}>Gratis</p>
+              <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: '-0.5px', lineHeight: 1 }}>$0<span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}> / siempre</span></div>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, margin: '4px 0 0' }}>Para clubes pequeños</p>
+            </div>
+
+            {/* Separador */}
+            <div style={{ width: 1, height: 40, background: 'rgba(255,255,255,0.07)', flexShrink: 0 }} className="hide-mobile" />
+
+            {/* Límites */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {['20 jugadores','1 admin','Sin tarjeta'].map(l => (
+                <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}>{l}</span>
+              ))}
+            </div>
+
+            {/* Separador */}
+            <div style={{ width: 1, height: 40, background: 'rgba(255,255,255,0.07)', flexShrink: 0 }} className="hide-mobile" />
+
+            {/* Features incluidas */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 18px', flex: 1 }}>
+              {['Dashboard básico','Gestión de jugadores','Carnet digital QR','Inscripciones digitales'].map(f => (
+                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <CheckCircle size={12} color="#6A9FFF" style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>{f}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <button onClick={() => openLead('free')} style={{ flexShrink: 0, padding: '10px 22px', borderRadius: 11, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.65)', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              Crear cuenta gratis
+            </button>
+          </div>
+        </Reveal>
 
         {/* Value message */}
         <Reveal>

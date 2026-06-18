@@ -95,6 +95,7 @@ function FilaMensualidad({ m, susp, onUpdated }) {
       valor_oficial: parseFloat(m.valor_oficial) || 0,
       valor_pagado:  parseFloat(m.valor_pagado)  || 0,
       estado:        m.estado || 'PENDIENTE',
+      anular_penalidad: false,
     });
     setEditando(true);
   };
@@ -102,10 +103,16 @@ function FilaMensualidad({ m, susp, onUpdated }) {
   const guardar = async () => {
     setGuardando(true);
     try {
+      const body = {
+        valor_oficial: form.valor_oficial,
+        valor_pagado:  form.valor_pagado,
+        estado:        form.estado,
+        ...(form.anular_penalidad ? { penalidad: 0 } : {}),
+      };
       const res  = await authFetch(`${API_BASE_URL}/invoices/mensualidad/${m.id}?club_id=${getClubId()}`, {
         method:  'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(form),
+        body:    JSON.stringify(body),
       });
       const data = await res.json();
       if (data.success) { setEditando(false); onUpdated(data.data); }
@@ -162,6 +169,17 @@ function FilaMensualidad({ m, susp, onUpdated }) {
               <option value="MORA">MORA</option>
             </select>
           </div>
+          {penalidad > 0 && (
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form.anular_penalidad || false}
+                onChange={e => setForm(f => ({ ...f, anular_penalidad: e.target.checked }))}
+                className="w-3.5 h-3.5 accent-[var(--cc)]"
+              />
+              <span className="text-xs text-[#EF4444]">Anular penalidad ({formatCOP(penalidad)})</span>
+            </label>
+          )}
           <div className="flex gap-2 pt-1">
             <button onClick={guardar} disabled={guardando}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--cc)] text-white text-xs font-semibold rounded-lg disabled:opacity-50">

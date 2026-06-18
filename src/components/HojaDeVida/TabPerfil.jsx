@@ -157,7 +157,10 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
   const [addingCat, setAddingCat] = useState(false);
   const [newCat,    setNewCat]    = useState({ categoria: '', equipo: '' });
 
+  const isPend = String(jugador.cedula).startsWith('PEND_');
+
   const [form, setForm] = useState({
+    nueva_cedula:        '',
     deporte:             jugador.deporte             || clubConfig?.deporte || 'futbol',
     posicion:            jugador.posicion            || '',
     numero_camiseta:     jugador.numero_camiseta     || '',
@@ -230,36 +233,47 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
     setError('');
     const up = v => typeof v === 'string' ? v.trim().toUpperCase() : v;
     try {
+      const { nueva_cedula, ...restoForm } = form;
+      const cambiandoCedula = isPend && nueva_cedula.trim() !== '';
+
+      if (isPend && !nueva_cedula.trim())
+        throw new Error('Debes ingresar la cédula real del jugador');
+
       const payload = {
-        ...form,
-        deporte:             form.deporte || null,
-        nombre:              up(form.nombre),
-        apellidos:           up(form.apellidos),
-        lugar_de_nacimiento: up(form.lugar_de_nacimiento),
-        eps:                 up(form.eps),
-        municipio:           up(form.municipio),
-        barrio:              up(form.barrio),
-        direccion:           up(form.direccion),
-        familiar_emergencia: up(form.familiar_emergencia),
-        correo_electronico:  form.correo_electronico?.trim().toLowerCase(),
-        numero_camiseta: form.numero_camiseta ? parseInt(form.numero_camiseta)  : null,
-        estatura:        form.estatura        ? parseFloat(form.estatura)        : null,
-        peso:            form.peso            ? parseFloat(form.peso)            : null,
-        fecha_nacimiento: form.fecha_nacimiento || null,
-        categorias:     form.categorias,
-        categoria:      form.categorias[0]?.categoria || '',
-        equipo:         form.categorias[0]?.equipo    || '',
-        tipo_descuento: form.tipo_descuento,
-        descuento_pct:  form.tipo_descuento === 'NA' ? 0 : Math.max(0, Math.min(100, Number(form.descuento_pct) || 0)),
+        ...restoForm,
+        deporte:             restoForm.deporte || null,
+        nombre:              up(restoForm.nombre),
+        apellidos:           up(restoForm.apellidos),
+        lugar_de_nacimiento: up(restoForm.lugar_de_nacimiento),
+        eps:                 up(restoForm.eps),
+        municipio:           up(restoForm.municipio),
+        barrio:              up(restoForm.barrio),
+        direccion:           up(restoForm.direccion),
+        familiar_emergencia: up(restoForm.familiar_emergencia),
+        correo_electronico:  restoForm.correo_electronico?.trim().toLowerCase(),
+        numero_camiseta: restoForm.numero_camiseta ? parseInt(restoForm.numero_camiseta)  : null,
+        estatura:        restoForm.estatura        ? parseFloat(restoForm.estatura)        : null,
+        peso:            restoForm.peso            ? parseFloat(restoForm.peso)            : null,
+        fecha_nacimiento: restoForm.fecha_nacimiento || null,
+        categorias:     restoForm.categorias,
+        categoria:      restoForm.categorias[0]?.categoria || '',
+        equipo:         restoForm.categorias[0]?.equipo    || '',
+        tipo_descuento: restoForm.tipo_descuento,
+        descuento_pct:  restoForm.tipo_descuento === 'NA' ? 0 : Math.max(0, Math.min(100, Number(restoForm.descuento_pct) || 0)),
+        ...(cambiandoCedula ? { nueva_cedula: nueva_cedula.trim() } : {}),
       };
-      const res  = await authFetch(
-        `${API_BASE_URL}/players/${jugador.cedula}?club_id=${getClubId()}`,
+
+      const endpoint = cambiandoCedula
+        ? `${API_BASE_URL}/players/${jugador.cedula}/completar?club_id=${getClubId()}`
+        : `${API_BASE_URL}/players/${jugador.cedula}?club_id=${getClubId()}`;
+
+      const res  = await authFetch(endpoint,
         { method: 'PATCH', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload) },
       );
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Error al guardar');
-      onUpdate?.(payload);
+      onUpdate?.({ ...payload, cedula: cambiandoCedula ? nueva_cedula.trim() : jugador.cedula });
       setGuardado(true);
       setTimeout(() => setGuardado(false), 2500);
     } catch (err) {
@@ -339,6 +353,13 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
           document.body
         )}
       </div>
+
+      {isPend && (
+        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-400 flex items-start gap-2">
+          <span className="mt-0.5 text-base leading-none">⚠️</span>
+          <span>Datos pendientes — ingresa la cédula real del jugador para completar su perfil.</span>
+        </div>
+      )}
 
       {error && (
         <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-[#EF4444]">{error}</div>
@@ -451,10 +472,33 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
       {/* Datos personales */}
       <Seccion titulo="Datos Personales">
         <div className="grid grid-cols-2 gap-3">
-          <CampoEdit label="Tipo de documento" value={form.tipo_id}   onChange={set('tipo_id')}   placeholder="CC, TI, CE…" />
           <div className="space-y-1">
-            <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Cédula / ID</label>
-            <p className="text-sm text-[var(--text-pri)] font-medium px-3 py-2">{jugador.cedula}</p>
+            <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Tipo de documento</label>
+            <select value={form.tipo_id} onChange={set('tipo_id')}
+              className={INPUT_CLS + ' cursor-pointer'} style={{ appearance: 'none', WebkitAppearance: 'none' }}>
+              <option value="">— Seleccionar —</option>
+              <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+              <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
+              <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+              <option value="Pasaporte">Pasaporte</option>
+              <option value="NIT">NIT</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">
+              Cédula / ID{isPend && <span className="ml-1 text-amber-400">*</span>}
+            </label>
+            {isPend ? (
+              <input
+                type="text"
+                value={form.nueva_cedula}
+                onChange={e => setForm(f => ({ ...f, nueva_cedula: e.target.value }))}
+                placeholder="Ej: 1234567890"
+                className={INPUT_CLS + ' border-amber-500/50 focus:border-amber-400'}
+              />
+            ) : (
+              <p className="text-sm text-[var(--text-pri)] font-medium px-3 py-2">{jugador.cedula}</p>
+            )}
           </div>
           <CampoEdit label="Nombre(s)"   value={form.nombre}    onChange={set('nombre')}    placeholder="Nombre(s)" />
           <CampoEdit label="Apellido(s)" value={form.apellidos} onChange={set('apellidos')} placeholder="Apellido(s)" />

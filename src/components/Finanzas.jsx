@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp, TrendingDown, Wallet, Plus, Trash2, Loader2,
   Users, ChevronDown, ChevronUp, Download, FileText, X,
-  CheckCircle, AlertCircle, Pencil,
+  CheckCircle, AlertCircle, Pencil, CalendarDays,
 } from 'lucide-react';
 import {
   ComposedChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -104,6 +104,43 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
   const [empForm,      setEmpForm]      = useState(EMP_EMPTY);
   const [empEditId,    setEmpEditId]    = useState(null);
   const [guardandoEmp, setGuardandoEmp] = useState(false);
+
+  // Modal preparar año siguiente
+  const mesHoy        = new Date().getMonth(); // 0-based (10=Nov, 11=Dic)
+  const anioSiguiente = new Date().getFullYear() + 1;
+  const cuotaActual   = parseFloat(clubConfig?.valor_mensualidad) || 0;
+  const [showAnioModal,  setShowAnioModal]  = useState(false);
+  const [cuotaCambia,    setCuotaCambia]    = useState(false);
+  const [nuevaCuota,     setNuevaCuota]     = useState('');
+  const [generando,      setGenerando]      = useState(false);
+  const [anioResultado,  setAnioResultado]  = useState(null);
+
+  const prepararAnio = async () => {
+    setGenerando(true);
+    setAnioResultado(null);
+    try {
+      const body = { anio: anioSiguiente };
+      if (cuotaCambia && nuevaCuota) body.nueva_cuota = parseFloat(nuevaCuota);
+      const res  = await authFetch(`${API_BASE}/invoices/generar-anio?club_id=${clubId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      setAnioResultado(data);
+    } catch {
+      setAnioResultado({ success: false, error: 'Error de conexión' });
+    } finally {
+      setGenerando(false);
+    }
+  };
+
+  const cerrarAnioModal = () => {
+    setShowAnioModal(false);
+    setCuotaCambia(false);
+    setNuevaCuota('');
+    setAnioResultado(null);
+  };
 
   // Filtro movimientos
   const [filtroTipo,   setFiltroTipo]   = useState('todos');
@@ -474,6 +511,12 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
           <p className="text-sm text-[var(--text-sec)]">Ingresos, gastos y nómina del club</p>
         </div>
         <div className="flex gap-2">
+          {mesHoy >= 10 && (
+            <button onClick={() => setShowAnioModal(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--cc)]/40 text-[var(--cc)] text-sm font-semibold hover:bg-[var(--cc12)] transition">
+              <CalendarDays className="w-4 h-4" /> Preparar {anioSiguiente}
+            </button>
+          )}
           <button onClick={() => { setShowForm(true); setForm(FORM_EMPTY); }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--cc)] text-white text-sm font-semibold hover:opacity-90 transition">
             <Plus className="w-4 h-4" /> Nuevo movimiento
@@ -837,6 +880,135 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
       {/* ═══════════════════════════════════════════════
           MODAL — Empleado
       ═══════════════════════════════════════════════ */}
+      {/* ── Modal preparar año siguiente ── */}
+      {showAnioModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={cerrarAnioModal}>
+          <div className="bg-[var(--bg-card)] border border-[var(--border-sub)] rounded-2xl w-full max-w-sm shadow-2xl"
+            onClick={e => e.stopPropagation()}>
+
+            {/* Cabecera */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-sub)]">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="w-5 h-5 text-[var(--cc)]" />
+                <p className="font-semibold text-[var(--text-pri)]">Preparar mensualidades {anioSiguiente}</p>
+              </div>
+              <button onClick={cerrarAnioModal} className="text-[var(--text-sec)] hover:text-[var(--text-pri)]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {!anioResultado ? (
+              <div className="p-6 space-y-5">
+                {/* Cuota actual */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-sub)]">
+                  <span className="text-sm text-[var(--text-sec)]">Cuota mensual {new Date().getFullYear()}</span>
+                  <span className="text-sm font-bold text-[var(--text-pri)]">{fmt(cuotaActual)}</span>
+                </div>
+
+                {/* Toggle cuota cambia */}
+                <div>
+                  <p className="text-sm font-medium text-[var(--text-pri)] mb-3">
+                    ¿La cuota cambia para {anioSiguiente}?
+                  </p>
+                  <div className="flex gap-2">
+                    {[false, true].map(v => (
+                      <button key={String(v)} onClick={() => { setCuotaCambia(v); if (!v) setNuevaCuota(''); }}
+                        className={`flex-1 py-2 rounded-xl text-sm font-semibold border transition ${
+                          cuotaCambia === v
+                            ? 'bg-[var(--cc)] text-white border-[var(--cc)]'
+                            : 'bg-[var(--bg-surface)] text-[var(--text-sec)] border-[var(--border-sub)] hover:border-[var(--cc)]/40'
+                        }`}>
+                        {v ? 'Sí, cambia' : 'No, igual'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Input nueva cuota */}
+                {cuotaCambia && (
+                  <div>
+                    <label className="block text-xs text-[var(--text-sec)] mb-1.5 font-medium">
+                      Nueva cuota mensual para {anioSiguiente}
+                    </label>
+                    <input
+                      type="number" min="0" autoFocus
+                      placeholder={String(cuotaActual)}
+                      value={nuevaCuota}
+                      onChange={e => setNuevaCuota(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-sub)] text-[var(--text-pri)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30 focus:border-[var(--cc)]"
+                    />
+                  </div>
+                )}
+
+                {/* Preview */}
+                <div className="p-3 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/20 text-sm text-[var(--text-sec)]">
+                  Se crearán <span className="font-semibold text-[var(--text-pri)]">12 mensualidades</span> por jugador activo
+                  para el año <span className="font-semibold text-[var(--text-pri)]">{anioSiguiente}</span> en
+                  estado <span className="font-semibold text-[var(--text-pri)]">PENDIENTE</span> con cuota{' '}
+                  <span className="font-semibold text-[var(--cc)]">
+                    {cuotaCambia && nuevaCuota ? fmt(parseFloat(nuevaCuota)) : fmt(cuotaActual)}
+                  </span>.
+                  {' '}Los meses que ya existan no se tocan.
+                </div>
+
+                <button
+                  onClick={prepararAnio}
+                  disabled={generando || (cuotaCambia && !nuevaCuota)}
+                  className="w-full py-2.5 rounded-xl bg-[var(--cc)] text-white font-semibold text-sm hover:opacity-90 transition disabled:opacity-40 flex items-center justify-center gap-2">
+                  {generando
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Generando…</>
+                    : <><CalendarDays className="w-4 h-4" /> Confirmar y generar {anioSiguiente}</>}
+                </button>
+              </div>
+            ) : (
+              <div className="p-6 space-y-4">
+                {anioResultado.success ? (
+                  <>
+                    <div className="flex items-center gap-3 p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+                      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-semibold text-green-400">¡Listo!</p>
+                        <p className="text-xs text-[var(--text-sec)] mt-0.5">{anioResultado.message}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-sub)]">
+                        <p className="text-xs text-[var(--text-sec)]">Mensualidades creadas</p>
+                        <p className="font-bold text-[var(--text-pri)] text-lg">{anioResultado.creados}</p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-sub)]">
+                        <p className="text-xs text-[var(--text-sec)]">Cuota {anioSiguiente}</p>
+                        <p className="font-bold text-[var(--cc)] text-lg">{fmt(anioResultado.cuota_usada)}</p>
+                      </div>
+                    </div>
+                    {anioResultado.cuota_actualizada && (
+                      <p className="text-xs text-[var(--text-sec)] text-center">
+                        La nueva cuota quedó guardada en la configuración del club.
+                      </p>
+                    )}
+                    {anioResultado.creados === 0 && (
+                      <p className="text-xs text-[var(--text-sec)] text-center">
+                        Todos los jugadores ya tenían sus 12 meses — no se creó nada nuevo.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                    <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                    <p className="text-sm text-red-400">{anioResultado.error || 'Error al generar'}</p>
+                  </div>
+                )}
+                <button onClick={cerrarAnioModal}
+                  className="w-full py-2.5 rounded-xl border border-[var(--border-sub)] text-[var(--text-sec)] text-sm font-semibold hover:text-[var(--text-pri)] transition">
+                  Cerrar
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {showEmpForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           onClick={() => setShowEmpForm(false)}>

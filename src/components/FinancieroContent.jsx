@@ -464,7 +464,7 @@ function SeccionHistorialLazy({ cedula }) {
   );
 }
 
-export default function FinancieroContent({ cedula, jugador, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated }) {
+export default function FinancieroContent({ cedula, jugador, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated, onJugadorUpdated }) {
   const misMensualidades = mensualidades.filter(m => String(m.cedula || m.player_id || '') === String(cedula));
   const misTorneos       = torneos.filter(t => t.cedula === cedula);
   const misSuspensiones  = suspensiones.filter(s => s.cedula === String(cedula));
@@ -472,9 +472,57 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
   const descuento    = Number(jugador?.descuento_pct ?? 0);
   const tipoLabel    = { BECA_DEPORTIVA: 'Beca Deportiva', BECA_SOCIAL: 'Beca Social', CONDICION_ESPECIAL: 'Condición Especial' };
   const tipoTexto    = tipoLabel[jugador?.tipo_descuento] ?? '';
+  const esExento     = jugador?.tipo_descuento === 'EXENTO';
+
+  const [cambiandoExento, setCambiandoExento] = useState(false);
+
+  const toggleExento = async () => {
+    setCambiandoExento(true);
+    try {
+      const res  = await authFetch(`${API_BASE_URL}/players/${cedula}/exento?club_id=${getClubId()}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ exento: !esExento }),
+      });
+      const data = await res.json();
+      if (data.success) onJugadorUpdated?.({
+        descuento_pct:  !esExento ? 100 : 0,
+        tipo_descuento: !esExento ? 'EXENTO' : null,
+      });
+    } catch (e) { console.error(e); }
+    finally { setCambiandoExento(false); }
+  };
 
   return (
     <div className="space-y-8">
+      {/* Franja EXENTO — siempre visible con toggle */}
+      <div className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border transition-colors ${
+        esExento
+          ? 'bg-sky-400/10 border-sky-400/20'
+          : 'bg-[var(--bg-surface)] border-[var(--bg-surface)]'
+      }`}>
+        <div className="flex items-center gap-2">
+          {esExento
+            ? <><span className="text-sky-400 text-sm font-semibold">EXENTO</span><span className="text-xs text-[var(--text-sec)]">— Sus mensualidades no generan cobro</span></>
+            : <span className="text-xs text-[var(--text-sec)]">¿Este jugador está exento de mensualidad?</span>
+          }
+        </div>
+        <button
+          onClick={toggleExento}
+          disabled={cambiandoExento}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-50 ${
+            esExento
+              ? 'bg-sky-400/10 border-sky-400/30 text-sky-400 hover:bg-sky-400/20'
+              : 'bg-[var(--bg-card)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]'
+          }`}
+        >
+          {cambiandoExento
+            ? <Loader2 className="w-3 h-3 animate-spin" />
+            : esExento ? <><X className="w-3 h-3" /> Quitar exención</> : <><Check className="w-3 h-3" /> Marcar exento</>
+          }
+        </button>
+      </div>
+
       {descuento > 0 && tipoTexto && (
         <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium"
           style={{ background: 'var(--cc)1a', border: '1px solid var(--cc)33', color: 'var(--cc)' }}>

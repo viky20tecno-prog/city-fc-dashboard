@@ -90,6 +90,7 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
               mensualidades={mensualidades}
               torneos={torneos}
               suspensiones={suspensiones}
+              onJugadorUpdated={(campos) => { handleUpdate(campos || {}); }}
             />
           )}
           {tab === 'carnet' && (

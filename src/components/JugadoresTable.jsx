@@ -724,6 +724,16 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                               <PauseCircle className="w-3 h-3" /> Suspendido
                             </span>
                           )}
+                          {String(j.cedula).startsWith('PEND_') && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-400/10 text-orange-400 border border-orange-400/20">
+                              ⚠ Datos pendientes
+                            </span>
+                          )}
+                          {j.tipo_descuento === 'EXENTO' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-sky-400/10 text-sky-400 border border-sky-400/20">
+                              EXENTO
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs mt-0.5" style={{ color: 'var(--text-mut)' }}>
                           {j.activo ? '🟢 Activo' : '🔴 Inactivo'}

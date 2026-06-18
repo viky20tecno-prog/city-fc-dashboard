@@ -483,7 +483,7 @@ function extraerMotivoExento(notas) {
 
 export default function FinancieroContent({ cedula, jugador, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated, onJugadorUpdated }) {
   const misMensualidades = mensualidades.filter(m => String(m.cedula || m.player_id || '') === String(cedula));
-  const misTorneos       = torneos.filter(t => t.cedula === cedula);
+  const misTorneos       = torneos.filter(t => String(t.cedula || t.player_id || '') === String(cedula));
   const misSuspensiones  = suspensiones.filter(s => s.cedula === String(cedula));
 
   const descuento = Number(jugador?.descuento_pct ?? 0);

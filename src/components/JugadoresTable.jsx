@@ -338,7 +338,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
   const jugadoresConPago = useMemo(() => {
     return jugadores.map(j => {
-      const mensJugador    = mensualidades.filter(m => (m.cedula || m.jugador_id) == j.cedula);
+      const mensJugador    = mensualidades.filter(m => (m.cedula || m.player_id) == j.cedula);
       // Si el backend lo marca como moroso → MORA; si no, calculamos localmente
       const esMoroso       = cedulasMorosos.has(String(j.cedula));
       const estadoLocal    = peorEstado(mensJugador);

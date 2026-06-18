@@ -375,8 +375,8 @@ export default function EstadoCuenta({ jugador, mensualidades, torneos, suspensi
   const cedula  = jugador.cedula;
   const nombre  = `${jugador['nombre(s)'] || jugador.nombre || ''} ${jugador['apellido(s)'] || jugador.apellidos || ''}`.trim();
 
-  const misMensualidades = mensualidades.filter(m => (m.cedula || m.jugador_id) === cedula);
-  const misTorneos       = torneos.filter(t => t.cedula === cedula);
+  const misMensualidades = mensualidades.filter(m => String(m.cedula || m.player_id || '') === String(cedula));
+  const misTorneos       = torneos.filter(t => String(t.cedula || t.player_id || '') === String(cedula));
   const misSuspensiones  = suspensiones.filter(s => s.cedula === String(cedula));
 
   return (

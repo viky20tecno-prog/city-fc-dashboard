@@ -964,54 +964,69 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       {/* MODAL ARCHIVAR / RESTAURAR */}
       {jugadorAArchivar && (
         <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
           onClick={() => !archivando && setJugadorAArchivar(null)}
         >
           <div
-            style={{ background: 'var(--bg-surface)', border: jugadorAArchivar.accion === 'archivar' ? '1px solid rgba(251,146,60,0.35)' : '1px solid rgba(34,197,94,0.35)', borderRadius: '16px', padding: '28px 32px', width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '20px' }}
+            style={{ background: 'var(--bg-card)', border: jugadorAArchivar.accion === 'archivar' ? '1.5px solid rgba(251,146,60,0.5)' : '1.5px solid rgba(34,197,94,0.5)', borderRadius: '20px', padding: '28px', width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: '0 24px 60px rgba(0,0,0,0.5)' }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: jugadorAArchivar.accion === 'archivar' ? 'rgba(251,146,60,0.12)' : 'rgba(34,197,94,0.12)', border: `1px solid ${jugadorAArchivar.accion === 'archivar' ? 'rgba(251,146,60,0.3)' : 'rgba(34,197,94,0.3)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                {jugadorAArchivar.accion === 'archivar' ? <Archive size={20} color="#FB923C" /> : <RotateCcw size={20} color="#22C55E" />}
+            {/* Icono + título */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: jugadorAArchivar.accion === 'archivar' ? 'rgba(251,146,60,0.15)' : 'rgba(34,197,94,0.15)', border: `1.5px solid ${jugadorAArchivar.accion === 'archivar' ? 'rgba(251,146,60,0.4)' : 'rgba(34,197,94,0.4)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {jugadorAArchivar.accion === 'archivar' ? <Archive size={22} color="#FB923C" /> : <RotateCcw size={22} color="#22C55E" />}
               </div>
               <div>
-                <div style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: '15px' }}>
+                <div style={{ color: 'var(--text-pri)', fontWeight: 700, fontSize: '18px', lineHeight: 1.3 }}>
                   {jugadorAArchivar.accion === 'archivar' ? '¿Archivar jugador?' : '¿Restaurar jugador?'}
                 </div>
-                <div style={{ color: 'var(--text-mut)', fontSize: '12px', marginTop: '2px' }}>
-                  {jugadorAArchivar.accion === 'archivar' ? 'El jugador queda inactivo. Sus datos se conservan.' : 'El jugador vuelve a la lista activa.'}
+                <div style={{ color: 'var(--text-sec)', fontSize: '14px', marginTop: '4px', lineHeight: 1.4 }}>
+                  {jugadorAArchivar.accion === 'archivar'
+                    ? 'El jugador queda inactivo. Sus datos se conservan y puede restaurarlo cuando quiera.'
+                    : 'El jugador vuelve a la lista activa con todos sus datos intactos.'}
                 </div>
               </div>
             </div>
-            <div style={{ background: 'var(--bg-card)', borderRadius: '10px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: '14px' }}>{jugadorAArchivar.nombreCompleto}</div>
-              <div style={{ color: 'var(--text-mut)', fontSize: '12px', fontFamily: 'monospace' }}>CC {jugadorAArchivar.cedula}</div>
+
+            {/* Datos del jugador */}
+            <div style={{ background: 'var(--bg-surface)', borderRadius: '12px', padding: '14px 16px', borderLeft: `3px solid ${jugadorAArchivar.accion === 'archivar' ? '#FB923C' : '#22C55E'}` }}>
+              <div style={{ color: 'var(--text-pri)', fontWeight: 700, fontSize: '16px' }}>{jugadorAArchivar.nombreCompleto}</div>
+              <div style={{ color: 'var(--text-sec)', fontSize: '13px', marginTop: '2px' }}>CC {jugadorAArchivar.cedula}</div>
             </div>
+
+            {/* Botones acción */}
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={() => setJugadorAArchivar(null)}
                 disabled={archivando}
-                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid var(--border-sub)', background: 'var(--bg-card)', color: 'var(--text-mut)', fontSize: '13px', cursor: 'pointer' }}
+                style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1.5px solid var(--border-sub)', background: 'transparent', color: 'var(--text-sec)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
               >
                 Cancelar
               </button>
               <button
                 onClick={() => confirmarArchivar(jugadorAArchivar.accion === 'restaurar')}
                 disabled={archivando}
-                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: `1px solid ${jugadorAArchivar.accion === 'archivar' ? 'rgba(251,146,60,0.4)' : 'rgba(34,197,94,0.4)'}`, background: jugadorAArchivar.accion === 'archivar' ? 'rgba(251,146,60,0.12)' : 'rgba(34,197,94,0.12)', color: jugadorAArchivar.accion === 'archivar' ? '#FB923C' : '#22C55E', fontSize: '13px', fontWeight: 600, cursor: archivando ? 'not-allowed' : 'pointer', opacity: archivando ? 0.6 : 1 }}
+                style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: jugadorAArchivar.accion === 'archivar' ? '#FB923C' : '#22C55E', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: archivando ? 'not-allowed' : 'pointer', opacity: archivando ? 0.7 : 1 }}
               >
-                {archivando ? (jugadorAArchivar.accion === 'archivar' ? 'Archivando…' : 'Restaurando…') : (jugadorAArchivar.accion === 'archivar' ? 'Sí, archivar' : 'Sí, restaurar')}
+                {archivando
+                  ? (jugadorAArchivar.accion === 'archivar' ? 'Archivando…' : 'Restaurando…')
+                  : (jugadorAArchivar.accion === 'archivar' ? 'Sí, archivar' : 'Sí, restaurar')}
               </button>
             </div>
-            {/* Eliminar definitivamente (solo desde archivados) */}
+
+            {/* Eliminar definitivamente — solo desde archivados */}
             {jugadorAArchivar.accion === 'restaurar' && (
-              <button
-                onClick={() => { setJugadorAEliminar(jugadorAArchivar); setJugadorAArchivar(null); }}
-                style={{ padding: '8px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.06)', color: 'rgba(239,68,68,0.7)', fontSize: '12px', cursor: 'pointer' }}
-              >
-                Eliminar definitivamente
-              </button>
+              <div style={{ borderTop: '1px solid var(--border-sub)', paddingTop: '16px' }}>
+                <p style={{ color: 'var(--text-sec)', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>
+                  ¿Ya no necesitas este jugador?
+                </p>
+                <button
+                  onClick={() => { setJugadorAEliminar(jugadorAArchivar); setJugadorAArchivar(null); }}
+                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '2px solid #EF4444', background: 'rgba(239,68,68,0.1)', color: '#EF4444', fontSize: '14px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                >
+                  <AlertTriangle size={16} /> Eliminar definitivamente
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -1020,28 +1035,26 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       {/* MODAL CONFIRMAR ELIMINACIÓN */}
       {jugadorAEliminar && (
         <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
           onClick={() => !eliminando && setJugadorAEliminar(null)}
         >
           <div
-            style={{ background: 'var(--bg-surface)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '16px', padding: '28px 32px', width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '20px' }}
+            style={{ background: 'var(--bg-card)', border: '2px solid rgba(239,68,68,0.5)', borderRadius: '20px', padding: '28px', width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: '0 24px 60px rgba(239,68,68,0.15)' }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Icono + título */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <AlertTriangle size={20} color="#EF4444" />
-              </div>
+            {/* Franja de alerta */}
+            <div style={{ background: 'rgba(239,68,68,0.12)', border: '1.5px solid rgba(239,68,68,0.35)', borderRadius: '12px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <AlertTriangle size={24} color="#EF4444" style={{ flexShrink: 0 }} />
               <div>
-                <div style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: '15px' }}>¿Eliminar jugador?</div>
-                <div style={{ color: 'var(--text-mut)', fontSize: '12px', marginTop: '2px' }}>Esta acción no se puede deshacer</div>
+                <div style={{ color: '#EF4444', fontWeight: 700, fontSize: '16px' }}>Acción irreversible</div>
+                <div style={{ color: '#f87171', fontSize: '13px', marginTop: '2px' }}>Esta acción no se puede deshacer. El jugador y todos sus datos se borrarán permanentemente.</div>
               </div>
             </div>
 
             {/* Datos del jugador */}
-            <div style={{ background: 'var(--bg-card)', borderRadius: '10px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: '14px' }}>{jugadorAEliminar.nombreCompleto}</div>
-              <div style={{ color: 'var(--text-mut)', fontSize: '12px', fontFamily: 'monospace' }}>CC {jugadorAEliminar.cedula}</div>
+            <div style={{ background: 'var(--bg-surface)', borderRadius: '12px', padding: '14px 16px', borderLeft: '3px solid #EF4444' }}>
+              <div style={{ color: 'var(--text-pri)', fontWeight: 700, fontSize: '16px' }}>{jugadorAEliminar.nombreCompleto}</div>
+              <div style={{ color: 'var(--text-sec)', fontSize: '13px', marginTop: '2px' }}>CC {jugadorAEliminar.cedula}</div>
             </div>
 
             {/* Botones */}
@@ -1049,16 +1062,16 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               <button
                 onClick={() => setJugadorAEliminar(null)}
                 disabled={eliminando}
-                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid var(--border-sub)', background: 'var(--bg-card)', color: 'var(--text-mut)', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1.5px solid var(--border-sub)', background: 'transparent', color: 'var(--text-sec)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
               >
                 Cancelar
               </button>
               <button
                 onClick={confirmarEliminar}
                 disabled={eliminando}
-                style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.12)', color: '#EF4444', fontSize: '13px', fontWeight: 600, cursor: eliminando ? 'not-allowed' : 'pointer', opacity: eliminando ? 0.6 : 1 }}
+                style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: '#EF4444', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: eliminando ? 'not-allowed' : 'pointer', opacity: eliminando ? 0.7 : 1 }}
               >
-                {eliminando ? 'Eliminando…' : 'Sí, eliminar'}
+                {eliminando ? 'Eliminando…' : 'Sí, eliminar para siempre'}
               </button>
             </div>
           </div>

@@ -297,7 +297,7 @@ export default function PortalAtleta() {
 const fmt = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(n) || 0);
 
 function Resultado({ datos, fotoUrl, color, onNuevaBusqueda }) {
-  const { atleta, mensualidades, saldo_pendiente, total_pagado, meses_pendientes } = datos;
+  const { atleta, mensualidades, saldo_pendiente, total_pagado, meses_pendientes, esExento } = datos;
   const [imgError, setImgError] = useState(false);
   const nombreCompleto = `${atleta.nombre} ${atleta.apellidos || ''}`.trim();
   const alDia = saldo_pendiente === 0;
@@ -326,6 +326,11 @@ function Resultado({ datos, fotoUrl, color, onNuevaBusqueda }) {
             <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.3px', lineHeight: 1.2 }}>{nombreCompleto}</div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>CC {atleta.cedula}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+              {esExento && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(56,189,248,0.12)', border: '1px solid rgba(56,189,248,0.3)', borderRadius: 999, padding: '2px 9px', fontSize: 11, fontWeight: 700, color: '#38bdf8', letterSpacing: 0.4 }}>
+                  ✦ EXENTO
+                </span>
+              )}
               {atleta.categoria && <Chip label={atleta.categoria} />}
               {atleta.equipo    && <Chip label={atleta.equipo} />}
               {atleta.posicion  && <Chip label={atleta.posicion} />}
@@ -341,15 +346,15 @@ function Resultado({ datos, fotoUrl, color, onNuevaBusqueda }) {
           <div style={{ fontSize: 19, fontWeight: 900, color, letterSpacing: '-0.5px', lineHeight: 1 }}>{fmt(total_pagado)}</div>
         </div>
         <div style={{
-          background: alDia ? 'rgba(0,208,132,0.07)' : 'rgba(245,158,11,0.07)',
-          border: `1px solid ${alDia ? 'rgba(0,208,132,0.22)' : 'rgba(245,158,11,0.22)'}`,
+          background: esExento ? 'rgba(56,189,248,0.07)' : alDia ? 'rgba(0,208,132,0.07)' : 'rgba(245,158,11,0.07)',
+          border: `1px solid ${esExento ? 'rgba(56,189,248,0.22)' : alDia ? 'rgba(0,208,132,0.22)' : 'rgba(245,158,11,0.22)'}`,
           borderRadius: 14, padding: '14px 16px',
         }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6 }}>Saldo pendiente</div>
-          <div style={{ fontSize: 19, fontWeight: 900, color: alDia ? '#00D084' : '#F59E0B', letterSpacing: '-0.5px', lineHeight: 1 }}>
-            {alDia ? '✓ Al día' : fmt(saldo_pendiente)}
+          <div style={{ fontSize: 19, fontWeight: 900, color: esExento ? '#38bdf8' : alDia ? '#00D084' : '#F59E0B', letterSpacing: '-0.5px', lineHeight: 1 }}>
+            {esExento ? '✦ Exento' : alDia ? '✓ Al día' : fmt(saldo_pendiente)}
           </div>
-          {!alDia && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>{meses_pendientes} mes{meses_pendientes !== 1 ? 'es' : ''} pendiente{meses_pendientes !== 1 ? 's' : ''}</div>}
+          {!alDia && !esExento && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>{meses_pendientes} mes{meses_pendientes !== 1 ? 'es' : ''} pendiente{meses_pendientes !== 1 ? 's' : ''}</div>}
         </div>
       </div>
 
@@ -406,6 +411,7 @@ const ESTADO_CFG = {
   vencido:     { bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.28)',   color: '#EF4444', label: 'Vencido'     },
   parcial:     { bg: 'rgba(74,158,255,0.12)',  border: 'rgba(74,158,255,0.28)',  color: '#4A9EFF', label: 'Parcial'     },
   por_validar: { bg: 'rgba(192,120,255,0.12)', border: 'rgba(192,120,255,0.28)', color: '#C678FF', label: 'Por validar' },
+  exento:      { bg: 'rgba(56,189,248,0.10)',  border: 'rgba(56,189,248,0.28)',  color: '#38bdf8', label: 'Exento'      },
 };
 
 function EstadoBadge({ estado }) {

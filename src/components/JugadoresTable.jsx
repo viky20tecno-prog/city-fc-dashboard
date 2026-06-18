@@ -382,7 +382,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         const cmp = (a[sortField] || '').toString().localeCompare((b[sortField] || '').toString(), 'es', { numeric: true });
         return sortDir === 'asc' ? cmp : -cmp;
       });
-  }, [jugadoresConPago, search, filtroEstado, filtroDeporte, filtroCategoria, sortField, sortDir]);
+  }, [jugadoresConPago, search, filtroEstado, filtroDeporte, filtroCategoria, sortField, sortDir, verArchivados]);
 
   const toggleSort = (field) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');

@@ -17,6 +17,7 @@ const ESTADO_DOT = {
   PENDIENTE:'#F59E0B',
   PARCIAL:  '#60A5FA',
   MORA:     '#EF4444',
+  EXENTO:   '#38bdf8',
 };
 
 /* ── dropdown para filtro de estado de pago ── */
@@ -367,7 +368,8 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       .filter(j => {
         if (verArchivados ? j.activo : !j.activo) return false;
         const matchSearch    = search === '' || j.nombreCompleto?.toLowerCase().includes(search.toLowerCase()) || j.cedula?.includes(search);
-        const matchEstado    = filtroEstado === 'TODOS' || j.estadoPago === filtroEstado;
+        const matchEstado    = filtroEstado === 'TODOS'
+          || (filtroEstado === 'EXENTO' ? j.tipo_descuento?.startsWith?.('EXENTO') : j.estadoPago === filtroEstado);
         const matchCategoria = filtroCategoria === 'TODOS'
           || (filtroCategoria === SIN_EQUIPO && !j.equipo && !j.categoria)
           || j.categoria === filtroCategoria
@@ -397,7 +399,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const formatCOP = (n) =>
     new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
 
-  const estados = ['TODOS', 'AL_DIA', 'PENDIENTE', 'PARCIAL', 'MORA'];
+  const estados = ['TODOS', 'AL_DIA', 'PENDIENTE', 'PARCIAL', 'MORA', 'EXENTO'];
 
   const exportarCSV = async () => {
     const XLSX = await import('xlsx');

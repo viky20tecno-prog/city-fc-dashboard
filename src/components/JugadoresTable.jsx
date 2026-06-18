@@ -729,7 +729,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                               ⚠ Datos pendientes
                             </span>
                           )}
-                          {j.tipo_descuento === 'EXENTO' && (
+                          {j.tipo_descuento?.startsWith?.('EXENTO') && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-sky-400/10 text-sky-400 border border-sky-400/20">
                               EXENTO
                             </span>
@@ -825,17 +825,31 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1">
                       {/* Financiero */}
-                      <button
-                        onClick={() => abrirHoja(j, 'financiero')}
-                        title="Estado financiero"
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
-                        style={{ background: 'rgba(182,134,49,0.08)', border: '1px solid rgba(182,134,49,0.25)', color: '#B68631' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(182,134,49,0.18)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(182,134,49,0.08)'}
-                      >
-                        <DollarSign className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Finanzas</span>
-                      </button>
+                      {j.tipo_descuento?.startsWith?.('EXENTO') ? (
+                        <button
+                          onClick={() => abrirHoja(j, 'financiero')}
+                          title="Jugador exento de mensualidades"
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
+                          style={{ background: 'rgba(56,189,248,0.08)', border: '1px solid rgba(56,189,248,0.3)', color: '#38bdf8' }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(56,189,248,0.18)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'rgba(56,189,248,0.08)'}
+                        >
+                          <DollarSign className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Exento</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => abrirHoja(j, 'financiero')}
+                          title="Estado financiero"
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition"
+                          style={{ background: 'rgba(182,134,49,0.08)', border: '1px solid rgba(182,134,49,0.25)', color: '#B68631' }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(182,134,49,0.18)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'rgba(182,134,49,0.08)'}
+                        >
+                          <DollarSign className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Finanzas</span>
+                        </button>
+                      )}
 
                       {/* Suspensión */}
                       <button

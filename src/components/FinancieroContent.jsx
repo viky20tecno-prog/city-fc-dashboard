@@ -464,66 +464,158 @@ function SeccionHistorialLazy({ cedula }) {
   );
 }
 
+const MOTIVOS_EXENTO = [
+  { key: 'BECA',      label: 'Beca deportiva' },
+  { key: 'SOCIAL',    label: 'Caso social'    },
+  { key: 'DIRECTIVO', label: 'Directivo/Staff' },
+  { key: 'OTRO',      label: 'Otro motivo'    },
+];
+
+const MOTIVO_DISPLAY = {
+  EXENTO_BECA:      'Beca deportiva',
+  EXENTO_SOCIAL:    'Caso social',
+  EXENTO_DIRECTIVO: 'Directivo / Staff',
+  EXENTO_OTRO:      'Otro motivo',
+  EXENTO:           'Sin motivo especificado',
+};
+
 export default function FinancieroContent({ cedula, jugador, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated, onJugadorUpdated }) {
   const misMensualidades = mensualidades.filter(m => String(m.cedula || m.player_id || '') === String(cedula));
   const misTorneos       = torneos.filter(t => t.cedula === cedula);
   const misSuspensiones  = suspensiones.filter(s => s.cedula === String(cedula));
 
-  const descuento    = Number(jugador?.descuento_pct ?? 0);
-  const tipoLabel    = { BECA_DEPORTIVA: 'Beca Deportiva', BECA_SOCIAL: 'Beca Social', CONDICION_ESPECIAL: 'Condición Especial' };
-  const tipoTexto    = tipoLabel[jugador?.tipo_descuento] ?? '';
-  const esExento     = jugador?.tipo_descuento === 'EXENTO';
+  const descuento = Number(jugador?.descuento_pct ?? 0);
+  const tipoLabel = { BECA_DEPORTIVA: 'Beca Deportiva', BECA_SOCIAL: 'Beca Social', CONDICION_ESPECIAL: 'Condición Especial' };
+  const tipoTexto = tipoLabel[jugador?.tipo_descuento] ?? '';
 
-  const [cambiandoExento, setCambiandoExento] = useState(false);
+  // Estado local para cambio visual inmediato (no depende del prop chain)
+  const calcEsExento = (td) => typeof td === 'string' && td.startsWith('EXENTO');
+  const [esExento,         setEsExento]         = useState(() => calcEsExento(jugador?.tipo_descuento));
+  const [tipoDescuentoLoc, setTipoDescuentoLoc] = useState(jugador?.tipo_descuento || null);
+  const [cambiandoExento,  setCambiandoExento]  = useState(false);
+  const [eligiendoMotivo,  setEligiendoMotivo]  = useState(false);
+  const [motivoSel,        setMotivoSel]        = useState(null);
 
-  const toggleExento = async () => {
+  // Sincronizar si el prop cambia por otra vía (e.g., refresh externo)
+  useEffect(() => {
+    setEsExento(calcEsExento(jugador?.tipo_descuento));
+    setTipoDescuentoLoc(jugador?.tipo_descuento || null);
+  }, [jugador?.tipo_descuento]);
+
+  const confirmarExento = async () => {
+    setCambiandoExento(true);
+    setEligiendoMotivo(false);
+    try {
+      const body = { exento: true, ...(motivoSel ? { motivo: motivoSel } : {}) };
+      const res  = await authFetch(`${API_BASE_URL}/players/${cedula}/exento?club_id=${getClubId()}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const nuevoTipo = data.tipo_descuento || 'EXENTO';
+        setEsExento(true);
+        setTipoDescuentoLoc(nuevoTipo);
+        onJugadorUpdated?.({ descuento_pct: 100, tipo_descuento: nuevoTipo });
+      }
+    } catch (e) { console.error(e); }
+    finally { setCambiandoExento(false); setMotivoSel(null); }
+  };
+
+  const quitarExento = async () => {
     setCambiandoExento(true);
     try {
       const res  = await authFetch(`${API_BASE_URL}/players/${cedula}/exento?club_id=${getClubId()}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ exento: !esExento }),
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ exento: false }),
       });
       const data = await res.json();
-      if (data.success) onJugadorUpdated?.({
-        descuento_pct:  !esExento ? 100 : 0,
-        tipo_descuento: !esExento ? 'EXENTO' : null,
-      });
+      if (data.success) {
+        setEsExento(false);
+        setTipoDescuentoLoc(null);
+        onJugadorUpdated?.({ descuento_pct: 0, tipo_descuento: null });
+      }
     } catch (e) { console.error(e); }
     finally { setCambiandoExento(false); }
   };
 
+  const motivoTexto = MOTIVO_DISPLAY[tipoDescuentoLoc] ?? null;
+
   return (
     <div className="space-y-8">
-      {/* Franja EXENTO — siempre visible con toggle */}
-      <div className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border transition-colors ${
-        esExento
-          ? 'bg-sky-400/10 border-sky-400/20'
-          : 'bg-[var(--bg-surface)] border-[var(--bg-surface)]'
+      {/* Franja EXENTO */}
+      <div className={`rounded-xl border transition-colors ${
+        esExento ? 'bg-sky-400/10 border-sky-400/20' : 'bg-[var(--bg-surface)] border-[var(--bg-surface)]'
       }`}>
-        <div className="flex items-center gap-2">
-          {esExento
-            ? <><span className="text-sky-400 text-sm font-semibold">EXENTO</span><span className="text-xs text-[var(--text-sec)]">— Sus mensualidades no generan cobro</span></>
-            : <span className="text-xs text-[var(--text-sec)]">¿Este jugador está exento de mensualidad?</span>
-          }
+        <div className="flex items-center justify-between gap-3 px-4 py-3">
+          <div className="flex items-center gap-2 min-w-0">
+            {esExento ? (
+              <div className="min-w-0">
+                <span className="text-sky-400 text-sm font-bold">EXENTO</span>
+                {motivoTexto && <span className="text-xs text-sky-300/70 ml-2">· {motivoTexto}</span>}
+                <p className="text-xs text-[var(--text-sec)] mt-0.5">Sus mensualidades no generan cobro</p>
+              </div>
+            ) : (
+              <span className="text-xs text-[var(--text-sec)]">¿Este jugador está exento de mensualidad?</span>
+            )}
+          </div>
+          {esExento ? (
+            <button
+              onClick={quitarExento}
+              disabled={cambiandoExento}
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border bg-[var(--bg-card)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-red-400 hover:border-red-400/40 transition disabled:opacity-50"
+            >
+              {cambiandoExento ? <Loader2 className="w-3 h-3 animate-spin" /> : <><X className="w-3 h-3" /> Quitar exención</>}
+            </button>
+          ) : (
+            <button
+              onClick={() => { setEligiendoMotivo(v => !v); setMotivoSel(null); }}
+              disabled={cambiandoExento}
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border bg-sky-400/10 border-sky-400/20 text-sky-400 hover:bg-sky-400/20 transition disabled:opacity-50"
+            >
+              {cambiandoExento ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Check className="w-3 h-3" /> Marcar exento</>}
+            </button>
+          )}
         </div>
-        <button
-          onClick={toggleExento}
-          disabled={cambiandoExento}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition disabled:opacity-50 ${
-            esExento
-              ? 'bg-sky-400/10 border-sky-400/30 text-sky-400 hover:bg-sky-400/20'
-              : 'bg-[var(--bg-card)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]'
-          }`}
-        >
-          {cambiandoExento
-            ? <Loader2 className="w-3 h-3 animate-spin" />
-            : esExento ? <><X className="w-3 h-3" /> Quitar exención</> : <><Check className="w-3 h-3" /> Marcar exento</>
-          }
-        </button>
+
+        {/* Selector de motivo inline */}
+        {eligiendoMotivo && !esExento && (
+          <div className="border-t border-sky-400/20 px-4 py-3 space-y-3">
+            <p className="text-xs font-semibold text-[var(--text-sec)]">Razón de la exención (opcional)</p>
+            <div className="flex flex-wrap gap-2">
+              {MOTIVOS_EXENTO.map(m => (
+                <button
+                  key={m.key}
+                  onClick={() => setMotivoSel(prev => prev === m.key ? null : m.key)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
+                    motivoSel === m.key
+                      ? 'bg-sky-400/20 border-sky-400/50 text-sky-300'
+                      : 'bg-[var(--bg-card)] border-[var(--cc20)] text-[var(--text-sec)] hover:border-sky-400/30 hover:text-sky-400'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={confirmarExento}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-500 text-white text-xs font-semibold rounded-lg hover:bg-sky-400 transition"
+              >
+                <Check className="w-3 h-3" /> Confirmar exención
+              </button>
+              <button
+                onClick={() => { setEligiendoMotivo(false); setMotivoSel(null); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-[var(--cc20)] text-[var(--text-sec)] text-xs rounded-lg hover:text-[var(--text-pri)] transition"
+              >
+                <X className="w-3 h-3" /> Cancelar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {descuento > 0 && tipoTexto && (
+      {descuento > 0 && tipoTexto && !esExento && (
         <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium"
           style={{ background: 'var(--cc)1a', border: '1px solid var(--cc)33', color: 'var(--cc)' }}>
           <span>🎓</span>

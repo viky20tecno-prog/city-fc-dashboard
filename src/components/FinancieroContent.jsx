@@ -143,11 +143,13 @@ function FilaMensualidad({ m, susp, onUpdated }) {
             <div>
               <label className="block text-[10px] text-[var(--text-sec)] mb-1">Valor oficial</label>
               <input type="number" className={INPUT_SM} value={form.valor_oficial}
+                onFocus={e => e.target.select()}
                 onChange={e => setForm(f => ({ ...f, valor_oficial: parseFloat(e.target.value) || 0 }))} />
             </div>
             <div>
               <label className="block text-[10px] text-[var(--text-sec)] mb-1">Valor pagado</label>
               <input type="number" className={INPUT_SM} value={form.valor_pagado}
+                onFocus={e => e.target.select()}
                 onChange={e => setForm(f => ({ ...f, valor_pagado: parseFloat(e.target.value) || 0 }))} />
             </div>
           </div>
@@ -197,14 +199,15 @@ function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated }
 
   const totalPagado    = items.reduce((s, m) => s + (parseFloat(m.valor_pagado)    || 0), 0);
   const totalPendiente = items.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
+  // Solo suspensiones activas — las anuladas no ocultan el estado real del mes
   const totalSusp = items.filter(m => {
     const n = parseInt(m.numero_mes);
-    return suspensiones.some(s => s.mes_inicio <= n && n <= s.mes_fin);
+    return suspensiones.some(s => s.activa && s.mes_inicio <= n && n <= s.mes_fin);
   }).length;
 
   const getSuspension = (numero_mes) => {
     const n = parseInt(numero_mes);
-    return suspensiones.find(s => s.mes_inicio <= n && n <= s.mes_fin) || null;
+    return suspensiones.find(s => s.activa && s.mes_inicio <= n && n <= s.mes_fin) || null;
   };
 
   const handleUpdated = (updated) => {

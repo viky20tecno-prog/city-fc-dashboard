@@ -487,8 +487,8 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
   const tipoLabel = { BECA_DEPORTIVA: 'Beca Deportiva', BECA_SOCIAL: 'Beca Social', CONDICION_ESPECIAL: 'Condición Especial' };
   const tipoTexto = tipoLabel[jugador?.tipo_descuento] ?? '';
 
-  const calcEsExento = (td) => td === 'EXENTO';
-  const [esExento,        setEsExento]        = useState(() => calcEsExento(jugador?.tipo_descuento));
+  const calcEsExento = (j) => Number(j?.descuento_pct) >= 100;
+  const [esExento,        setEsExento]        = useState(() => calcEsExento(jugador));
   const [motivoDisplay,   setMotivoDisplay]   = useState(() => extraerMotivoExento(jugador?.notas));
   const [cambiandoExento, setCambiandoExento] = useState(false);
   const [eligiendoMotivo, setEligiendoMotivo] = useState(false);
@@ -497,9 +497,9 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
   const [errorExento,     setErrorExento]     = useState('');
 
   useEffect(() => {
-    setEsExento(calcEsExento(jugador?.tipo_descuento));
+    setEsExento(calcEsExento(jugador));
     setMotivoDisplay(extraerMotivoExento(jugador?.notas));
-  }, [jugador?.tipo_descuento, jugador?.notas]);
+  }, [jugador?.descuento_pct, jugador?.notas]);
 
   const resetSelector = () => { setEligiendoMotivo(false); setMotivoSel(null); setMotivoOtroTexto(''); setErrorExento(''); };
 
@@ -521,7 +521,7 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
       if (data.success) {
         setEsExento(true);
         setMotivoDisplay(data.motivo_label || null);
-        onJugadorUpdated?.({ descuento_pct: 100, tipo_descuento: 'EXENTO', notas: data.motivo_label ? `[Exento: ${data.motivo_label}]` : jugador?.notas });
+        onJugadorUpdated?.({ descuento_pct: 100, tipo_descuento: null, notas: data.motivo_label ? `[Exento: ${data.motivo_label}]` : jugador?.notas });
         setMotivoOtroTexto('');
       } else {
         setErrorExento(data.error || 'No se pudo marcar como exento');

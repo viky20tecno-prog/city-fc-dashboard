@@ -369,7 +369,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         if (verArchivados ? j.activo : !j.activo) return false;
         const matchSearch    = search === '' || j.nombreCompleto?.toLowerCase().includes(search.toLowerCase()) || j.cedula?.includes(search);
         const matchEstado    = filtroEstado === 'TODOS'
-          || (filtroEstado === 'EXENTO' ? j.tipo_descuento?.startsWith?.('EXENTO') : j.estadoPago === filtroEstado);
+          || (filtroEstado === 'EXENTO' ? Number(j.descuento_pct) >= 100 : j.estadoPago === filtroEstado);
         const matchCategoria = filtroCategoria === 'TODOS'
           || (filtroCategoria === SIN_EQUIPO && !j.equipo && !j.categoria)
           || j.categoria === filtroCategoria
@@ -731,7 +731,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                               ⚠ Datos pendientes
                             </span>
                           )}
-                          {j.tipo_descuento?.startsWith?.('EXENTO') && (
+                          {Number(j.descuento_pct) >= 100 && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-sky-400/10 text-sky-400 border border-sky-400/20">
                               EXENTO
                             </span>
@@ -827,7 +827,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1">
                       {/* Financiero */}
-                      {j.tipo_descuento?.startsWith?.('EXENTO') ? (
+                      {Number(j.descuento_pct) >= 100 ? (
                         <button
                           onClick={() => abrirHoja(j, 'financiero')}
                           title="Jugador exento de mensualidades"

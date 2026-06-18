@@ -390,17 +390,20 @@ export default function Dashboard() {
 
   const cumpleaniosList = useMemo(() => {
     const hoy = new Date();
+    const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
     const lista = [];
     jugadores.forEach(j => {
       if (!j.fecha_nacimiento || !(j.activo === true || (j.activo || '').toString().toUpperCase() === 'SI')) return;
-      const [, mesStr, diaStr] = j.fecha_nacimiento.split('-');
-      if (!mesStr || !diaStr) return;
-      const mes = parseInt(mesStr), dia = parseInt(diaStr);
+      const [anioStr, mesStr, diaStr] = j.fecha_nacimiento.split('-');
+      if (!mesStr || !diaStr || !anioStr) return;
+      const mes = parseInt(mesStr), dia = parseInt(diaStr), anioNac = parseInt(anioStr);
       for (let offset = 0; offset <= 7; offset++) {
         const d = new Date(hoy); d.setDate(hoy.getDate() + offset);
         if (d.getMonth() + 1 === mes && d.getDate() === dia) {
           const nombre = `${j.nombre || ''} ${j.apellidos || ''}`.trim();
-          lista.push({ nombre, cedula: j.cedula, offset, diaLabel: offset === 0 ? 'Hoy' : offset === 1 ? 'Mañana' : `En ${offset} días` });
+          const edad = d.getFullYear() - anioNac;
+          const fechaLabel = `${dia} ${MESES[mes - 1]}`;
+          lista.push({ nombre, cedula: j.cedula, offset, edad, fechaLabel, diaLabel: offset === 0 ? 'Hoy' : offset === 1 ? 'Mañana' : `En ${offset} días` });
           break;
         }
       }
@@ -573,7 +576,9 @@ export default function Dashboard() {
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-pri)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nombre}</div>
-                        <div style={{ fontSize: '11px', color: j.offset === 0 ? c : 'var(--text-mut)', fontWeight: j.offset === 0 ? 600 : 400 }}>{j.diaLabel}</div>
+                        <div style={{ fontSize: '11px', color: j.offset === 0 ? c : 'var(--text-mut)', fontWeight: j.offset === 0 ? 600 : 400 }}>
+                          {j.diaLabel} · {j.fechaLabel} · {j.edad} años
+                        </div>
                       </div>
                     </div>
                   ))}

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Trophy, Plus, ArrowLeft, UserPlus, Save,
   Loader2, Pencil, Trash2, X, Users, Download, AlertTriangle,
+  ArrowUpAZ, ArrowDownAZ,
 } from 'lucide-react';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfSectionLabel, drawPdfTableHead } from '../lib/pdfHelpers';
 import { authFetch } from '../lib/authFetch';
@@ -36,8 +37,11 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const [pagandoId,         setPagandoId]          = useState(null);
   const [editIdx,           setEditIdx]            = useState(null);
   const [editForm,          setEditForm]           = useState({ nombre: '', fecha: '', valor: '' });
+  const [sortAlpha,         setSortAlpha]          = useState(null); // null | 'asc' | 'desc'
 
-  const torneosDef = Array.isArray(clubConfig?.torneos_iniciales) ? clubConfig.torneos_iniciales : [];
+  const [torneosDef, setTorneosDef] = useState(() =>
+    Array.isArray(clubConfig?.torneos_iniciales) ? clubConfig.torneos_iniciales : []
+  );
 
   const cargarEnrollments = useCallback(async () => {
     try {
@@ -65,7 +69,6 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(body),
     });
-    window.location.reload();
   };
 
   const guardarNuevo = async () => {
@@ -73,7 +76,11 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     setGuardando(true);
     try {
       const nueva = { nombre: torneoForm.nombre.trim(), fecha: torneoForm.fecha, valor: Number(torneoForm.valor) || 0 };
-      await patchConfig({ torneos_iniciales: [...torneosDef, nueva] });
+      const nuevaLista = [...torneosDef, nueva];
+      await patchConfig({ torneos_iniciales: nuevaLista });
+      setTorneosDef(nuevaLista);
+      setShowForm(false);
+      setTorneoForm({ nombre: '', fecha: '', valor: '' });
     } catch (e) { console.error(e); }
     finally { setGuardando(false); }
   };
@@ -88,6 +95,8 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
           : t
       );
       await patchConfig({ torneos_iniciales: nuevaLista });
+      setTorneosDef(nuevaLista);
+      setEditIdx(null);
     } catch (e) { console.error(e); }
     finally { setGuardando(false); }
   };
@@ -98,6 +107,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
       const nuevaLista = torneosDef.filter((_, i) => i !== idx);
       if (torneoSeleccionado === torneosDef[idx]?.nombre) setTorneoSeleccionado(null);
       await patchConfig({ torneos_iniciales: nuevaLista });
+      setTorneosDef(nuevaLista);
     } catch (e) { console.error(e); }
   };
 
@@ -520,16 +530,41 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-[var(--cc20)]">
-                        {['Jugador','Estado','Oficial','Pagado','Saldo','Pago',''].map(h => (
+                        <th className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium">
+                          <button
+                            onClick={() => setSortAlpha(s => s === 'asc' ? 'desc' : s === 'desc' ? null : 'asc')}
+                            className="flex items-center gap-1 hover:text-[var(--cc)] transition group"
+                            title={sortAlpha === 'asc' ? 'Orden Z→A' : sortAlpha === 'desc' ? 'Quitar orden' : 'Orden A→Z'}
+                          >
+                            Jugador
+                            {sortAlpha === 'asc'
+                              ? <ArrowUpAZ className="w-3.5 h-3.5 text-[var(--cc)]" />
+                              : sortAlpha === 'desc'
+                              ? <ArrowDownAZ className="w-3.5 h-3.5 text-[var(--cc)]" />
+                              : <ArrowUpAZ className="w-3.5 h-3.5 opacity-0 group-hover:opacity-40 transition" />
+                            }
+                          </button>
+                        </th>
+                        {['Estado','Oficial','Pagado','Saldo','Pago',''].map(h => (
                           <th key={h} className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium">{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {inscritosDelTorneo.map(e => {
-                        const jug    = jugadoresClub.find(j => String(j.cedula) === String(e.cedula));
-                        const nombre = jug ? `${jug.nombre} ${jug.apellidos || ''}`.trim() : `CC ${e.cedula}`;
-                        return (
+                      {[...inscritosDelTorneo]
+                        .map(e => {
+                          const jug = jugadoresClub.find(j => String(j.cedula) === String(e.cedula));
+                          return { ...e, _nombre: jug ? `${jug.nombre} ${jug.apellidos || ''}`.trim() : `CC ${e.cedula}` };
+                        })
+                        .sort((a, b) => {
+                          if (!sortAlpha) return 0;
+                          return sortAlpha === 'asc'
+                            ? a._nombre.localeCompare(b._nombre, 'es', { sensitivity: 'base' })
+                            : b._nombre.localeCompare(a._nombre, 'es', { sensitivity: 'base' });
+                        })
+                        .map(e => {
+                          const nombre = e._nombre;
+                          return (
                           <tr key={e.id} className="border-b border-[var(--cc20)] hover:bg-[var(--bg-surface)] transition">
                             <td className="py-2.5 px-4">
                               <p className="font-medium text-[var(--text-pri)] text-xs">{nombre}</p>
@@ -562,8 +597,8 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                               </button>
                             </td>
                           </tr>
-                        );
-                      })}
+                          );
+                        })}
                     </tbody>
                   </table>
                 </div>

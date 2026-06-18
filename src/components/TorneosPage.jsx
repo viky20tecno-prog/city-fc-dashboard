@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import {
   Trophy, Plus, ArrowLeft, UserPlus, Save,
   Loader2, Pencil, Trash2, X, Users, Download, AlertTriangle,
-  ArrowUpAZ, ArrowDownAZ,
+  ArrowUpAZ, ArrowDownAZ, Tag,
 } from 'lucide-react';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfSectionLabel, drawPdfTableHead } from '../lib/pdfHelpers';
 import { authFetch } from '../lib/authFetch';
@@ -38,6 +38,9 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const [editIdx,           setEditIdx]            = useState(null);
   const [editForm,          setEditForm]           = useState({ nombre: '', fecha: '', valor: '' });
   const [sortAlpha,         setSortAlpha]          = useState(null); // null | 'asc' | 'desc'
+  const [descOpen,          setDescOpen]           = useState(null);
+  const [descEdit,          setDescEdit]           = useState({});
+  const [guardandoDesc,     setGuardandoDesc]      = useState(null);
 
   const [torneosDef, setTorneosDef] = useState(() =>
     Array.isArray(clubConfig?.torneos_iniciales) ? clubConfig.torneos_iniciales : []
@@ -125,6 +128,26 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
       if (data.success) { setAddCedula(''); setAddNombre(''); setAddBusqueda(''); await cargarEnrollments(); }
     } catch (e) { console.error(e); }
     finally { setAddLoading(false); }
+  };
+
+  const guardarDescuento = async (id) => {
+    const descuento = Number(descEdit[id]?.monto) || 0;
+    const concepto  = (descEdit[id]?.concepto || '').trim();
+    setGuardandoDesc(id);
+    try {
+      const res = await authFetch(`${API_BASE}/torneos/${id}?club_id=${clubId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descuento, concepto_descuento: concepto }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDescEdit(d => ({ ...d, [id]: { monto: '', concepto: '' } }));
+        setDescOpen(null);
+        await cargarEnrollments();
+      }
+    } catch (e) { console.error(e); }
+    finally { setGuardandoDesc(null); }
   };
 
   const quitar = async (id) => {
@@ -545,7 +568,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                             }
                           </button>
                         </th>
-                        {['Estado','Oficial','Pagado','Saldo','Pago',''].map(h => (
+                        {['Estado','Oficial','Desc.','Pagado','Saldo','Pago',''].map(h => (
                           <th key={h} className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium">{h}</th>
                         ))}
                       </tr>
@@ -563,40 +586,129 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                             : b._nombre.localeCompare(a._nombre, 'es', { sensitivity: 'base' });
                         })
                         .map(e => {
-                          const nombre = e._nombre;
+                          const nombre    = e._nombre;
+                          const descuento = parseFloat(e.descuento) || 0;
+                          const concepto  = e.concepto_descuento || '';
+                          const isDescOpen = descOpen === e.id;
                           return (
-                          <tr key={e.id} className="border-b border-[var(--cc20)] hover:bg-[var(--bg-surface)] transition">
-                            <td className="py-2.5 px-4">
-                              <p className="font-medium text-[var(--text-pri)] text-xs">{nombre}</p>
-                              <p className="text-[var(--text-mut)] text-[10px]">CC {e.cedula}</p>
-                            </td>
-                            <td className="py-2.5 px-4"><span className={chipEstado(e.estado)}>{labelEstado(e)}</span></td>
-                            <td className="py-2.5 px-4 text-[var(--text-sec)] text-xs">{fmtCOP(e.valor_oficial)}</td>
-                            <td className="py-2.5 px-4 text-green-400 font-semibold text-xs">{fmtCOP(e.valor_pagado)}</td>
-                            <td className="py-2.5 px-4 text-red-400 text-xs">{fmtCOP(e.saldo_pendiente)}</td>
-                            <td className="py-2.5 px-4">
-                              {e.estado !== 'AL_DIA' && (
-                                <div className="flex items-center gap-1.5">
-                                  <input type="number" min={0}
-                                    value={pagoEdit[e.id] || ''}
-                                    onChange={ev => setPagoEdit(p => ({ ...p, [e.id]: ev.target.value }))}
-                                    placeholder="Total pagado"
-                                    className="w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-lg px-2 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
-                                  />
-                                  <button onClick={() => registrarPago(e.id)} disabled={!pagoEdit[e.id] || pagandoId === e.id}
-                                    className="p-1.5 rounded-lg bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] hover:bg-[var(--cc20)] transition disabled:opacity-40">
-                                    {pagandoId === e.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <Fragment key={e.id}>
+                            <tr className="border-b border-[var(--cc20)] hover:bg-[var(--bg-surface)] transition">
+                              <td className="py-2.5 px-4">
+                                <p className="font-medium text-[var(--text-pri)] text-xs">{nombre}</p>
+                                <p className="text-[var(--text-mut)] text-[10px]">CC {e.cedula}</p>
+                              </td>
+                              <td className="py-2.5 px-4"><span className={chipEstado(e.estado)}>{labelEstado(e)}</span></td>
+                              <td className="py-2.5 px-4 text-[var(--text-sec)] text-xs">{fmtCOP(e.valor_oficial)}</td>
+                              <td className="py-2.5 px-4">
+                                {descuento > 0 ? (
+                                  <button
+                                    onClick={() => { setDescOpen(isDescOpen ? null : e.id); setDescEdit(d => ({ ...d, [e.id]: { monto: String(descuento), concepto } })); }}
+                                    className="flex flex-col items-start gap-0.5 group"
+                                    title="Editar descuento"
+                                  >
+                                    <span className="text-xs font-semibold text-amber-400">−{fmtCOP(descuento)}</span>
+                                    {concepto && <span className="text-[10px] text-[var(--text-mut)] group-hover:text-amber-400 transition truncate max-w-[80px]">{concepto}</span>}
                                   </button>
-                                </div>
-                              )}
-                            </td>
-                            <td className="py-2.5 px-4">
-                              <button onClick={() => quitar(e.id)}
-                                className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-red-400 hover:bg-red-500/10 transition">
-                                <X className="w-3.5 h-3.5" />
-                              </button>
-                            </td>
-                          </tr>
+                                ) : (
+                                  <button
+                                    onClick={() => { setDescOpen(isDescOpen ? null : e.id); setDescEdit(d => ({ ...d, [e.id]: { monto: '', concepto: '' } })); }}
+                                    className="p-1 rounded-lg text-[var(--text-mut)] hover:text-amber-400 hover:bg-amber-500/10 transition"
+                                    title="Agregar descuento"
+                                  >
+                                    <Tag className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </td>
+                              <td className="py-2.5 px-4 text-green-400 font-semibold text-xs">{fmtCOP(e.valor_pagado)}</td>
+                              <td className="py-2.5 px-4 text-red-400 text-xs">{fmtCOP(e.saldo_pendiente)}</td>
+                              <td className="py-2.5 px-4">
+                                {e.estado !== 'AL_DIA' && (
+                                  <div className="flex items-center gap-1.5">
+                                    <input type="number" min={0}
+                                      value={pagoEdit[e.id] || ''}
+                                      onChange={ev => setPagoEdit(p => ({ ...p, [e.id]: ev.target.value }))}
+                                      placeholder="Total pagado"
+                                      className="w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-lg px-2 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
+                                    />
+                                    <button onClick={() => registrarPago(e.id)} disabled={!pagoEdit[e.id] || pagandoId === e.id}
+                                      className="p-1.5 rounded-lg bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] hover:bg-[var(--cc20)] transition disabled:opacity-40">
+                                      {pagandoId === e.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                                    </button>
+                                  </div>
+                                )}
+                              </td>
+                              <td className="py-2.5 px-4">
+                                <button onClick={() => quitar(e.id)}
+                                  className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-red-400 hover:bg-red-500/10 transition">
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+
+                            {/* Editor de descuento */}
+                            {isDescOpen && (
+                              <tr className="border-b border-[var(--cc20)]">
+                                <td colSpan={8} className="px-4 pb-3 pt-0">
+                                  <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 space-y-2.5">
+                                    <p className="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
+                                      <Tag className="w-3 h-3" /> Descuento para {nombre}
+                                    </p>
+                                    {/* Chips de concepto rápido */}
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {['Patrocinio','Campeón','Familiar','Directivo','Cortesía'].map(c => (
+                                        <button key={c}
+                                          onClick={() => setDescEdit(d => ({ ...d, [e.id]: { ...d[e.id], concepto: c } }))}
+                                          className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition ${
+                                            descEdit[e.id]?.concepto === c
+                                              ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                                              : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:border-amber-500/40 hover:text-amber-400'
+                                          }`}
+                                        >{c}</button>
+                                      ))}
+                                    </div>
+                                    <div className="flex gap-2 items-center flex-wrap">
+                                      <input
+                                        type="number" min={0}
+                                        value={descEdit[e.id]?.monto || ''}
+                                        onChange={ev => setDescEdit(d => ({ ...d, [e.id]: { ...d[e.id], monto: ev.target.value } }))}
+                                        placeholder="Monto descuento"
+                                        className="w-36 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-lg px-2 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-amber-500/60"
+                                      />
+                                      <input
+                                        type="text"
+                                        value={descEdit[e.id]?.concepto || ''}
+                                        onChange={ev => setDescEdit(d => ({ ...d, [e.id]: { ...d[e.id], concepto: ev.target.value } }))}
+                                        placeholder="Concepto (ej: Patrocinio Nike)"
+                                        className="flex-1 min-w-[140px] bg-[var(--bg-app)] border border-[var(--cc20)] rounded-lg px-2 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-amber-500/60"
+                                      />
+                                      <button
+                                        onClick={() => guardarDescuento(e.id)}
+                                        disabled={guardandoDesc === e.id}
+                                        className="px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-semibold hover:bg-amber-500/25 transition disabled:opacity-40 flex items-center gap-1.5"
+                                      >
+                                        {guardandoDesc === e.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                        Guardar
+                                      </button>
+                                      <button
+                                        onClick={() => setDescOpen(null)}
+                                        className="px-3 py-1.5 rounded-lg text-[var(--text-sec)] text-xs hover:text-[var(--text-pri)] transition"
+                                      >
+                                        Cancelar
+                                      </button>
+                                    </div>
+                                    {descuento > 0 && (
+                                      <button
+                                        onClick={() => { setDescEdit(d => ({ ...d, [e.id]: { monto: '0', concepto: '' } })); guardarDescuento(e.id); }}
+                                        className="text-[10px] text-red-400/60 hover:text-red-400 transition"
+                                      >
+                                        Quitar descuento
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </Fragment>
                           );
                         })}
                     </tbody>

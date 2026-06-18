@@ -465,19 +465,18 @@ function SeccionHistorialLazy({ cedula }) {
 }
 
 const MOTIVOS_EXENTO = [
-  { key: 'BECA',      label: 'Beca deportiva' },
-  { key: 'SOCIAL',    label: 'Caso social'    },
-  { key: 'DIRECTIVO', label: 'Directivo/Staff' },
-  { key: 'OTRO',      label: 'Otro motivo'    },
+  { key: 'BECA',      label: 'Beca deportiva'  },
+  { key: 'SOCIAL',    label: 'Caso social'      },
+  { key: 'DIRECTIVO', label: 'Directivo/Staff'  },
+  { key: 'OTRO',      label: 'Otro motivo'      },
 ];
 
-const MOTIVO_DISPLAY = {
-  EXENTO_BECA:      'Beca deportiva',
-  EXENTO_SOCIAL:    'Caso social',
-  EXENTO_DIRECTIVO: 'Directivo / Staff',
-  EXENTO_OTRO:      'Otro motivo',
-  EXENTO:           'Sin motivo especificado',
-};
+// Extrae el texto del motivo desde el campo notas: "[Exento: texto]"
+function extraerMotivoExento(notas) {
+  if (!notas) return null;
+  const match = notas.match(/^\[Exento:\s*(.+?)\]/);
+  return match ? match[1].trim() : null;
+}
 
 export default function FinancieroContent({ cedula, jugador, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated, onJugadorUpdated }) {
   const misMensualidades = mensualidades.filter(m => String(m.cedula || m.player_id || '') === String(cedula));
@@ -488,19 +487,19 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
   const tipoLabel = { BECA_DEPORTIVA: 'Beca Deportiva', BECA_SOCIAL: 'Beca Social', CONDICION_ESPECIAL: 'Condición Especial' };
   const tipoTexto = tipoLabel[jugador?.tipo_descuento] ?? '';
 
-  const calcEsExento = (td) => typeof td === 'string' && td.startsWith('EXENTO');
-  const [esExento,         setEsExento]         = useState(() => calcEsExento(jugador?.tipo_descuento));
-  const [tipoDescuentoLoc, setTipoDescuentoLoc] = useState(jugador?.tipo_descuento || null);
-  const [cambiandoExento,  setCambiandoExento]  = useState(false);
-  const [eligiendoMotivo,  setEligiendoMotivo]  = useState(false);
-  const [motivoSel,        setMotivoSel]        = useState(null);
-  const [motivoOtroTexto,  setMotivoOtroTexto]  = useState('');
-  const [errorExento,      setErrorExento]      = useState('');
+  const calcEsExento = (td) => td === 'EXENTO';
+  const [esExento,        setEsExento]        = useState(() => calcEsExento(jugador?.tipo_descuento));
+  const [motivoDisplay,   setMotivoDisplay]   = useState(() => extraerMotivoExento(jugador?.notas));
+  const [cambiandoExento, setCambiandoExento] = useState(false);
+  const [eligiendoMotivo, setEligiendoMotivo] = useState(false);
+  const [motivoSel,       setMotivoSel]       = useState(null);
+  const [motivoOtroTexto, setMotivoOtroTexto] = useState('');
+  const [errorExento,     setErrorExento]     = useState('');
 
   useEffect(() => {
     setEsExento(calcEsExento(jugador?.tipo_descuento));
-    setTipoDescuentoLoc(jugador?.tipo_descuento || null);
-  }, [jugador?.tipo_descuento]);
+    setMotivoDisplay(extraerMotivoExento(jugador?.notas));
+  }, [jugador?.tipo_descuento, jugador?.notas]);
 
   const resetSelector = () => { setEligiendoMotivo(false); setMotivoSel(null); setMotivoOtroTexto(''); setErrorExento(''); };
 
@@ -520,10 +519,9 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
       });
       const data = await res.json();
       if (data.success) {
-        const nuevoTipo = data.tipo_descuento || 'EXENTO';
         setEsExento(true);
-        setTipoDescuentoLoc(nuevoTipo);
-        onJugadorUpdated?.({ descuento_pct: 100, tipo_descuento: nuevoTipo });
+        setMotivoDisplay(data.motivo_label || null);
+        onJugadorUpdated?.({ descuento_pct: 100, tipo_descuento: 'EXENTO', notas: data.motivo_label ? `[Exento: ${data.motivo_label}]` : jugador?.notas });
         setMotivoOtroTexto('');
       } else {
         setErrorExento(data.error || 'No se pudo marcar como exento');
@@ -545,7 +543,7 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
       const data = await res.json();
       if (data.success) {
         setEsExento(false);
-        setTipoDescuentoLoc(null);
+        setMotivoDisplay(null);
         onJugadorUpdated?.({ descuento_pct: 0, tipo_descuento: null });
       } else {
         setErrorExento(data.error || 'No se pudo quitar la exención');
@@ -555,10 +553,6 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
       setErrorExento('Error de conexión — intenta de nuevo');
     } finally { setCambiandoExento(false); }
   };
-
-  const motivoDisplay = tipoDescuentoLoc === 'EXENTO_OTRO' && jugador?.notas
-    ? (jugador.notas.startsWith('[Exento] ') ? jugador.notas.replace('[Exento] ', '') : MOTIVO_DISPLAY[tipoDescuentoLoc])
-    : (MOTIVO_DISPLAY[tipoDescuentoLoc] ?? null);
 
   return (
     <div className="space-y-8">

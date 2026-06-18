@@ -197,13 +197,16 @@ function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated }
 
   if (!items.length) return <EmptySection texto="Sin datos de mensualidades" />;
 
-  const totalPagado    = items.reduce((s, m) => s + (parseFloat(m.valor_pagado)    || 0), 0);
-  const totalPendiente = items.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
-  // Solo suspensiones activas — las anuladas no ocultan el estado real del mes
-  const totalSusp = items.filter(m => {
-    const n = parseInt(m.numero_mes);
+  const isMesSuspendido = (numero_mes) => {
+    const n = parseInt(numero_mes);
     return suspensiones.some(s => s.activa && s.mes_inicio <= n && n <= s.mes_fin);
-  }).length;
+  };
+
+  const totalPagado    = items.reduce((s, m) => s + (parseFloat(m.valor_pagado) || 0), 0);
+  const totalPendiente = items.reduce((s, m) =>
+    s + (isMesSuspendido(m.numero_mes) ? 0 : (parseFloat(m.saldo_pendiente) || 0)), 0);
+  // Solo suspensiones activas — las anuladas no ocultan el estado real del mes
+  const totalSusp = items.filter(m => isMesSuspendido(m.numero_mes)).length;
 
   const getSuspension = (numero_mes) => {
     const n = parseInt(numero_mes);

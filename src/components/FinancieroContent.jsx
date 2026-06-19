@@ -354,11 +354,11 @@ function SeccionTorneos({ datos }) {
         {datos.map((t, i) => (
           <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--bg-surface)]">
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-[var(--text-pri)]">{t.torneo || 'Torneo'}</span>
+              <span className="text-sm font-medium text-[var(--text-pri)]">{t.nombre_torneo || 'Torneo'}</span>
               <EstadoBadge estado={t.estado} />
             </div>
             <p className="text-sm font-medium text-[var(--text-pri)]">
-              {formatCOP(t.valor_pagado)} <span className="text-[var(--text-sec)]">/ {formatCOP(t.valor_oficial)}</span>
+              {formatCOP(t.valor_pagado)} <span className="text-[var(--text-sec)]">/ {formatCOP(t.valor_inscrito ?? t.valor_oficial)}</span>
             </p>
           </div>
         ))}

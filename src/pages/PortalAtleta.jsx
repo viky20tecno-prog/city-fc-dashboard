@@ -271,7 +271,7 @@ function StepOTP({ color, phone, clubSlug, onVerified, onBack }) {
 
 // ── Paso 3: Resultado ─────────────────────────────────────────────────────────
 function Resultado({ datos, color, onNuevaBusqueda }) {
-  const { atleta, mensualidades, saldo_pendiente, total_pagado, meses_pendientes, esExento } = datos;
+  const { atleta, mensualidades, torneos = [], saldo_pendiente, total_pagado, meses_pendientes, esExento } = datos;
   const [fotoUrl, setFotoUrl] = useState(atleta?.foto_url || null);
   const [imgError, setImgError] = useState(false);
   const nombreCompleto = `${atleta.nombre} ${atleta.apellidos || ''}`.trim();
@@ -356,6 +356,40 @@ function Resultado({ datos, color, onNuevaBusqueda }) {
               Comunícate con tu club para regularizar tus pagos
             </div>
           )}
+        </div>
+      )}
+
+      {/* Torneos */}
+      {torneos.length > 0 && (
+        <div className="fade-up" style={{ animationDelay: '.16s', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
+          <div style={{ padding: '14px 16px 10px', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.5, textTransform: 'uppercase' }}>
+            Torneos inscritos
+          </div>
+          <div>
+            {torneos.map((t, i) => {
+              const pagado  = t.valor_pagado || 0;
+              const total   = t.valor_inscrito || 0;
+              const saldo   = t.saldo_pendiente || 0;
+              const alDiaT  = t.estado === 'AL_DIA';
+              const estadoColor = alDiaT ? '#00D084' : t.estado === 'ABONO' ? '#F59E0B' : '#EF4444';
+              const estadoLabel = alDiaT ? 'Al día' : t.estado === 'ABONO' ? 'Abono' : 'Pendiente';
+              return (
+                <div key={t.id || i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)', marginBottom: 3 }}>{t.nombre_torneo}</div>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: `${estadoColor}18`, border: `1px solid ${estadoColor}40`, borderRadius: 999, padding: '1px 8px', fontSize: 10, fontWeight: 700, color: estadoColor }}>
+                      {estadoLabel}
+                    </span>
+                  </div>
+                  <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>{fmt(pagado)}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>/ {fmt(total)}</div>
+                    {saldo > 0 && <div style={{ fontSize: 10, color: '#F59E0B', marginTop: 2 }}>Saldo: {fmt(saldo)}</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

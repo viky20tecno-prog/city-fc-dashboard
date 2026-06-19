@@ -7,6 +7,7 @@ import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { API_BASE_URL } from '../config';
 import { normalizarCategorias } from '../lib/categorias';
+import jsPDF from 'jspdf';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 
 const SUGERENCIAS = ['Benjamín', 'Infantil', 'Pre-juvenil', 'Juvenil', 'Sub-17', 'Sub-20', 'Mayores', 'Veteranos', 'Femenino'];
@@ -251,7 +252,6 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
 
     setExportando(true);
     try {
-      const { default: jsPDF } = await import('jspdf');
       const doc       = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const W = 210; const H = 297; const M = 12;
       const accentRgb = hexToRgb(color);

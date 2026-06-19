@@ -8,6 +8,7 @@ import {
   ComposedChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
+import jsPDF from 'jspdf';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
@@ -238,7 +239,6 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
 
   /* ── Comprobante PDF de nómina ──────────────────────── */
   const generarComprobantePago = async (empleado, monto, mes) => {
-    const { default: jsPDF } = await import('jspdf');
     const acHex = (typeof color === 'string' && color.startsWith('#')) ? color : '#E14924';
     const cr = parseInt(acHex.slice(1, 3), 16);
     const cg = parseInt(acHex.slice(3, 5), 16);
@@ -323,7 +323,6 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
 
   /* ── Exportar PDF ────────────────────────────────────── */
   const exportarPDF = async () => {
-    const { default: jsPDF } = await import('jspdf');
     const doc   = new jsPDF();
     const W     = 210;
     const M     = 14;

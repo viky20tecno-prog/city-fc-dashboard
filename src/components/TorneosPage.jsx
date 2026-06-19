@@ -4,6 +4,7 @@ import {
   Loader2, Pencil, Trash2, X, Users, Download, AlertTriangle,
   ArrowUpAZ, ArrowDownAZ, Tag,
 } from 'lucide-react';
+import jsPDF from 'jspdf';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfSectionLabel, drawPdfTableHead } from '../lib/pdfHelpers';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
@@ -178,7 +179,6 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     if (!torneoSeleccionado) return;
     const def       = torneosDef.find(t => t.nombre === torneoSeleccionado);
     const inscritos = enrollments.filter(e => e.nombre_torneo === torneoSeleccionado);
-    const { default: jsPDF } = await import('jspdf');
     const doc       = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const W = 210; const H = 297; const M = 14;
     const accentRgb = hexToRgb(color);

@@ -69,7 +69,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
         <div style={{ fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--text-mut)', marginBottom: '6px', fontWeight: 500 }}>
           {label}
         </div>
-        <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '38px', lineHeight: 1, color: 'var(--text-pri)', letterSpacing: '1px' }}>
+        <div style={{ fontFamily: "'Sport Event', cursive", fontSize: '38px', lineHeight: 1, color: 'var(--text-pri)', letterSpacing: '1px' }}>
           {value}
         </div>
         {sub != null && (
@@ -117,7 +117,7 @@ function EmptyDashboard() {
       <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--cc12)', border: '1px solid var(--cc20)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Users size={32} color="var(--cc)" strokeWidth={1.3} />
       </div>
-      <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '26px', letterSpacing: '2px', color: 'var(--text-sec)' }}>
+      <div style={{ fontFamily: "'Sport Event', cursive", fontSize: '26px', letterSpacing: '2px', color: 'var(--text-sec)' }}>
         Sin jugadores registrados
       </div>
       <div style={{ color: 'var(--text-mut)', fontSize: '14px', lineHeight: 1.7, maxWidth: 320 }}>

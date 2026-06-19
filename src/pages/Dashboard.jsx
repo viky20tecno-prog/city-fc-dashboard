@@ -439,7 +439,7 @@ export default function Dashboard() {
                   fill={`${c}12`} stroke={`${c}2E`} strokeWidth="0.8"/>
             <line x1="6" y1="21" x2="32" y2="21" stroke={c} strokeWidth="0.7" opacity="0.4"/>
             <text x="19" y="18.5" textAnchor="middle" fill={c}
-                  fontFamily="Bebas Neue, sans-serif" fontSize="9.5" letterSpacing="1.5">{initials}</text>
+                  fontFamily="Sport Event, sans-serif" fontSize="9.5" letterSpacing="1.5">{initials}</text>
             <line x1="13" y1="24" x2="25" y2="24" stroke="#B68631" strokeWidth="0.8" opacity="0.6"/>
             <text x="19" y="35" textAnchor="middle" fill="#B68631" fontFamily="Arial" fontSize="6.5" letterSpacing="1">★ ★ ★</text>
           </svg>
@@ -447,7 +447,7 @@ export default function Dashboard() {
 
         {/* Nombre del club */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', flexShrink: 0, minWidth: 0 }}>
-          <span style={{ fontFamily: "'Bebas Neue', cursive", fontSize: isMobile ? '17px' : '20px', letterSpacing: '3px', lineHeight: 1, color: 'var(--text-pri)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: isMobile ? '130px' : 'none' }}>
+          <span style={{ fontFamily: "'Sport Event', cursive", fontSize: isMobile ? '17px' : '20px', letterSpacing: '3px', lineHeight: 1, color: 'var(--text-pri)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: isMobile ? '130px' : 'none' }}>
             {clubConfig?.nombre || 'Mi Club'}
           </span>
           {!isMobile && (
@@ -733,7 +733,7 @@ export default function Dashboard() {
           }}>
             <div style={{ lineHeight: 1 }}><Clock size={48} color="#EF4444" strokeWidth={1.5} /></div>
             <div>
-              <div style={{ fontFamily: "'Bebas Neue', cursive", fontSize: '28px', letterSpacing: '3px', color: 'var(--text-pri)', marginBottom: '8px' }}>
+              <div style={{ fontFamily: "'Sport Event', cursive", fontSize: '28px', letterSpacing: '3px', color: 'var(--text-pri)', marginBottom: '8px' }}>
                 Tu período de prueba terminó
               </div>
               <div style={{ color: 'var(--text-sec)', fontSize: '14px', lineHeight: 1.6 }}>

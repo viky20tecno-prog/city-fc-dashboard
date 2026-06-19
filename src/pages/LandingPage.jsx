@@ -1961,7 +1961,7 @@ export default function LandingPage() {
               <div style={{ marginBottom: 16 }}>
                 <img src="/favicon.png" alt="ZenSports" style={{ width: 40, height: 40, objectFit: 'contain' }} />
               </div>
-              <p style={{ fontSize: 18, fontFamily: "'Bebas Neue','Space Grotesk',sans-serif", letterSpacing: 3, color: '#fff', margin: '0 0 8px' }}>ZENSPORTS</p>
+              <p style={{ fontSize: 18, fontFamily: "'Sport Event','Space Grotesk',sans-serif", letterSpacing: 3, color: '#fff', margin: '0 0 8px' }}>ZENSPORTS</p>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6, margin: '0 0 20px', maxWidth: 220 }}>
                 La plataforma de gestión deportiva con IA para clubes de toda Latinoamérica.
               </p>

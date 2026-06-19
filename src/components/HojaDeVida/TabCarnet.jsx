@@ -20,7 +20,7 @@ function EscudoSVG({ size = 32, color = 'var(--cc)', initials = 'FC' }) {
             fill={`${color}12`} stroke={`${color}30`} strokeWidth="0.8" />
       <line x1="6" y1="21" x2="32" y2="21" stroke={color} strokeWidth="0.7" opacity="0.4" />
       <text x="19" y="19" textAnchor="middle" fill={color}
-            fontFamily="Bebas Neue, sans-serif" fontSize={initials.length > 2 ? '8' : '9.5'} letterSpacing="1.5">
+            fontFamily="Sport Event, sans-serif" fontSize={initials.length > 2 ? '8' : '9.5'} letterSpacing="1.5">
         {initials.slice(0, 3)}
       </text>
       <line x1="13" y1="24" x2="25" y2="24" stroke="#B68631" strokeWidth="0.8" opacity="0.6" />
@@ -48,7 +48,7 @@ function SelloHolograma({ color, initials, logoUrl, dark }) {
       {logoUrl
         ? <image href={logoUrl} x="10" y="10" width="14" height="14" />
         : <text x="17" y="21" textAnchor="middle" fontSize="8.5" fontWeight="900" fill={color}
-                fontFamily="'Bebas Neue', cursive" letterSpacing="0.5">{initials.slice(0, 2)}</text>
+                fontFamily="'Sport Event', cursive" letterSpacing="0.5">{initials.slice(0, 2)}</text>
       }
       {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => {
         const rad = (deg - 90) * Math.PI / 180;
@@ -161,7 +161,7 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
           ? <img src={logoUrl} alt="logo" style={{ width: small ? '22px' : '26px', height: small ? '22px' : '26px', objectFit: 'contain' }} />
           : <EscudoSVG size={small ? 18 : 22} color={clubColor} initials={initials} />}
         <div>
-          <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: small ? '13px' : '15px', letterSpacing: '2.5px', color: th.textPri, lineHeight: 1 }}>
+          <div style={{ fontFamily: "'Sport Event',cursive", fontSize: small ? '13px' : '15px', letterSpacing: '2.5px', color: th.textPri, lineHeight: 1 }}>
             {clubNombre}
           </div>
           {!small && clubSub && (
@@ -251,7 +251,7 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
                 display: 'flex', alignItems: 'center', gap: '8px',
               }}>
                 {jugador.numero_camiseta && (
-                  <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: '22px', color: clubColor, lineHeight: 1 }}>
+                  <div style={{ fontFamily: "'Sport Event',cursive", fontSize: '22px', color: clubColor, lineHeight: 1 }}>
                     #{jugador.numero_camiseta}
                   </div>
                 )}
@@ -264,10 +264,10 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
             )}
           </div>
           <div style={{ padding: '10px 16px 4px' }}>
-            <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: '26px', color: th.textPri, lineHeight: 1, letterSpacing: '2px' }}>
+            <div style={{ fontFamily: "'Sport Event',cursive", fontSize: '26px', color: th.textPri, lineHeight: 1, letterSpacing: '2px' }}>
               {nombre || '—'}
             </div>
-            <div style={{ fontFamily: "'Bebas Neue',cursive", fontSize: '20px', color: clubColor, lineHeight: 1.1, letterSpacing: '1.5px' }}>
+            <div style={{ fontFamily: "'Sport Event',cursive", fontSize: '20px', color: clubColor, lineHeight: 1.1, letterSpacing: '1.5px' }}>
               {apellidos}
             </div>
             <div style={{ fontSize: '8px', color: th.textMut, letterSpacing: '2px', textTransform: 'uppercase', marginTop: '2px' }}>

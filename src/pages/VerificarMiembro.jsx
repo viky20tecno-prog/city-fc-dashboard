@@ -100,7 +100,7 @@ export default function VerificarMiembro() {
               {logoUrl
                 ? <img src={logoUrl} alt="logo" style={{ width: 38, height: 38, objectFit: 'contain', borderRadius: 8 }} />
                 : (
-                  <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}20`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color, fontFamily: "'Bebas Neue', cursive", letterSpacing: 1 }}>{initials}</div>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}20`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color, fontFamily: "'Sport Event', cursive", letterSpacing: 1 }}>{initials}</div>
                 )
               }
               <div>
@@ -161,7 +161,7 @@ export default function VerificarMiembro() {
                 ? <img src={logoUrl} alt="logo" style={{ width: 38, height: 38, objectFit: 'contain', borderRadius: 8 }} />
                 : (
                   <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}20`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontSize: 13, fontWeight: 900, color, fontFamily: "'Bebas Neue', cursive", letterSpacing: 1 }}>{initials}</span>
+                    <span style={{ fontSize: 13, fontWeight: 900, color, fontFamily: "'Sport Event', cursive", letterSpacing: 1 }}>{initials}</span>
                   </div>
                 )
               }

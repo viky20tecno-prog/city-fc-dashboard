@@ -44,7 +44,7 @@ export default function ZenSportsLogo({ variant = 'white', size = 'md', classNam
           }}
         />
         <span style={{
-          fontFamily: "'Bebas Neue', 'Space Grotesk', sans-serif",
+          fontFamily: "'Sport Event', 'Space Grotesk', sans-serif",
           fontSize: height * 0.65,
           fontWeight: 400,
           letterSpacing: '-0.02em',

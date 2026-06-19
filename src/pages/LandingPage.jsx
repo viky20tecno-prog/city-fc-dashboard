@@ -951,7 +951,7 @@ export default function LandingPage() {
   const colorActivo = PALETA.find(p => p.hex === previewColor) || PALETA[0];
 
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#060810', minHeight: '100vh', color: '#fff', overflowX: 'hidden' }} onMouseMove={onMove} onMouseLeave={onLeave}>
+    <div className="landing-page" style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#060810', minHeight: '100vh', color: '#fff', overflowX: 'hidden' }} onMouseMove={onMove} onMouseLeave={onLeave}>
       {/* Mouse-reactive glow — sigue al cursor en toda la página */}
       <div ref={glowRef} style={{
         position: 'fixed', pointerEvents: 'none', zIndex: 0,
@@ -1007,6 +1007,7 @@ export default function LandingPage() {
         @media(max-width:640px){.hero-h1{font-size:32px!important;letter-spacing:-1px!important;}.hide-mobile{display:none!important;}.show-mobile{display:flex!important;}.pricing-grid{grid-template-columns:1fr!important;}.bento-wide,.bento-narrow{grid-column:span 6!important;}.mobile-menu{display:flex!important;}.hero-cta-wrap{bottom:14px!important;gap:8px!important;padding:0 12px!important;}.hero-cta-btn{font-size:12px!important;padding:10px 14px!important;border-radius:10px!important;gap:5px!important;}.site-footer{padding-bottom:100px!important;}.wa-float{bottom:92px!important;right:16px!important;}}
         .show-mobile{display:none;}
         .mobile-menu{display:none;}
+        .landing-page h2 { font-family: 'Sport Event', 'Space Grotesk', sans-serif !important; letter-spacing: 1px !important; }
       `}</style>
 
       {/* ── NAVBAR ──────────────────────────────────────────────────────── */}
@@ -1021,10 +1022,11 @@ export default function LandingPage() {
         <div style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 10 }}
             aria-label="Ir al inicio"
           >
             <img src="/favicon.png" alt="ZenSports" style={{ width: 32, height: 32, objectFit: 'contain' }} />
+            <span style={{ fontFamily: "'Sport Event', sans-serif", fontSize: 20, letterSpacing: 3, color: '#fff', lineHeight: 1 }}>ZENSPORTS</span>
           </button>
           <div className="hide-mobile" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {[

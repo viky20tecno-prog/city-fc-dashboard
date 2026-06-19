@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { API_BASE_URL } from '../config';
 
 export default function VerificarMiembro() {
   const { clubSlug, cedula } = useParams();
+  const [searchParams] = useSearchParams();
 
   const [estado, setEstado]       = useState('cargando'); // 'cargando' | 'verificado' | 'no_encontrado' | 'error'
   const [clubConfig, setClubConfig] = useState(null);
@@ -67,6 +68,14 @@ export default function VerificarMiembro() {
   const posicion  = atleta?.posicion  || '';
   const numero    = atleta?.numero    || atleta?.numero_camiseta || '';
   const categoria = atleta?.categoria || '';
+
+  // Fecha de solicitud del carnet (pasada por el bot vía ?fecha=YYYY-MM-DD)
+  const fechaParam  = searchParams.get('fecha');
+  const hoyISO      = new Date().toISOString().split('T')[0];
+  const fechaValida = fechaParam === hoyISO;
+  const fechaDisplay = fechaParam
+    ? new Date(`${fechaParam}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })
+    : null;
 
   // Foto desde el registro del atleta o path estándar del bucket
   const fotoUrl = atleta?.foto_url
@@ -225,13 +234,26 @@ export default function VerificarMiembro() {
             </div>
           </div>
 
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)' }}>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '10px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
               <span style={{ fontSize: 11, fontWeight: 800, color, letterSpacing: 0.5 }}>ZenSports</span>
             </div>
+            {fechaDisplay && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                background: fechaValida ? 'rgba(0,208,132,0.12)' : 'rgba(245,166,35,0.12)',
+                border: `1px solid ${fechaValida ? 'rgba(0,208,132,0.4)' : 'rgba(245,166,35,0.4)'}`,
+                borderRadius: 999, padding: '3px 10px',
+              }}>
+                <div style={{ width: 5, height: 5, borderRadius: '50%', background: fechaValida ? '#00D084' : '#F5A623', boxShadow: `0 0 6px ${fechaValida ? '#00D084' : '#F5A623'}` }} />
+                <span style={{ fontSize: 9, fontWeight: 700, color: fechaValida ? '#00D084' : '#F5A623', letterSpacing: 0.8, whiteSpace: 'nowrap' }}>
+                  {fechaValida ? `Válido hoy · ${fechaDisplay}` : `Solicitado: ${fechaDisplay}`}
+                </span>
+              </div>
+            )}
             <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', letterSpacing: 0.5 }}>zensports.app</span>
           </div>
         </div>

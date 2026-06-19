@@ -185,12 +185,27 @@ export default function VerificarMiembro() {
             </div>
           </div>
 
-          {/* Badge verificado */}
-          <div style={{ padding: '24px 24px 0', display: 'flex', justifyContent: 'center' }}>
+          {/* Badge verificado + fecha */}
+          <div style={{ padding: '24px 24px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(0,208,132,0.10)', border: '1px solid rgba(0,208,132,0.30)', borderRadius: 999, padding: '6px 18px' }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00D084', boxShadow: '0 0 8px #00D084' }} />
               <span style={{ fontSize: 12, fontWeight: 700, color: '#00D084', letterSpacing: 1.5, textTransform: 'uppercase' }}>Miembro Verificado</span>
             </div>
+            {fechaDisplay && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: fechaValida ? 'rgba(0,208,132,0.08)' : 'rgba(245,166,35,0.10)',
+                border: `1px solid ${fechaValida ? 'rgba(0,208,132,0.25)' : 'rgba(245,166,35,0.35)'}`,
+                borderRadius: 999, padding: '4px 14px',
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={fechaValida ? '#00D084' : '#F5A623'} strokeWidth="2.5">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <span style={{ fontSize: 10, fontWeight: 700, color: fechaValida ? '#00D084' : '#F5A623', letterSpacing: 1, whiteSpace: 'nowrap' }}>
+                  {fechaValida ? `Válido hoy · ${fechaDisplay}` : `Solicitado: ${fechaDisplay}`}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Foto + datos */}
@@ -230,6 +245,12 @@ export default function VerificarMiembro() {
                   <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', width: 64, letterSpacing: 1, textTransform: 'uppercase' }}>Estado</div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: '#00D084' }}>Activo</div>
                 </div>
+                {fechaDisplay && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', width: 64, letterSpacing: 1, textTransform: 'uppercase' }}>Vigencia</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: fechaValida ? '#00D084' : '#F5A623' }}>{fechaDisplay}</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

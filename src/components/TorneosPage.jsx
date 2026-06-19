@@ -597,7 +597,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                             }
                           </button>
                         </th>
-                        {['Estado','Oficial','Desc.','Pagado','Saldo','Pago',''].map(h => (
+                        {['Estado','Oficial','Inscrito','Desc.','Pagado','Saldo','Pago',''].map(h => (
                           <th key={h} className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium">{h}</th>
                         ))}
                       </tr>
@@ -628,6 +628,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                               </td>
                               <td className="py-2.5 px-4"><span className={chipEstado(e.estado)}>{labelEstado(e)}</span></td>
                               <td className="py-2.5 px-4 text-[var(--text-sec)] text-xs">{fmtCOP(e.valor_oficial)}</td>
+                              <td className="py-2.5 px-4 text-[var(--cc)] font-semibold text-xs">{fmtCOP(e.valor_inscrito ?? e.valor_oficial)}</td>
                               <td className="py-2.5 px-4">
                                 {descuento > 0 ? (
                                   <button

@@ -10,8 +10,8 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zen
 const normalizarCatalogo = (raw) =>
   (raw || []).map(p =>
     typeof p === 'string'
-      ? { nombre: p, precio: 0 }
-      : { nombre: String(p.nombre || ''), precio: Number(p.precio) || 0 }
+      ? { nombre: p, precio: 0, precio_proveedor: 0 }
+      : { nombre: String(p.nombre || ''), precio: Number(p.precio) || 0, precio_proveedor: Number(p.precio_proveedor) || 0 }
   );
 
 export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club', clubConfig }) {
@@ -46,9 +46,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   // — Catálogo —
   const [catalogo, setCatalogo] = useState([]);
-  const [nuevaPrenda, setNuevaPrenda] = useState({ nombre: '', precio: '' });
+  const [nuevaPrenda, setNuevaPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '' });
   const [editandoIdx, setEditandoIdx] = useState(null);
-  const [editandoPrenda, setEditandoPrenda] = useState({ nombre: '', precio: '' });
+  const [editandoPrenda, setEditandoPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '' });
   const [guardandoCatalogo, setGuardandoCatalogo] = useState(false);
   const [catalogoMsg, setCatalogoMsg] = useState('');
 
@@ -119,8 +119,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const MAX_PRENDAS = 15;
 
   const agregarPrenda = () => {
-    const nombre = nuevaPrenda.nombre.trim();
-    const precio = Number(String(nuevaPrenda.precio).replace(/\D/g, '')) || 0;
+    const nombre           = nuevaPrenda.nombre.trim();
+    const precio           = Number(String(nuevaPrenda.precio).replace(/\D/g, ''))           || 0;
+    const precio_proveedor = Number(String(nuevaPrenda.precio_proveedor).replace(/\D/g, '')) || 0;
     if (!nombre) return;
     if (catalogo.length >= MAX_PRENDAS) {
       setCatalogoMsg(`Límite de ${MAX_PRENDAS} prendas alcanzado`);
@@ -128,8 +129,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       return;
     }
     if (guardandoCatalogo) return;
-    const nuevo = [...catalogo, { nombre, precio }];
-    setNuevaPrenda({ nombre: '', precio: '' });
+    const nuevo = [...catalogo, { nombre, precio, precio_proveedor }];
+    setNuevaPrenda({ nombre: '', precio: '', precio_proveedor: '' });
     saveCatalogo(nuevo);
   };
 
@@ -139,14 +140,15 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   const iniciarEditarPrenda = (idx) => {
     setEditandoIdx(idx);
-    setEditandoPrenda({ nombre: catalogo[idx].nombre, precio: String(catalogo[idx].precio) });
+    setEditandoPrenda({ nombre: catalogo[idx].nombre, precio: String(catalogo[idx].precio), precio_proveedor: String(catalogo[idx].precio_proveedor || '') });
   };
 
   const guardarEditPrenda = () => {
-    const nombre = editandoPrenda.nombre.trim();
-    const precio = Number(String(editandoPrenda.precio).replace(/\D/g, '')) || 0;
+    const nombre           = editandoPrenda.nombre.trim();
+    const precio           = Number(String(editandoPrenda.precio).replace(/\D/g, ''))           || 0;
+    const precio_proveedor = Number(String(editandoPrenda.precio_proveedor).replace(/\D/g, '')) || 0;
     if (!nombre) return;
-    const nuevo = catalogo.map((p, i) => i === editandoIdx ? { nombre, precio } : p);
+    const nuevo = catalogo.map((p, i) => i === editandoIdx ? { nombre, precio, precio_proveedor } : p);
     setEditandoIdx(null);
     saveCatalogo(nuevo);
   };
@@ -922,14 +924,23 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
             )}
 
             {/* Formulario agregar */}
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2 mb-4 flex-wrap">
               <input
                 type="text"
                 value={nuevaPrenda.nombre}
                 onChange={e => setNuevaPrenda(f => ({ ...f, nombre: e.target.value }))}
                 onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
                 placeholder="Nombre de la prenda"
-                className="flex-1 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                className="flex-1 min-w-[160px] bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+              />
+              <input
+                type="text"
+                inputMode="numeric"
+                value={nuevaPrenda.precio_proveedor}
+                onChange={e => setNuevaPrenda(f => ({ ...f, precio_proveedor: e.target.value.replace(/\D/g, '') }))}
+                onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
+                placeholder="P. proveedor"
+                className="w-32 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
               />
               <input
                 type="text"
@@ -937,8 +948,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 value={nuevaPrenda.precio}
                 onChange={e => setNuevaPrenda(f => ({ ...f, precio: e.target.value.replace(/\D/g, '') }))}
                 onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
-                placeholder="Precio"
-                className="w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                placeholder="P. público"
+                className="w-32 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
               />
               <button
                 onClick={agregarPrenda}
@@ -971,9 +982,18 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                         <input
                           type="text"
                           inputMode="numeric"
+                          value={editandoPrenda.precio_proveedor}
+                          onChange={e => setEditandoPrenda(f => ({ ...f, precio_proveedor: e.target.value.replace(/\D/g, '') }))}
+                          placeholder="Proveedor"
+                          className="w-24 shrink-0 bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)]"
+                        />
+                        <input
+                          type="text"
+                          inputMode="numeric"
                           value={editandoPrenda.precio}
                           onChange={e => setEditandoPrenda(f => ({ ...f, precio: e.target.value.replace(/\D/g, '') }))}
-                          className="w-20 shrink-0 bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
+                          placeholder="Público"
+                          className="w-24 shrink-0 bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)]"
                         />
                         <div className="flex gap-1 shrink-0">
                           <button onClick={guardarEditPrenda} disabled={guardandoCatalogo}
@@ -992,9 +1012,19 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                     ) : (
                       <>
                         <span className="flex-1 text-sm text-[var(--text-pri)]">{p.nombre}</span>
+                        {p.precio_proveedor > 0 && (
+                          <span className="text-xs text-[var(--text-sec)] font-mono">
+                            Prov: ${p.precio_proveedor.toLocaleString('es-CO')}
+                          </span>
+                        )}
                         <span className="text-sm font-mono text-[var(--cc)] font-semibold">
                           ${p.precio.toLocaleString('es-CO')}
                         </span>
+                        {p.precio_proveedor > 0 && p.precio > p.precio_proveedor && (
+                          <span className="text-xs font-mono text-green-400 bg-green-400/10 px-2 py-0.5 rounded-lg">
+                            +${(p.precio - p.precio_proveedor).toLocaleString('es-CO')}
+                          </span>
+                        )}
                         <button onClick={() => iniciarEditarPrenda(idx)}
                           className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors"
                         >

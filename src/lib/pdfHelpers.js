@@ -9,15 +9,21 @@ export function hexToRgb(hex) {
 export async function loadLogoDataUrl(url) {
   if (!url) return null;
   return new Promise(resolve => {
+    const timer = setTimeout(() => resolve(null), 5000);
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width; canvas.height = img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      resolve(canvas.toDataURL('image/png'));
+      clearTimeout(timer);
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width; canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      } catch (_) {
+        resolve(null);
+      }
     };
-    img.onerror = () => resolve(null);
+    img.onerror = () => { clearTimeout(timer); resolve(null); };
     img.src = url;
   });
 }

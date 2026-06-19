@@ -402,7 +402,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     XLSX.writeFile(wb, `jugadores_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
-  const exportarPDF = async () => {
+  const exportarPDF = async () => { try {
     const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const W = 297; const H = 210; const M = 12;
@@ -466,7 +466,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
     const filtroLabel = filtroCategoria === SIN_EQUIPO ? '-sin-equipo' : filtroCategoria !== 'TODOS' ? `-${filtroCategoria.toLowerCase().replace(/\s+/g, '-')}` : '';
     doc.save(`jugadores${filtroLabel}-${new Date().toISOString().split('T')[0]}.pdf`);
-  };
+  } catch (err) {
+    console.error('[PDF jugadores]', err);
+    alert('Error al generar el PDF: ' + err.message);
+  } };
 
   return (
     <>

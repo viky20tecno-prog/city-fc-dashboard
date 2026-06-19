@@ -346,7 +346,7 @@ function Resultado({ datos, color, onNuevaBusqueda }) {
                 </div>
                 <div style={{ flexShrink: 0, textAlign: 'right' }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>{fmt(m.valor_pagado)}</span>
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)' }}> / {fmt(m.valor_oficial)}</span>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)' }}> / {fmt(m.valor_inscrito ?? m.valor_oficial)}</span>
                 </div>
               </div>
             ))}

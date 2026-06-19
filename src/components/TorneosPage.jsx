@@ -28,7 +28,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const [jugadoresClub,     setJugadoresClub]      = useState([]);
   const [torneoSeleccionado, setTorneoSeleccionado] = useState(null);
   const [showForm,          setShowForm]           = useState(false);
-  const [torneoForm,        setTorneoForm]         = useState({ nombre: '', fecha: '', valor: '' });
+  const [torneoForm,        setTorneoForm]         = useState({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '' });
   const [guardando,         setGuardando]          = useState(false);
   const [addCedula,         setAddCedula]          = useState('');
   const [addNombre,         setAddNombre]          = useState('');
@@ -37,7 +37,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const [pagoEdit,          setPagoEdit]           = useState({});
   const [pagandoId,         setPagandoId]          = useState(null);
   const [editIdx,           setEditIdx]            = useState(null);
-  const [editForm,          setEditForm]           = useState({ nombre: '', fecha: '', valor: '' });
+  const [editForm,          setEditForm]           = useState({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '' });
   const [sortAlpha,         setSortAlpha]          = useState(null); // null | 'asc' | 'desc'
   const [descOpen,          setDescOpen]           = useState(null);
   const [descEdit,          setDescEdit]           = useState({});
@@ -79,12 +79,12 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     if (!torneoForm.nombre.trim()) return;
     setGuardando(true);
     try {
-      const nueva = { nombre: torneoForm.nombre.trim(), fecha: torneoForm.fecha, valor: Number(torneoForm.valor) || 0 };
+      const nueva = { nombre: torneoForm.nombre.trim(), fecha: torneoForm.fecha, valor_oficial: Number(torneoForm.valor_oficial) || 0, valor_inscrito: Number(torneoForm.valor_inscrito) || 0 };
       const nuevaLista = [...torneosDef, nueva];
       await patchConfig({ torneos_iniciales: nuevaLista });
       setTorneosDef(nuevaLista);
       setShowForm(false);
-      setTorneoForm({ nombre: '', fecha: '', valor: '' });
+      setTorneoForm({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '' });
     } catch (e) { console.error(e); }
     finally { setGuardando(false); }
   };
@@ -95,7 +95,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     try {
       const nuevaLista = torneosDef.map((t, i) =>
         i === editIdx
-          ? { nombre: editForm.nombre.trim(), fecha: editForm.fecha, valor: Number(editForm.valor) || 0 }
+          ? { nombre: editForm.nombre.trim(), fecha: editForm.fecha, valor_oficial: Number(editForm.valor_oficial) || 0, valor_inscrito: Number(editForm.valor_inscrito) || 0 }
           : t
       );
       await patchConfig({ torneos_iniciales: nuevaLista });
@@ -123,7 +123,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
       const res = await authFetch(`${API_BASE}/torneos?club_id=${clubId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cedulas: [addCedula], nombre_torneo: torneoSeleccionado, valor_oficial: def?.valor || 0 }),
+        body: JSON.stringify({ cedulas: [addCedula], nombre_torneo: torneoSeleccionado, valor_oficial: def?.valor_oficial ?? def?.valor ?? 0, valor_inscrito: def?.valor_inscrito ?? def?.valor ?? 0 }),
       });
       const data = await res.json();
       if (data.success) { setAddCedula(''); setAddNombre(''); setAddBusqueda(''); await cargarEnrollments(); }
@@ -207,7 +207,9 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     doc.setTextColor(239, 68, 68);  doc.text(`Pendiente: ${pendientes}`, M + 106, y + 7);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(80, 80, 80);
     doc.text(`Recaudado: $${totalRec.toLocaleString('es-CO')}`, M + 6, y + 14);
-    if (def?.valor) doc.text(`Valor inscripción: $${Number(def.valor).toLocaleString('es-CO')}`, M + 70, y + 14);
+    const vOficial  = def?.valor_oficial  ?? def?.valor ?? 0;
+    const vInscrito = def?.valor_inscrito ?? def?.valor ?? 0;
+    if (vInscrito > 0) doc.text(`Al inscrito: $${Number(vInscrito).toLocaleString('es-CO')}  ·  Oficial: $${Number(vOficial).toLocaleString('es-CO')}`, M + 70, y + 14);
     y += 24;
 
     const cols = [
@@ -303,18 +305,29 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
           {showForm && (
             <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl p-5 space-y-4">
               <h4 className="text-sm font-bold text-[var(--text-pri)]">Nuevo torneo</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input value={torneoForm.nombre} onChange={e => setTorneoForm(f => ({ ...f, nombre: e.target.value }))}
                   placeholder="Nombre del torneo *"
                   className="bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition" />
                 <input type="date" value={torneoForm.fecha} onChange={e => setTorneoForm(f => ({ ...f, fecha: e.target.value }))}
                   className="bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition" style={{ colorScheme: 'dark' }} />
-                <input type="number" value={torneoForm.valor} onChange={e => setTorneoForm(f => ({ ...f, valor: e.target.value }))}
-                  placeholder="Valor inscripción" min={0}
-                  className="bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-[var(--text-mut)] mb-1.5">Precio oficial <span className="text-[var(--text-mut)] font-normal">(solo admin)</span></p>
+                  <input type="number" value={torneoForm.valor_oficial} onChange={e => setTorneoForm(f => ({ ...f, valor_oficial: e.target.value }))}
+                    placeholder="$0" min={0}
+                    className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition" />
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--text-mut)] mb-1.5">Precio al inscrito <span className="text-[var(--text-mut)] font-normal">(lo que ve el jugador)</span></p>
+                  <input type="number" value={torneoForm.valor_inscrito} onChange={e => setTorneoForm(f => ({ ...f, valor_inscrito: e.target.value }))}
+                    placeholder="$0" min={0}
+                    className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition" />
+                </div>
               </div>
               <div className="flex gap-2 justify-end">
-                <button onClick={() => { setShowForm(false); setTorneoForm({ nombre: '', fecha: '', valor: '' }); }}
+                <button onClick={() => { setShowForm(false); setTorneoForm({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '' }); }}
                   className="px-4 py-2 rounded-xl border border-[var(--cc20)] text-[var(--text-sec)] text-sm hover:text-[var(--text-pri)] transition">
                   Cancelar
                 </button>
@@ -349,8 +362,19 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                         <div className="grid grid-cols-2 gap-2">
                           <input type="date" value={editForm.fecha} onChange={e => setEditForm(f => ({ ...f, fecha: e.target.value }))}
                             className="bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)]" style={{ colorScheme: 'dark' }} />
-                          <input type="number" value={editForm.valor} onChange={e => setEditForm(f => ({ ...f, valor: e.target.value }))}
-                            placeholder="Valor" className="bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)]" />
+                          <div />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <p className="text-[10px] text-[var(--text-mut)] mb-1">Precio oficial</p>
+                            <input type="number" value={editForm.valor_oficial} onChange={e => setEditForm(f => ({ ...f, valor_oficial: e.target.value }))}
+                              placeholder="$0" className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)]" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-[var(--text-mut)] mb-1">Precio al inscrito</p>
+                            <input type="number" value={editForm.valor_inscrito} onChange={e => setEditForm(f => ({ ...f, valor_inscrito: e.target.value }))}
+                              placeholder="$0" className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)]" />
+                          </div>
                         </div>
                         <div className="flex gap-2">
                           <button onClick={() => setEditIdx(null)} className="flex-1 py-2 rounded-xl border border-[var(--cc20)] text-[var(--text-sec)] text-xs">Cancelar</button>
@@ -366,11 +390,16 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                             <p className="text-sm font-bold text-[var(--text-pri)]">{t.nombre}</p>
                             <p className="text-xs text-[var(--text-sec)] mt-0.5">
                               {t.fecha ? `📅 ${t.fecha}` : 'Sin fecha'}
-                              {t.valor > 0 ? `  ·  ${fmtCOP(t.valor)}` : ''}
                             </p>
+                            {(t.valor_oficial > 0 || t.valor_inscrito > 0 || t.valor > 0) && (
+                              <div className="flex gap-3 mt-1.5">
+                                <span className="text-[10px] text-[var(--text-mut)]">Oficial: <span className="text-[var(--text-sec)] font-semibold">{fmtCOP(t.valor_oficial ?? t.valor)}</span></span>
+                                <span className="text-[10px] text-[var(--text-mut)]">Inscrito: <span className="font-semibold" style={{ color: 'var(--cc)' }}>{fmtCOP(t.valor_inscrito ?? t.valor)}</span></span>
+                              </div>
+                            )}
                           </div>
                           <div className="flex gap-1.5 flex-shrink-0">
-                            <button onClick={() => { setEditIdx(idx); setEditForm({ nombre: t.nombre, fecha: t.fecha || '', valor: String(t.valor || '') }); }}
+                            <button onClick={() => { setEditIdx(idx); setEditForm({ nombre: t.nombre, fecha: t.fecha || '', valor_oficial: String(t.valor_oficial ?? t.valor ?? ''), valor_inscrito: String(t.valor_inscrito ?? t.valor ?? '') }); }}
                               className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition">
                               <Pencil className="w-3.5 h-3.5" />
                             </button>

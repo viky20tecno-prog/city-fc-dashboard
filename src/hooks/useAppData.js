@@ -1,9 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-// Cambiar de sheets.js a api.js
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchAllData } from '../services/api';
 
 export function useAppData() {
-  // ✅ USANDO CITY FC API (v2.vercel.app) EN LUGAR DE GOOGLE SHEETS
   const [data, setData] = useState({
     jugadores: [],
     mensualidades: [],
@@ -16,14 +14,19 @@ export function useAppData() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const initialized = useRef(false);
 
   const refresh = useCallback(async () => {
-    setLoading(true);
+    // Solo muestra el spinner de carga completa en la primera carga.
+    // Los refreshes posteriores actualizan los datos en segundo plano
+    // sin desmontar el contenido (lo que cerraría drawers/modals abiertos).
+    if (!initialized.current) setLoading(true);
     setError(null);
     try {
       const result = await fetchAllData();
       setData(result);
       setLastUpdated(new Date());
+      initialized.current = true;
     } catch (err) {
       setError(err.message);
     } finally {

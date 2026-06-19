@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, CalendarDays, Loader2, Archive, RotateCcw } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, Loader2, Archive, RotateCcw } from 'lucide-react';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { ESTADO_COLORS, API_BASE_URL } from '../config';
 import HojaDeVida from './HojaDeVida';
@@ -230,30 +230,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const [verArchivados, setVerArchivados]         = useState(false);
   const [showImportar, setShowImportar]           = useState(false);
   const [showImportarMensualidades, setShowImportarMensualidades] = useState(false);
-  const [generandoAnio, setGenerandoAnio]         = useState(false);
-
-  const generarAnio = async () => {
-    if (!confirm(`¿Generar mensualidades ${new Date().getFullYear()} para todos los jugadores activos?\nSolo crea las que no existen, no sobreescribe.`)) return;
-    setGenerandoAnio(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const headers = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
-      const res = await fetch(`${API_BASE_URL}/invoices/generar-anio?club_id=${getClubId()}`, {
-        method: 'POST', headers,
-      });
-      const json = await res.json();
-      if (json.success) {
-        alert(`✅ ${json.message}\n${json.omitidos} ya existían y no fueron modificadas.`);
-        onRefresh();
-      } else {
-        alert('Error: ' + json.error);
-      }
-    } catch (e) {
-      alert('Error: ' + e.message);
-    } finally {
-      setGenerandoAnio(false);
-    }
-  };
 
   const abrirHoja = (j, tab = 'perfil') => { setJugadorDetalle(j); setJugadorDetalleTab(tab); };
 
@@ -572,19 +548,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 </button>
 
                 {/* Generar mensualidades del año */}
-                <button
-                  onClick={generarAnio}
-                  disabled={generandoAnio}
-                  title={`Generar mensualidades ${new Date().getFullYear()} para todos los jugadores`}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                  style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)', color: '#FBBF24', whiteSpace: 'nowrap', flexShrink: 0, opacity: generandoAnio ? 0.6 : 1 }}
-                  onMouseEnter={e => { if (!generandoAnio) e.currentTarget.style.background = 'rgba(251,191,36,0.18)'; }}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(251,191,36,0.08)'}
-                >
-                  {generandoAnio ? <Loader2 className="w-3.5 h-3.5" style={{ animation: 'spin 0.8s linear infinite' }} /> : <CalendarDays className="w-3.5 h-3.5" />}
-                  <span className="hidden sm:inline">Generar año</span>
-                </button>
-
                 {/* Toggle archivados */}
                 <button
                   onClick={() => { setVerArchivados(v => !v); setFiltroEstado('TODOS'); setSearch(''); }}

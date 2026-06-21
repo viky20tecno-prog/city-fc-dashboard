@@ -31,7 +31,23 @@ const FORM_EMPTY = {
   fecha: '', hora: '08:00',
   fecha_fin: '', hora_fin: '',
   lugar: '', descripcion: '', equipo: '',
+  recurrencia: null,
 };
+
+function getWeeklyDates(fechaStr, hasta) {
+  const d = new Date(fechaStr + 'T12:00:00');
+  const fin = hasta === 'MES'
+    ? new Date(d.getFullYear(), d.getMonth() + 1, 0)
+    : new Date(d.getFullYear(), 11, 31);
+  const fechas = [];
+  const curr = new Date(d);
+  curr.setDate(curr.getDate() + 7);
+  while (curr <= fin) {
+    fechas.push(localDateStr(curr));
+    curr.setDate(curr.getDate() + 7);
+  }
+  return fechas;
+}
 
 const INPUT = 'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-3 py-2 text-sm outline-none transition-colors';
 
@@ -277,30 +293,48 @@ export default function Calendario({ color, clubId }) {
   const closeForm = () => { setShowForm(false); setEditEvent(null); setForm(FORM_EMPTY); };
 
   const handleSave = async () => {
-    if (!form.titulo.trim() || !form.fecha) return;
+    if (!form.fecha) return;
+    const esEntrenamiento = form.tipo === 'ENTRENAMIENTO';
+    const tituloFinal = esEntrenamiento && !form.titulo.trim()
+      ? 'Entrenamiento'
+      : form.titulo.trim();
+    if (!esEntrenamiento && !tituloFinal) return;
     setSaving(true);
     try {
-      const body = {
+      const makeBody = (fecha) => ({
         tipo:         form.tipo,
-        titulo:       form.titulo.trim(),
+        titulo:       tituloFinal,
         descripcion:  form.descripcion || null,
-        fecha_inicio: new Date(`${form.fecha}T${form.hora || '00:00'}`).toISOString(),
-        fecha_fin:    form.fecha_fin
+        fecha_inicio: new Date(`${fecha}T${form.hora || '00:00'}`).toISOString(),
+        fecha_fin:    form.fecha_fin && form.fecha_fin !== fecha
           ? new Date(`${form.fecha_fin}T${form.hora_fin || '00:00'}`).toISOString()
-          : null,
+          : new Date(`${fecha}T${form.hora_fin || form.hora || '00:00'}`).toISOString(),
         lugar:  form.lugar  || null,
         equipo: form.equipo || null,
-      };
-      const url  = editEvent
+      });
+
+      const url = editEvent
         ? `${API_BASE_URL}/calendario/${editEvent.id}?club_id=${clubId}`
         : `${API_BASE_URL}/calendario?club_id=${clubId}`;
+
+      const method = editEvent ? 'PATCH' : 'POST';
       const res  = await authFetch(url, {
-        method: editEvent ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        method, headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(makeBody(form.fecha)),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
+
+      if (!editEvent && esEntrenamiento && form.recurrencia) {
+        const extras = getWeeklyDates(form.fecha, form.recurrencia);
+        await Promise.all(extras.map(f =>
+          authFetch(`${API_BASE_URL}/calendario?club_id=${clubId}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(makeBody(f)),
+          })
+        ));
+      }
+
       await fetchEvents();
       closeForm();
     } catch (e) { console.error(e); }
@@ -557,7 +591,7 @@ export default function Calendario({ color, clubId }) {
           {/* Tipo */}
           <div className="flex gap-2">
             {Object.entries(TIPOS).map(([key, t]) => (
-              <button key={key} onClick={() => setForm(f => ({ ...f, tipo: key }))}
+              <button key={key} onClick={() => setForm(f => ({ ...f, tipo: key, recurrencia: null }))}
                 style={form.tipo === key ? { background: t.bg, color: t.color, borderColor: t.color } : {}}
                 className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-all
                   ${form.tipo === key ? '' : 'border-[var(--cc20)] text-[var(--text-mut)] hover:border-[var(--cc)]'}`}>
@@ -566,17 +600,23 @@ export default function Calendario({ color, clubId }) {
             ))}
           </div>
 
-          {/* Título */}
-          <input type="text" value={form.titulo}
-            onChange={e => setForm(f => ({ ...f, titulo: e.target.value }))}
-            placeholder="Título del evento *" className={INPUT} autoFocus />
+          {/* Título — solo para no-entrenamiento o si ya está editando uno con título */}
+          {(form.tipo !== 'ENTRENAMIENTO' || editEvent) && (
+            <input type="text" value={form.titulo}
+              onChange={e => setForm(f => ({ ...f, titulo: e.target.value }))}
+              placeholder={form.tipo === 'ENTRENAMIENTO' ? 'Título (opcional)' : 'Título del evento *'}
+              className={INPUT} autoFocus={form.tipo !== 'ENTRENAMIENTO'} />
+          )}
 
           {/* Inicio */}
           <div className="space-y-1.5">
             <label className="block text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider">Inicio *</label>
             <div className="flex flex-col gap-2">
               <input type="date" value={form.fecha}
-                onChange={e => setForm(f => ({ ...f, fecha: e.target.value }))} className={INPUT} />
+                onChange={e => setForm(f => ({
+                  ...f, fecha: e.target.value,
+                  fecha_fin: f.fecha_fin === f.fecha || !f.fecha_fin ? e.target.value : f.fecha_fin,
+                }))} className={INPUT} autoFocus={form.tipo === 'ENTRENAMIENTO'} />
               <TimeInput value={form.hora} onChange={v => setForm(f => ({ ...f, hora: v }))} />
             </div>
           </div>
@@ -590,6 +630,38 @@ export default function Calendario({ color, clubId }) {
               <TimeInput value={form.hora_fin} onChange={v => setForm(f => ({ ...f, hora_fin: v }))} />
             </div>
           </div>
+
+          {/* Recurrencia — solo para entrenamiento nuevo */}
+          {form.tipo === 'ENTRENAMIENTO' && !editEvent && (
+            <div className="space-y-2">
+              <label className="block text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider">Repetir semanalmente</label>
+              <div className="flex flex-col gap-1.5">
+                {[
+                  { val: null,  label: 'Sin repetición' },
+                  { val: 'MES', label: 'Cada semana · resto del mes' },
+                  { val: 'AÑO', label: 'Cada semana · resto del año' },
+                ].map(opt => (
+                  <label key={String(opt.val)} className="flex items-center gap-2.5 cursor-pointer group">
+                    <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all
+                      ${form.recurrencia === opt.val
+                        ? 'border-[var(--cc)] bg-[var(--cc)]'
+                        : 'border-[var(--border-sub)] group-hover:border-[var(--cc)]'}`}
+                      onClick={() => setForm(f => ({ ...f, recurrencia: opt.val }))}>
+                      {form.recurrencia === opt.val && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                    </span>
+                    <span className="text-sm text-[var(--text-sec)] group-hover:text-[var(--text-pri)] transition-colors"
+                      onClick={() => setForm(f => ({ ...f, recurrencia: opt.val }))}>
+                      {opt.label}
+                      {opt.val && form.fecha && form.recurrencia === opt.val && (() => {
+                        const n = getWeeklyDates(form.fecha, opt.val).length;
+                        return n > 0 ? <span className="ml-1.5 text-xs font-bold text-[var(--cc)]">+{n} eventos</span> : null;
+                      })()}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Lugar */}
           <input type="text" value={form.lugar}
@@ -610,11 +682,15 @@ export default function Calendario({ color, clubId }) {
         </div>
 
         <div className="px-6 pb-6 flex gap-3">
-          <button onClick={handleSave} disabled={saving || !form.titulo || !form.fecha}
+          <button onClick={handleSave}
+            disabled={saving || (!form.fecha) || (form.tipo !== 'ENTRENAMIENTO' && !form.titulo.trim())}
             style={{ background: color }}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-white text-sm font-bold disabled:opacity-40 hover:opacity-85 transition-opacity">
             {saving && <Loader2 size={15} className="animate-spin" />}
-            {saving ? 'Guardando…' : editEvent ? 'Guardar cambios' : 'Crear evento'}
+            {saving ? 'Guardando…' : editEvent ? 'Guardar cambios'
+              : form.recurrencia
+                ? `Crear ${1 + (form.fecha ? getWeeklyDates(form.fecha, form.recurrencia).length : 0)} eventos`
+                : 'Crear evento'}
           </button>
           <button onClick={closeForm}
             className="px-5 py-3 rounded-xl border border-[var(--cc20)] text-[var(--text-sec)] text-sm font-semibold hover:border-[var(--cc)] transition-colors">

@@ -126,7 +126,7 @@ export default function PagoManualModal({ jugadores, catalogoUniformes = [], tor
   // ==================== PANTALLA ÉXITO ====================
   if (status === 'success' && ultimoPago) {
     return (
-      <div className="fixed inset-0 bg-[var(--bg-app)]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-[var(--bg-app)]/60 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
         <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--cc20)] p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 rounded-full bg-[var(--cc12)] flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-8 h-8 text-[var(--cc)]" />
@@ -169,7 +169,7 @@ export default function PagoManualModal({ jugadores, catalogoUniformes = [], tor
   // ==================== PANTALLA CONFIRMACIÓN ====================
   if (status === 'confirmar' || status === 'loading') {
     return (
-      <div className="fixed inset-0 bg-[var(--bg-app)]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-[var(--bg-app)]/60 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
         <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--cc20)] w-full max-w-md">
           <div className="flex items-center gap-3 p-6 border-b border-[var(--cc20)]">
             <div className="w-10 h-10 rounded-xl bg-[rgba(245,166,35,0.12)] flex items-center justify-center">
@@ -243,7 +243,7 @@ export default function PagoManualModal({ jugadores, catalogoUniformes = [], tor
 
   // ==================== FORMULARIO ====================
   return (
-    <div className="fixed inset-0 bg-[var(--bg-app)]/60 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 bg-[var(--bg-app)]/60 backdrop-blur-sm z-[1000] flex items-start justify-center p-4 overflow-y-auto">
       <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--cc20)] w-full max-w-lg my-8">
         <div className="flex items-center justify-between p-6 border-b border-[var(--cc20)]">
           <div className="flex items-center gap-3">

@@ -79,6 +79,39 @@ function getCalendarCells(year, month) {
   return cells;
 }
 
+// ── TimeInput — selector de hora accesible y con tema consistente ─────────────
+
+const HORAS    = Array.from({ length: 12 }, (_, i) => i + 1);          // 1-12
+const MINUTOS  = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+const SEL_BASE = 'bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] rounded-lg px-2 py-2 text-sm outline-none focus:border-[var(--cc)] transition-colors cursor-pointer';
+
+function TimeInput({ value, onChange }) {
+  const [rawH, rawM] = (value || '08:00').split(':').map(Number);
+  const ampm  = rawH >= 12 ? 'PM' : 'AM';
+  const hour12 = rawH === 0 ? 12 : rawH > 12 ? rawH - 12 : rawH;
+
+  function emit(h12, min, ap) {
+    let h24 = h12 % 12;
+    if (ap === 'PM') h24 += 12;
+    onChange(`${String(h24).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
+  }
+
+  return (
+    <div className="flex gap-1.5">
+      <select value={hour12} onChange={e => emit(Number(e.target.value), rawM, ampm)} className={SEL_BASE} style={{ flex: '0 0 auto', minWidth: '52px' }}>
+        {HORAS.map(h => <option key={h} value={h}>{h}</option>)}
+      </select>
+      <select value={rawM} onChange={e => emit(hour12, Number(e.target.value), ampm)} className={SEL_BASE} style={{ flex: '0 0 auto', minWidth: '60px' }}>
+        {MINUTOS.map(m => <option key={m} value={m}>{String(m).padStart(2, '0')}</option>)}
+      </select>
+      <select value={ampm} onChange={e => emit(hour12, rawM, e.target.value)} className={SEL_BASE} style={{ flex: '0 0 auto', minWidth: '62px' }}>
+        <option value="AM">a. m.</option>
+        <option value="PM">p. m.</option>
+      </select>
+    </div>
+  );
+}
+
 // ── EventCard — scope de módulo para identidad estable ────────────────────────
 
 function EventCard({ ev, onEdit, onDelete, onAsistencia, deleting, cacheEntry }) {
@@ -481,7 +514,7 @@ export default function Calendario({ color, clubId }) {
   // ── EventForm ────────────────────────────────────────────────────────────
 
   const EventForm = () => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
 
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--cc20)]">
@@ -513,22 +546,20 @@ export default function Calendario({ color, clubId }) {
           {/* Inicio */}
           <div className="space-y-1.5">
             <label className="block text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider">Inicio *</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-2">
               <input type="date" value={form.fecha}
                 onChange={e => setForm(f => ({ ...f, fecha: e.target.value }))} className={INPUT} />
-              <input type="time" value={form.hora}
-                onChange={e => setForm(f => ({ ...f, hora: e.target.value }))} className={INPUT} />
+              <TimeInput value={form.hora} onChange={v => setForm(f => ({ ...f, hora: v }))} />
             </div>
           </div>
 
           {/* Fin */}
           <div className="space-y-1.5">
             <label className="block text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider">Fin (opcional)</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-2">
               <input type="date" value={form.fecha_fin}
                 onChange={e => setForm(f => ({ ...f, fecha_fin: e.target.value }))} className={INPUT} />
-              <input type="time" value={form.hora_fin}
-                onChange={e => setForm(f => ({ ...f, hora_fin: e.target.value }))} className={INPUT} />
+              <TimeInput value={form.hora_fin} onChange={v => setForm(f => ({ ...f, hora_fin: v }))} />
             </div>
           </div>
 
@@ -574,8 +605,8 @@ export default function Calendario({ color, clubId }) {
     const total = asistPlayers.length;
 
     return (
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm">
-        <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg shadow-2xl flex flex-col max-h-[92vh]">
+      <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm">
+        <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg shadow-2xl flex flex-col max-h-[75vh]">
 
           {/* Header */}
           <div className="flex items-start justify-between px-5 py-4 border-b border-[var(--cc20)] shrink-0">
@@ -716,7 +747,7 @@ export default function Calendario({ color, clubId }) {
   // ── Render principal ──────────────────────────────────────────────────────
 
   return (
-    <div className="h-full overflow-y-auto bg-[var(--bg-app)] relative z-[1]">
+    <div className="h-full overflow-y-auto bg-[var(--bg-app)]">
       <div className="min-h-full p-6 flex flex-col items-center">
 
         {/* Título + controles */}

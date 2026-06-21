@@ -80,7 +80,7 @@ export default function UniformesTab({ jugadores }) {
 
       {/* Modal Nuevo Uniforme */}
       {mostrarModal && (
-        <div className="fixed inset-0 bg-[var(--bg-app)]/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-[var(--bg-app)]/50 flex items-center justify-center z-[1000] p-4 p-4">
           <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--cc20)] p-6 max-w-md w-full">
             <h3 className="text-xl font-bold text-[var(--text-pri)] mb-4">Registrar Uniforme</h3>
 

@@ -106,7 +106,7 @@ function EditModal({ pago, onClose, onSaved }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-md shadow-2xl">
         <div className="flex items-center justify-between p-5 border-b border-[var(--cc20)]">
           <h3 className="text-white font-semibold">Editar pago</h3>
@@ -459,7 +459,7 @@ export default function Conciliacion({ color = 'var(--cc)' }) {
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-start gap-3 px-5 py-4 rounded-2xl shadow-2xl max-w-sm animate-toast-in ${
+        <div className={`fixed bottom-6 right-6 z-[1000] flex items-start gap-3 px-5 py-4 rounded-2xl shadow-2xl max-w-sm animate-toast-in ${
           toast.type === 'ok'
             ? 'bg-green-500/15 border border-green-500/40 text-green-300'
             : toast.type === 'warn'

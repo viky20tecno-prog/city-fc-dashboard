@@ -30,7 +30,7 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
   }, [onRefresh]);
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div className="fixed inset-0 z-[1000] flex justify-end">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       <div

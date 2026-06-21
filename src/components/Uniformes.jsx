@@ -1053,7 +1053,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           MODAL: EDITAR PEDIDO
       ══════════════════════════════════════════════ */}
       {pedidoEditando && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-lg shadow-[0_8px_40px_rgba(0,50,150,0.4)] max-h-[90vh] overflow-y-auto">
 
             <div className="flex items-center justify-between p-5 border-b border-[var(--cc20)]">

@@ -792,7 +792,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
           MODAL — Nuevo movimiento
       ═══════════════════════════════════════════════ */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           onClick={() => setShowForm(false)}>
           <div className="bg-[var(--bg-card)] border border-[var(--border-sub)] rounded-2xl w-full max-w-md shadow-2xl"
             onClick={e => e.stopPropagation()}>
@@ -881,7 +881,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
       ═══════════════════════════════════════════════ */}
       {/* ── Modal preparar año siguiente ── */}
       {showAnioModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           onClick={cerrarAnioModal}>
           <div className="bg-[var(--bg-card)] border border-[var(--border-sub)] rounded-2xl w-full max-w-sm shadow-2xl"
             onClick={e => e.stopPropagation()}>
@@ -1009,7 +1009,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
       )}
 
       {showEmpForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           onClick={() => setShowEmpForm(false)}>
           <div className="bg-[var(--bg-card)] border border-[var(--border-sub)] rounded-2xl w-full max-w-sm shadow-2xl"
             onClick={e => e.stopPropagation()}>

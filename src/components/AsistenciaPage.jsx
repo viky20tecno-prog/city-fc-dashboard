@@ -80,7 +80,36 @@ const BOTONESESTADO = [
   { key: 'JUSTIFICADO', Icon: AlertCircle,  activeColor: '#F59E0B' },
 ];
 
-const INPUT = 'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-3 py-2 text-sm outline-none transition-colors';
+const INPUT   = 'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-3 py-2 text-sm outline-none transition-colors';
+const SEL_TI  = 'bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] rounded-lg px-2 py-2 text-sm outline-none focus:border-[var(--cc)] transition-colors cursor-pointer';
+
+const HORAS_TI   = Array.from({ length: 12 }, (_, i) => i + 1);
+const MINUTOS_TI = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+
+function TimeInput({ value, onChange }) {
+  const [rawH, rawM] = (value || '08:00').split(':').map(Number);
+  const ampm   = rawH >= 12 ? 'PM' : 'AM';
+  const hour12 = rawH === 0 ? 12 : rawH > 12 ? rawH - 12 : rawH;
+  function emit(h12, min, ap) {
+    let h24 = h12 % 12;
+    if (ap === 'PM') h24 += 12;
+    onChange(`${String(h24).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
+  }
+  return (
+    <div style={{ display: 'flex', gap: '6px' }}>
+      <select value={hour12} onChange={e => emit(Number(e.target.value), rawM, ampm)} className={SEL_TI} style={{ minWidth: '52px' }}>
+        {HORAS_TI.map(h => <option key={h} value={h}>{h}</option>)}
+      </select>
+      <select value={rawM} onChange={e => emit(hour12, Number(e.target.value), ampm)} className={SEL_TI} style={{ minWidth: '60px' }}>
+        {MINUTOS_TI.map(m => <option key={m} value={m}>{String(m).padStart(2, '0')}</option>)}
+      </select>
+      <select value={ampm} onChange={e => emit(hour12, rawM, e.target.value)} className={SEL_TI} style={{ minWidth: '62px' }}>
+        <option value="AM">a. m.</option>
+        <option value="PM">p. m.</option>
+      </select>
+    </div>
+  );
+}
 
 // ── Componente ────────────────────────────────────────────────────────────────
 
@@ -726,7 +755,7 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
               </div>
               <div>
                 <label style={S.label}>Hora</label>
-                <input type="time" value={formEdicion.hora} onChange={e => setFormEdicion(f => ({ ...f, hora: e.target.value }))} className={INPUT} />
+                <TimeInput value={formEdicion.hora} onChange={v => setFormEdicion(f => ({ ...f, hora: v }))} />
               </div>
               {equiposDisponibles.length > 0 && (
                 <div>
@@ -778,7 +807,7 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
 
       {/* ── Drawer: Historial del jugador ──────────────────────────────────── */}
       {jugadorDrawer && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', justifyContent: 'flex-end' }}>
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)' }} onClick={() => setJugadorDrawer(null)} />
           <div style={{ position: 'relative', width: '100%', maxWidth: '380px', height: '100%', background: 'var(--bg-card)', borderLeft: '1px solid var(--cc20)', display: 'flex', flexDirection: 'column', animation: 'slide-in-right 0.2s ease both', boxShadow: '-8px 0 40px rgba(0,0,0,0.25)' }}>
 
@@ -892,7 +921,7 @@ const S = {
     cursor: 'pointer', fontSize: '13px', fontWeight: 500, transition: 'all 0.12s',
   },
   overlay: {
-    position: 'fixed', inset: 0, zIndex: 50,
+    position: 'fixed', inset: 0, zIndex: 1000,
     display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
     background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)',
   },

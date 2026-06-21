@@ -311,6 +311,43 @@ body {
   transition: background-color 0.4s ease, color 0.3s ease;
 }
 
+/* ── Color-scheme: fuerza modo oscuro en controles nativos (date, time, select) ── */
+:root,
+[data-theme]:not([data-theme="light"]) {
+  color-scheme: dark;
+}
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* ── Date / time inputs — apariencia consistente con el tema ── */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: inherit;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  opacity: 0.45;
+  cursor: pointer;
+  filter: invert(1);
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.75;
+}
+
+/* ── Select nativo — sin flecha doble del navegador ── */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px !important;
+}
+
 /* ── Texto en tema claro ───────────────────────────────── */
 /* Cobertura global: headings, párrafos, inputs, divs con text-white */
 [data-theme="light"] h1.text-white,

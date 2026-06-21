@@ -95,14 +95,18 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     if (form.tipo_plantilla === 'cobro'  && !form.dia_envio)  { setError('Selecciona el día del mes'); return; }
     setSaving(true); setError('');
     try {
-      const url    = modal.mode === 'new' ? `${API}/plantillas?club_id=${clubId()}` : `${API}/plantillas/${modal.id}?club_id=${clubId()}`;
-      const method = modal.mode === 'new' ? 'POST' : 'PUT';
+      const cid  = clubId();
+      const url  = modal.mode === 'new' ? `${API}/plantillas?club_id=${cid}` : `${API}/plantillas/${modal.id}?club_id=${cid}`;
+      const hdrs = await authHeaders();
       const r = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+        method: modal.mode === 'new' ? 'POST' : 'PUT',
+        headers: { 'Content-Type': 'application/json', ...hdrs },
         body: JSON.stringify(form),
       });
-      const d = await r.json();
+      const text = await r.text();
+      let d;
+      try { d = JSON.parse(text); }
+      catch { setError(`Error ${r.status} — respuesta inesperada del servidor (club: ${cid})`); return; }
       if (!d.success) { setError(d.error || 'Error al guardar'); return; }
       setModal(null); load();
     } catch (e) { setError(e.message); }

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   ChevronLeft, ChevronRight, Plus, Edit2, Trash2,
   X, Loader2, MapPin, Clock, CalendarDays, List, Users,
-  CheckCircle2, XCircle, AlertCircle, ChevronDown,
+  CheckCircle2, XCircle, AlertCircle, ChevronDown, PauseCircle, PlayCircle,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
@@ -130,16 +130,31 @@ function TimeInput({ value, onChange }) {
 
 // ── EventCard — scope de módulo para identidad estable ────────────────────────
 
-function EventCard({ ev, onEdit, onDelete, onAsistencia, deleting, cacheEntry }) {
-  const t = TIPOS[ev.tipo] || TIPOS.EVENTO;
+function EventCard({ ev, onEdit, onDelete, onAsistencia, onToggleSuspend, deleting, suspending, cacheEntry }) {
+  const t    = TIPOS[ev.tipo] || TIPOS.EVENTO;
+  const susp = !!ev.suspendido;
   return (
     <div
-      className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)] group cursor-pointer hover:border-[var(--cc)] transition-colors"
-      onClick={() => onAsistencia(ev)}
+      className={`flex items-center gap-3 p-3 rounded-xl border group transition-colors ${
+        susp
+          ? 'bg-[var(--bg-surface)] border-[var(--border-sub)] opacity-60 cursor-default'
+          : 'bg-[var(--bg-surface)] border-[var(--cc20)] cursor-pointer hover:border-[var(--cc)]'
+      }`}
+      onClick={() => !susp && onAsistencia(ev)}
     >
-      <div className="w-1 self-stretch rounded-full shrink-0" style={{ background: t.color }} />
+      <div className="w-1 self-stretch rounded-full shrink-0"
+        style={{ background: susp ? 'var(--text-mut)' : t.color }} />
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-[var(--text-pri)] truncate">{ev.titulo}</p>
+        <div className="flex items-center gap-2">
+          <p className={`text-sm font-semibold truncate ${susp ? 'text-[var(--text-mut)] line-through' : 'text-[var(--text-pri)]'}`}>
+            {ev.titulo}
+          </p>
+          {susp && (
+            <span className="flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400 border border-yellow-500/25">
+              Suspendido
+            </span>
+          )}
+        </div>
         <div className="flex flex-wrap gap-3 mt-0.5">
           <span className="flex items-center gap-1 text-xs text-[var(--text-sec)]">
             <Clock size={10} />{formatTime(ev.fecha_inicio)}
@@ -151,12 +166,12 @@ function EventCard({ ev, onEdit, onDelete, onAsistencia, deleting, cacheEntry })
             </span>
           )}
           {ev.equipo && (
-            <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: t.color }}>
+            <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: susp ? 'var(--text-mut)' : t.color }}>
               <Users size={10} />{ev.equipo}
             </span>
           )}
         </div>
-        {cacheEntry && (
+        {cacheEntry && !susp && (
           <div className="flex gap-1.5 mt-1.5 flex-wrap">
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: '#22C55E', background: '#22C55E20' }}>
               ✓ {cacheEntry.PRESENTE} presentes
@@ -170,6 +185,19 @@ function EventCard({ ev, onEdit, onDelete, onAsistencia, deleting, cacheEntry })
         )}
       </div>
       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggleSuspend(ev); }}
+          disabled={suspending === ev.id}
+          title={susp ? 'Reactivar entrenamiento' : 'Suspender entrenamiento'}
+          className={`p-1.5 rounded-lg transition-colors ${
+            susp
+              ? 'text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20'
+              : 'text-[var(--text-sec)] hover:text-yellow-400 hover:bg-yellow-500/10'
+          }`}>
+          {suspending === ev.id
+            ? <Loader2 size={13} className="animate-spin" />
+            : susp ? <PlayCircle size={13} /> : <PauseCircle size={13} />}
+        </button>
         <button onClick={(e) => { e.stopPropagation(); onEdit(ev); }}
           className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">
           <Edit2 size={13} />
@@ -200,6 +228,7 @@ export default function Calendario({ color, clubId }) {
   const [form,           setForm]           = useState(FORM_EMPTY);
   const [saving,         setSaving]         = useState(false);
   const [deleting,       setDeleting]       = useState(null);
+  const [suspending,     setSuspending]     = useState(null);
 
   // Asistencia state
   const [asistEvento,    setAsistEvento]    = useState(null);
@@ -354,6 +383,19 @@ export default function Calendario({ color, clubId }) {
       await fetchEvents();
     } catch (e) { console.error(e); }
     finally     { setDeleting(null); }
+  };
+
+  const handleToggleSuspend = async (ev) => {
+    setSuspending(ev.id);
+    try {
+      await authFetch(`${API_BASE_URL}/calendario/${ev.id}?club_id=${clubId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ suspendido: !ev.suspendido }),
+      });
+      await fetchEvents();
+    } catch (e) { console.error(e); }
+    finally     { setSuspending(null); }
   };
 
   // ── Asistencia ────────────────────────────────────────────────────────────
@@ -536,7 +578,8 @@ export default function Calendario({ color, clubId }) {
           ) : (
             dayEvs.map(ev => (
               <EventCard key={ev.id} ev={ev} onEdit={openEdit} onDelete={handleDelete}
-                onAsistencia={openAsistencia} deleting={deleting} cacheEntry={asistCache[ev.id]} />
+                onAsistencia={openAsistencia} onToggleSuspend={handleToggleSuspend}
+                deleting={deleting} suspending={suspending} cacheEntry={asistCache[ev.id]} />
             ))
           )}
         </div>
@@ -568,7 +611,8 @@ export default function Calendario({ color, clubId }) {
               <div className="space-y-2">
                 {agendaEvents[ds].map(ev => (
                   <EventCard key={ev.id} ev={ev} onEdit={openEdit} onDelete={handleDelete}
-                    onAsistencia={openAsistencia} deleting={deleting} cacheEntry={asistCache[ev.id]} />
+                    onAsistencia={openAsistencia} onToggleSuspend={handleToggleSuspend}
+                    deleting={deleting} suspending={suspending} cacheEntry={asistCache[ev.id]} />
                 ))}
               </div>
             </div>

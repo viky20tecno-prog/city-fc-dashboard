@@ -69,8 +69,8 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await fetch(`${API}/plantillas`, {
-        headers: { Authorization: `Bearer ${token()}`, 'x-club-id': clubId() },
+      const r = await fetch(`${API}/plantillas?club_id=${clubId()}`, {
+        headers: { Authorization: `Bearer ${token()}` },
       });
       const d = await r.json();
       setPlantillas(d.plantillas || []);
@@ -90,11 +90,11 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     if (form.tipo_plantilla === 'cobro'  && !form.dia_envio)  { setError('Selecciona el día del mes'); return; }
     setSaving(true); setError('');
     try {
-      const url    = modal.mode === 'new' ? `${API}/plantillas` : `${API}/plantillas/${modal.id}`;
+      const url    = modal.mode === 'new' ? `${API}/plantillas?club_id=${clubId()}` : `${API}/plantillas/${modal.id}?club_id=${clubId()}`;
       const method = modal.mode === 'new' ? 'POST' : 'PUT';
       const r = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}`, 'x-club-id': clubId() },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify(form),
       });
       const d = await r.json();
@@ -105,9 +105,9 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   };
 
   const toggleActiva = async p => {
-    await fetch(`${API}/plantillas/${p.id}`, {
+    await fetch(`${API}/plantillas/${p.id}?club_id=${clubId()}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}`, 'x-club-id': clubId() },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
       body: JSON.stringify({ activa: !p.activa }),
     });
     load();
@@ -115,9 +115,9 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
 
   const eliminar = async id => {
     if (!confirm('¿Eliminar esta plantilla?')) return;
-    await fetch(`${API}/plantillas/${id}`, {
+    await fetch(`${API}/plantillas/${id}?club_id=${clubId()}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token()}`, 'x-club-id': clubId() },
+      headers: { Authorization: `Bearer ${token()}` },
     });
     load();
   };
@@ -125,9 +125,9 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const probar = async p => {
     setProbando(p.id);
     try {
-      const r = await fetch(`${API}/plantillas/${p.id}/probar`, {
+      const r = await fetch(`${API}/plantillas/${p.id}/probar?club_id=${clubId()}`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token()}`, 'x-club-id': clubId() },
+        headers: { Authorization: `Bearer ${token()}` },
       });
       const d = await r.json();
       if (d.success) alert(`✅ Prueba enviada a ${d.enviado_a}`);

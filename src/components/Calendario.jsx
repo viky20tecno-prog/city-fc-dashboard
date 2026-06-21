@@ -14,9 +14,9 @@ const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
 const DIAS  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 
 const TIPOS = {
-  PARTIDO:       { label: 'Partido',       color: 'var(--cc)',  bg: 'var(--cc12)'  },
-  ENTRENAMIENTO: { label: 'Entrenamiento', color: '#3B82F6',    bg: '#3B82F620'    },
-  EVENTO:        { label: 'Evento',        color: '#F59E0B',    bg: '#F59E0B20'    },
+  PARTIDO:       { label: 'Partido',       color: '#FCA5A5',  bg: '#DC262650'  },
+  ENTRENAMIENTO: { label: 'Entrenamiento', color: '#93C5FD',  bg: '#2563EB55'  },
+  EVENTO:        { label: 'Evento',        color: '#FCD34D',  bg: '#D9770650'  },
 };
 
 const ESTADOS = {

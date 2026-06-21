@@ -186,12 +186,17 @@ export default function Calendario({ color, clubId }) {
   const [deleting,       setDeleting]       = useState(null);
 
   // Asistencia state
-  const [asistEvento,    setAsistEvento]    = useState(null);   // evento activo
+  const [asistEvento,    setAsistEvento]    = useState(null);
   const [asistPlayers,   setAsistPlayers]   = useState([]);
   const [asistLoading,   setAsistLoading]   = useState(false);
-  const [asistSaving,    setAsistSaving]    = useState({});     // { cedula: true }
+  const [asistSaving,    setAsistSaving]    = useState({});
   const [asistSearch,    setAsistSearch]    = useState('');
-  const [asistCache,     setAsistCache]     = useState({});     // { [eventId]: stats }
+  const [asistCache,     setAsistCache]     = useState({});
+
+  // Drawer historial por jugador
+  const [jugadorDrawer,    setJugadorDrawer]    = useState(null);
+  const [historialJugador, setHistorialJugador] = useState([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -327,7 +332,22 @@ export default function Calendario({ color, clubId }) {
     finally     { setAsistLoading(false); }
   };
 
-  const closeAsistencia = () => { setAsistEvento(null); setAsistPlayers([]); setAsistSaving({}); };
+  const closeAsistencia = () => {
+    setAsistEvento(null); setAsistPlayers([]); setAsistSaving({});
+    setJugadorDrawer(null); setHistorialJugador([]);
+  };
+
+  const abrirDrawerJugador = async (p) => {
+    setJugadorDrawer(p);
+    setHistorialJugador([]);
+    setLoadingHistorial(true);
+    try {
+      const res  = await authFetch(`${API_BASE_URL}/asistencia/jugador/${p.cedula}?club_id=${clubId}`);
+      const data = await res.json();
+      setHistorialJugador(data.data || []);
+    } catch (e) { console.error(e); }
+    finally     { setLoadingHistorial(false); }
+  };
 
   const markAsistencia = async (cedula, estado) => {
     setAsistSaving(s => ({ ...s, [cedula]: true }));
@@ -366,6 +386,14 @@ export default function Calendario({ color, clubId }) {
     asistPlayers.forEach(p => { counts[p.estado] = (counts[p.estado] || 0) + 1; });
     return counts;
   }, [asistPlayers]);
+
+  const pctAsistencia = useMemo(() => {
+    if (!historialJugador.length) return null;
+    const marcados  = historialJugador.filter(h => h.estado !== 'PENDIENTE').length;
+    const presentes = historialJugador.filter(h => h.estado === 'PRESENTE').length;
+    if (!marcados) return null;
+    return Math.round((presentes / marcados) * 100);
+  }, [historialJugador]);
 
   const cells       = getCalendarCells(year, month);
   const dayEvs      = eventsByDay[selectedDate] || [];
@@ -682,25 +710,29 @@ export default function Calendario({ color, clubId }) {
               <p className="text-center text-sm text-[var(--text-sec)] py-8">Sin resultados para "{asistSearch}"</p>
             ) : (
               asistFiltered.map(p => {
-                const est     = ESTADOS[p.estado] || ESTADOS.PENDIENTE;
+                const est      = ESTADOS[p.estado] || ESTADOS.PENDIENTE;
                 const isSaving = asistSaving[p.cedula];
                 return (
                   <div key={p.cedula}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)]">
+                    className="flex items-center gap-3 p-3 rounded-xl border transition-colors"
+                    style={{ background: p.estado !== 'PENDIENTE' ? est.bg : 'var(--bg-surface)', borderColor: 'var(--cc20)' }}>
 
-                    {/* Avatar */}
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                    {/* Avatar — clicable para historial */}
+                    <button onClick={() => abrirDrawerJugador(p)}
+                      title="Ver historial"
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border-none cursor-pointer transition-opacity hover:opacity-75"
                       style={{ background: est.bg || 'var(--cc12)', color: est.color || 'var(--cc)' }}>
                       {(p.nombre?.[0] || '?').toUpperCase()}
-                    </div>
+                    </button>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
+                    {/* Info — clicable para historial */}
+                    <button onClick={() => abrirDrawerJugador(p)}
+                      className="flex-1 min-w-0 text-left bg-transparent border-none p-0 cursor-pointer">
                       <p className="text-sm font-semibold text-[var(--text-pri)] truncate">
                         {p.nombre} {p.apellidos}
                       </p>
                       <p className="text-xs text-[var(--text-sec)]">CC {p.cedula}</p>
-                    </div>
+                    </button>
 
                     {/* Botones estado */}
                     {isSaving ? (
@@ -708,14 +740,14 @@ export default function Calendario({ color, clubId }) {
                     ) : (
                       <div className="flex gap-1 shrink-0">
                         {['PRESENTE', 'AUSENTE', 'JUSTIFICADO'].map(e => {
-                          const es    = ESTADOS[e];
+                          const es     = ESTADOS[e];
                           const activo = p.estado === e;
                           return (
                             <button key={e} onClick={() => markAsistencia(p.cedula, e)}
                               title={es.label}
                               style={activo ? { background: es.bg, color: es.color, borderColor: es.color } : {}}
                               className={`p-1.5 rounded-lg border text-xs font-bold transition-all
-                                ${activo ? '' : 'border-[var(--cc20)] text-[var(--text-mut)] hover:border-[var(--cc20)] hover:bg-[var(--bg-card)]'}`}>
+                                ${activo ? '' : 'border-[var(--cc20)] text-[var(--text-mut)] hover:bg-[var(--bg-card)]'}`}>
                               <es.Icon size={14} />
                             </button>
                           );
@@ -740,6 +772,80 @@ export default function Calendario({ color, clubId }) {
             </div>
           )}
         </div>
+
+        {/* ── Drawer historial jugador ── */}
+        {jugadorDrawer && (
+          <div style={{ position: 'absolute', inset: 0, zIndex: 10, display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="absolute inset-0 bg-black/40" onClick={() => setJugadorDrawer(null)} />
+            <div className="relative w-full max-w-xs h-full bg-[var(--bg-card)] border-l border-[var(--cc20)] flex flex-col shadow-2xl" style={{ animation: 'slide-in-right 0.18s ease both' }}>
+
+              {/* Header */}
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--cc20)] shrink-0">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+                  style={{ background: `${color}1F`, color }}>
+                  {(jugadorDrawer.nombre?.[0] || '?').toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-[var(--text-pri)] truncate">{jugadorDrawer.nombre} {jugadorDrawer.apellidos}</p>
+                  <p className="text-xs text-[var(--text-sec)]">CC {jugadorDrawer.cedula}</p>
+                </div>
+                <button onClick={() => setJugadorDrawer(null)}
+                  className="p-1.5 rounded-lg text-[var(--text-sec)] hover:bg-[var(--bg-surface)] transition-colors">
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* % asistencia */}
+              {!loadingHistorial && pctAsistencia !== null && (
+                <div className="flex items-center gap-4 px-5 py-3 border-b border-[var(--cc20)] bg-[var(--bg-surface)] shrink-0">
+                  <div className="text-center">
+                    <p className="text-3xl font-black leading-none"
+                      style={{ color: pctAsistencia >= 75 ? '#22C55E' : pctAsistencia >= 50 ? '#F59E0B' : '#EF4444' }}>
+                      {pctAsistencia}%
+                    </p>
+                    <p className="text-[10px] text-[var(--text-mut)] mt-1">asistencia</p>
+                  </div>
+                  <div className="text-xs text-[var(--text-sec)] leading-relaxed">
+                    <p>{historialJugador.filter(h => h.estado === 'PRESENTE').length} presentes</p>
+                    <p>{historialJugador.filter(h => h.estado === 'AUSENTE').length} ausentes</p>
+                    <p>{historialJugador.filter(h => h.estado === 'JUSTIFICADO').length} justificados</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Lista historial */}
+              <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2">
+                {loadingHistorial ? (
+                  <div className="flex items-center justify-center py-12 gap-2 text-[var(--text-sec)]">
+                    <Loader2 size={16} className="animate-spin" style={{ color }} />
+                    <span className="text-sm">Cargando…</span>
+                  </div>
+                ) : historialJugador.length === 0 ? (
+                  <p className="text-center text-sm text-[var(--text-sec)] pt-10">Sin registros aún</p>
+                ) : (
+                  historialJugador.map((h, i) => {
+                    const est = ESTADOS[h.estado] || ESTADOS.PENDIENTE;
+                    const cal = h.calendario || {};
+                    const fev = cal.fecha_inicio ? localDateStr(new Date(cal.fecha_inicio)) : '';
+                    return (
+                      <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)]">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-[var(--text-pri)] truncate">{cal.titulo || 'Evento'}</p>
+                          <p className="text-[10px] text-[var(--text-sec)] mt-0.5">{fev ? formatDateLong(fev) : ''}{cal.equipo ? ` · ${cal.equipo}` : ''}</p>
+                        </div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+                          style={{ color: est.color, background: est.bg }}>
+                          {est.label}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+            <style>{`@keyframes slide-in-right { from { transform: translateX(100%); opacity:0.5 } to { transform: translateX(0); opacity:1 } }`}</style>
+          </div>
+        )}
       </div>
     );
   };

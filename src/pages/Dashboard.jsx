@@ -4,7 +4,7 @@ import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
   Clock, ClipboardCheck, Settings, AlertTriangle,
   Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays, Shield,
-  ChevronLeft, ChevronRight, ClipboardList,
+  ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -27,7 +27,6 @@ import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSe
 import EquiposPage from '../components/EquiposPage';
 import MiEquipoModal from '../components/MiEquipoModal';
 import Calendario from '../components/Calendario';
-import AsistenciaPage from '../components/AsistenciaPage';
 import CobroConfigModal from '../components/CobroConfigModal';
 import ErrorBoundary from '../components/ErrorBoundary';
 
@@ -35,7 +34,6 @@ const NAV = [
   { id: 'dashboard',    Icon: LayoutDashboard, title: 'Dashboard'     },
   { id: 'jugadores',    Icon: Users,            title: 'Jugadores'     },
   { id: 'calendario',   Icon: CalendarDays,     title: 'Calendario'    },
-  { id: 'asistencia',   Icon: ClipboardList,    title: 'Asistencia'    },
   { id: 'equipos',      Icon: Shield,           title: 'Equipos'       },
   { id: 'uniformes',    Icon: Shirt,            title: 'Uniformes'     },
   { id: 'torneos',      Icon: Trophy,           title: 'Torneos'       },
@@ -879,7 +877,6 @@ export default function Dashboard() {
               />
             )}
             {activeTab === 'calendario'   && <Calendario    color={c} clubId={getClubId()} />}
-            {activeTab === 'asistencia'   && <AsistenciaPage color={c} jugadores={jugadores} clubConfig={clubConfig} />}
             {activeTab === 'equipos'      && <EquiposPage  color={c} clubConfig={clubConfig} onConfigSaved={() => refetchConfig()} />}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'torneos'      && <TorneosPage  color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}

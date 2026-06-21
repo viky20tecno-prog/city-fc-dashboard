@@ -879,7 +879,7 @@ export default function Dashboard() {
               />
             )}
             {activeTab === 'calendario'   && <Calendario    color={c} clubId={getClubId()} />}
-            {activeTab === 'asistencia'   && <AsistenciaPage color={c} jugadores={jugadores} />}
+            {activeTab === 'asistencia'   && <AsistenciaPage color={c} jugadores={jugadores} clubConfig={clubConfig} />}
             {activeTab === 'equipos'      && <EquiposPage  color={c} clubConfig={clubConfig} onConfigSaved={() => refetchConfig()} />}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'torneos'      && <TorneosPage  color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}

@@ -23,8 +23,10 @@ const EMPTY = { nombre: '', mensaje: '', incluir_qr: false, hora_envio: '14:00',
 
 export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [plantillas, setPlantillas] = useState([]);
+  const [limite,     setLimite]     = useState(null);
+  const [plan,       setPlan]       = useState('');
   const [loading,    setLoading]    = useState(true);
-  const [modal,      setModal]      = useState(null); // null | { mode: 'new'|'edit', data }
+  const [modal,      setModal]      = useState(null);
   const [saving,     setSaving]     = useState(false);
   const [form,       setForm]       = useState(EMPTY);
   const [error,      setError]      = useState('');
@@ -40,6 +42,8 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
       });
       const d = await r.json();
       setPlantillas(d.plantillas || []);
+      setLimite(d.limite ?? null);
+      setPlan(d.plan || '');
     } finally {
       setLoading(false);
     }
@@ -101,7 +105,10 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     setTimeout(() => { ta.focus(); ta.setSelectionRange(s + key.length, s + key.length); }, 0);
   };
 
-  const hasQr = !!clubConfig?.qr_pago_url;
+  const hasQr      = !!clubConfig?.qr_pago_url;
+  const limitado   = limite !== null && plantillas.length >= limite;
+  const limiteText = limite === Infinity || limite === null ? null
+    : `${plantillas.length} / ${limite} plantillas · plan ${plan.charAt(0).toUpperCase() + plan.slice(1)}`;
 
   return (
     <div style={{ padding: '20px 16px', maxWidth: 700, margin: '0 auto' }}>
@@ -114,16 +121,36 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
             Mensajes automáticos que se envían a los jugadores cuando hay un evento hoy
           </p>
         </div>
-        <button onClick={openNew} style={{
-          display: 'flex', alignItems: 'center', gap: 6,
-          background: color, color: '#fff', border: 'none', borderRadius: 10,
-          padding: '8px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-        }}>
-          <Plus size={15} /> Nueva
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+          {limiteText && (
+            <span style={{ fontSize: 11, color: limitado ? '#EF4444' : 'var(--text-sec)', fontWeight: 600 }}>
+              {limiteText}
+            </span>
+          )}
+          <button onClick={limitado ? undefined : openNew} style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: limitado ? 'var(--cc20)' : color,
+            color: limitado ? 'var(--text-sec)' : '#fff',
+            border: 'none', borderRadius: 10,
+            padding: '8px 14px', fontSize: 13, fontWeight: 600,
+            cursor: limitado ? 'not-allowed' : 'pointer',
+          }} title={limitado ? `Límite de tu plan alcanzado. Mejora a un plan superior para crear más plantillas.` : ''}>
+            <Plus size={15} /> Nueva
+          </button>
+        </div>
       </div>
 
       {/* Lista */}
+      {limitado && (
+        <div style={{
+          background: '#FEF3C720', border: '1px solid #F59E0B50',
+          borderRadius: 10, padding: '10px 14px', marginBottom: 14,
+          fontSize: 13, color: '#92400E', display: 'flex', alignItems: 'center', gap: 8,
+        }}>
+          ⚠️ Alcanzaste el límite de tu plan <strong>{plan}</strong>. Mejora tu plan para crear más plantillas.
+        </div>
+      )}
+
       {loading ? (
         <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-sec)' }}>Cargando…</div>
       ) : plantillas.length === 0 ? (

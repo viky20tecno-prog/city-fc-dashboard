@@ -9,7 +9,8 @@ const LandingPage    = lazy(() => import('./pages/LandingPage'));
 const RegistroClub   = lazy(() => import('./pages/RegistroClub'));
 const FormInscripcion = lazy(() => import('./components/FormInscripcion'));
 const VerificarMiembro = lazy(() => import('./pages/VerificarMiembro'));
-const PortalAtleta   = lazy(() => import('./pages/PortalAtleta'));
+const PortalAtleta       = lazy(() => import('./pages/PortalAtleta'));
+const AsistenciaPublica  = lazy(() => import('./pages/AsistenciaPublica'));
 
 function PageLoader() {
   return (
@@ -35,8 +36,9 @@ export default function App() {
           <Route path="/auth/callback"   element={<AuthCallback />} />
           <Route path="/inscripcion"     element={<FormInscripcion />} />
           <Route path="/verificar/:clubSlug/:cedula" element={<VerificarMiembro />} />
-          <Route path="/p/:clubSlug"                 element={<PortalAtleta />} />
-          <Route path="/p/:clubSlug/:cedula"         element={<PortalAtleta />} />
+          <Route path="/p/:clubSlug"                         element={<PortalAtleta />} />
+          <Route path="/p/:clubSlug/:cedula"               element={<PortalAtleta />} />
+          <Route path="/asistencia/:clubSlug/:eventoId"    element={<AsistenciaPublica />} />
 
           {/* Rutas protegidas */}
           <Route path="/app/*" element={

@@ -91,24 +91,30 @@ export default function TabAsistencia({ jugador }) {
       {/* Resumen visual */}
       <div className="flex items-center gap-5 p-4 rounded-2xl border border-[var(--border-sub)] bg-[var(--bg-surface)]">
         <div className="relative flex-shrink-0">
-          <CircleProgress pct={stats.pct} color={pctColor} size={80} />
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-xl font-black leading-none" style={{ color: pctColor }}>
+          <CircleProgress pct={stats.pct} color={pctColor} size={84} />
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+            <span className="text-lg font-black leading-none" style={{ color: pctColor }}>
               {stats.pct != null ? `${stats.pct}%` : '—'}
             </span>
+            {stats.total > 0 && (
+              <span className="text-[10px] font-semibold text-[var(--text-mut)] leading-none">
+                {stats.presentes}/{stats.total}
+              </span>
+            )}
           </div>
         </div>
-        <div className="flex-1 grid grid-cols-2 gap-2">
-          {[
-            { label: 'Asistencias',   val: stats.presentes,  color: '#22C55E' },
-            { label: 'No asistió',    val: stats.noAsistio,  color: '#6B7280' },
-            { label: 'Total eventos', val: stats.total,      color: 'var(--text-sec)' },
-          ].map(({ label, val, color }) => (
-            <div key={label}>
-              <p className="text-lg font-bold leading-none" style={{ color }}>{val}</p>
-              <p className="text-[10px] text-[var(--text-mut)] mt-0.5">{label}</p>
-            </div>
-          ))}
+        <div className="flex-1 space-y-2">
+          <div>
+            <p className="text-2xl font-black leading-none" style={{ color: '#22C55E' }}>
+              {stats.presentes}
+              <span className="text-sm font-semibold text-[var(--text-mut)] ml-1">de {stats.total}</span>
+            </p>
+            <p className="text-[10px] text-[var(--text-mut)] mt-0.5">eventos con asistencia</p>
+          </div>
+          <div>
+            <p className="text-lg font-bold leading-none text-[var(--text-sec)]">{stats.noAsistio}</p>
+            <p className="text-[10px] text-[var(--text-mut)] mt-0.5">sin asistencia</p>
+          </div>
         </div>
       </div>
 

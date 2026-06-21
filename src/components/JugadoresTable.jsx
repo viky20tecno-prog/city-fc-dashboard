@@ -719,15 +719,15 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                           )}
                           {(() => {
                             const s = asistenciaStats[j.cedula];
-                            if (!s || s.porcentaje == null) return null;
+                            if (!s || !s.total_eventos) return null;
                             const c = s.porcentaje >= 75 ? '#22C55E' : s.porcentaje >= 50 ? '#F59E0B' : '#EF4444';
                             return (
                               <button
                                 onClick={e => { e.stopPropagation(); abrirHoja(j, 'asistencia'); }}
-                                title="Ver historial de asistencia"
+                                title={`${s.porcentaje}% — ${s.presentes} de ${s.total_eventos} eventos`}
                                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border transition-opacity hover:opacity-75"
                                 style={{ color: c, background: `${c}15`, borderColor: `${c}30` }}>
-                                {s.porcentaje}% asist.
+                                {s.presentes}/{s.total_eventos} asist.
                               </button>
                             );
                           })()}

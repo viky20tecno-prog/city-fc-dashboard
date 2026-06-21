@@ -1004,9 +1004,23 @@ export default function LandingPage() {
         .bento-narrow { grid-column:span 2; }
         @media(max-width:900px){ .bento-wide,.bento-narrow { grid-column:span 3 !important; } }
         @media(max-width:768px){ .float-badge { display:none !important; } }
-        @media(max-width:640px){.hero-h1{font-size:32px!important;letter-spacing:-1px!important;}.hide-mobile{display:none!important;}.show-mobile{display:flex!important;}.pricing-grid{grid-template-columns:1fr!important;}.bento-wide,.bento-narrow{grid-column:span 6!important;}.mobile-menu{display:flex!important;}.hero-cta-wrap{bottom:14px!important;gap:8px!important;padding:0 12px!important;}.hero-cta-btn{font-size:12px!important;padding:10px 14px!important;border-radius:10px!important;gap:5px!important;}.site-footer{padding-bottom:100px!important;}.wa-float{bottom:92px!important;right:16px!important;}}
+        @media(max-width:640px){
+          .hero-h1{font-size:32px!important;letter-spacing:-1px!important;}
+          .hide-mobile{display:none!important;}
+          .show-mobile{display:flex!important;}
+          .pricing-grid{grid-template-columns:1fr!important;}
+          .bento-wide,.bento-narrow{grid-column:span 6!important;}
+          .mobile-menu{display:flex!important;}
+          .hero-cta-wrap{display:none!important;}
+          .hero-cta-mobile{display:flex!important;}
+          .hero-cta-btn{font-size:13px!important;padding:12px 18px!important;border-radius:10px!important;gap:5px!important;}
+          .footer-grid{grid-template-columns:1fr!important;gap:32px!important;}
+          .site-footer{padding-bottom:100px!important;}
+          .wa-float{bottom:92px!important;right:16px!important;}
+        }
         .show-mobile{display:none;}
         .mobile-menu{display:none;}
+        .hero-cta-mobile{display:none;}
       `}</style>
 
       {/* ── NAVBAR ──────────────────────────────────────────────────────── */}
@@ -1176,6 +1190,37 @@ export default function LandingPage() {
                 Ver cómo funciona en 2 min
               </button>
             </div>
+          </div>
+
+          {/* CTAs mobile — fuera del overflow:hidden del hero image */}
+          <div className="hero-cta-mobile" style={{
+            flexDirection: 'column', gap: 10, marginTop: 16, padding: '0 8px',
+          }}>
+            <button
+              className="btn-primary hero-cta-btn"
+              onClick={() => openLead('free')}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`,
+                border: 'none', color: '#fff', fontWeight: 700,
+                borderRadius: 12, padding: '13px 20px', cursor: 'pointer', width: '100%',
+                boxShadow: `0 8px 32px ${previewColor}60`,
+              }}
+            >
+              Comenzar prueba gratis de 5 días <ArrowRight size={15} />
+            </button>
+            <button
+              className="btn-ghost hero-cta-btn"
+              onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.16)',
+                backdropFilter: 'blur(12px)',
+                color: '#fff', borderRadius: 12, padding: '13px 20px', cursor: 'pointer', width: '100%',
+              }}
+            >
+              Ver cómo funciona en 2 min
+            </button>
           </div>
 
           {/* Sub-texto + social proof */}
@@ -1960,7 +2005,7 @@ export default function LandingPage() {
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto', padding: '60px 24px 40px' }}>
           {/* Fila principal */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr', gap: 40, marginBottom: 48, flexWrap: 'wrap' }}>
+          <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr', gap: 40, marginBottom: 48 }}>
 
             {/* Marca */}
             <div>

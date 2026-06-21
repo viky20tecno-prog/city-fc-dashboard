@@ -49,7 +49,7 @@ function getWeeklyDates(fechaStr, hasta) {
   return fechas;
 }
 
-const INPUT = 'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-3 py-2 text-sm outline-none transition-colors';
+const INPUT = 'w-full bg-[var(--bg-surface)] border border-[var(--cc30)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-3 py-2 text-sm outline-none transition-colors';
 
 // ── Utilidades ────────────────────────────────────────────────────────────────
 
@@ -99,7 +99,7 @@ function getCalendarCells(year, month) {
 
 const HORAS    = Array.from({ length: 12 }, (_, i) => i + 1);          // 1-12
 const MINUTOS  = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-const SEL_BASE = 'bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] rounded-lg px-2 py-2 text-sm outline-none focus:border-[var(--cc)] transition-colors cursor-pointer';
+const SEL_BASE = 'bg-[var(--bg-surface)] border border-[var(--cc30)] text-[var(--text-pri)] rounded-lg px-2 py-2 text-sm outline-none focus:border-[var(--cc)] transition-colors cursor-pointer';
 
 function TimeInput({ value, onChange }) {
   const [rawH, rawM] = (value || '08:00').split(':').map(Number);
@@ -138,7 +138,7 @@ function EventCard({ ev, onEdit, onDelete, onAsistencia, onToggleSuspend, deleti
       className={`flex items-center gap-3 p-3 rounded-xl border group transition-colors ${
         susp
           ? 'bg-[var(--bg-surface)] border-[var(--border-sub)] opacity-60 cursor-default'
-          : 'bg-[var(--bg-surface)] border-[var(--cc20)] cursor-pointer hover:border-[var(--cc)]'
+          : 'bg-[var(--bg-surface)] border-[var(--cc30)] cursor-pointer hover:border-[var(--cc)]'
       }`}
       onClick={() => !susp && onAsistencia(ev)}
     >
@@ -177,7 +177,7 @@ function EventCard({ ev, onEdit, onDelete, onAsistencia, onToggleSuspend, deleti
               ✓ {cacheEntry.PRESENTE} presentes
             </span>
             {cacheEntry.PENDIENTE > 0 && (
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-[var(--text-mut)] bg-[var(--bg-card)] border border-[var(--cc20)]">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-[var(--text-mut)] bg-[var(--bg-card)] border border-[var(--cc30)]">
                 {cacheEntry.PENDIENTE} pendientes
               </span>
             )}
@@ -199,7 +199,7 @@ function EventCard({ ev, onEdit, onDelete, onAsistencia, onToggleSuspend, deleti
             : susp ? <PlayCircle size={13} /> : <PauseCircle size={13} />}
         </button>
         <button onClick={(e) => { e.stopPropagation(); onEdit(ev); }}
-          className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">
+          className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc20)] transition-colors">
           <Edit2 size={13} />
         </button>
         <button onClick={(e) => { e.stopPropagation(); onDelete(ev.id); }} disabled={deleting === ev.id}
@@ -483,7 +483,7 @@ export default function Calendario({ color, clubId }) {
   const MonthView = () => (
     <div>
       {/* Navegación mes */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--cc20)] bg-[var(--bg-card)]">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--cc30)] bg-[var(--bg-card)]">
         <button onClick={prevMonth}
           className="p-2 rounded-lg hover:bg-[var(--bg-surface)] text-[var(--text-sec)] hover:text-[var(--cc)] transition-colors">
           <ChevronLeft size={18} />
@@ -518,19 +518,19 @@ export default function Calendario({ color, clubId }) {
             <button
               key={idx}
               onClick={() => setSelectedDate(ds)}
-              style={isSelected ? { background: color, boxShadow: `0 4px 14px ${color}50` }
-                    : isToday   ? { background: `${color}20`, border: `1.5px solid ${color}60` }
+              style={isSelected ? { background: color, boxShadow: `0 4px 14px ${color}70` }
+                    : isToday   ? { background: `${color}38`, border: `2px solid ${color}` }
                                 : {}}
               className={`
                 min-h-[68px] rounded-xl p-2 flex flex-col gap-0.5 text-left transition-all
-                ${!cell.current ? 'opacity-20 pointer-events-none' : ''}
-                ${isSelected ? '' : isToday ? '' : 'bg-[var(--bg-surface)] border border-[var(--cc20)] hover:border-[var(--cc)]'}
+                ${!cell.current ? 'opacity-30 pointer-events-none' : ''}
+                ${isSelected ? '' : isToday ? '' : 'bg-[var(--bg-surface)] border-2 border-[var(--cc30)] hover:border-[var(--cc)]'}
               `}
             >
               <span className="text-xs font-bold leading-none"
                 style={isSelected ? { color: '#fff' }
-                      : isToday   ? { color }
-                                  : { color: 'var(--text-sec)' }}>
+                      : isToday   ? { color: '#fff' }
+                                  : { color: 'var(--text-pri)' }}>
                 {cell.day}
               </span>
 
@@ -540,7 +540,7 @@ export default function Calendario({ color, clubId }) {
                   <span key={ev.id}
                     className="block text-[10px] font-semibold truncate leading-tight rounded-md px-1 py-0.5 mt-0.5"
                     style={isSelected
-                      ? { color: 'rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.18)' }
+                      ? { color: '#fff', background: 'rgba(255,255,255,0.25)' }
                       : { color: t.color, background: t.bg }}>
                     {ev.titulo}
                   </span>
@@ -549,7 +549,7 @@ export default function Calendario({ color, clubId }) {
 
               {extra > 0 && (
                 <span className="text-[9px] font-semibold leading-tight px-1"
-                  style={isSelected ? { color: 'rgba(255,255,255,0.65)' } : { color: 'var(--text-mut)' }}>
+                  style={isSelected ? { color: 'rgba(255,255,255,0.8)' } : { color: 'var(--text-sec)' }}>
                   +{extra} más
                 </span>
               )}
@@ -559,7 +559,7 @@ export default function Calendario({ color, clubId }) {
       </div>
 
       {/* Panel día seleccionado */}
-      <div className="border-t border-[var(--cc20)] bg-[var(--bg-card)]">
+      <div className="border-t border-[var(--cc30)] bg-[var(--bg-card)]">
         <div className="flex items-center justify-between px-5 py-3">
           <p className="text-sm font-bold text-[var(--text-pri)]">{formatDateLong(selectedDate)}</p>
           <button onClick={() => openCreate(selectedDate)}
@@ -604,7 +604,7 @@ export default function Calendario({ color, clubId }) {
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider"
                   style={isToday ? { color } : { color: 'var(--text-sec)' }}>{label}</span>
-                <div className="flex-1 h-px bg-[var(--cc20)]" />
+                <div className="flex-1 h-px bg-[var(--cc30)]" />
               </div>
               <div className="space-y-2">
                 {agendaEvents[ds].map(ev => (
@@ -624,9 +624,9 @@ export default function Calendario({ color, clubId }) {
 
   const EventForm = () => (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--bg-card)] border border-[var(--cc30)] rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
 
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--cc20)]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--cc30)]">
           <h2 className="text-[var(--text-pri)] font-bold">{editEvent ? 'Editar evento' : 'Nuevo evento'}</h2>
           <button onClick={closeForm} className="text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors">
             <X size={20} />
@@ -641,7 +641,7 @@ export default function Calendario({ color, clubId }) {
               <button key={key} onClick={() => setForm(f => ({ ...f, tipo: key, recurrencia: null }))}
                 style={form.tipo === key ? { background: t.bg, color: t.color, borderColor: t.color } : {}}
                 className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-all
-                  ${form.tipo === key ? '' : 'border-[var(--cc20)] text-[var(--text-mut)] hover:border-[var(--cc)]'}`}>
+                  ${form.tipo === key ? '' : 'border-[var(--cc30)] text-[var(--text-mut)] hover:border-[var(--cc)]'}`}>
                 {t.label}
               </button>
             ))}
@@ -742,7 +742,7 @@ export default function Calendario({ color, clubId }) {
                 : 'Crear evento'}
           </button>
           <button onClick={closeForm}
-            className="px-5 py-3 rounded-xl border border-[var(--cc20)] text-[var(--text-sec)] text-sm font-semibold hover:border-[var(--cc)] transition-colors">
+            className="px-5 py-3 rounded-xl border border-[var(--cc30)] text-[var(--text-sec)] text-sm font-semibold hover:border-[var(--cc)] transition-colors">
             Cancelar
           </button>
         </div>
@@ -759,10 +759,10 @@ export default function Calendario({ color, clubId }) {
 
     return (
       <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm">
-        <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg shadow-2xl flex flex-col max-h-[75vh]">
+        <div className="bg-[var(--bg-card)] border border-[var(--cc30)] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg shadow-2xl flex flex-col max-h-[75vh]">
 
           {/* Header */}
-          <div className="flex items-start justify-between px-5 py-4 border-b border-[var(--cc20)] shrink-0">
+          <div className="flex items-start justify-between px-5 py-4 border-b border-[var(--cc30)] shrink-0">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-bold px-2 py-0.5 rounded-full"
@@ -787,17 +787,17 @@ export default function Calendario({ color, clubId }) {
 
           {/* Stats */}
           {!asistLoading && total > 0 && (
-            <div className="flex items-center gap-4 px-5 py-3 border-b border-[var(--cc20)] shrink-0">
+            <div className="flex items-center gap-4 px-5 py-3 border-b border-[var(--cc30)] shrink-0">
               <div className="text-center flex-1">
                 <p className="text-2xl font-black" style={{ color: '#22C55E' }}>{asistStats.PRESENTE}</p>
                 <p className="text-[10px] text-[var(--text-mut)]">Asistieron</p>
               </div>
-              <div className="w-px h-8 bg-[var(--cc20)]" />
+              <div className="w-px h-8 bg-[var(--cc30)]" />
               <div className="text-center flex-1">
                 <p className="text-2xl font-black text-[var(--text-mut)]">{asistStats.PENDIENTE}</p>
                 <p className="text-[10px] text-[var(--text-mut)]">Sin marcar</p>
               </div>
-              <div className="w-px h-8 bg-[var(--cc20)]" />
+              <div className="w-px h-8 bg-[var(--cc30)]" />
               <div className="text-center flex-1">
                 <p className="text-2xl font-black text-[var(--text-pri)]">{total}</p>
                 <p className="text-[10px] text-[var(--text-mut)]">Total</p>
@@ -807,7 +807,7 @@ export default function Calendario({ color, clubId }) {
 
           {/* Search */}
           {!asistLoading && total > 4 && (
-            <div className="px-5 py-3 border-b border-[var(--cc20)] shrink-0">
+            <div className="px-5 py-3 border-b border-[var(--cc30)] shrink-0">
               <input
                 type="text"
                 value={asistSearch}
@@ -845,14 +845,14 @@ export default function Calendario({ color, clubId }) {
                     className="flex items-center gap-3 p-3 rounded-xl border transition-all"
                     style={{
                       background: presente ? '#22C55E12' : 'var(--bg-surface)',
-                      borderColor: presente ? '#22C55E40' : 'var(--cc20)',
+                      borderColor: presente ? '#22C55E40' : 'var(--cc30)',
                     }}>
 
                     {/* Avatar */}
                     <button onClick={() => abrirDrawerJugador(p)}
                       title="Ver historial"
                       className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 cursor-pointer transition-opacity hover:opacity-75"
-                      style={{ background: presente ? '#22C55E20' : 'var(--cc12)', color: presente ? '#22C55E' : 'var(--cc)' }}>
+                      style={{ background: presente ? '#22C55E20' : 'var(--cc20)', color: presente ? '#22C55E' : 'var(--cc)' }}>
                       {(p.nombre?.[0] || '?').toUpperCase()}
                     </button>
 
@@ -887,7 +887,7 @@ export default function Calendario({ color, clubId }) {
 
           {/* Footer — botón guardar */}
           {!asistLoading && total > 0 && (
-            <div className="px-5 py-3 border-t border-[var(--cc20)] shrink-0">
+            <div className="px-5 py-3 border-t border-[var(--cc30)] shrink-0">
               <button onClick={closeAsistencia}
                 style={{ background: color }}
                 className="w-full py-3 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 hover:opacity-85 transition-opacity">
@@ -902,10 +902,10 @@ export default function Calendario({ color, clubId }) {
         {jugadorDrawer && (
           <div style={{ position: 'absolute', inset: 0, zIndex: 10, display: 'flex', justifyContent: 'flex-end' }}>
             <div className="absolute inset-0 bg-black/40" onClick={() => setJugadorDrawer(null)} />
-            <div className="relative w-full max-w-xs h-full bg-[var(--bg-card)] border-l border-[var(--cc20)] flex flex-col shadow-2xl" style={{ animation: 'slide-in-right 0.18s ease both' }}>
+            <div className="relative w-full max-w-xs h-full bg-[var(--bg-card)] border-l border-[var(--cc30)] flex flex-col shadow-2xl" style={{ animation: 'slide-in-right 0.18s ease both' }}>
 
               {/* Header */}
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--cc20)] shrink-0">
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--cc30)] shrink-0">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
                   style={{ background: `${color}1F`, color }}>
                   {(jugadorDrawer.nombre?.[0] || '?').toUpperCase()}
@@ -922,7 +922,7 @@ export default function Calendario({ color, clubId }) {
 
               {/* % asistencia */}
               {!loadingHistorial && pctAsistencia !== null && (
-                <div className="flex items-center gap-4 px-5 py-3 border-b border-[var(--cc20)] bg-[var(--bg-surface)] shrink-0">
+                <div className="flex items-center gap-4 px-5 py-3 border-b border-[var(--cc30)] bg-[var(--bg-surface)] shrink-0">
                   <div className="text-center">
                     <p className="text-3xl font-black leading-none"
                       style={{ color: pctAsistencia >= 75 ? '#22C55E' : pctAsistencia >= 50 ? '#F59E0B' : '#EF4444' }}>
@@ -953,7 +953,7 @@ export default function Calendario({ color, clubId }) {
                     const cal = h.calendario || {};
                     const fev = cal.fecha_inicio ? localDateStr(new Date(cal.fecha_inicio)) : '';
                     return (
-                      <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)]">
+                      <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc30)]">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-semibold text-[var(--text-pri)] truncate">{cal.titulo || 'Evento'}</p>
                           <p className="text-[10px] text-[var(--text-sec)] mt-0.5">{fev ? formatDateLong(fev) : ''}{cal.equipo ? ` · ${cal.equipo}` : ''}</p>
@@ -988,7 +988,7 @@ export default function Calendario({ color, clubId }) {
             <p className="text-xs text-[var(--text-sec)] mt-0.5">Partidos, entrenamientos y eventos del club</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-xl p-0.5">
+            <div className="flex bg-[var(--bg-surface)] border border-[var(--cc30)] rounded-xl p-0.5">
               {[{ id: 'mes', Icon: CalendarDays, label: 'Mes' },
                 { id: 'agenda', Icon: List,        label: 'Agenda' }].map(({ id, Icon, label }) => (
                 <button key={id} onClick={() => setView(id)}
@@ -1008,7 +1008,7 @@ export default function Calendario({ color, clubId }) {
         </div>
 
         {/* Card principal */}
-        <div className="w-full max-w-2xl bg-[var(--bg-app)] rounded-2xl border border-[var(--cc20)] shadow-xl overflow-hidden">
+        <div className="w-full max-w-2xl bg-[var(--bg-app)] rounded-2xl border border-[var(--cc30)] shadow-xl overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-20 gap-2 text-[var(--text-sec)]">
               <Loader2 size={18} className="animate-spin" style={{ color }} />

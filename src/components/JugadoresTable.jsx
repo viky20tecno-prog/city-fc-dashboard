@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, Loader2, Archive, RotateCcw } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
@@ -8,6 +8,7 @@ import SuspensionModal from './SuspensionModal';
 import ImportarJugadoresModal from './ImportarJugadoresModal';
 import MensualidadesImportModal from './MensualidadesImportModal';
 import { deletePlayer, archivePlayer, getClubId } from '../services/api';
+import { authFetch } from '../lib/authFetch';
 import { supabase } from '../lib/supabase';
 import { normalizarCategorias, listarEquipos } from '../lib/categorias';
 
@@ -231,6 +232,20 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const [verArchivados, setVerArchivados]         = useState(false);
   const [showImportar, setShowImportar]           = useState(false);
   const [showImportarMensualidades, setShowImportarMensualidades] = useState(false);
+
+  const [asistenciaStats, setAsistenciaStats] = useState({});
+
+  useEffect(() => {
+    const clubId = getClubId();
+    authFetch(`${API_BASE_URL}/asistencia/stats?club_id=${clubId}`)
+      .then(r => r.json())
+      .then(d => {
+        const map = {};
+        (d.data || []).forEach(s => { map[s.cedula] = s; });
+        setAsistenciaStats(map);
+      })
+      .catch(() => {});
+  }, []);
 
   const abrirHoja = (j, tab = 'perfil') => { setJugadorDetalle(j); setJugadorDetalleTab(tab); };
 
@@ -702,6 +717,20 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                               EXENTO
                             </span>
                           )}
+                          {(() => {
+                            const s = asistenciaStats[j.cedula];
+                            if (!s || s.porcentaje == null) return null;
+                            const c = s.porcentaje >= 75 ? '#22C55E' : s.porcentaje >= 50 ? '#F59E0B' : '#EF4444';
+                            return (
+                              <button
+                                onClick={e => { e.stopPropagation(); abrirHoja(j, 'asistencia'); }}
+                                title="Ver historial de asistencia"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border transition-opacity hover:opacity-75"
+                                style={{ color: c, background: `${c}15`, borderColor: `${c}30` }}>
+                                {s.porcentaje}% asist.
+                              </button>
+                            );
+                          })()}
                         </div>
                         <div className="text-xs mt-0.5" style={{ color: 'var(--text-mut)' }}>
                           {j.activo ? '🟢 Activo' : '🔴 Inactivo'}
@@ -926,7 +955,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           torneos={torneos || []}
           suspensiones={suspensiones}
           initialTab={jugadorDetalleTab}
-          visibleTabs={jugadorDetalleTab === 'financiero' ? ['financiero'] : ['perfil', 'carnet']}
+          visibleTabs={jugadorDetalleTab === 'financiero' ? ['financiero'] : ['perfil', 'asistencia', 'carnet']}
           onClose={() => setJugadorDetalle(null)}
           onRefresh={onRefresh}
           categoriasJugadores={categoriasJugadores}

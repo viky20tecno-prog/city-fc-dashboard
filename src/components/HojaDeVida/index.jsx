@@ -1,13 +1,15 @@
 import { useState, useCallback } from 'react';
-import { X, User, DollarSign, CreditCard } from 'lucide-react';
+import { X, User, DollarSign, CreditCard, ClipboardList } from 'lucide-react';
 import FinancieroContent from '../FinancieroContent';
 import TabPerfil from './TabPerfil';
 import TabCarnet from './TabCarnet';
+import TabAsistencia from './TabAsistencia';
 
 const TABS = [
-  { key: 'perfil',     label: 'Perfil',     icon: User       },
-  { key: 'financiero', label: 'Financiero', icon: DollarSign },
-  { key: 'carnet',     label: 'Carnet',     icon: CreditCard },
+  { key: 'perfil',     label: 'Perfil',     icon: User          },
+  { key: 'financiero', label: 'Financiero', icon: DollarSign    },
+  { key: 'asistencia', label: 'Asistencia', icon: ClipboardList },
+  { key: 'carnet',     label: 'Carnet',     icon: CreditCard    },
 ];
 
 export default function HojaDeVida({ jugador, mensualidades, torneos, suspensiones, onClose, onRefresh, initialTab = 'perfil', visibleTabs, categoriasJugadores = [], clubConfig }) {
@@ -92,6 +94,9 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
               suspensiones={suspensiones}
               onJugadorUpdated={(campos) => { handleUpdate(campos || {}); }}
             />
+          )}
+          {tab === 'asistencia' && (
+            <TabAsistencia jugador={jugadorLocal} />
           )}
           {tab === 'carnet' && (
             <TabCarnet jugador={jugadorLocal} clubConfig={clubConfig} />

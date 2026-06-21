@@ -301,17 +301,22 @@ export default function Calendario({ color, clubId }) {
     if (!esEntrenamiento && !tituloFinal) return;
     setSaving(true);
     try {
-      const makeBody = (fecha) => ({
-        tipo:         form.tipo,
-        titulo:       tituloFinal,
-        descripcion:  form.descripcion || null,
-        fecha_inicio: new Date(`${fecha}T${form.hora || '00:00'}`).toISOString(),
-        fecha_fin:    form.fecha_fin && form.fecha_fin !== fecha
-          ? new Date(`${form.fecha_fin}T${form.hora_fin || '00:00'}`).toISOString()
-          : new Date(`${fecha}T${form.hora_fin || form.hora || '00:00'}`).toISOString(),
-        lugar:  form.lugar  || null,
-        equipo: form.equipo || null,
-      });
+      const makeBody = (fecha) => {
+        const fechaFinDate = esEntrenamiento
+          ? fecha
+          : (form.fecha_fin || fecha);
+        return {
+          tipo:         form.tipo,
+          titulo:       tituloFinal,
+          descripcion:  form.descripcion || null,
+          fecha_inicio: new Date(`${fecha}T${form.hora || '00:00'}`).toISOString(),
+          fecha_fin:    form.hora_fin
+            ? new Date(`${fechaFinDate}T${form.hora_fin}`).toISOString()
+            : null,
+          lugar:  form.lugar  || null,
+          equipo: form.equipo || null,
+        };
+      };
 
       const url = editEvent
         ? `${API_BASE_URL}/calendario/${editEvent.id}?club_id=${clubId}`
@@ -623,10 +628,12 @@ export default function Calendario({ color, clubId }) {
 
           {/* Fin */}
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider">Fin (opcional)</label>
+            <label className="block text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider">Hora fin (opcional)</label>
             <div className="flex flex-col gap-2">
-              <input type="date" value={form.fecha_fin}
-                onChange={e => setForm(f => ({ ...f, fecha_fin: e.target.value }))} className={INPUT} />
+              {form.tipo !== 'ENTRENAMIENTO' && (
+                <input type="date" value={form.fecha_fin}
+                  onChange={e => setForm(f => ({ ...f, fecha_fin: e.target.value }))} className={INPUT} />
+              )}
               <TimeInput value={form.hora_fin} onChange={v => setForm(f => ({ ...f, hora_fin: v }))} />
             </div>
           </div>

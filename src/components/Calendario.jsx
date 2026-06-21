@@ -81,10 +81,13 @@ function getCalendarCells(year, month) {
 
 // ── EventCard — scope de módulo para identidad estable ────────────────────────
 
-function EventCard({ ev, onEdit, onDelete, onAsistencia, deleting }) {
+function EventCard({ ev, onEdit, onDelete, onAsistencia, deleting, cacheEntry }) {
   const t = TIPOS[ev.tipo] || TIPOS.EVENTO;
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)] group">
+    <div
+      className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)] group cursor-pointer hover:border-[var(--cc)] transition-colors"
+      onClick={() => onAsistencia(ev)}
+    >
       <div className="w-1 self-stretch rounded-full shrink-0" style={{ background: t.color }} />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-[var(--text-pri)] truncate">{ev.titulo}</p>
@@ -104,17 +107,25 @@ function EventCard({ ev, onEdit, onDelete, onAsistencia, deleting }) {
             </span>
           )}
         </div>
+        {cacheEntry && (
+          <div className="flex gap-1.5 mt-1.5 flex-wrap">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: '#22C55E', background: '#22C55E20' }}>
+              ✓ {cacheEntry.PRESENTE} presentes
+            </span>
+            {cacheEntry.PENDIENTE > 0 && (
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-[var(--text-mut)] bg-[var(--bg-card)] border border-[var(--cc20)]">
+                {cacheEntry.PENDIENTE} pendientes
+              </span>
+            )}
+          </div>
+        )}
       </div>
       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <button onClick={() => onAsistencia(ev)} title="Pasar asistencia"
-          className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-green-400 hover:bg-green-500/10 transition-colors">
-          <Users size={13} />
-        </button>
-        <button onClick={() => onEdit(ev)}
+        <button onClick={(e) => { e.stopPropagation(); onEdit(ev); }}
           className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">
           <Edit2 size={13} />
         </button>
-        <button onClick={() => onDelete(ev.id)} disabled={deleting === ev.id}
+        <button onClick={(e) => { e.stopPropagation(); onDelete(ev.id); }} disabled={deleting === ev.id}
           className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-red-400 hover:bg-red-500/10 transition-colors">
           {deleting === ev.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
         </button>
@@ -147,6 +158,7 @@ export default function Calendario({ color, clubId }) {
   const [asistLoading,   setAsistLoading]   = useState(false);
   const [asistSaving,    setAsistSaving]    = useState({});     // { cedula: true }
   const [asistSearch,    setAsistSearch]    = useState('');
+  const [asistCache,     setAsistCache]     = useState({});     // { [eventId]: stats }
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -159,6 +171,14 @@ export default function Calendario({ color, clubId }) {
   };
 
   useEffect(() => { fetchEvents(); }, [clubId]);
+
+  // Sync caché cuando cambian los jugadores del evento activo de asistencia
+  useEffect(() => {
+    if (!asistEvento || asistPlayers.length === 0) return;
+    const s = { PRESENTE: 0, AUSENTE: 0, JUSTIFICADO: 0, PENDIENTE: 0 };
+    asistPlayers.forEach(p => { s[p.estado] = (s[p.estado] || 0) + 1; });
+    setAsistCache(c => ({ ...c, [asistEvento.id]: { ...s, total: asistPlayers.length } }));
+  }, [asistPlayers, asistEvento]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const eventsByDay = useMemo(() => {
     const map = {};
@@ -416,7 +436,7 @@ export default function Calendario({ color, clubId }) {
           ) : (
             dayEvs.map(ev => (
               <EventCard key={ev.id} ev={ev} onEdit={openEdit} onDelete={handleDelete}
-                onAsistencia={openAsistencia} deleting={deleting} />
+                onAsistencia={openAsistencia} deleting={deleting} cacheEntry={asistCache[ev.id]} />
             ))
           )}
         </div>
@@ -448,7 +468,7 @@ export default function Calendario({ color, clubId }) {
               <div className="space-y-2">
                 {agendaEvents[ds].map(ev => (
                   <EventCard key={ev.id} ev={ev} onEdit={openEdit} onDelete={handleDelete}
-                    onAsistencia={openAsistencia} deleting={deleting} />
+                    onAsistencia={openAsistencia} deleting={deleting} cacheEntry={asistCache[ev.id]} />
                 ))}
               </div>
             </div>
@@ -677,12 +697,15 @@ export default function Calendario({ color, clubId }) {
             )}
           </div>
 
-          {/* Footer */}
+          {/* Footer — botón guardar */}
           {!asistLoading && total > 0 && (
             <div className="px-5 py-3 border-t border-[var(--cc20)] shrink-0">
-              <p className="text-xs text-center text-[var(--text-sec)]">
-                {asistStats.PRESENTE} de {total} jugadores marcados como presentes
-              </p>
+              <button onClick={closeAsistencia}
+                style={{ background: color }}
+                className="w-full py-3 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 hover:opacity-85 transition-opacity">
+                <CheckCircle2 size={15} />
+                Guardar lista · {asistStats.PRESENTE} de {total} presentes
+              </button>
             </div>
           )}
         </div>

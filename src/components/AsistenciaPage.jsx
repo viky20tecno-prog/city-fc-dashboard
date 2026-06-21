@@ -117,6 +117,9 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
   // ── Export PDF
   const [exportandoPDF, setExportandoPDF] = useState(false);
 
+  // ── Caché de asistencia por evento (persiste al volver a la lista)
+  const [asistCache, setAsistCache] = useState({});
+
   // ── Drawer historial jugador
   const [jugadorDrawer,    setJugadorDrawer]    = useState(null);
   const [historialJugador, setHistorialJugador] = useState([]);
@@ -150,6 +153,14 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
     setSearch('');
     cargarEventos(fecha);
   }, [fecha]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync caché cuando cambian los jugadores del evento activo
+  useEffect(() => {
+    if (!eventoActivo || players.length === 0) return;
+    const s = { PRESENTE: 0, AUSENTE: 0, JUSTIFICADO: 0, PENDIENTE: 0 };
+    players.forEach(p => { s[p.estado] = (s[p.estado] || 0) + 1; });
+    setAsistCache(c => ({ ...c, [eventoActivo.id]: { ...s, total: players.length } }));
+  }, [players, eventoActivo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Funciones de datos ────────────────────────────────────────────────────
 
@@ -470,6 +481,18 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
                       <p style={{ fontSize: '12px', color: 'var(--text-sec)', marginTop: '2px' }}>
                         {formatTime(ev.fecha_inicio)}{ev.equipo ? ` · ${ev.equipo}` : ''}
                       </p>
+                      {asistCache[ev.id] && (
+                        <div style={{ display: 'flex', gap: '5px', marginTop: '5px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '10px', fontWeight: 700, color: '#22C55E', background: '#22C55E20', padding: '2px 7px', borderRadius: '99px' }}>
+                            ✓ {asistCache[ev.id].PRESENTE} presentes
+                          </span>
+                          {asistCache[ev.id].PENDIENTE > 0 && (
+                            <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-mut)', background: 'var(--bg-surface)', padding: '2px 7px', borderRadius: '99px', border: '1px solid var(--cc20)' }}>
+                              {asistCache[ev.id].PENDIENTE} pendientes
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </button>
 
@@ -606,7 +629,7 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
           )}
 
           {/* Lista de jugadores */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {loadingAs ? (
               <div style={S.centered}>
                 <Loader2 size={20} style={{ color }} className="animate-spin" />
@@ -670,6 +693,21 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
               })
             )}
           </div>
+          {/* Botón guardar lista */}
+          {!loadingAs && players.length > 0 && (
+            <div style={{ flexShrink: 0, padding: '12px 16px', borderTop: '1px solid var(--cc20)', background: 'var(--bg-card)', marginTop: 'auto' }}>
+              <button onClick={volverAEventos} style={{
+                width: '100%', padding: '13px', borderRadius: '12px',
+                background: color, color: '#fff', border: 'none',
+                fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                transition: 'opacity 0.15s',
+              }}>
+                <CheckCircle2 size={16} />
+                Guardar lista · {stats.PRESENTE} de {players.length} presentes
+              </button>
+            </div>
+          )}
         </div>
       )}
 

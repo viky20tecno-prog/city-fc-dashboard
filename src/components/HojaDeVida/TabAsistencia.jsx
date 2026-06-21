@@ -1,14 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, CheckCircle2, XCircle, AlertCircle, Trophy } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Trophy } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
 import { authFetch } from '../../lib/authFetch';
 import { getClubId } from '../../services/api';
 
 const ESTADOS = {
-  PRESENTE:    { label: 'Presente',    color: '#22C55E', bg: '#22C55E15', Icon: CheckCircle2 },
-  AUSENTE:     { label: 'Ausente',     color: '#EF4444', bg: '#EF444415', Icon: XCircle      },
-  JUSTIFICADO: { label: 'Justificado', color: '#F59E0B', bg: '#F59E0B15', Icon: AlertCircle  },
-  PENDIENTE:   { label: 'Pendiente',   color: '#6B7280', bg: 'transparent', Icon: null       },
+  PRESENTE:  { label: 'Asistió',     color: '#22C55E', bg: '#22C55E15', Icon: CheckCircle2 },
+  PENDIENTE: { label: 'No asistió',  color: '#6B7280', bg: 'transparent', Icon: XCircle    },
+  AUSENTE:   { label: 'No asistió',  color: '#6B7280', bg: 'transparent', Icon: XCircle    },
 };
 
 const pad2 = n => String(n).padStart(2, '0');
@@ -58,11 +57,9 @@ export default function TabAsistencia({ jugador }) {
   }, [jugador.cedula, clubId]);
 
   const stats = useMemo(() => {
-    const s = { PRESENTE: 0, AUSENTE: 0, JUSTIFICADO: 0, PENDIENTE: 0 };
-    historial.forEach(h => { s[h.estado] = (s[h.estado] || 0) + 1; });
-    // % = presentes / total eventos del club (no solo los marcados del jugador)
-    const pct = totalEventos > 0 ? Math.round((s.PRESENTE / totalEventos) * 100) : null;
-    return { ...s, total: totalEventos, pct };
+    const presentes = historial.filter(h => h.estado === 'PRESENTE').length;
+    const pct = totalEventos > 0 ? Math.round((presentes / totalEventos) * 100) : null;
+    return { presentes, noAsistio: totalEventos - presentes, total: totalEventos, pct };
   }, [historial, totalEventos]);
 
   const pctColor = stats.pct == null ? '#6B7280'
@@ -70,7 +67,9 @@ export default function TabAsistencia({ jugador }) {
     : stats.pct >= 50 ? '#F59E0B'
     : '#EF4444';
 
-  const filtrados = filtro === 'TODOS' ? historial : historial.filter(h => h.estado === filtro);
+  const filtrados = filtro === 'TODOS' ? historial
+    : filtro === 'AUSENTE' ? historial.filter(h => h.estado !== 'PRESENTE')
+    : historial.filter(h => h.estado === filtro);
 
   if (loading) return (
     <div className="flex items-center justify-center py-20 gap-2 text-[var(--text-sec)]">
@@ -101,10 +100,9 @@ export default function TabAsistencia({ jugador }) {
         </div>
         <div className="flex-1 grid grid-cols-2 gap-2">
           {[
-            { label: 'Asistencias',  val: stats.PRESENTE,    color: '#22C55E' },
-            { label: 'Ausencias',    val: stats.AUSENTE,     color: '#EF4444' },
-            { label: 'Justificados', val: stats.JUSTIFICADO, color: '#F59E0B' },
-            { label: 'Total eventos', val: stats.total,       color: 'var(--text-sec)' },
+            { label: 'Asistencias',   val: stats.presentes,  color: '#22C55E' },
+            { label: 'No asistió',    val: stats.noAsistio,  color: '#6B7280' },
+            { label: 'Total eventos', val: stats.total,      color: 'var(--text-sec)' },
           ].map(({ label, val, color }) => (
             <div key={label}>
               <p className="text-lg font-bold leading-none" style={{ color }}>{val}</p>
@@ -132,16 +130,19 @@ export default function TabAsistencia({ jugador }) {
 
       {/* Filtros */}
       <div className="flex gap-1.5 flex-wrap">
-        {['TODOS', 'PRESENTE', 'AUSENTE', 'JUSTIFICADO'].map(f => {
-          const active = filtro === f;
-          const c = f === 'TODOS' ? 'var(--cc)' : ESTADOS[f].color;
+        {[
+          { key: 'TODOS',    label: `Todos (${historial.length})`,            color: 'var(--cc)',  bg: 'var(--cc12)' },
+          { key: 'PRESENTE', label: `Asistió (${stats.presentes})`,           color: '#22C55E',   bg: '#22C55E15'   },
+          { key: 'AUSENTE',  label: `No asistió (${stats.noAsistio})`,        color: '#6B7280',   bg: 'var(--bg-surface)' },
+        ].map(({ key, label, color: c, bg }) => {
+          const active = filtro === key;
           return (
-            <button key={f} onClick={() => setFiltro(f)}
+            <button key={key} onClick={() => setFiltro(key)}
               className="px-3 py-1 rounded-full text-xs font-semibold transition-all border"
               style={active
-                ? { background: f === 'TODOS' ? 'var(--cc12)' : ESTADOS[f]?.bg, color: c, borderColor: c }
+                ? { background: bg, color: c, borderColor: c }
                 : { background: 'transparent', color: 'var(--text-mut)', borderColor: 'var(--border-sub)' }}>
-              {f === 'TODOS' ? `Todos (${historial.length})` : `${ESTADOS[f].label} (${stats[f] || 0})`}
+              {label}
             </button>
           );
         })}

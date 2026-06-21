@@ -258,8 +258,8 @@ export default function Calendario({ color, clubId }) {
   // Sync caché cuando cambian los jugadores del evento activo de asistencia
   useEffect(() => {
     if (!asistEvento || asistPlayers.length === 0) return;
-    const s = { PRESENTE: 0, AUSENTE: 0, JUSTIFICADO: 0, PENDIENTE: 0 };
-    asistPlayers.forEach(p => { s[p.estado] = (s[p.estado] || 0) + 1; });
+    const s = { PRESENTE: 0, PENDIENTE: 0 };
+    asistPlayers.forEach(p => { const k = p.estado === 'PRESENTE' ? 'PRESENTE' : 'PENDIENTE'; s[k]++; });
     setAsistCache(c => ({ ...c, [asistEvento.id]: { ...s, total: asistPlayers.length } }));
   }, [asistPlayers, asistEvento]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -463,17 +463,15 @@ export default function Calendario({ color, clubId }) {
   }, [asistPlayers, asistSearch]);
 
   const asistStats = useMemo(() => {
-    const counts = { PRESENTE: 0, AUSENTE: 0, JUSTIFICADO: 0, PENDIENTE: 0 };
-    asistPlayers.forEach(p => { counts[p.estado] = (counts[p.estado] || 0) + 1; });
-    return counts;
+    const presentes = asistPlayers.filter(p => p.estado === 'PRESENTE').length;
+    return { PRESENTE: presentes, PENDIENTE: asistPlayers.length - presentes };
   }, [asistPlayers]);
 
   const pctAsistencia = useMemo(() => {
     if (!historialJugador.length) return null;
-    const marcados  = historialJugador.filter(h => h.estado !== 'PENDIENTE').length;
     const presentes = historialJugador.filter(h => h.estado === 'PRESENTE').length;
-    if (!marcados) return null;
-    return Math.round((presentes / marcados) * 100);
+    if (!presentes) return null;
+    return Math.round((presentes / historialJugador.length) * 100);
   }, [historialJugador]);
 
   const cells       = getCalendarCells(year, month);
@@ -789,18 +787,21 @@ export default function Calendario({ color, clubId }) {
 
           {/* Stats */}
           {!asistLoading && total > 0 && (
-            <div className="grid grid-cols-4 gap-2 px-5 py-3 border-b border-[var(--cc20)] shrink-0">
-              {[
-                { key: 'PRESENTE',    label: 'Presentes',    color: '#22C55E' },
-                { key: 'AUSENTE',     label: 'Ausentes',     color: '#EF4444' },
-                { key: 'JUSTIFICADO', label: 'Justific.',    color: '#F59E0B' },
-                { key: 'PENDIENTE',   label: 'Pendientes',   color: 'var(--text-mut)' },
-              ].map(({ key, label, color: c }) => (
-                <div key={key} className="text-center">
-                  <p className="text-lg font-bold" style={{ color: c }}>{asistStats[key] || 0}</p>
-                  <p className="text-[10px] text-[var(--text-mut)]">{label}</p>
-                </div>
-              ))}
+            <div className="flex items-center gap-4 px-5 py-3 border-b border-[var(--cc20)] shrink-0">
+              <div className="text-center flex-1">
+                <p className="text-2xl font-black" style={{ color: '#22C55E' }}>{asistStats.PRESENTE}</p>
+                <p className="text-[10px] text-[var(--text-mut)]">Asistieron</p>
+              </div>
+              <div className="w-px h-8 bg-[var(--cc20)]" />
+              <div className="text-center flex-1">
+                <p className="text-2xl font-black text-[var(--text-mut)]">{asistStats.PENDIENTE}</p>
+                <p className="text-[10px] text-[var(--text-mut)]">Sin marcar</p>
+              </div>
+              <div className="w-px h-8 bg-[var(--cc20)]" />
+              <div className="text-center flex-1">
+                <p className="text-2xl font-black text-[var(--text-pri)]">{total}</p>
+                <p className="text-[10px] text-[var(--text-mut)]">Total</p>
+              </div>
             </div>
           )}
 
@@ -837,22 +838,25 @@ export default function Calendario({ color, clubId }) {
               <p className="text-center text-sm text-[var(--text-sec)] py-8">Sin resultados para "{asistSearch}"</p>
             ) : (
               asistFiltered.map(p => {
-                const est      = ESTADOS[p.estado] || ESTADOS.PENDIENTE;
+                const presente = p.estado === 'PRESENTE';
                 const isSaving = asistSaving[p.cedula];
                 return (
                   <div key={p.cedula}
-                    className="flex items-center gap-3 p-3 rounded-xl border transition-colors"
-                    style={{ background: p.estado !== 'PENDIENTE' ? est.bg : 'var(--bg-surface)', borderColor: 'var(--cc20)' }}>
+                    className="flex items-center gap-3 p-3 rounded-xl border transition-all"
+                    style={{
+                      background: presente ? '#22C55E12' : 'var(--bg-surface)',
+                      borderColor: presente ? '#22C55E40' : 'var(--cc20)',
+                    }}>
 
-                    {/* Avatar — clicable para historial */}
+                    {/* Avatar */}
                     <button onClick={() => abrirDrawerJugador(p)}
                       title="Ver historial"
-                      className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border-none cursor-pointer transition-opacity hover:opacity-75"
-                      style={{ background: est.bg || 'var(--cc12)', color: est.color || 'var(--cc)' }}>
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 cursor-pointer transition-opacity hover:opacity-75"
+                      style={{ background: presente ? '#22C55E20' : 'var(--cc12)', color: presente ? '#22C55E' : 'var(--cc)' }}>
                       {(p.nombre?.[0] || '?').toUpperCase()}
                     </button>
 
-                    {/* Info — clicable para historial */}
+                    {/* Info */}
                     <button onClick={() => abrirDrawerJugador(p)}
                       className="flex-1 min-w-0 text-left bg-transparent border-none p-0 cursor-pointer">
                       <p className="text-sm font-semibold text-[var(--text-pri)] truncate">
@@ -861,25 +865,19 @@ export default function Calendario({ color, clubId }) {
                       <p className="text-xs text-[var(--text-sec)]">CC {p.cedula}</p>
                     </button>
 
-                    {/* Botones estado */}
+                    {/* Toggle asistencia */}
                     {isSaving ? (
-                      <Loader2 size={16} className="animate-spin text-[var(--text-sec)]" />
+                      <Loader2 size={18} className="animate-spin shrink-0" style={{ color: '#22C55E' }} />
                     ) : (
-                      <div className="flex gap-1 shrink-0">
-                        {['PRESENTE', 'AUSENTE', 'JUSTIFICADO'].map(e => {
-                          const es     = ESTADOS[e];
-                          const activo = p.estado === e;
-                          return (
-                            <button key={e} onClick={() => markAsistencia(p.cedula, e)}
-                              title={es.label}
-                              style={activo ? { background: es.bg, color: es.color, borderColor: es.color } : {}}
-                              className={`p-1.5 rounded-lg border text-xs font-bold transition-all
-                                ${activo ? '' : 'border-[var(--cc20)] text-[var(--text-mut)] hover:bg-[var(--bg-card)]'}`}>
-                              <es.Icon size={14} />
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <button
+                        onClick={() => markAsistencia(p.cedula, presente ? 'PENDIENTE' : 'PRESENTE')}
+                        title={presente ? 'Quitar asistencia' : 'Marcar presente'}
+                        className="shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all"
+                        style={presente
+                          ? { background: '#22C55E', borderColor: '#22C55E', color: '#fff' }
+                          : { background: 'transparent', borderColor: 'var(--border-sub)', color: 'transparent' }}>
+                        <CheckCircle2 size={16} />
+                      </button>
                     )}
                   </div>
                 );

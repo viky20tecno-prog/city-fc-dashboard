@@ -4,7 +4,7 @@ import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
   Clock, ClipboardCheck, Settings, AlertTriangle,
   Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays, Shield,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, MessageSquare,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -28,6 +28,7 @@ import EquiposPage from '../components/EquiposPage';
 import MiEquipoModal from '../components/MiEquipoModal';
 import Calendario from '../components/Calendario';
 import CobroConfigModal from '../components/CobroConfigModal';
+import PlantillasMensajes from '../components/PlantillasMensajes';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 const NAV = [
@@ -41,6 +42,7 @@ const NAV = [
   { id: 'cobro',        Icon: Clock,            title: 'Ciclo de Cobro'},
   { id: 'conciliacion', Icon: ClipboardCheck,   title: 'Conciliación'  },
   { id: 'finanzas',     Icon: TrendingUp,       title: 'Finanzas'      },
+  { id: 'plantillas',   Icon: MessageSquare,    title: 'Plantillas WA' },
 ];
 
 function NavBtn({ id, Icon, title, active, color, onClick, collapsed }) {
@@ -884,6 +886,7 @@ export default function Dashboard() {
             {activeTab === 'cobro'        && <TimelineCobro  color={c} />}
             {activeTab === 'conciliacion' && <Conciliacion   color={c} />}
             {activeTab === 'finanzas'     && <Finanzas color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
+            {activeTab === 'plantillas'   && <PlantillasMensajes color={c} clubConfig={clubConfig} />}
           </>
         )}
       </main>

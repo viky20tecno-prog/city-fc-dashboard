@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { MessageSquarePlus, Pencil, Trash2, ToggleLeft, ToggleRight, Plus, X, QrCode, Send } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { getClubId } from '../services/api';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
@@ -63,14 +65,17 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [form,       setForm]       = useState(EMPTY);
   const [error,      setError]      = useState('');
 
-  const token  = () => localStorage.getItem('token')  || sessionStorage.getItem('token')  || '';
-  const clubId = () => localStorage.getItem('clubId') || sessionStorage.getItem('clubId') || '';
+  const authHeaders = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+  };
+  const clubId = () => getClubId() || '';
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const r = await fetch(`${API}/plantillas?club_id=${clubId()}`, {
-        headers: { Authorization: `Bearer ${token()}` },
+        headers: await authHeaders(),
       });
       const d = await r.json();
       setPlantillas(d.plantillas || []);
@@ -94,7 +99,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
       const method = modal.mode === 'new' ? 'POST' : 'PUT';
       const r = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
         body: JSON.stringify(form),
       });
       const d = await r.json();
@@ -107,7 +112,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const toggleActiva = async p => {
     await fetch(`${API}/plantillas/${p.id}?club_id=${clubId()}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
       body: JSON.stringify({ activa: !p.activa }),
     });
     load();
@@ -117,7 +122,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     if (!confirm('¿Eliminar esta plantilla?')) return;
     await fetch(`${API}/plantillas/${id}?club_id=${clubId()}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token()}` },
+      headers: await authHeaders(),
     });
     load();
   };
@@ -127,7 +132,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     try {
       const r = await fetch(`${API}/plantillas/${p.id}/probar?club_id=${clubId()}`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token()}` },
+        headers: await authHeaders(),
       });
       const d = await r.json();
       if (d.success) alert(`✅ Prueba enviada a ${d.enviado_a}`);

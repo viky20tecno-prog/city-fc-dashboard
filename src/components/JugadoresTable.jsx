@@ -720,7 +720,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                           {(() => {
                             const s = asistenciaStats[j.cedula];
                             if (!s || !s.total_eventos) return null;
-                            const c = s.porcentaje >= 75 ? '#22C55E' : s.porcentaje >= 50 ? '#F59E0B' : '#EF4444';
+                            const c = s.presentes === 0 ? '#6B7280'
+                              : s.porcentaje >= 75 ? '#22C55E'
+                              : s.porcentaje >= 50 ? '#F59E0B'
+                              : '#EF4444';
                             return (
                               <button
                                 onClick={e => { e.stopPropagation(); abrirHoja(j, 'asistencia'); }}

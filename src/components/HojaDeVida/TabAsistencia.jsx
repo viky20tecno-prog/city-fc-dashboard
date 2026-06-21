@@ -43,25 +43,27 @@ function CircleProgress({ pct, color, size = 80 }) {
 
 export default function TabAsistencia({ jugador }) {
   const clubId = getClubId();
-  const [historial, setHistorial]   = useState([]);
-  const [loading,   setLoading]     = useState(true);
-  const [filtro,    setFiltro]      = useState('TODOS');
+  const [historial,     setHistorial]     = useState([]);
+  const [totalEventos,  setTotalEventos]  = useState(0);
+  const [loading,       setLoading]       = useState(true);
+  const [filtro,        setFiltro]        = useState('TODOS');
 
   useEffect(() => {
     setLoading(true);
     authFetch(`${API_BASE_URL}/asistencia/jugador/${jugador.cedula}?club_id=${clubId}`)
       .then(r => r.json())
-      .then(d => setHistorial(d.data || []))
-      .catch(() => setHistorial([]))
+      .then(d => { setHistorial(d.data || []); setTotalEventos(d.total_eventos || 0); })
+      .catch(() => { setHistorial([]); setTotalEventos(0); })
       .finally(() => setLoading(false));
   }, [jugador.cedula, clubId]);
 
   const stats = useMemo(() => {
-    const s = { PRESENTE: 0, AUSENTE: 0, JUSTIFICADO: 0, PENDIENTE: 0, total: 0 };
-    historial.forEach(h => { s[h.estado] = (s[h.estado] || 0) + 1; s.total++; });
-    const marcados = s.PRESENTE + s.AUSENTE + s.JUSTIFICADO;
-    return { ...s, marcados, pct: marcados > 0 ? Math.round((s.PRESENTE / marcados) * 100) : null };
-  }, [historial]);
+    const s = { PRESENTE: 0, AUSENTE: 0, JUSTIFICADO: 0, PENDIENTE: 0 };
+    historial.forEach(h => { s[h.estado] = (s[h.estado] || 0) + 1; });
+    // % = presentes / total eventos del club (no solo los marcados del jugador)
+    const pct = totalEventos > 0 ? Math.round((s.PRESENTE / totalEventos) * 100) : null;
+    return { ...s, total: totalEventos, pct };
+  }, [historial, totalEventos]);
 
   const pctColor = stats.pct == null ? '#6B7280'
     : stats.pct >= 75 ? '#22C55E'
@@ -99,10 +101,10 @@ export default function TabAsistencia({ jugador }) {
         </div>
         <div className="flex-1 grid grid-cols-2 gap-2">
           {[
-            { label: 'Presentes',    val: stats.PRESENTE,    color: '#22C55E' },
-            { label: 'Ausentes',     val: stats.AUSENTE,     color: '#EF4444' },
+            { label: 'Asistencias',  val: stats.PRESENTE,    color: '#22C55E' },
+            { label: 'Ausencias',    val: stats.AUSENTE,     color: '#EF4444' },
             { label: 'Justificados', val: stats.JUSTIFICADO, color: '#F59E0B' },
-            { label: 'Eventos',      val: stats.marcados,    color: 'var(--text-sec)' },
+            { label: 'Total eventos', val: stats.total,       color: 'var(--text-sec)' },
           ].map(({ label, val, color }) => (
             <div key={label}>
               <p className="text-lg font-bold leading-none" style={{ color }}>{val}</p>
@@ -139,7 +141,7 @@ export default function TabAsistencia({ jugador }) {
               style={active
                 ? { background: f === 'TODOS' ? 'var(--cc12)' : ESTADOS[f]?.bg, color: c, borderColor: c }
                 : { background: 'transparent', color: 'var(--text-mut)', borderColor: 'var(--border-sub)' }}>
-              {f === 'TODOS' ? `Todos (${stats.total})` : `${ESTADOS[f].label} (${stats[f] || 0})`}
+              {f === 'TODOS' ? `Todos (${historial.length})` : `${ESTADOS[f].label} (${stats[f] || 0})`}
             </button>
           );
         })}

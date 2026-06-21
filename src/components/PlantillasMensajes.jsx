@@ -1,35 +1,45 @@
 import { useEffect, useState, useCallback } from 'react';
-import { MessageSquarePlus, Pencil, Trash2, ToggleLeft, ToggleRight, Plus, X, QrCode, Clock, Send, CalendarDays, BanknoteIcon } from 'lucide-react';
+import { MessageSquarePlus, Pencil, Trash2, ToggleLeft, ToggleRight, Plus, X, QrCode, Send } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
 const TIPO_PLANTILLA_OPTS = [
-  { value: 'evento', label: '📅 Recordatorio de evento', desc: 'Se envía automáticamente cuando hay un evento hoy a la hora configurada' },
-  { value: 'cobro',  label: '💰 Cobro de mensualidades', desc: 'Se envía a jugadores con pagos pendientes el día del mes que configures' },
+  {
+    value: 'evento',
+    icon: '📅',
+    label: 'Recordatorio de evento',
+    desc: 'Se envía cuando hay un evento hoy a la hora configurada',
+  },
+  {
+    value: 'cobro',
+    icon: '💰',
+    label: 'Cobro de mensualidades',
+    desc: 'Se envía a jugadores con pagos pendientes el día del mes que elijas',
+  },
 ];
 
 const TIPO_EVENTO_OPTS = [
-  { value: 'ENTRENAMIENTO', label: 'Entrenamiento'       },
-  { value: 'PARTIDO',       label: 'Partido'             },
-  { value: 'EVENTO',        label: 'Evento especial'     },
-  { value: 'todos',         label: 'Todos los eventos'   },
+  { value: 'ENTRENAMIENTO', label: 'Entrenamiento'     },
+  { value: 'PARTIDO',       label: 'Partido'           },
+  { value: 'EVENTO',        label: 'Evento especial'   },
+  { value: 'todos',         label: 'Todos los eventos' },
 ];
 
 const VARS_EVENTO = [
-  { key: '{dia}',         desc: 'Día de la semana  —  JUEVES' },
-  { key: '{lugar}',       desc: 'Lugar del evento'            },
-  { key: '{hora_inicio}', desc: 'Hora de inicio  —  9:00 pm'  },
-  { key: '{hora_fin}',    desc: 'Hora de fin  —  11:00 pm'    },
-  { key: '{club_nombre}', desc: 'Nombre del club'             },
-  { key: '{llave_pago}',  desc: 'Clave / número de pago'      },
+  { key: '{dia}',         desc: 'Día — JUEVES'             },
+  { key: '{lugar}',       desc: 'Lugar del evento'         },
+  { key: '{hora_inicio}', desc: 'Hora inicio — 9:00 pm'    },
+  { key: '{hora_fin}',    desc: 'Hora fin — 11:00 pm'      },
+  { key: '{club_nombre}', desc: 'Nombre del club'          },
+  { key: '{llave_pago}',  desc: 'Clave de pago'            },
 ];
 
 const VARS_COBRO = [
-  { key: '{nombre}',      desc: 'Nombre del jugador'              },
-  { key: '{deuda}',       desc: 'Monto total adeudado  —  $150.000' },
-  { key: '{meses}',       desc: 'Meses pendientes  —  enero, febrero' },
-  { key: '{club_nombre}', desc: 'Nombre del club'                 },
-  { key: '{llave_pago}',  desc: 'Clave / número de pago'          },
+  { key: '{nombre}',      desc: 'Nombre del jugador'        },
+  { key: '{deuda}',       desc: 'Total adeudado — $150.000' },
+  { key: '{meses}',       desc: 'Meses — enero, febrero'    },
+  { key: '{club_nombre}', desc: 'Nombre del club'           },
+  { key: '{llave_pago}',  desc: 'Clave de pago'             },
 ];
 
 const EMPTY = {
@@ -39,7 +49,8 @@ const EMPTY = {
   dia_envio: 5,
 };
 
-const DIAS_MES = Array.from({ length: 28 }, (_, i) => i + 1);
+const INPUT_CLS = 'w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition placeholder:text-[var(--text-mut)]';
+const LABEL_CLS = 'block text-xs font-semibold text-[var(--text-sec)] mb-1.5';
 
 export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [plantillas, setPlantillas] = useState([]);
@@ -126,121 +137,125 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   };
 
   const insertVar = key => {
-    const ta = document.getElementById('plantilla-mensaje');
+    const ta = document.getElementById('plantilla-msg');
     if (!ta) { setForm(f => ({ ...f, mensaje: f.mensaje + key })); return; }
     const s = ta.selectionStart, e = ta.selectionEnd;
-    const next = form.mensaje.slice(0, s) + key + form.mensaje.slice(e);
-    setForm(f => ({ ...f, mensaje: next }));
+    setForm(f => ({ ...f, mensaje: f.mensaje.slice(0, s) + key + f.mensaje.slice(e) }));
     setTimeout(() => { ta.focus(); ta.setSelectionRange(s + key.length, s + key.length); }, 0);
   };
 
   const hasQr    = !!clubConfig?.qr_pago_url;
   const limitado = limite !== null && plantillas.length >= limite;
-  const limiteText = (limite === null || limite === Infinity) ? null
-    : `${plantillas.length} / ${limite} · plan ${plan.charAt(0).toUpperCase() + plan.slice(1)}`;
-  const vars = form.tipo_plantilla === 'cobro' ? VARS_COBRO : VARS_EVENTO;
+  const vars     = form.tipo_plantilla === 'cobro' ? VARS_COBRO : VARS_EVENTO;
 
   const labelTipo = p => {
     const tipo = p.tipo_plantilla || 'evento';
     if (tipo === 'cobro') return `💰 Cobro · día ${p.dia_envio} de cada mes`;
-    const ev = TIPO_EVENTO_OPTS.find(t => t.value === p.tipo_evento)?.label || p.tipo_evento;
+    const ev = TIPO_EVENTO_OPTS.find(t => t.value === p.tipo_evento)?.label || p.tipo_evento || 'Evento';
     return `📅 ${ev} · ${(p.hora_envio || '').slice(0, 5)}`;
   };
 
   return (
-    <div style={{ padding: '20px 16px', maxWidth: 700, margin: '0 auto' }}>
+    <div className="p-5 max-w-2xl mx-auto">
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+      <div className="flex items-start justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-pri)' }}>Plantillas de mensajes</h2>
-          <p style={{ fontSize: 13, color: 'var(--text-sec)', marginTop: 2 }}>
+          <h2 className="text-lg font-bold text-[var(--text-pri)]">Plantillas de mensajes</h2>
+          <p className="text-xs text-[var(--text-sec)] mt-1">
             Mensajes automáticos que el sistema envía por WhatsApp según el trigger configurado
           </p>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-          {limiteText && (
-            <span style={{ fontSize: 11, color: limitado ? '#EF4444' : 'var(--text-sec)', fontWeight: 600 }}>
-              {limiteText}
+        <div className="flex flex-col items-end gap-1.5">
+          {limite !== null && (
+            <span className={`text-xs font-semibold ${limitado ? 'text-red-400' : 'text-[var(--text-mut)]'}`}>
+              {plantillas.length} / {limite === Infinity ? '∞' : limite} · {plan}
             </span>
           )}
-          <button onClick={limitado ? undefined : openNew} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: limitado ? 'var(--cc20)' : color, color: limitado ? 'var(--text-sec)' : '#fff',
-            border: 'none', borderRadius: 10, padding: '8px 14px', fontSize: 13, fontWeight: 600,
-            cursor: limitado ? 'not-allowed' : 'pointer',
-          }} title={limitado ? 'Límite del plan alcanzado' : ''}>
-            <Plus size={15} /> Nueva
+          <button
+            onClick={limitado ? undefined : openNew}
+            disabled={limitado}
+            style={{ background: limitado ? undefined : color }}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition
+              ${limitado ? 'bg-[var(--cc12)] text-[var(--text-mut)] cursor-not-allowed' : 'text-white hover:opacity-90 cursor-pointer'}`}
+          >
+            <Plus size={14} /> Nueva
           </button>
         </div>
       </div>
 
       {/* Banner límite */}
       {limitado && (
-        <div style={{
-          background: '#FEF3C720', border: '1px solid #F59E0B50', borderRadius: 10,
-          padding: '10px 14px', marginBottom: 14, fontSize: 13, color: '#92400E',
-          display: 'flex', alignItems: 'center', gap: 8,
-        }}>
-          ⚠️ Alcanzaste el límite de tu plan <strong>{plan}</strong>. Mejora tu plan para crear más plantillas.
+        <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 mb-4 text-amber-300 text-sm">
+          ⚠️ Alcanzaste el límite de tu plan <strong className="capitalize">{plan}</strong>. Mejora tu plan para agregar más plantillas.
         </div>
       )}
 
       {/* Lista */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-sec)' }}>Cargando…</div>
+        <div className="flex justify-center py-16">
+          <div className="w-7 h-7 rounded-full border-2 border-[var(--cc20)] border-t-[var(--cc)] animate-spin" />
+        </div>
       ) : plantillas.length === 0 ? (
-        <div style={{
-          border: '2px dashed var(--cc20)', borderRadius: 14, padding: '40px 20px',
-          textAlign: 'center', color: 'var(--text-sec)',
-        }}>
-          <MessageSquarePlus size={36} style={{ marginBottom: 12, opacity: 0.4 }} />
-          <p style={{ fontWeight: 600, marginBottom: 6 }}>Sin plantillas configuradas</p>
-          <p style={{ fontSize: 13 }}>Crea una plantilla de evento o de cobro y se enviará automáticamente</p>
+        <div className="border-2 border-dashed border-[var(--cc20)] rounded-2xl p-12 text-center">
+          <MessageSquarePlus size={36} className="mx-auto mb-3 text-[var(--text-mut)]" />
+          <p className="text-sm font-semibold text-[var(--text-sec)] mb-1">Sin plantillas configuradas</p>
+          <p className="text-xs text-[var(--text-mut)]">Crea una plantilla de evento o de cobro y se enviará automáticamente</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="flex flex-col gap-3">
           {plantillas.map(p => (
-            <div key={p.id} style={{
-              background: 'var(--bg-card)', border: '1px solid var(--cc20)', borderRadius: 12,
-              padding: '14px 16px', borderLeft: `3px solid ${p.activa ? color : 'var(--cc30)'}`,
-              opacity: p.activa ? 1 : 0.6,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-pri)' }}>{p.nombre}</span>
-                    <span style={{
-                      fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 6,
-                      background: p.activa ? `${color}20` : 'var(--cc12)',
-                      color: p.activa ? color : 'var(--text-sec)',
-                    }}>{p.activa ? 'ACTIVA' : 'PAUSADA'}</span>
-                    {p.incluir_qr && <span style={{ fontSize: 11, padding: '2px 7px', borderRadius: 6, background: 'var(--cc12)', color: 'var(--text-sec)' }}>QR</span>}
+            <div
+              key={p.id}
+              className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl p-4 transition"
+              style={{ borderLeft: `3px solid ${p.activa ? color : 'var(--cc30)'}`, opacity: p.activa ? 1 : 0.55 }}
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-bold text-[var(--text-pri)]">{p.nombre}</span>
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      style={{
+                        background: p.activa ? `${color}20` : 'var(--cc12)',
+                        color:      p.activa ? color        : 'var(--text-mut)',
+                      }}
+                    >
+                      {p.activa ? 'ACTIVA' : 'PAUSADA'}
+                    </span>
+                    {p.incluir_qr && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--cc12)] text-[var(--text-mut)]">
+                        QR
+                      </span>
+                    )}
                   </div>
-                  <p style={{ fontSize: 12, color: 'var(--text-sec)', marginTop: 4 }}>{labelTipo(p)}</p>
-                  <p style={{
-                    fontSize: 12, color: 'var(--text-sec)', marginTop: 5, whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word', display: '-webkit-box',
-                    WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                  }}>{p.mensaje}</p>
+                  <p className="text-xs text-[var(--text-sec)] mt-1">{labelTipo(p)}</p>
+                  <p className="text-xs text-[var(--text-mut)] mt-1.5 line-clamp-2 whitespace-pre-wrap break-words">
+                    {p.mensaje}
+                  </p>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
-                  <button onClick={() => probar(p)} disabled={probando === p.id} title="Enviar prueba al admin"
-                    style={{ background: `${color}15`, border: `1px solid ${color}30`, borderRadius: 7, padding: '4px 8px', cursor: 'pointer', color, fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Send size={11} /> {probando === p.id ? '…' : 'Probar'}
+
+                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => probar(p)}
+                    disabled={probando === p.id}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] text-xs font-semibold hover:text-[var(--text-pri)] hover:border-[var(--cc30)] transition disabled:opacity-50 cursor-pointer"
+                  >
+                    <Send size={11} /> {probando === p.id ? 'Enviando…' : 'Probar'}
                   </button>
-                  <div style={{ display: 'flex', gap: 4 }}>
+                  <div className="flex items-center gap-0.5">
                     <button onClick={() => toggleActiva(p)} title={p.activa ? 'Pausar' : 'Activar'}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: p.activa ? color : 'var(--text-sec)', padding: 4 }}>
+                      className="p-1.5 rounded-lg hover:bg-[var(--cc12)] transition cursor-pointer"
+                      style={{ color: p.activa ? color : 'var(--text-mut)' }}>
                       {p.activa ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
                     </button>
-                    <button onClick={() => openEdit(p)} title="Editar"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sec)', padding: 4 }}>
-                      <Pencil size={15} />
+                    <button onClick={() => openEdit(p)}
+                      className="p-1.5 rounded-lg hover:bg-[var(--cc12)] text-[var(--text-sec)] hover:text-[var(--text-pri)] transition cursor-pointer">
+                      <Pencil size={14} />
                     </button>
-                    <button onClick={() => eliminar(p.id)} title="Eliminar"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444', padding: 4 }}>
-                      <Trash2 size={15} />
+                    <button onClick={() => eliminar(p.id)}
+                      className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--text-mut)] hover:text-red-400 transition cursor-pointer">
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
@@ -252,116 +267,170 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
 
       {/* Modal */}
       {modal && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16,
-        }} onClick={e => e.target === e.currentTarget && setModal(null)}>
-          <div style={{
-            background: 'var(--bg-card)', border: '1px solid var(--cc20)', borderRadius: 16,
-            width: '100%', maxWidth: 560, maxHeight: '92vh', overflowY: 'auto', padding: 24,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-pri)' }}>
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={e => e.target === e.currentTarget && setModal(null)}
+        >
+          <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-[540px] max-h-[92vh] overflow-y-auto p-6">
+
+            {/* Header modal */}
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-base font-bold text-[var(--text-pri)]">
                 {modal.mode === 'new' ? 'Nueva plantilla' : 'Editar plantilla'}
               </h3>
-              <button onClick={() => setModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-sec)' }}>
-                <X size={20} />
+              <button onClick={() => setModal(null)}
+                className="p-1.5 rounded-lg hover:bg-[var(--cc12)] text-[var(--text-sec)] transition cursor-pointer">
+                <X size={18} />
               </button>
             </div>
 
             {/* Tipo de plantilla */}
-            <label style={S.label}>Tipo de plantilla</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+            <p className={LABEL_CLS}>Tipo de plantilla</p>
+            <div className="grid grid-cols-2 gap-3 mb-4">
               {TIPO_PLANTILLA_OPTS.map(o => (
-                <button key={o.value} onClick={() => setForm(f => ({ ...f, tipo_plantilla: o.value }))} style={{
-                  padding: '10px 12px', borderRadius: 10, textAlign: 'left', cursor: 'pointer',
-                  border: `2px solid ${form.tipo_plantilla === o.value ? color : 'var(--cc20)'}`,
-                  background: form.tipo_plantilla === o.value ? `${color}12` : 'var(--bg-base)',
-                  fontFamily: 'inherit',
-                }}>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: form.tipo_plantilla === o.value ? color : 'var(--text-pri)', marginBottom: 3 }}>{o.label}</p>
-                  <p style={{ fontSize: 11, color: 'var(--text-sec)', lineHeight: 1.4 }}>{o.desc}</p>
+                <button
+                  key={o.value}
+                  onClick={() => setForm(f => ({ ...f, tipo_plantilla: o.value }))}
+                  className="text-left p-3 rounded-xl border-2 transition cursor-pointer"
+                  style={{
+                    borderColor:  form.tipo_plantilla === o.value ? color : 'var(--cc20)',
+                    background:   form.tipo_plantilla === o.value ? `${color}12` : 'var(--bg-app)',
+                  }}
+                >
+                  <p className="text-sm font-bold text-[var(--text-pri)] mb-1">{o.icon} {o.label}</p>
+                  <p className="text-[11px] text-[var(--text-sec)] leading-snug">{o.desc}</p>
                 </button>
               ))}
             </div>
 
             {/* Nombre */}
-            <label style={S.label}>Nombre de la plantilla</label>
-            <input value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))}
-              placeholder="ej: Recordatorio entrenamiento" style={S.input} />
+            <label className={LABEL_CLS}>Nombre de la plantilla</label>
+            <input
+              value={form.nombre}
+              onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))}
+              placeholder="ej: Recordatorio de entrenamiento"
+              className={`${INPUT_CLS} mb-4`}
+            />
 
-            {/* Trigger — condicional según tipo */}
+            {/* Trigger */}
             {form.tipo_plantilla === 'evento' ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+              <div className="grid grid-cols-2 gap-3 mb-4">
                 <div>
-                  <label style={S.label}>Tipo de evento</label>
-                  <select value={form.tipo_evento} onChange={e => setForm(f => ({ ...f, tipo_evento: e.target.value }))} style={S.input}>
+                  <label className={LABEL_CLS}>Tipo de evento</label>
+                  <select
+                    value={form.tipo_evento}
+                    onChange={e => setForm(f => ({ ...f, tipo_evento: e.target.value }))}
+                    className={INPUT_CLS}
+                    style={{ colorScheme: 'dark' }}
+                  >
                     {TIPO_EVENTO_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={S.label}>Hora de envío</label>
-                  <input type="time" value={form.hora_envio}
-                    onChange={e => setForm(f => ({ ...f, hora_envio: e.target.value }))} style={S.input} />
+                  <label className={LABEL_CLS}>Hora de envío</label>
+                  <input
+                    type="time"
+                    value={form.hora_envio}
+                    onChange={e => setForm(f => ({ ...f, hora_envio: e.target.value }))}
+                    className={INPUT_CLS}
+                    style={{ colorScheme: 'dark' }}
+                  />
                 </div>
               </div>
             ) : (
-              <div style={{ marginBottom: 14 }}>
-                <label style={S.label}>Día del mes para enviar (solo a jugadores con deuda)</label>
-                <select value={form.dia_envio} onChange={e => setForm(f => ({ ...f, dia_envio: Number(e.target.value) }))} style={S.input}>
-                  {DIAS_MES.map(d => <option key={d} value={d}>Día {d} de cada mes</option>)}
+              <div className="mb-4">
+                <label className={LABEL_CLS}>Día del mes para enviar</label>
+                <select
+                  value={form.dia_envio}
+                  onChange={e => setForm(f => ({ ...f, dia_envio: Number(e.target.value) }))}
+                  className={INPUT_CLS}
+                  style={{ colorScheme: 'dark' }}
+                >
+                  {Array.from({ length: 28 }, (_, i) => i + 1).map(d => (
+                    <option key={d} value={d}>Día {d} de cada mes</option>
+                  ))}
                 </select>
-                <p style={{ fontSize: 11, color: 'var(--text-sec)', marginTop: -8 }}>
+                <p className="text-[11px] text-[var(--text-mut)] mt-1">
                   Solo recibirán el mensaje los jugadores con mensualidades pendientes o en mora.
                 </p>
               </div>
             )}
 
             {/* Variables */}
-            <label style={S.label}>Variables — clic para insertar en el mensaje</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+            <p className={LABEL_CLS}>Variables — clic para insertar</p>
+            <div className="flex flex-wrap gap-2 mb-4">
               {vars.map(v => (
-                <button key={v.key} onClick={() => insertVar(v.key)} title={v.desc} style={{
-                  background: `${color}15`, border: `1px solid ${color}35`, color,
-                  borderRadius: 6, padding: '3px 9px', fontSize: 12, fontWeight: 600,
-                  cursor: 'pointer', fontFamily: 'monospace',
-                }}>{v.key}</button>
+                <button
+                  key={v.key}
+                  onClick={() => insertVar(v.key)}
+                  title={v.desc}
+                  className="px-3 py-1 rounded-lg bg-[var(--cc12)] border border-[var(--cc20)] text-[var(--text-sec)] text-xs font-mono font-semibold hover:text-[var(--text-pri)] hover:border-[var(--cc30)] transition cursor-pointer"
+                >
+                  {v.key}
+                </button>
               ))}
             </div>
 
             {/* Mensaje */}
-            <label style={S.label}>Mensaje</label>
-            <textarea id="plantilla-mensaje" value={form.mensaje}
+            <label className={LABEL_CLS}>Mensaje</label>
+            <textarea
+              id="plantilla-msg"
+              value={form.mensaje}
               onChange={e => setForm(f => ({ ...f, mensaje: e.target.value }))}
-              rows={7} style={{ ...S.input, fontFamily: 'monospace', fontSize: 13, resize: 'vertical' }}
+              rows={7}
+              className={`${INPUT_CLS} font-mono resize-y`}
               placeholder={form.tipo_plantilla === 'cobro'
-                ? 'Hola {nombre} 👋\n\nTe recordamos que tienes pagos pendientes en {club_nombre}:\n📅 Meses: {meses}\n💰 Total: {deuda}\n\n🔑 Paga aquí: {llave_pago}'
+                ? 'Hola {nombre} 👋\n\nTienes pagos pendientes en {club_nombre}:\n📅 Meses: {meses}\n💰 Total: {deuda}\n\n🔑 Paga aquí: {llave_pago}'
                 : '☀️ ¡Buen día!\n\nHOY, {dia}\n📍 {lugar}\n🕘 {hora_inicio} - {hora_fin}\n\n🔑 LLAVE PARA PAGOS:\n{llave_pago}'}
             />
 
-            {/* Opciones */}
-            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginTop: 2 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14, color: 'var(--text-pri)' }}>
-                <input type="checkbox" checked={form.activa} onChange={e => setForm(f => ({ ...f, activa: e.target.checked }))} />
+            {/* Checkboxes */}
+            <div className="flex flex-wrap gap-5 mt-3">
+              <label className="flex items-center gap-2 text-sm text-[var(--text-sec)] cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={form.activa}
+                  onChange={e => setForm(f => ({ ...f, activa: e.target.checked }))}
+                  className="accent-[var(--cc)] w-4 h-4"
+                />
                 Plantilla activa
               </label>
-              <label style={{
-                display: 'flex', alignItems: 'center', gap: 8, fontSize: 14,
-                cursor: hasQr ? 'pointer' : 'not-allowed',
-                color: hasQr ? 'var(--text-pri)' : 'var(--text-sec)', opacity: hasQr ? 1 : 0.5,
-              }} title={!hasQr ? 'Configura el QR de pagos en Ciclo de Cobro primero' : ''}>
-                <input type="checkbox" checked={form.incluir_qr} disabled={!hasQr}
-                  onChange={e => setForm(f => ({ ...f, incluir_qr: e.target.checked }))} />
-                <QrCode size={14} /> Incluir QR de pagos
-                {!hasQr && <span style={{ fontSize: 11, color: '#EF4444' }}>(no configurado)</span>}
+              <label
+                className={`flex items-center gap-2 text-sm select-none ${hasQr ? 'text-[var(--text-sec)] cursor-pointer' : 'text-[var(--text-mut)] cursor-not-allowed'}`}
+                title={!hasQr ? 'Configura el QR de pagos en Ciclo de Cobro primero' : ''}
+              >
+                <input
+                  type="checkbox"
+                  checked={form.incluir_qr}
+                  disabled={!hasQr}
+                  onChange={e => setForm(f => ({ ...f, incluir_qr: e.target.checked }))}
+                  className="accent-[var(--cc)] w-4 h-4"
+                />
+                <QrCode size={13} /> Incluir QR de pagos
+                {!hasQr && <span className="text-red-400 text-[10px]">(no configurado)</span>}
               </label>
             </div>
 
-            {error && <p style={{ color: '#EF4444', fontSize: 13, marginTop: 12 }}>{error}</p>}
+            {error && (
+              <p className="text-red-400 text-sm mt-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2">
+                {error}
+              </p>
+            )}
 
-            <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'flex-end' }}>
-              <button onClick={() => setModal(null)} style={S.btnSec}>Cancelar</button>
-              <button onClick={save} disabled={saving} style={{ ...S.btnPri, background: color, opacity: saving ? 0.7 : 1 }}>
+            {/* Acciones */}
+            <div className="flex justify-end gap-3 mt-5">
+              <button
+                onClick={() => setModal(null)}
+                className="px-5 py-2.5 rounded-xl border border-[var(--cc20)] text-sm text-[var(--text-sec)] hover:text-[var(--text-pri)] transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={save}
+                disabled={saving}
+                style={{ background: color }}
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50 transition cursor-pointer"
+              >
                 {saving ? 'Guardando…' : 'Guardar plantilla'}
               </button>
             </div>
@@ -371,14 +440,3 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     </div>
   );
 }
-
-const S = {
-  label: { display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-sec)', marginBottom: 5, marginTop: 2 },
-  input: {
-    width: '100%', background: 'var(--bg-base)', border: '1px solid var(--cc20)',
-    borderRadius: 8, padding: '9px 12px', fontSize: 14, color: 'var(--text-pri)',
-    outline: 'none', boxSizing: 'border-box', marginBottom: 12, fontFamily: 'inherit',
-  },
-  btnPri: { padding: '9px 20px', borderRadius: 9, border: 'none', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
-  btnSec: { padding: '9px 20px', borderRadius: 9, border: '1px solid var(--cc20)', background: 'transparent', color: 'var(--text-sec)', fontSize: 14, cursor: 'pointer' },
-};

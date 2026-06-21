@@ -170,7 +170,7 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [] }) {
         body: JSON.stringify({
           tipo:        'ENTRENAMIENTO',
           titulo:      `Entrenamiento ${formatLabel(fecha)}`,
-          fecha_inicio: `${fecha}T${crearHora}:00`,
+          fecha_inicio: new Date(`${fecha}T${crearHora}`).toISOString(),
           equipo:      crearEquipo || null,
         }),
       });

@@ -124,7 +124,7 @@ function exportarPDF(pendientes, clubNombre = 'Mi Club', color = '#E14924', logo
   ventana.focus();
 }
 
-export default function PagosPendientesList({ pendientes, codigoPais = '57', clubNombre = 'Mi Club', color = 'var(--cc)', logoUrl = '', filtroLabel = null }) {
+export default function PagosPendientesList({ pendientes, codigoPais = '57', clubNombre = 'Mi Club', color = 'var(--cc)', logoUrl = '', filtroLabel = null, morososConCuotaMes = 0 }) {
   if (!pendientes || pendientes.length === 0) {
     return (
       <div style={{
@@ -133,13 +133,18 @@ export default function PagosPendientesList({ pendientes, codigoPais = '57', clu
         position: 'relative', overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, var(--cc50), transparent)', pointerEvents: 'none' }} />
-        <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-pri)', marginBottom: '16px' }}>
+        <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-pri)', marginBottom: '12px' }}>
           {filtroLabel ? `Pagos pendientes · ${filtroLabel}` : 'Por cobrar este mes'}
         </h2>
-        <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-mut)' }}>
+        <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-mut)' }}>
           <Clock style={{ width: '32px', height: '32px', margin: '0 auto 8px', color: '#22C55E' }} />
           {filtroLabel ? `Sin jugadores con estado ${filtroLabel} este mes` : '¡Todos al día este mes!'}
         </div>
+        {morososConCuotaMes > 0 && (
+          <div style={{ marginTop: '8px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)', fontSize: '12px', color: '#EF4444', textAlign: 'center' }}>
+            {morososConCuotaMes} moroso{morososConCuotaMes > 1 ? 's' : ''} también {morososConCuotaMes > 1 ? 'tienen' : 'tiene'} cuota pendiente este mes → ver sección <strong>En Mora</strong>
+          </div>
+        )}
       </div>
     );
   }

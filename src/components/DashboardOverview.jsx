@@ -27,9 +27,15 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
   const icoSz  = isMobile ? 34 : 48;
   const icoR   = isMobile ? '8px' : '12px';
   const iconSz = isMobile ? 15 : 22;
-  const numSz  = isMobile ? '24px' : '38px';
   const lblSz  = isMobile ? '9px' : '11px';
   const subSz  = isMobile ? '9px' : '11px';
+  // Reducir fuente si el valor es largo (montos formateados, ej: "$ 8.710.000")
+  const valLen = String(value).replace(/\s/g, '').length;
+  const numSz  = valLen > 9
+    ? (isMobile ? '15px' : '20px')
+    : valLen > 6
+      ? (isMobile ? '18px' : '28px')
+      : (isMobile ? '24px' : '38px');
   return (
     <div
       onClick={onClick}
@@ -77,7 +83,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
         <div style={{ fontSize: lblSz, letterSpacing: isMobile ? '0.8px' : '1.5px', textTransform: 'uppercase', color: 'var(--text-mut)', marginBottom: isMobile ? '3px' : '6px', fontWeight: 500 }}>
           {label}
         </div>
-        <div style={{ fontFamily: "'Sport Event', cursive", fontSize: numSz, lineHeight: 1, color: 'var(--text-pri)', letterSpacing: '1px' }}>
+        <div style={{ fontFamily: "'Sport Event', cursive", fontSize: numSz, lineHeight: 1, color: 'var(--text-pri)', letterSpacing: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {value}
         </div>
         {sub != null && (
@@ -195,8 +201,11 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
   const pendientesList = useMemo(() => {
     return activos
       .map(j => {
+        const ced = String(j.cedula);
+        // Excluir morosos: el KPI ya los cuenta en MORA, no duplicar en PENDIENTES
+        if (morososSet.has(ced)) return null;
         const mens = mensualidades.find(
-          m => String(m.cedula) === String(j.cedula) &&
+          m => String(m.cedula) === ced &&
                parseInt(m.numero_mes) === mesActual &&
                parseInt(m.anio) === anioActual,
         );
@@ -212,7 +221,19 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
       })
       .filter(Boolean)
       .sort((a, b) => b.saldo - a.saldo);
-  }, [activos, mensualidades, mesActual, anioActual]);
+  }, [activos, morososSet, mensualidades, mesActual, anioActual]);
+
+  // Conteo de morosos que también tienen cuota del mes sin pagar (info para el admin)
+  const morososConCuotaMes = useMemo(() => {
+    return morosos.filter(m => {
+      const mens = mensualidades.find(
+        inv => String(inv.cedula) === String(m.cedula) &&
+               parseInt(inv.numero_mes) === mesActual &&
+               parseInt(inv.anio) === anioActual,
+      );
+      return mens && !['AL_DIA'].includes(mens.estado);
+    }).length;
+  }, [morosos, mensualidades, mesActual, anioActual]);
 
   const pendientesFiltered = useMemo(() => {
     if (activeKpi === 'parciales')   return pendientesList.filter(p => p.estado === 'PARCIAL');
@@ -303,6 +324,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
           color={color}
           logoUrl={logoUrl}
           filtroLabel={activeKpi === 'pendientes' ? 'Pendiente' : activeKpi === 'parciales' ? 'Parcial' : null}
+          morososConCuotaMes={morososConCuotaMes}
         />
       </div>
 

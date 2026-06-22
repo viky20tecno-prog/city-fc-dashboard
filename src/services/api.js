@@ -3,11 +3,11 @@ import { supabase } from '../lib/supabase';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
 export function getClubId() {
-  return localStorage.getItem('clubId') || null;
+  return sessionStorage.getItem('clubId') || null;
 }
 
 export function setClubId(clubId) {
-  localStorage.setItem('clubId', clubId);
+  sessionStorage.setItem('clubId', clubId);
 }
 
 async function getAuthHeaders() {

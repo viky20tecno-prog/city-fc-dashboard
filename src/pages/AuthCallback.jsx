@@ -38,7 +38,7 @@ export default function AuthCallback() {
         .single();
 
       if (club?.slug) {
-        localStorage.setItem('clubId', club.slug);
+        sessionStorage.setItem('clubId', club.slug);
         navigate('/app', { replace: true });
       } else {
         navigate('/registro', { replace: true });

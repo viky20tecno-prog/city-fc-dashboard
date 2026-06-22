@@ -12,7 +12,7 @@ const TABS = [
 export default function ArbitrajePagos({ color = 'var(--cc)' }) {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedPartidoId, setSelectedPartidoId] = useState(null);
-  const [clubId] = useState(() => localStorage.getItem('clubId') || 'city-fc');
+  const [clubId] = useState(() => sessionStorage.getItem('clubId') || null);
 
   const handleViewPagos = (partidoId) => {
     setSelectedPartidoId(partidoId);

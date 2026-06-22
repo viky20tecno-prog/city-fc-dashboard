@@ -141,7 +141,7 @@ export default function Dashboard() {
 
   // ── Guard: si no hay clubId en localStorage, cerrar sesión y redirigir ──
   useEffect(() => {
-    if (!localStorage.getItem('clubId')) {
+    if (!sessionStorage.getItem('clubId')) {
       supabase.auth.signOut().then(() => navigate('/login', { replace: true }));
     }
   }, [navigate]);
@@ -152,13 +152,13 @@ export default function Dashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user?.id) return;
       const userId = session.user.id;
-      const prevClubId = localStorage.getItem('clubId');
+      const prevClubId = sessionStorage.getItem('clubId');
 
       const { data: ownedClub } = await supabase
         .from('clubs').select('slug').eq('owner_user_id', userId).single();
       if (ownedClub?.slug) {
-        localStorage.setItem('userRole', 'ADMIN');
-        localStorage.setItem('clubId', ownedClub.slug);
+        sessionStorage.setItem('userRole', 'ADMIN');
+        sessionStorage.setItem('clubId', ownedClub.slug);
         if (ownedClub.slug !== prevClubId) {
           refresh();
           refetchConfig();
@@ -172,13 +172,13 @@ export default function Dashboard() {
         .eq('activo', true)
         .single();
       if (membership?.role) {
-        localStorage.setItem('userRole', membership.role);
+        sessionStorage.setItem('userRole', membership.role);
         if (membership?.club_id) {
           // club_members.club_id es UUID; la API usa slug → resolver
           const { data: clubRow } = await supabase
             .from('clubs').select('slug').eq('id', membership.club_id).single();
           const resolvedId = clubRow?.slug || membership.club_id;
-          localStorage.setItem('clubId', resolvedId);
+          sessionStorage.setItem('clubId', resolvedId);
           if (resolvedId !== prevClubId) {
             refresh();
             refetchConfig();
@@ -243,7 +243,7 @@ export default function Dashboard() {
     document.documentElement.style.setProperty('--cc30', `${c}4D`);
     document.documentElement.style.setProperty('--cc50', `${c}80`);
     if (clubConfig?.codigo_pais) {
-      localStorage.setItem('codigoPais', clubConfig.codigo_pais);
+      sessionStorage.setItem('codigoPais', clubConfig.codigo_pais);
     }
   }, [c, clubConfig?.codigo_pais]);
 
@@ -376,8 +376,8 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    localStorage.removeItem('clubId');
-    localStorage.removeItem('userRole');
+    sessionStorage.removeItem('clubId');
+    sessionStorage.removeItem('userRole');
     navigate('/login');
   };
 

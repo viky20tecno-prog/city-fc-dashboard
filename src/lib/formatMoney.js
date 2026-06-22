@@ -39,5 +39,5 @@ export function getCurrencyLabel(codigoPais) {
 }
 
 export function getCodigoPais() {
-  return localStorage.getItem('codigoPais') || '57';
+  return sessionStorage.getItem('codigoPais') || '57';
 }

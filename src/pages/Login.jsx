@@ -115,8 +115,8 @@ export default function Login() {
       return;
     }
 
-    localStorage.setItem('clubId', clubId);
-    localStorage.setItem('userRole', userRole);
+    sessionStorage.setItem('clubId', clubId);
+    sessionStorage.setItem('userRole', userRole);
     navigate('/app');
   };
 

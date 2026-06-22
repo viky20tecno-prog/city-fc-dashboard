@@ -140,7 +140,7 @@ export default function RegistroClub() {
           access_token:  data.access_token,
           refresh_token: data.refresh_token,
         });
-        localStorage.setItem('clubId', data.club_slug);
+        sessionStorage.setItem('clubId', data.club_slug);
       }
       setExito(true);
       setTimeout(() => navigate('/app'), 2000);

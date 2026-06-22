@@ -1,5 +1,5 @@
 export function useRole() {
-  const role = localStorage.getItem('userRole') || 'ADMIN';
+  const role = sessionStorage.getItem('userRole') || 'ADMIN';
 
   return {
     role,

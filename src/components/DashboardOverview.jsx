@@ -20,8 +20,16 @@ const COLORS = {
   gold:   { icon: '#B68631', bg: 'rgba(182,134,49,0.08)',   border: 'rgba(182,134,49,0.2)',   glow: 'rgba(182,134,49,0.12)'   },
 };
 
-function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, delay = 0, wide, onClick, active }) {
+function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, delay = 0, wide, onClick, active, isMobile }) {
   const c = colorObj || COLORS[color];
+  const pad    = isMobile ? '12px' : '20px';
+  const gap    = isMobile ? '10px' : '16px';
+  const icoSz  = isMobile ? 34 : 48;
+  const icoR   = isMobile ? '8px' : '12px';
+  const iconSz = isMobile ? 15 : 22;
+  const numSz  = isMobile ? '24px' : '38px';
+  const lblSz  = isMobile ? '9px' : '11px';
+  const subSz  = isMobile ? '9px' : '11px';
   return (
     <div
       onClick={onClick}
@@ -29,10 +37,10 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
         background: 'var(--bg-card)',
         border: `1px solid ${active ? c.icon : c.border}`,
         borderRadius: '14px',
-        padding: '20px',
+        padding: pad,
         display: 'flex',
         alignItems: 'center',
-        gap: '16px',
+        gap,
         position: 'relative',
         overflow: 'hidden',
         animation: `kpi-in 0.45s ease ${delay}s both`,
@@ -57,23 +65,23 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
       }} />
 
       <div style={{
-        width: '48px', height: '48px', borderRadius: '12px', flexShrink: 0,
+        width: `${icoSz}px`, height: `${icoSz}px`, borderRadius: icoR, flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: c.bg, border: `1px solid ${c.border}`,
         position: 'relative',
       }}>
-        <Icon size={22} color={c.icon} strokeWidth={1.8} />
+        <Icon size={iconSz} color={c.icon} strokeWidth={1.8} />
       </div>
 
       <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-        <div style={{ fontSize: '11px', letterSpacing: '1.5px', textTransform: 'uppercase', color: 'var(--text-mut)', marginBottom: '6px', fontWeight: 500 }}>
+        <div style={{ fontSize: lblSz, letterSpacing: isMobile ? '0.8px' : '1.5px', textTransform: 'uppercase', color: 'var(--text-mut)', marginBottom: isMobile ? '3px' : '6px', fontWeight: 500 }}>
           {label}
         </div>
-        <div style={{ fontFamily: "'Sport Event', cursive", fontSize: '38px', lineHeight: 1, color: 'var(--text-pri)', letterSpacing: '1px' }}>
+        <div style={{ fontFamily: "'Sport Event', cursive", fontSize: numSz, lineHeight: 1, color: 'var(--text-pri)', letterSpacing: '1px' }}>
           {value}
         </div>
         {sub != null && (
-          <div style={{ fontSize: '11px', color: 'var(--text-mut)', marginTop: '5px' }}>{sub}</div>
+          <div style={{ fontSize: subSz, color: 'var(--text-mut)', marginTop: isMobile ? '2px' : '5px' }}>{sub}</div>
         )}
       </div>
     </div>
@@ -167,7 +175,9 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
       const ced = String(j.cedula);
       if (morososSet.has(ced)) { mora++; return; }
       const inv = mensualidades.find(
-        m => String(m.cedula) === ced && parseInt(m.numero_mes) === mesActual,
+        m => String(m.cedula) === ced &&
+             parseInt(m.numero_mes) === mesActual &&
+             parseInt(m.anio)       === anioActual,
       );
       if (!inv || inv.estado === 'AL_DIA') {
         alDia++;
@@ -180,7 +190,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
     const totalEsperado = mensualidades.reduce((s, m) => s + (parseFloat(m.valor_oficial) || 0), 0);
     const pct = activos.length > 0 ? Math.round((alDia / activos.length) * 100) : 0;
     return { stats: { alDia, pendientes, parciales, mora, recaudado, totalEsperado, pct }, alDiaList: alDiaArr };
-  }, [activos, morososSet, mensualidades, mesActual]);
+  }, [activos, morososSet, mensualidades, mesActual, anioActual]);
 
   const pendientesList = useMemo(() => {
     return activos
@@ -229,14 +239,14 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
         gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr) repeat(3, 1fr)',
         gap: '10px',
       }}>
-        <KpiCard icon={Users}         label="Jugadores"  value={activos.length}   sub="Activos"                  colorObj={clubColor} delay={0.05} />
-        <KpiCard icon={CheckCircle}   label="Al Día"     value={stats.alDia}      sub={`${stats.pct}%`}          color="green"  delay={0.10}
+        <KpiCard icon={Users}         label="Jugadores"  value={activos.length}   sub="Activos"                  colorObj={clubColor} delay={0.05} isMobile={isMobile} />
+        <KpiCard icon={CheckCircle}   label="Al Día"     value={stats.alDia}      sub={`${stats.pct}%`}          color="green"  delay={0.10} isMobile={isMobile}
           onClick={() => kpiToggle('aldia')} active={activeKpi === 'aldia'} />
-        <KpiCard icon={Clock}         label="Pendientes" value={stats.pendientes} sub="Por cobrar"               color="yellow" delay={0.15}
+        <KpiCard icon={Clock}         label="Pendientes" value={stats.pendientes} sub="Por cobrar"               color="yellow" delay={0.15} isMobile={isMobile}
           onClick={() => kpiToggle('pendientes')} active={activeKpi === 'pendientes'} />
-        <KpiCard icon={XCircle}       label="En Mora"    value={stats.mora}       sub={`${stats.mora} jugadores`} color="red"   delay={0.20}
+        <KpiCard icon={XCircle}       label="En Mora"    value={stats.mora}       sub={`${stats.mora} jugadores`} color="red"   delay={0.20} isMobile={isMobile}
           onClick={() => kpiToggle('mora')} active={activeKpi === 'mora'} />
-        <KpiCard icon={AlertTriangle} label="Parciales"  value={stats.parciales}  sub="Abonos"                   color="purple" delay={0.25}
+        <KpiCard icon={AlertTriangle} label="Parciales"  value={stats.parciales}  sub="Abonos"                   color="purple" delay={0.25} isMobile={isMobile}
           onClick={() => kpiToggle('parciales')} active={activeKpi === 'parciales'} />
         <KpiCard
           icon={DollarSign}
@@ -245,6 +255,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
           sub={`de ${formatCOP(stats.totalEsperado)}`}
           color="gold"
           delay={0.30}
+          isMobile={isMobile}
         />
       </div>
 

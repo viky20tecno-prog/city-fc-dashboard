@@ -4,7 +4,7 @@ import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
   Clock, ClipboardCheck, Settings, AlertTriangle,
   Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays, Shield,
-  ChevronLeft, ChevronRight, MessageSquare,
+  ChevronLeft, ChevronRight, MessageSquare, Link2, Globe,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -146,31 +146,44 @@ export default function Dashboard() {
     }
   }, [navigate]);
 
-  // ── Revalidar rol desde Supabase al montar (evita manipulación de localStorage) ──
+  // ── Revalidar rol Y club desde Supabase al montar (evita datos stale en localStorage) ──
   useEffect(() => {
     async function revalidarRol() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user?.id) return;
       const userId = session.user.id;
+      const prevClubId = localStorage.getItem('clubId');
 
       const { data: ownedClub } = await supabase
         .from('clubs').select('slug').eq('owner_user_id', userId).single();
       if (ownedClub?.slug) {
         localStorage.setItem('userRole', 'ADMIN');
+        localStorage.setItem('clubId', ownedClub.slug);
+        if (ownedClub.slug !== prevClubId) {
+          refresh();
+          refetchConfig();
+        }
         return;
       }
       const { data: membership } = await supabase
         .from('club_members')
-        .select('role')
+        .select('role, club_id')
         .eq('user_id', userId)
         .eq('activo', true)
         .single();
       if (membership?.role) {
         localStorage.setItem('userRole', membership.role);
+        if (membership?.club_id) {
+          localStorage.setItem('clubId', membership.club_id);
+          if (membership.club_id !== prevClubId) {
+            refresh();
+            refetchConfig();
+          }
+        }
       }
     }
     revalidarRol();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Trial ──
   const trialActivo    = clubConfig?.plan === 'trial' && clubConfig?.trial_ends_at;
@@ -506,7 +519,7 @@ export default function Dashboard() {
           {isMobile ? '+PAGO' : 'PAGO MANUAL'}
         </button>
 
-        {/* Inscripción y Portal — solo desktop */}
+        {/* Inscripción y Portal — desktop: texto completo; mobile: íconos en topbar */}
         {!isMobile && (
           <>
             <button style={S.actionBtn(false)} onClick={() => window.open(inscripcionUrl, '_blank')}>
@@ -853,15 +866,73 @@ export default function Dashboard() {
         ) : (
           <>
             {activeTab === 'dashboard' && (
-              <DashboardOverview
-                jugadores={jugadores}
-                mensualidades={mensualidades}
-                morosos={morosos}
-                codigoPais={clubConfig?.codigo_pais || '57'}
-                color={c}
-                clubNombre={clubConfig?.nombre}
-                logoUrl={clubConfig?.logo_url}
-              />
+              <>
+                {isMobile && (
+                  <div style={{
+                    display: 'flex', gap: '8px', marginBottom: '12px',
+                  }}>
+                    <button
+                      onClick={() => window.open(inscripcionUrl, '_blank')}
+                      style={{
+                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                        padding: '10px 8px', borderRadius: '10px',
+                        border: `1px solid ${c}40`, background: `${c}12`,
+                        color: c, fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                        letterSpacing: '0.3px',
+                      }}
+                    >
+                      <Link2 size={13} />
+                      Inscripción
+                    </button>
+                    <button
+                      onClick={handleCopyLink}
+                      style={{
+                        width: '40px', height: '40px', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        borderRadius: '10px', border: `1px solid ${c}30`,
+                        background: `${c}0C`, cursor: 'pointer',
+                      }}
+                      title="Copiar link de inscripción"
+                    >
+                      {linkCopied ? <Check size={13} color="#22C55E" /> : <Copy size={13} color={c} />}
+                    </button>
+                    <button
+                      onClick={() => window.open(portalUrl, '_blank')}
+                      style={{
+                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                        padding: '10px 8px', borderRadius: '10px',
+                        border: '1px solid rgba(0,170,255,0.30)', background: 'rgba(0,170,255,0.08)',
+                        color: '#4A9EFF', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                        letterSpacing: '0.3px',
+                      }}
+                    >
+                      <Globe size={13} />
+                      Portal Atleta
+                    </button>
+                    <button
+                      onClick={handleCopyPortal}
+                      style={{
+                        width: '40px', height: '40px', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        borderRadius: '10px', border: '1px solid rgba(0,170,255,0.20)',
+                        background: 'rgba(0,170,255,0.06)', cursor: 'pointer',
+                      }}
+                      title="Copiar link del Portal Atleta"
+                    >
+                      {portalCopied ? <Check size={13} color="#22C55E" /> : <Copy size={13} color="#4A9EFF" />}
+                    </button>
+                  </div>
+                )}
+                <DashboardOverview
+                  jugadores={jugadores}
+                  mensualidades={mensualidades}
+                  morosos={morosos}
+                  codigoPais={clubConfig?.codigo_pais || '57'}
+                  color={c}
+                  clubNombre={clubConfig?.nombre}
+                  logoUrl={clubConfig?.logo_url}
+                />
+              </>
             )}
             {activeTab === 'jugadores' && (
               <JugadoresTable

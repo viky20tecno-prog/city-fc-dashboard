@@ -141,7 +141,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
       const { error } = await supabase.storage.from('club-assets').upload(path, file, { upsert: true });
       if (error) throw error;
       const { data: { publicUrl } } = supabase.storage.from('club-assets').getPublicUrl(path);
-      setQrPagoUrl(publicUrl);
+      setQrPagoUrl(`${publicUrl}?t=${Date.now()}`);
     } catch (err) {
       console.error('Error subiendo QR:', err);
     } finally {
@@ -163,7 +163,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
         deportes:             deportesSeleccionados,
         deporte:              deportesSeleccionados[0] || 'futbol',
         color:                colorClub,
-        logo_url:             logoUrl ? logoUrl.split('?')[0] : null,
+        logo_url:             logoUrl || null,
         valor_mensualidad:    mensualidad.valor,
         dias_gracia_mora:     mensualidad.dias_gracia,
         penalidad_mora:       mensualidad.penalidad,

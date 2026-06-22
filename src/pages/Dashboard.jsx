@@ -174,8 +174,12 @@ export default function Dashboard() {
       if (membership?.role) {
         localStorage.setItem('userRole', membership.role);
         if (membership?.club_id) {
-          localStorage.setItem('clubId', membership.club_id);
-          if (membership.club_id !== prevClubId) {
+          // club_members.club_id es UUID; la API usa slug → resolver
+          const { data: clubRow } = await supabase
+            .from('clubs').select('slug').eq('id', membership.club_id).single();
+          const resolvedId = clubRow?.slug || membership.club_id;
+          localStorage.setItem('clubId', resolvedId);
+          if (resolvedId !== prevClubId) {
             refresh();
             refetchConfig();
           }

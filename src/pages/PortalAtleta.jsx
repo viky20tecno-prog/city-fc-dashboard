@@ -93,6 +93,7 @@ function StepPhone({ color, clubSlug, onSent }) {
           ref={inputRef}
           type="tel"
           inputMode="numeric"
+          aria-label="Número de celular"
           placeholder="300 000 0000"
           value={phone}
           onChange={e => { setPhone(e.target.value.replace(/[^\d\s]/g, '')); setError(null); }}
@@ -213,6 +214,7 @@ function StepOTP({ color, phone, clubSlug, onVerified, onBack }) {
         ref={inputRef}
         type="tel"
         inputMode="numeric"
+        aria-label="Código de verificación de 4 dígitos"
         pattern="[0-9]*"
         maxLength={4}
         placeholder="_ _ _ _"

@@ -398,16 +398,28 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
     // Campos a auditar: [header, getter, requerido]
     const CAMPOS = [
-      { h: 'NOMBRE',           get: j => j.nombreCompleto || '',           req: true  },
-      { h: 'CÉDULA',           get: j => String(j.cedula || ''),           req: true  },
-      { h: 'CELULAR',          get: j => String(j.celular || ''),          req: true  },
-      { h: 'CORREO',           get: j => j.correo_electronico || '',       req: false },
-      { h: 'CATEGORÍA',        get: j => (j.categoria || '').toUpperCase(), req: true  },
-      { h: 'POSICIÓN',         get: j => (j.posicion || '').toUpperCase(), req: false },
-      { h: 'FECHA NAC.',       get: j => j.fecha_nacimiento || '',         req: false },
-      { h: 'TIPO SANGRE',      get: j => (j.tipo_sangre || '').toUpperCase(), req: false },
-      { h: 'EPS',              get: j => (j.eps || '').toUpperCase(),        req: false },
-      { h: 'ESTADO',           get: j => j.activo ? 'ACTIVO' : 'INACTIVO', req: true  },
+      { h: 'NOMBRE',          get: j => j.nombreCompleto || '',                          req: true  },
+      { h: 'CÉDULA',          get: j => String(j.cedula || ''),                          req: true  },
+      { h: 'CELULAR',         get: j => String(j.celular || ''),                         req: true  },
+      { h: 'CORREO',          get: j => j.correo_electronico || '',                      req: false },
+      { h: 'INSTAGRAM',       get: j => j.instagram || '',                               req: false },
+      { h: 'CATEGORÍA',       get: j => (j.categoria || '').toUpperCase(),               req: true  },
+      { h: 'EQUIPO',          get: j => (j.equipo || '').toUpperCase(),                  req: false },
+      { h: 'POSICIÓN',        get: j => (j.posicion || '').toUpperCase(),                req: false },
+      { h: 'N° CAMISETA',     get: j => String(j.numero_camiseta || ''),                req: false },
+      { h: 'FECHA NAC.',      get: j => j.fecha_nacimiento || '',                        req: false },
+      { h: 'LUGAR NAC.',      get: j => (j.lugar_de_nacimiento || '').toUpperCase(),     req: false },
+      { h: 'TIPO SANGRE',     get: j => (j.tipo_sangre || '').toUpperCase(),             req: false },
+      { h: 'EPS',             get: j => (j.eps || '').toUpperCase(),                     req: false },
+      { h: 'ESTATURA',        get: j => String(j.estatura || ''),                        req: false },
+      { h: 'PESO',            get: j => String(j.peso || ''),                            req: false },
+      { h: 'MUNICIPIO',       get: j => (j.municipio || '').toUpperCase(),               req: false },
+      { h: 'BARRIO',          get: j => (j.barrio || '').toUpperCase(),                  req: false },
+      { h: 'DIRECCIÓN',       get: j => (j.direccion || '').toUpperCase(),               req: false },
+      { h: 'CONTACTO EMERG.', get: j => (j.familiar_emergencia || '').toUpperCase(),     req: false },
+      { h: 'CEL. CONTACTO',   get: j => String(j.celular_contacto || ''),               req: false },
+      { h: 'OBSERVACIONES',   get: j => j.notas || '',                                   req: false },
+      { h: 'ESTADO',          get: j => j.activo ? 'ACTIVO' : 'INACTIVO',               req: true  },
     ];
 
     const esPend    = (j) => String(j.cedula).startsWith('PEND_');
@@ -423,9 +435,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     wb.creator = 'ZenSports';
     const ws = wb.addWorksheet('DIRECTORIO', { views: [{ state: 'frozen', ySplit: 2 }] });
 
+    const COL_WIDTH = {
+      'NOMBRE': 30, 'CORREO': 26, 'INSTAGRAM': 20, 'DIRECCIÓN': 30,
+      'OBSERVACIONES': 38, 'CONTACTO EMERG.': 24, 'CEL. CONTACTO': 18,
+      'MUNICIPIO': 16, 'BARRIO': 14, 'CÉDULA': 14, 'CELULAR': 16,
+    };
     ws.columns = [
-      { width: 6  },  // #
-      ...CAMPOS.map(c => ({ width: c.h === 'NOMBRE' ? 32 : c.h === 'CORREO' ? 28 : 16 })),
+      { width: 5 },  // #
+      ...CAMPOS.map(c => ({ width: COL_WIDTH[c.h] ?? 14 })),
     ];
 
     // Título
@@ -477,7 +494,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         } else {
           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colNum === 1 ? 'FFF1F5F9' : zebra } };
           cell.font = { size: 10, name: 'Calibri', color: { argb: 'FF1E293B' },
-            bold: colNum === 10 && j.activo };  // ESTADO en negrita si activo
+            bold: colNum === 1 + CAMPOS.length && j.activo };  // ESTADO en negrita si activo
         }
 
         // Color especial para celda ESTADO
@@ -496,7 +513,8 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     const url    = URL.createObjectURL(blob);
     const a      = document.createElement('a');
     a.href       = url;
-    a.download   = `directorio_jugadores_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const clubSlug = (clubConfig?.nombre || 'club').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    a.download   = `jugadores_${clubSlug}_${new Date().toISOString().split('T')[0]}.xlsx`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -838,7 +856,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 {/* Exportar Excel */}
                 <button
                   onClick={exportarCSV}
-                  title="Directorio completo de jugadores — resalta datos faltantes"
+                  title="Exportar ficha completa de todos los jugadores — resalta datos faltantes"
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
                   style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', color: '#22C55E', whiteSpace: 'nowrap', flexShrink: 0 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.18)'}

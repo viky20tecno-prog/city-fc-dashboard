@@ -673,11 +673,16 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
     const logoData = await loadLogoDataUrl(clubConfig?.logo_url);
 
-    // Índice meses en mora por cédula
-    const anio = new Date().getFullYear();
+    // Variables de fecha — usadas tanto en filas como en totales
+    const anio       = new Date().getFullYear();
+    const mesHoy     = new Date().getMonth() + 1;
+    const diaHoy     = new Date().getDate();
+    const diasGracia = clubConfig?.dias_gracia_mora ?? 7;
+
+    // Índice meses en mora por cédula (solo hasta mes actual)
     const moraPorCedula = {};
     (mensualidades || [])
-      .filter(m => parseInt(m.anio) === anio && m.estado === 'MORA')
+      .filter(m => parseInt(m.anio) === anio && m.estado === 'MORA' && parseInt(m.numero_mes) <= mesHoy)
       .forEach(m => {
         const ced = String(m.cedula || m.player_id || '');
         moraPorCedula[ced] = (moraPorCedula[ced] || 0) + 1;
@@ -729,7 +734,21 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(30, 40, 50);
       doc.text(formatCOP(j.totalPagado), cols[7].x, y);
-      const deudaJ = j.saldoPendiente || 0;
+      // Deuda solo hasta el mes actual (no meses futuros)
+      const mensJ = (mensualidades || []).filter(m =>
+        String(m.cedula || m.player_id || '') === String(j.cedula) &&
+        parseInt(m.anio) === anio && parseInt(m.numero_mes) <= mesHoy
+      );
+      let deudaJ = 0;
+      mensJ.forEach(m => {
+        const numMes = parseInt(m.numero_mes);
+        const saldo  = parseFloat(m.saldo_pendiente) || 0;
+        if (m.estado === 'MORA' || m.estado === 'PARCIAL') {
+          deudaJ += saldo;
+        } else if (m.estado === 'PENDIENTE' && (numMes < mesHoy || diaHoy > diasGracia)) {
+          deudaJ += saldo;
+        }
+      });
       if (deudaJ > 0) {
         doc.setTextColor(239, 68, 68);
         doc.setFont('helvetica', 'bold');
@@ -751,17 +770,11 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
     // ── Fila de totales ───────────────────────────────────────────
     if (filtered.length) {
-      const diaHoy      = new Date().getDate();
-      const diasGracia  = clubConfig?.dias_gracia_mora ?? 7;
-      const anioHoy     = new Date().getFullYear();
-      const mesHoy      = new Date().getMonth() + 1;
-
-      // Suma saldoPendiente ya registrado en DB (MORA + PARCIAL + PENDIENTE de meses pasados)
-      // Si estamos dentro del periodo de gracia NO sumamos el mes actual (sigue en PENDIENTE)
-      // Si ya pasaron los días de gracia, el mes actual también es deuda exigible
+      // anio, mesHoy, diaHoy, diasGracia ya definidos arriba
       const totalDeuda  = filtered.reduce((sum, j) => {
         const mensJ = (mensualidades || []).filter(m =>
-          String(m.cedula || m.player_id || '') === String(j.cedula) && parseInt(m.anio) === anioHoy
+          String(m.cedula || m.player_id || '') === String(j.cedula) &&
+          parseInt(m.anio) === anio && parseInt(m.numero_mes) <= mesHoy
         );
         let deudaJ = 0;
         mensJ.forEach(m => {
@@ -807,7 +820,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         doc.setFontSize(7);
         doc.setFont('helvetica', 'italic');
         doc.setTextColor(150, 150, 150);
-        doc.text(`* Dentro de los ${diasGracia} días de gracia — mes ${mesHoy < 10 ? '0' + mesHoy : mesHoy}/${anioHoy} aún no se contabiliza como mora.`, cols[1].x, y);
+        doc.text(`* Dentro de los ${diasGracia} días de gracia — mes ${mesHoy < 10 ? '0' + mesHoy : mesHoy}/${anio} aún no se contabiliza como mora.`, cols[1].x, y);
       }
     }
 

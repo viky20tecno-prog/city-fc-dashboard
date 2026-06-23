@@ -719,6 +719,68 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       doc.text('No hay jugadores en este listado.', M, y + 4);
     }
 
+    // ── Fila de totales ───────────────────────────────────────────
+    if (filtered.length) {
+      const diaHoy      = new Date().getDate();
+      const diasGracia  = clubConfig?.dias_gracia_mora ?? 7;
+      const anioHoy     = new Date().getFullYear();
+      const mesHoy      = new Date().getMonth() + 1;
+
+      // Suma saldoPendiente ya registrado en DB (MORA + PARCIAL + PENDIENTE de meses pasados)
+      // Si estamos dentro del periodo de gracia NO sumamos el mes actual (sigue en PENDIENTE)
+      // Si ya pasaron los días de gracia, el mes actual también es deuda exigible
+      const totalDeuda  = filtered.reduce((sum, j) => {
+        const mensJ = (mensualidades || []).filter(m =>
+          String(m.cedula || m.player_id || '') === String(j.cedula) && parseInt(m.anio) === anioHoy
+        );
+        let deudaJ = 0;
+        mensJ.forEach(m => {
+          const numMes = parseInt(m.numero_mes);
+          const saldo  = parseFloat(m.saldo_pendiente) || 0;
+          if (m.estado === 'MORA' || m.estado === 'PARCIAL') {
+            deudaJ += saldo;
+          } else if (m.estado === 'PENDIENTE') {
+            // Mes pasado → siempre deuda; mes actual → solo si ya pasó gracia
+            if (numMes < mesHoy || (numMes === mesHoy && diaHoy > diasGracia)) {
+              deudaJ += saldo;
+            }
+          }
+        });
+        return sum + deudaJ;
+      }, 0);
+
+      const totalPagado = filtered.reduce((s, j) => s + (j.totalPagado || 0), 0);
+      const conDeuda    = filtered.filter(j => (j.saldoPendiente || 0) > 0).length;
+
+      if (y > H - 28) { doc.addPage(); y = drawPageHeader(); }
+      y += 4;
+
+      // Línea separadora
+      doc.setDrawColor(180, 180, 180);
+      doc.setLineWidth(0.4);
+      doc.line(M - 2, y - 2, W - M + 2, y - 2);
+      y += 4;
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 40, 50);
+      doc.text(`TOTAL JUGADORES: ${filtered.length}   |   CON DEUDA: ${conDeuda}`, cols[1].x, y);
+
+      doc.setTextColor(239, 68, 68);
+      doc.text(`DEUDA EXIGIBLE: ${formatCOP(totalDeuda)}`, cols[5].x, y);
+
+      doc.setTextColor(34, 197, 94);
+      doc.text(`RECAUDADO: ${formatCOP(totalPagado)}`, cols[7].x - 5, y);
+
+      if (diaHoy <= diasGracia) {
+        y += 6;
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(150, 150, 150);
+        doc.text(`* Dentro de los ${diasGracia} días de gracia — mes ${mesHoy < 10 ? '0' + mesHoy : mesHoy}/${anioHoy} aún no se contabiliza como mora.`, cols[1].x, y);
+      }
+    }
+
     const pages = doc.internal.getNumberOfPages();
     for (let p = 1; p <= pages; p++) {
       doc.setPage(p);
@@ -1122,14 +1184,22 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                         <PauseCircle className="w-4 h-4" />
                       </button>
 
-                      {/* Restaurar — solo visible en vista inactivos */}
-                      {verArchivados && (
+                      {/* Inactivar / Restaurar */}
+                      {verArchivados ? (
                         <button
                           onClick={() => setJugadorAArchivar({ ...j, accion: 'restaurar' })}
                           title="Restaurar jugador"
                           className="p-1.5 rounded-lg transition text-[var(--text-mut)] hover:text-green-500 hover:bg-green-500/10"
                         >
                           <RotateCcw className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setJugadorAArchivar({ ...j, accion: 'archivar' })}
+                          title="Inactivar jugador"
+                          className="p-1.5 rounded-lg transition text-[var(--text-mut)] hover:text-orange-400 hover:bg-orange-400/10"
+                        >
+                          <Archive className="w-4 h-4" />
                         </button>
                       )}
                     </div>

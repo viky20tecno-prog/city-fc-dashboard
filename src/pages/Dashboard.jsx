@@ -146,23 +146,24 @@ export default function Dashboard() {
     }
   }, [navigate]);
 
-  // ── Revalidar rol Y club desde Supabase al montar (evita datos stale en localStorage) ──
+  // ── Revalidar rol Y club desde Supabase al montar ──
+  // Solo corre si esta pestaña aún no tiene su club asignado en sessionStorage.
+  // Si ya lo tiene, el login de otra pestaña no debe sobreescribirlo.
   useEffect(() => {
     async function revalidarRol() {
+      // Esta pestaña ya está autenticada con un club → no sobreescribir
+      if (sessionStorage.getItem('clubId')) return;
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user?.id) return;
       const userId = session.user.id;
-      const prevClubId = sessionStorage.getItem('clubId');
-
       const { data: ownedClub } = await supabase
         .from('clubs').select('slug').eq('owner_user_id', userId).single();
       if (ownedClub?.slug) {
         sessionStorage.setItem('userRole', 'ADMIN');
         sessionStorage.setItem('clubId', ownedClub.slug);
-        if (ownedClub.slug !== prevClubId) {
-          refresh();
-          refetchConfig();
-        }
+        refresh();
+        refetchConfig();
         return;
       }
       const { data: membership } = await supabase
@@ -179,10 +180,8 @@ export default function Dashboard() {
             .from('clubs').select('slug').eq('id', membership.club_id).single();
           const resolvedId = clubRow?.slug || membership.club_id;
           sessionStorage.setItem('clubId', resolvedId);
-          if (resolvedId !== prevClubId) {
-            refresh();
-            refetchConfig();
-          }
+          refresh();
+          refetchConfig();
         }
       }
     }

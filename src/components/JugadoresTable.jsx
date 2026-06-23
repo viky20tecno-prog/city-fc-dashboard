@@ -421,27 +421,23 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     const ExcelJS = (await import('exceljs')).default ?? (await import('exceljs'));
     const MESES   = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
                      'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
-    const anio = new Date().getFullYear();
+    const anio    = new Date().getFullYear();
+    const fecha   = new Date().toLocaleDateString('es-CO', { day:'2-digit', month:'long', year:'numeric' });
 
-    // Colores de fondo por estado (ARGB sin #)
-    const FILL = {
-      EXENTO:     'FFE0F2FE', // celeste claro
-      AL_DIA:     'FFD1FAE5', // verde claro
-      MORA:       'FFFEE2E2', // rojo claro
-      SUSPENDIDO: 'FFFEF9C3', // amarillo claro
-      PENDIENTE:  'FFFEF3C7', // ámbar claro
-      PARCIAL:    'FFDBEAFE', // azul claro
-    };
-    const FONT_COLOR = {
-      EXENTO:     'FF0369A1',
-      AL_DIA:     'FF166534',
-      MORA:       'FFB91C1C',
-      SUSPENDIDO: 'FF92400E',
-      PENDIENTE:  'FF92400E',
-      PARCIAL:    'FF1E40AF',
+    // Paleta de estados
+    const ESTADO_STYLE = {
+      EXENTO:     { bg: 'FF1D4ED8', fg: 'FFFFFFFF', bold: true  },  // azul intenso / blanco
+      AL_DIA:     { bg: 'FFD1FAE5', fg: 'FF166534', bold: false },  // verde
+      MORA:       { bg: 'FFFEE2E2', fg: 'FFB91C1C', bold: true  },  // rojo / negrita
+      SUSPENDIDO: { bg: 'FFFED7AA', fg: 'FF9A3412', bold: false },  // naranja
+      PENDIENTE:  { bg: 'FFF3F4F6', fg: 'FF6B7280', bold: false },  // gris suave
+      PARCIAL:    { bg: 'FFDBEAFE', fg: 'FF1E40AF', bold: false },  // azul claro
     };
 
-    // Índice mensualidades por cédula → { [numero_mes]: estado }
+    // Cédulas pendientes de registro
+    const esCedulaPend = (ced) => String(ced).startsWith('PEND_');
+
+    // Índice mensualidades: cédula → { [numero_mes]: estado }
     const mensIdx = {};
     (mensualidades || [])
       .filter(m => parseInt(m.anio) === anio)
@@ -452,69 +448,91 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       });
 
     const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet(`ESTADO ${anio}`);
+    wb.creator = 'ZenSports';
+    const ws = wb.addWorksheet(`ESTADO ${anio}`, { views: [{ state: 'frozen', ySplit: 2 }] });
 
-    // Columnas con ancho
     ws.columns = [
-      { width: 32 }, // Jugador
-      { width: 16 }, // Cédula
-      { width: 20 }, // Categoría
-      ...MESES.map(() => ({ width: 14 })),
+      { width: 34 },
+      { width: 18 },
+      { width: 22 },
+      ...MESES.map(() => ({ width: 13 })),
     ];
 
-    // Fila de encabezado
-    const headerRow = ws.addRow(['JUGADOR', 'CÉDULA', 'CATEGORÍA', ...MESES]);
-    headerRow.eachCell(cell => {
-      cell.fill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF111827' } };
-      cell.font   = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-      cell.alignment = { horizontal: 'center', vertical: 'middle' };
-      cell.border = {
-        bottom: { style: 'thin', color: { argb: 'FF374151' } },
-      };
-    });
-    headerRow.height = 20;
+    // ── Fila título ───────────────────────────────────────────────
+    const titleRow = ws.addRow([`ESTADO DE MENSUALIDADES ${anio}  ·  ${fecha.toUpperCase()}  ·  ${clubConfig?.nombre?.toUpperCase() || ''}`]);
+    ws.mergeCells(1, 1, 1, 3 + MESES.length);
+    titleRow.getCell(1).fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+    titleRow.getCell(1).font      = { bold: true, color: { argb: 'FFFBBF24' }, size: 11, name: 'Calibri' };
+    titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+    titleRow.height = 24;
 
-    // Filas de datos
+    // ── Fila encabezado ───────────────────────────────────────────
+    const headerRow = ws.addRow(['JUGADOR', 'CÉDULA', 'CATEGORÍA', ...MESES]);
+    headerRow.eachCell((cell, col) => {
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: col <= 3 ? 'FF1E293B' : 'FF334155' } };
+      cell.font      = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10, name: 'Calibri' };
+      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: false };
+      cell.border    = { bottom: { style: 'medium', color: { argb: 'FFFBBF24' } } };
+    });
+    headerRow.height = 22;
+
+    // AutoFiltro desde la fila de encabezados
+    ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: 3 + MESES.length } };
+
+    // ── Filas de datos ────────────────────────────────────────────
     const jugadoresOrdenados = [...jugadoresConPago]
       .filter(j => j.activo)
       .sort((a, b) => (a.nombreCompleto || '').localeCompare(b.nombreCompleto || '', 'es'));
 
-    for (const j of jugadoresOrdenados) {
-      const esExentoGlobal  = Number(j.descuento_pct) >= 100;
-      const mesesDelJugador = mensIdx[String(j.cedula)] || {};
+    jugadoresOrdenados.forEach((j, idx) => {
+      const esPend         = esCedulaPend(j.cedula);
+      const esExentoGlobal = Number(j.descuento_pct) >= 100;
+      const mesesJ         = mensIdx[String(j.cedula)] || {};
+      const zebraFg        = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC';
 
       const estadosMes = MESES.map((_, i) => {
         if (esExentoGlobal) return 'EXENTO';
-        const est = mesesDelJugador[i + 1] || '-';
+        const est = mesesJ[i + 1] || '-';
         return est === 'EXENTO' ? 'SUSPENDIDO' : est;
       });
 
       const dataRow = ws.addRow([
         (j.nombreCompleto || '').toUpperCase(),
-        j.cedula || '',
+        String(j.cedula || '').toUpperCase(),
         (j.categoria || '').toUpperCase(),
         ...estadosMes,
       ]);
 
       dataRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
-        cell.alignment = { horizontal: colNum <= 3 ? 'left' : 'center', vertical: 'middle' };
-        cell.font      = { size: 10 };
+        const esMesCol = colNum > 3;
+        const estado   = esMesCol ? estadosMes[colNum - 4] : null;
+        const estStyle = estado ? ESTADO_STYLE[estado] : null;
 
-        if (colNum > 3) {
-          const estado = estadosMes[colNum - 4];
-          const fillColor  = FILL[estado];
-          const fontColor  = FONT_COLOR[estado];
-          if (fillColor) {
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fillColor } };
-            cell.font = { size: 10, color: { argb: fontColor }, bold: estado === 'MORA' };
+        // Fondo y fuente para celdas de meses
+        if (esMesCol && estStyle) {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: estStyle.bg } };
+          cell.font = { size: 10, name: 'Calibri', color: { argb: estStyle.fg }, bold: estStyle.bold };
+        } else {
+          // Celdas de información (jugador, cédula, categoría)
+          if (esPend) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF7ED' } };
+            cell.font = { size: 10, name: 'Calibri', bold: true, italic: true, color: { argb: 'FF9A3412' } };
+          } else {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: zebraFg } };
+            cell.font = { size: 10, name: 'Calibri', color: { argb: 'FF1E293B' } };
           }
         }
-      });
-      dataRow.height = 18;
-    }
 
-    // Congelar primera fila
-    ws.views = [{ state: 'frozen', ySplit: 1 }];
+        cell.alignment = { horizontal: esMesCol ? 'center' : 'left', vertical: 'middle' };
+
+        // Borde izquierdo naranja para cédulas pendientes
+        if (colNum === 1 && esPend) {
+          cell.border = { left: { style: 'medium', color: { argb: 'FFF97316' } } };
+        }
+      });
+
+      dataRow.height = 19;
+    });
 
     // Descargar
     const buffer = await wb.xlsx.writeBuffer();

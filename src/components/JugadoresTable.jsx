@@ -1,6 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, Loader2, Archive, RotateCcw } from 'lucide-react';
-import jsPDF from 'jspdf';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { ESTADO_COLORS, API_BASE_URL } from '../config';
 import HojaDeVida from './HojaDeVida';
@@ -419,6 +418,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   };
 
   const exportarPDF = async () => { try {
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const W = 297; const H = 210; const M = 12;
     const accentRgb = hexToRgb(color || clubConfig?.color);

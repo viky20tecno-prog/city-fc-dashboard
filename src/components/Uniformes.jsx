@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Shirt, CheckCircle, AlertCircle, Search, Loader, X, Pencil, Save, Download, Plus, Trash2, Package } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
-import jsPDF from 'jspdf';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfSectionLabel, drawPdfTableHead } from '../lib/pdfHelpers';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
@@ -239,6 +238,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const generarPDF = async () => {
     setGenerandoPDF(true);
     try {
+      const { default: jsPDF } = await import('jspdf');
       const doc      = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const W        = doc.internal.pageSize.getWidth();
       const H        = doc.internal.pageSize.getHeight();

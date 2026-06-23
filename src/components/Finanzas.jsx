@@ -8,7 +8,6 @@ import {
   ComposedChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
-import jsPDF from 'jspdf';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
@@ -244,6 +243,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
     const cg = parseInt(acHex.slice(3, 5), 16);
     const cb = parseInt(acHex.slice(5, 7), 16);
 
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [105, 148] }); // A6
     const W = 105;
     const M = 10;
@@ -323,6 +323,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
 
   /* ── Exportar PDF ────────────────────────────────────── */
   const exportarPDF = async () => {
+    const { default: jsPDF } = await import('jspdf');
     const doc   = new jsPDF();
     const W     = 210;
     const M     = 14;

@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import jsPDF from 'jspdf';
 import {
   ChevronLeft, ChevronRight, CheckCircle2, XCircle, AlertCircle,
   Loader2, Users, Plus, ClipboardList, X, Download,
@@ -334,6 +333,7 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
     if (exportandoPDF || !eventoActivo || players.length === 0) return;
     setExportandoPDF(true);
     try {
+      const { default: jsPDF } = await import('jspdf');
       const doc = new jsPDF();
       const W = 210, M = 14, H = 297;
       const accentRgb = hexToRgb(color);

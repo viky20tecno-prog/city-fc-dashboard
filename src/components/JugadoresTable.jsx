@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, Loader2, Archive, RotateCcw } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, Loader2, Archive, RotateCcw, ClipboardList } from 'lucide-react';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { ESTADO_COLORS, API_BASE_URL } from '../config';
 import HojaDeVida from './HojaDeVida';
@@ -417,6 +417,48 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     XLSX.writeFile(wb, `jugadores_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
+  const exportarEstadoActual = async () => {
+    const XLSX = await import('xlsx');
+    const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const anio = new Date().getFullYear();
+
+    // Índice de mensualidades por cédula → { [numero_mes]: estado }
+    const mensIdx = {};
+    (mensualidades || [])
+      .filter(m => parseInt(m.anio) === anio)
+      .forEach(m => {
+        const ced = String(m.cedula || m.player_id || '');
+        if (!mensIdx[ced]) mensIdx[ced] = {};
+        mensIdx[ced][parseInt(m.numero_mes)] = m.estado;
+      });
+
+    const headers = ['Jugador', 'Cédula', 'Categoría', 'Rol', ...MESES];
+
+    const rows = [...(jugadores || [])]
+      .filter(j => j.activo !== false)
+      .sort((a, b) => (a.nombreCompleto || '').localeCompare(b.nombreCompleto || '', 'es'))
+      .map(j => {
+        const esExentoGlobal = Number(j.descuento_pct) >= 100;
+        const mesesDelJugador = mensIdx[String(j.cedula)] || {};
+        const estados = MESES.map((_, i) => {
+          if (esExentoGlobal) return 'EXENTO';
+          return mesesDelJugador[i + 1] || '-';
+        });
+        return [j.nombreCompleto || '', j.cedula || '', j.categoria || '', j.rol || '', ...estados];
+      });
+
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    ws['!cols'] = [
+      { wch: 28 }, { wch: 14 }, { wch: 16 }, { wch: 14 },
+      ...MESES.map(() => ({ wch: 12 })),
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `Estado ${anio}`);
+    XLSX.writeFile(wb, `estado_actual_${anio}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
   const exportarPDF = async () => { try {
     const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -537,6 +579,19 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 >
                   <Upload className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Excel</span>
+                </button>
+
+                {/* Estado Actual — Excel 12 meses */}
+                <button
+                  onClick={exportarEstadoActual}
+                  title={`Descargar estado de los 12 meses de ${new Date().getFullYear()} para todos los jugadores`}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
+                  style={{ background: 'rgba(56,189,248,0.08)', border: '1px solid rgba(56,189,248,0.28)', color: '#38bdf8', whiteSpace: 'nowrap', flexShrink: 0 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(56,189,248,0.18)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(56,189,248,0.08)'}
+                >
+                  <ClipboardList className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Estado Actual</span>
                 </button>
 
                 {/* Exportar PDF */}

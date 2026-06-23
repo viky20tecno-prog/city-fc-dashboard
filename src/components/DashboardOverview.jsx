@@ -209,7 +209,8 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
                parseInt(m.numero_mes) === mesActual &&
                parseInt(m.anio) === anioActual,
         );
-        if (!mens || ['AL_DIA', 'MORA'].includes(mens.estado)) return null;
+        if (j.descuento_pct >= 100) return null;
+        if (!mens || ['AL_DIA', 'MORA', 'EXENTO', 'SUSPENDIDO'].includes(mens.estado)) return null;
         return {
           nombre:   `${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase(),
           cedula:   j.cedula,

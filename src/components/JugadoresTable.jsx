@@ -433,25 +433,25 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         mensIdx[ced][parseInt(m.numero_mes)] = m.estado;
       });
 
-    const headers = ['Jugador', 'Cédula', 'Categoría', 'Rol', ...MESES];
+    const headers = ['Jugador', 'Cédula', 'Categoría', ...MESES];
 
-    const rows = [...(jugadores || [])]
-      .filter(j => j.activo !== false)
+    const rows = [...jugadoresConPago]
+      .filter(j => j.activo)
       .sort((a, b) => (a.nombreCompleto || '').localeCompare(b.nombreCompleto || '', 'es'))
       .map(j => {
-        const esExentoGlobal = Number(j.descuento_pct) >= 100;
+        const esExentoGlobal  = Number(j.descuento_pct) >= 100;
         const mesesDelJugador = mensIdx[String(j.cedula)] || {};
         const estados = MESES.map((_, i) => {
           if (esExentoGlobal) return 'EXENTO';
           const est = mesesDelJugador[i + 1] || '-';
           return est === 'EXENTO' ? 'SUSPENDIDO' : est;
         });
-        return [j.nombreCompleto || '', j.cedula || '', j.categoria || '', j.rol || '', ...estados];
+        return [j.nombreCompleto || '', j.cedula || '', j.categoria || '', ...estados];
       });
 
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     ws['!cols'] = [
-      { wch: 28 }, { wch: 14 }, { wch: 16 }, { wch: 14 },
+      { wch: 28 }, { wch: 14 }, { wch: 16 },
       ...MESES.map(() => ({ wch: 12 })),
     ];
 

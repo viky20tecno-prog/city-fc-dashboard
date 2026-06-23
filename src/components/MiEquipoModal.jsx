@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Loader2, Copy, Check, UserCheck, ShieldOff, AlertTriangle } from 'lucide-react';
+import { X, Plus, Trash2, Loader2, Copy, Check, UserCheck, ShieldOff, AlertTriangle, Phone } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 
@@ -15,7 +15,7 @@ export default function MiEquipoModal({ clubId, onClose }) {
   const [loading,   setLoading]   = useState(true);
   const [showForm,  setShowForm]  = useState(false);
   const [saving,    setSaving]    = useState(false);
-  const [newMember, setNewMember] = useState({ email: '', nombre: '', role: 'ENTRENADOR' });
+  const [newMember, setNewMember] = useState({ email: '', nombre: '', role: 'ENTRENADOR', celular: '' });
   const [created,   setCreated]   = useState(null);
   const [copied,    setCopied]    = useState(false);
   const [error,     setError]     = useState(null);
@@ -50,7 +50,7 @@ export default function MiEquipoModal({ clubId, onClose }) {
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
       setCreated(data);
-      setNewMember({ email: '', nombre: '', role: 'ENTRENADOR' });
+      setNewMember({ email: '', nombre: '', role: 'ENTRENADOR', celular: '' });
       setShowForm(false);
       await fetchMembers();
     } catch (e) {
@@ -151,9 +151,16 @@ export default function MiEquipoModal({ clubId, onClose }) {
                   <div key={m.id} className={`flex items-center gap-3 p-3 rounded-xl border ${m.activo ? 'border-[var(--cc20)] bg-[var(--bg-surface)]' : 'border-gray-700/50 bg-gray-800/30 opacity-60'}`}>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-[var(--text-pri)] truncate">{m.nombre}</p>
-                      <span className={`inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border ${rs.color}`}>
-                        {rs.label}
-                      </span>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold border ${rs.color}`}>
+                          {rs.label}
+                        </span>
+                        {m.celular && (
+                          <span className="flex items-center gap-1 text-[10px] text-[var(--text-sec)]">
+                            <Phone size={9} /> {m.celular}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <button
@@ -201,6 +208,18 @@ export default function MiEquipoModal({ clubId, onClose }) {
                 />
               </div>
               <div>
+                <label className="block text-xs text-[var(--text-sec)] mb-1">
+                  Celular WhatsApp <span className="text-[var(--text-mut)]">(para bot WA)</span>
+                </label>
+                <input
+                  type="tel"
+                  value={newMember.celular}
+                  onChange={(e) => setNewMember(p => ({ ...p, celular: e.target.value.replace(/\D/g, '') }))}
+                  placeholder="Ej: 3001234567"
+                  className={INPUT}
+                />
+              </div>
+              <div>
                 <label className="block text-xs text-[var(--text-sec)] mb-1">Rol</label>
                 <select
                   value={newMember.role}
@@ -242,7 +261,7 @@ export default function MiEquipoModal({ clubId, onClose }) {
 
         <div className="px-6 py-3 border-t border-[var(--cc20)]">
           <p className="text-xs text-[var(--text-mut)] text-center">
-            Los entrenadores pueden ver jugadores y arbitraje, pero no acceden a información financiera.
+            Los entrenadores pueden ver jugadores y arbitraje, pero no acceden a información financiera. El celular activa su acceso al bot de WhatsApp.
           </p>
         </div>
       </div>

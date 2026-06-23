@@ -455,21 +455,22 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       { width: 34 },
       { width: 18 },
       { width: 22 },
+      { width: 12 },
       ...MESES.map(() => ({ width: 13 })),
     ];
 
     // ── Fila título ───────────────────────────────────────────────
     const titleRow = ws.addRow([`ESTADO DE MENSUALIDADES ${anio}  ·  ${fecha.toUpperCase()}  ·  ${clubConfig?.nombre?.toUpperCase() || ''}`]);
-    ws.mergeCells(1, 1, 1, 3 + MESES.length);
+    ws.mergeCells(1, 1, 1, 4 + MESES.length);
     titleRow.getCell(1).fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
     titleRow.getCell(1).font      = { bold: true, color: { argb: 'FFFBBF24' }, size: 11, name: 'Calibri' };
     titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
     titleRow.height = 24;
 
     // ── Fila encabezado ───────────────────────────────────────────
-    const headerRow = ws.addRow(['JUGADOR', 'CÉDULA', 'CATEGORÍA', ...MESES]);
+    const headerRow = ws.addRow(['JUGADOR', 'CÉDULA', 'CATEGORÍA', 'ESTADO', ...MESES]);
     headerRow.eachCell((cell, col) => {
-      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: col <= 3 ? 'FF1E293B' : 'FF334155' } };
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: col <= 4 ? 'FF1E293B' : 'FF334155' } };
       cell.font      = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10, name: 'Calibri' };
       cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: false };
       cell.border    = { bottom: { style: 'medium', color: { argb: 'FFFBBF24' } } };
@@ -477,15 +478,16 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     headerRow.height = 22;
 
     // AutoFiltro desde la fila de encabezados
-    ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: 3 + MESES.length } };
+    ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: 4 + MESES.length } };
 
     // ── Filas de datos ────────────────────────────────────────────
-    const jugadoresOrdenados = [...jugadoresConPago]
-      .filter(j => j.activo)
-      .sort((a, b) => (a.nombreCompleto || '').localeCompare(b.nombreCompleto || '', 'es'));
+    const activos   = [...jugadoresConPago].filter(j =>  j.activo).sort((a, b) => (a.nombreCompleto||'').localeCompare(b.nombreCompleto||'','es'));
+    const inactivos = [...jugadoresConPago].filter(j => !j.activo).sort((a, b) => (a.nombreCompleto||'').localeCompare(b.nombreCompleto||'','es'));
+    const jugadoresOrdenados = [...activos, ...inactivos];
 
     jugadoresOrdenados.forEach((j, idx) => {
       const esPend         = esCedulaPend(j.cedula);
+      const esInactivo     = !j.activo;
       const esExentoGlobal = Number(j.descuento_pct) >= 100;
       const mesesJ         = mensIdx[String(j.cedula)] || {};
       const zebraFg        = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC';
@@ -500,34 +502,47 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         (j.nombreCompleto || '').toUpperCase(),
         String(j.cedula || '').toUpperCase(),
         (j.categoria || '').toUpperCase(),
+        esInactivo ? 'INACTIVO' : 'ACTIVO',
         ...estadosMes,
       ]);
 
       dataRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
-        const esMesCol = colNum > 3;
-        const estado   = esMesCol ? estadosMes[colNum - 4] : null;
-        const estStyle = estado ? ESTADO_STYLE[estado] : null;
+        const esMesCol    = colNum > 4;
+        const esEstadoCol = colNum === 4;
+        const estado      = esMesCol ? estadosMes[colNum - 5] : null;
+        const estStyle    = estado ? ESTADO_STYLE[estado] : null;
 
-        // Fondo y fuente para celdas de meses
         if (esMesCol && estStyle) {
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: estStyle.bg } };
-          cell.font = { size: 10, name: 'Calibri', color: { argb: estStyle.fg }, bold: estStyle.bold };
+          const bg = esInactivo ? 'FFE5E7EB' : estStyle.bg;
+          const fg = esInactivo ? 'FF9CA3AF' : estStyle.fg;
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+          cell.font = { size: 10, name: 'Calibri', color: { argb: fg }, bold: !esInactivo && estStyle.bold };
+        } else if (esEstadoCol) {
+          const bg = esInactivo ? 'FFE5E7EB' : 'FFD1FAE5';
+          const fg = esInactivo ? 'FF6B7280' : 'FF166534';
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+          cell.font = { size: 10, name: 'Calibri', bold: true, color: { argb: fg } };
         } else {
           // Celdas de información (jugador, cédula, categoría)
           if (esPend) {
             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF7ED' } };
             cell.font = { size: 10, name: 'Calibri', bold: true, italic: true, color: { argb: 'FF9A3412' } };
+          } else if (esInactivo) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
+            cell.font = { size: 10, name: 'Calibri', italic: true, color: { argb: 'FF9CA3AF' } };
           } else {
             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: zebraFg } };
             cell.font = { size: 10, name: 'Calibri', color: { argb: 'FF1E293B' } };
           }
         }
 
-        cell.alignment = { horizontal: esMesCol ? 'center' : 'left', vertical: 'middle' };
+        cell.alignment = { horizontal: (esMesCol || esEstadoCol) ? 'center' : 'left', vertical: 'middle' };
 
-        // Borde izquierdo naranja para cédulas pendientes
         if (colNum === 1 && esPend) {
           cell.border = { left: { style: 'medium', color: { argb: 'FFF97316' } } };
+        }
+        if (colNum === 1 && esInactivo && !esPend) {
+          cell.border = { left: { style: 'thin', color: { argb: 'FFD1D5DB' } } };
         }
       });
 
@@ -556,18 +571,29 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
     const logoData = await loadLogoDataUrl(clubConfig?.logo_url);
 
+    // Índice meses en mora por cédula
+    const anio = new Date().getFullYear();
+    const moraPorCedula = {};
+    (mensualidades || [])
+      .filter(m => parseInt(m.anio) === anio && m.estado === 'MORA')
+      .forEach(m => {
+        const ced = String(m.cedula || m.player_id || '');
+        moraPorCedula[ced] = (moraPorCedula[ced] || 0) + 1;
+      });
+
     const cols = [
-      { label: 'Nombre',    x: M },
-      { label: 'Cédula',    x: M + 62 },
-      { label: 'Celular',   x: M + 96 },
-      { label: 'Categoría', x: M + 128 },
-      { label: 'Equipo',    x: M + 160 },
-      { label: 'Estado',    x: M + 197 },
-      { label: 'Pagado',    x: M + 227 },
+      { label: '#',         x: M },
+      { label: 'NOMBRE',    x: M + 10 },
+      { label: 'CÉDULA',    x: M + 72 },
+      { label: 'CELULAR',   x: M + 104 },
+      { label: 'CATEGORÍA', x: M + 134 },
+      { label: 'ESTADO',    x: M + 167 },
+      { label: 'EN MORA',   x: M + 194 },
+      { label: 'PAGADO',    x: M + 222 },
     ];
 
     const drawPageHeader = () => {
-      const y0 = drawPdfHeader(doc, { W, M, clubName, title: titulo, date: `${fecha} · ${filtered.length} jugadores`, logoData, accentRgb });
+      const y0 = drawPdfHeader(doc, { W, M, clubName, title: titulo.toUpperCase(), date: `${fecha.toUpperCase()} · ${filtered.length} JUGADORES`, logoData, accentRgb });
       return drawPdfTableHead(doc, { W, M, y: y0, columns: cols, accentRgb });
     };
 
@@ -579,18 +605,26 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.8);
       doc.setTextColor(30, 40, 50);
-      doc.text((j.nombreCompleto || '').slice(0, 28),  cols[0].x, y);
-      doc.text(String(j.cedula || ''),                 cols[1].x, y);
-      doc.text(String(j.celular || ''),                cols[2].x, y);
-      doc.text((j.categoria || '—').slice(0, 14),      cols[3].x, y);
-      doc.text((j.equipo || '—').slice(0, 16),         cols[4].x, y);
+      doc.text(String(i + 1),                                       cols[0].x, y);
+      doc.text((j.nombreCompleto || '').toUpperCase().slice(0, 26), cols[1].x, y);
+      doc.text(String(j.cedula || ''),                              cols[2].x, y);
+      doc.text(String(j.celular || ''),                             cols[3].x, y);
+      doc.text((j.categoria || '—').toUpperCase().slice(0, 14),     cols[4].x, y);
       const estadoColor = j.estadoPago === 'AL_DIA' ? [34, 197, 94] : j.estadoPago === 'MORA' ? [239, 68, 68] : [245, 166, 35];
       doc.setTextColor(...estadoColor);
       doc.setFont('helvetica', 'bold');
-      doc.text(j.estadoPago === 'AL_DIA' ? 'Al día' : j.estadoPago === 'MORA' ? 'En mora' : 'Pendiente', cols[5].x, y);
+      doc.text(j.estadoPago === 'AL_DIA' ? 'AL DÍA' : j.estadoPago === 'MORA' ? 'EN MORA' : j.estadoPago?.toUpperCase() || '-', cols[5].x, y);
+      const mMora = moraPorCedula[String(j.cedula)] || 0;
+      if (mMora > 0) {
+        doc.setTextColor(239, 68, 68);
+        doc.text(`${mMora} MES${mMora > 1 ? 'ES' : ''}`, cols[6].x, y);
+      } else {
+        doc.setTextColor(150, 150, 150);
+        doc.text('—', cols[6].x, y);
+      }
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(30, 40, 50);
-      doc.text(formatCOP(j.totalPagado), cols[6].x, y);
+      doc.text(formatCOP(j.totalPagado), cols[7].x, y);
       y += 8;
     });
 
@@ -604,7 +638,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     const pages = doc.internal.getNumberOfPages();
     for (let p = 1; p <= pages; p++) {
       doc.setPage(p);
-      drawPdfFooter(doc, { W, H, M, clubName, pageNum: p, totalPages: pages, note: `${filtered.length} jugadores` });
+      drawPdfFooter(doc, { W, H, M, clubName, pageNum: p, totalPages: pages, note: `${filtered.length} JUGADORES` });
     }
 
     const filtroLabel = filtroCategoria === SIN_EQUIPO ? '-sin-equipo' : filtroCategoria !== 'TODOS' ? `-${filtroCategoria.toLowerCase().replace(/\s+/g, '-')}` : '';
@@ -706,16 +740,15 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   <span className="hidden sm:inline">Importar</span>
                 </button>
 
-                {/* Generar mensualidades del año */}
-                {/* Toggle archivados */}
+                {/* Toggle inactivos */}
                 <button
                   onClick={() => { setVerArchivados(v => !v); setFiltroEstado('TODOS'); setSearch(''); }}
-                  title={verArchivados ? 'Ver jugadores activos' : 'Ver jugadores archivados'}
+                  title={verArchivados ? 'Ver jugadores activos' : 'Ver jugadores inactivos'}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
                   style={{ background: verArchivados ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.05)', border: `1px solid ${verArchivados ? 'rgba(239,68,68,0.35)' : 'rgba(255,255,255,0.12)'}`, color: verArchivados ? '#EF4444' : 'var(--text-mut)', whiteSpace: 'nowrap', flexShrink: 0 }}
                 >
                   <Archive className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{verArchivados ? 'Activos' : 'Archivados'}</span>
+                  <span className="hidden sm:inline">{verArchivados ? 'Activos' : 'Inactivos'}</span>
                 </button>
 
                 {/* Importar estados mensualidades */}
@@ -1005,22 +1038,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                         <PauseCircle className="w-4 h-4" />
                       </button>
 
-                      {/* Archivar / Restaurar */}
-                      {verArchivados ? (
+                      {/* Restaurar — solo visible en vista inactivos */}
+                      {verArchivados && (
                         <button
                           onClick={() => setJugadorAArchivar({ ...j, accion: 'restaurar' })}
                           title="Restaurar jugador"
                           className="p-1.5 rounded-lg transition text-[var(--text-mut)] hover:text-green-500 hover:bg-green-500/10"
                         >
                           <RotateCcw className="w-4 h-4" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => setJugadorAArchivar({ ...j, accion: 'archivar' })}
-                          title="Archivar jugador (desactivar sin borrar)"
-                          className="p-1.5 rounded-lg transition text-[var(--text-mut)] hover:text-orange-400 hover:bg-orange-400/10"
-                        >
-                          <Archive className="w-4 h-4" />
                         </button>
                       )}
                     </div>
@@ -1133,11 +1158,11 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               </div>
               <div>
                 <div style={{ color: 'var(--text-pri)', fontWeight: 700, fontSize: '18px', lineHeight: 1.3 }}>
-                  {jugadorAArchivar.accion === 'archivar' ? '¿Archivar jugador?' : '¿Restaurar jugador?'}
+                  {jugadorAArchivar.accion === 'archivar' ? '¿Inactivar jugador?' : '¿Restaurar jugador?'}
                 </div>
                 <div style={{ color: 'var(--text-sec)', fontSize: '14px', marginTop: '4px', lineHeight: 1.4 }}>
                   {jugadorAArchivar.accion === 'archivar'
-                    ? 'El jugador queda inactivo. Sus datos se conservan y puede restaurarlo cuando quiera.'
+                    ? 'El jugador quedará inactivo. Sus datos se conservan y puedes restaurarlo cuando quieras.'
                     : 'El jugador vuelve a la lista activa con todos sus datos intactos.'}
                 </div>
               </div>
@@ -1164,8 +1189,8 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: jugadorAArchivar.accion === 'archivar' ? '#FB923C' : '#22C55E', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: archivando ? 'not-allowed' : 'pointer', opacity: archivando ? 0.7 : 1 }}
               >
                 {archivando
-                  ? (jugadorAArchivar.accion === 'archivar' ? 'Archivando…' : 'Restaurando…')
-                  : (jugadorAArchivar.accion === 'archivar' ? 'Sí, archivar' : 'Sí, restaurar')}
+                  ? (jugadorAArchivar.accion === 'archivar' ? 'Inactivando…' : 'Restaurando…')
+                  : (jugadorAArchivar.accion === 'archivar' ? 'Sí, inactivar' : 'Sí, restaurar')}
               </button>
             </div>
 

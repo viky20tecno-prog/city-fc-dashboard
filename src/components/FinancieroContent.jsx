@@ -18,6 +18,7 @@ const ESTADO_ICON = {
   PENDIENTE: { icon: Clock,         color: 'text-[#F59E0B]',  bg: 'bg-yellow-500/10 border border-yellow-500/20' },
   PARCIAL:   { icon: AlertTriangle, color: 'text-[var(--cc)]',  bg: 'bg-[var(--cc)]/10 border border-[var(--cc)]/20'   },
   MORA:      { icon: XCircle,       color: 'text-[#EF4444]',  bg: 'bg-red-500/10 border border-red-500/20'       },
+  EXENTO:    { icon: CheckCircle,   color: 'text-sky-400',    bg: 'bg-sky-400/10 border border-sky-400/20'       },
 };
 
 const ESTADO_PEDIDO = {
@@ -81,14 +82,15 @@ function SuspendidoBadge({ motivo, detalle, cancelada }) {
 
 const MESES_LABEL = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-function FilaMensualidad({ m, susp, onUpdated }) {
+function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub = 65000 }) {
   const [editando, setEditando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [form, setForm] = useState({});
 
-  const nombreMes  = m.mes || MESES_LABEL[parseInt(m.numero_mes)] || '';
-  const penalidad  = parseFloat(m.penalidad) || 0;
-  const totalDeuda = (parseFloat(m.valor_oficial) || 0) + penalidad;
+  const nombreMes        = m.mes || MESES_LABEL[parseInt(m.numero_mes)] || '';
+  const penalidad        = parseFloat(m.penalidad) || 0;
+  const totalDeuda       = (parseFloat(m.valor_oficial) || 0) + penalidad;
+  const esExentoIndividual = !esExentoGlobal && m.estado === 'EXENTO';
 
   const abrirEdit = () => {
     setForm({
@@ -122,21 +124,33 @@ function FilaMensualidad({ m, susp, onUpdated }) {
 
   const INPUT_SM = 'w-full bg-[var(--bg-card)] border border-[var(--cc20)] text-[var(--text-pri)] rounded-lg px-2 py-1.5 text-xs outline-none focus:border-[var(--cc)]';
 
+  const rowBg = esExentoGlobal
+    ? 'bg-sky-400/5 border-sky-400/15'
+    : (susp || esExentoIndividual)
+      ? 'bg-yellow-400/5 border-yellow-400/20'
+      : 'bg-[var(--bg-surface)] border-[var(--bg-surface)]';
+
   return (
-    <div className={`p-3 rounded-xl border ${susp ? 'bg-yellow-400/5 border-yellow-400/20' : 'bg-[var(--bg-surface)] border-[var(--bg-surface)]'}`}>
+    <div className={`p-3 rounded-xl border ${rowBg}`}>
       {!editando ? (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <span className="text-sm font-medium text-[var(--text-pri)] w-16 flex-shrink-0">{nombreMes}</span>
-            {susp
-              ? <SuspendidoBadge motivo={susp.motivo} detalle={susp.detalle} cancelada={!susp.activa} />
-              : <EstadoBadge estado={m.estado} />}
+            {esExentoGlobal
+              ? <EstadoBadge estado="EXENTO" />
+              : esExentoIndividual
+                ? <SuspendidoBadge motivo="RETIRO_TEMPORAL" />
+                : susp
+                  ? <SuspendidoBadge motivo={susp.motivo} detalle={susp.detalle} cancelada={!susp.activa} />
+                  : <EstadoBadge estado={m.estado} />}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 ml-2">
             <p className="text-sm font-medium text-[var(--text-pri)]">
-              {formatCOP(m.valor_pagado)}<span className="text-[var(--text-sec)]"> / {formatCOP(totalDeuda)}</span>
+              {esExentoGlobal
+                ? <><span>$0</span><span className="text-[var(--text-sec)]"> / {formatCOP(cuotaClub)}</span></>
+                : <>{formatCOP(m.valor_pagado)}<span className="text-[var(--text-sec)]"> / {formatCOP(totalDeuda)}</span></>}
             </p>
-            {!susp && (
+            {!susp && !esExentoIndividual && (
               <button onClick={abrirEdit} className="p-1 rounded-lg text-[var(--text-mut)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">
                 <Pencil className="w-3 h-3" />
               </button>
@@ -202,7 +216,7 @@ function FilaMensualidad({ m, susp, onUpdated }) {
   );
 }
 
-function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated }) {
+function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, esExentoGlobal = false, cuotaClub = 65000 }) {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
@@ -259,7 +273,7 @@ function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated }
       </div>
       <div className="space-y-2">
         {items.map((m, i) => (
-          <FilaMensualidad key={m.id || i} m={m} susp={getSuspension(m.numero_mes)} onUpdated={handleUpdated} />
+          <FilaMensualidad key={m.id || i} m={m} susp={getSuspension(m.numero_mes)} onUpdated={handleUpdated} esExentoGlobal={esExentoGlobal} cuotaClub={cuotaClub} />
         ))}
       </div>
     </div>
@@ -502,7 +516,7 @@ function extraerMotivoExento(notas) {
   return match ? match[1].trim() : null;
 }
 
-export default function FinancieroContent({ cedula, jugador, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated, onJugadorUpdated }) {
+export default function FinancieroContent({ cedula, jugador, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated, onJugadorUpdated, clubConfig }) {
   const misMensualidades = mensualidades.filter(m => String(m.cedula || m.player_id || '') === String(cedula));
   const misTorneos       = torneos.filter(t => String(t.cedula || t.player_id || '') === String(cedula));
   const misSuspensiones  = suspensiones.filter(s => s.cedula === String(cedula));
@@ -680,7 +694,13 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
           <span>{tipoTexto} · {descuento}% de descuento aplicado</span>
         </div>
       )}
-      <SeccionMensualidades datos={misMensualidades} suspensiones={misSuspensiones} onMensualidadUpdated={onMensualidadUpdated} />
+      <SeccionMensualidades
+        datos={misMensualidades}
+        suspensiones={misSuspensiones}
+        onMensualidadUpdated={onMensualidadUpdated}
+        esExentoGlobal={esExento}
+        cuotaClub={parseFloat(clubConfig?.valor_mensualidad) || 65000}
+      />
       <SeccionPedidoUniforme cedula={cedula} />
       <SeccionTorneos datos={misTorneos} />
       <SeccionHistorialLazy cedula={cedula} />

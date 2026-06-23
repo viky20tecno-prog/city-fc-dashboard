@@ -41,6 +41,12 @@ function Checkbox({ checked, onChange, color }) {
 export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSaved }) {
   const clubId = getClubId();
   const c = color;
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', fn);
+    return () => window.removeEventListener('resize', fn);
+  }, []);
 
   /* ── categorías ── */
   const [categorias,  setCategorias]  = useState(() => normalizarCategorias(clubConfig?.categorias_jugadores || []));
@@ -305,13 +311,21 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
     finally { setExportando(false); }
   };
 
+  // En mobile: mostrar solo izquierda (lista) o derecha (detalle), nunca ambas
+  const showLeft  = !isMobile || !seleccion;
+  const showRight = !isMobile || !!seleccion;
+
   return (
-    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100%', overflow: 'hidden', flexDirection: isMobile ? 'column' : 'row' }}>
 
       {/* ══ PANEL IZQUIERDO ══ */}
       <div style={{
-        width: 300, flexShrink: 0, borderRight: '1px solid var(--border-sub)',
-        display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-app)',
+        width: isMobile ? '100%' : 300,
+        flexShrink: 0,
+        borderRight: isMobile ? 'none' : '1px solid var(--border-sub)',
+        borderBottom: isMobile && showLeft ? '1px solid var(--border-sub)' : 'none',
+        display: showLeft ? 'flex' : 'none',
+        flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-app)',
       }}>
         <div style={{ padding: '18px 18px 12px', borderBottom: '1px solid var(--border-sub)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -460,7 +474,7 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
       </div>
 
       {/* ══ PANEL DERECHO ══ */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-app)' }}>
+      <div style={{ flex: 1, display: showRight ? 'flex' : 'none', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-app)' }}>
         {!seleccion ? (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, color: 'var(--text-mut)' }}>
             <Shield size={40} strokeWidth={1.2} />
@@ -473,7 +487,15 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
           <>
             {/* header */}
             <div style={{ padding: '16px 22px 12px', borderBottom: '1px solid var(--border-sub)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-              <div>
+              {isMobile && (
+                <button onClick={() => setSeleccion(null)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, marginRight: 10, padding: '6px 10px', borderRadius: 8,
+                    background: 'var(--bg-card)', border: '1px solid var(--border-sub)',
+                    color: 'var(--text-sec)', cursor: 'pointer', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>
+                  ← Volver
+                </button>
+              )}
+              <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {seleccion === '__sin__' ? <UserX size={16} color="#F59E0B" /> : <Tag size={15} color={c} />}
                   <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text-pri)' }}>

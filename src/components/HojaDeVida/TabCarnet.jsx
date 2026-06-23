@@ -118,7 +118,8 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
   const RedIcon = ({ red }) => { const Ic = RED_ICONS[red] || Link; return <Ic size={9} />; };
 
   const cardBase = {
-    width: '320px',
+    width: '100%',
+    maxWidth: '320px',
     background: th.bgCard,
     borderRadius: '16px',
     border: `1px solid ${th.border}`,

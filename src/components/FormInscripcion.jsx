@@ -546,6 +546,11 @@ export default function FormInscripcion() {
         .fi-sel { appearance:none; -webkit-appearance:none; cursor:pointer; }
         @keyframes spin { to { transform:rotate(360deg); } }
         @keyframes fadein { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+        @media (max-width: 640px) {
+          .fi-body { flex-direction: column !important; }
+          .fi-photo-col { width: 100% !important; }
+          .fi-photo-zone { height: 180px !important; aspect-ratio: unset !important; }
+        }
       `}</style>
 
       <div style={{ ...S.shell, '--c': c }}>
@@ -579,16 +584,17 @@ export default function FormInscripcion() {
         </div>
 
         {/* ── CUERPO DOS COLUMNAS ── */}
-        <div style={S.body}>
+        <div className="fi-body" style={S.body}>
 
           {/* ── COLUMNA FOTO ── */}
-          <div style={S.photoCol}>
+          <div className="fi-photo-col" style={S.photoCol}>
             <p style={{ color: 'var(--text-sec)', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>
               Fotografía
             </p>
 
             {/* Zona de drop */}
             <div
+              className="fi-photo-zone"
               onClick={() => photoInputRef.current?.click()}
               onDragOver={(e) => { e.preventDefault(); setPhotoDragging(true); }}
               onDragLeave={() => setPhotoDragging(false)}

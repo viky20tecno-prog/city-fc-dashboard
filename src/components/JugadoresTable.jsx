@@ -336,7 +336,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       const estadoPago     = esMoroso ? 'MORA' : estadoLocal;
       const saldoPendiente = mensJugador.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
       const totalPagado    = mensJugador.reduce((s, m) => s + (parseFloat(m.valor_pagado)    || 0), 0);
-      const nombre = `${j.nombre || j['nombre(s)'] || ''} ${j.apellidos || j['apellido(s)'] || ''}`.trim();
+      const nombre = `${j.nombre || j['nombre(s)'] || ''} ${j.apellidos || j['apellido(s)'] || ''}`.trim().toUpperCase();
       return {
         ...j, nombreCompleto: nombre, estadoPago, saldoPendiente, totalPagado,
         activo: j.activo === true || (j.activo || '').toString().toUpperCase() === 'SI',
@@ -393,28 +393,112 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const estados = ['TODOS', 'AL_DIA', 'PENDIENTE', 'PARCIAL', 'MORA', 'EXENTO'];
 
   const exportarCSV = async () => {
-    const XLSX = await import('xlsx');
-    const headers = ['Nombre', 'Cédula', 'Celular', 'Estado', 'Categoría', 'Equipo', 'Pagado', 'Pendiente', 'Activo'];
-    const rows = filtered.map(j => [
-      j.nombreCompleto,
-      j.cedula,
-      j.celular || '',
-      j.estadoPago,
-      j.categoria || '',
-      j.equipo || '',
-      j.totalPagado,
-      j.saldoPendiente,
-      j.activo ? 'SI' : 'NO',
-    ]);
+    const ExcelJS = (await import('exceljs')).default ?? (await import('exceljs'));
+    const fecha   = new Date().toLocaleDateString('es-CO', { day:'2-digit', month:'long', year:'numeric' });
 
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    ws['!cols'] = [
-      { wch: 28 }, { wch: 14 }, { wch: 14 }, { wch: 12 },
-      { wch: 16 }, { wch: 16 }, { wch: 12 }, { wch: 12 }, { wch: 8 },
+    // Campos a auditar: [header, getter, requerido]
+    const CAMPOS = [
+      { h: 'NOMBRE',           get: j => j.nombreCompleto || '',           req: true  },
+      { h: 'CÉDULA',           get: j => String(j.cedula || ''),           req: true  },
+      { h: 'CELULAR',          get: j => String(j.celular || ''),          req: true  },
+      { h: 'CORREO',           get: j => j.correo_electronico || '',       req: false },
+      { h: 'CATEGORÍA',        get: j => (j.categoria || '').toUpperCase(), req: true  },
+      { h: 'POSICIÓN',         get: j => (j.posicion || '').toUpperCase(), req: false },
+      { h: 'FECHA NAC.',       get: j => j.fecha_nacimiento || '',         req: false },
+      { h: 'TIPO SANGRE',      get: j => j.tipo_sangre || '',              req: false },
+      { h: 'EPS',              get: j => j.eps || '',                      req: false },
+      { h: 'ESTADO',           get: j => j.activo ? 'ACTIVO' : 'INACTIVO', req: true  },
     ];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Jugadores');
-    XLSX.writeFile(wb, `jugadores_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+    const esPend    = (j) => String(j.cedula).startsWith('PEND_');
+    const esFaltante = (val) => val === '' || val === null || val === undefined;
+
+    const todos = [...jugadoresConPago]
+      .sort((a, b) => {
+        if (a.activo !== b.activo) return a.activo ? -1 : 1;
+        return (a.nombreCompleto || '').localeCompare(b.nombreCompleto || '', 'es');
+      });
+
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'ZenSports';
+    const ws = wb.addWorksheet('DIRECTORIO', { views: [{ state: 'frozen', ySplit: 2 }] });
+
+    ws.columns = [
+      { width: 6  },  // #
+      ...CAMPOS.map(c => ({ width: c.h === 'NOMBRE' ? 32 : c.h === 'CORREO' ? 28 : 16 })),
+    ];
+
+    // Título
+    const titleRow = ws.addRow([`DIRECTORIO DE JUGADORES  ·  ${fecha.toUpperCase()}  ·  ${(clubConfig?.nombre || '').toUpperCase()}`]);
+    ws.mergeCells(1, 1, 1, 1 + CAMPOS.length);
+    titleRow.getCell(1).fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+    titleRow.getCell(1).font      = { bold: true, color: { argb: 'FFFBBF24' }, size: 11, name: 'Calibri' };
+    titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+    titleRow.height = 24;
+
+    // Encabezado
+    const hRow = ws.addRow(['#', ...CAMPOS.map(c => c.h)]);
+    hRow.eachCell((cell, col) => {
+      const esReq = col > 1 && CAMPOS[col - 2]?.req;
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: col === 1 ? 'FF0F172A' : esReq ? 'FF1E293B' : 'FF334155' } };
+      cell.font      = { bold: true, color: { argb: esReq ? 'FFFBBF24' : 'FFD1D5DB' }, size: 10, name: 'Calibri' };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border    = { bottom: { style: 'medium', color: { argb: 'FFFBBF24' } } };
+    });
+    hRow.height = 22;
+    ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: 1 + CAMPOS.length } };
+
+    // Filas de datos
+    todos.forEach((j, idx) => {
+      const isPend     = esPend(j);
+      const esInactivo = !j.activo;
+      const zebra      = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC';
+
+      const valores = CAMPOS.map(c => c.get(j));
+      const dataRow = ws.addRow([idx + 1, ...valores]);
+
+      dataRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
+        const campoIdx = colNum - 2;           // 0-based index into CAMPOS
+        const val      = colNum > 1 ? valores[campoIdx] : null;
+        const faltante = colNum > 1 && esFaltante(val);
+
+        if (isPend) {
+          // Fila PEND_: toda naranja — datos inexistentes
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+          cell.font = { size: 10, name: 'Calibri', bold: true, italic: true, color: { argb: 'FF92400E' } };
+          if (colNum === 1) cell.border = { left: { style: 'medium', color: { argb: 'FFF97316' } } };
+        } else if (faltante) {
+          // Campo faltante: amarillo suave
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF9C4' } };
+          cell.font = { size: 10, name: 'Calibri', italic: true, color: { argb: 'FF92400E' } };
+        } else if (esInactivo) {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
+          cell.font = { size: 10, name: 'Calibri', italic: true, color: { argb: 'FF9CA3AF' } };
+        } else {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colNum === 1 ? 'FFF1F5F9' : zebra } };
+          cell.font = { size: 10, name: 'Calibri', color: { argb: 'FF1E293B' },
+            bold: colNum === 10 && j.activo };  // ESTADO en negrita si activo
+        }
+
+        // Color especial para celda ESTADO
+        if (!isPend && colNum === 1 + CAMPOS.length) {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: j.activo ? 'FFD1FAE5' : 'FFF3F4F6' } };
+          cell.font = { size: 10, name: 'Calibri', bold: true, color: { argb: j.activo ? 'FF166534' : 'FF9CA3AF' } };
+        }
+
+        cell.alignment = { horizontal: colNum <= 2 ? 'center' : 'left', vertical: 'middle' };
+      });
+      dataRow.height = 18;
+    });
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob   = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url    = URL.createObjectURL(blob);
+    const a      = document.createElement('a');
+    a.href       = url;
+    a.download   = `directorio_jugadores_${new Date().toISOString().split('T')[0]}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const exportarEstadoActual = async () => {
@@ -691,7 +775,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 {/* Exportar Excel */}
                 <button
                   onClick={exportarCSV}
-                  title={`Exportar ${filtered.length} jugadores a Excel`}
+                  title="Directorio completo de jugadores — resalta datos faltantes"
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
                   style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', color: '#22C55E', whiteSpace: 'nowrap', flexShrink: 0 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.18)'}

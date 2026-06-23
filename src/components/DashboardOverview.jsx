@@ -116,7 +116,7 @@ function AlDiaPanel({ jugadores, color }) {
         {jugadores.map(j => (
           <div key={j.cedula} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', borderRadius: '8px', background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.12)' }}>
             <CheckCircle size={11} color="#22C55E" strokeWidth={2.5} />
-            <span style={{ fontSize: '12px', color: 'var(--text-sec)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nombre}</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-sec)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(j.nombre || '').toUpperCase()}</span>
           </div>
         ))}
       </div>
@@ -187,7 +187,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
       );
       if (!inv || inv.estado === 'AL_DIA') {
         alDia++;
-        alDiaArr.push({ nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim(), cedula: j.cedula });
+        alDiaArr.push({ nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase(), cedula: j.cedula });
       } else if (inv.estado === 'PARCIAL')   parciales++;
       else if (inv.estado === 'PENDIENTE') pendientes++;
       else { alDia++; alDiaArr.push({ nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim(), cedula: j.cedula }); }
@@ -211,7 +211,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
         );
         if (!mens || ['AL_DIA', 'MORA'].includes(mens.estado)) return null;
         return {
-          nombre:   `${j.nombre || ''} ${j.apellidos || ''}`.trim(),
+          nombre:   `${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase(),
           cedula:   j.cedula,
           celular:  j.celular,
           equipo:   j.equipo || '',

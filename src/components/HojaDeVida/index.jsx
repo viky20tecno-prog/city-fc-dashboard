@@ -19,7 +19,7 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
   const [tab, setTab] = useState(initialTab);
   const [jugadorLocal, setJugadorLocal] = useState(jugador);
 
-  const nombre = `${jugadorLocal['nombre(s)'] || jugadorLocal.nombre || ''} ${jugadorLocal['apellido(s)'] || jugadorLocal.apellidos || ''}`.trim();
+  const nombre = `${jugadorLocal['nombre(s)'] || jugadorLocal.nombre || ''} ${jugadorLocal['apellido(s)'] || jugadorLocal.apellidos || ''}`.trim().toUpperCase();
 
   const handleFotoUpdate = useCallback((nuevaUrl) => {
     setJugadorLocal(j => ({ ...j, foto_url: nuevaUrl }));

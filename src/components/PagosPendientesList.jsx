@@ -205,7 +205,7 @@ export default function PagosPendientesList({ pendientes, codigoPais = '57', clu
               border: '1px solid var(--cc20)',
             }}>
               <div>
-                <p style={{ fontWeight: 600, color: 'var(--text-pri)', fontSize: '13px' }}>{p.nombre}</p>
+                <p style={{ fontWeight: 600, color: 'var(--text-pri)', fontSize: '13px' }}>{(p.nombre || '').toUpperCase()}</p>
                 <p style={{ fontSize: '11px', color: 'var(--text-mut)', marginTop: '3px' }}>
                   CC {p.cedula}{p.equipo ? ` · ${p.equipo}` : ''}
                 </p>

@@ -554,7 +554,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                             <span className="text-xs font-bold text-[var(--cc)]">{(j.nombre || '?')[0].toUpperCase()}</span>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-[var(--text-pri)]">{j.nombre} {j.apellidos}</p>
+                            <p className="text-sm font-medium text-[var(--text-pri)]">{`${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase()}</p>
                             <p className="text-xs text-[var(--text-sec)]">CC {j.cedula}</p>
                           </div>
                         </button>
@@ -579,7 +579,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 <div className="p-3 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/20 flex items-center gap-3">
                   <CheckCircle className="w-4 h-4 text-[var(--cc)] flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-[var(--text-pri)]">{jugadorEncontrado.nombre} {jugadorEncontrado.apellidos}</p>
+                    <p className="text-sm font-medium text-[var(--text-pri)]">{`${jugadorEncontrado.nombre || ''} ${jugadorEncontrado.apellidos || ''}`.trim().toUpperCase()}</p>
                     <p className="text-xs text-[var(--text-sec)]">CC {jugadorEncontrado.cedula}</p>
                   </div>
                   <button onClick={limpiarBusqueda} className="ml-auto text-xs text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors">

@@ -694,7 +694,7 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
                     <button onClick={() => abrirDrawerJugador(p)}
                       style={{ flex: 1, minWidth: 0, background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
                       <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-pri)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
-                        {p.nombre} {p.apellidos}
+                        {`${p.nombre || ''} ${p.apellidos || ''}`.trim().toUpperCase()}
                       </p>
                       {(p.equipo || p.categoria) && (
                         <p style={{ fontSize: '11px', color: 'var(--text-sec)', marginTop: '2px' }}>
@@ -821,7 +821,7 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-pri)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {jugadorDrawer.nombre} {jugadorDrawer.apellidos}
+                  {`${jugadorDrawer.nombre || ''} ${jugadorDrawer.apellidos || ''}`.trim().toUpperCase()}
                 </p>
                 <p style={{ fontSize: '12px', color: 'var(--text-sec)' }}>CC {jugadorDrawer.cedula}</p>
               </div>

@@ -559,9 +559,9 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                           ) : (
                             sugeridos.map(j => (
                               <button key={j.cedula} type="button"
-                                onClick={() => { setAddCedula(String(j.cedula)); setAddNombre(`${j.nombre || ''} ${j.apellidos || ''}`.trim()); setAddBusqueda(''); }}
+                                onClick={() => { setAddCedula(String(j.cedula)); setAddNombre(`${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase()); setAddBusqueda(''); }}
                                 className="w-full text-left px-4 py-2.5 hover:bg-[var(--bg-surface)] transition border-b border-[var(--cc20)] last:border-0">
-                                <p className="text-sm text-[var(--text-pri)]">{j.nombre} {j.apellidos}</p>
+                                <p className="text-sm text-[var(--text-pri)]">{`${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase()}</p>
                                 <p className="text-xs text-[var(--text-sec)]">CC {j.cedula}</p>
                               </button>
                             ))
@@ -614,7 +614,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                       {[...inscritosDelTorneo]
                         .map(e => {
                           const jug = jugadoresClub.find(j => String(j.cedula) === String(e.cedula));
-                          return { ...e, _nombre: jug ? `${jug.nombre} ${jug.apellidos || ''}`.trim() : `CC ${e.cedula}` };
+                          return { ...e, _nombre: jug ? `${jug.nombre} ${jug.apellidos || ''}`.trim().toUpperCase() : `CC ${e.cedula}` };
                         })
                         .sort((a, b) => {
                           if (!sortAlpha) return 0;

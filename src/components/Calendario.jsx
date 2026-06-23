@@ -860,7 +860,7 @@ export default function Calendario({ color, clubId }) {
                     <button onClick={() => abrirDrawerJugador(p)}
                       className="flex-1 min-w-0 text-left bg-transparent border-none p-0 cursor-pointer">
                       <p className="text-sm font-semibold text-[var(--text-pri)] truncate">
-                        {p.nombre} {p.apellidos}
+                        {`${p.nombre || ''} ${p.apellidos || ''}`.trim().toUpperCase()}
                       </p>
                       <p className="text-xs text-[var(--text-sec)]">CC {p.cedula}</p>
                     </button>

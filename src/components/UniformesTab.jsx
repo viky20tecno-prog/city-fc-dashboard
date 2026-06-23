@@ -113,7 +113,7 @@ export default function UniformesTab({ jugadores }) {
                   <option value="">-- Selecciona jugador --</option>
                   {jugadores && jugadores.map(j => (
                     <option key={j.cedula} value={j.cedula}>
-                      {j.nombre} {j.apellidos} ({j.cedula})
+                      {`${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase()} ({j.cedula})
                     </option>
                   ))}
                 </select>

@@ -561,7 +561,7 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
                           {(j.nombre?.[0] || '?').toUpperCase()}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-pri)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{j.nombre} {j.apellidos}</div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-pri)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{`${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase()}</div>
                           <div style={{ fontSize: 11, color: 'var(--text-mut)' }}>
                             {j.cedula}
                             {j.categoria && <span style={{ color: '#F59E0B', marginLeft: 6 }}>· {j.categoria}{j.equipo ? ` / ${j.equipo}` : ''}</span>}
@@ -590,7 +590,7 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
                             {(j.nombre?.[0] || '?').toUpperCase()}
                           </div>
                           <div style={{ flex: 1 }}>
-                            <div style={{ color: 'var(--text-pri)', fontSize: 13, fontWeight: 600 }}>{j.nombre} {j.apellidos}</div>
+                            <div style={{ color: 'var(--text-pri)', fontSize: 13, fontWeight: 600 }}>{`${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase()}</div>
                             <div style={{ color: 'var(--text-mut)', fontSize: 11 }}>{j.cedula}</div>
                           </div>
                         </div>
@@ -634,7 +634,7 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
                             {(j.nombre?.[0] || '?').toUpperCase()}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ color: 'var(--text-pri)', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{j.nombre} {j.apellidos}</div>
+                            <div style={{ color: 'var(--text-pri)', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{`${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase()}</div>
                             <div style={{ color: 'var(--text-mut)', fontSize: 11 }}>{j.cedula}</div>
                           </div>
                         </div>

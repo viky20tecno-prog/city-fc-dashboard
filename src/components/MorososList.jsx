@@ -213,7 +213,7 @@ export default function MorososList({ morosos, codigoPais = '57', clubNombre = '
             transition: 'background-color 0.2s',
           }}>
             <div>
-              <p style={{ fontWeight: 600, color: 'var(--text-pri)', fontSize: '13px' }}>{m.nombre}</p>
+              <p style={{ fontWeight: 600, color: 'var(--text-pri)', fontSize: '13px' }}>{(m.nombre || '').toUpperCase()}</p>
               <p style={{ fontSize: '11px', color: 'var(--text-mut)', marginTop: '3px' }}>
                 CC {m.cedula} · {m.meses_mora} mes{m.meses_mora !== 1 ? 'es' : ''} de mora
               </p>

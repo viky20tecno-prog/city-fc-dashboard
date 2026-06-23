@@ -1149,6 +1149,9 @@ export default function LandingPage() {
             <img
               src="/og-image.jpg"
               alt="ZenSports — AI Powering Performance"
+              fetchpriority="high"
+              width="1200"
+              height="630"
               style={{ width: '100%', display: 'block', borderRadius: 20 }}
             />
             {/* Gradient bottom overlay para los CTAs */}

@@ -443,7 +443,8 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         const mesesDelJugador = mensIdx[String(j.cedula)] || {};
         const estados = MESES.map((_, i) => {
           if (esExentoGlobal) return 'EXENTO';
-          return mesesDelJugador[i + 1] || '-';
+          const est = mesesDelJugador[i + 1] || '-';
+          return est === 'EXENTO' ? 'SUSPENDIDO' : est;
         });
         return [j.nombreCompleto || '', j.cedula || '', j.categoria || '', j.rol || '', ...estados];
       });

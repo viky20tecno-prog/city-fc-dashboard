@@ -177,7 +177,15 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const exportarPDF = async () => {
     if (!torneoSeleccionado) return;
     const def       = torneosDef.find(t => t.nombre === torneoSeleccionado);
-    const inscritos = enrollments.filter(e => e.nombre_torneo === torneoSeleccionado);
+    const inscritos = enrollments
+      .filter(e => e.nombre_torneo === torneoSeleccionado)
+      .sort((a, b) => {
+        const jA = jugadoresClub.find(j => String(j.cedula) === String(a.cedula));
+        const jB = jugadoresClub.find(j => String(j.cedula) === String(b.cedula));
+        const nA = jA ? `${jA.nombre||''} ${jA.apellidos||''}`.trim() : String(a.cedula);
+        const nB = jB ? `${jB.nombre||''} ${jB.apellidos||''}`.trim() : String(b.cedula);
+        return nA.toUpperCase().localeCompare(nB.toUpperCase(), 'es');
+      });
     const { default: jsPDF } = await import('jspdf');
     const doc       = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const W = 210; const H = 297; const M = 14;
@@ -229,7 +237,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(30, 40, 50);
       doc.text(String(e.cedula || ''), cols[0].x, y + 1.5);
       const jugador = jugadoresClub.find(j => String(j.cedula) === String(e.cedula));
-      const nombre  = jugador ? `${jugador.nombre || ''} ${jugador.apellidos || ''}`.trim() : String(e.cedula);
+      const nombre  = jugador ? `${jugador.nombre || ''} ${jugador.apellidos || ''}`.trim().toUpperCase() : String(e.cedula);
       doc.text(nombre.slice(0, 32), cols[1].x, y + 1.5);
       doc.setTextColor(34, 197, 94);
       doc.text(`$${parseFloat(e.valor_pagado || 0).toLocaleString('es-CO')}`, cols[2].x, y + 1.5);
@@ -237,7 +245,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
       doc.text(`$${parseFloat(e.saldo_pendiente || 0).toLocaleString('es-CO')}`, cols[3].x, y + 1.5);
       const estadoColor = e.estado === 'AL_DIA' ? [34, 197, 94] : e.estado === 'ABONO' ? [245, 166, 35] : [239, 68, 68];
       doc.setTextColor(...estadoColor); doc.setFont('helvetica', 'bold');
-      doc.text(e.estado === 'AL_DIA' ? 'Al día' : e.estado === 'ABONO' ? 'Abono' : 'Pendiente', cols[4].x, y + 1.5);
+      doc.text(e.estado === 'AL_DIA' ? 'AL DÍA' : e.estado === 'ABONO' ? 'ABONO' : 'PENDIENTE', cols[4].x, y + 1.5);
       y += 8;
     });
 

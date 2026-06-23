@@ -405,8 +405,8 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       { h: 'CATEGORÍA',        get: j => (j.categoria || '').toUpperCase(), req: true  },
       { h: 'POSICIÓN',         get: j => (j.posicion || '').toUpperCase(), req: false },
       { h: 'FECHA NAC.',       get: j => j.fecha_nacimiento || '',         req: false },
-      { h: 'TIPO SANGRE',      get: j => j.tipo_sangre || '',              req: false },
-      { h: 'EPS',              get: j => j.eps || '',                      req: false },
+      { h: 'TIPO SANGRE',      get: j => (j.tipo_sangre || '').toUpperCase(), req: false },
+      { h: 'EPS',              get: j => (j.eps || '').toUpperCase(),        req: false },
       { h: 'ESTADO',           get: j => j.activo ? 'ACTIVO' : 'INACTIVO', req: true  },
     ];
 
@@ -683,7 +683,8 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
     let y = drawPageHeader();
 
-    filtered.forEach((j, i) => {
+    const pdfData = [...filtered].sort((a, b) => (a.nombreCompleto||'').localeCompare(b.nombreCompleto||'', 'es'));
+    pdfData.forEach((j, i) => {
       if (y > H - 20) { doc.addPage(); y = drawPageHeader(); }
       if (i % 2 === 0) { doc.setFillColor(248, 249, 250); doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F'); }
       doc.setFont('helvetica', 'normal');

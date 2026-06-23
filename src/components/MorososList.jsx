@@ -20,10 +20,11 @@ function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoU
     ? `<img src="${logoUrl}" alt="" style="height:44px;width:44px;object-fit:contain;border-radius:8px;margin-right:14px;flex-shrink:0" />`
     : '';
 
-  const filas = morosos.map((m, i) => `
+  const sorted = [...morosos].sort((a, b) => (a.nombre||'').toUpperCase().localeCompare((b.nombre||'').toUpperCase(), 'es'));
+  const filas = sorted.map((m, i) => `
     <tr style="background:${i % 2 === 0 ? '#f9fafb' : '#ffffff'}">
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${i + 1}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#111">${esc(m.nombre)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#111">${esc((m.nombre||'').toUpperCase())}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${esc(m.cedula)}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${esc(m.celular) || '—'}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;text-align:center">

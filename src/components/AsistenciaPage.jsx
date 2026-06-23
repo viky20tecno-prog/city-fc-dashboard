@@ -379,7 +379,10 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
       ];
       y = drawPdfTableHead(doc, { W, M, y, columns: cols, accentRgb });
 
-      players.forEach((p, idx) => {
+      const sortedPlayers = [...players].sort((a, b) =>
+        `${a.nombre||''} ${a.apellidos||''}`.toUpperCase().localeCompare(`${b.nombre||''} ${b.apellidos||''}`.toUpperCase(), 'es')
+      );
+      sortedPlayers.forEach((p, idx) => {
         if (y > 278) {
           drawPdfFooter(doc, { W, H, M, clubName });
           doc.addPage();
@@ -400,11 +403,11 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
         doc.setFontSize(8.5);
         doc.setTextColor(60, 60, 60);
         doc.text(String(idx + 1), M + 2, y);
-        doc.text(`${p.nombre || ''} ${p.apellidos || ''}`.trim().slice(0, 38), M + 12, y);
+        doc.text(`${p.nombre || ''} ${p.apellidos || ''}`.trim().toUpperCase().slice(0, 38), M + 12, y);
         doc.text(String(p.cedula || ''), M + 105, y);
         doc.setTextColor(...estRgb);
         doc.setFont('helvetica', 'bold');
-        doc.text(ESTADOS[p.estado]?.label || p.estado, M + 148, y);
+        doc.text((ESTADOS[p.estado]?.label || p.estado).toUpperCase(), M + 148, y);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(60, 60, 60);
         y += 8;

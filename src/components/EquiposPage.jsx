@@ -285,10 +285,10 @@ export default function EquiposPage({ color = '#00AAFF', clubConfig, onConfigSav
         doc.setFontSize(8);
         doc.setTextColor(30, 40, 50);
         doc.text(String(i + 1),                                      cols[0].x, y);
-        doc.text(`${j.nombre || ''} ${j.apellidos || ''}`.slice(0, 35), cols[1].x, y);
+        doc.text(`${j.nombre || ''} ${j.apellidos || ''}`.toUpperCase().slice(0, 35), cols[1].x, y);
         doc.text(String(j.cedula || ''),                             cols[2].x, y);
         doc.text(String(j.celular || ''),                            cols[3].x, y);
-        doc.text((j.posicion || '—').slice(0, 14),                   cols[4].x, y);
+        doc.text((j.posicion || '—').toUpperCase().slice(0, 14),      cols[4].x, y);
         doc.text(String(j.numero_camiseta || '—'),                   cols[5].x, y);
         y += 8;
       });

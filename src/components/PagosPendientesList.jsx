@@ -20,16 +20,17 @@ function exportarPDF(pendientes, clubNombre = 'Mi Club', color = '#E14924', logo
     ? `<img src="${logoUrl}" alt="" style="height:44px;width:44px;object-fit:contain;border-radius:8px;margin-right:14px;flex-shrink:0" />`
     : '';
 
-  const ESTADO_LABEL = { PENDIENTE: 'Pendiente', PARCIAL: 'Abono parcial', POR_VALIDAR: 'Por validar' };
+  const ESTADO_LABEL = { PENDIENTE: 'PENDIENTE', PARCIAL: 'ABONO PARCIAL', POR_VALIDAR: 'POR VALIDAR' };
   const ESTADO_COLOR = { PENDIENTE: '#F59E0B', PARCIAL: '#8B5CF6', POR_VALIDAR: '#3B82F6' };
 
-  const filas = pendientes.map((p, i) => {
+  const sortedPend = [...pendientes].sort((a, b) => (a.nombre||'').toUpperCase().localeCompare((b.nombre||'').toUpperCase(), 'es'));
+  const filas = sortedPend.map((p, i) => {
     const estadoColor = ESTADO_COLOR[p.estado] || '#F59E0B';
     const estadoLabel = ESTADO_LABEL[p.estado] || p.estado;
     return `
     <tr style="background:${i % 2 === 0 ? '#f9fafb' : '#ffffff'}">
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${i + 1}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#111">${esc(p.nombre)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:600;color:#111">${esc((p.nombre||'').toUpperCase())}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${esc(p.cedula)}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${esc(p.celular) || '—'}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#6b7280">${esc(p.equipo) || '—'}</td>

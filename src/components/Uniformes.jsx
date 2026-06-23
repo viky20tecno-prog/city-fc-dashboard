@@ -249,9 +249,10 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       const fmtCOP   = (n) => `$${parseFloat(n || 0).toLocaleString('es-CO')}`;
       const logoData = await loadLogoDataUrl(clubConfig?.logo_url);
 
-      const pendientes = pedidos.filter(p => p.estado === 'PENDIENTE');
-      const pagados    = pedidos.filter(p => p.estado === 'PAGADO');
-      const entregados = pedidos.filter(p => p.estado === 'ENTREGADO');
+      const sortByName = (arr) => [...arr].sort((a, b) => String(a.nombre||'').toUpperCase().localeCompare(String(b.nombre||'').toUpperCase(), 'es'));
+      const pendientes = sortByName(pedidos.filter(p => p.estado === 'PENDIENTE'));
+      const pagados    = sortByName(pedidos.filter(p => p.estado === 'PAGADO'));
+      const entregados = sortByName(pedidos.filter(p => p.estado === 'ENTREGADO'));
       const getPrendas = (p) => String(p.prendas || p.prenda || p.tipo_uniforme || p.tipo || '—');
 
       const C = {
@@ -290,17 +291,17 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         const mid = y + 5.8;
         doc.text(trunc(String(p.cedula || ''), 14), C.cedula, mid);
         const esFamiliar = p.tipo && p.tipo !== 'Jugador';
-        const nombrePDF  = trunc(String(p.nombre || '—'), esFamiliar ? 19 : 26);
+        const nombrePDF  = trunc(String(p.nombre || '—').toUpperCase(), esFamiliar ? 19 : 26);
         doc.text(nombrePDF, C.nombre, mid);
         if (esFamiliar) {
           doc.setTextColor(147, 51, 234); doc.setFontSize(6.5);
-          doc.text(trunc(p.tipo, 14), C.nombre + doc.getTextWidth(nombrePDF) + 1.5, mid);
+          doc.text(trunc(String(p.tipo || '').toUpperCase(), 14), C.nombre + doc.getTextWidth(nombrePDF) + 1.5, mid);
           doc.setFontSize(7.8); doc.setTextColor(30, 40, 50);
         }
-        doc.text(trunc(getPrendas(p), 44), C.prendas, mid);
+        doc.text(trunc(getPrendas(p).toUpperCase(), 44), C.prendas, mid);
         doc.text(String(p.talla || '—'), C.talla, mid);
         doc.text(String(p.numero_estampar || '—'), C.numero, mid);
-        doc.text(trunc(String(p.nombre_estampar || '—'), 16), C.estampa, mid);
+        doc.text(trunc(String(p.nombre_estampar || '—').toUpperCase(), 16), C.estampa, mid);
         doc.setTextColor(...accentRgb); doc.setFont('helvetica', 'bold');
         doc.text(fmtCOP(p.total), C.total, mid);
         return y + rH;

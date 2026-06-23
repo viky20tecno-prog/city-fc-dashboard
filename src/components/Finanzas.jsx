@@ -410,11 +410,11 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
     doc.setFillColor(cr, cg, cb_);
     doc.rect(M, y, W - M * 2, 7, 'F');
     doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
-    doc.text('Fecha',       M + 1,      y + 5);
-    doc.text('Tipo',        M + 26,     y + 5);
-    doc.text('Categoría',   M + 44,     y + 5);
-    doc.text('Descripción', M + 88,     y + 5);
-    doc.text('Monto',       W - M - 1,  y + 5, { align: 'right' });
+    doc.text('FECHA',       M + 1,      y + 5);
+    doc.text('TIPO',        M + 26,     y + 5);
+    doc.text('CATEGORÍA',   M + 44,     y + 5);
+    doc.text('DESCRIPCIÓN', M + 88,     y + 5);
+    doc.text('MONTO',       W - M - 1,  y + 5, { align: 'right' });
     y += 10;
 
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
@@ -426,11 +426,11 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
       doc.setTextColor(80, 80, 80); doc.setFont('helvetica', 'normal');
       doc.text(r.fecha, M + 1, y);
       doc.setTextColor(tr, tg, tb); doc.setFont('helvetica', 'bold');
-      doc.text(r.tipo, M + 26, y);
+      doc.text((r.tipo || '').toUpperCase(), M + 26, y);
       doc.setFont('helvetica', 'normal'); doc.setTextColor(80, 80, 80);
-      doc.text(r.categoria.slice(0, 20), M + 44, y);
+      doc.text((r.categoria || '').toUpperCase().slice(0, 20), M + 44, y);
       const desc = r.descripcion.length > 42 ? r.descripcion.slice(0, 41) + '…' : r.descripcion;
-      doc.text(desc, M + 88, y);
+      doc.text(desc.toUpperCase(), M + 88, y);
       doc.setTextColor(tr, tg, tb); doc.setFont('helvetica', 'bold');
       doc.text(fmt(r.monto), W - M - 1, y, { align: 'right' });
       y += 7;

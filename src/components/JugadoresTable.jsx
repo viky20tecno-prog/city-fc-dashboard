@@ -418,12 +418,30 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   };
 
   const exportarEstadoActual = async () => {
-    const XLSX = await import('xlsx');
-    const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
-                   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const ExcelJS = (await import('exceljs')).default ?? (await import('exceljs'));
+    const MESES   = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
+                     'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
     const anio = new Date().getFullYear();
 
-    // Índice de mensualidades por cédula → { [numero_mes]: estado }
+    // Colores de fondo por estado (ARGB sin #)
+    const FILL = {
+      EXENTO:     'FFE0F2FE', // celeste claro
+      AL_DIA:     'FFD1FAE5', // verde claro
+      MORA:       'FFFEE2E2', // rojo claro
+      SUSPENDIDO: 'FFFEF9C3', // amarillo claro
+      PENDIENTE:  'FFFEF3C7', // ámbar claro
+      PARCIAL:    'FFDBEAFE', // azul claro
+    };
+    const FONT_COLOR = {
+      EXENTO:     'FF0369A1',
+      AL_DIA:     'FF166534',
+      MORA:       'FFB91C1C',
+      SUSPENDIDO: 'FF92400E',
+      PENDIENTE:  'FF92400E',
+      PARCIAL:    'FF1E40AF',
+    };
+
+    // Índice mensualidades por cédula → { [numero_mes]: estado }
     const mensIdx = {};
     (mensualidades || [])
       .filter(m => parseInt(m.anio) === anio)
@@ -433,31 +451,80 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         mensIdx[ced][parseInt(m.numero_mes)] = m.estado;
       });
 
-    const headers = ['Jugador', 'Cédula', 'Categoría', ...MESES];
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet(`ESTADO ${anio}`);
 
-    const rows = [...jugadoresConPago]
-      .filter(j => j.activo)
-      .sort((a, b) => (a.nombreCompleto || '').localeCompare(b.nombreCompleto || '', 'es'))
-      .map(j => {
-        const esExentoGlobal  = Number(j.descuento_pct) >= 100;
-        const mesesDelJugador = mensIdx[String(j.cedula)] || {};
-        const estados = MESES.map((_, i) => {
-          if (esExentoGlobal) return 'EXENTO';
-          const est = mesesDelJugador[i + 1] || '-';
-          return est === 'EXENTO' ? 'SUSPENDIDO' : est;
-        });
-        return [j.nombreCompleto || '', j.cedula || '', j.categoria || '', ...estados];
-      });
-
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    ws['!cols'] = [
-      { wch: 28 }, { wch: 14 }, { wch: 16 },
-      ...MESES.map(() => ({ wch: 12 })),
+    // Columnas con ancho
+    ws.columns = [
+      { width: 32 }, // Jugador
+      { width: 16 }, // Cédula
+      { width: 20 }, // Categoría
+      ...MESES.map(() => ({ width: 14 })),
     ];
 
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, `Estado ${anio}`);
-    XLSX.writeFile(wb, `estado_actual_${anio}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    // Fila de encabezado
+    const headerRow = ws.addRow(['JUGADOR', 'CÉDULA', 'CATEGORÍA', ...MESES]);
+    headerRow.eachCell(cell => {
+      cell.fill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF111827' } };
+      cell.font   = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = {
+        bottom: { style: 'thin', color: { argb: 'FF374151' } },
+      };
+    });
+    headerRow.height = 20;
+
+    // Filas de datos
+    const jugadoresOrdenados = [...jugadoresConPago]
+      .filter(j => j.activo)
+      .sort((a, b) => (a.nombreCompleto || '').localeCompare(b.nombreCompleto || '', 'es'));
+
+    for (const j of jugadoresOrdenados) {
+      const esExentoGlobal  = Number(j.descuento_pct) >= 100;
+      const mesesDelJugador = mensIdx[String(j.cedula)] || {};
+
+      const estadosMes = MESES.map((_, i) => {
+        if (esExentoGlobal) return 'EXENTO';
+        const est = mesesDelJugador[i + 1] || '-';
+        return est === 'EXENTO' ? 'SUSPENDIDO' : est;
+      });
+
+      const dataRow = ws.addRow([
+        (j.nombreCompleto || '').toUpperCase(),
+        j.cedula || '',
+        (j.categoria || '').toUpperCase(),
+        ...estadosMes,
+      ]);
+
+      dataRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
+        cell.alignment = { horizontal: colNum <= 3 ? 'left' : 'center', vertical: 'middle' };
+        cell.font      = { size: 10 };
+
+        if (colNum > 3) {
+          const estado = estadosMes[colNum - 4];
+          const fillColor  = FILL[estado];
+          const fontColor  = FONT_COLOR[estado];
+          if (fillColor) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fillColor } };
+            cell.font = { size: 10, color: { argb: fontColor }, bold: estado === 'MORA' };
+          }
+        }
+      });
+      dataRow.height = 18;
+    }
+
+    // Congelar primera fila
+    ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+    // Descargar
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob   = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url    = URL.createObjectURL(blob);
+    const a      = document.createElement('a');
+    a.href       = url;
+    a.download   = `estado_actual_${anio}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const exportarPDF = async () => { try {

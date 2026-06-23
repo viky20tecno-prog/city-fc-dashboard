@@ -18,6 +18,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "@tailwindcss/vite": "^4.2.1",
+    "exceljs": "^4.4.0",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.575.0",
     "qrcode": "^1.5.4",

@@ -686,12 +686,13 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     const cols = [
       { label: '#',         x: M },
       { label: 'NOMBRE',    x: M + 10 },
-      { label: 'CÉDULA',    x: M + 72 },
-      { label: 'CELULAR',   x: M + 104 },
-      { label: 'CATEGORÍA', x: M + 134 },
-      { label: 'ESTADO',    x: M + 167 },
-      { label: 'EN MORA',   x: M + 194 },
-      { label: 'PAGADO',    x: M + 222 },
+      { label: 'CÉDULA',    x: M + 68 },
+      { label: 'CELULAR',   x: M + 98 },
+      { label: 'CATEGORÍA', x: M + 126 },
+      { label: 'ESTADO',    x: M + 158 },
+      { label: 'EN MORA',   x: M + 184 },
+      { label: 'PAGADO',    x: M + 207 },
+      { label: 'DEUDA',     x: M + 246 },
     ];
 
     const drawPageHeader = () => {
@@ -728,6 +729,16 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(30, 40, 50);
       doc.text(formatCOP(j.totalPagado), cols[7].x, y);
+      const deudaJ = j.saldoPendiente || 0;
+      if (deudaJ > 0) {
+        doc.setTextColor(239, 68, 68);
+        doc.setFont('helvetica', 'bold');
+        doc.text(formatCOP(deudaJ), cols[8].x, y);
+      } else {
+        doc.setTextColor(150, 150, 150);
+        doc.setFont('helvetica', 'normal');
+        doc.text('—', cols[8].x, y);
+      }
       y += 8;
     });
 
@@ -807,7 +818,8 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     }
 
     const filtroLabel = filtroCategoria === SIN_EQUIPO ? '-sin-equipo' : filtroCategoria !== 'TODOS' ? `-${filtroCategoria.toLowerCase().replace(/\s+/g, '-')}` : '';
-    doc.save(`jugadores${filtroLabel}-${new Date().toISOString().split('T')[0]}.pdf`);
+    const clubSlugPdf = (clubConfig?.nombre || 'club').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    doc.save(`listado-jugadores-${clubSlugPdf}${filtroLabel}-${new Date().toISOString().split('T')[0]}.pdf`);
   } catch (err) {
     console.error('[PDF jugadores]', err);
     alert('Error al generar el PDF: ' + err.message);
@@ -882,14 +894,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 {/* Exportar PDF */}
                 <button
                   onClick={exportarPDF}
-                  title={`Exportar ${filtered.length} jugadores a PDF`}
+                  title={`Reporte PDF de jugadores con estado y deuda — ${filtered.length} jugadores`}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
                   style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.25)', color: '#A855F7', whiteSpace: 'nowrap', flexShrink: 0 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(168,85,247,0.18)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'rgba(168,85,247,0.08)'}
                 >
                   <FileText className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">PDF</span>
+                  <span className="hidden sm:inline">Reporte</span>
                 </button>
 
                 {/* Importar jugadores Excel */}

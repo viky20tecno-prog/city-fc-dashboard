@@ -28,6 +28,7 @@ const TIPO_EVENTO_OPTS = [
 ];
 
 const VARS_EVENTO = [
+  { key: '{nombre}',      desc: 'Nombre del jugador'       },
   { key: '{dia}',         desc: 'Día — JUEVES'             },
   { key: '{lugar}',       desc: 'Lugar del evento'         },
   { key: '{hora_inicio}', desc: 'Hora inicio — 9:00 pm'    },

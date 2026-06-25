@@ -68,9 +68,7 @@ export default function WahaConnect({ clubConfig, onConectado }) {
       setMsg('La sesión falló. Intenta reconectar.');
       detenerPoll();
     } else if (d.status === 'STOPPED') {
-      // Sesión caducó o no existe — volver a idle para que pueda reconectar
-      setFase('idle');
-      detenerPoll();
+      // WAHA aún no arrancó la sesión — seguir esperando (no cerrar)
     }
   }, [onConectado]);
 

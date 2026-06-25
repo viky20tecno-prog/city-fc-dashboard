@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { MessageSquarePlus, Pencil, Trash2, ToggleLeft, ToggleRight, Plus, X, QrCode, Send } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
+import WahaConnect from './WahaConnect';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
@@ -190,6 +191,11 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
 
   return (
     <div className="p-5 max-w-2xl mx-auto">
+
+      {/* Conexión WhatsApp propio */}
+      <div className="mb-5">
+        <WahaConnect clubConfig={clubConfig} onConectado={load} />
+      </div>
 
       {/* Header */}
       <div className="flex items-start justify-between mb-5">

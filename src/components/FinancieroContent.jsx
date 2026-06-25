@@ -93,10 +93,22 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
   const esExentoIndividual = !esExentoGlobal && m.estado === 'EXENTO';
 
   const abrirEdit = () => {
+    // Si el mes tiene estado EXENTO heredado (no debe existir por mes),
+    // restaurar valor_oficial a la cuota del club y calcular estado correcto.
+    const esExentoLegacy  = m.estado === 'EXENTO';
+    const oficialRestaurado = esExentoLegacy
+      ? cuotaClub
+      : (parseFloat(m.valor_oficial) || cuotaClub);
+    const pagado   = parseFloat(m.valor_pagado) || 0;
+    const totalRec = oficialRestaurado + (parseFloat(m.penalidad) || 0);
+    const estadoRec = esExentoLegacy
+      ? (pagado >= totalRec ? 'AL_DIA' : pagado > 0 ? 'PARCIAL' : 'PENDIENTE')
+      : (m.estado || 'PENDIENTE');
+
     setForm({
-      valor_oficial: parseFloat(m.valor_oficial) || 0,
-      valor_pagado:  parseFloat(m.valor_pagado)  || 0,
-      estado:        m.estado || 'PENDIENTE',
+      valor_oficial:   oficialRestaurado,
+      valor_pagado:    pagado,
+      estado:          estadoRec,
       anular_penalidad: false,
     });
     setEditando(true);

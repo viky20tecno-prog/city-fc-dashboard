@@ -415,10 +415,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       { h: 'CELULAR',         get: j => String(j.celular || ''),                         req: true  },
       { h: 'CORREO',          get: j => j.correo_electronico || '',                      req: false },
       { h: 'INSTAGRAM',       get: j => j.instagram || '',                               req: false },
-      { h: 'CATEGORÍA',       get: j => (j.categoria || '').toUpperCase(),               req: true  },
-      { h: 'EQUIPO',          get: j => (j.equipo || '').toUpperCase(),                  req: false },
-      { h: 'POSICIÓN',        get: j => (j.posicion || '').toUpperCase(),                req: false },
-      { h: 'N° CAMISETA',     get: j => String(j.numero_camiseta || ''),                req: false },
       { h: 'FECHA NAC.',      get: j => j.fecha_nacimiento || '',                        req: false },
       { h: 'LUGAR NAC.',      get: j => (j.lugar_de_nacimiento || '').toUpperCase(),     req: false },
       { h: 'TIPO SANGRE',     get: j => (j.tipo_sangre || '').toUpperCase(),             req: false },
@@ -431,6 +427,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       { h: 'CONTACTO EMERG.', get: j => (j.familiar_emergencia || '').toUpperCase(),     req: false },
       { h: 'CEL. CONTACTO',   get: j => String(j.celular_contacto || ''),               req: false },
       { h: 'OBSERVACIONES',   get: j => j.notas || '',                                   req: false },
+      { h: 'CATEGORÍA',       get: j => (j.categoria || '').toUpperCase(),               req: true  },
+      { h: 'EQUIPO',          get: j => (j.equipo || '').toUpperCase(),                  req: false },
+      { h: 'POSICIÓN',        get: j => (j.posicion || '').toUpperCase(),                req: false },
+      { h: 'N° CAMISETA',     get: j => String(j.numero_camiseta || ''),                req: false },
       { h: 'ESTADO',          get: j => j.activo ? 'ACTIVO' : 'INACTIVO',               req: true  },
     ];
 

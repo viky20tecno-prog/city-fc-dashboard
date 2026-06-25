@@ -197,25 +197,6 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
             </div>
           )}
 
-          {/* Leyenda */}
-          <div className="flex items-center gap-4 text-xs text-[var(--text-sec)]">
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-md bg-[var(--bg-app)] border border-[var(--border-sub)] inline-block" />
-              Normal · cobra
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-md bg-yellow-400/20 border border-yellow-400/40 inline-block" />
-              Suspendido · no cobra
-            </span>
-          </div>
-
-          {/* Resumen de meses suspendidos */}
-          {totalSuspendidos > 0 && (
-            <div className="p-3 rounded-xl bg-yellow-400/5 border border-yellow-400/20 text-xs text-yellow-400/80">
-              {totalSuspendidos} mes{totalSuspendidos > 1 ? 'es' : ''} suspendido{totalSuspendidos > 1 ? 's' : ''} en {anio} — mensualidad no cobrada
-            </div>
-          )}
-
           {/* Popover: seleccionar motivo para activar un mes */}
           {popoverMes && (
             <div className="p-4 rounded-xl bg-[var(--bg-app)] border border-[var(--cc)]/30 space-y-3">
@@ -291,6 +272,25 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                   {cancelando ? 'Desactivando...' : 'Desactivar rango'}
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Leyenda */}
+          <div className="flex items-center gap-4 text-xs text-[var(--text-sec)]">
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md bg-[var(--bg-app)] border border-[var(--border-sub)] inline-block" />
+              Normal · cobra
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md bg-yellow-400/20 border border-yellow-400/40 inline-block" />
+              Suspendido · no cobra
+            </span>
+          </div>
+
+          {/* Resumen de meses suspendidos */}
+          {totalSuspendidos > 0 && (
+            <div className="p-3 rounded-xl bg-yellow-400/5 border border-yellow-400/20 text-xs text-yellow-400/80">
+              {totalSuspendidos} mes{totalSuspendidos > 1 ? 'es' : ''} suspendido{totalSuspendidos > 1 ? 's' : ''} en {anio} — mensualidad no cobrada
             </div>
           )}
 

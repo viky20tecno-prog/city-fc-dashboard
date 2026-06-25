@@ -377,7 +377,9 @@ export default function EstadoCuenta({ jugador, mensualidades, torneos, suspensi
 
   const misMensualidades = mensualidades.filter(m => String(m.cedula || m.player_id || '') === String(cedula));
   const misTorneos       = torneos.filter(t => String(t.cedula || t.player_id || '') === String(cedula));
-  const misSuspensiones  = suspensiones.filter(s => s.cedula === String(cedula));
+  const misSuspensiones  = suspensiones.filter(s =>
+    s.cedula === String(cedula) && s.activa && s.anio === new Date().getFullYear()
+  );
 
   return (
     <div className="fixed inset-0 bg-[var(--bg-app)]/60 backdrop-blur-sm z-[1000] flex items-start justify-center p-4 overflow-y-auto">

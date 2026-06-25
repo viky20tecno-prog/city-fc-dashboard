@@ -561,6 +561,16 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         mensIdx[ced][parseInt(m.numero_mes)] = m.estado;
       });
 
+    // Índice suspensiones activas: cédula → Set<numero_mes>
+    const suspIdx = {};
+    (suspensiones || [])
+      .filter(s => s.activa && parseInt(s.anio) === anio)
+      .forEach(s => {
+        const ced = String(s.cedula || '');
+        if (!suspIdx[ced]) suspIdx[ced] = new Set();
+        for (let m = s.mes_inicio; m <= s.mes_fin; m++) suspIdx[ced].add(m);
+      });
+
     const wb = new ExcelJS.Workbook();
     wb.creator = 'ZenSports';
     const ws = wb.addWorksheet(`ESTADO ${anio}`, { views: [{ state: 'frozen', ySplit: 2 }] });
@@ -607,9 +617,12 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       const mesesJ         = mensIdx[String(j.cedula)] || {};
       const zebraFg        = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC';
 
+      const suspMeses = suspIdx[String(j.cedula)];
       const estadosMes = MESES.map((_, i) => {
         if (esExentoGlobal) return 'EXENTO';
-        const est = mesesJ[i + 1] || '-';
+        const mes = i + 1;
+        if (suspMeses?.has(mes)) return 'SUSPENDIDO';
+        const est = mesesJ[mes] || '-';
         return est === 'EXENTO' ? 'SUSPENDIDO' : est;
       });
 

@@ -591,7 +591,16 @@ export default function Dashboard() {
                 <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
                   {cumpleaniosList.map(j => {
                     const pais = sessionStorage.getItem('codigoPais') || '57';
-                    const waMsg = encodeURIComponent(`¡Hola ${j.nombre}! 🎂 El equipo de ${clubConfig?.nombre || 'tu club'} te desea un feliz cumpleaños. ¡Que lo pases increíble hoy! ⚽🎉`);
+                    const clubNombre = clubConfig?.nombre || 'tu club';
+                    const waMsg = encodeURIComponent(
+                      `*¡Feliz cumpleaños, ${j.nombre}!* \n\n` +
+                      `Hoy es un día muy especial para todo el equipo de *${clubNombre}*. ` +
+                      `Queremos que sepas que eres una parte importante de este proyecto y nos alegra mucho tenerte con nosotros.\n\n` +
+                      `Que este nuevo año de vida te traiga salud, energía y muchos éxitos dentro y fuera de la cancha. ` +
+                      `Gracias por tu esfuerzo, tu actitud y tu compromiso con el equipo, se nota y se valora.\n\n` +
+                      `*¡Disfruta mucho tu día!*\n` +
+                      `El equipo de ${clubNombre} ❤️`
+                    );
                     const waUrl = j.celular ? `https://wa.me/${pais}${j.celular}?text=${waMsg}` : null;
                     return (
                       <div key={j.cedula} style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid var(--border-sub)' }}>

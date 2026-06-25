@@ -60,19 +60,29 @@ export default function WahaConnect({ clubConfig, onConectado }) {
       setFase('exito');
       detenerPoll();
       onConectado?.();
-    } else if (d.status === 'SCAN_QR_CODE') {
+    } else if (d.status === 'SCAN_QR_CODE' || d.status === 'STARTING') {
       setFase('qr');
       fetchQr();
     } else if (d.status === 'FAILED') {
       setFase('error');
       setMsg('La sesión falló. Intenta reconectar.');
       detenerPoll();
+    } else if (d.status === 'STOPPED') {
+      // Sesión caducó o no existe — volver a idle para que pueda reconectar
+      setFase('idle');
+      detenerPoll();
     }
   }, [onConectado]);
 
   const fetchQr = async () => {
     const d = await apiCall('/waha/qr');
-    if (d.success && d.qr) setQrSrc(d.qr);
+    if (!d.success) return;
+    if (d.raw) {
+      // WAHA devolvió el string raw del QR — renderizar con API de QR de Google
+      setQrSrc(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(d.qr)}`);
+    } else if (d.qr) {
+      setQrSrc(d.qr);
+    }
   };
 
   const iniciarPoll = useCallback(() => {

@@ -38,6 +38,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
   const [confirmarDesactivar, setConfirmarDesactivar] = useState(null); // { mes, suspension }
 
   const [cancelando, setCancelando] = useState(null);
+  const [errorMsg,   setErrorMsg]   = useState('');
 
   useEffect(() => { cargarSuspensiones(); }, []);
 
@@ -84,11 +85,19 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
   const handleCancelar = async (id) => {
     setCancelando(id);
     setConfirmarDesactivar(null);
+    setErrorMsg('');
     try {
       const res  = await authFetch(`${API_BASE}/suspensiones/${id}?club_id=${getClubId()}`, { method: 'DELETE' });
       const data = await res.json();
-      if (data.success) { await cargarSuspensiones(); onSuccess?.(); }
-    } catch { /* silencioso */ } finally { setCancelando(null); }
+      if (data.success) {
+        await cargarSuspensiones();
+        onSuccess?.();
+      } else {
+        setErrorMsg(data.error || 'No se pudo desactivar la suspensión');
+      }
+    } catch {
+      setErrorMsg('Error de conexión — intenta de nuevo');
+    } finally { setCancelando(null); }
   };
 
   const handleConfirmarSuspension = async () => {
@@ -272,6 +281,13 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                   {cancelando ? 'Desactivando...' : 'Desactivar rango'}
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Error feedback */}
+          {errorMsg && (
+            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400">
+              {errorMsg}
             </div>
           )}
 

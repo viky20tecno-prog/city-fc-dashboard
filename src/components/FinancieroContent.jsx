@@ -138,11 +138,9 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
             <span className="text-sm font-medium text-[var(--text-pri)] w-16 flex-shrink-0">{nombreMes}</span>
             {esExentoGlobal
               ? <EstadoBadge estado="EXENTO" />
-              : esExentoIndividual
-                ? <SuspendidoBadge motivo="RETIRO_TEMPORAL" />
-                : susp
-                  ? <SuspendidoBadge motivo={susp.motivo} detalle={susp.detalle} cancelada={!susp.activa} />
-                  : <EstadoBadge estado={m.estado} />}
+              : susp
+                ? <SuspendidoBadge motivo={susp.motivo} detalle={susp.detalle} cancelada={!susp.activa} />
+                : <EstadoBadge estado={esExentoIndividual ? 'EXENTO' : m.estado} />}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 ml-2">
             <p className="text-sm font-medium text-[var(--text-pri)]">
@@ -150,7 +148,7 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
                 ? <><span>$0</span><span className="text-[var(--text-sec)]"> / {formatCOP(cuotaClub)}</span></>
                 : <>{formatCOP(m.valor_pagado)}<span className="text-[var(--text-sec)]"> / {formatCOP(totalDeuda)}</span></>}
             </p>
-            {!susp && !esExentoIndividual && (
+            {!susp && (
               <button onClick={abrirEdit} className="p-1 rounded-lg text-[var(--text-mut)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">
                 <Pencil className="w-3 h-3" />
               </button>

@@ -157,6 +157,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const hasQr    = !!clubConfig?.qr_pago_url;
   const limitado = limite !== null && plantillas.length >= limite;
   const vars     = form.tipo_plantilla === 'cobro' ? VARS_COBRO : VARS_EVENTO;
+  const planBloqueado = plan === 'trial' || plan === 'starter';
 
   const labelTipo = p => {
     const tipo = p.tipo_plantilla || 'evento';
@@ -164,6 +165,28 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     const ev = TIPO_EVENTO_OPTS.find(t => t.value === p.tipo_evento)?.label || p.tipo_evento || 'Evento';
     return `📅 ${ev} · ${(p.hora_envio || '').slice(0, 5)}`;
   };
+
+  if (planBloqueado) return (
+    <div className="p-5 max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[400px] text-center">
+      <div className="text-5xl mb-4">🔒</div>
+      <h2 className="text-lg font-bold text-[var(--text-pri)] mb-2">Plantillas de mensajes automáticos</h2>
+      <p className="text-sm text-[var(--text-sec)] mb-1 max-w-md">
+        Envía recordatorios de entrenamientos y cobros automáticamente desde el número de WhatsApp de tu club.
+      </p>
+      <p className="text-xs text-[var(--text-mut)] mb-6 max-w-sm">
+        Disponible en los planes <strong className="text-[var(--text-sec)]">Pro</strong> y <strong className="text-[var(--text-sec)]">Scale</strong>.
+      </p>
+      <a
+        href="https://zensports.zenpra.ai/#pricing"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ background: color }}
+        className="px-6 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition"
+      >
+        Ver planes y upgrades
+      </a>
+    </div>
+  );
 
   return (
     <div className="p-5 max-w-2xl mx-auto">

@@ -51,6 +51,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const [editandoPrenda, setEditandoPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '' });
   const [guardandoCatalogo, setGuardandoCatalogo] = useState(false);
   const [catalogoMsg, setCatalogoMsg] = useState('');
+  const [lightbox, setLightbox] = useState(null);
   const [uploadingImg, setUploadingImg] = useState(false);
 
   const searchRef  = useRef(null);
@@ -1070,7 +1071,11 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                     ) : (
                       <>
                         {/* Thumbnail */}
-                        <div className="w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-[var(--bg-surface)] border border-[var(--cc20)] flex items-center justify-center">
+                        <div
+                          className="w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-[var(--bg-surface)] border border-[var(--cc20)] flex items-center justify-center"
+                          style={p.imagen_url ? { cursor: 'zoom-in' } : {}}
+                          onClick={p.imagen_url ? () => setLightbox({ url: p.imagen_url, nombre: p.nombre }) : undefined}
+                        >
                           {p.imagen_url
                             ? <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-cover" />
                             : <Package className="w-4 h-4 text-[var(--text-mut)] opacity-40" />}
@@ -1109,6 +1114,33 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 </p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── LIGHTBOX imagen prenda ── */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => setLightbox(null)}
+        >
+          <div className="relative max-w-lg w-full mx-4" onClick={e => e.stopPropagation()}>
+            <img
+              src={lightbox.url}
+              alt={lightbox.nombre}
+              className="w-full rounded-2xl shadow-2xl object-contain max-h-[80vh]"
+            />
+            {lightbox.nombre && (
+              <div className="absolute bottom-0 left-0 right-0 bg-black/60 rounded-b-2xl px-4 py-2 text-center">
+                <span className="text-white text-sm font-medium">{lightbox.nombre}</span>
+              </div>
+            )}
+            <button
+              onClick={() => setLightbox(null)}
+              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}

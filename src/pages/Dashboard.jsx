@@ -592,11 +592,22 @@ export default function Dashboard() {
                   {cumpleaniosList.map(j => {
                     const pais = sessionStorage.getItem('codigoPais') || '57';
                     const clubNombre = clubConfig?.nombre || 'tu club';
+                    const deportePrincipal = deportesClub[0] || 'futbol';
+                    const ctxDeporte = {
+                      futbol:     { lugar: 'la cancha',      logro: 'muchos goles'       },
+                      natacion:   { lugar: 'la piscina',     logro: 'muchas medallas'     },
+                      padel:      { lugar: 'la pista',       logro: 'muchos puntos'       },
+                      rugby:      { lugar: 'el campo',       logro: 'muchos tries'        },
+                      baloncesto: { lugar: 'la cancha',      logro: 'muchas canastas'     },
+                      voleibol:   { lugar: 'la cancha',      logro: 'muchos sets ganados' },
+                      beisbol:    { lugar: 'el diamante',    logro: 'muchos jonrones'     },
+                      ciclismo:   { lugar: 'la ruta',        logro: 'muchas victorias'    },
+                    }[deportePrincipal] || { lugar: 'el campo', logro: 'muchos éxitos' };
                     const waMsg = encodeURIComponent(
                       `*¡Feliz cumpleaños, ${j.nombre}!* \n\n` +
                       `Hoy es un día muy especial para todo el equipo de *${clubNombre}*. ` +
                       `Queremos que sepas que eres una parte importante de este proyecto y nos alegra mucho tenerte con nosotros.\n\n` +
-                      `Que este nuevo año de vida te traiga salud, energía y muchos éxitos dentro y fuera de la cancha. ` +
+                      `Que este nuevo año de vida te traiga salud, energía y ${ctxDeporte.logro} dentro y fuera de ${ctxDeporte.lugar}. ` +
                       `Gracias por tu esfuerzo, tu actitud y tu compromiso con el equipo, se nota y se valora.\n\n` +
                       `*¡Disfruta mucho tu día!*\n` +
                       `El equipo de ${clubNombre} ❤️`

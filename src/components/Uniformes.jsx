@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Shirt, CheckCircle, AlertCircle, Search, Loader, X, Pencil, Save, Download, Plus, Trash2, Package } from 'lucide-react';
+import { Shirt, CheckCircle, AlertCircle, Search, Loader, X, Pencil, Save, Download, Plus, Trash2, Package, Camera } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
+import { supabase } from '../lib/supabase';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfSectionLabel, drawPdfTableHead } from '../lib/pdfHelpers';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
@@ -9,8 +10,8 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zen
 const normalizarCatalogo = (raw) =>
   (raw || []).map(p =>
     typeof p === 'string'
-      ? { nombre: p, precio: 0, precio_proveedor: 0 }
-      : { nombre: String(p.nombre || ''), precio: Number(p.precio) || 0, precio_proveedor: Number(p.precio_proveedor) || 0 }
+      ? { nombre: p, precio: 0, precio_proveedor: 0, imagen_url: '' }
+      : { nombre: String(p.nombre || ''), precio: Number(p.precio) || 0, precio_proveedor: Number(p.precio_proveedor) || 0, imagen_url: p.imagen_url || '' }
   );
 
 export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club', clubConfig }) {
@@ -45,13 +46,16 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   // — Catálogo —
   const [catalogo, setCatalogo] = useState([]);
-  const [nuevaPrenda, setNuevaPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '' });
+  const [nuevaPrenda, setNuevaPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '' });
   const [editandoIdx, setEditandoIdx] = useState(null);
-  const [editandoPrenda, setEditandoPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '' });
+  const [editandoPrenda, setEditandoPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '' });
   const [guardandoCatalogo, setGuardandoCatalogo] = useState(false);
   const [catalogoMsg, setCatalogoMsg] = useState('');
+  const [uploadingImg, setUploadingImg] = useState(false);
 
-  const searchRef = useRef(null);
+  const searchRef  = useRef(null);
+  const imgNewRef  = useRef(null);
+  const imgEditRef = useRef(null);
 
   useEffect(() => { cargarDatos(); }, []);
 
@@ -87,6 +91,22 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       }
     } catch (e) {
       console.error('Error cargando datos:', e);
+    }
+  };
+
+  const uploadPrendaImagen = async (file, setter) => {
+    if (!file) return;
+    setUploadingImg(true);
+    try {
+      const ext  = file.name.split('.').pop().toLowerCase() || 'jpg';
+      const slug = getClubId() || 'club';
+      const path = `${slug}/prendas/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('club-assets').upload(path, file, { upsert: true });
+      if (error) { setCatalogoMsg(`Error subiendo imagen: ${error.message}`); return; }
+      const { data: { publicUrl } } = supabase.storage.from('club-assets').getPublicUrl(path);
+      setter(url => ({ ...url, imagen_url: publicUrl }));
+    } finally {
+      setUploadingImg(false);
     }
   };
 
@@ -128,8 +148,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       return;
     }
     if (guardandoCatalogo) return;
-    const nuevo = [...catalogo, { nombre, precio, precio_proveedor }];
-    setNuevaPrenda({ nombre: '', precio: '', precio_proveedor: '' });
+    const nuevo = [...catalogo, { nombre, precio, precio_proveedor, imagen_url: nuevaPrenda.imagen_url || '' }];
+    setNuevaPrenda({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '' });
     saveCatalogo(nuevo);
   };
 
@@ -139,7 +159,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   const iniciarEditarPrenda = (idx) => {
     setEditandoIdx(idx);
-    setEditandoPrenda({ nombre: catalogo[idx].nombre, precio: String(catalogo[idx].precio), precio_proveedor: String(catalogo[idx].precio_proveedor || '') });
+    setEditandoPrenda({ nombre: catalogo[idx].nombre, precio: String(catalogo[idx].precio), precio_proveedor: String(catalogo[idx].precio_proveedor || ''), imagen_url: catalogo[idx].imagen_url || '' });
   };
 
   const guardarEditPrenda = () => {
@@ -147,7 +167,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     const precio           = Number(String(editandoPrenda.precio).replace(/\D/g, ''))           || 0;
     const precio_proveedor = Number(String(editandoPrenda.precio_proveedor).replace(/\D/g, '')) || 0;
     if (!nombre) return;
-    const nuevo = catalogo.map((p, i) => i === editandoIdx ? { nombre, precio, precio_proveedor } : p);
+    const nuevo = catalogo.map((p, i) => i === editandoIdx ? { nombre, precio, precio_proveedor, imagen_url: editandoPrenda.imagen_url || '' } : p);
     setEditandoIdx(null);
     saveCatalogo(nuevo);
   };
@@ -638,13 +658,20 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                           <button
                             key={p.nombre}
                             onClick={() => togglePrenda(p)}
-                            className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                               seleccionada
                                 ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
                                 : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
                             }`}
                           >
-                            <span>{p.nombre}</span>
+                            {p.imagen_url ? (
+                              <img src={p.imagen_url} alt={p.nombre} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-white/10" />
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] flex items-center justify-center shrink-0">
+                                <Package className="w-3.5 h-3.5 opacity-30" />
+                              </div>
+                            )}
+                            <span className="flex-1 text-left">{p.nombre}</span>
                             <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
                           </button>
                         );
@@ -926,13 +953,32 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
             {/* Formulario agregar */}
             <div className="flex gap-2 mb-4 flex-wrap">
+              {/* Miniatura / botón imagen */}
+              <button
+                type="button"
+                onClick={() => imgNewRef.current?.click()}
+                disabled={uploadingImg}
+                title="Subir imagen de la prenda"
+                className="w-12 h-12 shrink-0 rounded-xl border-2 border-dashed border-[var(--cc20)] hover:border-[var(--cc)] transition-colors flex items-center justify-center overflow-hidden bg-[var(--bg-app)]"
+              >
+                {uploadingImg ? (
+                  <Loader className="w-4 h-4 animate-spin text-[var(--cc)]" />
+                ) : nuevaPrenda.imagen_url ? (
+                  <img src={nuevaPrenda.imagen_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <Camera className="w-4 h-4 text-[var(--text-mut)]" />
+                )}
+              </button>
+              <input ref={imgNewRef} type="file" accept="image/*" className="hidden"
+                onChange={e => e.target.files?.[0] && uploadPrendaImagen(e.target.files[0], setNuevaPrenda)} />
+
               <input
                 type="text"
                 value={nuevaPrenda.nombre}
                 onChange={e => setNuevaPrenda(f => ({ ...f, nombre: e.target.value }))}
                 onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
                 placeholder="Nombre de la prenda"
-                className="flex-1 min-w-[160px] bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                className="flex-1 min-w-[140px] bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
               />
               <input
                 type="text"
@@ -941,7 +987,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 onChange={e => setNuevaPrenda(f => ({ ...f, precio_proveedor: e.target.value.replace(/\D/g, '') }))}
                 onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
                 placeholder="P. proveedor"
-                className="w-32 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                className="w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
               />
               <input
                 type="text"
@@ -950,11 +996,11 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 onChange={e => setNuevaPrenda(f => ({ ...f, precio: e.target.value.replace(/\D/g, '') }))}
                 onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
                 placeholder="P. público"
-                className="w-32 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                className="w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
               />
               <button
                 onClick={agregarPrenda}
-                disabled={!nuevaPrenda.nombre.trim() || catalogo.length >= MAX_PRENDAS}
+                disabled={!nuevaPrenda.nombre.trim() || catalogo.length >= MAX_PRENDAS || uploadingImg}
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--cc)] text-white text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--cc)]/80 transition-colors"
               >
                 {guardandoCatalogo ? <Loader className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
@@ -974,6 +1020,17 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                   <div key={idx} className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[var(--bg-app)] border border-[var(--cc20)]">
                     {editandoIdx === idx ? (
                       <>
+                        {/* Imagen editable */}
+                        <button type="button" onClick={() => imgEditRef.current?.click()} disabled={uploadingImg}
+                          className="w-10 h-10 shrink-0 rounded-lg border-2 border-dashed border-[var(--cc20)] hover:border-[var(--cc)] transition-colors flex items-center justify-center overflow-hidden bg-[var(--bg-surface)]"
+                        >
+                          {uploadingImg ? <Loader className="w-3 h-3 animate-spin text-[var(--cc)]" />
+                            : editandoPrenda.imagen_url ? <img src={editandoPrenda.imagen_url} alt="" className="w-full h-full object-cover" />
+                            : <Camera className="w-3.5 h-3.5 text-[var(--text-mut)]" />}
+                        </button>
+                        <input ref={imgEditRef} type="file" accept="image/*" className="hidden"
+                          onChange={e => e.target.files?.[0] && uploadPrendaImagen(e.target.files[0], setEditandoPrenda)} />
+
                         <input
                           type="text"
                           value={editandoPrenda.nombre}
@@ -997,7 +1054,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                           className="w-24 shrink-0 bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)]"
                         />
                         <div className="flex gap-1 shrink-0">
-                          <button onClick={guardarEditPrenda} disabled={guardandoCatalogo}
+                          <button onClick={guardarEditPrenda} disabled={guardandoCatalogo || uploadingImg}
                             className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--cc)] text-white text-xs font-medium disabled:opacity-40"
                           >
                             {guardandoCatalogo ? <Loader className="w-3 h-3 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
@@ -1012,6 +1069,12 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                       </>
                     ) : (
                       <>
+                        {/* Thumbnail */}
+                        <div className="w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-[var(--bg-surface)] border border-[var(--cc20)] flex items-center justify-center">
+                          {p.imagen_url
+                            ? <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-cover" />
+                            : <Package className="w-4 h-4 text-[var(--text-mut)] opacity-40" />}
+                        </div>
                         <span className="flex-1 text-sm text-[var(--text-pri)]">{p.nombre}</span>
                         {p.precio_proveedor > 0 && (
                           <span className="text-xs text-[var(--text-sec)] font-mono">

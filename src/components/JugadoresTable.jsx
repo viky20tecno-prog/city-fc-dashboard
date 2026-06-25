@@ -327,15 +327,27 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       return (PRIORIDAD[m.estado] || 0) > (PRIORIDAD[worst] || 0) ? m.estado : worst;
     }, 'SIN_DATOS');
 
+  const mesActualTabla  = new Date().getMonth() + 1;
+  const anioActualTabla = new Date().getFullYear();
+
   const jugadoresConPago = useMemo(() => {
     return jugadores.map(j => {
-      const mensJugador    = mensualidades.filter(m => (m.cedula || m.player_id) == j.cedula);
+      const mensJugador = mensualidades.filter(m => (m.cedula || m.player_id) == j.cedula);
+
+      // Solo meses hasta el mes actual del año vigente para estado y saldo.
+      // Los meses futuros (no cobrados aún) no deben afectar el semáforo ni el saldo.
+      const mensHastaHoy = mensJugador.filter(m => {
+        const anioM = parseInt(m.anio) || anioActualTabla;
+        const mesM  = parseInt(m.numero_mes);
+        return anioM < anioActualTabla || (anioM === anioActualTabla && mesM <= mesActualTabla);
+      });
+
       // Si el backend lo marca como moroso → MORA; si no, calculamos localmente
       const esMoroso       = cedulasMorosos.has(String(j.cedula));
-      const estadoLocal    = peorEstado(mensJugador);
+      const estadoLocal    = peorEstado(mensHastaHoy);
       const estadoPago     = esMoroso ? 'MORA' : estadoLocal;
-      const saldoPendiente = mensJugador.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
-      const totalPagado    = mensJugador.reduce((s, m) => s + (parseFloat(m.valor_pagado)    || 0), 0);
+      const saldoPendiente = mensHastaHoy.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
+      const totalPagado    = mensHastaHoy.reduce((s, m) => s + (parseFloat(m.valor_pagado)    || 0), 0);
       const nombre = `${j.nombre || j['nombre(s)'] || ''} ${j.apellidos || j['apellido(s)'] || ''}`.trim().toUpperCase();
       return {
         ...j, nombreCompleto: nombre, estadoPago, saldoPendiente, totalPagado,

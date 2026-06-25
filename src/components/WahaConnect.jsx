@@ -33,7 +33,7 @@ export default function WahaConnect({ clubConfig, onConectado }) {
   const plan = (clubConfig?.plan || 'trial').toLowerCase();
   const planOk = plan === 'pro' || plan === 'scale';
 
-  const [fase, setFase]       = useState('idle');   // idle | conectando | qr | exito | error
+  const [fase, setFase]       = useState('idle');   // idle | conectando | qr | exito | error | waha_plus
   const [status, setStatus]   = useState(null);      // STOPPED | STARTING | SCAN_QR_CODE | WORKING | FAILED
   const [qrSrc, setQrSrc]     = useState(null);
   const [me, setMe]           = useState(null);      // { id, pushName }
@@ -90,6 +90,10 @@ export default function WahaConnect({ clubConfig, onConectado }) {
     const d = await apiCall('/waha/conectar', { method: 'POST' });
     setLoading(false);
     if (!d.success) {
+      if (d.waha_plus_required) {
+        setFase('waha_plus');
+        return;
+      }
       setMsg(d.error || 'Error al iniciar sesión');
       setFase('error');
       return;
@@ -160,6 +164,39 @@ export default function WahaConnect({ clubConfig, onConectado }) {
           className="flex-shrink-0 text-xs text-red-400 hover:text-red-300 border border-red-400/30 hover:border-red-400/60 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-40"
         >
           {loading ? 'Desconectando…' : 'Desconectar'}
+        </button>
+      </div>
+    );
+  }
+
+  // ── WAHA Plus requerido ────────────────────────────────────────────────────
+  if (fase === 'waha_plus') {
+    return (
+      <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/5 p-5 space-y-3">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-yellow-400">Se necesita WAHA Plus</p>
+            <p className="text-xs text-[var(--text-sec)] mt-1">
+              La instancia de WAHA en Railway es la versión gratuita (Core) que solo soporta
+              un número. Para conectar el WhatsApp de cada club por separado se necesita
+              actualizar a <strong className="text-yellow-400">WAHA Plus</strong>.
+            </p>
+          </div>
+        </div>
+        <div className="text-xs text-[var(--text-sec)] space-y-1 pl-8">
+          <p className="font-medium text-[var(--text-pri)]">Cómo actualizar:</p>
+          <ol className="space-y-1 list-decimal list-inside">
+            <li>Ir a Railway → servicio WAHA → Settings → Source</li>
+            <li>Cambiar imagen Docker a <span className="font-mono text-yellow-400">devlikeapro/waha-plus:latest</span></li>
+            <li>Redeploy → volver aquí y conectar</li>
+          </ol>
+        </div>
+        <button
+          onClick={reintentar}
+          className="ml-8 text-xs text-[var(--text-sec)] hover:text-[var(--text-pri)] border border-[var(--border-sub)] px-3 py-1.5 rounded-lg transition-colors"
+        >
+          Cerrar
         </button>
       </div>
     );

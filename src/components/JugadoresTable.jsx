@@ -576,26 +576,28 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     const ws = wb.addWorksheet(`ESTADO ${anio}`, { views: [{ state: 'frozen', ySplit: 2 }] });
 
     ws.columns = [
-      { width: 34 },
-      { width: 18 },
-      { width: 22 },
-      { width: 12 },
-      { width: 36 },
+      { width: 34 },  // JUGADOR
+      { width: 18 },  // CÉDULA
+      { width: 12 },  // ESTADO
       ...MESES.map(() => ({ width: 13 })),
+      { width: 22 },  // CATEGORÍA
+      { width: 36 },  // OBSERVACIONES
     ];
+
+    const TOTAL_COLS = 3 + MESES.length + 2;
 
     // ── Fila título ───────────────────────────────────────────────
     const titleRow = ws.addRow([`ESTADO DE MENSUALIDADES ${anio}  ·  ${fecha.toUpperCase()}  ·  ${clubConfig?.nombre?.toUpperCase() || ''}`]);
-    ws.mergeCells(1, 1, 1, 5 + MESES.length);
+    ws.mergeCells(1, 1, 1, TOTAL_COLS);
     titleRow.getCell(1).fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
     titleRow.getCell(1).font      = { bold: true, color: { argb: 'FFFBBF24' }, size: 11, name: 'Calibri' };
     titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
     titleRow.height = 24;
 
     // ── Fila encabezado ───────────────────────────────────────────
-    const headerRow = ws.addRow(['JUGADOR', 'CÉDULA', 'CATEGORÍA', 'ESTADO', 'OBSERVACIONES', ...MESES]);
+    const headerRow = ws.addRow(['JUGADOR', 'CÉDULA', 'ESTADO', ...MESES, 'CATEGORÍA', 'OBSERVACIONES']);
     headerRow.eachCell((cell, col) => {
-      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: col <= 4 ? 'FF1E293B' : 'FF334155' } };
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: col <= 3 ? 'FF1E293B' : 'FF334155' } };
       cell.font      = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10, name: 'Calibri' };
       cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: false };
       cell.border    = { bottom: { style: 'medium', color: { argb: 'FFFBBF24' } } };
@@ -603,7 +605,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     headerRow.height = 22;
 
     // AutoFiltro desde la fila de encabezados
-    ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: 5 + MESES.length } };
+    ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: TOTAL_COLS } };
 
     // ── Filas de datos ────────────────────────────────────────────
     const activos   = [...jugadoresConPago].filter(j =>  j.activo).sort((a, b) => (a.nombreCompleto||'').localeCompare(b.nombreCompleto||'','es'));
@@ -629,20 +631,26 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       // Observaciones: usar notas del jugador, quitando prefijo "[Exento: ...]" si quedó de lógica anterior
       const observaciones = (j.notas || '').replace(/^\[Exento:[^\]]*\]\s*/, '').trim();
 
+      const COL_ESTADO = 3;
+      const COL_MES_INICIO = 4;                           // primera columna de mes
+      const COL_MES_FIN    = 3 + MESES.length;           // última columna de mes
+      const COL_CAT        = 3 + MESES.length + 1;
+      const COL_OBS        = 3 + MESES.length + 2;
+
       const dataRow = ws.addRow([
         (j.nombreCompleto || '').toUpperCase(),
         String(j.cedula || '').toUpperCase(),
-        (j.categoria || '').toUpperCase(),
         esInactivo ? 'INACTIVO' : 'ACTIVO',
-        observaciones,
         ...estadosMes,
+        (j.categoria || '').toUpperCase(),
+        observaciones,
       ]);
 
       dataRow.eachCell({ includeEmpty: true }, (cell, colNum) => {
-        const esMesCol    = colNum > 5;
-        const esEstadoCol = colNum === 4;
-        const esObsCol    = colNum === 5;
-        const estado      = esMesCol ? estadosMes[colNum - 6] : null;
+        const esMesCol    = colNum >= COL_MES_INICIO && colNum <= COL_MES_FIN;
+        const esEstadoCol = colNum === COL_ESTADO;
+        const esObsCol    = colNum === COL_OBS;
+        const estado      = esMesCol ? estadosMes[colNum - COL_MES_INICIO] : null;
         const estStyle    = estado ? ESTADO_STYLE[estado] : null;
 
         if (esMesCol && estStyle) {
@@ -669,7 +677,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           }
         }
 
-        cell.alignment = { horizontal: (esMesCol || esEstadoCol) ? 'center' : 'left', vertical: 'middle', wrapText: esObsCol };
+        cell.alignment = { horizontal: (esMesCol || esEstadoCol) ? 'center' : 'left', vertical: 'middle', wrapText: esObsCol || false };
 
         if (colNum === 1 && esPend) {
           cell.border = { left: { style: 'medium', color: { argb: 'FFF97316' } } };

@@ -4,7 +4,7 @@ import {
   RefreshCw, LayoutDashboard, Users, Shirt, Activity,
   Clock, ClipboardCheck, Settings, AlertTriangle,
   Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays, Shield,
-  ChevronLeft, ChevronRight, MessageSquare, Link2, Globe,
+  ChevronLeft, ChevronRight, MessageSquare, Link2, Globe, FolderOpen, Send,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -29,6 +29,7 @@ import MiEquipoModal from '../components/MiEquipoModal';
 import Calendario from '../components/Calendario';
 import CobroConfigModal from '../components/CobroConfigModal';
 import PlantillasMensajes from '../components/PlantillasMensajes';
+import DocumentosClub from '../components/DocumentosClub';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 const NAV = [
@@ -43,6 +44,7 @@ const NAV = [
   { id: 'conciliacion', Icon: ClipboardCheck,   title: 'Conciliación'  },
   { id: 'finanzas',     Icon: TrendingUp,       title: 'Finanzas'      },
   { id: 'plantillas',   Icon: MessageSquare,    title: 'Plantillas WA' },
+  { id: 'documentos',   Icon: FolderOpen,       title: 'Documentos'    },
 ];
 
 function NavBtn({ id, Icon, title, active, color, onClick, collapsed }) {
@@ -421,7 +423,7 @@ export default function Dashboard() {
           const nombre = `${j.nombre || ''} ${j.apellidos || ''}`.trim();
           const edad = d.getFullYear() - anioNac;
           const fechaLabel = `${dia} ${MESES[mes - 1]}`;
-          lista.push({ nombre, cedula: j.cedula, offset, edad, fechaLabel, diaLabel: offset === 0 ? 'Hoy' : offset === 1 ? 'Mañana' : `En ${offset} días` });
+          lista.push({ nombre, cedula: j.cedula, celular: j.celular, offset, edad, fechaLabel, diaLabel: offset === 0 ? 'Hoy' : offset === 1 ? 'Mañana' : `En ${offset} días` });
           break;
         }
       }
@@ -587,24 +589,45 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
-                  {cumpleaniosList.map(j => (
-                    <div key={j.cedula} style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid var(--border-sub)' }}>
-                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: j.offset === 0 ? `${c}20` : 'var(--bg-card)', border: `1px solid ${j.offset === 0 ? c : 'var(--border-sub)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '16px' }}>
-                        🎂
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-pri)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nombre}</div>
-                        <div style={{ fontSize: '11px', color: j.offset === 0 ? c : 'var(--text-mut)', fontWeight: j.offset === 0 ? 600 : 400 }}>
-                          {j.diaLabel} · {j.fechaLabel} · {j.edad} años
+                  {cumpleaniosList.map(j => {
+                    const pais = sessionStorage.getItem('codigoPais') || '57';
+                    const waMsg = encodeURIComponent(`¡Hola ${j.nombre}! 🎂 El equipo de ${clubConfig?.nombre || 'tu club'} te desea un feliz cumpleaños. ¡Que lo pases increíble hoy! ⚽🎉`);
+                    const waUrl = j.celular ? `https://wa.me/${pais}${j.celular}?text=${waMsg}` : null;
+                    return (
+                      <div key={j.cedula} style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid var(--border-sub)' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: j.offset === 0 ? `${c}20` : 'var(--bg-card)', border: `1px solid ${j.offset === 0 ? c : 'var(--border-sub)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '16px' }}>
+                          🎂
                         </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-pri)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{j.nombre}</div>
+                          <div style={{ fontSize: '11px', color: j.offset === 0 ? c : 'var(--text-mut)', fontWeight: j.offset === 0 ? 600 : 400 }}>
+                            {j.diaLabel} · {j.fechaLabel} · {j.edad} años
+                          </div>
+                        </div>
+                        {waUrl && (
+                          <a
+                            href={waUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Enviar felicitación por WhatsApp"
+                            style={{
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              width: 28, height: 28, borderRadius: 7, flexShrink: 0,
+                              background: '#25D36620', color: '#25D366',
+                              textDecoration: 'none',
+                            }}
+                          >
+                            <Send size={13} strokeWidth={2} />
+                          </a>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
               {cumpleaniosList.length > 0 && (
                 <div style={{ padding: '10px 16px', fontSize: '11px', color: 'var(--text-mut)', textAlign: 'center', borderTop: '1px solid var(--border-sub)' }}>
-                  Revisa sus perfiles en Jugadores para enviar saludos
+                  Toca el ícono verde para enviar una felicitación por WhatsApp
                 </div>
               )}
             </div>
@@ -961,6 +984,7 @@ export default function Dashboard() {
             {activeTab === 'conciliacion' && <Conciliacion   color={c} />}
             {activeTab === 'finanzas'     && <Finanzas color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'plantillas'   && <PlantillasMensajes color={c} clubConfig={clubConfig} />}
+            {activeTab === 'documentos'   && <DocumentosClub     color={c} />}
           </>
         )}
       </main>

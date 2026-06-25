@@ -3,6 +3,7 @@ import {
   ChevronLeft, ChevronRight, Plus, Edit2, Trash2,
   X, Loader2, MapPin, Clock, CalendarDays, List, Users,
   CheckCircle2, XCircle, AlertCircle, ChevronDown, PauseCircle, PlayCircle,
+  DollarSign,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
@@ -31,6 +32,7 @@ const FORM_EMPTY = {
   fecha: '', hora: '08:00',
   fecha_fin: '', hora_fin: '',
   lugar: '', descripcion: '', equipo: '',
+  monto_arbitraje: '',
   recurrencia: null,
 };
 
@@ -50,6 +52,8 @@ function getWeeklyDates(fechaStr, hasta) {
 }
 
 const INPUT = 'w-full bg-[var(--bg-surface)] border border-[var(--cc30)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-3 py-2 text-sm outline-none transition-colors';
+
+const fmtCOP = (n) => Math.round(Number(n) || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
 
 // ── Utilidades ────────────────────────────────────────────────────────────────
 
@@ -181,6 +185,11 @@ function EventCard({ ev, onEdit, onDelete, onAsistencia, onToggleSuspend, deleti
                 {cacheEntry.PENDIENTE} pendientes
               </span>
             )}
+            {cacheEntry.monto_arbitraje > 0 && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: '#F59E0B', background: '#F59E0B20' }}>
+                $ {cacheEntry.pagaron || 0}/{cacheEntry.total} arbitraje
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -258,9 +267,12 @@ export default function Calendario({ color, clubId }) {
   // Sync caché cuando cambian los jugadores del evento activo de asistencia
   useEffect(() => {
     if (!asistEvento || asistPlayers.length === 0) return;
-    const s = { PRESENTE: 0, PENDIENTE: 0 };
-    asistPlayers.forEach(p => { const k = p.estado === 'PRESENTE' ? 'PRESENTE' : 'PENDIENTE'; s[k]++; });
-    setAsistCache(c => ({ ...c, [asistEvento.id]: { ...s, total: asistPlayers.length } }));
+    const s = { PRESENTE: 0, PENDIENTE: 0, pagaron: 0 };
+    asistPlayers.forEach(p => {
+      s[p.estado === 'PRESENTE' ? 'PRESENTE' : 'PENDIENTE']++;
+      if (p.pago_arbitraje) s.pagaron++;
+    });
+    setAsistCache(c => ({ ...c, [asistEvento.id]: { ...s, total: asistPlayers.length, monto_arbitraje: asistEvento.monto_arbitraje || 0 } }));
   }, [asistPlayers, asistEvento]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const eventsByDay = useMemo(() => {
@@ -311,9 +323,10 @@ export default function Calendario({ color, clubId }) {
       hora:        start ? `${pad2(start.getHours())}:${pad2(start.getMinutes())}` : '',
       fecha_fin:   end   ? localDateStr(end)                                       : '',
       hora_fin:    end   ? `${pad2(end.getHours())}:${pad2(end.getMinutes())}`     : '',
-      lugar:       ev.lugar       || '',
-      descripcion: ev.descripcion || '',
-      equipo:      ev.equipo      || '',
+      lugar:           ev.lugar            || '',
+      descripcion:     ev.descripcion      || '',
+      equipo:          ev.equipo           || '',
+      monto_arbitraje: ev.monto_arbitraje  || '',
     });
     setEditEvent(ev);
     setShowForm(true);
@@ -335,15 +348,18 @@ export default function Calendario({ color, clubId }) {
           ? fecha
           : (form.fecha_fin || fecha);
         return {
-          tipo:         form.tipo,
-          titulo:       tituloFinal,
-          descripcion:  form.descripcion || null,
-          fecha_inicio: new Date(`${fecha}T${form.hora || '00:00'}`).toISOString(),
-          fecha_fin:    form.hora_fin
+          tipo:            form.tipo,
+          titulo:          tituloFinal,
+          descripcion:     form.descripcion || null,
+          fecha_inicio:    new Date(`${fecha}T${form.hora || '00:00'}`).toISOString(),
+          fecha_fin:       form.hora_fin
             ? new Date(`${fechaFinDate}T${form.hora_fin}`).toISOString()
             : null,
-          lugar:  form.lugar  || null,
-          equipo: form.equipo || null,
+          lugar:           form.lugar  || null,
+          equipo:          form.equipo || null,
+          monto_arbitraje: (form.tipo === 'PARTIDO' && form.monto_arbitraje)
+            ? parseInt(form.monto_arbitraje)
+            : null,
         };
       };
 
@@ -431,25 +447,39 @@ export default function Calendario({ color, clubId }) {
   };
 
   const markAsistencia = async (cedula, estado) => {
+    const prev_pago = asistPlayers.find(p => p.cedula === cedula)?.pago_arbitraje ?? false;
     setAsistSaving(s => ({ ...s, [cedula]: true }));
-    // optimistic update
-    setAsistPlayers(prev =>
-      prev.map(p => p.cedula === cedula ? { ...p, estado } : p)
-    );
+    setAsistPlayers(prev => prev.map(p => p.cedula === cedula ? { ...p, estado } : p));
     try {
       await authFetch(`${API_BASE_URL}/asistencia/${asistEvento.id}/${cedula}?club_id=${clubId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado }),
+        body: JSON.stringify({ estado, pago_arbitraje: prev_pago }),
       });
     } catch (e) {
       console.error(e);
-      // revert on error
-      setAsistPlayers(prev =>
-        prev.map(p => p.cedula === cedula ? { ...p, estado: 'PENDIENTE' } : p)
-      );
+      setAsistPlayers(prev => prev.map(p => p.cedula === cedula ? { ...p, estado: 'PENDIENTE' } : p));
     } finally {
       setAsistSaving(s => { const n = { ...s }; delete n[cedula]; return n; });
+    }
+  };
+
+  const markArbitraje = async (cedula, pago) => {
+    const prev_estado = asistPlayers.find(p => p.cedula === cedula)?.estado || 'PENDIENTE';
+    const key = `arb_${cedula}`;
+    setAsistSaving(s => ({ ...s, [key]: true }));
+    setAsistPlayers(prev => prev.map(p => p.cedula === cedula ? { ...p, pago_arbitraje: pago } : p));
+    try {
+      await authFetch(`${API_BASE_URL}/asistencia/${asistEvento.id}/${cedula}?club_id=${clubId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: prev_estado, pago_arbitraje: pago }),
+      });
+    } catch (e) {
+      console.error(e);
+      setAsistPlayers(prev => prev.map(p => p.cedula === cedula ? { ...p, pago_arbitraje: !pago } : p));
+    } finally {
+      setAsistSaving(s => { const n = { ...s }; delete n[key]; return n; });
     }
   };
 
@@ -464,8 +494,17 @@ export default function Calendario({ color, clubId }) {
 
   const asistStats = useMemo(() => {
     const presentes = asistPlayers.filter(p => p.estado === 'PRESENTE').length;
-    return { PRESENTE: presentes, PENDIENTE: asistPlayers.length - presentes };
-  }, [asistPlayers]);
+    const pagaron   = asistPlayers.filter(p => p.pago_arbitraje).length;
+    const monto     = asistEvento?.monto_arbitraje || 0;
+    return {
+      PRESENTE:        presentes,
+      PENDIENTE:       asistPlayers.length - presentes,
+      pagaron,
+      pendientePago:   asistPlayers.length - pagaron,
+      montoRecaudado:  pagaron * monto,
+      montoTotal:      asistPlayers.length * monto,
+    };
+  }, [asistPlayers, asistEvento]);
 
   const pctAsistencia = useMemo(() => {
     if (!historialJugador.length) return null;
@@ -723,6 +762,23 @@ export default function Calendario({ color, clubId }) {
             placeholder={form.tipo === 'PARTIDO' ? 'Equipo (filtra asistencia)' : 'Equipo (opcional)'}
             className={INPUT} />
 
+          {/* Arbitraje — solo para PARTIDO */}
+          {form.tipo === 'PARTIDO' && (
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider">
+                Valor arbitraje por jugador (COP)
+              </label>
+              <input
+                type="number"
+                value={form.monto_arbitraje}
+                onChange={e => setForm(f => ({ ...f, monto_arbitraje: e.target.value }))}
+                placeholder="Ej: 15000"
+                min="0"
+                className={INPUT}
+              />
+            </div>
+          )}
+
           {/* Descripción */}
           <textarea value={form.descripcion}
             onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))}
@@ -785,7 +841,7 @@ export default function Calendario({ color, clubId }) {
             </button>
           </div>
 
-          {/* Stats */}
+          {/* Stats asistencia */}
           {!asistLoading && total > 0 && (
             <div className="flex items-center gap-4 px-5 py-3 border-b border-[var(--cc30)] shrink-0">
               <div className="text-center flex-1">
@@ -801,6 +857,27 @@ export default function Calendario({ color, clubId }) {
               <div className="text-center flex-1">
                 <p className="text-2xl font-black text-[var(--text-pri)]">{total}</p>
                 <p className="text-[10px] text-[var(--text-mut)]">Total</p>
+              </div>
+            </div>
+          )}
+
+          {/* Stats arbitraje — solo cuando el partido tiene monto configurado */}
+          {!asistLoading && total > 0 && asistEvento.monto_arbitraje > 0 && (
+            <div className="flex items-center gap-4 px-5 py-2.5 border-b border-[var(--cc30)] shrink-0 bg-[#F59E0B08]">
+              <DollarSign size={13} className="shrink-0" style={{ color: '#F59E0B' }} />
+              <div className="text-center flex-1">
+                <p className="text-xl font-black" style={{ color: '#F59E0B' }}>{asistStats.pagaron}</p>
+                <p className="text-[10px] text-[var(--text-mut)]">Pagaron</p>
+              </div>
+              <div className="w-px h-6 bg-[var(--cc30)]" />
+              <div className="text-center flex-1">
+                <p className="text-xl font-black text-[var(--text-mut)]">{asistStats.pendientePago}</p>
+                <p className="text-[10px] text-[var(--text-mut)]">Pendientes</p>
+              </div>
+              <div className="w-px h-6 bg-[var(--cc30)]" />
+              <div className="text-center flex-1">
+                <p className="text-sm font-black leading-tight" style={{ color: '#F59E0B' }}>{fmtCOP(asistStats.montoRecaudado)}</p>
+                <p className="text-[10px] text-[var(--text-mut)]">Cobrado</p>
               </div>
             </div>
           )}
@@ -879,20 +956,45 @@ export default function Calendario({ color, clubId }) {
                         <CheckCircle2 size={16} />
                       </button>
                     )}
+
+                    {/* Toggle arbitraje — solo cuando el partido tiene monto */}
+                    {asistEvento.monto_arbitraje > 0 && (
+                      asistSaving[`arb_${p.cedula}`] ? (
+                        <Loader2 size={18} className="animate-spin shrink-0" style={{ color: '#F59E0B' }} />
+                      ) : (
+                        <button
+                          onClick={() => markArbitraje(p.cedula, !p.pago_arbitraje)}
+                          title={p.pago_arbitraje ? 'Quitar pago arbitraje' : 'Marcar arbitraje pagado'}
+                          className="shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all"
+                          style={p.pago_arbitraje
+                            ? { background: '#F59E0B', borderColor: '#F59E0B', color: '#fff' }
+                            : { background: 'transparent', borderColor: 'var(--border-sub)', color: 'transparent' }}>
+                          <DollarSign size={14} />
+                        </button>
+                      )
+                    )}
                   </div>
                 );
               })
             )}
           </div>
 
-          {/* Footer — botón guardar */}
+          {/* Footer */}
           {!asistLoading && total > 0 && (
-            <div className="px-5 py-3 border-t border-[var(--cc30)] shrink-0">
+            <div className="px-5 py-3 border-t border-[var(--cc30)] shrink-0 space-y-2">
+              {asistEvento.monto_arbitraje > 0 && (
+                <div className="flex items-center justify-between text-xs px-1">
+                  <span className="text-[var(--text-sec)]">Arbitraje cobrado</span>
+                  <span className="font-bold" style={{ color: '#F59E0B' }}>
+                    {fmtCOP(asistStats.montoRecaudado)} / {fmtCOP(asistStats.montoTotal)}
+                  </span>
+                </div>
+              )}
               <button onClick={closeAsistencia}
                 style={{ background: color }}
                 className="w-full py-3 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 hover:opacity-85 transition-opacity">
                 <CheckCircle2 size={15} />
-                Guardar lista · {asistStats.PRESENTE} de {total} presentes
+                Guardar · {asistStats.PRESENTE} de {total} presentes
               </button>
             </div>
           )}

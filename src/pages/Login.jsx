@@ -136,19 +136,33 @@ export default function Login() {
     if (!clubId) {
       // Super admin: mostrar selector de clubs
       if (SUPER_ADMIN_EMAILS.includes(data?.user?.email)) {
-        const { data: { session } } = await supabase.auth.getSession();
-        const token = session?.access_token;
-        setSaToken(token);
-        const r = await fetch(`${API_BASE}/superadmin/clubs`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const json = await r.json();
-        if (json.success) {
-          setClubs(json.clubs);
-          setVista('selector_club');
+        // Usar el token que viene directamente en la respuesta del login (funciona en móvil)
+        const token = data?.session?.access_token;
+        if (!token) {
+          setError('No se pudo obtener el token de sesión. Intenta de nuevo.');
+          await supabase.auth.signOut();
           setLoading(false);
           return;
         }
+        setSaToken(token);
+        try {
+          const r = await fetch(`${API_BASE}/superadmin/clubs`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const json = await r.json();
+          if (json.success) {
+            setClubs(json.clubs);
+            setVista('selector_club');
+            setLoading(false);
+            return;
+          }
+          setError(`Error cargando clubs: ${json.error || 'intenta de nuevo'}`);
+        } catch (fetchErr) {
+          setError('No se pudo conectar al servidor. Verifica tu conexión e intenta de nuevo.');
+        }
+        await supabase.auth.signOut();
+        setLoading(false);
+        return;
       }
       setError('No se encontró un club asociado a esta cuenta.');
       await supabase.auth.signOut();

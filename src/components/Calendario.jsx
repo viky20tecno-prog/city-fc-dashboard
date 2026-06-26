@@ -813,7 +813,9 @@ export default function Calendario({ color, clubId }) {
           )}
 
           {/* Convocados — solo para PARTIDO */}
-          {form.tipo === 'PARTIDO' && (
+          {form.tipo === 'PARTIDO' && (() => {
+            const equiposUnicos = [...new Set(formPlayers.map(p => p.equipo).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+            return (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider">
@@ -835,6 +837,34 @@ export default function Calendario({ color, clubId }) {
                   </button>
                 </div>
               </div>
+
+              {/* Selector de equipo prestablecido */}
+              {equiposUnicos.length > 0 && (
+                <div className="flex gap-1.5 flex-wrap">
+                  {equiposUnicos.map(eq => {
+                    const cedulasEq = formPlayers.filter(p => p.equipo === eq).map(p => p.cedula);
+                    const todosDelEq = cedulasEq.every(c => form.convocados.includes(c));
+                    return (
+                      <button
+                        key={eq}
+                        type="button"
+                        onClick={() => setForm(f => ({
+                          ...f,
+                          convocados: todosDelEq
+                            ? f.convocados.filter(c => !cedulasEq.includes(c))
+                            : [...new Set([...f.convocados, ...cedulasEq])],
+                        }))}
+                        className="px-3 py-1 rounded-lg text-xs font-semibold border transition-all"
+                        style={todosDelEq
+                          ? { background: 'var(--cc)', borderColor: 'var(--cc)', color: '#fff' }
+                          : { background: 'var(--bg-surface)', borderColor: 'var(--cc30)', color: 'var(--text-sec)' }}>
+                        {eq} ({cedulasEq.length})
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               <input
                 type="text"
                 value={formPlayersSearch}
@@ -879,7 +909,8 @@ export default function Calendario({ color, clubId }) {
                 )}
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {/* Descripción */}
           <textarea value={form.descripcion}

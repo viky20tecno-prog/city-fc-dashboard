@@ -276,7 +276,9 @@ export default function Calendario({ color, clubId }) {
     try {
       const res  = await authFetch(`${API_BASE_URL}/players?club_id=${clubId}`);
       const data = await res.json();
-      setFormPlayers(data.data || []);
+      setFormPlayers((data.data || []).sort((a, b) =>
+        `${a.nombre} ${a.apellidos}`.localeCompare(`${b.nombre} ${b.apellidos}`, 'es')
+      ));
     } catch (e) { console.error(e); }
     finally     { setFormPlayersLoading(false); }
   };

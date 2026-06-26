@@ -12,32 +12,51 @@ function normalizeKey(k) {
     .replace(/[^a-z0-9]/g, '_');
 }
 
+// Busca la primera clave que coincida exactamente o que empiece con `prefix_`/`prefix__`.
+// Permite leer cabeceras tipo "NOMBRES (solo nombres)" → nombres__solo_nombres_ usando el prefijo "nombres".
+function pget(n, prefix) {
+  if (n[prefix] !== undefined && n[prefix] !== '') return n[prefix];
+  const hit = Object.keys(n).find(k => k.startsWith(prefix + '_') || k.startsWith(prefix + '__'));
+  return hit ? n[hit] : '';
+}
+
 function mapRow(rawObj) {
   const n = {};
   Object.entries(rawObj).forEach(([k, v]) => { n[normalizeKey(k)] = String(v ?? '').trim(); });
 
   return {
-    cedula:               n.cedula || n.documento || n.cc || '',
-    nombre:               n.nombre || n.nombres || n['nombre_s_'] || '',
-    apellidos:            n.apellidos || n.apellido || n['apellido_s_'] || '',
-    celular:              n.celular || n.telefono || n.movil || n.cel || '',
-    correo_electronico:   n.correo_electronico || n.correo || n.email || '',
+    // cedula: acepta "NUMERO DE IDENTIFICACION" (Google Forms City FC)
+    cedula:               n.cedula || n.documento || n.cc || n.numero_de_identificacion || n.numero_identificacion || '',
+    // nombre/apellidos: acepta "NOMBRES (solo nombres)" y "APELLIDOS (solo apellidos)"
+    nombre:               n.nombre || pget(n, 'nombres'),
+    apellidos:            n.apellidos || n.apellido || pget(n, 'apellidos'),
+    // celular: acepta "NUMERO CELULAR PERSONAL"
+    celular:              n.celular || n.telefono || n.movil || n.cel || n.numero_celular_personal || '',
+    // correo: acepta "DIRECCION DE CORREO ELECTRONICO"
+    correo_electronico:   n.correo_electronico || n.correo || n.email || n.direccion_de_correo_electronico || '',
     fecha_nacimiento:     n.fecha_nacimiento || n.fecha_nac || n.nacimiento || '',
-    lugar_de_nacimiento:  n.lugar_de_nacimiento || n.lugar_nacimiento || n.ciudad_nacimiento || '',
+    // lugar_nacimiento: acepta "MUNICIPIO DE NACIMIENTO"
+    lugar_de_nacimiento:  n.lugar_de_nacimiento || n.lugar_nacimiento || n.ciudad_nacimiento || n.municipio_de_nacimiento || '',
     tipo_sangre:          n.tipo_sangre || n.sangre || n.grupo_sanguineo || '',
     eps:                  n.eps || n.seguro || n.eps_seguro || '',
-    familiar_emergencia:  n.familiar_emergencia || n.contacto_emergencia || n.emergencia || '',
-    celular_contacto:     n.celular_contacto || n.tel_emergencia || n.telefono_emergencia || '',
+    // familiar: acepta "FAMILIAR EN CASO DE EMERGENCIA"
+    familiar_emergencia:  n.familiar_emergencia || n.contacto_emergencia || n.emergencia || n.familiar_en_caso_de_emergencia || '',
+    // celular_contacto: acepta "NUMERO CELULAR DEL FAMILAR"
+    celular_contacto:     n.celular_contacto || n.tel_emergencia || n.telefono_emergencia || n.numero_celular_del_familar || '',
     municipio:            n.municipio || n.ciudad || '',
-    direccion:            n.direccion || n.direccion_ || '',
-    barrio:               n.barrio || '',
-    estatura:             n.estatura || n.talla || '',
-    peso:                 n.peso || '',
+    // direccion: acepta "DIRECCION DE RESIDENCIA" (explícito para no pisar correo)
+    direccion:            n.direccion || n.direccion_de_residencia || '',
+    // barrio: acepta "LUGAR DE RESIDENCIA (barrio)"
+    barrio:               n.barrio || pget(n, 'lugar_de_residencia'),
+    // estatura/peso: acepta "ESTATURA (1.XX)" y "PESO (KG)"
+    estatura:             n.estatura || n.talla || pget(n, 'estatura'),
+    peso:                 n.peso || pget(n, 'peso'),
     posicion:             n.posicion || '',
     numero_camiseta:      n.numero_camiseta || n.camiseta || n.numero || '',
     categoria:            n.categoria || n.categoria_ || '',
     equipo:               n.equipo || '',
-    instagram:            n.instagram || '',
+    // instagram: acepta "USUARIO PERSONAL DE INSTAGRAM (con @)"
+    instagram:            n.instagram || pget(n, 'usuario_personal_de_instagram'),
   };
 }
 

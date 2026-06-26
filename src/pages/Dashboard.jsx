@@ -543,22 +543,28 @@ export default function Dashboard() {
         )}
 
         {/* Refresh */}
-        <div style={S.roundBtn} onClick={handleRefresh} title="Actualizar datos">
+        <div
+          style={{ ...S.roundBtn, ...(isMobile && { flexDirection: 'column', gap: '2px', height: 'auto', width: 'auto', padding: '4px 7px' }) }}
+          onClick={handleRefresh}
+          title="Actualizar datos"
+        >
           <RefreshCw
             size={14}
             color="var(--text-sec)"
             style={{ animation: (refreshing || loading) ? 'spin 1s linear infinite' : 'none' }}
           />
+          {isMobile && <span style={{ fontSize: '8px', color: 'var(--text-mut)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>Sync</span>}
         </div>
 
         {/* Notificaciones cumpleaños */}
         <div ref={bellRef} style={{ position: 'relative', flexShrink: 0 }}>
           <div
-            style={{ ...S.roundBtn, background: showBell ? `${c}1F` : S.roundBtn.background }}
+            style={{ ...S.roundBtn, background: showBell ? `${c}1F` : S.roundBtn.background, ...(isMobile && { flexDirection: 'column', gap: '2px', height: 'auto', width: 'auto', padding: '4px 7px' }) }}
             onClick={() => setShowBell(v => !v)}
             title={`Notificaciones${cumpleaniosList.length ? ` · ${cumpleaniosList.length} cumpleaños` : ''}`}
           >
             <Bell size={14} color={showBell ? c : 'var(--text-sec)'} />
+            {isMobile && <span style={{ fontSize: '8px', color: 'var(--text-mut)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>Alertas</span>}
             {cumpleaniosList.length > 0 && (
               <span style={{
                 position: 'absolute', top: '5px', right: '5px',
@@ -933,14 +939,16 @@ export default function Dashboard() {
                     <button
                       onClick={handleCopyLink}
                       style={{
-                        width: '40px', height: '40px', flexShrink: 0,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px',
+                        padding: '6px 8px',
                         borderRadius: '10px', border: `1px solid ${c}30`,
                         background: `${c}0C`, cursor: 'pointer',
                       }}
                       title="Copiar link de inscripción"
                     >
                       {linkCopied ? <Check size={13} color="#22C55E" /> : <Copy size={13} color={c} />}
+                      <span style={{ fontSize: '8px', color: 'var(--text-mut)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>Copiar</span>
                     </button>
                     <button
                       onClick={() => window.open(portalUrl, '_blank')}
@@ -958,14 +966,16 @@ export default function Dashboard() {
                     <button
                       onClick={handleCopyPortal}
                       style={{
-                        width: '40px', height: '40px', flexShrink: 0,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px',
+                        padding: '6px 8px',
                         borderRadius: '10px', border: '1px solid rgba(0,170,255,0.20)',
                         background: 'rgba(0,170,255,0.06)', cursor: 'pointer',
                       }}
                       title="Copiar link del Portal Atleta"
                     >
                       {portalCopied ? <Check size={13} color="#22C55E" /> : <Copy size={13} color="#4A9EFF" />}
+                      <span style={{ fontSize: '8px', color: 'var(--text-mut)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>Copiar</span>
                     </button>
                   </div>
                 )}

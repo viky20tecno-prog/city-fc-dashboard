@@ -68,6 +68,10 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [error,      setError]      = useState('');
   const [enviandoEstado, setEnviandoEstado] = useState(false);
   const [resultadoEstado, setResultadoEstado] = useState(null);
+  const [jugadoresLista, setJugadoresLista] = useState([]);
+  const [busqueda, setBusqueda] = useState('');
+  const [jugadorSel, setJugadorSel] = useState(null);
+  const [showSugeridos, setShowSugeridos] = useState(false);
 
   const authHeaders = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -78,13 +82,21 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await fetch(`${API}/plantillas?club_id=${clubId()}`, {
-        headers: await authHeaders(),
-      });
-      const d = await r.json();
-      setPlantillas(d.plantillas || []);
-      setLimite(d.limite ?? null);
-      setPlan(d.plan || '');
+      const hdrs = await authHeaders();
+      const [rPlant, rPlayers] = await Promise.all([
+        fetch(`${API}/plantillas?club_id=${clubId()}`, { headers: hdrs }),
+        fetch(`${API}/players?club_id=${clubId()}`, { headers: hdrs }),
+      ]);
+      const dPlant = await rPlant.json();
+      setPlantillas(dPlant.plantillas || []);
+      setLimite(dPlant.limite ?? null);
+      setPlan(dPlant.plan || '');
+      const dPlayers = await rPlayers.json();
+      setJugadoresLista(
+        (dPlayers.data || [])
+          .filter(j => j.activo)
+          .sort((a, b) => `${a.nombre} ${a.apellidos}`.localeCompare(`${b.nombre} ${b.apellidos}`, 'es'))
+      );
     } finally { setLoading(false); }
   }, []);
 
@@ -158,15 +170,16 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   };
 
   const enviarEstadoCuenta = async () => {
-    if (!confirm('¿Enviar el estado de cuenta por WhatsApp a todos los jugadores activos con número registrado?')) return;
+    const destino = jugadorSel
+      ? `${jugadorSel.nombre} ${jugadorSel.apellidos}`.trim()
+      : `todos los jugadores activos con número registrado`;
+    if (!confirm(`¿Enviar estado de cuenta por WhatsApp a ${destino}?`)) return;
     setEnviandoEstado(true);
     setResultadoEstado(null);
     try {
       const hdrs = await authHeaders();
-      const r = await fetch(`${API}/players/estado-cuenta-masivo?club_id=${clubId()}`, {
-        method: 'POST',
-        headers: hdrs,
-      });
+      const url  = `${API}/players/estado-cuenta-masivo?club_id=${clubId()}${jugadorSel ? `&cedula=${jugadorSel.cedula}` : ''}`;
+      const r = await fetch(url, { method: 'POST', headers: hdrs });
       const d = await r.json();
       if (d.success) setResultadoEstado({ ok: true, total: d.total, sin_numero: d.sin_numero });
       else setResultadoEstado({ ok: false, msg: d.error || 'Error desconocido' });
@@ -220,34 +233,83 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
       </div>
 
       {/* Card — Estado de cuenta masivo */}
-      <div className="mb-5 bg-[var(--bg-card)] border border-[rgba(37,211,102,0.25)] rounded-2xl p-5">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-[var(--text-pri)] flex items-center gap-2">
-              <span>💬</span> Estado de cuenta masivo
-            </p>
-            <p className="text-xs text-[var(--text-sec)] mt-1">
-              Envía un mensaje personalizado a cada jugador activo con su resumen de mensualidades, uniformes y torneos, más el enlace a su portal.
-            </p>
-            {resultadoEstado && (
-              <div className={`mt-3 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium ${resultadoEstado.ok ? 'bg-[rgba(37,211,102,0.10)] border border-[rgba(37,211,102,0.25)] text-[#25D366]' : 'bg-red-500/10 border border-red-500/25 text-red-400'}`}>
-                {resultadoEstado.ok
-                  ? `✅ Enviando a ${resultadoEstado.total} jugadores en segundo plano${resultadoEstado.sin_numero > 0 ? ` · ${resultadoEstado.sin_numero} sin número excluidos` : ''}`
-                  : `❌ ${resultadoEstado.msg}`}
-                <button onClick={() => setResultadoEstado(null)} className="ml-auto opacity-60 hover:opacity-100 text-base leading-none">×</button>
-              </div>
-            )}
+      <div className="mb-5 bg-[var(--bg-card)] border border-[rgba(37,211,102,0.25)] rounded-2xl p-5 space-y-3">
+        <p className="text-sm font-bold text-[var(--text-pri)] flex items-center gap-2">
+          <span>💬</span> Estado de cuenta
+        </p>
+        <p className="text-xs text-[var(--text-sec)]">
+          Envía el estado de cuenta personalizado (mensualidades, uniformes, torneos + portal) a un jugador o a todo el club.
+        </p>
+
+        {/* Buscador de jugador */}
+        <div className="relative">
+          {jugadorSel ? (
+            <div className="flex items-center gap-2 bg-[var(--bg-app)] border border-[rgba(37,211,102,0.35)] rounded-xl px-3 py-2">
+              <span className="text-sm text-[var(--text-pri)] flex-1">
+                {jugadorSel.nombre} {jugadorSel.apellidos}
+                <span className="text-[var(--text-mut)] text-xs ml-2">CC {jugadorSel.cedula}</span>
+              </span>
+              <button onClick={() => { setJugadorSel(null); setBusqueda(''); }} className="text-[var(--text-mut)] hover:text-red-400 transition text-lg leading-none">×</button>
+            </div>
+          ) : (
+            <>
+              <input
+                type="search"
+                value={busqueda}
+                onChange={e => { setBusqueda(e.target.value); setShowSugeridos(true); }}
+                onFocus={() => setShowSugeridos(true)}
+                placeholder="Buscar jugador… (vacío = enviar a todos)"
+                className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] placeholder:text-[var(--text-mut)] focus:outline-none focus:border-[rgba(37,211,102,0.5)] transition"
+              />
+              {showSugeridos && busqueda.length >= 1 && (() => {
+                const lower = busqueda.toLowerCase();
+                const sugs  = jugadoresLista.filter(j =>
+                  `${j.nombre} ${j.apellidos}`.toLowerCase().includes(lower) ||
+                  String(j.cedula).includes(busqueda)
+                ).slice(0, 6);
+                return sugs.length > 0 ? (
+                  <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl overflow-hidden shadow-xl">
+                    {sugs.map(j => (
+                      <button key={j.cedula} type="button"
+                        onClick={() => { setJugadorSel(j); setBusqueda(''); setShowSugeridos(false); }}
+                        className="w-full text-left px-4 py-2.5 hover:bg-[var(--bg-surface)] transition border-b border-[var(--cc20)] last:border-0">
+                        <p className="text-sm text-[var(--text-pri)]">{j.nombre} {j.apellidos}</p>
+                        <p className="text-xs text-[var(--text-sec)]">CC {j.cedula}{j.celular ? '' : ' · sin número'}</p>
+                      </button>
+                    ))}
+                  </div>
+                ) : null;
+              })()}
+            </>
+          )}
+        </div>
+
+        {/* Resultado */}
+        {resultadoEstado && (
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium ${resultadoEstado.ok ? 'bg-[rgba(37,211,102,0.10)] border border-[rgba(37,211,102,0.25)] text-[#25D366]' : 'bg-red-500/10 border border-red-500/25 text-red-400'}`}>
+            {resultadoEstado.ok
+              ? `✅ Enviando a ${resultadoEstado.total} jugador${resultadoEstado.total !== 1 ? 'es' : ''} en segundo plano${resultadoEstado.sin_numero > 0 ? ` · ${resultadoEstado.sin_numero} sin número excluidos` : ''}`
+              : `❌ ${resultadoEstado.msg}`}
+            <button onClick={() => setResultadoEstado(null)} className="ml-auto opacity-60 hover:opacity-100 text-base leading-none">×</button>
           </div>
+        )}
+
+        {/* Botón */}
+        <div className="flex justify-end">
           <button
             onClick={enviarEstadoCuenta}
             disabled={enviandoEstado}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-50 flex-shrink-0"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-50"
             style={{ background: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.35)', color: '#25D366' }}
             onMouseEnter={e => { if (!enviandoEstado) e.currentTarget.style.background = 'rgba(37,211,102,0.25)'; }}
             onMouseLeave={e => e.currentTarget.style.background = 'rgba(37,211,102,0.15)'}
           >
             <Send size={14} />
-            {enviandoEstado ? 'Enviando…' : 'Enviar ahora'}
+            {enviandoEstado
+              ? 'Enviando…'
+              : jugadorSel
+                ? `Enviar a ${jugadorSel.nombre}`
+                : `Enviar a todos (${jugadoresLista.filter(j => j.celular).length})`}
           </button>
         </div>
       </div>

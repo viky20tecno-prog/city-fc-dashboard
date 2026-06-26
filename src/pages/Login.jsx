@@ -45,10 +45,11 @@ export default function Login() {
   const [vista, setVista]         = useState('login');
   const [clubs, setClubs]           = useState([]);
   const [clubSearch, setClubSearch] = useState('');
-  const [phoneQuery, setPhoneQuery] = useState('');
-  const [phoneResult, setPhoneResult] = useState(null);
+  const [phoneQuery, setPhoneQuery]     = useState('');
+  const [phoneResult, setPhoneResult]   = useState(null);
   const [phoneLoading, setPhoneLoading] = useState(false);
-  const [saToken, setSaToken]       = useState(null);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [saToken, setSaToken]           = useState(null);
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
   const [verClave, setVerClave]   = useState(false);
@@ -191,6 +192,22 @@ export default function Login() {
 
   const irLogin     = () => { setVista('login');     limpiar(); };
   const irRecuperar = () => { setVista('recuperar'); limpiar(); };
+
+  const resetSession = async () => {
+    if (!phoneQuery.trim()) return;
+    setResetLoading(true);
+    try {
+      const r = await fetch(`${API_BASE}/superadmin/reset-session?phone=${encodeURIComponent(phoneQuery.trim())}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${saToken}` },
+      });
+      const json = await r.json();
+      if (json.success) {
+        setPhoneResult(prev => ({ ...prev, sesion_cache: null, _resetMsg: `Sesión eliminada (${json.eliminadas} registro${json.eliminadas !== 1 ? 's' : ''})` }));
+      }
+    } catch { /* silent */ }
+    finally { setResetLoading(false); }
+  };
 
   const buscarPhone = async () => {
     if (!phoneQuery.trim()) return;
@@ -582,9 +599,18 @@ export default function Login() {
                         {/* Sesión caché */}
                         {phoneResult.sesion_cache && (
                           <div style={{ paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', margin: '0 0 5px' }}>
-                              Sesión bot {phoneResult.sesion_cache.activa ? <span style={{ color: '#00D084' }}>● activa</span> : <span style={{ color: 'rgba(255,255,255,0.25)' }}>● expirada</span>}
-                            </p>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', margin: 0 }}>
+                                Sesión bot {phoneResult.sesion_cache.activa ? <span style={{ color: '#00D084' }}>● activa</span> : <span style={{ color: 'rgba(255,255,255,0.25)' }}>● expirada</span>}
+                              </p>
+                              <button
+                                onClick={resetSession}
+                                disabled={resetLoading}
+                                style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, color: '#F87171', cursor: 'pointer' }}
+                              >
+                                {resetLoading ? '...' : 'Resetear sesión'}
+                              </button>
+                            </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               <RolBadge rol={phoneResult.sesion_cache.rol_cacheado} />
                               {phoneResult.sesion_cache.club_cacheado && <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>{phoneResult.sesion_cache.club_cacheado}</span>}
@@ -593,6 +619,9 @@ export default function Login() {
                               Última actividad: {new Date(phoneResult.sesion_cache.ultima_actividad).toLocaleString('es-CO')}
                             </p>
                           </div>
+                        )}
+                        {phoneResult._resetMsg && (
+                          <p style={{ color: '#00D084', fontSize: 12, margin: 0 }}>✓ {phoneResult._resetMsg}</p>
                         )}
                       </div>
                     )}

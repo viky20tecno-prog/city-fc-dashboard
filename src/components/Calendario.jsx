@@ -270,17 +270,16 @@ export default function Calendario({ color, clubId }) {
 
   useEffect(() => { fetchEvents(); }, [clubId]);
 
-  // Carga jugadores cuando se abre el formulario en modo PARTIDO
-  useEffect(() => {
-    if (!showForm || form.tipo !== 'PARTIDO') return;
+  const cargarFormPlayers = async () => {
     if (formPlayers.length > 0) return;
     setFormPlayersLoading(true);
-    authFetch(`${API_BASE_URL}/players?club_id=${clubId}`)
-      .then(r => r.json())
-      .then(d => setFormPlayers(d.data || []))
-      .catch(e => console.error(e))
-      .finally(() => setFormPlayersLoading(false));
-  }, [showForm, form.tipo]); // eslint-disable-line
+    try {
+      const res  = await authFetch(`${API_BASE_URL}/players?club_id=${clubId}`);
+      const data = await res.json();
+      setFormPlayers(data.data || []);
+    } catch (e) { console.error(e); }
+    finally     { setFormPlayersLoading(false); }
+  };
 
   const formPlayersFiltered = useMemo(() => {
     if (!formPlayersSearch.trim()) return formPlayers;
@@ -358,6 +357,7 @@ export default function Calendario({ color, clubId }) {
     });
     setEditEvent(ev);
     setShowForm(true);
+    if (ev.tipo === 'PARTIDO') cargarFormPlayers();
   };
 
   const closeForm = () => { setShowForm(false); setEditEvent(null); setForm(FORM_EMPTY); setFormPlayersSearch(''); };
@@ -708,7 +708,7 @@ export default function Calendario({ color, clubId }) {
           {/* Tipo */}
           <div className="flex gap-2">
             {Object.entries(TIPOS).map(([key, t]) => (
-              <button key={key} onClick={() => setForm(f => ({ ...f, tipo: key, recurrencia: null }))}
+              <button key={key} onClick={() => { setForm(f => ({ ...f, tipo: key, recurrencia: null })); if (key === 'PARTIDO') cargarFormPlayers(); }}
                 style={form.tipo === key ? { background: t.bg, color: t.color, borderColor: t.color } : {}}
                 className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-all
                   ${form.tipo === key ? '' : 'border-[var(--cc30)] text-[var(--text-mut)] hover:border-[var(--cc)]'}`}>

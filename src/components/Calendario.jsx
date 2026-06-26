@@ -250,6 +250,7 @@ export default function Calendario({ color, clubId }) {
 
   // Jugadores para selector de convocados en el formulario
   const [formPlayers,        setFormPlayers]        = useState([]);
+  const [formTorneos,        setFormTorneos]        = useState({});
   const [formPlayersLoading, setFormPlayersLoading] = useState(false);
   const [formPlayersSearch,  setFormPlayersSearch]  = useState('');
 
@@ -274,11 +275,25 @@ export default function Calendario({ color, clubId }) {
     if (formPlayers.length > 0) return;
     setFormPlayersLoading(true);
     try {
-      const res  = await authFetch(`${API_BASE_URL}/players?club_id=${clubId}`);
-      const data = await res.json();
-      setFormPlayers((data.data || []).sort((a, b) =>
+      const [resPlayers, resTorneos] = await Promise.all([
+        authFetch(`${API_BASE_URL}/players?club_id=${clubId}`),
+        authFetch(`${API_BASE_URL}/torneos?club_id=${clubId}`),
+      ]);
+      const dataPlayers = await resPlayers.json();
+      const dataTorneos = await resTorneos.json();
+
+      setFormPlayers((dataPlayers.data || []).sort((a, b) =>
         `${a.nombre} ${a.apellidos}`.localeCompare(`${b.nombre} ${b.apellidos}`, 'es')
       ));
+
+      // Agrupar inscripciones por nombre_torneo → { "Torneo JBC": ["123","456"], ... }
+      const map = {};
+      (dataTorneos.data || []).forEach(({ nombre_torneo, cedula }) => {
+        if (!nombre_torneo || !cedula) return;
+        if (!map[nombre_torneo]) map[nombre_torneo] = [];
+        map[nombre_torneo].push(String(cedula));
+      });
+      setFormTorneos(map);
     } catch (e) { console.error(e); }
     finally     { setFormPlayersLoading(false); }
   };
@@ -838,30 +853,60 @@ export default function Calendario({ color, clubId }) {
                 </div>
               </div>
 
-              {/* Selector de equipo prestablecido */}
-              {equiposUnicos.length > 0 && (
-                <div className="flex gap-1.5 flex-wrap">
-                  {equiposUnicos.map(eq => {
-                    const cedulasEq = formPlayers.filter(p => p.equipo === eq).map(p => p.cedula);
-                    const todosDelEq = cedulasEq.every(c => form.convocados.includes(c));
-                    return (
-                      <button
-                        key={eq}
-                        type="button"
-                        onClick={() => setForm(f => ({
-                          ...f,
-                          convocados: todosDelEq
-                            ? f.convocados.filter(c => !cedulasEq.includes(c))
-                            : [...new Set([...f.convocados, ...cedulasEq])],
-                        }))}
-                        className="px-3 py-1 rounded-lg text-xs font-semibold border transition-all"
-                        style={todosDelEq
-                          ? { background: 'var(--cc)', borderColor: 'var(--cc)', color: '#fff' }
-                          : { background: 'var(--bg-surface)', borderColor: 'var(--cc30)', color: 'var(--text-sec)' }}>
-                        {eq} ({cedulasEq.length})
-                      </button>
-                    );
-                  })}
+              {/* Chips de equipos y torneos */}
+              {(equiposUnicos.length > 0 || Object.keys(formTorneos).length > 0) && (
+                <div className="space-y-1.5">
+                  {equiposUnicos.length > 0 && (
+                    <div>
+                      <p className="text-[10px] text-[var(--text-mut)] mb-1 uppercase tracking-wider">Equipos</p>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {equiposUnicos.map(eq => {
+                          const cedulasGrupo = formPlayers.filter(p => p.equipo === eq).map(p => String(p.cedula));
+                          const activo = cedulasGrupo.length > 0 && cedulasGrupo.every(c => form.convocados.includes(c));
+                          return (
+                            <button key={eq} type="button"
+                              onClick={() => setForm(f => ({
+                                ...f,
+                                convocados: activo
+                                  ? f.convocados.filter(c => !cedulasGrupo.includes(c))
+                                  : [...new Set([...f.convocados, ...cedulasGrupo])],
+                              }))}
+                              className="px-3 py-1 rounded-lg text-xs font-semibold border transition-all"
+                              style={activo
+                                ? { background: 'var(--cc)', borderColor: 'var(--cc)', color: '#fff' }
+                                : { background: 'var(--bg-surface)', borderColor: 'var(--cc30)', color: 'var(--text-sec)' }}>
+                              {eq} ({cedulasGrupo.length})
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  {Object.keys(formTorneos).length > 0 && (
+                    <div>
+                      <p className="text-[10px] text-[var(--text-mut)] mb-1 uppercase tracking-wider">Torneos</p>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {Object.entries(formTorneos).sort(([a],[b]) => a.localeCompare(b,'es')).map(([nombre, cedulas]) => {
+                          const activo = cedulas.length > 0 && cedulas.every(c => form.convocados.includes(c));
+                          return (
+                            <button key={nombre} type="button"
+                              onClick={() => setForm(f => ({
+                                ...f,
+                                convocados: activo
+                                  ? f.convocados.filter(c => !cedulas.includes(c))
+                                  : [...new Set([...f.convocados, ...cedulas])],
+                              }))}
+                              className="px-3 py-1 rounded-lg text-xs font-semibold border transition-all"
+                              style={activo
+                                ? { background: '#6366F1', borderColor: '#6366F1', color: '#fff' }
+                                : { background: 'var(--bg-surface)', borderColor: '#6366F130', color: 'var(--text-sec)' }}>
+                              {nombre} ({cedulas.length})
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

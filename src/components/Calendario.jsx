@@ -3,7 +3,7 @@ import {
   ChevronLeft, ChevronRight, Plus, Edit2, Trash2,
   X, Loader2, MapPin, Clock, CalendarDays, List, Users,
   CheckCircle2, XCircle, AlertCircle, ChevronDown, PauseCircle, PlayCircle,
-  DollarSign,
+  DollarSign, Check,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
@@ -33,6 +33,7 @@ const FORM_EMPTY = {
   fecha_fin: '', hora_fin: '',
   lugar: '', descripcion: '', equipo: '',
   monto_arbitraje: '',
+  convocados: [],
   recurrencia: null,
 };
 
@@ -247,6 +248,11 @@ export default function Calendario({ color, clubId }) {
   const [asistSearch,    setAsistSearch]    = useState('');
   const [asistCache,     setAsistCache]     = useState({});
 
+  // Jugadores para selector de convocados en el formulario
+  const [formPlayers,        setFormPlayers]        = useState([]);
+  const [formPlayersLoading, setFormPlayersLoading] = useState(false);
+  const [formPlayersSearch,  setFormPlayersSearch]  = useState('');
+
   // Drawer historial por jugador
   const [jugadorDrawer,    setJugadorDrawer]    = useState(null);
   const [historialJugador, setHistorialJugador] = useState([]);
@@ -263,6 +269,27 @@ export default function Calendario({ color, clubId }) {
   };
 
   useEffect(() => { fetchEvents(); }, [clubId]);
+
+  // Carga jugadores cuando se abre el formulario en modo PARTIDO
+  useEffect(() => {
+    if (!showForm || form.tipo !== 'PARTIDO') return;
+    if (formPlayers.length > 0) return;
+    setFormPlayersLoading(true);
+    authFetch(`${API_BASE_URL}/players?club_id=${clubId}`)
+      .then(r => r.json())
+      .then(d => setFormPlayers(d.data || []))
+      .catch(e => console.error(e))
+      .finally(() => setFormPlayersLoading(false));
+  }, [showForm, form.tipo]); // eslint-disable-line
+
+  const formPlayersFiltered = useMemo(() => {
+    if (!formPlayersSearch.trim()) return formPlayers;
+    const q = formPlayersSearch.toLowerCase();
+    return formPlayers.filter(p =>
+      `${p.nombre || ''} ${p.apellidos || ''}`.toLowerCase().includes(q) ||
+      String(p.cedula).includes(q)
+    );
+  }, [formPlayers, formPlayersSearch]);
 
   // Sync caché cuando cambian los jugadores del evento activo de asistencia
   useEffect(() => {
@@ -327,12 +354,13 @@ export default function Calendario({ color, clubId }) {
       descripcion:     ev.descripcion      || '',
       equipo:          ev.equipo           || '',
       monto_arbitraje: ev.monto_arbitraje  || '',
+      convocados:      ev.convocados       || [],
     });
     setEditEvent(ev);
     setShowForm(true);
   };
 
-  const closeForm = () => { setShowForm(false); setEditEvent(null); setForm(FORM_EMPTY); };
+  const closeForm = () => { setShowForm(false); setEditEvent(null); setForm(FORM_EMPTY); setFormPlayersSearch(''); };
 
   const handleSave = async () => {
     if (!form.fecha) return;
@@ -359,6 +387,9 @@ export default function Calendario({ color, clubId }) {
           equipo:          form.equipo || null,
           monto_arbitraje: (form.tipo === 'PARTIDO' && form.monto_arbitraje)
             ? parseInt(form.monto_arbitraje)
+            : null,
+          convocados: (form.tipo === 'PARTIDO' && form.convocados.length > 0)
+            ? form.convocados
             : null,
         };
       };
@@ -776,6 +807,75 @@ export default function Calendario({ color, clubId }) {
                 min="0"
                 className={INPUT}
               />
+            </div>
+          )}
+
+          {/* Convocados — solo para PARTIDO */}
+          {form.tipo === 'PARTIDO' && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider">
+                  Jugadores convocados
+                  {form.convocados.length > 0 && (
+                    <span className="ml-2 font-black" style={{ color: 'var(--cc)' }}>{form.convocados.length} sel.</span>
+                  )}
+                </label>
+                <div className="flex gap-3 text-xs">
+                  <button type="button"
+                    onClick={() => setForm(f => ({ ...f, convocados: formPlayers.map(p => p.cedula) }))}
+                    className="font-semibold hover:opacity-75 transition-opacity" style={{ color: 'var(--cc)' }}>
+                    Todos
+                  </button>
+                  <button type="button"
+                    onClick={() => setForm(f => ({ ...f, convocados: [] }))}
+                    className="text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors">
+                    Ninguno
+                  </button>
+                </div>
+              </div>
+              <input
+                type="text"
+                value={formPlayersSearch}
+                onChange={e => setFormPlayersSearch(e.target.value)}
+                placeholder="Buscar jugador…"
+                className={INPUT}
+              />
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-[var(--cc30)] divide-y divide-[var(--cc30)] bg-[var(--bg-surface)]">
+                {formPlayersLoading ? (
+                  <div className="flex items-center justify-center py-6 gap-2 text-[var(--text-sec)]">
+                    <Loader2 size={14} className="animate-spin" />
+                    <span className="text-xs">Cargando…</span>
+                  </div>
+                ) : formPlayersFiltered.length === 0 ? (
+                  <p className="text-xs text-center text-[var(--text-sec)] py-4">Sin resultados</p>
+                ) : (
+                  formPlayersFiltered.map(p => {
+                    const checked = form.convocados.includes(String(p.cedula));
+                    return (
+                      <label key={p.cedula}
+                        className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-[var(--cc)]/5 transition-colors select-none">
+                        <span className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
+                          checked ? 'bg-[var(--cc)] border-[var(--cc)]' : 'border-[var(--border-sub)]'
+                        }`}>
+                          {checked && <Check size={10} className="text-white" strokeWidth={3} />}
+                        </span>
+                        <span className="text-sm text-[var(--text-pri)] flex-1 min-w-0 truncate">
+                          {`${p.nombre || ''} ${p.apellidos || ''}`.trim().toUpperCase()}
+                        </span>
+                        <span className="text-xs text-[var(--text-sec)] shrink-0">{p.cedula}</span>
+                        <input type="checkbox" className="sr-only" checked={checked} onChange={() =>
+                          setForm(f => ({
+                            ...f,
+                            convocados: checked
+                              ? f.convocados.filter(c => c !== String(p.cedula))
+                              : [...f.convocados, String(p.cedula)],
+                          }))
+                        } />
+                      </label>
+                    );
+                  })
+                )}
+              </div>
             </div>
           )}
 

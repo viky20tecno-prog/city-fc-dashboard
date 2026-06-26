@@ -8,6 +8,8 @@ import {
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 
 const WHATSAPP_SOPORTE = '573023903192';
+const SUPER_ADMIN_EMAILS = ['diego31escobar@gmail.com'];
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
 const CYCLE_COLORS = ['#6A00FF', '#AE68FF', '#8B2AFF', '#C084FF', '#7C3AED'];
 const BTN_COLOR = '#6A00FF';
@@ -25,6 +27,8 @@ export default function Login() {
 
   useEffect(() => { document.title = 'ZenSports — Iniciar sesión'; }, []);
   const [vista, setVista]         = useState('login');
+  const [clubs, setClubs]         = useState([]);
+  const [clubSearch, setClubSearch] = useState('');
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
   const [verClave, setVerClave]   = useState(false);
@@ -109,6 +113,21 @@ export default function Login() {
     }
 
     if (!clubId) {
+      // Super admin: mostrar selector de clubs
+      if (SUPER_ADMIN_EMAILS.includes(data?.user?.email)) {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        const r = await fetch(`${API_BASE}/superadmin/clubs`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await r.json();
+        if (json.success) {
+          setClubs(json.clubs);
+          setVista('selector_club');
+          setLoading(false);
+          return;
+        }
+      }
       setError('No se encontró un club asociado a esta cuenta.');
       await supabase.auth.signOut();
       setLoading(false);
@@ -428,6 +447,51 @@ export default function Login() {
                   Regístrate aquí
                 </button>
               </p>
+            </>
+          )}
+
+          {/* ══ SELECTOR CLUB (super admin) ══ */}
+          {vista === 'selector_club' && (
+            <>
+              <h3 style={{ color: '#fff', fontSize: 22, fontWeight: 800, margin: '0 0 4px' }}>Super Admin</h3>
+              <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: '0 0 18px' }}>Selecciona el club al que quieres acceder</p>
+
+              <input
+                type="text"
+                placeholder="Buscar club..."
+                value={clubSearch}
+                onChange={e => setClubSearch(e.target.value)}
+                style={{ ...inp, marginBottom: 12 }}
+                autoFocus
+              />
+
+              <div style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {clubs
+                  .filter(c => c.name.toLowerCase().includes(clubSearch.toLowerCase()) || c.slug.toLowerCase().includes(clubSearch.toLowerCase()))
+                  .map(c => (
+                    <button
+                      key={c.slug}
+                      onClick={() => {
+                        sessionStorage.setItem('clubId', c.slug);
+                        sessionStorage.setItem('userRole', 'ADMIN');
+                        navigate('/app');
+                      }}
+                      style={{
+                        width: '100%', padding: '12px 16px', textAlign: 'left',
+                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)',
+                        borderRadius: 10, cursor: 'pointer', color: '#fff', fontSize: 14,
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        transition: 'background 0.15s, border-color 0.15s',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(106,0,255,0.15)'; e.currentTarget.style.borderColor = 'rgba(106,0,255,0.4)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.10)'; }}
+                    >
+                      <span style={{ fontWeight: 600 }}>{c.name}</span>
+                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{c.slug}</span>
+                    </button>
+                  ))
+                }
+              </div>
             </>
           )}
 

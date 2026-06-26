@@ -12,6 +12,22 @@ const SUPER_ADMIN_EMAILS = ['diego31escobar@gmail.com'];
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
 const CYCLE_COLORS = ['#6A00FF', '#AE68FF', '#8B2AFF', '#C084FF', '#7C3AED'];
+
+const ROL_COLORS = {
+  admin:              { bg: 'rgba(106,0,255,0.2)',   border: 'rgba(106,0,255,0.4)',   color: '#AE68FF' },
+  admin_club_inactivo:{ bg: 'rgba(245,158,11,0.15)', border: 'rgba(245,158,11,0.3)',  color: '#F59E0B' },
+  entrenador:         { bg: 'rgba(245,158,11,0.15)', border: 'rgba(245,158,11,0.3)',  color: '#F59E0B' },
+  jugador:            { bg: 'rgba(0,208,132,0.15)',  border: 'rgba(0,208,132,0.3)',   color: '#00D084' },
+  visitante:          { bg: 'rgba(255,255,255,0.06)',border: 'rgba(255,255,255,0.12)',color: 'rgba(255,255,255,0.4)' },
+};
+function RolBadge({ rol }) {
+  const c = ROL_COLORS[rol] || ROL_COLORS.visitante;
+  return (
+    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', padding: '2px 8px', borderRadius: 999, background: c.bg, color: c.color, border: `1px solid ${c.border}` }}>
+      {rol?.replace('_club_inactivo', ' (club inactivo)')}
+    </span>
+  );
+}
 const BTN_COLOR = '#6A00FF';
 
 const FEATURES = [
@@ -540,26 +556,44 @@ export default function Login() {
                   <div style={{ marginTop: 10, padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 10 }}>
                     {!phoneResult.success ? (
                       <p style={{ color: '#FF7070', fontSize: 13, margin: 0 }}>{phoneResult.error}</p>
-                    ) : phoneResult.rol === 'visitante' ? (
-                      <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, margin: 0 }}>Número no registrado en ningún club</p>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{
-                            fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
-                            padding: '2px 8px', borderRadius: 999,
-                            background: phoneResult.rol === 'admin' ? 'rgba(106,0,255,0.2)' : phoneResult.rol === 'jugador' ? 'rgba(0,208,132,0.15)' : 'rgba(245,158,11,0.15)',
-                            color:      phoneResult.rol === 'admin' ? '#AE68FF' : phoneResult.rol === 'jugador' ? '#00D084' : '#F59E0B',
-                            border: `1px solid ${phoneResult.rol === 'admin' ? 'rgba(106,0,255,0.4)' : phoneResult.rol === 'jugador' ? 'rgba(0,208,132,0.3)' : 'rgba(245,158,11,0.3)'}`,
-                          }}>
-                            {phoneResult.rol}
-                          </span>
-                          {phoneResult.nombre && <span style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{phoneResult.nombre}</span>}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {/* Rol real en DB */}
+                        <div>
+                          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', margin: '0 0 5px' }}>Estado en base de datos</p>
+                          {phoneResult.rol === 'visitante' ? (
+                            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, margin: 0 }}>No registrado en ningún club activo</p>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <RolBadge rol={phoneResult.rol} />
+                                {phoneResult.nombre && <span style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{phoneResult.nombre}</span>}
+                              </div>
+                              {phoneResult.club_nombre && (
+                                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, margin: 0 }}>
+                                  Club: <span style={{ color: '#fff' }}>{phoneResult.club_nombre}</span>
+                                  {phoneResult.cedula && <> · Cédula: <span style={{ color: '#fff' }}>{phoneResult.cedula}</span></>}
+                                  {phoneResult.nota && <><br /><span style={{ color: '#F59E0B', fontSize: 11 }}>{phoneResult.nota}</span></>}
+                                </p>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, margin: 0 }}>
-                          Club: <span style={{ color: '#fff' }}>{phoneResult.club_nombre}</span>
-                          {phoneResult.cedula && <> · Cédula: <span style={{ color: '#fff' }}>{phoneResult.cedula}</span></>}
-                        </p>
+                        {/* Sesión caché */}
+                        {phoneResult.sesion_cache && (
+                          <div style={{ paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', margin: '0 0 5px' }}>
+                              Sesión bot {phoneResult.sesion_cache.activa ? <span style={{ color: '#00D084' }}>● activa</span> : <span style={{ color: 'rgba(255,255,255,0.25)' }}>● expirada</span>}
+                            </p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <RolBadge rol={phoneResult.sesion_cache.rol_cacheado} />
+                              {phoneResult.sesion_cache.club_cacheado && <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>{phoneResult.sesion_cache.club_cacheado}</span>}
+                            </div>
+                            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, margin: '4px 0 0' }}>
+                              Última actividad: {new Date(phoneResult.sesion_cache.ultima_actividad).toLocaleString('es-CO')}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

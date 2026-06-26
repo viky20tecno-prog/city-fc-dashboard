@@ -27,8 +27,12 @@ export default function Login() {
 
   useEffect(() => { document.title = 'ZenSports — Iniciar sesión'; }, []);
   const [vista, setVista]         = useState('login');
-  const [clubs, setClubs]         = useState([]);
+  const [clubs, setClubs]           = useState([]);
   const [clubSearch, setClubSearch] = useState('');
+  const [phoneQuery, setPhoneQuery] = useState('');
+  const [phoneResult, setPhoneResult] = useState(null);
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [saToken, setSaToken]       = useState(null);
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
   const [verClave, setVerClave]   = useState(false);
@@ -117,6 +121,7 @@ export default function Login() {
       if (SUPER_ADMIN_EMAILS.includes(data?.user?.email)) {
         const { data: { session } } = await supabase.auth.getSession();
         const token = session?.access_token;
+        setSaToken(token);
         const r = await fetch(`${API_BASE}/superadmin/clubs`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -170,6 +175,23 @@ export default function Login() {
 
   const irLogin     = () => { setVista('login');     limpiar(); };
   const irRecuperar = () => { setVista('recuperar'); limpiar(); };
+
+  const buscarPhone = async () => {
+    if (!phoneQuery.trim()) return;
+    setPhoneLoading(true);
+    setPhoneResult(null);
+    try {
+      const r = await fetch(`${API_BASE}/superadmin/lookup-phone?phone=${encodeURIComponent(phoneQuery.trim())}`, {
+        headers: { Authorization: `Bearer ${saToken}` },
+      });
+      const json = await r.json();
+      setPhoneResult(json);
+    } catch {
+      setPhoneResult({ success: false, error: 'Error de conexión' });
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
 
   return (
     <div style={{
@@ -465,7 +487,7 @@ export default function Login() {
                 autoFocus
               />
 
-              <div style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ maxHeight: 260, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {clubs
                   .filter(c => c.name.toLowerCase().includes(clubSearch.toLowerCase()) || c.slug.toLowerCase().includes(clubSearch.toLowerCase()))
                   .map(c => (
@@ -491,6 +513,57 @@ export default function Login() {
                     </button>
                   ))
                 }
+              </div>
+
+              {/* ── Lookup de número ── */}
+              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase', margin: '0 0 10px' }}>Buscar número</p>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="text"
+                    placeholder="3201234567"
+                    value={phoneQuery}
+                    onChange={e => { setPhoneQuery(e.target.value); setPhoneResult(null); }}
+                    onKeyDown={e => e.key === 'Enter' && buscarPhone()}
+                    style={{ ...inp, flex: 1, marginBottom: 0 }}
+                  />
+                  <button
+                    onClick={buscarPhone}
+                    disabled={phoneLoading}
+                    style={{ padding: '0 18px', background: '#6A00FF', border: 'none', borderRadius: 12, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
+                  >
+                    {phoneLoading ? '...' : 'Buscar'}
+                  </button>
+                </div>
+
+                {phoneResult && (
+                  <div style={{ marginTop: 10, padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 10 }}>
+                    {!phoneResult.success ? (
+                      <p style={{ color: '#FF7070', fontSize: 13, margin: 0 }}>{phoneResult.error}</p>
+                    ) : phoneResult.rol === 'visitante' ? (
+                      <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, margin: 0 }}>Número no registrado en ningún club</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{
+                            fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
+                            padding: '2px 8px', borderRadius: 999,
+                            background: phoneResult.rol === 'admin' ? 'rgba(106,0,255,0.2)' : phoneResult.rol === 'jugador' ? 'rgba(0,208,132,0.15)' : 'rgba(245,158,11,0.15)',
+                            color:      phoneResult.rol === 'admin' ? '#AE68FF' : phoneResult.rol === 'jugador' ? '#00D084' : '#F59E0B',
+                            border: `1px solid ${phoneResult.rol === 'admin' ? 'rgba(106,0,255,0.4)' : phoneResult.rol === 'jugador' ? 'rgba(0,208,132,0.3)' : 'rgba(245,158,11,0.3)'}`,
+                          }}>
+                            {phoneResult.rol}
+                          </span>
+                          {phoneResult.nombre && <span style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{phoneResult.nombre}</span>}
+                        </div>
+                        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, margin: 0 }}>
+                          Club: <span style={{ color: '#fff' }}>{phoneResult.club_nombre}</span>
+                          {phoneResult.cedula && <> · Cédula: <span style={{ color: '#fff' }}>{phoneResult.cedula}</span></>}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </>
           )}

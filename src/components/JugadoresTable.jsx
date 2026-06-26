@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, Loader2, Archive, RotateCcw, ClipboardList, MessageCircle } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, Loader2, Archive, RotateCcw, ClipboardList } from 'lucide-react';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { ESTADO_COLORS, API_BASE_URL } from '../config';
 import HojaDeVida from './HojaDeVida';
@@ -231,8 +231,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const [verArchivados, setVerArchivados]         = useState(false);
   const [showImportar, setShowImportar]           = useState(false);
   const [showImportarMensualidades, setShowImportarMensualidades] = useState(false);
-  const [enviandoEstado, setEnviandoEstado]       = useState(false);
-  const [resultadoEstado, setResultadoEstado]     = useState(null);
 
   const [asistenciaStats, setAsistenciaStats] = useState({});
 
@@ -703,29 +701,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     URL.revokeObjectURL(url);
   };
 
-  const enviarEstadoCuenta = async () => {
-    const clubId = getClubId();
-    const activos = jugadores.filter(j => j.activo);
-    const conNum  = activos.filter(j => j.celular).length;
-    const sinNum  = activos.filter(j => !j.celular).length;
-    if (!confirm(`¿Enviar estado de cuenta por WhatsApp a ${conNum} jugadores con número registrado?\n${sinNum > 0 ? `(${sinNum} jugadores sin número quedarán excluidos)` : ''}`)) return;
-    setEnviandoEstado(true);
-    setResultadoEstado(null);
-    try {
-      const res  = await authFetch(`${API_BASE_URL}/players/estado-cuenta-masivo?club_id=${clubId}`, { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        setResultadoEstado({ ok: true, total: data.total, sin_numero: data.sin_numero });
-      } else {
-        setResultadoEstado({ ok: false, msg: data.error || 'Error desconocido' });
-      }
-    } catch (e) {
-      setResultadoEstado({ ok: false, msg: e.message });
-    } finally {
-      setEnviandoEstado(false);
-    }
-  };
-
   const exportarPDF = async () => { try {
     const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -1005,23 +980,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   <span className="hidden sm:inline">{verArchivados ? 'Activos' : 'Inactivos'}</span>
                 </button>
 
-                {/* Enviar estado de cuenta WA */}
-                <button
-                  onClick={enviarEstadoCuenta}
-                  disabled={enviandoEstado}
-                  title="Enviar estado de cuenta personalizado por WhatsApp a todos los jugadores activos"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition disabled:opacity-50"
-                  style={{ background: 'rgba(37,211,102,0.10)', border: '1px solid rgba(37,211,102,0.30)', color: '#25D366', whiteSpace: 'nowrap', flexShrink: 0 }}
-                  onMouseEnter={e => { if (!enviandoEstado) e.currentTarget.style.background = 'rgba(37,211,102,0.20)'; }}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(37,211,102,0.10)'}
-                >
-                  {enviandoEstado
-                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    : <MessageCircle className="w-3.5 h-3.5" />
-                  }
-                  <span className="hidden sm:inline">{enviandoEstado ? 'Enviando…' : 'Estado WA'}</span>
-                </button>
-
                 {/* Importar estados mensualidades */}
                 <button
                   onClick={() => setShowImportarMensualidades(true)}
@@ -1036,17 +994,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 </button>
               </div>
             </div>
-
-            {/* Resultado envío estado de cuenta */}
-            {resultadoEstado && (
-              <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium ${resultadoEstado.ok ? 'bg-[rgba(37,211,102,0.10)] border border-[rgba(37,211,102,0.30)] text-[#25D366]' : 'bg-red-500/10 border border-red-500/30 text-red-400'}`}>
-                {resultadoEstado.ok
-                  ? <><MessageCircle className="w-3.5 h-3.5 flex-shrink-0" />Enviando a {resultadoEstado.total} jugadores en segundo plano.{resultadoEstado.sin_numero > 0 ? ` (${resultadoEstado.sin_numero} sin número excluidos)` : ''}</>
-                  : <><AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />Error: {resultadoEstado.msg}</>
-                }
-                <button onClick={() => setResultadoEstado(null)} className="ml-auto opacity-60 hover:opacity-100"><X className="w-3.5 h-3.5" /></button>
-              </div>
-            )}
 
             {/* Fila 2: chips de filtros activos */}
             {(filtroEstado !== 'TODOS' || filtroCategoria !== 'TODOS' || search) && (

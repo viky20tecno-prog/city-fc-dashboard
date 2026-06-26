@@ -66,6 +66,8 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [probando,   setProbando]   = useState(null);
   const [form,       setForm]       = useState(EMPTY);
   const [error,      setError]      = useState('');
+  const [enviandoEstado, setEnviandoEstado] = useState(false);
+  const [resultadoEstado, setResultadoEstado] = useState(null);
 
   const authHeaders = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -155,6 +157,26 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     setTimeout(() => { ta.focus(); ta.setSelectionRange(s + key.length, s + key.length); }, 0);
   };
 
+  const enviarEstadoCuenta = async () => {
+    if (!confirm('¿Enviar el estado de cuenta por WhatsApp a todos los jugadores activos con número registrado?')) return;
+    setEnviandoEstado(true);
+    setResultadoEstado(null);
+    try {
+      const hdrs = await authHeaders();
+      const r = await fetch(`${API}/players/estado-cuenta-masivo?club_id=${clubId()}`, {
+        method: 'POST',
+        headers: hdrs,
+      });
+      const d = await r.json();
+      if (d.success) setResultadoEstado({ ok: true, total: d.total, sin_numero: d.sin_numero });
+      else setResultadoEstado({ ok: false, msg: d.error || 'Error desconocido' });
+    } catch (e) {
+      setResultadoEstado({ ok: false, msg: e.message });
+    } finally {
+      setEnviandoEstado(false);
+    }
+  };
+
   const hasQr    = !!clubConfig?.qr_pago_url;
   const limitado = limite !== null && plantillas.length >= limite;
   const vars     = form.tipo_plantilla === 'cobro' ? VARS_COBRO : VARS_EVENTO;
@@ -195,6 +217,39 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
       {/* Conexión WhatsApp propio */}
       <div className="mb-5">
         <WahaConnect clubConfig={clubConfig} onConectado={load} />
+      </div>
+
+      {/* Card — Estado de cuenta masivo */}
+      <div className="mb-5 bg-[var(--bg-card)] border border-[rgba(37,211,102,0.25)] rounded-2xl p-5">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-[var(--text-pri)] flex items-center gap-2">
+              <span>💬</span> Estado de cuenta masivo
+            </p>
+            <p className="text-xs text-[var(--text-sec)] mt-1">
+              Envía un mensaje personalizado a cada jugador activo con su resumen de mensualidades, uniformes y torneos, más el enlace a su portal.
+            </p>
+            {resultadoEstado && (
+              <div className={`mt-3 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium ${resultadoEstado.ok ? 'bg-[rgba(37,211,102,0.10)] border border-[rgba(37,211,102,0.25)] text-[#25D366]' : 'bg-red-500/10 border border-red-500/25 text-red-400'}`}>
+                {resultadoEstado.ok
+                  ? `✅ Enviando a ${resultadoEstado.total} jugadores en segundo plano${resultadoEstado.sin_numero > 0 ? ` · ${resultadoEstado.sin_numero} sin número excluidos` : ''}`
+                  : `❌ ${resultadoEstado.msg}`}
+                <button onClick={() => setResultadoEstado(null)} className="ml-auto opacity-60 hover:opacity-100 text-base leading-none">×</button>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={enviarEstadoCuenta}
+            disabled={enviandoEstado}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-50 flex-shrink-0"
+            style={{ background: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.35)', color: '#25D366' }}
+            onMouseEnter={e => { if (!enviandoEstado) e.currentTarget.style.background = 'rgba(37,211,102,0.25)'; }}
+            onMouseLeave={e => e.currentTarget.style.background = 'rgba(37,211,102,0.15)'}
+          >
+            <Send size={14} />
+            {enviandoEstado ? 'Enviando…' : 'Enviar ahora'}
+          </button>
+        </div>
       </div>
 
       {/* Header */}

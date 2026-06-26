@@ -2,8 +2,35 @@ import { useState, useRef } from 'react';
 import { X, Upload, FileSpreadsheet, AlertCircle, CheckCircle2, Download, Loader2 } from 'lucide-react';
 import { importarJugadoresBulk } from '../services/api';
 
-const PLANTILLA_HEADERS = 'cedula,nombre,apellidos,celular,correo_electronico,fecha_nacimiento,lugar_de_nacimiento,tipo_sangre,eps,familiar_emergencia,celular_contacto,municipio,direccion,barrio,estatura,peso,posicion,numero_camiseta,categoria,equipo,instagram';
-const PLANTILLA_EJEMPLO = '12345678,Carlos,Mendoza Torres,3001234567,carlos@email.com,1998-06-15,Medellín,O+,Sura,María Torres,3009876543,Medellín,Cra 45 #67-89,El Poblado,1.75,68,Delantero,10,Sub-20,Equipo A,@carlos';
+const PLANTILLA_COLS = [
+  { key: 'cedula',              label: 'cedula',              req: true,  width: 16 },
+  { key: 'nombre',              label: 'nombre',              req: true,  width: 18 },
+  { key: 'apellidos',           label: 'apellidos',           req: true,  width: 22 },
+  { key: 'celular',             label: 'celular',             req: false, width: 16 },
+  { key: 'correo_electronico',  label: 'correo_electronico',  req: false, width: 26 },
+  { key: 'fecha_nacimiento',    label: 'fecha_nacimiento',    req: false, width: 16 },
+  { key: 'lugar_de_nacimiento', label: 'lugar_de_nacimiento', req: false, width: 18 },
+  { key: 'tipo_sangre',         label: 'tipo_sangre',         req: false, width: 12 },
+  { key: 'eps',                 label: 'eps',                 req: false, width: 12 },
+  { key: 'familiar_emergencia', label: 'familiar_emergencia', req: false, width: 24 },
+  { key: 'celular_contacto',    label: 'celular_contacto',    req: false, width: 16 },
+  { key: 'municipio',           label: 'municipio',           req: false, width: 14 },
+  { key: 'direccion',           label: 'direccion',           req: false, width: 26 },
+  { key: 'barrio',              label: 'barrio',              req: false, width: 14 },
+  { key: 'estatura',            label: 'estatura',            req: false, width: 10 },
+  { key: 'peso',                label: 'peso',                req: false, width: 10 },
+  { key: 'posicion',            label: 'posicion',            req: false, width: 14 },
+  { key: 'numero_camiseta',     label: 'numero_camiseta',     req: false, width: 12 },
+  { key: 'categoria',           label: 'categoria',           req: false, width: 14 },
+  { key: 'equipo',              label: 'equipo',              req: false, width: 14 },
+  { key: 'instagram',           label: 'instagram',           req: false, width: 16 },
+];
+const PLANTILLA_EJEMPLO_VALS = [
+  'EJEMPLO', 'Carlos', 'Mendoza Torres', '3001234567', 'carlos@email.com',
+  '1998-06-15', 'Medellín', 'O+', 'Sura', 'María Torres', '3009876543',
+  'Medellín', 'Cra 45 #67-89', 'El Poblado', '1.75', '68',
+  'Delantero', '10', 'Sub-20', 'Equipo A', '@carlos',
+];
 
 function normalizeKey(k) {
   return k
@@ -60,9 +87,12 @@ function mapRow(rawObj) {
   };
 }
 
+const ES_EJEMPLO = (f) => (f.cedula || '').toUpperCase().trim() === 'EJEMPLO';
+
 function validarFila(f) {
-  if (!f.cedula) return 'Cédula requerida';
-  if (!f.nombre) return 'Nombre requerido';
+  if (ES_EJEMPLO(f))  return '__ejemplo__';
+  if (!f.cedula)      return 'Cédula requerida';
+  if (!f.nombre)      return 'Nombre requerido';
   return null;
 }
 
@@ -118,17 +148,47 @@ export default function ImportarJugadoresModal({ onClose, onSuccess }) {
     }
   };
 
-  const descargarPlantilla = () => {
-    const csv  = `${PLANTILLA_HEADERS}\n${PLANTILLA_EJEMPLO}`;
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const descargarPlantilla = async () => {
+    const ExcelJS = (await import('exceljs')).default ?? (await import('exceljs'));
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'ZenSports';
+    const ws = wb.addWorksheet('Jugadores', { views: [{ state: 'frozen', ySplit: 1 }] });
+
+    ws.columns = PLANTILLA_COLS.map(c => ({ key: c.key, header: c.label, width: c.width }));
+
+    // Fila de cabeceras: fondo oscuro, requeridas en ámbar
+    const hRow = ws.getRow(1);
+    hRow.height = 22;
+    PLANTILLA_COLS.forEach((c, i) => {
+      const cell = hRow.getCell(i + 1);
+      cell.value = c.label;
+      cell.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+      cell.font  = { bold: true, color: { argb: c.req ? 'FFFBBF24' : 'FFD1D5DB' }, size: 10, name: 'Calibri' };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = { bottom: { style: 'thin', color: { argb: 'FF334155' } } };
+    });
+
+    // Fila de ejemplo: fondo ámbar claro, texto ámbar oscuro en itálica
+    const eRow = ws.addRow(PLANTILLA_EJEMPLO_VALS);
+    eRow.height = 20;
+    eRow.eachCell((cell) => {
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF8E1' } };
+      cell.font      = { italic: true, color: { argb: 'FF92400E' }, size: 10, name: 'Calibri' };
+      cell.alignment = { vertical: 'middle' };
+      cell.border    = { top: { style: 'thin', color: { argb: 'FFF59E0B' } }, bottom: { style: 'thin', color: { argb: 'FFF59E0B' } } };
+    });
+
+    const buf  = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
-    a.href = url; a.download = 'plantilla_jugadores.csv'; a.click();
+    a.href = url; a.download = 'plantilla_jugadores.xlsx'; a.click();
     URL.revokeObjectURL(url);
   };
 
   const filasValidas   = filas.filter(f => !validarFila(f));
-  const filasInvalidas = filas.filter(f =>  validarFila(f));
+  const filasEjemplo   = filas.filter(f =>  validarFila(f) === '__ejemplo__');
+  const filasInvalidas = filas.filter(f =>  validarFila(f) && validarFila(f) !== '__ejemplo__');
 
   return (
     <div
@@ -215,13 +275,15 @@ export default function ImportarJugadoresModal({ onClose, onSuccess }) {
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', borderRadius: '10px', border: '1px solid var(--border-sub)', background: 'var(--bg-card)', color: 'var(--text-sec)', fontSize: '13px', cursor: 'pointer' }}
               >
                 <Download size={15} />
-                Descargar plantilla CSV
+                Descargar plantilla Excel
               </button>
 
               <div style={{ background: 'var(--bg-card)', borderRadius: '10px', padding: '12px 14px', fontSize: '12px', color: 'var(--text-mut)', lineHeight: 1.6 }}>
                 <strong style={{ color: 'var(--text-sec)' }}>Requeridas:</strong> cedula, nombre, apellidos
                 <br />
                 <strong style={{ color: 'var(--text-sec)' }}>Opcionales:</strong> celular, correo_electronico, fecha_nacimiento, lugar_de_nacimiento, tipo_sangre, eps, familiar_emergencia, celular_contacto, municipio, direccion, barrio, estatura, peso, posicion, numero_camiseta, categoria, equipo, instagram
+                <br />
+                <span style={{ color: '#F59E0B' }}>La fila con cédula <strong>EJEMPLO</strong> se omite automáticamente al importar.</span>
               </div>
             </div>
           )}
@@ -233,6 +295,11 @@ export default function ImportarJugadoresModal({ onClose, onSuccess }) {
                 <span style={{ padding: '4px 12px', borderRadius: '20px', background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.25)', color: '#22C55E', fontSize: '12px', fontWeight: 600 }}>
                   ✓ {filasValidas.length} válidos
                 </span>
+                {filasEjemplo.length > 0 && (
+                  <span style={{ padding: '4px 12px', borderRadius: '20px', background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.35)', color: '#F59E0B', fontSize: '12px', fontWeight: 600 }}>
+                    ⊘ {filasEjemplo.length} ejemplo — se omitirá
+                  </span>
+                )}
                 {filasInvalidas.length > 0 && (
                   <span style={{ padding: '4px 12px', borderRadius: '20px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#EF4444', fontSize: '12px', fontWeight: 600 }}>
                     ✕ {filasInvalidas.length} con error
@@ -251,16 +318,20 @@ export default function ImportarJugadoresModal({ onClose, onSuccess }) {
                   </thead>
                   <tbody>
                     {filas.slice(0, 12).map((f, i) => {
-                      const err = validarFila(f);
+                      const err      = validarFila(f);
+                      const esEjem   = err === '__ejemplo__';
+                      const rowBg    = esEjem ? 'rgba(245,158,11,0.06)' : err ? 'rgba(239,68,68,0.04)' : 'transparent';
                       return (
-                        <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: err ? 'rgba(239,68,68,0.04)' : 'transparent' }}>
+                        <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: rowBg }}>
                           <td style={{ padding: '7px 10px', color: 'var(--text-mut)' }}>{i + 2}</td>
-                          <td style={{ padding: '7px 10px', color: 'var(--text-pri)', fontFamily: 'monospace' }}>{f.cedula || <span style={{ color: '#EF4444' }}>—</span>}</td>
-                          <td style={{ padding: '7px 10px', color: 'var(--text-pri)' }}>{f.nombre || <span style={{ color: '#EF4444' }}>—</span>}</td>
-                          <td style={{ padding: '7px 10px', color: 'var(--text-sec)' }}>{f.apellidos}</td>
-                          <td style={{ padding: '7px 10px', color: 'var(--text-mut)' }}>{f.celular}</td>
+                          <td style={{ padding: '7px 10px', color: esEjem ? '#F59E0B' : 'var(--text-pri)', fontFamily: 'monospace', fontStyle: esEjem ? 'italic' : 'normal' }}>{f.cedula || <span style={{ color: '#EF4444' }}>—</span>}</td>
+                          <td style={{ padding: '7px 10px', color: esEjem ? '#F59E0B' : 'var(--text-pri)', fontStyle: esEjem ? 'italic' : 'normal' }}>{f.nombre || <span style={{ color: '#EF4444' }}>—</span>}</td>
+                          <td style={{ padding: '7px 10px', color: 'var(--text-sec)', fontStyle: esEjem ? 'italic' : 'normal' }}>{f.apellidos}</td>
+                          <td style={{ padding: '7px 10px', color: 'var(--text-mut)', fontStyle: esEjem ? 'italic' : 'normal' }}>{f.celular}</td>
                           <td style={{ padding: '7px 10px' }}>
-                            {err
+                            {esEjem
+                              ? <span style={{ color: '#F59E0B', fontSize: '11px' }}>Ejemplo — se omitirá</span>
+                              : err
                               ? <span style={{ color: '#EF4444', fontSize: '11px' }}>{err}</span>
                               : <span style={{ color: '#22C55E', fontSize: '11px' }}>OK</span>}
                           </td>

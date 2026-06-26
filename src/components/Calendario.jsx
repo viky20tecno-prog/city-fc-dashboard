@@ -952,7 +952,7 @@ export default function Calendario({ color, clubId }) {
                         className="shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all"
                         style={presente
                           ? { background: '#22C55E', borderColor: '#22C55E', color: '#fff' }
-                          : { background: 'transparent', borderColor: 'var(--border-sub)', color: 'transparent' }}>
+                          : { background: 'rgba(34,197,94,0.08)', borderColor: '#4B5563', color: 'rgba(34,197,94,0.35)' }}>
                         <CheckCircle2 size={16} />
                       </button>
                     )}
@@ -968,7 +968,7 @@ export default function Calendario({ color, clubId }) {
                           className="shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all"
                           style={p.pago_arbitraje
                             ? { background: '#F59E0B', borderColor: '#F59E0B', color: '#fff' }
-                            : { background: 'transparent', borderColor: 'var(--border-sub)', color: 'transparent' }}>
+                            : { background: 'rgba(245,158,11,0.08)', borderColor: '#4B5563', color: 'rgba(245,158,11,0.35)' }}>
                           <DollarSign size={14} />
                         </button>
                       )

@@ -68,6 +68,8 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [error,      setError]      = useState('');
   const [enviandoEstado, setEnviandoEstado] = useState(false);
   const [resultadoEstado, setResultadoEstado] = useState(null);
+  const [enviandoAhora, setEnviandoAhora] = useState(null);   // id de plantilla en envío
+  const [resultadoAhora, setResultadoAhora] = useState({});   // { [id]: { ok, msg } }
   const [jugadoresLista, setJugadoresLista] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [jugadorSel, setJugadorSel] = useState(null);
@@ -147,6 +149,29 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     load();
   };
 
+  const enviarAhora = async p => {
+    if (!confirm(`¿Enviar "${p.nombre}" ahora a todos los jugadores del club?`)) return;
+    setEnviandoAhora(p.id);
+    setResultadoAhora(r => ({ ...r, [p.id]: null }));
+    try {
+      const r = await fetch(`${API}/plantillas/${p.id}/enviar?club_id=${clubId()}`, {
+        method: 'POST',
+        headers: await authHeaders(),
+      });
+      const d = await r.json();
+      if (d.success) {
+        setResultadoAhora(r => ({ ...r, [p.id]: { ok: true, msg: 'Enviando en segundo plano…' } }));
+        setTimeout(() => setResultadoAhora(r => ({ ...r, [p.id]: null })), 6000);
+      } else {
+        setResultadoAhora(r => ({ ...r, [p.id]: { ok: false, msg: d.error || 'Error al enviar' } }));
+      }
+    } catch (e) {
+      setResultadoAhora(r => ({ ...r, [p.id]: { ok: false, msg: e.message } }));
+    } finally {
+      setEnviandoAhora(null);
+    }
+  };
+
   const probar = async p => {
     setProbando(p.id);
     try {
@@ -190,6 +215,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     }
   };
 
+  const tieneWA  = !!clubConfig?.waha_session;
   const hasQr    = !!clubConfig?.qr_pago_url;
   const limitado = limite !== null && plantillas.length >= limite;
   const vars     = form.tipo_plantilla === 'cobro' ? VARS_COBRO : VARS_EVENTO;
@@ -392,6 +418,22 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
                 </div>
 
                 <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  {/* Enviar ahora — solo si tiene WA conectado */}
+                  {tieneWA && (
+                    <button
+                      onClick={() => enviarAhora(p)}
+                      disabled={enviandoAhora === p.id}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition disabled:opacity-50 cursor-pointer"
+                      style={{
+                        background: 'rgba(37,211,102,0.12)',
+                        border: '1px solid rgba(37,211,102,0.35)',
+                        color: '#25D366',
+                      }}
+                    >
+                      <Send size={11} />
+                      {enviandoAhora === p.id ? 'Enviando…' : 'Enviar ahora'}
+                    </button>
+                  )}
                   <button
                     onClick={() => probar(p)}
                     disabled={probando === p.id}
@@ -416,6 +458,17 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
                   </div>
                 </div>
               </div>
+
+              {/* Feedback enviar ahora */}
+              {resultadoAhora[p.id] && (
+                <div className={`mt-2 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium ${
+                  resultadoAhora[p.id].ok
+                    ? 'bg-[rgba(37,211,102,0.10)] border border-[rgba(37,211,102,0.25)] text-[#25D366]'
+                    : 'bg-red-500/10 border border-red-500/25 text-red-400'
+                }`}>
+                  {resultadoAhora[p.id].ok ? '✅' : '❌'} {resultadoAhora[p.id].msg}
+                </div>
+              )}
             </div>
           ))}
         </div>

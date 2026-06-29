@@ -16,7 +16,6 @@ import { API_BASE_URL } from '../config';
 import DashboardOverview from '../components/DashboardOverview';
 import JugadoresTable from '../components/JugadoresTable';
 import Uniformes from '../components/Uniformes';
-import TimelineCobro from '../components/TimelineCobro';
 import Conciliacion from '../components/Conciliacion';
 import Finanzas from '../components/Finanzas';
 import TorneosPage from '../components/TorneosPage';
@@ -38,7 +37,6 @@ const NAV = [
   { id: 'equipos',      Icon: Shield,           title: 'Equipos'       },
   { id: 'uniformes',    Icon: Shirt,            title: 'Uniformes'     },
   { id: 'torneos',      Icon: Trophy,           title: 'Torneos'       },
-  { id: 'cobro',        Icon: Clock,            title: 'Ciclo de Cobro'},
   { id: 'conciliacion', Icon: ClipboardCheck,   title: 'Conciliación'  },
   { id: 'finanzas',     Icon: TrendingUp,       title: 'Finanzas'      },
   { id: 'plantillas',   Icon: MessageSquare,    title: 'Plantillas WA' },
@@ -260,7 +258,7 @@ export default function Dashboard() {
   const { isAdmin } = useRole();
 
   // Filtra el nav según los módulos habilitados en el plan del club y el rol del usuario.
-  const ADMIN_ONLY_TABS = new Set(['cobro', 'conciliacion', 'finanzas']);
+  const ADMIN_ONLY_TABS = new Set(['conciliacion', 'finanzas']);
   const modulos = clubConfig?.modulos;
   // Normalizar deportes del club: array nuevo o string legacy
   const deportesClub = Array.isArray(clubConfig?.deportes) && clubConfig.deportes.length > 0
@@ -1005,7 +1003,6 @@ export default function Dashboard() {
             {activeTab === 'equipos'      && <EquiposPage  color={c} clubConfig={clubConfig} onConfigSaved={() => refetchConfig()} />}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'torneos'      && <TorneosPage  color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
-            {activeTab === 'cobro'        && <TimelineCobro  color={c} />}
             {activeTab === 'conciliacion' && <Conciliacion   color={c} />}
             {activeTab === 'finanzas'     && <Finanzas color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'plantillas'   && <PlantillasMensajes color={c} clubConfig={clubConfig} />}

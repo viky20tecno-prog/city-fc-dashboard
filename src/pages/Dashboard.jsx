@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  RefreshCw, LayoutDashboard, Users, Shirt, Activity,
+  RefreshCw, LayoutDashboard, Users, Shirt,
   Clock, ClipboardCheck, Settings, AlertTriangle,
   Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays, Shield,
   ChevronLeft, ChevronRight, MessageSquare, Link2, Globe, FolderOpen, Send,
@@ -16,7 +16,6 @@ import { API_BASE_URL } from '../config';
 import DashboardOverview from '../components/DashboardOverview';
 import JugadoresTable from '../components/JugadoresTable';
 import Uniformes from '../components/Uniformes';
-import ArbitrajePagos from './ArbitrajePagos';
 import TimelineCobro from '../components/TimelineCobro';
 import Conciliacion from '../components/Conciliacion';
 import Finanzas from '../components/Finanzas';
@@ -39,7 +38,6 @@ const NAV = [
   { id: 'equipos',      Icon: Shield,           title: 'Equipos'       },
   { id: 'uniformes',    Icon: Shirt,            title: 'Uniformes'     },
   { id: 'torneos',      Icon: Trophy,           title: 'Torneos'       },
-  { id: 'arbitraje',    Icon: Activity,         title: 'Pago Arbitraje'},
   { id: 'cobro',        Icon: Clock,            title: 'Ciclo de Cobro'},
   { id: 'conciliacion', Icon: ClipboardCheck,   title: 'Conciliación'  },
   { id: 'finanzas',     Icon: TrendingUp,       title: 'Finanzas'      },
@@ -271,8 +269,6 @@ export default function Dashboard() {
   const navVisible = NAV.filter(({ id }) => {
     if (!isAdmin && ADMIN_ONLY_TABS.has(id)) return false;
     if (id === 'dashboard' || id === 'jugadores') return true;
-    // Arbitraje solo aplica a fútbol — ocultar si ningún deporte del club es fútbol
-    if (id === 'arbitraje' && !deportesClub.includes('futbol')) return false;
     if (!modulos) return true;
     return modulos[id] !== false;
   });
@@ -1009,7 +1005,6 @@ export default function Dashboard() {
             {activeTab === 'equipos'      && <EquiposPage  color={c} clubConfig={clubConfig} onConfigSaved={() => refetchConfig()} />}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'torneos'      && <TorneosPage  color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
-            {activeTab === 'arbitraje'    && <ArbitrajePagos color={c} />}
             {activeTab === 'cobro'        && <TimelineCobro  color={c} />}
             {activeTab === 'conciliacion' && <Conciliacion   color={c} />}
             {activeTab === 'finanzas'     && <Finanzas color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}

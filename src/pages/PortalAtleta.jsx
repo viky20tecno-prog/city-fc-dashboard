@@ -275,10 +275,12 @@ function StepOTP({ color, phone, clubSlug, onVerified, onBack }) {
 
 // ── Paso 3: Resultado ─────────────────────────────────────────────────────────
 const UNIFORME_ESTADO = {
-  AL_DIA:    { color: '#00D084', label: 'Al día'    },
-  PENDIENTE: { color: '#F59E0B', label: 'Pendiente' },
-  MORA:      { color: '#EF4444', label: 'En mora'   },
-  ABONO:     { color: '#4A9EFF', label: 'Abono'     },
+  AL_DIA:    { color: '#00D084', label: 'Al día'           },
+  PAGADO:    { color: '#00D084', label: 'Pagado'           },
+  ENTREGADO: { color: '#00D084', label: 'Entregado'        },
+  PENDIENTE: { color: '#F59E0B', label: 'Pendiente de pago'},
+  MORA:      { color: '#EF4444', label: 'En mora'          },
+  ABONO:     { color: '#4A9EFF', label: 'Abono'            },
 };
 
 function Resultado({ datos, color, onNuevaBusqueda }) {
@@ -407,25 +409,55 @@ function Resultado({ datos, color, onNuevaBusqueda }) {
       {/* Uniformes */}
       {uniformes.length > 0 && (
         <div className="fade-up" style={{ animationDelay: '.18s', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
-          <div style={{ padding: '14px 16px 10px', fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.5, textTransform: 'uppercase' }}>
-            Uniformes
+          <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1.5, textTransform: 'uppercase' }}>Uniforme</span>
           </div>
           <div>
             {uniformes.map((u, i) => {
               const cfg = UNIFORME_ESTADO[u.estado] || { color: '#9CA3AF', label: u.estado || 'Pendiente' };
+              const prendas = u.descripcion ? u.descripcion.split(',').map(p => p.trim()).filter(Boolean) : [];
               return (
-                <div key={u.id || i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)', marginBottom: 3 }}>{u.descripcion || 'Uniforme'}</div>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: `${cfg.color}18`, border: `1px solid ${cfg.color}40`, borderRadius: 999, padding: '1px 8px', fontSize: 10, fontWeight: 700, color: cfg.color }}>
+                <div key={u.id || i} style={{ padding: '10px 16px 14px', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: `${cfg.color}18`, border: `1px solid ${cfg.color}40`, borderRadius: 999, padding: '3px 9px', fontSize: 10, fontWeight: 700, color: cfg.color }}>
                       <span style={{ width: 4, height: 4, borderRadius: '50%', background: cfg.color }} />
                       {cfg.label}
                     </span>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 15, fontWeight: 800, color: '#F59E0B' }}>{fmt(u.valor_oficial)}</div>
+                      {u.saldo_pendiente > 0 && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>Saldo: {fmt(u.saldo_pendiente)}</div>}
+                    </div>
                   </div>
-                  <div style={{ flexShrink: 0, textAlign: 'right' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>{fmt(u.valor_pagado)}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>/ {fmt(u.valor_oficial)}</div>
-                    {u.saldo_pendiente > 0 && <div style={{ fontSize: 10, color: '#F59E0B', marginTop: 2 }}>Saldo: {fmt(u.saldo_pendiente)}</div>}
+                  {prendas.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.28)', fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 }}>Prendas</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {prendas.map((p, pi) => (
+                          <span key={pi} style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 6, padding: '2px 8px' }}>{p}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    {u.talla && (
+                      <div>
+                        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 2 }}>Talla</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.75)' }}>{u.talla}</div>
+                      </div>
+                    )}
+                    {u.numero && (
+                      <div>
+                        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 2 }}>Número</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.75)' }}>#{String(u.numero).padStart(3, '0')}</div>
+                      </div>
+                    )}
+                    {u.nombre_estampar && (
+                      <div>
+                        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 2 }}>Estampa</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.75)', letterSpacing: 0.5 }}>{u.nombre_estampar.toUpperCase()}</div>
+                      </div>
+                    )}
                   </div>
                 </div>
               );

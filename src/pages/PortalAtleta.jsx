@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
+const SESSION_TTL_MS = 10 * 60 * 1000; // 10 minutos
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(n) || 0);
@@ -448,6 +449,8 @@ export default function PortalAtleta() {
   const { clubSlug } = useParams();
   const navigate     = useNavigate();
 
+  const SESSION_KEY = `portal_session_${clubSlug}`;
+
   const [club, setClub]               = useState(null);
   const [clubCargando, setClubCargando] = useState(true);
 
@@ -458,6 +461,21 @@ export default function PortalAtleta() {
 
   useEffect(() => {
     document.title = 'Estado de Cuenta · ZenSports';
+    // Restaurar sesión guardada si sigue vigente (< 10 min)
+    try {
+      const saved = localStorage.getItem(SESSION_KEY);
+      if (saved) {
+        const { ts, data: savedData } = JSON.parse(saved);
+        if (Date.now() - ts < SESSION_TTL_MS) {
+          setDatos(savedData);
+          setStep('result');
+          if (savedData?.club) setClub(savedData.club);
+        } else {
+          localStorage.removeItem(SESSION_KEY);
+        }
+      }
+    } catch { /* ignora sesión corrupta */ }
+
     async function cargarClub() {
       try {
         const { data } = await supabase.from('clubs').select('config').eq('slug', clubSlug).single();
@@ -466,7 +484,7 @@ export default function PortalAtleta() {
       finally { setClubCargando(false); }
     }
     cargarClub();
-  }, [clubSlug]);
+  }, [clubSlug]); // eslint-disable-line
 
   function handleSent(normalizedPhone) {
     setPhone(normalizedPhone);
@@ -477,12 +495,14 @@ export default function PortalAtleta() {
     if (!club && json.club) setClub(json.club);
     setDatos(json);
     setStep('result');
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify({ ts: Date.now(), data: json })); } catch { /* ignora */ }
   }
 
   function handleReset() {
     setStep('phone');
     setPhone('');
     setDatos(null);
+    try { localStorage.removeItem(SESSION_KEY); } catch { /* ignora */ }
   }
 
   const color      = club?.color || '#00AAFF';

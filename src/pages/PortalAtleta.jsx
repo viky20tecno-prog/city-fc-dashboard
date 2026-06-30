@@ -493,7 +493,8 @@ export default function PortalAtleta() {
 
   useEffect(() => {
     document.title = 'Estado de Cuenta · ZenSports';
-    // Restaurar sesión guardada si sigue vigente (< 10 min)
+    // Restaurar sesión guardada si sigue vigente (< 10 min),
+    // luego refrescar datos en background para mostrar cambios recientes
     try {
       const saved = localStorage.getItem(SESSION_KEY);
       if (saved) {
@@ -502,6 +503,19 @@ export default function PortalAtleta() {
           setDatos(savedData);
           setStep('result');
           if (savedData?.club) setClub(savedData.club);
+          // Refresco silencioso: actualiza datos sin pedir OTP de nuevo
+          const cedula = savedData?.atleta?.cedula;
+          if (cedula) {
+            fetch(`${API_BASE}/publico/atleta/${clubSlug}/${cedula}`)
+              .then(r => r.ok ? r.json() : null)
+              .then(json => {
+                if (json?.success) {
+                  setDatos(json);
+                  try { localStorage.setItem(SESSION_KEY, JSON.stringify({ ts: Date.now(), data: json })); } catch { /* ignora */ }
+                }
+              })
+              .catch(() => { /* mantiene datos cacheados si falla */ });
+          }
         } else {
           localStorage.removeItem(SESSION_KEY);
         }

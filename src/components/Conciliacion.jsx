@@ -16,10 +16,11 @@ const ESTADOS = [
 ];
 
 const CONCEPTO_COLORS = {
-  mensualidad: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-  uniforme:    'bg-purple-500/15 text-purple-300 border-purple-500/20',
-  torneo:      'bg-orange-500/15 text-orange-300 border-orange-500/20',
-  otro:        'bg-gray-500/15 text-gray-300 border-gray-500/20',
+  mensualidad:    'bg-blue-500/15 text-blue-300 border-blue-500/20',
+  mensualidad_wa: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
+  uniforme:       'bg-purple-500/15 text-purple-300 border-purple-500/20',
+  torneo:         'bg-orange-500/15 text-orange-300 border-orange-500/20',
+  otro:           'bg-gray-500/15 text-gray-300 border-gray-500/20',
 };
 
 function formatMoney(v) {
@@ -218,7 +219,7 @@ function PagoRow({ pago, onEdit, onAction, actionLoading }) {
       {/* Concepto */}
       <td className="px-4 py-3">
         <span className={`inline-flex px-2 py-0.5 rounded-lg border text-xs font-medium ${CONCEPTO_COLORS[pago.concepto] || CONCEPTO_COLORS.otro}`}>
-          {pago.concepto}
+          {pago.concepto === 'mensualidad_wa' ? 'mensualidad WA' : pago.concepto}
         </span>
       </td>
 

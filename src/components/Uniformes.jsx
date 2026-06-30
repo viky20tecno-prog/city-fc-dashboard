@@ -886,7 +886,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                               <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(34,197,94,0.12)] text-green-400 border border-green-400/20">PAGADO</span>
                             )}
                             {p.estado === 'ENTREGADO' && (
-                              <span className="px-2 py-1 rounded-lg text-xs bg-[var(--cc12)] text-[var(--cc)] border border-[var(--cc)]/20">ENTREGADO</span>
+                              <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(34,197,94,0.12)] text-green-400 border border-green-400/20">ENTREGADO</span>
                             )}
                           </td>
                           <td className="py-2 px-3">

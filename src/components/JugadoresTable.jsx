@@ -437,7 +437,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     const esPend    = (j) => String(j.cedula).startsWith('PEND_');
     const esFaltante = (val) => val === '' || val === null || val === undefined;
 
-    const todos = [...jugadoresConPago]
+    const todos = [...filtered]
       .sort((a, b) => {
         if (a.activo !== b.activo) return a.activo ? -1 : 1;
         return (a.nombreCompleto || '').localeCompare(b.nombreCompleto || '', 'es');
@@ -920,7 +920,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 {/* Exportar Excel */}
                 <button
                   onClick={exportarCSV}
-                  title="Exportar ficha completa de todos los jugadores — resalta datos faltantes"
+                  title="Exportar ficha completa de los jugadores filtrados — resalta datos faltantes"
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
                   style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', color: '#22C55E', whiteSpace: 'nowrap', flexShrink: 0 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.18)'}

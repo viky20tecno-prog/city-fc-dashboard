@@ -61,7 +61,8 @@ function mapRow(rawObj) {
     celular:              n.celular || n.telefono || n.movil || n.cel || n.numero_celular_personal || '',
     // correo: acepta "DIRECCION DE CORREO ELECTRONICO"
     correo_electronico:   n.correo_electronico || n.correo || n.email || n.direccion_de_correo_electronico || '',
-    fecha_nacimiento:     n.fecha_nacimiento || n.fecha_nac || n.nacimiento || '',
+    // fecha_nacimiento: acepta "FECHA DE NACIMIENTO" (Google Forms / plantillas con "de")
+    fecha_nacimiento:     n.fecha_nacimiento || n.fecha_nac || n.nacimiento || pget(n, 'fecha'),
     // lugar_nacimiento: acepta "MUNICIPIO DE NACIMIENTO"
     lugar_de_nacimiento:  n.lugar_de_nacimiento || n.lugar_nacimiento || n.ciudad_nacimiento || n.municipio_de_nacimiento || '',
     tipo_sangre:          n.tipo_sangre || n.sangre || n.grupo_sanguineo || '',

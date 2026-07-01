@@ -1285,6 +1285,15 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                           <Archive className="w-4 h-4" />
                         </button>
                       )}
+
+                      {/* Eliminar definitivamente */}
+                      <button
+                        onClick={() => setJugadorAEliminar(j)}
+                        title="Eliminar jugador definitivamente"
+                        className="p-1.5 rounded-lg transition text-[var(--text-mut)] hover:text-red-500 hover:bg-red-500/10"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>

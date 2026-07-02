@@ -4,6 +4,7 @@ import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
+import ComprobanteLink from './ComprobanteLink';
 
 const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(n) || 0);
 
@@ -337,10 +338,10 @@ function SeccionHistorialLazy({ cedula }) {
               {p.referencia && <p className="text-xs text-[var(--text-sec)]">Ref: {p.referencia}</p>}
               {p.mensaje_alerta && <p className="text-xs text-[#C678FF] mt-1 italic">📝 {p.mensaje_alerta}</p>}
               {p.url_comprobante && (
-                <a href={p.url_comprobante} target="_blank" rel="noopener noreferrer"
+                <ComprobanteLink url={p.url_comprobante}
                   className="text-xs text-[var(--cc)] hover:underline mt-1 inline-block">
                   📎 Ver comprobante
-                </a>
+                </ComprobanteLink>
               )}
             </div>
           ))}

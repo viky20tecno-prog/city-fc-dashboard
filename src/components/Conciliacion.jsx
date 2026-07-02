@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { CheckCircle, XCircle, Pencil, ExternalLink, RefreshCw, Clock, AlertCircle, CheckCheck, Wallet } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
+import { esUrlWaha, fetchComprobanteBlobUrl } from '../lib/comprobanteUrl';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
@@ -37,23 +38,42 @@ function formatDate(iso) {
 function ImagenComprobante({ url }) {
   const [open, setOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [resolvedUrl, setResolvedUrl] = useState(esUrlWaha(url) ? null : url);
+
+  useEffect(() => {
+    if (!esUrlWaha(url)) { setResolvedUrl(url); return; }
+    let objectUrl;
+    let cancelado = false;
+    (async () => {
+      try {
+        objectUrl = await fetchComprobanteBlobUrl(url);
+        if (!cancelado) setResolvedUrl(objectUrl);
+      } catch {
+        if (!cancelado) setImgError(true);
+      }
+    })();
+    return () => { cancelado = true; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [url]);
 
   if (!url) return <span className="text-gray-600 text-xs">Sin imagen</span>;
 
-  if (imgError) {
-    return (
-      <a href={url} target="_blank" rel="noreferrer"
-        className="inline-flex items-center gap-1 text-[var(--cc)] text-xs hover:underline">
-        <ExternalLink className="w-3 h-3" /> Ver
-      </a>
-    );
+  if (imgError || !resolvedUrl) {
+    if (imgError) {
+      return (
+        <a href={url} target="_blank" rel="noreferrer"
+          className="inline-flex items-center gap-1 text-[var(--cc)] text-xs hover:underline">
+          <ExternalLink className="w-3 h-3" /> Ver
+        </a>
+      );
+    }
+    return <span className="text-gray-600 text-xs">Cargando…</span>;
   }
 
   return (
     <>
       <button onClick={() => setOpen(true)} className="block group">
         <img
-          src={url}
+          src={resolvedUrl}
           alt="Comprobante"
           onError={() => setImgError(true)}
           className="h-10 w-16 object-cover rounded-lg border border-[var(--cc20)] group-hover:border-[var(--cc)]/50 transition cursor-pointer"
@@ -65,7 +85,7 @@ function ImagenComprobante({ url }) {
           onClick={() => setOpen(false)}
         >
           <img
-            src={url}
+            src={resolvedUrl}
             alt="Comprobante"
             className="max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl"
             onClick={e => e.stopPropagation()}

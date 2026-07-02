@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { CheckCircle, XCircle, Pencil, RefreshCw, Clock, AlertCircle, CheckCheck, Wallet } from 'lucide-react';
+import { CheckCircle, XCircle, Pencil, RefreshCw, Clock, AlertCircle, CheckCheck, Wallet, X, Plus } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { esUrlWaha, fetchComprobanteBlobUrl } from '../lib/comprobanteUrl';
@@ -99,8 +99,18 @@ function EditModal({ pago, onClose, onSaved }) {
     referencia: pago.referencia || '',
     concepto:  pago.concepto || 'mensualidad',
   });
+  const [dividir, setDividir] = useState(false);
+  const [lineas, setLineas]   = useState([{ concepto: pago.concepto || 'mensualidad', monto: pago.monto }]);
   const [saving, setSaving] = useState(false);
   const [error, setError]   = useState('');
+
+  const puedeAprobar = pago.estado_revision === 'pendiente' || pago.estado_revision === 'excedente_pendiente';
+  const sumaLineas = lineas.reduce((s, l) => s + (parseInt(l.monto) || 0), 0);
+  const restante   = form.monto - sumaLineas;
+
+  const agregarLinea    = () => setLineas(ls => [...ls, { concepto: 'mensualidad', monto: 0 }]);
+  const quitarLinea     = (i) => setLineas(ls => ls.filter((_, idx) => idx !== i));
+  const actualizarLinea = (i, campo, valor) => setLineas(ls => ls.map((l, idx) => idx === i ? { ...l, [campo]: valor } : l));
 
   const handleSave = async () => {
     setSaving(true);
@@ -121,9 +131,30 @@ function EditModal({ pago, onClose, onSaved }) {
     }
   };
 
+  const handleAprobarConReparto = async () => {
+    if (sumaLineas <= 0) { setError('Agrega al menos un concepto con monto mayor a 0'); return; }
+    if (sumaLineas > form.monto) { setError('La suma de los conceptos no puede superar el monto pagado'); return; }
+    setSaving(true);
+    setError('');
+    try {
+      const res = await authFetch(`${API_BASE}/payments/${pago.id}?club_id=${getClubId()}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accion: 'aprobar', monto: form.monto, banco: form.banco, referencia: form.referencia, allocations: lineas }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Error al aprobar');
+      onSaved(data.data);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-md shadow-2xl">
+      <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-5 border-b border-[var(--cc20)]">
           <h3 className="text-white font-semibold">Editar pago</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition">✕</button>
@@ -139,21 +170,9 @@ function EditModal({ pago, onClose, onSaved }) {
             </p>
           </div>
 
-          {/* Concepto */}
+          {/* Monto total pagado */}
           <div>
-            <label className="text-xs text-gray-400 mb-1 block">Concepto</label>
-            <select
-              value={form.concepto}
-              onChange={e => setForm(f => ({ ...f, concepto: e.target.value }))}
-              className="w-full bg-[var(--bg-input)] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
-            >
-              {CONCEPTOS.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
-            </select>
-          </div>
-
-          {/* Monto */}
-          <div>
-            <label className="text-xs text-gray-400 mb-1 block">Monto</label>
+            <label className="text-xs text-gray-400 mb-1 block">Monto total pagado</label>
             <input
               type="number"
               value={form.monto}
@@ -161,6 +180,59 @@ function EditModal({ pago, onClose, onSaved }) {
               className="w-full bg-[var(--bg-input)] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
             />
           </div>
+
+          {puedeAprobar && (
+            <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer select-none">
+              <input type="checkbox" checked={dividir} onChange={e => setDividir(e.target.checked)} className="accent-[var(--cc)]" />
+              Dividir este pago en varios conceptos
+            </label>
+          )}
+
+          {dividir ? (
+            <div className="space-y-2 bg-white/[0.02] border border-[var(--cc20)] rounded-xl p-3">
+              {lineas.map((l, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <select
+                    value={l.concepto}
+                    onChange={e => actualizarLinea(i, 'concepto', e.target.value)}
+                    className="flex-1 bg-[var(--bg-input)] border border-[var(--cc20)] text-white rounded-xl px-2 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
+                  >
+                    {CONCEPTOS.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                  </select>
+                  <input
+                    type="number"
+                    value={l.monto}
+                    onChange={e => actualizarLinea(i, 'monto', parseInt(e.target.value) || 0)}
+                    className="w-28 bg-[var(--bg-input)] border border-[var(--cc20)] text-white rounded-xl px-2 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
+                  />
+                  {lineas.length > 1 && (
+                    <button onClick={() => quitarLinea(i)} className="text-gray-500 hover:text-red-400 transition flex-shrink-0">
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button onClick={agregarLinea} className="flex items-center gap-1 text-xs text-[var(--cc)] hover:underline">
+                <Plus className="w-3 h-3" /> Agregar concepto
+              </button>
+              <p className={`text-xs ${restante < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                Asignado: {formatMoney(sumaLineas)} de {formatMoney(form.monto)}
+                {restante > 0 && ` — quedan ${formatMoney(restante)} sin asignar (irán a Saldo a Favor)`}
+                {restante < 0 && ' — te pasaste del monto total'}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Concepto</label>
+              <select
+                value={form.concepto}
+                onChange={e => setForm(f => ({ ...f, concepto: e.target.value }))}
+                className="w-full bg-[var(--bg-input)] border border-[var(--cc20)] text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--cc)]/50"
+              >
+                {CONCEPTOS.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+              </select>
+            </div>
+          )}
 
           {/* Banco */}
           <div>
@@ -199,13 +271,23 @@ function EditModal({ pago, onClose, onSaved }) {
           >
             Cancelar
           </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex-1 py-2 rounded-xl bg-[var(--cc)]/10 border border-[var(--cc)]/30 text-[var(--cc)] text-sm font-medium hover:bg-[var(--cc)]/20 transition disabled:opacity-50"
-          >
-            {saving ? 'Guardando...' : 'Guardar cambios'}
-          </button>
+          {dividir ? (
+            <button
+              onClick={handleAprobarConReparto}
+              disabled={saving}
+              className="flex-1 py-2 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-sm font-medium hover:bg-green-500/20 transition disabled:opacity-50"
+            >
+              {saving ? 'Aprobando...' : 'Aprobar con este reparto'}
+            </button>
+          ) : (
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex-1 py-2 rounded-xl bg-[var(--cc)]/10 border border-[var(--cc)]/30 text-[var(--cc)] text-sm font-medium hover:bg-[var(--cc)]/20 transition disabled:opacity-50"
+            >
+              {saving ? 'Guardando...' : 'Guardar cambios'}
+            </button>
+          )}
         </div>
       </div>
     </div>

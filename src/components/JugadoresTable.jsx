@@ -1,9 +1,8 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { Search, ChevronUp, ChevronDown, BookOpen, PauseCircle, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, Loader2, Archive, RotateCcw, ClipboardList } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, BookOpen, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, Loader2, Archive, RotateCcw, ClipboardList } from 'lucide-react';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { ESTADO_COLORS, API_BASE_URL } from '../config';
 import HojaDeVida from './HojaDeVida';
-import SuspensionModal from './SuspensionModal';
 import ImportarJugadoresModal from './ImportarJugadoresModal';
 import MensualidadesImportModal from './MensualidadesImportModal';
 import { deletePlayer, archivePlayer, getClubId } from '../services/api';
@@ -223,7 +222,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const [sortDir, setSortDir]             = useState('asc');
   const [jugadorDetalle, setJugadorDetalle]       = useState(null);
   const [jugadorDetalleTab, setJugadorDetalleTab] = useState('perfil');
-  const [jugadorSuspension, setJugadorSuspension] = useState(null);
   const [jugadorAEliminar, setJugadorAEliminar]   = useState(null);
   const [eliminando, setEliminando]               = useState(false);
   const [jugadorAArchivar, setJugadorAArchivar]   = useState(null);
@@ -275,9 +273,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       setArchivando(false);
     }
   };
-
-  const tieneSuspensionActiva = (cedula) =>
-    suspensiones.some(s => s.activa && s.cedula === String(cedula));
 
   const [uniformePopover, setUniformePopover] = useState(null);
   useEffect(() => {
@@ -1105,11 +1100,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-semibold text-[var(--text-pri)] text-sm">{j.nombreCompleto}</span>
-                          {tieneSuspensionActiva(j.cedula) && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
-                              <PauseCircle className="w-3 h-3" /> Suspendido
-                            </span>
-                          )}
                           {String(j.cedula).startsWith('PEND_') && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-400/10 text-orange-400 border border-orange-400/20">
                               ⚠ Datos pendientes
@@ -1254,19 +1244,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                         </button>
                       )}
 
-                      {/* Suspensión */}
-                      <button
-                        onClick={() => setJugadorSuspension(j)}
-                        title="Gestionar suspensión"
-                        className={`p-1.5 rounded-lg transition ${
-                          tieneSuspensionActiva(j.cedula)
-                            ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20'
-                            : 'text-[var(--text-mut)] hover:text-yellow-400 hover:bg-yellow-400/10'
-                        }`}
-                      >
-                        <PauseCircle className="w-4 h-4" />
-                      </button>
-
                       {/* Inactivar / Restaurar */}
                       {verArchivados ? (
                         <button
@@ -1375,15 +1352,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           onRefresh={onRefresh}
           categoriasJugadores={categoriasJugadores}
           clubConfig={clubConfig}
-        />
-      )}
-
-      {/* MODAL SUSPENSIÓN */}
-      {jugadorSuspension && (
-        <SuspensionModal
-          jugador={jugadorSuspension}
-          onClose={() => setJugadorSuspension(null)}
-          onSuccess={onRefresh}
         />
       )}
 

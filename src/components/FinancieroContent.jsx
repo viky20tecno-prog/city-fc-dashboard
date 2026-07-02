@@ -8,6 +8,7 @@ import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
+import SuspensionModal from './SuspensionModal';
 
 const formatCOP = (n) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
@@ -226,8 +227,9 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
   );
 }
 
-function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, esExentoGlobal = false, cuotaClub = 65000 }) {
+function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, esExentoGlobal = false, cuotaClub = 65000, jugador }) {
   const [items, setItems] = useState([]);
+  const [gestionandoSuspension, setGestionandoSuspension] = useState(false);
 
   useEffect(() => {
     setItems(
@@ -263,13 +265,21 @@ function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, 
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
         <Calendar className="w-5 h-5 text-[var(--cc)]" />
         <h3 className="text-base font-semibold text-[var(--text-pri)]">Mensualidades 2026</h3>
         {totalSusp > 0 && (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
             <PauseCircle className="w-3 h-3" /> {totalSusp} suspendido{totalSusp > 1 ? 's' : ''}
           </span>
+        )}
+        {jugador && (
+          <button
+            onClick={() => setGestionandoSuspension(true)}
+            className="ml-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition text-[var(--text-mut)] hover:text-yellow-400 hover:bg-yellow-400/10 border-transparent hover:border-yellow-400/20"
+          >
+            <PauseCircle className="w-3.5 h-3.5" /> Gestionar suspensión
+          </button>
         )}
       </div>
       <div className="grid grid-cols-2 gap-2 mb-3">
@@ -287,6 +297,13 @@ function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, 
           <FilaMensualidad key={m.id || i} m={m} susp={getSuspension(m.numero_mes)} onUpdated={handleUpdated} esExentoGlobal={esExentoGlobal} cuotaClub={cuotaClub} />
         ))}
       </div>
+      {gestionandoSuspension && jugador && (
+        <SuspensionModal
+          jugador={jugador}
+          onClose={() => setGestionandoSuspension(false)}
+          onSuccess={onMensualidadUpdated}
+        />
+      )}
     </div>
   );
 }
@@ -711,6 +728,7 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
         onMensualidadUpdated={onMensualidadUpdated}
         esExentoGlobal={esExento}
         cuotaClub={parseFloat(clubConfig?.valor_mensualidad) || 65000}
+        jugador={jugador}
       />
       <SeccionPedidoUniforme cedula={cedula} />
       <SeccionTorneos datos={misTorneos} />

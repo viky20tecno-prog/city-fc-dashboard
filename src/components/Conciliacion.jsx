@@ -311,6 +311,11 @@ function PagoRow({ pago, onEdit, onAction, actionLoading }) {
       <td className="px-4 py-3">
         <p className="text-white text-sm font-medium">{jugador}</p>
         <p className="text-gray-500 text-xs">{pago.cedula}</p>
+        {pago.nota_jugador && (
+          <div className="mt-1.5 px-2 py-1 rounded-lg bg-sky-400/10 border border-sky-400/20 text-sky-300 text-[11px] max-w-[180px]">
+            💬 <span className="italic">"{pago.nota_jugador}"</span>
+          </div>
+        )}
       </td>
 
       {/* Concepto */}

@@ -12,7 +12,11 @@ export const esUrlWaha = (url) => typeof url === 'string' && url.includes('/api/
 // (recuerda hacer URL.revokeObjectURL cuando ya no se use).
 export async function fetchComprobanteBlobUrl(url) {
   const res = await authFetch(`${API_BASE}/waha/media-proxy?url=${encodeURIComponent(url)}&club_id=${getClubId()}`);
-  if (!res.ok) throw new Error('No se pudo cargar el comprobante');
+  if (!res.ok) {
+    let detalle = '';
+    try { detalle = await res.text(); } catch { /* ignore */ }
+    throw new Error(`No se pudo cargar el comprobante (HTTP ${res.status}): ${detalle}`);
+  }
   const blob = await res.blob();
   return URL.createObjectURL(blob);
 }

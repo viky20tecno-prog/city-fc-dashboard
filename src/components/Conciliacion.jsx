@@ -38,6 +38,7 @@ function formatDate(iso) {
 function ImagenComprobante({ url }) {
   const [open, setOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [errorDetalle, setErrorDetalle] = useState(''); // TEMP-DEBUG: quitar tras diagnosticar
   const [resolvedUrl, setResolvedUrl] = useState(esUrlWaha(url) ? null : url);
 
   useEffect(() => {
@@ -48,8 +49,8 @@ function ImagenComprobante({ url }) {
       try {
         objectUrl = await fetchComprobanteBlobUrl(url);
         if (!cancelado) setResolvedUrl(objectUrl);
-      } catch {
-        if (!cancelado) setImgError(true);
+      } catch (e) {
+        if (!cancelado) { setImgError(true); setErrorDetalle(e.message); }
       }
     })();
     return () => { cancelado = true; if (objectUrl) URL.revokeObjectURL(objectUrl); };
@@ -60,10 +61,9 @@ function ImagenComprobante({ url }) {
   if (imgError || !resolvedUrl) {
     if (imgError) {
       return (
-        <a href={url} target="_blank" rel="noreferrer"
-          className="inline-flex items-center gap-1 text-[var(--cc)] text-xs hover:underline">
-          <ExternalLink className="w-3 h-3" /> Ver
-        </a>
+        <span className="text-red-400 text-[10px] max-w-[160px] inline-block" title={errorDetalle}>
+          {errorDetalle || 'Error desconocido'}
+        </span>
       );
     }
     return <span className="text-gray-600 text-xs">Cargando…</span>;

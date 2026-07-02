@@ -19,11 +19,15 @@ export default function ComprobanteLink({ url, children, className }) {
     e.preventDefault();
     if (cargando) return;
     setCargando(true);
+    // Abrir la pestaña de forma síncrona (antes del await) para que el navegador
+    // no la bloquee como popup — se le cambia la URL cuando ya tengamos el blob.
+    const ventana = window.open('', '_blank', 'noopener,noreferrer');
     try {
       const blobUrl = await fetchComprobanteBlobUrl(url);
-      window.open(blobUrl, '_blank', 'noopener,noreferrer');
-    } catch {
-      alert('No se pudo cargar el comprobante');
+      if (ventana) ventana.location.href = blobUrl;
+    } catch (err) {
+      if (ventana) ventana.close();
+      alert(err.message || 'No se pudo cargar el comprobante');
     } finally {
       setCargando(false);
     }

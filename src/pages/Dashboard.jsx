@@ -104,7 +104,7 @@ export default function Dashboard() {
   const {
     jugadores, mensualidades, uniformes, torneos,
     registroPagos, morosos, suspensiones,
-    loading, error, refresh,
+    loading, error, refresh, lastUpdated,
   } = useAppData();
 
   const [activeTab,       setActiveTab]       = useState('dashboard');
@@ -1003,7 +1003,7 @@ export default function Dashboard() {
             {activeTab === 'equipos'      && <EquiposPage  color={c} clubConfig={clubConfig} onConfigSaved={() => refetchConfig()} />}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'torneos'      && <TorneosPage  color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
-            {activeTab === 'conciliacion' && <Conciliacion   color={c} />}
+            {activeTab === 'conciliacion' && <Conciliacion   color={c} refreshTrigger={lastUpdated} />}
             {activeTab === 'finanzas'     && <Finanzas color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'plantillas'   && <PlantillasMensajes color={c} clubConfig={clubConfig} />}
             {activeTab === 'documentos'   && <DocumentosClub     color={c} />}

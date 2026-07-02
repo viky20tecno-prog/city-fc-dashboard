@@ -378,7 +378,7 @@ function PagoRow({ pago, onEdit, onAction, actionLoading }) {
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
-export default function Conciliacion({ color = 'var(--cc)' }) {
+export default function Conciliacion({ color = 'var(--cc)', refreshTrigger }) {
   const [pagos, setPagos]           = useState([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState('');
@@ -405,6 +405,9 @@ export default function Conciliacion({ color = 'var(--cc)' }) {
   }, [filtroEstado, clubId]);
 
   useEffect(() => { cargarPagos(); }, [cargarPagos]);
+
+  // Botón "Actualizar" del encabezado general — recarga también los pagos de Conciliación
+  useEffect(() => { if (refreshTrigger) cargarPagos(); }, [refreshTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const showToast = (msg, type = 'ok', title = null) => {
     setToast({ msg, type, title });

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { CheckCircle, XCircle, Pencil, ExternalLink, RefreshCw, Clock, AlertCircle, CheckCheck, Wallet } from 'lucide-react';
+import { CheckCircle, XCircle, Pencil, RefreshCw, Clock, AlertCircle, CheckCheck, Wallet } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { esUrlWaha, fetchComprobanteBlobUrl } from '../lib/comprobanteUrl';
@@ -38,7 +38,6 @@ function formatDate(iso) {
 function ImagenComprobante({ url }) {
   const [open, setOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const [errorDetalle, setErrorDetalle] = useState(''); // TEMP-DEBUG: quitar tras diagnosticar
   const [resolvedUrl, setResolvedUrl] = useState(esUrlWaha(url) ? null : url);
 
   useEffect(() => {
@@ -49,8 +48,8 @@ function ImagenComprobante({ url }) {
       try {
         objectUrl = await fetchComprobanteBlobUrl(url);
         if (!cancelado) setResolvedUrl(objectUrl);
-      } catch (e) {
-        if (!cancelado) { setImgError(true); setErrorDetalle(e.message); }
+      } catch {
+        if (!cancelado) setImgError(true);
       }
     })();
     return () => { cancelado = true; if (objectUrl) URL.revokeObjectURL(objectUrl); };
@@ -60,11 +59,7 @@ function ImagenComprobante({ url }) {
 
   if (imgError || !resolvedUrl) {
     if (imgError) {
-      return (
-        <span className="text-red-400 text-[10px] max-w-[160px] inline-block" title={errorDetalle}>
-          {errorDetalle || 'Error desconocido'}
-        </span>
-      );
+      return <span className="text-gray-600 text-xs" title="El comprobante ya no está disponible">Comprobante no disponible</span>;
     }
     return <span className="text-gray-600 text-xs">Cargando…</span>;
   }

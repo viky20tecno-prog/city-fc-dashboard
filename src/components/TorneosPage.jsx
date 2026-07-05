@@ -40,6 +40,9 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const [descOpen,          setDescOpen]           = useState(null);
   const [descEdit,          setDescEdit]           = useState({});
   const [guardandoDesc,     setGuardandoDesc]      = useState(null);
+  const [montoOpen,         setMontoOpen]          = useState(null);
+  const [montoEdit,         setMontoEdit]          = useState({});
+  const [guardandoMonto,    setGuardandoMonto]     = useState(null);
 
   const [torneosDef, setTorneosDef] = useState(() =>
     Array.isArray(clubConfig?.torneos_iniciales) ? clubConfig.torneos_iniciales : []
@@ -164,6 +167,26 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
       }
     } catch (e) { console.error(e); }
     finally { setGuardandoDesc(null); }
+  };
+
+  const guardarMonto = async (id) => {
+    const valor_oficial  = Number(montoEdit[id]?.oficial)  || 0;
+    const valor_inscrito = Number(montoEdit[id]?.inscrito) || 0;
+    setGuardandoMonto(id);
+    try {
+      const res = await authFetch(`${API_BASE}/torneos/${id}?club_id=${clubId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valor_oficial, valor_inscrito }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMontoEdit(m => ({ ...m, [id]: { oficial: '', inscrito: '' } }));
+        setMontoOpen(null);
+        await cargarEnrollments();
+      }
+    } catch (e) { console.error(e); }
+    finally { setGuardandoMonto(null); }
   };
 
   const quitar = async (id) => {
@@ -666,7 +689,8 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                           const nombre    = e._nombre;
                           const descuento = parseFloat(e.descuento) || 0;
                           const concepto  = e.concepto_descuento || '';
-                          const isDescOpen = descOpen === e.id;
+                          const isDescOpen  = descOpen === e.id;
+                          const isMontoOpen = montoOpen === e.id;
                           return (
                           <Fragment key={e.id}>
                             <tr className="border-b border-[var(--cc20)] hover:bg-[var(--bg-surface)] transition">
@@ -675,7 +699,16 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                                 <p className="text-[var(--text-mut)] text-[10px]">CC {e.cedula}</p>
                               </td>
                               <td className="py-2.5 px-4"><span className={chipEstado(e.estado)}>{labelEstado(e)}</span></td>
-                              <td className="py-2.5 px-4 text-[var(--text-sec)] text-xs">{fmtCOP(e.valor_oficial)}</td>
+                              <td className="py-2.5 px-4">
+                                <button
+                                  onClick={() => { setMontoOpen(isMontoOpen ? null : e.id); setMontoEdit(m => ({ ...m, [e.id]: { oficial: String(e.valor_oficial ?? ''), inscrito: String(e.valor_inscrito ?? e.valor_oficial ?? '') } })); }}
+                                  className="flex items-center gap-1 text-[var(--text-sec)] hover:text-[var(--cc)] transition group"
+                                  title="Corregir montos"
+                                >
+                                  {fmtCOP(e.valor_oficial)}
+                                  <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-70 transition" />
+                                </button>
+                              </td>
                               <td className="py-2.5 px-4 text-[var(--cc)] font-semibold text-xs">{fmtCOP(e.valor_inscrito ?? e.valor_oficial)}</td>
                               <td className="py-2.5 px-4">
                                 {descuento > 0 ? (
@@ -782,6 +815,56 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                                         Quitar descuento
                                       </button>
                                     )}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+
+                            {/* Editor de montos (corrección por error del admin) */}
+                            {isMontoOpen && (
+                              <tr className="border-b border-[var(--cc20)]">
+                                <td colSpan={8} className="px-4 pb-3 pt-0">
+                                  <div className="bg-[var(--cc12)] border border-[var(--cc)]/30 rounded-xl p-3 space-y-2.5">
+                                    <p className="text-xs font-semibold text-[var(--cc)] flex items-center gap-1.5">
+                                      <Pencil className="w-3 h-3" /> Corregir montos de {nombre}
+                                    </p>
+                                    <div className="flex gap-2 items-center flex-wrap">
+                                      <div>
+                                        <p className="text-[10px] text-[var(--text-mut)] mb-1">Precio oficial</p>
+                                        <input
+                                          type="number" min={0}
+                                          value={montoEdit[e.id]?.oficial ?? ''}
+                                          onChange={ev => setMontoEdit(m => ({ ...m, [e.id]: { ...m[e.id], oficial: ev.target.value } }))}
+                                          placeholder="$0"
+                                          className="w-32 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-lg px-2 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
+                                        />
+                                      </div>
+                                      <div>
+                                        <p className="text-[10px] text-[var(--text-mut)] mb-1">Precio al inscrito</p>
+                                        <input
+                                          type="number" min={0}
+                                          value={montoEdit[e.id]?.inscrito ?? ''}
+                                          onChange={ev => setMontoEdit(m => ({ ...m, [e.id]: { ...m[e.id], inscrito: ev.target.value } }))}
+                                          placeholder="$0"
+                                          className="w-32 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-lg px-2 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
+                                        />
+                                      </div>
+                                      <button
+                                        onClick={() => guardarMonto(e.id)}
+                                        disabled={guardandoMonto === e.id}
+                                        className="px-3 py-1.5 rounded-lg bg-[var(--cc)] text-white text-xs font-semibold hover:opacity-90 transition disabled:opacity-40 flex items-center gap-1.5 self-end"
+                                      >
+                                        {guardandoMonto === e.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                        Guardar
+                                      </button>
+                                      <button
+                                        onClick={() => setMontoOpen(null)}
+                                        className="px-3 py-1.5 rounded-lg text-[var(--text-sec)] text-xs hover:text-[var(--text-pri)] transition self-end"
+                                      >
+                                        Cancelar
+                                      </button>
+                                    </div>
+                                    <p className="text-[10px] text-[var(--text-mut)]">El saldo pendiente se recalcula automáticamente con el nuevo monto.</p>
                                   </div>
                                 </td>
                               </tr>

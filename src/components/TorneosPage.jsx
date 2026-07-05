@@ -27,7 +27,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const [jugadoresClub,     setJugadoresClub]      = useState([]);
   const [torneoSeleccionado, setTorneoSeleccionado] = useState(null);
   const [showForm,          setShowForm]           = useState(false);
-  const [torneoForm,        setTorneoForm]         = useState({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '' });
+  const [torneoForm,        setTorneoForm]         = useState({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '', descripcion: '' });
   const [guardando,         setGuardando]          = useState(false);
   const [addSeleccionados,  setAddSeleccionados]   = useState([]); // [{ cedula, nombre }]
   const [addBusqueda,       setAddBusqueda]        = useState('');
@@ -35,7 +35,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const [pagoEdit,          setPagoEdit]           = useState({});
   const [pagandoId,         setPagandoId]          = useState(null);
   const [editIdx,           setEditIdx]            = useState(null);
-  const [editForm,          setEditForm]           = useState({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '' });
+  const [editForm,          setEditForm]           = useState({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '', descripcion: '' });
   const [sortAlpha,         setSortAlpha]          = useState(null); // null | 'asc' | 'desc'
   const [descOpen,          setDescOpen]           = useState(null);
   const [descEdit,          setDescEdit]           = useState({});
@@ -91,12 +91,12 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     if (!torneoForm.nombre.trim()) return;
     setGuardando(true);
     try {
-      const nueva = { id: crypto.randomUUID(), nombre: torneoForm.nombre.trim(), fecha: torneoForm.fecha, valor_oficial: Number(torneoForm.valor_oficial) || 0, valor_inscrito: Number(torneoForm.valor_inscrito) || 0 };
+      const nueva = { id: crypto.randomUUID(), nombre: torneoForm.nombre.trim(), fecha: torneoForm.fecha, valor_oficial: Number(torneoForm.valor_oficial) || 0, valor_inscrito: Number(torneoForm.valor_inscrito) || 0, descripcion: torneoForm.descripcion.trim() };
       const nuevaLista = [...torneosDef, nueva];
       await patchConfig({ torneos_iniciales: nuevaLista });
       setTorneosDef(nuevaLista);
       setShowForm(false);
-      setTorneoForm({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '' });
+      setTorneoForm({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '', descripcion: '' });
     } catch (e) { console.error(e); }
     finally { setGuardando(false); }
   };
@@ -107,7 +107,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     try {
       const nuevaLista = torneosDef.map((t, i) =>
         i === editIdx
-          ? { ...t, nombre: editForm.nombre.trim(), fecha: editForm.fecha, valor_oficial: Number(editForm.valor_oficial) || 0, valor_inscrito: Number(editForm.valor_inscrito) || 0 }
+          ? { ...t, nombre: editForm.nombre.trim(), fecha: editForm.fecha, valor_oficial: Number(editForm.valor_oficial) || 0, valor_inscrito: Number(editForm.valor_inscrito) || 0, descripcion: editForm.descripcion.trim() }
           : t
       );
       await patchConfig({ torneos_iniciales: nuevaLista });
@@ -256,9 +256,11 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     const pendientes = inscritos.filter(e => e.estado === 'PENDIENTE').length;
     const totalRec   = inscritos.reduce((s, e) => s + parseFloat(e.valor_pagado || 0), 0);
 
-    doc.setFillColor(245, 246, 248); doc.rect(M, y, W - M * 2, 18, 'F');
+    const descripcion = def?.descripcion || '';
+    const boxH = descripcion ? 25 : 18;
+    doc.setFillColor(245, 246, 248); doc.rect(M, y, W - M * 2, boxH, 'F');
     const [r, g, b] = accentRgb;
-    doc.setFillColor(r, g, b); doc.rect(M, y, 3, 18, 'F');
+    doc.setFillColor(r, g, b); doc.rect(M, y, 3, boxH, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(r, g, b);
     doc.text(`${inscritos.length} inscritos`, M + 6, y + 7);
     doc.setTextColor(34, 197, 94);  doc.text(`Al día: ${pagados}`,       M + 38, y + 7);
@@ -269,7 +271,11 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     const vOficial  = def?.valor_oficial  ?? def?.valor ?? 0;
     const vInscrito = def?.valor_inscrito ?? def?.valor ?? 0;
     if (vInscrito > 0) doc.text(`Al inscrito: $${Number(vInscrito).toLocaleString('es-CO')}  ·  Oficial: $${Number(vOficial).toLocaleString('es-CO')}`, M + 70, y + 14);
-    y += 24;
+    if (descripcion) {
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(110, 110, 110);
+      doc.text(descripcion.slice(0, 120), M + 6, y + 20.5);
+    }
+    y += boxH + 6;
 
     const cols = [
       { label: 'Cédula',  x: M + 2 },
@@ -386,8 +392,14 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                     className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition" />
                 </div>
               </div>
+              <div>
+                <p className="text-xs text-[var(--text-mut)] mb-1.5">Descripción corta <span className="text-[var(--text-mut)] font-normal">(aparece en el PDF de inscritos)</span></p>
+                <input value={torneoForm.descripcion} onChange={e => setTorneoForm(f => ({ ...f, descripcion: e.target.value }))}
+                  placeholder="Ej: Torneo interno de fútbol 7, categoría sub-15" maxLength={140}
+                  className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition" />
+              </div>
               <div className="flex gap-2 justify-end">
-                <button onClick={() => { setShowForm(false); setTorneoForm({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '' }); }}
+                <button onClick={() => { setShowForm(false); setTorneoForm({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '', descripcion: '' }); }}
                   className="px-4 py-2 rounded-xl border border-[var(--cc20)] text-[var(--text-sec)] text-sm hover:text-[var(--text-pri)] transition">
                   Cancelar
                 </button>
@@ -436,6 +448,12 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                               placeholder="$0" className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)]" />
                           </div>
                         </div>
+                        <div>
+                          <p className="text-[10px] text-[var(--text-mut)] mb-1">Descripción corta</p>
+                          <input value={editForm.descripcion} onChange={e => setEditForm(f => ({ ...f, descripcion: e.target.value }))}
+                            placeholder="Ej: Torneo interno de fútbol 7, categoría sub-15" maxLength={140}
+                            className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)]" />
+                        </div>
                         <div className="flex gap-2">
                           <button onClick={() => setEditIdx(null)} className="flex-1 py-2 rounded-xl border border-[var(--cc20)] text-[var(--text-sec)] text-xs">Cancelar</button>
                           <button onClick={guardarEdicion} disabled={guardando} className="flex-1 py-2 rounded-xl bg-[var(--cc)] text-white text-xs font-bold disabled:opacity-40">
@@ -451,6 +469,9 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                             <p className="text-xs text-[var(--text-sec)] mt-0.5">
                               {t.fecha ? `📅 ${t.fecha}` : 'Sin fecha'}
                             </p>
+                            {t.descripcion && (
+                              <p className="text-xs text-[var(--text-mut)] mt-1">{t.descripcion}</p>
+                            )}
                             {(t.valor_oficial > 0 || t.valor_inscrito > 0 || t.valor > 0) && (
                               <div className="flex gap-3 mt-1.5">
                                 <span className="text-[10px] text-[var(--text-mut)]">Oficial: <span className="text-[var(--text-sec)] font-semibold">{fmtCOP(t.valor_oficial ?? t.valor)}</span></span>
@@ -459,7 +480,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                             )}
                           </div>
                           <div className="flex gap-1.5 flex-shrink-0">
-                            <button onClick={() => { setEditIdx(idx); setEditForm({ nombre: t.nombre, fecha: t.fecha || '', valor_oficial: String(t.valor_oficial ?? t.valor ?? ''), valor_inscrito: String(t.valor_inscrito ?? t.valor ?? '') }); }}
+                            <button onClick={() => { setEditIdx(idx); setEditForm({ nombre: t.nombre, fecha: t.fecha || '', valor_oficial: String(t.valor_oficial ?? t.valor ?? ''), valor_inscrito: String(t.valor_inscrito ?? t.valor ?? ''), descripcion: t.descripcion || '' }); }}
                               className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition">
                               <Pencil className="w-3.5 h-3.5" />
                             </button>
@@ -546,6 +567,9 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                     {def?.fecha ? `📅 ${def.fecha}` : ''}
                     {def?.valor > 0 ? `  ·  Inscripción: ${fmtCOP(def.valor)}` : ''}
                   </p>
+                  {def?.descripcion && (
+                    <p className="text-xs text-[var(--text-mut)] mt-0.5">{def.descripcion}</p>
+                  )}
                 </div>
               </div>
               <button onClick={exportarPDF}

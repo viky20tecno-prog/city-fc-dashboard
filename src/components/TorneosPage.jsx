@@ -336,12 +336,12 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const yaInscritos           = new Set(inscritosDelTorneo.map(e => String(e.cedula)));
   const yaSeleccionados       = new Set(addSeleccionados.map(j => String(j.cedula)));
   const jugadoresDisponibles  = jugadoresClub.filter(j => !yaInscritos.has(String(j.cedula)) && !yaSeleccionados.has(String(j.cedula)));
-  const sugeridos = addBusqueda.length >= 1
+  const jugadoresVisibles = addBusqueda.length >= 1
     ? jugadoresDisponibles.filter(j => {
         const full = `${j.nombre || ''} ${j.apellidos || ''}`.toLowerCase();
         return full.includes(addBusqueda.toLowerCase()) || String(j.cedula).includes(addBusqueda);
-      }).slice(0, 8)
-    : [];
+      })
+    : jugadoresDisponibles;
 
   return (
     <div className="space-y-5">
@@ -598,59 +598,57 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                 </div>
               )}
 
-              <div className="flex gap-2 items-start">
-                <div className="relative flex-1">
-                  <input
-                    type="search"
-                    value={addBusqueda}
-                    onChange={e => setAddBusqueda(e.target.value)}
-                    placeholder="Buscar por nombre o cédula para agregar..."
-                    className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition"
-                  />
-                  {addBusqueda.length >= 1 && (
-                    <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl overflow-hidden shadow-xl">
-                      {sugeridos.length === 0 ? (
-                        <p className="px-4 py-3 text-xs text-[var(--text-sec)]">Sin resultados</p>
-                      ) : (
-                        <>
-                          {sugeridos.map(j => (
-                            <button key={j.cedula} type="button"
-                              onClick={() => {
-                                setAddSeleccionados(s => [...s, { cedula: String(j.cedula), nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase() }]);
-                                setAddBusqueda('');
-                              }}
-                              className="w-full text-left px-4 py-2.5 hover:bg-[var(--bg-surface)] transition border-b border-[var(--cc20)] last:border-0 flex items-center justify-between gap-2">
-                              <span>
-                                <p className="text-sm text-[var(--text-pri)]">{`${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase()}</p>
-                                <p className="text-xs text-[var(--text-sec)]">CC {j.cedula}</p>
-                              </span>
-                              <Plus className="w-3.5 h-3.5 text-[var(--cc)] flex-shrink-0" />
-                            </button>
-                          ))}
-                          {sugeridos.length > 1 && (
-                            <button type="button"
-                              onClick={() => {
-                                setAddSeleccionados(s => [
-                                  ...s,
-                                  ...sugeridos.map(j => ({ cedula: String(j.cedula), nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase() })),
-                                ]);
-                                setAddBusqueda('');
-                              }}
-                              className="w-full text-left px-4 py-2 text-xs font-semibold text-[var(--cc)] hover:bg-[var(--cc12)] transition">
-                              + Agregar los {sugeridos.length} encontrados
-                            </button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
+              <div className="flex gap-2 items-center mb-3">
+                <input
+                  type="search"
+                  value={addBusqueda}
+                  onChange={e => setAddBusqueda(e.target.value)}
+                  placeholder="Buscar por nombre o cédula (o elige de la lista de abajo)..."
+                  className="flex-1 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition"
+                />
                 <button onClick={inscribirSeleccionados} disabled={addSeleccionados.length === 0 || addLoading}
                   className="px-4 py-2 rounded-xl bg-[var(--cc)] text-white text-sm font-bold disabled:opacity-40 hover:opacity-90 transition flex items-center gap-2 shrink-0">
                   {addLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   Inscribir{addSeleccionados.length > 0 ? ` (${addSeleccionados.length})` : ''}
                 </button>
               </div>
+
+              {jugadoresVisibles.length === 0 ? (
+                <p className="text-xs text-[var(--text-sec)] px-1">
+                  {addBusqueda.length >= 1 ? 'Sin resultados' : 'No hay más jugadores disponibles para agregar.'}
+                </p>
+              ) : (
+                <div className="border border-[var(--cc20)] rounded-xl p-3 max-h-56 overflow-y-auto">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[10px] text-[var(--text-mut)]">
+                      {jugadoresVisibles.length} jugador{jugadoresVisibles.length !== 1 ? 'es' : ''} {addBusqueda.length >= 1 ? 'encontrado' + (jugadoresVisibles.length !== 1 ? 's' : '') : 'disponible' + (jugadoresVisibles.length !== 1 ? 's' : '')}
+                    </p>
+                    {jugadoresVisibles.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setAddSeleccionados(s => [
+                          ...s,
+                          ...jugadoresVisibles.map(j => ({ cedula: String(j.cedula), nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase() })),
+                        ])}
+                        className="text-[10px] font-semibold text-[var(--cc)] hover:underline"
+                      >
+                        + Agregar todos
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {jugadoresVisibles.map(j => (
+                      <button key={j.cedula} type="button"
+                        onClick={() => setAddSeleccionados(s => [...s, { cedula: String(j.cedula), nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase() }])}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-[var(--bg-app)] border border-[var(--cc20)] text-[var(--text-pri)] hover:border-[var(--cc)] hover:bg-[var(--cc12)] transition"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--cc)] flex-shrink-0" />
+                        {`${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {inscritosDelTorneo.length === 0 ? (

@@ -10,8 +10,8 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zen
 const normalizarCatalogo = (raw) =>
   (raw || []).map(p =>
     typeof p === 'string'
-      ? { nombre: p, precio: 0, precio_proveedor: 0, imagen_url: '' }
-      : { nombre: String(p.nombre || ''), precio: Number(p.precio) || 0, precio_proveedor: Number(p.precio_proveedor) || 0, imagen_url: p.imagen_url || '' }
+      ? { nombre: p, precio: 0, precio_proveedor: 0, imagen_url: '', descripcion: '' }
+      : { nombre: String(p.nombre || ''), precio: Number(p.precio) || 0, precio_proveedor: Number(p.precio_proveedor) || 0, imagen_url: p.imagen_url || '', descripcion: p.descripcion || '' }
   );
 
 export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club', clubConfig }) {
@@ -46,9 +46,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   // — Catálogo —
   const [catalogo, setCatalogo] = useState([]);
-  const [nuevaPrenda, setNuevaPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '' });
+  const [nuevaPrenda, setNuevaPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '', descripcion: '' });
   const [editandoIdx, setEditandoIdx] = useState(null);
-  const [editandoPrenda, setEditandoPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '' });
+  const [editandoPrenda, setEditandoPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '', descripcion: '' });
   const [guardandoCatalogo, setGuardandoCatalogo] = useState(false);
   const [catalogoMsg, setCatalogoMsg] = useState('');
   const [lightbox, setLightbox] = useState(null);
@@ -149,8 +149,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       return;
     }
     if (guardandoCatalogo) return;
-    const nuevo = [...catalogo, { nombre, precio, precio_proveedor, imagen_url: nuevaPrenda.imagen_url || '' }];
-    setNuevaPrenda({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '' });
+    const nuevo = [...catalogo, { nombre, precio, precio_proveedor, imagen_url: nuevaPrenda.imagen_url || '', descripcion: nuevaPrenda.descripcion.trim() }];
+    setNuevaPrenda({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '', descripcion: '' });
     saveCatalogo(nuevo);
   };
 
@@ -160,7 +160,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   const iniciarEditarPrenda = (idx) => {
     setEditandoIdx(idx);
-    setEditandoPrenda({ nombre: catalogo[idx].nombre, precio: String(catalogo[idx].precio), precio_proveedor: String(catalogo[idx].precio_proveedor || ''), imagen_url: catalogo[idx].imagen_url || '' });
+    setEditandoPrenda({ nombre: catalogo[idx].nombre, precio: String(catalogo[idx].precio), precio_proveedor: String(catalogo[idx].precio_proveedor || ''), imagen_url: catalogo[idx].imagen_url || '', descripcion: catalogo[idx].descripcion || '' });
   };
 
   const guardarEditPrenda = () => {
@@ -168,7 +168,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     const precio           = Number(String(editandoPrenda.precio).replace(/\D/g, ''))           || 0;
     const precio_proveedor = Number(String(editandoPrenda.precio_proveedor).replace(/\D/g, '')) || 0;
     if (!nombre) return;
-    const nuevo = catalogo.map((p, i) => i === editandoIdx ? { nombre, precio, precio_proveedor, imagen_url: editandoPrenda.imagen_url || '' } : p);
+    const nuevo = catalogo.map((p, i) => i === editandoIdx ? { nombre, precio, precio_proveedor, imagen_url: editandoPrenda.imagen_url || '', descripcion: editandoPrenda.descripcion.trim() } : p);
     setEditandoIdx(null);
     saveCatalogo(nuevo);
   };
@@ -672,7 +672,10 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                 <Package className="w-3.5 h-3.5 opacity-30" />
                               </div>
                             )}
-                            <span className="flex-1 text-left">{p.nombre}</span>
+                            <span className="flex-1 text-left">
+                              {p.nombre}
+                              {p.descripcion && <span className="block text-xs font-normal opacity-60">{p.descripcion}</span>}
+                            </span>
                             <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
                           </button>
                         );
@@ -1009,6 +1012,16 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
               </button>
             </div>
 
+            <input
+              type="text"
+              value={nuevaPrenda.descripcion}
+              onChange={e => setNuevaPrenda(f => ({ ...f, descripcion: e.target.value }))}
+              onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
+              placeholder="Descripción corta (opcional — tallas, material, para qué categoría, etc.)"
+              maxLength={140}
+              className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 mb-4 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+            />
+
             {/* Lista de prendas */}
             {catalogo.length === 0 ? (
               <div className="text-center py-10 text-[var(--text-mut)]">
@@ -1018,7 +1031,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
             ) : (
               <div className="space-y-2">
                 {catalogo.map((p, idx) => (
-                  <div key={idx} className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[var(--bg-app)] border border-[var(--cc20)]">
+                  <div key={idx} className="px-4 py-3 rounded-xl bg-[var(--bg-app)] border border-[var(--cc20)] space-y-2">
+                  <div className="flex items-center gap-2">
                     {editandoIdx === idx ? (
                       <>
                         {/* Imagen editable */}
@@ -1106,6 +1120,19 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                         </button>
                       </>
                     )}
+                  </div>
+                  {editandoIdx === idx ? (
+                    <input
+                      type="text"
+                      value={editandoPrenda.descripcion}
+                      onChange={e => setEditandoPrenda(f => ({ ...f, descripcion: e.target.value }))}
+                      placeholder="Descripción corta (opcional)"
+                      maxLength={140}
+                      className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-xs text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)]"
+                    />
+                  ) : (
+                    p.descripcion && <p className="text-xs text-[var(--text-mut)] pl-12">{p.descripcion}</p>
+                  )}
                   </div>
                 ))}
                 <p className="text-xs text-[var(--text-sec)] text-right pt-1">

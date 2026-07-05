@@ -199,7 +199,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
 
   const registrarPago = async (id) => {
     const monto = Number(pagoEdit[id]);
-    if (!monto || monto <= 0) return;
+    if (Number.isNaN(monto) || monto < 0) return;
     setPagandoId(id);
     try {
       const res = await authFetch(`${API_BASE}/torneos/${id}?club_id=${clubId}`, {
@@ -733,20 +733,18 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                               <td className="py-2.5 px-4 text-green-400 font-semibold text-xs">{fmtCOP(e.valor_pagado)}</td>
                               <td className="py-2.5 px-4 text-red-400 text-xs">{fmtCOP(e.saldo_pendiente)}</td>
                               <td className="py-2.5 px-4">
-                                {e.estado !== 'AL_DIA' && (
-                                  <div className="flex items-center gap-1.5">
-                                    <input type="number" min={0}
-                                      value={pagoEdit[e.id] || ''}
-                                      onChange={ev => setPagoEdit(p => ({ ...p, [e.id]: ev.target.value }))}
-                                      placeholder="Total pagado"
-                                      className="w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-lg px-2 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
-                                    />
-                                    <button onClick={() => registrarPago(e.id)} disabled={!pagoEdit[e.id] || pagandoId === e.id}
-                                      className="p-1.5 rounded-lg bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] hover:bg-[var(--cc20)] transition disabled:opacity-40">
-                                      {pagandoId === e.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                                    </button>
-                                  </div>
-                                )}
+                                <div className="flex items-center gap-1.5">
+                                  <input type="number" min={0}
+                                    value={pagoEdit[e.id] ?? ''}
+                                    onChange={ev => setPagoEdit(p => ({ ...p, [e.id]: ev.target.value }))}
+                                    placeholder={e.estado === 'AL_DIA' ? 'Corregir pagado' : 'Total pagado'}
+                                    className="w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-lg px-2 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
+                                  />
+                                  <button onClick={() => registrarPago(e.id)} disabled={pagoEdit[e.id] === undefined || pagoEdit[e.id] === '' || pagandoId === e.id}
+                                    className="p-1.5 rounded-lg bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] hover:bg-[var(--cc20)] transition disabled:opacity-40">
+                                    {pagandoId === e.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                                  </button>
+                                </div>
                               </td>
                               <td className="py-2.5 px-4">
                                 <button onClick={() => quitar(e.id)}

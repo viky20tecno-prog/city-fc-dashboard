@@ -118,12 +118,23 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   };
 
   const eliminar = async (idx) => {
-    if (!confirm('¿Eliminar este torneo? Los jugadores inscritos seguirán en la base de datos.')) return;
+    const torneo    = torneosDef[idx];
+    const inscritos = enrollments.filter(e => e.torneo_id === torneo?.id);
+    const mensaje = inscritos.length > 0
+      ? `¿Eliminar este torneo y las ${inscritos.length} inscripciones de jugadores que tiene? Esta acción no se puede deshacer.`
+      : '¿Eliminar este torneo?';
+    if (!confirm(mensaje)) return;
     try {
       const nuevaLista = torneosDef.filter((_, i) => i !== idx);
-      if (torneoSeleccionado === torneosDef[idx]?.id) setTorneoSeleccionado(null);
+      if (torneoSeleccionado === torneo?.id) setTorneoSeleccionado(null);
       await patchConfig({ torneos_iniciales: nuevaLista });
       setTorneosDef(nuevaLista);
+      if (inscritos.length > 0) {
+        await Promise.all(
+          inscritos.map(e => authFetch(`${API_BASE}/torneos/${e.id}?club_id=${clubId}`, { method: 'DELETE' }))
+        );
+        await cargarEnrollments();
+      }
     } catch (e) { console.error(e); }
   };
 

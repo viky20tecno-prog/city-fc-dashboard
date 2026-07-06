@@ -14,16 +14,44 @@ const normalizarCatalogo = (raw) =>
       : { nombre: String(p.nombre || ''), precio: Number(p.precio) || 0, precio_proveedor: Number(p.precio_proveedor) || 0, imagen_url: p.imagen_url || '', descripcion: p.descripcion || '' }
   );
 
+const CATEGORIAS       = ['Niño', 'Hombre', 'Mujer'];
+const TALLAS_NINO      = ['4', '6', '8', '10', '12', '14', '16'];
+const TALLAS_ADULTO    = ['S', 'M', 'L', 'XL', '2XL', '3XL'];
+const tallasPorCategoria = (categoria) => (categoria === 'Niño' ? TALLAS_NINO : TALLAS_ADULTO);
+
+const calcularEdad = (fechaNacimiento) => {
+  if (!fechaNacimiento) return null;
+  const nacimiento = new Date(fechaNacimiento);
+  if (isNaN(nacimiento.getTime())) return null;
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - nacimiento.getFullYear();
+  const m = hoy.getMonth() - nacimiento.getMonth();
+  if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
+  return edad;
+};
+
+const categoriaDefaultJugador = (jugador) => {
+  const edad = calcularEdad(jugador?.fecha_nacimiento);
+  return edad !== null && edad < 18 ? 'Niño' : 'Hombre';
+};
+
+let personaKeySeq = 0;
+const nuevaPersona = (esFamiliar, categoria) => ({
+  key: `p${Date.now()}_${personaKeySeq++}`,
+  esFamiliar,
+  categoria,
+  prendas: [],
+  nombre_estampar: '',
+  talla: '',
+  numero: '',
+});
+
 export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club', clubConfig }) {
   const [tabPrincipal, setTabPrincipal] = useState('pedido');
 
   // — Pedido form —
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({
-    cedula: '', nombre: '', prendas: [],
-    nombre_estampar: '', talla: '', numero: '',
-    es_familiar: false, genero: 'Hombre',
-  });
+  const [personas, setPersonas] = useState([]);
   const [jugadorEncontrado, setJugadorEncontrado] = useState(null);
   const [jugadores, setJugadores] = useState([]);
   const [busqueda, setBusqueda] = useState('');
@@ -40,7 +68,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const [cambiandoEstado, setCambiandoEstado] = useState(null);
   const [generandoPDF, setGenerandoPDF] = useState(false);
   const [pedidoEditando, setPedidoEditando] = useState(null);
-  const [editForm, setEditForm] = useState({ prendas: [], talla: '', numero: '', nombre_estampar: '' });
+  const [editForm, setEditForm] = useState({ prendas: [], talla: '', numero: '', nombre_estampar: '', categoria: 'Hombre' });
   const [editError, setEditError] = useState('');
   const [guardandoEdit, setGuardandoEdit] = useState(false);
 
@@ -190,77 +218,110 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const seleccionarJugador = (jugador) => {
     const nombreCompleto = `${jugador.nombre || ''} ${jugador.apellidos || ''}`.trim();
     setJugadorEncontrado(jugador);
-    setForm(f => ({ ...f, cedula: jugador.cedula, nombre: nombreCompleto }));
     setBusqueda(nombreCompleto);
     setSugerencias([]);
     setMostrarSugerencias(false);
     setError('');
+    setPersonas([nuevaPersona(false, categoriaDefaultJugador(jugador))]);
     setStep(2);
   };
 
   const limpiarBusqueda = () => {
     setBusqueda(''); setSugerencias([]); setMostrarSugerencias(false);
     setJugadorEncontrado(null); setStep(1);
-    setForm({ cedula: '', nombre: '', prendas: [], nombre_estampar: '', talla: '', numero: '', es_familiar: false, genero: 'Hombre' });
+    setPersonas([]);
     setError('');
   };
 
-  const togglePrenda = (prenda) => {
-    setForm(f => {
-      const existe = f.prendas.find(p => p.nombre === prenda.nombre);
-      return {
-        ...f,
-        prendas: existe
-          ? f.prendas.filter(p => p.nombre !== prenda.nombre)
-          : [...f.prendas, { ...prenda, cantidad: 1 }],
-      };
-    });
+  const agregarFamiliar = () => {
+    setPersonas(ps => [...ps, nuevaPersona(true, 'Hombre')]);
   };
 
-  const cambiarCantidad = (nombre, delta) => {
-    setForm(f => ({
-      ...f,
-      prendas: f.prendas.map(p => p.nombre === nombre ? { ...p, cantidad: Math.max(1, (p.cantidad || 1) + delta) } : p),
+  const quitarPersona = (key) => {
+    setPersonas(ps => ps.filter(p => p.key !== key));
+  };
+
+  const actualizarPersona = (key, cambios) => {
+    setPersonas(ps => ps.map(p => (p.key === key ? { ...p, ...(typeof cambios === 'function' ? cambios(p) : cambios) } : p)));
+  };
+
+  const setCategoriaPersona = (key, categoria) => {
+    actualizarPersona(key, { categoria, talla: '' });
+  };
+
+  const togglePrendaPersona = (key, prenda) => {
+    actualizarPersona(key, p => ({
+      prendas: p.prendas.find(x => x.nombre === prenda.nombre)
+        ? p.prendas.filter(x => x.nombre !== prenda.nombre)
+        : [...p.prendas, { ...prenda, cantidad: 1 }],
     }));
   };
 
-  const total = form.prendas.reduce((sum, p) => sum + p.precio * (p.cantidad || 1), 0);
-  const totalUnidades = form.prendas.reduce((sum, p) => sum + (p.cantidad || 1), 0);
+  const cambiarCantidadPersona = (key, nombre, delta) => {
+    actualizarPersona(key, p => ({
+      prendas: p.prendas.map(x => x.nombre === nombre ? { ...x, cantidad: Math.max(1, (x.cantidad || 1) + delta) } : x),
+    }));
+  };
+
   const formatNumero = (val) => val.replace(/\D/g, '').slice(0, 3);
-  const numeroValido = !!form.numero;
+
+  const totalPersona = (p) => p.prendas.reduce((sum, x) => sum + x.precio * (x.cantidad || 1), 0);
+  const totalGeneral = personas.reduce((sum, p) => sum + totalPersona(p), 0);
 
   const handleSubmit = async () => {
     setError('');
-    const faltantes = [];
-    if (form.prendas.length === 0) faltantes.push('prenda');
-    if (!form.talla) faltantes.push('talla');
-    if (!form.numero) faltantes.push('número');
-    if (faltantes.length > 0) { setError(`Faltá completar: ${faltantes.join(', ')}.`); return; }
-    const clubId = getClubId();
-    setEnviando(true);
-    try {
-      const res = await authFetch(`${API_BASE}/uniforms?club_id=${clubId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          tipo: form.es_familiar ? `Familiar - ${form.genero}` : 'Jugador',
-          prendas: form.prendas.map(p => (p.cantidad || 1) > 1 ? `${p.nombre} x${p.cantidad}` : p.nombre).join(', '),
-          total,
-          numero: form.numero.padStart(3, '0'),
-          club_id: clubId,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setExito(true);
-        await cargarDatos();
-        setTimeout(() => { setExito(false); limpiarBusqueda(); }, 3000);
-      } else {
-        setError(data.error || data.message || 'Error al registrar el pedido.');
+    if (personas.length === 0) { setError('Agregá al menos un pedido.'); return; }
+    const errores = [];
+    personas.forEach((p, i) => {
+      const faltantes = [];
+      if (p.prendas.length === 0) faltantes.push('prenda');
+      if (!p.talla) faltantes.push('talla');
+      if (!p.numero) faltantes.push('número');
+      if (faltantes.length > 0) {
+        const etiqueta = p.esFamiliar ? `Familiar ${i + 1}` : 'Jugador';
+        errores.push(`${etiqueta}: falta ${faltantes.join(', ')}`);
       }
-    } catch { setError('Error de conexión. Intentá de nuevo.'); }
-    finally { setEnviando(false); }
+    });
+    if (errores.length > 0) { setError(errores.join(' · ')); return; }
+
+    const clubId = getClubId();
+    const nombreCompleto = `${jugadorEncontrado.nombre || ''} ${jugadorEncontrado.apellidos || ''}`.trim();
+    setEnviando(true);
+    const fallidos = [];
+    let exitosos = 0;
+    for (const p of personas) {
+      try {
+        const res = await authFetch(`${API_BASE}/uniforms?club_id=${clubId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cedula: jugadorEncontrado.cedula,
+            nombre: nombreCompleto,
+            tipo: p.esFamiliar ? `Familiar - ${p.categoria}` : 'Jugador',
+            nombre_estampar: p.nombre_estampar,
+            talla: p.talla,
+            numero: p.numero.padStart(3, '0'),
+            prendas: p.prendas.map(x => (x.cantidad || 1) > 1 ? `${x.nombre} x${x.cantidad}` : x.nombre).join(', '),
+            total: totalPersona(p),
+            club_id: clubId,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) exitosos++;
+        else fallidos.push({ key: p.key, msg: data.error || data.message || 'Error al registrar' });
+      } catch {
+        fallidos.push({ key: p.key, msg: 'Error de conexión' });
+      }
+    }
+    await cargarDatos();
+    if (fallidos.length === 0) {
+      setExito(exitosos);
+      setTimeout(() => { setExito(false); limpiarBusqueda(); }, 3000);
+    } else {
+      setPersonas(ps => ps.filter(p => fallidos.some(f => f.key === p.key)));
+      setError(`${exitosos} pedido(s) registrado(s). ${fallidos.length} con error: ${fallidos.map(f => f.msg).join(' · ')}`);
+    }
+    setEnviando(false);
   };
 
   // — PDF —
@@ -423,6 +484,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       talla: pedido.talla || '',
       numero: pedido.numero_estampar ? String(parseInt(pedido.numero_estampar, 10)) : '',
       nombre_estampar: pedido.nombre_estampar || '',
+      categoria: TALLAS_NINO.includes(pedido.talla) ? 'Niño' : 'Hombre',
     });
     setEditError('');
     setPedidoEditando(pedido);
@@ -538,7 +600,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
             {exito && (
               <div className="flex items-center gap-3 p-4 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/30 mb-6">
                 <CheckCircle className="w-5 h-5 text-[var(--cc)]" />
-                <p className="text-sm text-[var(--cc)] font-medium">¡Pedido registrado exitosamente!</p>
+                <p className="text-sm text-[var(--cc)] font-medium">
+                  {exito > 1 ? `¡${exito} pedidos registrados exitosamente!` : '¡Pedido registrado exitosamente!'}
+                </p>
               </div>
             )}
             {error && (
@@ -626,159 +690,175 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                   </button>
                 </div>
 
-                {/* Toggle familiar */}
-                <div className={`rounded-xl border transition-all ${form.es_familiar ? 'bg-[rgba(198,120,255,0.1)] border-[#C678FF]/30' : 'bg-[var(--bg-app)] border-[var(--cc20)]'}`}>
-                  <button type="button" onClick={() => setForm(f => ({ ...f, es_familiar: !f.es_familiar }))}
-                    className="w-full flex items-center justify-between px-4 py-3 text-left"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-base">👨‍👩‍👦</span>
+                {/* Un bloque de pedido por persona (jugador + familiares agregados) */}
+                {personas.map((persona, idx) => {
+                  const tallas = tallasPorCategoria(persona.categoria);
+                  const totalPer = totalPersona(persona);
+                  const totalUnidadesPer = persona.prendas.reduce((s, x) => s + (x.cantidad || 1), 0);
+                  return (
+                    <div key={persona.key} className="rounded-xl border border-[var(--cc20)] bg-[var(--bg-app)] p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-[var(--text-pri)]">
+                          {persona.esFamiliar ? `👨‍👩‍👦 Familiar ${personas.slice(0, idx).filter(p => p.esFamiliar).length + 1}` : '⚽ Jugador'}
+                        </p>
+                        <button type="button" onClick={() => quitarPersona(persona.key)}
+                          className="flex items-center gap-1 text-xs text-[var(--text-sec)] hover:text-[#FF5E5E] transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Quitar
+                        </button>
+                      </div>
+
+                      {/* Categoría */}
                       <div>
-                        <p className={`text-sm font-medium ${form.es_familiar ? 'text-[#C678FF]' : 'text-[var(--text-sec)]'}`}>Pedido para familiar</p>
-                        <p className="text-xs text-[var(--text-sec)]">{form.es_familiar ? 'Uniforme para un familiar del jugador' : 'Activar si el uniforme es para un familiar'}</p>
+                        <p className="text-xs text-[var(--text-sec)] mb-2">Categoría *</p>
+                        <div className="flex gap-2">
+                          {CATEGORIAS.map(cat => (
+                            <button key={cat} type="button" onClick={() => setCategoriaPersona(persona.key, cat)}
+                              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                                persona.categoria === cat
+                                  ? 'bg-[rgba(198,120,255,0.15)] border-[#C678FF]/50 text-[#C678FF]'
+                                  : 'bg-[var(--bg-surface)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
+                              }`}
+                            >
+                              <span>{cat === 'Niño' ? '🧒' : cat === 'Mujer' ? '👩' : '👨'}</span>{cat}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                    <div className={`w-10 rounded-full flex items-center transition-all px-0.5 ${form.es_familiar ? 'bg-[#C678FF]' : 'bg-[#1A3A5C]'}`} style={{ height: '22px' }}>
-                      <div className={`w-4 h-4 rounded-full bg-white transition-transform ${form.es_familiar ? 'translate-x-5' : 'translate-x-0'}`} />
-                    </div>
-                  </button>
-                  {form.es_familiar && (
-                    <div className="px-4 pb-4 pt-1 border-t border-[#C678FF]/20">
-                      <p className="text-xs text-[var(--text-sec)] mb-2">Género del familiar *</p>
-                      <div className="flex gap-3">
-                        {['Hombre', 'Mujer'].map(g => (
-                          <button key={g} type="button" onClick={() => setForm(f => ({ ...f, genero: g }))}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
-                              form.genero === g
-                                ? 'bg-[rgba(198,120,255,0.15)] border-[#C678FF]/50 text-[#C678FF]'
-                                : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
-                            }`}
-                          >
-                            <span>{g === 'Hombre' ? '👨' : '👩'}</span>{g}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
 
-                {/* Prendas del catálogo */}
-                <div>
-                  <label className="block text-xs text-[var(--text-sec)] mb-1.5">Prendas * <span className="font-normal">(podés seleccionar varias)</span></label>
-                  {catalogo.length === 0 ? (
-                    <p className="text-sm text-[var(--text-mut)] text-center py-4">
-                      Sin prendas. <button className="underline text-[var(--cc)]" onClick={() => setTabPrincipal('catalogo')}>Configurar catálogo</button>
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-2">
-                      {catalogo.map(p => {
-                        const seleccionada = form.prendas.find(x => x.nombre === p.nombre);
-                        const cantidad = seleccionada?.cantidad || 1;
-                        return (
-                          <div
-                            key={p.nombre}
-                            onClick={() => togglePrenda(p)}
-                            role="button"
-                            tabIndex={0}
-                            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors cursor-pointer ${
-                              seleccionada
-                                ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
-                                : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
-                            }`}
-                          >
-                            {p.imagen_url ? (
-                              <img src={p.imagen_url} alt={p.nombre} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-white/10" />
-                            ) : (
-                              <div className="w-8 h-8 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] flex items-center justify-center shrink-0">
-                                <Package className="w-3.5 h-3.5 opacity-30" />
-                              </div>
-                            )}
-                            <span className="flex-1 text-left">
-                              {p.nombre}
-                              {p.descripcion && <span className="block text-xs font-normal opacity-60">{p.descripcion}</span>}
-                            </span>
-                            {seleccionada ? (
-                              <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                                <button
-                                  onClick={() => cambiarCantidad(p.nombre, -1)}
-                                  disabled={cantidad <= 1}
-                                  className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none disabled:opacity-30 disabled:cursor-not-allowed"
-                                >−</button>
-                                <span className="w-5 text-center font-mono text-sm">{cantidad}</span>
-                                <button
-                                  onClick={() => cambiarCantidad(p.nombre, 1)}
-                                  className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none"
-                                >+</button>
-                                <span className="font-mono text-xs w-16 text-right">${(p.precio * cantidad).toLocaleString('es-CO')}</span>
-                              </div>
-                            ) : (
-                              <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
-                            )}
+                      {/* Prendas del catálogo */}
+                      <div>
+                        <label className="block text-xs text-[var(--text-sec)] mb-1.5">Prendas * <span className="font-normal">(podés seleccionar varias)</span></label>
+                        {catalogo.length === 0 ? (
+                          <p className="text-sm text-[var(--text-mut)] text-center py-4">
+                            Sin prendas. <button className="underline text-[var(--cc)]" onClick={() => setTabPrincipal('catalogo')}>Configurar catálogo</button>
+                          </p>
+                        ) : (
+                          <div className="grid grid-cols-1 gap-2">
+                            {catalogo.map(p => {
+                              const seleccionada = persona.prendas.find(x => x.nombre === p.nombre);
+                              const cantidad = seleccionada?.cantidad || 1;
+                              return (
+                                <div
+                                  key={p.nombre}
+                                  onClick={() => togglePrendaPersona(persona.key, p)}
+                                  role="button"
+                                  tabIndex={0}
+                                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors cursor-pointer ${
+                                    seleccionada
+                                      ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
+                                      : 'bg-[var(--bg-surface)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
+                                  }`}
+                                >
+                                  {p.imagen_url ? (
+                                    <img src={p.imagen_url} alt={p.nombre} className="w-8 h-8 rounded-lg object-cover shrink-0 border border-white/10" />
+                                  ) : (
+                                    <div className="w-8 h-8 rounded-lg bg-[var(--bg-app)] border border-[var(--cc20)] flex items-center justify-center shrink-0">
+                                      <Package className="w-3.5 h-3.5 opacity-30" />
+                                    </div>
+                                  )}
+                                  <span className="flex-1 text-left">
+                                    {p.nombre}
+                                    {p.descripcion && <span className="block text-xs font-normal opacity-60">{p.descripcion}</span>}
+                                  </span>
+                                  {seleccionada ? (
+                                    <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                      <button
+                                        onClick={() => cambiarCantidadPersona(persona.key, p.nombre, -1)}
+                                        disabled={cantidad <= 1}
+                                        className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none disabled:opacity-30 disabled:cursor-not-allowed"
+                                      >−</button>
+                                      <span className="w-5 text-center font-mono text-sm">{cantidad}</span>
+                                      <button
+                                        onClick={() => cambiarCantidadPersona(persona.key, p.nombre, 1)}
+                                        className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none"
+                                      >+</button>
+                                      <span className="font-mono text-xs w-16 text-right">${(p.precio * cantidad).toLocaleString('es-CO')}</span>
+                                    </div>
+                                  ) : (
+                                    <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {form.prendas.length > 0 && (
-                    <div className="mt-3 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--cc)]/30">
-                      <span className="text-xs text-[var(--text-sec)]">{totalUnidades} unidad{totalUnidades > 1 ? 'es' : ''} · {form.prendas.length} prenda{form.prendas.length > 1 ? 's' : ''} distinta{form.prendas.length > 1 ? 's' : ''}</span>
-                      <span className="text-sm font-bold text-[var(--cc)]">Total: ${total.toLocaleString('es-CO')}</span>
-                    </div>
-                  )}
-                </div>
+                        )}
+                        {persona.prendas.length > 0 && (
+                          <div className="mt-3 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc)]/30">
+                            <span className="text-xs text-[var(--text-sec)]">{totalUnidadesPer} unidad{totalUnidadesPer > 1 ? 'es' : ''} · {persona.prendas.length} prenda{persona.prendas.length > 1 ? 's' : ''} distinta{persona.prendas.length > 1 ? 's' : ''}</span>
+                            <span className="text-sm font-bold text-[var(--cc)]">Total: ${totalPer.toLocaleString('es-CO')}</span>
+                          </div>
+                        )}
+                      </div>
 
-                {/* Nombre a estampar */}
-                <div>
-                  <label className="block text-xs text-[var(--text-sec)] mb-1.5">
-                    Nombre a estampar <span className="ml-1 font-normal italic">— puede ser apodo o sobrenombre</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.nombre_estampar}
-                    onChange={e => setForm(f => ({ ...f, nombre_estampar: e.target.value.toUpperCase() }))}
-                    placeholder="Ej: CAÑÓN, TOÑO, EL DIEZ..."
-                    className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
-                  />
-                </div>
+                      {/* Nombre a estampar */}
+                      <div>
+                        <label className="block text-xs text-[var(--text-sec)] mb-1.5">
+                          Nombre a estampar <span className="ml-1 font-normal italic">— puede ser apodo o sobrenombre</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={persona.nombre_estampar}
+                          onChange={e => actualizarPersona(persona.key, { nombre_estampar: e.target.value.toUpperCase() })}
+                          placeholder="Ej: CAÑÓN, TOÑO, EL DIEZ..."
+                          className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                        />
+                      </div>
 
-                {/* Talla y Número */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-[var(--text-sec)] mb-1.5">Talla *</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {['S', 'M', 'L', 'XL'].map(t => (
-                        <button key={t} onClick={() => setForm(f => ({ ...f, talla: t }))}
-                          className={`py-2 rounded-xl text-sm font-medium border transition-colors ${
-                            form.talla === t
-                              ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
-                              : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
-                          }`}
-                        >{t}</button>
-                      ))}
+                      {/* Talla y Número */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-[var(--text-sec)] mb-1.5">Talla *</label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {tallas.map(t => (
+                              <button key={t} onClick={() => actualizarPersona(persona.key, { talla: t })}
+                                className={`py-2 rounded-xl text-sm font-medium border transition-colors ${
+                                  persona.talla === t
+                                    ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
+                                    : 'bg-[var(--bg-surface)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
+                                }`}
+                              >{t}</button>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-[var(--text-sec)] mb-1.5">Número * <span className="font-normal">(3 dígitos)</span></label>
+                          <input
+                            type="text" inputMode="numeric" value={persona.numero}
+                            onChange={e => actualizarPersona(persona.key, { numero: formatNumero(e.target.value) })}
+                            placeholder="001" maxLength={3}
+                            className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                          />
+                          {persona.numero && (
+                            <p className="text-xs mt-1 font-mono text-[var(--cc)]">
+                              #{persona.numero.padStart(3, '0')}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
+                  );
+                })}
+
+                <button type="button" onClick={agregarFamiliar}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-[var(--cc20)] text-sm font-medium text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/50 transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> Agregar familiar
+                </button>
+
+                {personas.length > 0 && (
+                  <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/30">
+                    <span className="text-sm text-[var(--text-sec)]">{personas.length} pedido{personas.length > 1 ? 's' : ''} en este envío</span>
+                    <span className="text-base font-bold text-[var(--cc)]">Total: ${totalGeneral.toLocaleString('es-CO')}</span>
                   </div>
-                  <div>
-                    <label className="block text-xs text-[var(--text-sec)] mb-1.5">Número * <span className="font-normal">(3 dígitos)</span></label>
-                    <input
-                      type="text" inputMode="numeric" value={form.numero}
-                      onChange={e => setForm(f => ({ ...f, numero: formatNumero(e.target.value) }))}
-                      placeholder="001" maxLength={3}
-                      className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
-                    />
-                    {form.numero && (
-                      <p className="text-xs mt-1 font-mono text-[var(--cc)]">
-                        #{form.numero.padStart(3, '0')}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                )}
 
                 <button
                   onClick={handleSubmit}
-                  disabled={form.prendas.length === 0 || !form.talla || !form.numero || enviando || !numeroValido}
+                  disabled={personas.length === 0 || enviando}
                   className="w-full py-3 rounded-xl bg-[var(--cc)] text-white text-sm font-bold hover:bg-[var(--cc)]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {enviando ? <><Loader className="w-4 h-4 animate-spin" /> Registrando...</> : 'Registrar pedido'}
+                  {enviando ? <><Loader className="w-4 h-4 animate-spin" /> Registrando...</> : personas.length > 1 ? `Registrar ${personas.length} pedidos` : 'Registrar pedido'}
                 </button>
                 <p className="text-xs text-[var(--text-sec)] text-center">* Campos obligatorios</p>
               </div>
@@ -1295,12 +1375,30 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 />
               </div>
 
+              {/* Categoría */}
+              <div>
+                <p className="text-xs text-[var(--text-sec)] mb-2">Categoría *</p>
+                <div className="flex gap-2">
+                  {CATEGORIAS.map(cat => (
+                    <button key={cat} type="button" onClick={() => setEditForm(f => ({ ...f, categoria: cat, talla: '' }))}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                        editForm.categoria === cat
+                          ? 'bg-[rgba(198,120,255,0.15)] border-[#C678FF]/50 text-[#C678FF]'
+                          : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
+                      }`}
+                    >
+                      <span>{cat === 'Niño' ? '🧒' : cat === 'Mujer' ? '👩' : '👨'}</span>{cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Talla y Número */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs text-[var(--text-sec)] mb-1.5">Talla *</label>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {['S', 'M', 'L', 'XL'].map(t => (
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {tallasPorCategoria(editForm.categoria).map(t => (
                       <button key={t} onClick={() => setEditForm(f => ({ ...f, talla: t }))}
                         className={`py-2 rounded-xl text-sm font-medium border transition-colors ${
                           editForm.talla === t

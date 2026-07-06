@@ -4,7 +4,7 @@ import {
   Loader2, Pencil, Trash2, X, Users, Download, AlertTriangle,
   ArrowUpAZ, ArrowDownAZ, ArrowUp01, ArrowDown01, Tag,
 } from 'lucide-react';
-import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfSectionLabel, drawPdfTableHead } from '../lib/pdfHelpers';
+import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { supabase } from '../lib/supabase';

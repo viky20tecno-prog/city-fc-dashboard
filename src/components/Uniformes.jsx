@@ -10,8 +10,8 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zen
 const normalizarCatalogo = (raw) =>
   (raw || []).map(p =>
     typeof p === 'string'
-      ? { nombre: p, precio: 0, precio_proveedor: 0, imagen_url: '', descripcion: '' }
-      : { nombre: String(p.nombre || ''), precio: Number(p.precio) || 0, precio_proveedor: Number(p.precio_proveedor) || 0, imagen_url: p.imagen_url || '', descripcion: p.descripcion || '' }
+      ? { nombre: p, precio: 0, precio_proveedor: 0, imagen_url: '', descripcion: '', requiere_numero: true }
+      : { nombre: String(p.nombre || ''), precio: Number(p.precio) || 0, precio_proveedor: Number(p.precio_proveedor) || 0, imagen_url: p.imagen_url || '', descripcion: p.descripcion || '', requiere_numero: p.requiere_numero !== false }
   );
 
 const sortByName = (arr) => [...arr].sort((a, b) => String(a.nombre || '').toUpperCase().localeCompare(String(b.nombre || '').toUpperCase(), 'es'));
@@ -76,9 +76,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   // — Catálogo —
   const [catalogo, setCatalogo] = useState([]);
-  const [nuevaPrenda, setNuevaPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '', descripcion: '' });
+  const [nuevaPrenda, setNuevaPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '', descripcion: '', requiere_numero: true });
   const [editandoIdx, setEditandoIdx] = useState(null);
-  const [editandoPrenda, setEditandoPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '', descripcion: '' });
+  const [editandoPrenda, setEditandoPrenda] = useState({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '', descripcion: '', requiere_numero: true });
   const [guardandoCatalogo, setGuardandoCatalogo] = useState(false);
   const [catalogoMsg, setCatalogoMsg] = useState('');
   const [lightbox, setLightbox] = useState(null);
@@ -179,8 +179,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       return;
     }
     if (guardandoCatalogo) return;
-    const nuevo = [...catalogo, { nombre, precio, precio_proveedor, imagen_url: nuevaPrenda.imagen_url || '', descripcion: nuevaPrenda.descripcion.trim() }];
-    setNuevaPrenda({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '', descripcion: '' });
+    const nuevo = [...catalogo, { nombre, precio, precio_proveedor, imagen_url: nuevaPrenda.imagen_url || '', descripcion: nuevaPrenda.descripcion.trim(), requiere_numero: nuevaPrenda.requiere_numero }];
+    setNuevaPrenda({ nombre: '', precio: '', precio_proveedor: '', imagen_url: '', descripcion: '', requiere_numero: true });
     saveCatalogo(nuevo);
   };
 
@@ -190,7 +190,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   const iniciarEditarPrenda = (idx) => {
     setEditandoIdx(idx);
-    setEditandoPrenda({ nombre: catalogo[idx].nombre, precio: String(catalogo[idx].precio), precio_proveedor: String(catalogo[idx].precio_proveedor || ''), imagen_url: catalogo[idx].imagen_url || '', descripcion: catalogo[idx].descripcion || '' });
+    setEditandoPrenda({ nombre: catalogo[idx].nombre, precio: String(catalogo[idx].precio), precio_proveedor: String(catalogo[idx].precio_proveedor || ''), imagen_url: catalogo[idx].imagen_url || '', descripcion: catalogo[idx].descripcion || '', requiere_numero: catalogo[idx].requiere_numero !== false });
   };
 
   const guardarEditPrenda = () => {
@@ -198,7 +198,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     const precio           = Number(String(editandoPrenda.precio).replace(/\D/g, ''))           || 0;
     const precio_proveedor = Number(String(editandoPrenda.precio_proveedor).replace(/\D/g, '')) || 0;
     if (!nombre) return;
-    const nuevo = catalogo.map((p, i) => i === editandoIdx ? { nombre, precio, precio_proveedor, imagen_url: editandoPrenda.imagen_url || '', descripcion: editandoPrenda.descripcion.trim() } : p);
+    const nuevo = catalogo.map((p, i) => i === editandoIdx ? { nombre, precio, precio_proveedor, imagen_url: editandoPrenda.imagen_url || '', descripcion: editandoPrenda.descripcion.trim(), requiere_numero: editandoPrenda.requiere_numero } : p);
     setEditandoIdx(null);
     saveCatalogo(nuevo);
   };
@@ -269,6 +269,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   const totalPersona = (p) => p.prendas.reduce((sum, x) => sum + x.precio * (x.cantidad || 1), 0);
   const totalGeneral = personas.reduce((sum, p) => sum + totalPersona(p), 0);
+  const requiereNumero = (prendas) => prendas.length === 0 || prendas.some(x => x.requiere_numero !== false);
 
   const handleSubmit = async () => {
     setError('');
@@ -278,7 +279,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       const faltantes = [];
       if (p.prendas.length === 0) faltantes.push('prenda');
       if (!p.talla) faltantes.push('talla');
-      if (!p.numero) faltantes.push('número');
+      if (!p.numero && requiereNumero(p.prendas)) faltantes.push('número');
       if (faltantes.length > 0) {
         const etiqueta = p.esFamiliar ? `Familiar ${i + 1}` : 'Jugador';
         errores.push(`${etiqueta}: falta ${faltantes.join(', ')}`);
@@ -302,7 +303,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
             tipo: p.esFamiliar ? `Familiar - ${p.categoria}` : 'Jugador',
             nombre_estampar: p.nombre_estampar,
             talla: p.talla,
-            numero: p.numero.padStart(3, '0'),
+            numero: p.numero ? p.numero.padStart(3, '0') : '',
             prendas: p.prendas.map(x => (x.cantidad || 1) > 1 ? `${x.nombre} x${x.cantidad}` : x.nombre).join(', '),
             total: totalPersona(p),
             club_id: clubId,
@@ -516,7 +517,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     setEditError('');
     if (editForm.prendas.length === 0) { setEditError('Seleccioná al menos una prenda.'); return; }
     if (!editForm.talla)               { setEditError('Seleccioná una talla.'); return; }
-    if (!editForm.numero)              { setEditError('Ingresá el número de camiseta.'); return; }
+    if (!editForm.numero && requiereNumero(editForm.prendas)) { setEditError('Ingresá el número de camiseta.'); return; }
     const totalEdit = editForm.prendas.reduce((s, p) => s + p.precio * (p.cantidad || 1), 0);
     const pedidoId = pedidoEditando.id ?? pedidoEditando._id ?? pedidoEditando.rowId ?? pedidoEditando.row_id;
     if (!pedidoId) { setEditError('No se encontró el ID del pedido.'); return; }
@@ -528,7 +529,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         body: JSON.stringify({
           prendas: editForm.prendas.map(p => (p.cantidad || 1) > 1 ? `${p.nombre} x${p.cantidad}` : p.nombre).join(', '),
           talla: editForm.talla,
-          numero: editForm.numero.padStart(3, '0'),
+          numero: editForm.numero ? editForm.numero.padStart(3, '0') : '',
           nombre_estampar: editForm.nombre_estampar,
           total: totalEdit,
         }),
@@ -823,7 +824,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs text-[var(--text-sec)] mb-1.5">Número * <span className="font-normal">(3 dígitos)</span></label>
+                          <label className="block text-xs text-[var(--text-sec)] mb-1.5">
+                            Número {requiereNumero(persona.prendas) ? '*' : ''} <span className="font-normal">{requiereNumero(persona.prendas) ? '(3 dígitos)' : '(opcional)'}</span>
+                          </label>
                           <input
                             type="text" inputMode="numeric" value={persona.numero}
                             onChange={e => actualizarPersona(persona.key, { numero: formatNumero(e.target.value) })}
@@ -1137,8 +1140,17 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
               onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
               placeholder="Descripción corta (opcional — tallas, material, para qué categoría, etc.)"
               maxLength={140}
-              className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 mb-4 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+              className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 mb-2 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
             />
+            <label className="flex items-center gap-2 mb-4 text-xs text-[var(--text-sec)] cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={nuevaPrenda.requiere_numero}
+                onChange={e => setNuevaPrenda(f => ({ ...f, requiere_numero: e.target.checked }))}
+                className="accent-[var(--cc)]"
+              />
+              Requiere número de camiseta al pedirla <span className="opacity-60">(desmarcá para prendas como pantalonetas o medias)</span>
+            </label>
 
             {/* Lista de prendas */}
             {catalogo.length === 0 ? (
@@ -1240,16 +1252,32 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                     )}
                   </div>
                   {editandoIdx === idx ? (
-                    <input
-                      type="text"
-                      value={editandoPrenda.descripcion}
-                      onChange={e => setEditandoPrenda(f => ({ ...f, descripcion: e.target.value }))}
-                      placeholder="Descripción corta (opcional)"
-                      maxLength={140}
-                      className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-xs text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)]"
-                    />
+                    <>
+                      <input
+                        type="text"
+                        value={editandoPrenda.descripcion}
+                        onChange={e => setEditandoPrenda(f => ({ ...f, descripcion: e.target.value }))}
+                        placeholder="Descripción corta (opcional)"
+                        maxLength={140}
+                        className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-xs text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)]"
+                      />
+                      <label className="flex items-center gap-2 pl-1 text-xs text-[var(--text-sec)] cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={editandoPrenda.requiere_numero}
+                          onChange={e => setEditandoPrenda(f => ({ ...f, requiere_numero: e.target.checked }))}
+                          className="accent-[var(--cc)]"
+                        />
+                        Requiere número de camiseta al pedirla
+                      </label>
+                    </>
                   ) : (
-                    p.descripcion && <p className="text-xs text-[var(--text-mut)] pl-12">{p.descripcion}</p>
+                    <>
+                      {p.descripcion && <p className="text-xs text-[var(--text-mut)] pl-12">{p.descripcion}</p>}
+                      {p.requiere_numero === false && (
+                        <p className="text-[10px] text-[var(--text-mut)] pl-12">Sin número (opcional al pedirla)</p>
+                      )}
+                    </>
                   )}
                   </div>
                 ))}
@@ -1411,7 +1439,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--text-sec)] mb-1.5">Número *</label>
+                  <label className="block text-xs text-[var(--text-sec)] mb-1.5">Número {requiereNumero(editForm.prendas) ? '*' : <span className="font-normal">(opcional)</span>}</label>
                   <input type="text" inputMode="numeric" value={editForm.numero}
                     onChange={e => setEditForm(f => ({ ...f, numero: e.target.value.replace(/\D/g, '').slice(0, 3) }))}
                     placeholder="001" maxLength={3}

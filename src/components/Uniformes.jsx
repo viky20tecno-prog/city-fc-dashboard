@@ -212,12 +212,20 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         ...f,
         prendas: existe
           ? f.prendas.filter(p => p.nombre !== prenda.nombre)
-          : [...f.prendas, prenda],
+          : [...f.prendas, { ...prenda, cantidad: 1 }],
       };
     });
   };
 
-  const total = form.prendas.reduce((sum, p) => sum + p.precio, 0);
+  const cambiarCantidad = (nombre, delta) => {
+    setForm(f => ({
+      ...f,
+      prendas: f.prendas.map(p => p.nombre === nombre ? { ...p, cantidad: Math.max(1, (p.cantidad || 1) + delta) } : p),
+    }));
+  };
+
+  const total = form.prendas.reduce((sum, p) => sum + p.precio * (p.cantidad || 1), 0);
+  const totalUnidades = form.prendas.reduce((sum, p) => sum + (p.cantidad || 1), 0);
   const formatNumero = (val) => val.replace(/\D/g, '').slice(0, 3);
   const numeroValido = !!form.numero;
 
@@ -237,7 +245,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         body: JSON.stringify({
           ...form,
           tipo: form.es_familiar ? `Familiar - ${form.genero}` : 'Jugador',
-          prendas: form.prendas.map(p => p.nombre).join(', '),
+          prendas: form.prendas.map(p => (p.cantidad || 1) > 1 ? `${p.nombre} x${p.cantidad}` : p.nombre).join(', '),
           total,
           numero: form.numero.padStart(3, '0'),
           club_id: clubId,
@@ -400,10 +408,13 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const abrirEditar = (pedido) => {
     const prendasStr = pedido.prendas || pedido.prenda || '';
     const prendasArray = prendasStr
-      ? prendasStr.split(',').map(s => s.trim()).reduce((acc, nombre) => {
+      ? prendasStr.split(',').map(s => s.trim()).reduce((acc, item) => {
+          const m = item.match(/^(.*?)\s+x(\d+)$/i);
+          const nombre   = m ? m[1].trim() : item;
+          const cantidad = m ? parseInt(m[2], 10) : 1;
+          if (!nombre) return acc;
           const encontrada = catalogo.find(p => p.nombre === nombre);
-          if (encontrada) acc.push(encontrada);
-          else if (nombre) acc.push({ nombre, precio: 0 });
+          acc.push(encontrada ? { ...encontrada, cantidad } : { nombre, precio: 0, cantidad });
           return acc;
         }, [])
       : [];
@@ -426,9 +437,16 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         ...f,
         prendas: existe
           ? f.prendas.filter(p => p.nombre !== prenda.nombre)
-          : [...f.prendas, prenda],
+          : [...f.prendas, { ...prenda, cantidad: 1 }],
       };
     });
+  };
+
+  const cambiarCantidadEdit = (nombre, delta) => {
+    setEditForm(f => ({
+      ...f,
+      prendas: f.prendas.map(p => p.nombre === nombre ? { ...p, cantidad: Math.max(1, (p.cantidad || 1) + delta) } : p),
+    }));
   };
 
   const handleGuardarEdit = async () => {
@@ -436,7 +454,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     if (editForm.prendas.length === 0) { setEditError('Seleccioná al menos una prenda.'); return; }
     if (!editForm.talla)               { setEditError('Seleccioná una talla.'); return; }
     if (!editForm.numero)              { setEditError('Ingresá el número de camiseta.'); return; }
-    const totalEdit = editForm.prendas.reduce((s, p) => s + p.precio, 0);
+    const totalEdit = editForm.prendas.reduce((s, p) => s + p.precio * (p.cantidad || 1), 0);
     const pedidoId = pedidoEditando.id ?? pedidoEditando._id ?? pedidoEditando.rowId ?? pedidoEditando.row_id;
     if (!pedidoId) { setEditError('No se encontró el ID del pedido.'); return; }
     setGuardandoEdit(true);
@@ -445,7 +463,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prendas: editForm.prendas.map(p => p.nombre).join(', '),
+          prendas: editForm.prendas.map(p => (p.cantidad || 1) > 1 ? `${p.nombre} x${p.cantidad}` : p.nombre).join(', '),
           talla: editForm.talla,
           numero: editForm.numero.padStart(3, '0'),
           nombre_estampar: editForm.nombre_estampar,
@@ -655,11 +673,14 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                     <div className="grid grid-cols-1 gap-2">
                       {catalogo.map(p => {
                         const seleccionada = form.prendas.find(x => x.nombre === p.nombre);
+                        const cantidad = seleccionada?.cantidad || 1;
                         return (
-                          <button
+                          <div
                             key={p.nombre}
                             onClick={() => togglePrenda(p)}
-                            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                            role="button"
+                            tabIndex={0}
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors cursor-pointer ${
                               seleccionada
                                 ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
                                 : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
@@ -676,15 +697,31 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                               {p.nombre}
                               {p.descripcion && <span className="block text-xs font-normal opacity-60">{p.descripcion}</span>}
                             </span>
-                            <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
-                          </button>
+                            {seleccionada ? (
+                              <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                <button
+                                  onClick={() => cambiarCantidad(p.nombre, -1)}
+                                  disabled={cantidad <= 1}
+                                  className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none disabled:opacity-30 disabled:cursor-not-allowed"
+                                >−</button>
+                                <span className="w-5 text-center font-mono text-sm">{cantidad}</span>
+                                <button
+                                  onClick={() => cambiarCantidad(p.nombre, 1)}
+                                  className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none"
+                                >+</button>
+                                <span className="font-mono text-xs w-16 text-right">${(p.precio * cantidad).toLocaleString('es-CO')}</span>
+                              </div>
+                            ) : (
+                              <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
                   )}
                   {form.prendas.length > 0 && (
                     <div className="mt-3 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--cc)]/30">
-                      <span className="text-xs text-[var(--text-sec)]">{form.prendas.length} prenda{form.prendas.length > 1 ? 's' : ''} seleccionada{form.prendas.length > 1 ? 's' : ''}</span>
+                      <span className="text-xs text-[var(--text-sec)]">{totalUnidades} unidad{totalUnidades > 1 ? 'es' : ''} · {form.prendas.length} prenda{form.prendas.length > 1 ? 's' : ''} distinta{form.prendas.length > 1 ? 's' : ''}</span>
                       <span className="text-sm font-bold text-[var(--cc)]">Total: ${total.toLocaleString('es-CO')}</span>
                     </div>
                   )}
@@ -1208,24 +1245,42 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 <div className="grid grid-cols-1 gap-1.5">
                   {catalogo.map(p => {
                     const sel = editForm.prendas.find(x => x.nombre === p.nombre);
+                    const cantidad = sel?.cantidad || 1;
                     return (
-                      <button key={p.nombre} onClick={() => toggleEditPrenda(p)}
-                        className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                      <div key={p.nombre} onClick={() => toggleEditPrenda(p)}
+                        role="button" tabIndex={0}
+                        className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors cursor-pointer ${
                           sel
                             ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
                             : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
                         }`}
                       >
                         <span>{p.nombre}</span>
-                        <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
-                      </button>
+                        {sel ? (
+                          <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                            <button
+                              onClick={() => cambiarCantidadEdit(p.nombre, -1)}
+                              disabled={cantidad <= 1}
+                              className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none disabled:opacity-30 disabled:cursor-not-allowed"
+                            >−</button>
+                            <span className="w-5 text-center font-mono text-sm">{cantidad}</span>
+                            <button
+                              onClick={() => cambiarCantidadEdit(p.nombre, 1)}
+                              className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none"
+                            >+</button>
+                            <span className="font-mono text-xs w-16 text-right">${(p.precio * cantidad).toLocaleString('es-CO')}</span>
+                          </div>
+                        ) : (
+                          <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
                 {editForm.prendas.length > 0 && (
                   <div className="mt-2 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--cc)]/30">
-                    <span className="text-xs text-[var(--text-sec)]">{editForm.prendas.length} prenda{editForm.prendas.length > 1 ? 's' : ''}</span>
-                    <span className="text-sm font-bold text-[var(--cc)]">Total: ${editForm.prendas.reduce((s, p) => s + p.precio, 0).toLocaleString('es-CO')}</span>
+                    <span className="text-xs text-[var(--text-sec)]">{editForm.prendas.reduce((s, p) => s + (p.cantidad || 1), 0)} unidades · {editForm.prendas.length} prenda{editForm.prendas.length > 1 ? 's' : ''} distinta{editForm.prendas.length > 1 ? 's' : ''}</span>
+                    <span className="text-sm font-bold text-[var(--cc)]">Total: ${editForm.prendas.reduce((s, p) => s + p.precio * (p.cantidad || 1), 0).toLocaleString('es-CO')}</span>
                   </div>
                 )}
               </div>

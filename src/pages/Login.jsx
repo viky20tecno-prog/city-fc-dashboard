@@ -124,10 +124,8 @@ export default function Login() {
           .eq('activo', true)
           .single();
         if (membership?.club_id) {
-          // club_members.club_id es UUID; la API usa slug → resolver
-          const { data: clubRow } = await supabase
-            .from('clubs').select('slug').eq('id', membership.club_id).single();
-          clubId   = clubRow?.slug || membership.club_id;
+          // club_members.club_id ya es el slug del club (ver migracion_roles_club_members.sql)
+          clubId   = membership.club_id;
           userRole = membership.role || 'ENTRENADOR';
         }
       }

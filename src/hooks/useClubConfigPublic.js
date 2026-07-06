@@ -8,7 +8,7 @@ export function useClubConfigPublic(clubId) {
   useEffect(() => {
     if (!clubId) return;
     supabase
-      .from('clubs')
+      .from('clubs_publico')
       .select('config')
       .eq('slug', clubId)
       .single()

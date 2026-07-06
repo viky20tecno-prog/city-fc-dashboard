@@ -524,7 +524,7 @@ export default function PortalAtleta() {
 
     async function cargarClub() {
       try {
-        const { data } = await supabase.from('clubs').select('config').eq('slug', clubSlug).single();
+        const { data } = await supabase.from('clubs_publico').select('config').eq('slug', clubSlug).single();
         if (data?.config) setClub(data.config);
       } catch { /* usa defaults */ }
       finally { setClubCargando(false); }

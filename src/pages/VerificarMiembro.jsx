@@ -19,7 +19,7 @@ export default function VerificarMiembro() {
       try {
         // 1. Branding del club (anon, no falla si club no existe)
         const { data: clubRow } = await supabase
-          .from('clubs')
+          .from('clubs_publico')
           .select('config')
           .eq('slug', clubSlug)
           .single();

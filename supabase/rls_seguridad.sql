@@ -57,12 +57,12 @@ CREATE POLICY "Owner puede actualizar su club"
   USING (owner_user_id = auth.uid())
   WITH CHECK (owner_user_id = auth.uid());
 
--- Anon: lectura pública para portal atleta, verificación de carnets y landing
+-- Anon: SIN acceso directo a `clubs` (el config completo incluye
+-- llave_pago, cuenta_bancaria, celulares_staff, etc.). El portal
+-- atleta, la verificación de carnets y el formulario de inscripción
+-- leen branding público a través de la vista `clubs_publico`
+-- (allowlist de columnas) — ver migracion_rls_clubs_publico.sql.
 DROP POLICY IF EXISTS "Lectura pública clubs verificación" ON clubs;
-CREATE POLICY "Lectura pública clubs verificación"
-  ON clubs FOR SELECT
-  TO anon
-  USING (true);
 
 -- ============================================================
 -- 3. POLÍTICAS — club_members

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, Fragment } from 'react';
 import {
   Trophy, Plus, ArrowLeft, UserPlus, Save,
   Loader2, Pencil, Trash2, X, Users, Download, AlertTriangle,
-  ArrowUpAZ, ArrowDownAZ, Tag,
+  ArrowUpAZ, ArrowDownAZ, ArrowUp01, ArrowDown01, Tag,
 } from 'lucide-react';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfSectionLabel, drawPdfTableHead } from '../lib/pdfHelpers';
 import { authFetch } from '../lib/authFetch';
@@ -36,7 +36,8 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const [pagandoId,         setPagandoId]          = useState(null);
   const [editIdx,           setEditIdx]            = useState(null);
   const [editForm,          setEditForm]           = useState({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '', descripcion: '' });
-  const [sortAlpha,         setSortAlpha]          = useState(null); // null | 'asc' | 'desc'
+  const [sortCol,           setSortCol]            = useState({ campo: null, dir: 'asc' }); // campo: 'nombre'|'oficial'|'inscrito'|'pagado'|'saldo'
+  const [torneosSort,       setTorneosSort]        = useState({ campo: 'nombre', dir: 'asc' }); // campo: 'nombre' | 'monto'
   const [descOpen,          setDescOpen]           = useState(null);
   const [descEdit,          setDescEdit]           = useState({});
   const [guardandoDesc,     setGuardandoDesc]      = useState(null);
@@ -324,6 +325,36 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const enrollmentsHuerfanos = enrollments.filter(e => !e.torneo_id || !torneoIdsActivos.includes(e.torneo_id));
   const [eliminandoHuerfanos, setEliminandoHuerfanos] = useState(false);
 
+  const montoDe = (t) => Number(t.valor_inscrito ?? t.valor_oficial ?? t.valor ?? 0);
+  const toggleTorneosSort = (campo) => {
+    setTorneosSort(s => s.campo !== campo
+      ? { campo, dir: 'asc' }
+      : { campo, dir: s.dir === 'asc' ? 'desc' : 'asc' });
+  };
+
+  const toggleSortCol = (campo) => {
+    setSortCol(s => {
+      if (s.campo !== campo) return { campo, dir: 'asc' };
+      if (s.dir === 'asc') return { campo, dir: 'desc' };
+      return { campo: null, dir: 'asc' };
+    });
+  };
+  const valorInscrito = (e) => Number(e.valor_inscrito ?? e.valor_oficial) || 0;
+  const sortColValor = (e, campo) => {
+    if (campo === 'oficial')  return Number(e.valor_oficial) || 0;
+    if (campo === 'inscrito') return valorInscrito(e);
+    if (campo === 'pagado')   return Number(e.valor_pagado) || 0;
+    if (campo === 'saldo')    return Number(e.saldo_pendiente) || 0;
+    return 0;
+  };
+  const torneosOrdenados = torneosDef
+    .map((t, idx) => ({ t, idx }))
+    .sort((a, b) => {
+      const dirMul = torneosSort.dir === 'asc' ? 1 : -1;
+      if (torneosSort.campo === 'monto') return (montoDe(a.t) - montoDe(b.t)) * dirMul;
+      return String(a.t.nombre || '').toUpperCase().localeCompare(String(b.t.nombre || '').toUpperCase(), 'es') * dirMul;
+    });
+
   const eliminarHuerfanos = async () => {
     if (!confirm(`¿Eliminar ${enrollmentsHuerfanos.length} inscripciones huérfanas? Esta acción no se puede deshacer.`)) return;
     setEliminandoHuerfanos(true);
@@ -418,8 +449,34 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
               <p className="text-xs text-[var(--text-mut)] mt-1">Crea tu primer torneo con el botón de arriba.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {torneosDef.map((t, idx) => {
+            <>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[var(--text-mut)]">Ordenar por:</span>
+                <button
+                  onClick={() => toggleTorneosSort('nombre')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition ${
+                    torneosSort.campo === 'nombre'
+                      ? 'bg-[var(--cc12)] border-[var(--cc)]/40 text-[var(--cc)]'
+                      : 'border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
+                  }`}
+                >
+                  {torneosSort.campo === 'nombre' && torneosSort.dir === 'desc' ? <ArrowDownAZ className="w-3.5 h-3.5" /> : <ArrowUpAZ className="w-3.5 h-3.5" />}
+                  Nombre
+                </button>
+                <button
+                  onClick={() => toggleTorneosSort('monto')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition ${
+                    torneosSort.campo === 'monto'
+                      ? 'bg-[var(--cc12)] border-[var(--cc)]/40 text-[var(--cc)]'
+                      : 'border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
+                  }`}
+                >
+                  {torneosSort.campo === 'monto' && torneosSort.dir === 'desc' ? <ArrowDown01 className="w-3.5 h-3.5" /> : <ArrowUp01 className="w-3.5 h-3.5" />}
+                  Monto
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {torneosOrdenados.map(({ t, idx }) => {
                 const ins  = enrollments.filter(e => e.torneo_id === t.id);
                 const pag  = ins.filter(e => e.estado === 'AL_DIA').length;
                 const abo  = ins.filter(e => e.estado === 'ABONO').length;
@@ -505,7 +562,8 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                   </div>
                 );
               })}
-            </div>
+              </div>
+            </>
           )}
 
           {/* ── Inscripciones huérfanas ── */}
@@ -551,6 +609,25 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
         const abonos      = inscritosDelTorneo.filter(e => e.estado === 'ABONO').length;
         const pendientes  = inscritosDelTorneo.filter(e => e.estado === 'PENDIENTE').length;
         const totalRec    = inscritosDelTorneo.reduce((s, e) => s + parseFloat(e.valor_pagado || 0), 0);
+        const renderSortTh = (campo, label, tipo) => {
+          const activo = sortCol.campo === campo;
+          const desc   = activo && sortCol.dir === 'desc';
+          const Icono  = tipo === 'num'
+            ? (desc ? ArrowDown01 : ArrowUp01)
+            : (desc ? ArrowDownAZ : ArrowUpAZ);
+          return (
+            <th className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium">
+              <button
+                onClick={() => toggleSortCol(campo)}
+                className="flex items-center gap-1 hover:text-[var(--cc)] transition group"
+                title={activo ? (sortCol.dir === 'asc' ? 'Invertir orden' : 'Quitar orden') : 'Ordenar'}
+              >
+                {label}
+                <Icono className={`w-3.5 h-3.5 transition ${activo ? 'text-[var(--cc)]' : 'opacity-0 group-hover:opacity-40'}`} />
+              </button>
+            </th>
+          );
+        };
         return (
           <div className="space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-3">
@@ -686,24 +763,15 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-[var(--cc20)]">
-                        <th className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium">
-                          <button
-                            onClick={() => setSortAlpha(s => s === 'asc' ? 'desc' : s === 'desc' ? null : 'asc')}
-                            className="flex items-center gap-1 hover:text-[var(--cc)] transition group"
-                            title={sortAlpha === 'asc' ? 'Orden Z→A' : sortAlpha === 'desc' ? 'Quitar orden' : 'Orden A→Z'}
-                          >
-                            Jugador
-                            {sortAlpha === 'asc'
-                              ? <ArrowUpAZ className="w-3.5 h-3.5 text-[var(--cc)]" />
-                              : sortAlpha === 'desc'
-                              ? <ArrowDownAZ className="w-3.5 h-3.5 text-[var(--cc)]" />
-                              : <ArrowUpAZ className="w-3.5 h-3.5 opacity-0 group-hover:opacity-40 transition" />
-                            }
-                          </button>
-                        </th>
-                        {['Estado','Oficial','Inscrito','Desc.','Pagado','Saldo','Pago',''].map(h => (
-                          <th key={h} className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium">{h}</th>
-                        ))}
+                        {renderSortTh('nombre', 'Jugador', 'alpha')}
+                        <th className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium">Estado</th>
+                        {renderSortTh('oficial', 'Oficial', 'num')}
+                        {renderSortTh('inscrito', 'Inscrito', 'num')}
+                        <th className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium">Desc.</th>
+                        {renderSortTh('pagado', 'Pagado', 'num')}
+                        {renderSortTh('saldo', 'Saldo', 'num')}
+                        <th className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium">Pago</th>
+                        <th className="text-left py-2.5 px-4 text-xs text-[var(--text-sec)] font-medium"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -713,10 +781,10 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                           return { ...e, _nombre: jug ? `${jug.nombre} ${jug.apellidos || ''}`.trim().toUpperCase() : `CC ${e.cedula}` };
                         })
                         .sort((a, b) => {
-                          if (!sortAlpha) return 0;
-                          return sortAlpha === 'asc'
-                            ? a._nombre.localeCompare(b._nombre, 'es', { sensitivity: 'base' })
-                            : b._nombre.localeCompare(a._nombre, 'es', { sensitivity: 'base' });
+                          if (!sortCol.campo) return 0;
+                          const dirMul = sortCol.dir === 'asc' ? 1 : -1;
+                          if (sortCol.campo === 'nombre') return a._nombre.localeCompare(b._nombre, 'es', { sensitivity: 'base' }) * dirMul;
+                          return (sortColValor(a, sortCol.campo) - sortColValor(b, sortCol.campo)) * dirMul;
                         })
                         .map(e => {
                           const nombre    = e._nombre;

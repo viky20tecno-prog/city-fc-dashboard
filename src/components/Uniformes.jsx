@@ -14,6 +14,8 @@ const normalizarCatalogo = (raw) =>
       : { nombre: String(p.nombre || ''), precio: Number(p.precio) || 0, precio_proveedor: Number(p.precio_proveedor) || 0, imagen_url: p.imagen_url || '', descripcion: p.descripcion || '' }
   );
 
+const sortByName = (arr) => [...arr].sort((a, b) => String(a.nombre || '').toUpperCase().localeCompare(String(b.nombre || '').toUpperCase(), 'es'));
+
 const CATEGORIAS       = ['Niño', 'Hombre', 'Mujer'];
 const TALLAS_NINO      = ['4', '6', '8', '10', '12', '14', '16'];
 const TALLAS_ADULTO    = ['S', 'M', 'L', 'XL', '2XL', '3XL'];
@@ -339,7 +341,6 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       const fmtCOP   = (n) => `$${parseFloat(n || 0).toLocaleString('es-CO')}`;
       const logoData = await loadLogoDataUrl(clubConfig?.logo_url);
 
-      const sortByName = (arr) => [...arr].sort((a, b) => String(a.nombre||'').toUpperCase().localeCompare(String(b.nombre||'').toUpperCase(), 'es'));
       const pendientes = sortByName(pedidos.filter(p => p.estado === 'PENDIENTE'));
       const pagados    = sortByName(pedidos.filter(p => p.estado === 'PAGADO'));
       const entregados = sortByName(pedidos.filter(p => p.estado === 'ENTREGADO'));
@@ -871,9 +872,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           TAB: PEDIDOS
       ══════════════════════════════════════════════ */}
       {tabPrincipal === 'pedidos' && (() => {
-        const pendientes  = pedidos.filter(p => p.estado === 'PENDIENTE');
-        const pagados     = pedidos.filter(p => p.estado === 'PAGADO');
-        const entregados  = pedidos.filter(p => p.estado === 'ENTREGADO');
+        const pendientes  = sortByName(pedidos.filter(p => p.estado === 'PENDIENTE'));
+        const pagados     = sortByName(pedidos.filter(p => p.estado === 'PAGADO'));
+        const entregados  = sortByName(pedidos.filter(p => p.estado === 'ENTREGADO'));
         const vistaActual = tabPedidos === 'PENDIENTE' ? pendientes : tabPedidos === 'PAGADO' ? pagados : entregados;
         const TAB_CFG = [
           { key: 'PENDIENTE', label: 'Pendientes', count: pendientes.length, activeClass: 'bg-[rgba(245,166,35,0.12)] text-[#F5A623] border-[#F5A623]/30' },

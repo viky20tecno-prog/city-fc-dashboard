@@ -776,6 +776,11 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                         className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none"
                                       >+</button>
                                       <span className="font-mono text-xs w-16 text-right">${(p.precio * cantidad).toLocaleString('es-CO')}</span>
+                                      <button
+                                        onClick={() => togglePrendaPersona(persona.key, p)}
+                                        title="Quitar prenda"
+                                        className="w-6 h-6 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 flex items-center justify-center shrink-0"
+                                      ><X className="w-3.5 h-3.5" /></button>
                                     </div>
                                   ) : (
                                     <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
@@ -796,14 +801,17 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                       {/* Nombre a estampar */}
                       <div>
                         <label className="block text-xs text-[var(--text-sec)] mb-1.5">
-                          Nombre a estampar <span className="ml-1 font-normal italic">— puede ser apodo o sobrenombre</span>
+                          Nombre a estampar {requiereNumero(persona.prendas)
+                            ? <span className="ml-1 font-normal italic">— puede ser apodo o sobrenombre</span>
+                            : <span className="font-normal">(no aplica para estas prendas)</span>}
                         </label>
                         <input
                           type="text"
                           value={persona.nombre_estampar}
                           onChange={e => actualizarPersona(persona.key, { nombre_estampar: e.target.value.toUpperCase() })}
                           placeholder="Ej: CAÑÓN, TOÑO, EL DIEZ..."
-                          className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                          disabled={!requiereNumero(persona.prendas)}
+                          className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         />
                       </div>
 
@@ -831,7 +839,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                             type="text" inputMode="numeric" value={persona.numero}
                             onChange={e => actualizarPersona(persona.key, { numero: formatNumero(e.target.value) })}
                             placeholder="001" maxLength={3}
-                            className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                            disabled={!requiereNumero(persona.prendas)}
+                            className="w-full bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                           />
                           {persona.numero && (
                             <p className="text-xs mt-1 font-mono text-[var(--cc)]">
@@ -1378,6 +1387,11 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                               className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none"
                             >+</button>
                             <span className="font-mono text-xs w-16 text-right">${(p.precio * cantidad).toLocaleString('es-CO')}</span>
+                            <button
+                              onClick={() => toggleEditPrenda(p)}
+                              title="Quitar prenda"
+                              className="w-6 h-6 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 flex items-center justify-center shrink-0"
+                            ><X className="w-3.5 h-3.5" /></button>
                           </div>
                         ) : (
                           <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
@@ -1385,6 +1399,16 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                       </div>
                     );
                   })}
+                  {editForm.prendas.filter(sel => !catalogo.some(p => p.nombre === sel.nombre)).map(sel => (
+                    <div key={sel.nombre} className="flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]">
+                      <span>{sel.nombre} <span className="font-normal opacity-60 text-xs">(ya no está en el catálogo)</span></span>
+                      <button
+                        onClick={() => toggleEditPrenda(sel)}
+                        title="Quitar prenda"
+                        className="w-6 h-6 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 flex items-center justify-center shrink-0"
+                      ><X className="w-3.5 h-3.5" /></button>
+                    </div>
+                  ))}
                 </div>
                 {editForm.prendas.length > 0 && (
                   <div className="mt-2 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--cc)]/30">
@@ -1396,11 +1420,14 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
               {/* Nombre a estampar */}
               <div>
-                <label className="block text-xs text-[var(--text-sec)] mb-1.5">Nombre a estampar</label>
+                <label className="block text-xs text-[var(--text-sec)] mb-1.5">
+                  Nombre a estampar {!requiereNumero(editForm.prendas) && <span className="font-normal">(no aplica para estas prendas)</span>}
+                </label>
                 <input type="text" value={editForm.nombre_estampar}
                   onChange={e => setEditForm(f => ({ ...f, nombre_estampar: e.target.value.toUpperCase() }))}
                   placeholder="Ej: CAÑÓN, TOÑO..."
-                  className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                  disabled={!requiereNumero(editForm.prendas)}
+                  className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -1443,7 +1470,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                   <input type="text" inputMode="numeric" value={editForm.numero}
                     onChange={e => setEditForm(f => ({ ...f, numero: e.target.value.replace(/\D/g, '').slice(0, 3) }))}
                     placeholder="001" maxLength={3}
-                    className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                    disabled={!requiereNumero(editForm.prendas)}
+                    className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   />
                   {editForm.numero && (
                     <p className="text-xs mt-1 font-mono text-[var(--cc)]">#{editForm.numero.padStart(3,'0')}</p>

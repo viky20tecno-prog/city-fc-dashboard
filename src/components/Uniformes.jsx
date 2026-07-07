@@ -383,12 +383,14 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         const mid = y + 5.8;
         doc.text(trunc(String(p.cedula || ''), 14), C.cedula, mid);
         const esFamiliar = p.tipo && p.tipo !== 'Jugador';
-        const nombrePDF  = trunc(String(p.nombre || '—').toUpperCase(), esFamiliar ? 19 : 26);
-        doc.text(nombrePDF, C.nombre, mid);
+        const nombrePDF  = trunc(String(p.nombre || '—').toUpperCase(), 26);
         if (esFamiliar) {
-          doc.setTextColor(147, 51, 234); doc.setFontSize(6.5);
-          doc.text(trunc(String(p.tipo || '').toUpperCase(), 14), C.nombre + doc.getTextWidth(nombrePDF) + 1.5, mid);
+          doc.text(nombrePDF, C.nombre, y + 4);
+          doc.setTextColor(147, 51, 234); doc.setFontSize(6.3);
+          doc.text(trunc(String(p.tipo || '').toUpperCase(), 22), C.nombre, y + 7.6);
           doc.setFontSize(7.8); doc.setTextColor(30, 40, 50);
+        } else {
+          doc.text(nombrePDF, C.nombre, mid);
         }
         doc.text(trunc(getPrendas(p).toUpperCase(), 44), C.prendas, mid);
         doc.text(String(p.talla || '—'), C.talla, mid);

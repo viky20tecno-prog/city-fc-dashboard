@@ -461,7 +461,10 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const handleEliminar = async (pedido) => {
     const pid = pedido.id ?? pedido._id;
     if (!pid) return;
-    if (!window.confirm(`¿Eliminar pedido de ${pedido.nombre}? Esta acción no se puede deshacer.`)) return;
+    const avisoPago = pedido.estado === 'PAGADO' || pedido.estado === 'ENTREGADO'
+      ? `\n\n⚠️ Este pedido ya está ${pedido.estado} (${pedido.prendas || pedido.prenda || ''} · $${Number(pedido.total || 0).toLocaleString('es-CO')}). Si lo eliminás, se pierde el registro del pago.`
+      : '';
+    if (!window.confirm(`¿Eliminar pedido de ${pedido.nombre}? Esta acción no se puede deshacer.${avisoPago}`)) return;
     const clubId = getClubId();
     try {
       const res = await authFetch(`${API_BASE}/uniforms/${pid}?club_id=${clubId}`, { method: 'DELETE' });
@@ -1040,7 +1043,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                   <Pencil className="w-3.5 h-3.5" /> Editar
                                 </button>
                               )}
-                              <button onClick={() => handleEliminar(p)} disabled={cargando}
+                              <span className="w-px h-5 bg-[var(--cc20)] mx-0.5" />
+                              <button onClick={() => handleEliminar(p)} disabled={cargando} title="Eliminar pedido"
                                 className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/40 transition-all text-xs disabled:opacity-50"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />

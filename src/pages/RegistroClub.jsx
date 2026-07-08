@@ -72,6 +72,8 @@ export default function RegistroClub() {
   const adminFromLanding    = dec('admin');
   const emailFromLanding    = dec('email');
   const ciudadFromLanding   = dec('ciudad');
+  const planFromLanding     = dec('plan');
+  const esFree              = planFromLanding === 'free';
 
   const [form, setForm] = useState({
     ...INITIAL,
@@ -128,6 +130,7 @@ export default function RegistroClub() {
           password:      form.password,
           color,
           codigo_pais:   pais.codigo,
+          plan:          planFromLanding || undefined,
         }),
       });
       const data = await res.json();
@@ -307,10 +310,12 @@ export default function RegistroClub() {
             <>
               <div style={{ marginBottom: 20 }}>
                 <h3 style={{ color: '#fff', fontSize: 20, fontWeight: 800, margin: '0 0 6px', lineHeight: 1.25 }}>
-                  Activa tu prueba gratuita
+                  {esFree ? 'Crea tu cuenta gratis' : 'Activa tu prueba gratuita'}
                 </h3>
                 <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: 0, lineHeight: 1.6 }}>
-                  Tu consultor ya te explicó todo. Completa tus datos para comenzar.
+                  {esFree
+                    ? 'Completa tus datos para comenzar. Sin tarjeta, sin vencimiento.'
+                    : 'Tu consultor ya te explicó todo. Completa tus datos para comenzar.'}
                 </p>
               </div>
 
@@ -405,11 +410,11 @@ export default function RegistroClub() {
                 <button type="submit" disabled={loading}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, padding: '14px', background: loading ? 'rgba(255,255,255,0.08)' : color, border: 'none', borderRadius: 14, color: '#fff', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: loading ? 'none' : `0 4px 24px ${color}50`, transition: 'background 0.3s, box-shadow 0.3s', marginTop: 4 }}>
                   {loading ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={18} />}
-                  {loading ? 'Creando tu club…' : 'Activar prueba gratuita'}
+                  {loading ? 'Creando tu club…' : (esFree ? 'Crear cuenta gratis' : 'Activar prueba gratuita')}
                 </button>
 
                 <p style={{ textAlign: 'center', color: 'var(--text-mut)', fontSize: 12, margin: 0 }}>
-                  5 días gratis · Sin tarjeta · Cancela cuando quieras
+                  {esFree ? 'Gratis para siempre · Hasta 20 jugadores · Sin tarjeta' : '5 días gratis · Sin tarjeta · Cancela cuando quieras'}
                 </p>
               </form>
 

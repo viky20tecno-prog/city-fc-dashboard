@@ -93,9 +93,9 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
   const [selectedTheme,  setSelectedTheme]  = useState(getStoredTheme);
 
   const [mensualidad, setMensualidad] = useState({
-    valor:       clubConfig?.valor_mensualidad ?? 65000,
-    dias_gracia: clubConfig?.dias_gracia_mora  ?? 7,
-    penalidad:   clubConfig?.penalidad_mora    ?? 5000,
+    valor:       clubConfig?.valor_mensualidad ?? 0,
+    dias_gracia: clubConfig?.dias_gracia_mora  ?? 0,
+    penalidad:   clubConfig?.penalidad_mora    ?? 0,
   });
 
   const [whatsapp,   setWhatsapp]   = useState(clubConfig?.whatsapp    || '');

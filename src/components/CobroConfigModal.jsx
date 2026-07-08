@@ -11,7 +11,7 @@ const MESES = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio',
 
 function calcDias(form) {
   const dc = Math.min(25, Math.max(1, Number(form.dia_cobro) || 1));
-  const dg = Math.max(1, Number(form.dias_gracia_mora) || 7);
+  const dg = Math.max(0, Number(form.dias_gracia_mora) || 0);
   return {
     preventivo:   dc > 4 ? dc - 4 : 27,
     cobro:        dc,
@@ -133,9 +133,9 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
     whatsapp:          clubConfig?.whatsapp          || '',
     llave_pago:        clubConfig?.llave_pago         || '',
     qr_pago_url:       clubConfig?.qr_pago_url        || '',
-    valor_mensualidad: clubConfig?.valor_mensualidad  ?? 65000,
-    penalidad_mora:    clubConfig?.penalidad_mora      ?? 10000,
-    dias_gracia_mora:  clubConfig?.dias_gracia_mora    ?? 7,
+    valor_mensualidad: clubConfig?.valor_mensualidad  ?? 0,
+    penalidad_mora:    clubConfig?.penalidad_mora      ?? 0,
+    dias_gracia_mora:  clubConfig?.dias_gracia_mora    ?? 0,
     dia_cobro:         clubConfig?.dia_cobro           ?? 1,
     cuenta_banco:      clubConfig?.cuenta_bancaria?.banco  || '',
     cuenta_tipo:       clubConfig?.cuenta_bancaria?.tipo   || '',
@@ -175,7 +175,7 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
     }
   };
 
-  const valorCambio = Number(form.valor_mensualidad) !== Number(clubConfig?.valor_mensualidad ?? 65000);
+  const valorCambio = Number(form.valor_mensualidad) !== Number(clubConfig?.valor_mensualidad ?? 0);
 
   const handleSave = async () => {
     setSaving(true);

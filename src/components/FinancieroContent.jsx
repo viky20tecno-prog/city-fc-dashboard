@@ -84,7 +84,7 @@ function SuspendidoBadge({ motivo, detalle, cancelada }) {
 
 const MESES_LABEL = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub = 65000 }) {
+function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub = 0 }) {
   const [editando, setEditando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [form, setForm] = useState({});
@@ -228,7 +228,7 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
   );
 }
 
-function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, esExentoGlobal = false, cuotaClub = 65000, jugador }) {
+function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, esExentoGlobal = false, cuotaClub = 0, jugador }) {
   const [items, setItems] = useState([]);
   const [gestionandoSuspension, setGestionandoSuspension] = useState(false);
 
@@ -728,7 +728,7 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
         suspensiones={misSuspensiones}
         onMensualidadUpdated={onMensualidadUpdated}
         esExentoGlobal={esExento}
-        cuotaClub={parseFloat(clubConfig?.valor_mensualidad ?? 65000)}
+        cuotaClub={parseFloat(clubConfig?.valor_mensualidad ?? 0)}
         jugador={jugador}
       />
       <SeccionPedidoUniforme cedula={cedula} />

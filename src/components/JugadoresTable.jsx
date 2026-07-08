@@ -711,7 +711,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     const anio       = new Date().getFullYear();
     const mesHoy     = new Date().getMonth() + 1;
     const diaHoy     = new Date().getDate();
-    const diasGracia = clubConfig?.dias_gracia_mora ?? 7;
+    const diasGracia = clubConfig?.dias_gracia_mora ?? 0;
 
     // Índice meses en mora por cédula (solo hasta mes actual)
     const moraPorCedula = {};

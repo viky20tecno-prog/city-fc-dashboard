@@ -146,6 +146,8 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
   const [saved,       setSaved]       = useState(false);
   const [uploadingQR, setUploadingQR] = useState(false);
   const [activeMsg,   setActiveMsg]   = useState(0);
+  const [aplicarAPendientes, setAplicarAPendientes] = useState(false);
+  const [actualizadasMsg,    setActualizadasMsg]    = useState('');
   const qrRef = useRef(null);
 
   const overlayRef = useRef(null);
@@ -173,8 +175,11 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
     }
   };
 
+  const valorCambio = Number(form.valor_mensualidad) !== Number(clubConfig?.valor_mensualidad ?? 65000);
+
   const handleSave = async () => {
     setSaving(true);
+    setActualizadasMsg('');
     try {
       await authFetch(`${API_BASE}/config?club_id=${getClubId()}`, {
         method:  'PATCH',
@@ -192,6 +197,17 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
             : null,
         }),
       });
+
+      if (aplicarAPendientes && valorCambio) {
+        const resp = await authFetch(`${API_BASE}/config/aplicar-mensualidad-pendientes?club_id=${getClubId()}`, {
+          method: 'POST',
+        });
+        const data = await resp.json();
+        if (data.success) {
+          setActualizadasMsg(`${data.actualizadas} mensualidad(es) pendiente(s) actualizada(s) al nuevo valor.`);
+        }
+      }
+
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       onSaved?.();
@@ -296,6 +312,21 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
                   onChange={e => set('dias_gracia_mora', e.target.value)} style={inp} />
               </div>
             </div>
+
+            {valorCambio && (
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, padding: '10px 13px', background: `${c}0d`, border: `1px solid ${c}30`, borderRadius: 10, cursor: 'pointer' }}>
+                <input type="checkbox" checked={aplicarAPendientes}
+                  onChange={e => setAplicarAPendientes(e.target.checked)}
+                  style={{ marginTop: 2, cursor: 'pointer' }} />
+                <span style={{ fontSize: 12, color: '#CBD5E1', lineHeight: 1.5 }}>
+                  Aplicar este nuevo valor a las mensualidades <strong>pendientes o en mora</strong> del mes actual en adelante.
+                  No afecta lo ya pagado ni meses anteriores.
+                </span>
+              </label>
+            )}
+            {actualizadasMsg && (
+              <p style={{ fontSize: 11.5, color: '#00D084', margin: 0 }}>✓ {actualizadasMsg}</p>
+            )}
 
             {/* ── Día de cobro ── */}
             {(() => {

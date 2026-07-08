@@ -728,7 +728,7 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
         suspensiones={misSuspensiones}
         onMensualidadUpdated={onMensualidadUpdated}
         esExentoGlobal={esExento}
-        cuotaClub={parseFloat(clubConfig?.valor_mensualidad) || 65000}
+        cuotaClub={parseFloat(clubConfig?.valor_mensualidad ?? 65000)}
         jugador={jugador}
       />
       <SeccionPedidoUniforme cedula={cedula} />

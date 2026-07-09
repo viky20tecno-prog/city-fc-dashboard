@@ -140,6 +140,8 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
     cuenta_banco:      clubConfig?.cuenta_bancaria?.banco  || '',
     cuenta_tipo:       clubConfig?.cuenta_bancaria?.tipo   || '',
     cuenta_numero:     clubConfig?.cuenta_bancaria?.numero || '',
+    razon_social:      clubConfig?.razon_social       || '',
+    nit:               clubConfig?.nit                || '',
   });
 
   const [saving,      setSaving]      = useState(false);
@@ -195,6 +197,8 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
           cuenta_bancaria:   (form.cuenta_numero || form.cuenta_banco)
             ? { banco: form.cuenta_banco || null, tipo: form.cuenta_tipo || null, numero: form.cuenta_numero || null }
             : null,
+          razon_social:      form.razon_social || null,
+          nit:               form.nit          || null,
         }),
       });
 
@@ -389,6 +393,22 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
               <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: '#CBD5E1', letterSpacing: 0.3 }}>
                 🏦 Cuenta bancaria (transferencia)
               </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <label style={lbl}>Razón social</label>
+                  <input value={form.razon_social}
+                    onChange={e => set('razon_social', e.target.value)}
+                    placeholder="Ej: Corp. Mi Club"
+                    style={inp} />
+                </div>
+                <div>
+                  <label style={lbl}>NIT</label>
+                  <input value={form.nit}
+                    onChange={e => set('nit', e.target.value)}
+                    placeholder="Ej: 901906743"
+                    style={inp} />
+                </div>
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div>
                   <label style={lbl}>Banco</label>

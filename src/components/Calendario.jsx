@@ -592,7 +592,7 @@ export default function Calendario({ color, clubId }) {
       </div>
 
       {/* Grid de días */}
-      <div className="grid grid-cols-7 gap-1.5 px-4 pb-4">
+      <div className="grid grid-cols-7 gap-1 sm:gap-1.5 px-1.5 sm:px-4 pb-4">
         {cells.map((cell, idx) => {
           const ds         = localDateStr(cell.date);
           const isToday    = ds === todayStr;
@@ -600,6 +600,7 @@ export default function Calendario({ color, clubId }) {
           const evs        = eventsByDay[ds] || [];
           const visible    = evs.slice(0, 2);
           const extra      = evs.length - 2;
+          const tiposDelDia = [...new Set(evs.map(ev => ev.tipo))].slice(0, 3);
 
           return (
             <button
@@ -609,7 +610,7 @@ export default function Calendario({ color, clubId }) {
                     : isToday   ? { background: `${color}38`, border: `2px solid ${color}` }
                                 : {}}
               className={`
-                min-h-[68px] rounded-xl p-2 flex flex-col gap-0.5 text-left transition-all
+                aspect-square sm:aspect-auto sm:min-h-[68px] rounded-lg sm:rounded-xl p-1 sm:p-2 flex flex-col items-center sm:items-stretch justify-center sm:justify-start gap-0.5 text-left transition-all overflow-hidden
                 ${!cell.current ? 'opacity-30 pointer-events-none' : ''}
                 ${isSelected ? '' : isToday ? '' : 'bg-[var(--bg-surface)] border-2 border-[var(--cc30)] hover:border-[var(--cc)]'}
               `}
@@ -621,25 +622,41 @@ export default function Calendario({ color, clubId }) {
                 {cell.day}
               </span>
 
-              {visible.map(ev => {
-                const t = TIPOS[ev.tipo] || TIPOS.EVENTO;
-                return (
-                  <span key={ev.id}
-                    className="block text-[10px] font-semibold truncate leading-tight rounded-md px-1 py-0.5 mt-0.5"
-                    style={isSelected
-                      ? { color: '#fff', background: 'rgba(255,255,255,0.25)' }
-                      : { color: t.color, background: t.bg }}>
-                    {ev.titulo}
-                  </span>
-                );
-              })}
-
-              {extra > 0 && (
-                <span className="text-[9px] font-semibold leading-tight px-1"
-                  style={isSelected ? { color: 'rgba(255,255,255,0.8)' } : { color: 'var(--text-sec)' }}>
-                  +{extra} más
+              {/* Móvil: puntos de color por tipo de evento (sin espacio para texto) */}
+              {tiposDelDia.length > 0 && (
+                <span className="flex sm:hidden gap-0.5 mt-0.5">
+                  {tiposDelDia.map(tipo => {
+                    const t = TIPOS[tipo] || TIPOS.EVENTO;
+                    return (
+                      <span key={tipo} className="w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{ background: isSelected ? '#fff' : t.color }} />
+                    );
+                  })}
                 </span>
               )}
+
+              {/* Desktop: título de cada evento (hay espacio de sobra) */}
+              <span className="hidden sm:contents">
+                {visible.map(ev => {
+                  const t = TIPOS[ev.tipo] || TIPOS.EVENTO;
+                  return (
+                    <span key={ev.id}
+                      className="block text-[10px] font-semibold truncate leading-tight rounded-md px-1 py-0.5 mt-0.5"
+                      style={isSelected
+                        ? { color: '#fff', background: 'rgba(255,255,255,0.25)' }
+                        : { color: t.color, background: t.bg }}>
+                      {ev.titulo}
+                    </span>
+                  );
+                })}
+
+                {extra > 0 && (
+                  <span className="text-[9px] font-semibold leading-tight px-1"
+                    style={isSelected ? { color: 'rgba(255,255,255,0.8)' } : { color: 'var(--text-sec)' }}>
+                    +{extra} más
+                  </span>
+                )}
+              </span>
             </button>
           );
         })}
@@ -1262,18 +1279,18 @@ export default function Calendario({ color, clubId }) {
       <div className="min-h-full p-6 flex flex-col items-center">
 
         {/* Título + controles */}
-        <div className="w-full max-w-2xl flex items-center justify-between mb-5">
+        <div className="w-full max-w-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
           <div>
             <h1 className="text-xl font-bold text-[var(--text-pri)]">Calendario</h1>
-            <p className="text-xs text-[var(--text-sec)] mt-0.5">Partidos, entrenamientos y eventos del club</p>
+            <p className="text-xs text-[var(--text-sec)] mt-0.5 hidden sm:block">Partidos, entrenamientos y eventos del club</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex bg-[var(--bg-surface)] border border-[var(--cc30)] rounded-xl p-0.5">
+            <div className="flex flex-1 sm:flex-initial bg-[var(--bg-surface)] border border-[var(--cc30)] rounded-xl p-0.5">
               {[{ id: 'mes', Icon: CalendarDays, label: 'Mes' },
                 { id: 'agenda', Icon: List,        label: 'Agenda' }].map(({ id, Icon, label }) => (
                 <button key={id} onClick={() => setView(id)}
                   style={view === id ? { background: color, color: '#fff' } : {}}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
+                  className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
                     ${view === id ? '' : 'text-[var(--text-sec)] hover:text-[var(--text-pri)]'}`}>
                   <Icon size={13} />{label}
                 </button>
@@ -1281,7 +1298,7 @@ export default function Calendario({ color, clubId }) {
             </div>
             <button onClick={() => openCreate(view === 'mes' ? selectedDate : null)}
               style={{ background: color }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold hover:opacity-85 transition-opacity">
+              className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold hover:opacity-85 transition-opacity">
               <Plus size={15} /> Evento
             </button>
           </div>

@@ -342,7 +342,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       const fmtCOP   = (n) => `$${parseFloat(n || 0).toLocaleString('es-CO')}`;
       const logoData = await loadLogoDataUrl(clubConfig?.logo_url);
 
-      const pendientes = sortByName(pedidos.filter(p => p.estado === 'PENDIENTE'));
+      const pendientes = sortByName(pedidos.filter(p => p.estado === 'PENDIENTE' || p.estado === 'ABONO'));
       const pagados    = sortByName(pedidos.filter(p => p.estado === 'PAGADO'));
       const entregados = sortByName(pedidos.filter(p => p.estado === 'ENTREGADO'));
       const getPrendas = (p) => String(p.prendas || p.prenda || p.tipo_uniforme || p.tipo || '—');
@@ -441,7 +441,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   };
 
   // — Pedidos edit —
-  const handleCambiarEstado = async (pedido, nuevoEstado) => {
+  const handleCambiarEstado = async (pedido, nuevoEstado, extraFields = {}) => {
     const pedidoId = pedido.id ?? pedido._id ?? pedido.rowId ?? pedido.row_id;
     if (!pedidoId) return;
     const clubId = getClubId();
@@ -450,7 +450,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}?club_id=${clubId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado: nuevoEstado }),
+        body: JSON.stringify({ estado: nuevoEstado, ...extraFields }),
       });
       const data = await res.json();
       if (res.ok || data.success) await cargarDatos();
@@ -458,11 +458,52 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     finally { setCambiandoEstado(null); }
   };
 
+  const handleRevertirPago = (pedido) => {
+    const abonado = Number(pedido.valor_pagado) || 0;
+    if (abonado > 0 && !window.confirm(`Este pedido tiene un abono registrado de $${abonado.toLocaleString('es-CO')}. ¿Revertir a pendiente y borrar el abono?`)) return;
+    handleCambiarEstado(pedido, 'PENDIENTE', { valor_pagado: 0 });
+  };
+
+  // — Abonos —
+  const [pedidoAbonando, setPedidoAbonando] = useState(null);
+  const [montoAbono, setMontoAbono]         = useState('');
+  const [abonoError, setAbonoError]         = useState('');
+  const [guardandoAbono, setGuardandoAbono] = useState(false);
+
+  const abrirAbono = (pedido) => { setPedidoAbonando(pedido); setMontoAbono(''); setAbonoError(''); };
+  const cerrarAbono = () => { setPedidoAbonando(null); setAbonoError(''); };
+
+  const handleGuardarAbono = async () => {
+    if (!pedidoAbonando) return;
+    const monto        = Number(montoAbono);
+    const totalPedido   = Number(pedidoAbonando.total) || 0;
+    const yaAbonado     = Number(pedidoAbonando.valor_pagado) || 0;
+    const saldoActual   = totalPedido - yaAbonado;
+    if (!monto || monto <= 0)      { setAbonoError('Ingresá un monto válido.'); return; }
+    if (monto > saldoActual)       { setAbonoError(`El abono no puede superar el saldo pendiente ($${saldoActual.toLocaleString('es-CO')}).`); return; }
+
+    setGuardandoAbono(true);
+    try {
+      const pedidoId = pedidoAbonando.id ?? pedidoAbonando._id;
+      const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}?club_id=${getClubId()}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valor_pagado: yaAbonado + monto }),
+      });
+      const data = await res.json();
+      if (res.ok || data.success) { await cargarDatos(); cerrarAbono(); }
+      else setAbonoError(data.error || 'Error registrando el abono');
+    } catch (e) {
+      console.error('[Uniformes] Error registrando abono:', e);
+      setAbonoError('Error de conexión');
+    } finally { setGuardandoAbono(false); }
+  };
+
   const handleEliminar = async (pedido) => {
     const pid = pedido.id ?? pedido._id;
     if (!pid) return;
-    const avisoPago = pedido.estado === 'PAGADO' || pedido.estado === 'ENTREGADO'
-      ? `\n\n⚠️ Este pedido ya está ${pedido.estado} (${pedido.prendas || pedido.prenda || ''} · $${Number(pedido.total || 0).toLocaleString('es-CO')}). Si lo eliminás, se pierde el registro del pago.`
+    const avisoPago = pedido.estado === 'PAGADO' || pedido.estado === 'ENTREGADO' || pedido.estado === 'ABONO'
+      ? `\n\n⚠️ Este pedido ya está ${pedido.estado} (${pedido.prendas || pedido.prenda || ''} · $${Number(pedido.total || 0).toLocaleString('es-CO')}${pedido.estado === 'ABONO' ? ` · abonado $${Number(pedido.valor_pagado || 0).toLocaleString('es-CO')}` : ''}). Si lo eliminás, se pierde el registro del pago.`
       : '';
     if (!window.confirm(`¿Eliminar pedido de ${pedido.nombre}? Esta acción no se puede deshacer.${avisoPago}`)) return;
     const clubId = getClubId();
@@ -889,7 +930,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           TAB: PEDIDOS
       ══════════════════════════════════════════════ */}
       {tabPrincipal === 'pedidos' && (() => {
-        const pendientes  = sortByName(pedidos.filter(p => p.estado === 'PENDIENTE'));
+        const pendientes  = sortByName(pedidos.filter(p => p.estado === 'PENDIENTE' || p.estado === 'ABONO'));
         const pagados     = sortByName(pedidos.filter(p => p.estado === 'PAGADO'));
         const entregados  = sortByName(pedidos.filter(p => p.estado === 'ENTREGADO'));
         const vistaActual = tabPedidos === 'PENDIENTE' ? pendientes : tabPedidos === 'PAGADO' ? pagados : entregados;
@@ -1012,6 +1053,11 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                           <td className="py-2 px-3 text-[var(--text-pri)] font-mono font-bold">{p.numero_estampar}</td>
                           <td className="py-2 px-3 text-[var(--cc)] font-semibold">
                             {p.total ? `$${Number(p.total).toLocaleString('es-CO')}` : '—'}
+                            {p.estado === 'ABONO' && (
+                              <div className="text-[10px] font-normal text-[var(--text-sec)] mt-0.5">
+                                Abonado ${Number(p.valor_pagado || 0).toLocaleString('es-CO')} · Saldo ${(Number(p.total || 0) - Number(p.valor_pagado || 0)).toLocaleString('es-CO')}
+                              </div>
+                            )}
                           </td>
                           <td className="py-2 px-3 text-[var(--text-sec)] text-xs">{formatFecha(p.created_at)}</td>
                           <td className="py-2 px-3">
@@ -1019,6 +1065,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                               <button onClick={() => handleCambiarEstado(p, 'PAGADO')} disabled={cargando}
                                 className="px-2 py-1 rounded-lg text-xs bg-[rgba(245,166,35,0.12)] text-[#F5A623] border border-[#F5A623]/20 hover:bg-[rgba(34,197,94,0.12)] hover:text-green-400 hover:border-green-400/20 transition-all disabled:opacity-50 cursor-pointer"
                               >{cargando ? '...' : 'PENDIENTE'}</button>
+                            )}
+                            {p.estado === 'ABONO' && (
+                              <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(74,158,255,0.12)] text-[#4A9EFF] border border-[#4A9EFF]/20">ABONO</span>
                             )}
                             {p.estado === 'PAGADO' && (
                               <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(34,197,94,0.12)] text-green-400 border border-green-400/20">PAGADO</span>
@@ -1029,6 +1078,13 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                           </td>
                           <td className="py-2 px-3">
                             <div className="flex items-center gap-1.5">
+                              {(p.estado === 'PENDIENTE' || p.estado === 'ABONO') && (
+                                <button onClick={() => abrirAbono(p)} disabled={cargando} title="Registrar abono"
+                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#4A9EFF]/30 text-[#4A9EFF] hover:bg-[rgba(74,158,255,0.12)] transition-all text-xs disabled:opacity-50"
+                                >
+                                  <Plus className="w-3.5 h-3.5" /> Abonar
+                                </button>
+                              )}
                               {p.estado === 'PAGADO' && (
                                 <button onClick={() => handleCambiarEstado(p, 'ENTREGADO')} disabled={cargando}
                                   className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc)]/30 text-[var(--cc)] hover:bg-[var(--cc12)] transition-all text-xs disabled:opacity-50"
@@ -1036,8 +1092,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                   {cargando ? <Loader className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />} Entregar
                                 </button>
                               )}
-                              {p.estado === 'PAGADO' && (
-                                <button onClick={() => handleCambiarEstado(p, 'PENDIENTE')} disabled={cargando} title="Revertir a pendiente"
+                              {(p.estado === 'PAGADO' || p.estado === 'ABONO') && (
+                                <button onClick={() => handleRevertirPago(p)} disabled={cargando} title="Revertir a pendiente"
                                   className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] hover:text-[#F5A623] hover:border-[#F5A623]/40 transition-all text-xs disabled:opacity-50"
                                 >
                                   {cargando ? <Loader className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />} Revertir
@@ -1339,6 +1395,82 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           </div>
         </div>
       )}
+
+      {/* ══════════════════════════════════════════════
+          MODAL: ABONAR
+      ══════════════════════════════════════════════ */}
+      {pedidoAbonando && (() => {
+        const totalPedido = Number(pedidoAbonando.total) || 0;
+        const yaAbonado   = Number(pedidoAbonando.valor_pagado) || 0;
+        const saldo       = totalPedido - yaAbonado;
+        return (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={cerrarAbono}>
+            <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-sm shadow-[0_8px_40px_rgba(0,50,150,0.4)]" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-5 border-b border-[var(--cc20)]">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[rgba(74,158,255,0.12)] flex items-center justify-center">
+                    <Plus className="w-4 h-4 text-[#4A9EFF]" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-[var(--text-pri)]">Registrar abono</h3>
+                    <p className="text-xs text-[var(--text-sec)]">{pedidoAbonando.nombre}</p>
+                  </div>
+                </div>
+                <button onClick={cerrarAbono} className="p-2 rounded-lg text-[var(--text-sec)] hover:text-[var(--text-pri)] hover:bg-[var(--bg-surface)] transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-5 space-y-4">
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="bg-[var(--bg-surface)] rounded-xl p-3 border border-[var(--cc20)]">
+                    <p className="text-[10px] text-[var(--text-sec)] uppercase tracking-wide mb-1">Total</p>
+                    <p className="font-bold text-[var(--text-pri)]">${totalPedido.toLocaleString('es-CO')}</p>
+                  </div>
+                  <div className="bg-[var(--bg-surface)] rounded-xl p-3 border border-[var(--cc20)]">
+                    <p className="text-[10px] text-[var(--text-sec)] uppercase tracking-wide mb-1">Abonado</p>
+                    <p className="font-bold text-[#4A9EFF]">${yaAbonado.toLocaleString('es-CO')}</p>
+                  </div>
+                  <div className="col-span-2 bg-[var(--bg-surface)] rounded-xl p-3 border border-[var(--cc20)]">
+                    <p className="text-[10px] text-[var(--text-sec)] uppercase tracking-wide mb-1">Saldo pendiente</p>
+                    <p className="font-bold text-[#F5A623]">${saldo.toLocaleString('es-CO')}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-[var(--text-sec)] mb-1.5">Monto a abonar *</label>
+                  <input
+                    type="number"
+                    value={montoAbono}
+                    onChange={e => { setMontoAbono(e.target.value); setAbonoError(''); }}
+                    placeholder="Ej: 50000"
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                    autoFocus
+                  />
+                </div>
+
+                {abonoError && (
+                  <div className="flex items-start gap-2 p-2.5 rounded-lg bg-[rgba(255,94,94,0.1)] border border-[#FF5E5E]/20">
+                    <AlertCircle className="w-4 h-4 text-[#FF5E5E] shrink-0 mt-0.5" />
+                    <span className="text-xs text-[#FF5E5E]">{abonoError}</span>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-1">
+                  <button onClick={cerrarAbono} disabled={guardandoAbono}
+                    className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-sec)] border border-[var(--cc20)] hover:bg-[var(--bg-surface)] transition-colors disabled:opacity-50"
+                  >Cancelar</button>
+                  <button onClick={handleGuardarAbono} disabled={guardandoAbono}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-[#4A9EFF] text-white hover:bg-[#4A9EFF]/80 transition-colors disabled:opacity-50"
+                  >
+                    {guardandoAbono ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ══════════════════════════════════════════════
           MODAL: EDITAR PEDIDO

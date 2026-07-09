@@ -106,13 +106,26 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
     if (!editForm.nombre.trim()) return;
     setGuardando(true);
     try {
+      const torneoId       = torneosDef[editIdx]?.id;
+      const nombreNuevo     = editForm.nombre.trim();
+      const valorOficial    = Number(editForm.valor_oficial)  || 0;
+      const valorInscrito   = Number(editForm.valor_inscrito) || 0;
       const nuevaLista = torneosDef.map((t, i) =>
         i === editIdx
-          ? { ...t, nombre: editForm.nombre.trim(), fecha: editForm.fecha, valor_oficial: Number(editForm.valor_oficial) || 0, valor_inscrito: Number(editForm.valor_inscrito) || 0, descripcion: editForm.descripcion.trim() }
+          ? { ...t, nombre: nombreNuevo, fecha: editForm.fecha, valor_oficial: valorOficial, valor_inscrito: valorInscrito, descripcion: editForm.descripcion.trim() }
           : t
       );
       await patchConfig({ torneos_iniciales: nuevaLista });
       setTorneosDef(nuevaLista);
+      // Propagar nombre/precio a los jugadores que ya estaban inscritos en este torneo
+      if (torneoId) {
+        await authFetch(`${API_BASE}/torneos/definicion/${torneoId}?club_id=${clubId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre_torneo: nombreNuevo, valor_oficial: valorOficial, valor_inscrito: valorInscrito }),
+        });
+        await cargarEnrollments();
+      }
       setEditIdx(null);
     } catch (e) { console.error(e); }
     finally { setGuardando(false); }

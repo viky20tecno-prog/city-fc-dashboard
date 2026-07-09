@@ -285,9 +285,9 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const uniformeData = (cedula) => {
     const pedidos = (uniformes || []).filter(u => String(u.cedula) === String(cedula));
     if (!pedidos.length) return null;
-    // Retornar el peor estado: PENDIENTE > PAGADO > ENTREGADO
-    if (pedidos.some(u => u.estado === 'PENDIENTE' || u.estado === 'MORA' || u.estado === 'PARCIAL'))
-      return pedidos.find(u => u.estado === 'PENDIENTE' || u.estado === 'MORA' || u.estado === 'PARCIAL');
+    // Retornar el peor estado: PENDIENTE/ABONO > PAGADO > ENTREGADO
+    if (pedidos.some(u => u.estado === 'PENDIENTE' || u.estado === 'MORA' || u.estado === 'PARCIAL' || u.estado === 'ABONO'))
+      return pedidos.find(u => u.estado === 'PENDIENTE' || u.estado === 'MORA' || u.estado === 'PARCIAL' || u.estado === 'ABONO');
     if (pedidos.some(u => u.estado === 'PAGADO'))
       return pedidos.find(u => u.estado === 'PAGADO');
     return pedidos[0];
@@ -296,14 +296,16 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const uniformeStatus = (cedula) => {
     const u = uniformeData(cedula);
     if (!u) return null;
-    if (u.estado === 'ENTREGADO' || u.estado === 'AL_DIA') return 'entregado';
-    if (u.estado === 'MORA')                               return 'mora';
-    if (u.estado === 'PAGADO')                             return 'entregado';
+    if (u.estado === 'ENTREGADO' || u.estado === 'AL_DIA')  return 'entregado';
+    if (u.estado === 'MORA')                                return 'mora';
+    if (u.estado === 'PAGADO')                              return 'entregado';
+    if (u.estado === 'ABONO' || u.estado === 'PARCIAL')     return 'abono';
     return 'pendiente';
   };
 
   const UNIFORME_STYLE = {
     pendiente: { color: '#F5A623', bg: 'rgba(245,166,35,0.12)', border: 'rgba(245,166,35,0.30)', label: 'Pendiente de pago' },
+    abono:     { color: '#4A9EFF', bg: 'rgba(74,158,255,0.12)', border: 'rgba(74,158,255,0.30)', label: 'Abono parcial'     },
     mora:      { color: '#EF4444', bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.30)',  label: 'En mora'           },
     entregado: { color: '#22C55E', bg: 'rgba(34,197,94,0.12)',  border: 'rgba(34,197,94,0.30)',  label: 'Al día / Entregado' },
     none:      { color: 'var(--text-mut)', bg: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)', label: 'Sin pedido' },
@@ -1168,7 +1170,9 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                             >
                               <Shirt className="w-4 h-4" />
                             </button>
-                            {open && (
+                            {open && (() => {
+                              const uData = uniformeData(j.cedula);
+                              return (
                               <div
                                 className="absolute z-30 left-0 top-8 min-w-[160px] rounded-xl shadow-xl p-3 text-sm"
                                 style={{ background: 'var(--bg-card)', border: `1px solid ${st.border}` }}
@@ -1181,8 +1185,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                                   <Shirt className="w-3 h-3" />
                                   {st.label}
                                 </span>
+                                {status === 'abono' && uData && (
+                                  <p className="text-xs mt-1.5" style={{ color: 'var(--text-sec)' }}>
+                                    Abonado {formatCOP(uData.valor_pagado || 0)} · Saldo {formatCOP((uData.total || 0) - (uData.valor_pagado || 0))}
+                                  </p>
+                                )}
                               </div>
-                            )}
+                              );
+                            })()}
                           </div>
                         </div>
                       );

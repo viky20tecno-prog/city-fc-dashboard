@@ -62,6 +62,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const [numerosUsados, setNumerosUsados] = useState([]);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState('');
+  const [errorEsDuplicado, setErrorEsDuplicado] = useState(false);
   const [exito, setExito] = useState(false);
 
   // — Pedidos list —
@@ -224,6 +225,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     setSugerencias([]);
     setMostrarSugerencias(false);
     setError('');
+    setErrorEsDuplicado(false);
     setPersonas([nuevaPersona(false, categoriaDefaultJugador(jugador))]);
     setStep(2);
   };
@@ -233,6 +235,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     setJugadorEncontrado(null); setStep(1);
     setPersonas([]);
     setError('');
+    setErrorEsDuplicado(false);
   };
 
   const agregarFamiliar = () => {
@@ -273,6 +276,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   const handleSubmit = async () => {
     setError('');
+    setErrorEsDuplicado(false);
     if (personas.length === 0) { setError('Agregá al menos un pedido.'); return; }
     const errores = [];
     personas.forEach((p, i) => {
@@ -292,6 +296,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     setEnviando(true);
     const fallidos = [];
     let exitosos = 0;
+    let huboDuplicado = false;
     for (const p of personas) {
       try {
         const res = await authFetch(`${API_BASE}/uniforms?club_id=${clubId}`, {
@@ -311,7 +316,10 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         });
         const data = await res.json();
         if (data.success) exitosos++;
-        else fallidos.push({ key: p.key, msg: data.error || data.message || 'Error al registrar' });
+        else {
+          if (res.status === 409) huboDuplicado = true;
+          fallidos.push({ key: p.key, msg: data.error || data.message || 'Error al registrar' });
+        }
       } catch {
         fallidos.push({ key: p.key, msg: 'Error de conexión' });
       }
@@ -322,7 +330,12 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       setTimeout(() => { setExito(false); limpiarBusqueda(); }, 3000);
     } else {
       setPersonas(ps => ps.filter(p => fallidos.some(f => f.key === p.key)));
-      setError(`${exitosos} pedido(s) registrado(s). ${fallidos.length} con error: ${fallidos.map(f => f.msg).join(' · ')}`);
+      if (huboDuplicado) {
+        setErrorEsDuplicado(true);
+        setError('Este jugador ya tiene un pedido de uniforme activo (pendiente, con abono o pagado). Para sumarle más prendas no crees un pedido nuevo: abrí la pestaña "Pedidos", buscá el pedido existente y usá "Editar".');
+      } else {
+        setError(`${exitosos} pedido(s) registrado(s). ${fallidos.length} con error: ${fallidos.map(f => f.msg).join(' · ')}`);
+      }
     }
     setEnviando(false);
   };
@@ -654,9 +667,20 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
               </div>
             )}
             {error && (
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/30 mb-6">
-                <AlertCircle className="w-5 h-5 text-[#FF5E5E]" />
-                <p className="text-sm text-[#FF5E5E]">{error}</p>
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/30 mb-6">
+                <AlertCircle className="w-5 h-5 text-[#FF5E5E] flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm text-[#FF5E5E]">{error}</p>
+                  {errorEsDuplicado && (
+                    <button
+                      type="button"
+                      onClick={() => { setTabPrincipal('pedidos'); setError(''); setErrorEsDuplicado(false); }}
+                      className="mt-2 text-xs font-semibold text-[#FF5E5E] underline hover:no-underline"
+                    >
+                      Ir a la pestaña "Pedidos" →
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 

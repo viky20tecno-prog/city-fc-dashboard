@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Shirt, CheckCircle, AlertCircle, Search, Loader, X, Pencil, Save, Download, Plus, Trash2, Package, Camera } from 'lucide-react';
+import { Shirt, CheckCircle, AlertCircle, Search, Loader, X, Pencil, Save, Download, Plus, Trash2, Package, Camera, RotateCcw } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { supabase } from '../lib/supabase';
@@ -1034,6 +1034,13 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                   className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc)]/30 text-[var(--cc)] hover:bg-[var(--cc12)] transition-all text-xs disabled:opacity-50"
                                 >
                                   {cargando ? <Loader className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />} Entregar
+                                </button>
+                              )}
+                              {p.estado === 'PAGADO' && (
+                                <button onClick={() => handleCambiarEstado(p, 'PENDIENTE')} disabled={cargando} title="Revertir a pendiente"
+                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] hover:text-[#F5A623] hover:border-[#F5A623]/40 transition-all text-xs disabled:opacity-50"
+                                >
+                                  {cargando ? <Loader className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />} Revertir
                                 </button>
                               )}
                               {p.estado !== 'ENTREGADO' && (

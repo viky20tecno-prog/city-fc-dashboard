@@ -303,7 +303,7 @@ function PagoRow({ pago, onEdit, onAction, actionLoading }) {
   const isPendiente = pago.estado_revision === 'pendiente' || pago.estado_revision === 'excedente_pendiente';
 
   return (
-    <tr className="border-b border-[var(--cc20)] hover:bg-white/[0.02] transition-colors">
+    <tr className={`border-b border-[var(--cc20)] hover:bg-white/[0.02] transition-colors ${pago.alerta_fraude ? 'bg-red-500/[0.04]' : ''}`}>
       {/* Fecha */}
       <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">{formatDate(pago.created_at)}</td>
 
@@ -314,6 +314,17 @@ function PagoRow({ pago, onEdit, onAction, actionLoading }) {
         {pago.nota_jugador && (
           <div className="mt-1.5 px-2 py-1 rounded-lg bg-sky-400/10 border border-sky-400/20 text-sky-300 text-[11px] max-w-[180px]">
             💬 <span className="italic">"{pago.nota_jugador}"</span>
+          </div>
+        )}
+        {pago.alerta_fraude && (
+          <div
+            className="mt-1.5 px-2 py-1 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] max-w-[220px] font-medium"
+            title="Cruce automático contra todos los pagos del club — verifica con el banco antes de aprobar"
+          >
+            ⚠️ {[
+              pago.alerta_fraude.referencia_duplicada && 'Referencia repetida',
+              pago.alerta_fraude.imagen_duplicada && 'Imagen repetida',
+            ].filter(Boolean).join(' · ')}
           </div>
         )}
       </td>

@@ -738,32 +738,35 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
               <div className="space-y-2">
                 {empleadosConEstado.map(emp => (
                   <div key={emp.id}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-sub)] flex-wrap">
-                    {/* Avatar */}
-                    <div className="w-9 h-9 rounded-full bg-[var(--cc)]/15 border border-[var(--cc)]/25 flex items-center justify-center flex-shrink-0 text-[var(--cc)] font-bold text-sm">
-                      {emp.nombre.charAt(0).toUpperCase()}
+                    className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-sub)]">
+                    {/* Avatar + Info — su propia fila en móvil, para que el nombre tenga ancho real */}
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-9 h-9 rounded-full bg-[var(--cc)]/15 border border-[var(--cc)]/25 flex items-center justify-center flex-shrink-0 text-[var(--cc)] font-bold text-sm">
+                        {emp.nombre.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-[var(--text-pri)] leading-tight">{emp.nombre}</p>
+                        <p className="text-xs text-[var(--text-sec)]">{emp.cargo || 'Sin cargo'} · {fmt(emp.salario_mensual)}/mes</p>
+                      </div>
                     </div>
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[var(--text-pri)] leading-tight">{emp.nombre}</p>
-                      <p className="text-xs text-[var(--text-sec)]">{emp.cargo || 'Sin cargo'} · {fmt(emp.salario_mensual)}/mes</p>
-                    </div>
-                    {/* Estado del mes */}
-                    {emp.pago ? (
-                      <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#22C55E]/12 text-[#22C55E] text-xs font-semibold">
-                        <CheckCircle className="w-3.5 h-3.5" /> Pagado {mesLabel(mesVista)}
-                      </span>
-                    ) : (
-                      <button onClick={() => pagarNomina(emp)}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--cc)]/12 text-[var(--cc)] border border-[var(--cc)]/25 text-xs font-semibold hover:bg-[var(--cc)]/20 transition">
-                        <Wallet className="w-3.5 h-3.5" /> Pagar {mesLabel(mesVista)}
+                    {/* Estado del mes + Editar — su propia fila en móvil */}
+                    <div className="flex items-center gap-2 shrink-0 pl-12 sm:pl-0">
+                      {emp.pago ? (
+                        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#22C55E]/12 text-[#22C55E] text-xs font-semibold whitespace-nowrap">
+                          <CheckCircle className="w-3.5 h-3.5" /> Pagado {mesLabel(mesVista)}
+                        </span>
+                      ) : (
+                        <button onClick={() => pagarNomina(emp)}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--cc)]/12 text-[var(--cc)] border border-[var(--cc)]/25 text-xs font-semibold hover:bg-[var(--cc)]/20 transition whitespace-nowrap">
+                          <Wallet className="w-3.5 h-3.5" /> Pagar {mesLabel(mesVista)}
+                        </button>
+                      )}
+                      {/* Editar */}
+                      <button onClick={() => { setEmpEditId(emp.id); setEmpForm({ nombre: emp.nombre, cargo: emp.cargo, salario_mensual: emp.salario_mensual }); setShowEmpForm(true); }}
+                        className="p-1.5 rounded-lg border border-[var(--border-sub)] text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition shrink-0">
+                        <Pencil className="w-3.5 h-3.5" />
                       </button>
-                    )}
-                    {/* Editar */}
-                    <button onClick={() => { setEmpEditId(emp.id); setEmpForm({ nombre: emp.nombre, cargo: emp.cargo, salario_mensual: emp.salario_mensual }); setShowEmpForm(true); }}
-                      className="p-1.5 rounded-lg border border-[var(--border-sub)] text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition">
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
+                    </div>
                   </div>
                 ))}
               </div>

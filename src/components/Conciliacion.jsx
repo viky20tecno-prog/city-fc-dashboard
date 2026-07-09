@@ -489,12 +489,12 @@ export default function Conciliacion({ color = 'var(--cc)', refreshTrigger }) {
       </div>
 
       {/* Filtros de estado */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-x-auto">
         {ESTADOS.map(e => (
           <button
             key={e.id}
             onClick={() => setFiltro(e.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm border transition-all ${
+            className={`shrink-0 whitespace-nowrap flex items-center gap-2 px-4 py-2 rounded-xl text-sm border transition-all ${
               filtroEstado === e.id
                 ? `${e.bg} ${e.color} shadow-[0_0_15px_var(--cc12)]`
                 : 'border-transparent text-gray-400 hover:text-white hover:bg-white/5'

@@ -1022,7 +1022,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
               <p className="text-center text-sm text-[var(--text-sec)] py-8">No hay pedidos en este estado</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-max text-sm">
                   <thead>
                     <tr className="border-b border-[var(--cc20)]">
                       {['Cédula','Nombre','Prendas','Estampar','Talla','Número','Total','Fecha','Estado',''].map(h => (

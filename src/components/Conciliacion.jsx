@@ -533,7 +533,7 @@ export default function Conciliacion({ color = 'var(--cc)', refreshTrigger }) {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-max">
               <thead>
                 <tr className="border-b border-[var(--cc20)] text-left">
                   {['Fecha', 'Jugador', 'Concepto', 'Monto', 'Banco', 'Referencia', 'Comprobante', 'Acciones'].map(h => (

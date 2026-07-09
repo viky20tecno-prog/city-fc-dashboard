@@ -659,7 +659,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
               <p className="text-center text-sm text-[var(--text-sec)] py-8">No hay movimientos en este período</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-max text-sm">
                   <thead>
                     <tr className="border-b border-[var(--border-sub)]">
                       {['Fecha','Tipo','Categoría','Descripción','Monto',''].map(h => (

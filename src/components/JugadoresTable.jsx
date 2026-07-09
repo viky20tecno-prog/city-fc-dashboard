@@ -1049,7 +1049,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
         {/* TABLE */}
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-max">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-sub)' }}>
                 {[

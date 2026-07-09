@@ -778,7 +778,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
             ) : (
               <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full min-w-max text-sm">
                     <thead>
                       <tr className="border-b border-[var(--cc20)]">
                         {renderSortTh('nombre', 'Jugador', 'alpha')}

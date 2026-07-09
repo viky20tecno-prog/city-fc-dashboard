@@ -119,11 +119,16 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
       setTorneosDef(nuevaLista);
       // Propagar nombre/precio a los jugadores que ya estaban inscritos en este torneo
       if (torneoId) {
-        await authFetch(`${API_BASE}/torneos/definicion/${torneoId}?club_id=${clubId}`, {
+        const propRes = await authFetch(`${API_BASE}/torneos/definicion/${torneoId}?club_id=${clubId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ nombre_torneo: nombreNuevo, valor_oficial: valorOficial, valor_inscrito: valorInscrito }),
         });
+        const propData = await propRes.json().catch(() => ({}));
+        if (!propRes.ok || !propData.success) {
+          console.error('[Torneos] No se pudo propagar el precio a los inscritos:', propRes.status, propData);
+          alert('El torneo se guardó, pero no se pudo actualizar el precio de los jugadores ya inscritos. Probá de nuevo en un momento.');
+        }
         await cargarEnrollments();
       }
       setEditIdx(null);

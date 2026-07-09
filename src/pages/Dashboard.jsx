@@ -5,6 +5,7 @@ import {
   Clock, ClipboardCheck, Settings, AlertTriangle,
   Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays, Shield,
   ChevronLeft, ChevronRight, MessageSquare, Link2, Globe, FolderOpen, Send,
+  MoreHorizontal,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -119,6 +120,7 @@ export default function Dashboard() {
   const [colorOverride,    setColorOverride]    = useState(null);
   const [isMobile,         setIsMobile]         = useState(() => window.innerWidth < 768);
   const [showBell,         setShowBell]         = useState(false);
+  const [showMasMenu,      setShowMasMenu]      = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('sidebarCollapsed') === 'true');
   const bellRef = useRef(null);
 
@@ -267,6 +269,9 @@ export default function Dashboard() {
     if (!modulos) return true;
     return modulos[id] !== false;
   });
+  const navPrincipal = navVisible.slice(0, 5);
+  const navMas       = navVisible.slice(5);
+  const masActivo     = showMasMenu || navMas.some(({ id }) => id === activeTab);
 
   const S = {
     shell: {
@@ -733,43 +738,110 @@ export default function Dashboard() {
 
       {/* ───── BOTTOM NAV (mobile) ───── */}
       {isMobile && (
-        <nav style={S.bottomNav}>
-          {navVisible.slice(0, 5).map(({ id, Icon, title }) => {
-            const isActive = activeTab === id;
-            return (
+          <>
+            <nav style={S.bottomNav}>
+              {navPrincipal.map(({ id, Icon, title }) => {
+                const isActive = activeTab === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => { setActiveTab(id); setShowMasMenu(false); }}
+                    style={{
+                      flex: 1, height: '56px',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      gap: '3px', border: 'none', background: 'transparent', cursor: 'pointer',
+                      color: isActive ? c : 'var(--text-mut)',
+                      position: 'relative',
+                    }}
+                  >
+                    {isActive && (
+                      <div style={{ position: 'absolute', top: 0, left: '20%', right: '20%', height: '2px', background: c, borderRadius: '0 0 2px 2px' }} />
+                    )}
+                    <Icon size={20} strokeWidth={isActive ? 2 : 1.6} style={isActive ? { filter: `drop-shadow(0 0 4px ${c}AA)` } : {}} />
+                    <span style={{ fontSize: '9px', letterSpacing: '0.5px', fontWeight: isActive ? 600 : 400 }}>{title.split(' ')[0]}</span>
+                  </button>
+                );
+              })}
+              {/* Botón "Más" — abre el resto de secciones + configuración + cerrar sesión */}
               <button
-                key={id}
-                onClick={() => setActiveTab(id)}
+                onClick={() => setShowMasMenu(v => !v)}
                 style={{
                   flex: 1, height: '56px',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   gap: '3px', border: 'none', background: 'transparent', cursor: 'pointer',
-                  color: isActive ? c : 'var(--text-mut)',
+                  color: masActivo ? c : 'var(--text-mut)',
                   position: 'relative',
                 }}
               >
-                {isActive && (
+                {masActivo && (
                   <div style={{ position: 'absolute', top: 0, left: '20%', right: '20%', height: '2px', background: c, borderRadius: '0 0 2px 2px' }} />
                 )}
-                <Icon size={20} strokeWidth={isActive ? 2 : 1.6} style={isActive ? { filter: `drop-shadow(0 0 4px ${c}AA)` } : {}} />
-                <span style={{ fontSize: '9px', letterSpacing: '0.5px', fontWeight: isActive ? 600 : 400 }}>{title.split(' ')[0]}</span>
+                <MoreHorizontal size={20} strokeWidth={masActivo ? 2 : 1.6} style={masActivo ? { filter: `drop-shadow(0 0 4px ${c}AA)` } : {}} />
+                <span style={{ fontSize: '9px', letterSpacing: '0.5px', fontWeight: masActivo ? 600 : 400 }}>Más</span>
               </button>
-            );
-          })}
-          {/* Botón "Más" para tabs extra */}
-          <button
-            onClick={() => setShowTheme(v => !v)}
-            style={{
-              flex: 1, height: '56px',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: '3px', border: 'none', background: 'transparent', cursor: 'pointer',
-              color: 'var(--text-mut)',
-            }}
-          >
-            <Settings size={20} strokeWidth={1.6} />
-            <span style={{ fontSize: '9px', letterSpacing: '0.5px' }}>Más</span>
-          </button>
-        </nav>
+            </nav>
+
+            {showMasMenu && (
+              <>
+                <div
+                  onClick={() => setShowMasMenu(false)}
+                  style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 90 }}
+                />
+                <div style={{
+                  position: 'fixed', left: 0, right: 0, bottom: '56px', zIndex: 91,
+                  background: 'var(--bg-card)', borderTop: `1px solid ${c}33`,
+                  borderRadius: '16px 16px 0 0', padding: '8px 8px calc(8px + env(safe-area-inset-bottom))',
+                  maxHeight: '70vh', overflowY: 'auto',
+                  boxShadow: '0 -8px 24px rgba(0,0,0,0.35)',
+                }}>
+                  {navMas.map(({ id, Icon, title }) => {
+                    const isActive = activeTab === id;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => { setActiveTab(id); setShowMasMenu(false); }}
+                        style={{
+                          width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+                          padding: '13px 12px', borderRadius: '10px', border: 'none',
+                          background: isActive ? `${c}14` : 'transparent',
+                          color: isActive ? c : 'var(--text-pri)',
+                          fontSize: '14px', fontWeight: isActive ? 600 : 500, textAlign: 'left', cursor: 'pointer',
+                        }}
+                      >
+                        <Icon size={18} strokeWidth={1.8} />
+                        {title}
+                      </button>
+                    );
+                  })}
+                  <div style={{ height: '1px', background: 'var(--border-sub)', margin: '6px 4px' }} />
+                  <button
+                    onClick={() => { setShowMasMenu(false); setShowTheme(true); }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+                      padding: '13px 12px', borderRadius: '10px', border: 'none',
+                      background: 'transparent', color: 'var(--text-pri)',
+                      fontSize: '14px', fontWeight: 500, textAlign: 'left', cursor: 'pointer',
+                    }}
+                  >
+                    <Settings size={18} strokeWidth={1.8} />
+                    Configuración
+                  </button>
+                  <button
+                    onClick={() => { setShowMasMenu(false); handleLogout(); }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+                      padding: '13px 12px', borderRadius: '10px', border: 'none',
+                      background: 'transparent', color: '#EF4444',
+                      fontSize: '14px', fontWeight: 500, textAlign: 'left', cursor: 'pointer',
+                    }}
+                  >
+                    <LogOut size={18} strokeWidth={1.8} />
+                    Cerrar sesión
+                  </button>
+                </div>
+              </>
+            )}
+          </>
       )}
 
       {/* ───── TRIAL EXPIRADO — overlay bloqueante ───── */}

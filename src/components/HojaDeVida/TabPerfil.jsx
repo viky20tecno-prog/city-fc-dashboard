@@ -582,7 +582,7 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
         </div>
         {form.tipo_descuento !== 'NA' && Number(form.descuento_pct) > 0 && (
           <p className="text-xs mt-2" style={{ color: 'var(--text-mut)' }}>
-            Al guardar se ajustará la mensualidad del mes actual si aún no está pagada.
+            Al guardar se ajustará la mensualidad del mes actual y de los meses futuros de este año que aún no estén pagados.
           </p>
         )}
       </Seccion>

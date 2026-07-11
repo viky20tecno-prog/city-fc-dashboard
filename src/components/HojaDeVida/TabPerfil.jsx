@@ -610,7 +610,7 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
                   onChange={e => {
                     const valorFijo = Math.max(0, Number(e.target.value) || 0);
                     const pct = cuotaClub > 0 ? Math.max(0, Math.min(100, (1 - valorFijo / cuotaClub) * 100)) : 0;
-                    setForm(f => ({ ...f, descuento_pct: Math.round(pct * 100) / 100 }));
+                    setForm(f => ({ ...f, descuento_pct: Math.round(pct * 10000) / 10000 }));
                   }}
                   placeholder="ej: 45000" className={INPUT_CLS} />
               </div>

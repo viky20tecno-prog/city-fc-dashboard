@@ -3,6 +3,7 @@ import { X, Camera, Loader2, Save, MessageCircle, Info, Eye, Settings2 } from 'l
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
 import { authFetch } from '../lib/authFetch';
+import ModalDescuentosAfectados from './ModalDescuentosAfectados';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
@@ -150,6 +151,7 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
   const [activeMsg,   setActiveMsg]   = useState(0);
   const [aplicarAPendientes, setAplicarAPendientes] = useState(false);
   const [actualizadasMsg,    setActualizadasMsg]    = useState('');
+  const [becadosAfectados,   setBecadosAfectados]   = useState(null); // null = modal cerrado
   const qrRef = useRef(null);
 
   const overlayRef = useRef(null);
@@ -179,6 +181,14 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
 
   const valorCambio = Number(form.valor_mensualidad) !== Number(clubConfig?.valor_mensualidad ?? 0);
 
+  const aplicarMensualidadPendientes = async () => {
+    const resp = await authFetch(`${API_BASE}/config/aplicar-mensualidad-pendientes?club_id=${getClubId()}`, {
+      method: 'POST',
+    });
+    const data = await resp.json();
+    return data.success ? (data.actualizadas || 0) : 0;
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setActualizadasMsg('');
@@ -202,24 +212,42 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
         }),
       });
 
-      if (aplicarAPendientes && valorCambio) {
-        const resp = await authFetch(`${API_BASE}/config/aplicar-mensualidad-pendientes?club_id=${getClubId()}`, {
-          method: 'POST',
-        });
-        const data = await resp.json();
-        if (data.success) {
-          setActualizadasMsg(`${data.actualizadas} mensualidad(es) pendiente(s) actualizada(s) al nuevo valor.`);
-        }
-      }
-
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       onSaved?.();
+
+      if (aplicarAPendientes && valorCambio) {
+        // Los jugadores con beca/descuento activo no se tocan de una — se le pide al
+        // admin que revise/edite su valor en un modal aparte antes de aplicar nada.
+        const respBecados = await authFetch(
+          `${API_BASE}/config/jugadores-con-descuento-afectados?club_id=${getClubId()}&nuevo_valor=${Number(form.valor_mensualidad)}`
+        );
+        const dataBecados = await respBecados.json();
+        const becados = dataBecados.success ? (dataBecados.data || []) : [];
+
+        if (becados.length > 0) {
+          setBecadosAfectados(becados);
+        } else {
+          const actualizadas = await aplicarMensualidadPendientes();
+          setActualizadasMsg(`${actualizadas} mensualidad(es) pendiente(s) actualizada(s) al nuevo valor.`);
+        }
+      }
     } catch (err) {
       console.error('Error guardando config cobro:', err);
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleConfirmDescuentos = async (valores) => {
+    await authFetch(`${API_BASE}/config/aplicar-descuentos-masivo?club_id=${getClubId()}`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ valores }),
+    });
+    const actualizadas = await aplicarMensualidadPendientes();
+    setActualizadasMsg(`${valores.length} jugador(es) con beca actualizado(s), ${actualizadas} mensualidad(es) más al nuevo valor.`);
+    setBecadosAfectados(null);
   };
 
   const mensajes = buildMensajes(form, clubConfig?.nombre);
@@ -238,6 +266,7 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
   };
 
   return (
+    <>
     <div
       ref={overlayRef}
       style={{
@@ -566,5 +595,15 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
 
       </div>
     </div>
+
+    {becadosAfectados && (
+      <ModalDescuentosAfectados
+        color={c}
+        becados={becadosAfectados}
+        onClose={() => setBecadosAfectados(null)}
+        onConfirm={handleConfirmDescuentos}
+      />
+    )}
+    </>
   );
 }

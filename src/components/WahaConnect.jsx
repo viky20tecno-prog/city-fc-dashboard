@@ -70,6 +70,10 @@ export default function WahaConnect({ clubConfig, onConectado }) {
       setFase('error');
       setMsg('La sesión falló. Intenta reconectar.');
       detenerPoll();
+    } else if (d.status === 'DUPLICATE_NUMBER') {
+      setFase('error');
+      setMsg(d.error || 'Este número ya está conectado en otra sesión. Usa un número diferente.');
+      detenerPoll();
     } else if (d.status === 'STOPPED') {
       // Confirmado por WAHA (no una falla de red) — la sesión sí se cerró de verdad
       setFase('idle');

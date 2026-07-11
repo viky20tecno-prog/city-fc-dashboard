@@ -156,6 +156,8 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
   const [error,     setError]     = useState('');
   const [addingCat, setAddingCat] = useState(false);
   const [newCat,    setNewCat]    = useState({ categoria: '', equipo: '' });
+  const [modoDescuento, setModoDescuento] = useState('pct'); // 'pct' | 'fijo'
+  const cuotaClub = parseFloat(clubConfig?.valor_mensualidad) || 0;
 
   const isPend = String(jugador.cedula).startsWith('PEND_');
 
@@ -557,33 +559,70 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
 
       {/* Beca / Descuento */}
       <Seccion titulo="Beca / Descuento">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Tipo</label>
-            <select value={form.tipo_descuento}
-              onChange={e => {
-                const tipo = e.target.value;
-                setForm(f => ({ ...f, tipo_descuento: tipo, descuento_pct: tipo === 'NA' ? 0 : f.descuento_pct }));
-              }}
-              className={INPUT_CLS}>
-              <option value="NA">Sin descuento</option>
-              <option value="BECA_DEPORTIVA">Beca Deportiva</option>
-              <option value="BECA_SOCIAL">Beca Social</option>
-              <option value="CONDICION_ESPECIAL">Condición Especial</option>
-            </select>
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Descuento (%)</label>
-            <input type="number" min="0" max="100" step="1"
-              value={form.descuento_pct} onChange={set('descuento_pct')}
-              disabled={form.tipo_descuento === 'NA'} placeholder="0"
-              className={INPUT_CLS} style={{ opacity: form.tipo_descuento === 'NA' ? 0.4 : 1 }} />
-          </div>
+        <div className="space-y-1 mb-3">
+          <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Tipo</label>
+          <select value={form.tipo_descuento}
+            onChange={e => {
+              const tipo = e.target.value;
+              setForm(f => ({ ...f, tipo_descuento: tipo, descuento_pct: tipo === 'NA' ? 0 : f.descuento_pct }));
+            }}
+            className={INPUT_CLS}>
+            <option value="NA">Sin descuento</option>
+            <option value="BECA_DEPORTIVA">Beca Deportiva</option>
+            <option value="BECA_SOCIAL">Beca Social</option>
+            <option value="CONDICION_ESPECIAL">Condición Especial</option>
+          </select>
         </div>
-        {form.tipo_descuento !== 'NA' && Number(form.descuento_pct) > 0 && (
-          <p className="text-xs mt-2" style={{ color: 'var(--text-mut)' }}>
-            Al guardar se ajustará la mensualidad del mes actual y de los meses futuros de este año que aún no estén pagados.
-          </p>
+
+        {form.tipo_descuento !== 'NA' && (
+          <>
+            <div className="flex gap-2 mb-2">
+              <button type="button" onClick={() => setModoDescuento('pct')}
+                className="px-3 py-1 rounded-lg text-xs font-semibold transition"
+                style={modoDescuento === 'pct'
+                  ? { background: 'var(--cc)', color: '#fff' }
+                  : { background: 'var(--bg-card)', color: 'var(--text-sec)', border: '1px solid var(--border-sub)' }}>
+                Por %
+              </button>
+              <button type="button" onClick={() => setModoDescuento('fijo')}
+                disabled={!cuotaClub}
+                title={!cuotaClub ? 'Configura primero la cuota base del club (Ciclo de Cobro)' : ''}
+                className="px-3 py-1 rounded-lg text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed"
+                style={modoDescuento === 'fijo'
+                  ? { background: 'var(--cc)', color: '#fff' }
+                  : { background: 'var(--bg-card)', color: 'var(--text-sec)', border: '1px solid var(--border-sub)' }}>
+                Valor fijo ($)
+              </button>
+            </div>
+
+            {modoDescuento === 'pct' ? (
+              <div className="space-y-1">
+                <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Descuento (%)</label>
+                <input type="number" min="0" max="100" step="1"
+                  value={form.descuento_pct} onChange={set('descuento_pct')}
+                  placeholder="0" className={INPUT_CLS} />
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Valor mensual fijo ($)</label>
+                <input type="number" min="0" step="1000"
+                  value={cuotaClub ? Math.round(cuotaClub * (1 - (Number(form.descuento_pct) || 0) / 100)) : 0}
+                  onChange={e => {
+                    const valorFijo = Math.max(0, Number(e.target.value) || 0);
+                    const pct = cuotaClub > 0 ? Math.max(0, Math.min(100, (1 - valorFijo / cuotaClub) * 100)) : 0;
+                    setForm(f => ({ ...f, descuento_pct: Math.round(pct * 100) / 100 }));
+                  }}
+                  placeholder="ej: 45000" className={INPUT_CLS} />
+              </div>
+            )}
+
+            <p className="text-xs mt-2" style={{ color: 'var(--text-mut)' }}>
+              {cuotaClub > 0 && (
+                <>Este jugador pagará <strong>${Math.round(cuotaClub * (1 - (Number(form.descuento_pct) || 0) / 100)).toLocaleString('es-CO')}</strong>/mes. </>
+              )}
+              Al guardar se aplica a <strong>los 12 meses de este año</strong> (los meses ya pagados en su totalidad no se tocan).
+            </p>
+          </>
         )}
       </Seccion>
 

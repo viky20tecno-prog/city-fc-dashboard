@@ -72,7 +72,7 @@ function SuspendidoBadge({ motivo, detalle, cancelada }) {
         cancelada ? 'bg-[var(--bg-surface)]/20 text-[var(--text-sec)] border-[var(--bg-surface)]/30'
                   : 'bg-yellow-400/10 text-yellow-400 border-yellow-400/20'
       }`}>
-        <PauseCircle className="w-3 h-3" /> SUSPENDIDO
+        <PauseCircle className="w-3 h-3" /> NO APLICA
       </span>
       <span className="text-xs text-[var(--text-sec)]">
         {MOTIVO_LABEL[motivo] || motivo}{detalle ? ` · ${detalle}` : ''}
@@ -160,7 +160,9 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
             <p className="text-sm font-medium text-[var(--text-pri)]">
               {esExentoGlobal
                 ? <><span>$0</span><span className="text-[var(--text-sec)]"> / {formatCOP(cuotaClub)}</span></>
-                : <>{formatCOP(m.valor_pagado)}<span className="text-[var(--text-sec)]"> / {formatCOP(totalDeuda)}</span></>}
+                : susp
+                  ? <><span>$0</span><span className="text-[var(--text-sec)]"> / $0</span></>
+                  : <>{formatCOP(m.valor_pagado)}<span className="text-[var(--text-sec)]"> / {formatCOP(totalDeuda)}</span></>}
             </p>
             {!susp && (
               <button onClick={abrirEdit} className="p-1 rounded-lg text-[var(--text-mut)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">

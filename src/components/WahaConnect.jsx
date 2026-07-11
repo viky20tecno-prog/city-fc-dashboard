@@ -33,7 +33,10 @@ export default function WahaConnect({ clubConfig, onConectado }) {
   const plan = (clubConfig?.plan || 'trial').toLowerCase();
   const planOk = plan === 'pro' || plan === 'scale';
 
-  const [fase, setFase]       = useState('idle');   // idle | conectando | qr | exito | error | waha_plus
+  // Si ya había una sesión guardada, arrancar optimista en "conectado" — evita que un
+  // simple recargo de página muestre "desconectado" mientras se confirma con WAHA en
+  // segundo plano (una falla transitoria de red no debe forzar un re-escaneo del QR).
+  const [fase, setFase]       = useState(() => (planOk && clubConfig?.waha_session ? 'exito' : 'idle'));
   const [status, setStatus]   = useState(null);      // STOPPED | STARTING | SCAN_QR_CODE | WORKING | FAILED
   const [qrSrc, setQrSrc]     = useState(null);
   const [me, setMe]           = useState(null);      // { id, pushName }
@@ -68,8 +71,11 @@ export default function WahaConnect({ clubConfig, onConectado }) {
       setMsg('La sesión falló. Intenta reconectar.');
       detenerPoll();
     } else if (d.status === 'STOPPED') {
-      // WAHA aún no arrancó la sesión — seguir esperando (no cerrar)
+      // Confirmado por WAHA (no una falla de red) — la sesión sí se cerró de verdad
+      setFase('idle');
+      detenerPoll();
     }
+    // 'UNKNOWN' = no se pudo confirmar con WAHA ahora mismo — no tocar fase, mantener el último estado conocido
   }, [onConectado]);
 
   const fetchQr = async () => {

@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   ChevronLeft, ChevronRight, CheckCircle2, XCircle, AlertCircle,
-  Loader2, Users, Plus, ClipboardList, X, Download,
+  Loader2, Users, Plus, ClipboardList, X, Download, Trophy,
   MoreHorizontal, Edit2, Trash2, AlertTriangle,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import {
-  drawPdfHeader, drawPdfFooter, drawPdfTableHead,
+  drawPdfHeader, drawPdfFooter, drawPdfTableHead, drawPdfSectionLabel,
   hexToRgb, loadLogoDataUrl,
 } from '../lib/pdfHelpers';
 
@@ -144,6 +144,12 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
 
   // ── Export PDF
   const [exportandoPDF, setExportandoPDF] = useState(false);
+
+  // ── Reporte de ranking de asistencia (mensual/anual)
+  const [reporteModal,     setReporteModal]     = useState(false);
+  const [reporteAnio,      setReporteAnio]      = useState(new Date().getFullYear());
+  const [reporteMes,       setReporteMes]       = useState('');
+  const [generandoReporte, setGenerandoReporte] = useState(false);
 
   // ── Caché de asistencia por evento (persiste al volver a la lista)
   const [asistCache, setAsistCache] = useState({});
@@ -420,6 +426,93 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
     }
   }
 
+  // ── Reporte de ranking de asistencia (entrenamientos) ──────────────────────
+
+  async function generarReporteRanking() {
+    if (generandoReporte) return;
+    setGenerandoReporte(true);
+    try {
+      const qs = new URLSearchParams({ club_id: clubId, anio: String(reporteAnio) });
+      if (reporteMes) qs.set('mes', reporteMes);
+      const res  = await authFetch(`${API_BASE_URL}/asistencia/ranking-entrenamientos?${qs}`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Error al generar el reporte');
+
+      const { general, por_equipo } = data;
+      if (general.length === 0) {
+        alert('No hay entrenamientos registrados en ese período.');
+        return;
+      }
+
+      const { default: jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      const W = 210, M = 14, H = 297;
+      const accentRgb = hexToRgb(color);
+      const logoData  = await loadLogoDataUrl(clubConfig?.logo_url);
+      const clubName  = clubConfig?.nombre || 'Mi Club';
+      const periodo   = reporteMes ? `${MESES[reporteMes - 1]} ${reporteAnio}` : `Año ${reporteAnio}`;
+
+      let y = drawPdfHeader(doc, {
+        W, M, clubName,
+        title: 'Ranking de asistencia',
+        subtitle: `Entrenamientos · ${periodo}`,
+        logoData, accentRgb, height: 32,
+      });
+
+      const cols = [
+        { label: '#',      x: M + 2   },
+        { label: 'Nombre', x: M + 12  },
+        { label: 'Asist.', x: M + 140 },
+        { label: '%',      x: M + 168 },
+      ];
+
+      function pintarTabla(label, ranking) {
+        if (y > 250) { drawPdfFooter(doc, { W, H, M, clubName }); doc.addPage(); y = 18; }
+        y = drawPdfSectionLabel(doc, { W, M, y, label, count: ranking.length, accentRgb });
+        y = drawPdfTableHead(doc, { W, M, y, columns: cols, accentRgb });
+
+        ranking.forEach((p, idx) => {
+          if (y > 278) {
+            drawPdfFooter(doc, { W, H, M, clubName });
+            doc.addPage();
+            y = drawPdfTableHead(doc, { W, M, y: 18, columns: cols, accentRgb });
+          }
+          const esTop5 = idx < 5;
+          if (esTop5) {
+            doc.setFillColor(255, 247, 230);
+            doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F');
+          } else if (idx % 2 === 0) {
+            doc.setFillColor(248, 249, 250);
+            doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F');
+          }
+
+          doc.setFont('helvetica', esTop5 ? 'bold' : 'normal');
+          doc.setFontSize(8.5);
+          doc.setTextColor(60, 60, 60);
+          doc.text(esTop5 ? `${idx + 1} ★` : String(idx + 1), M + 2, y);
+          doc.text(`${p.nombre || p.cedula}`.toUpperCase().slice(0, 42), M + 12, y);
+          doc.text(`${p.presentes}/${p.total_eventos}`, M + 140, y);
+          doc.setTextColor(...accentRgb);
+          doc.text(`${p.porcentaje}%`, M + 168, y);
+          doc.setTextColor(60, 60, 60);
+          y += 8;
+        });
+        y += 6;
+      }
+
+      pintarTabla('General', general);
+      Object.entries(por_equipo).forEach(([equipo, ranking]) => pintarTabla(equipo, ranking));
+
+      drawPdfFooter(doc, { W, H, M, clubName });
+      doc.save(`ranking-asistencia-${periodo.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+      setReporteModal(false);
+    } catch (e) {
+      alert(e.message || 'Error al generar el reporte');
+    } finally {
+      setGenerandoReporte(false);
+    }
+  }
+
   // ── Drawer historial jugador ───────────────────────────────────────────────
 
   async function abrirDrawerJugador(p) {
@@ -484,9 +577,14 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
             {esNombrado ? formatFechaLarga(fecha) : formatFechaLarga(fecha)}
           </p>
         </div>
-        <button onClick={() => setFecha(f => addDays(f, 1))} style={S.navBtn}>
-          <ChevronRight size={18} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button onClick={() => setReporteModal(true)} title="Reporte de asistencia" style={S.navBtn}>
+            <Trophy size={17} />
+          </button>
+          <button onClick={() => setFecha(f => addDays(f, 1))} style={S.navBtn}>
+            <ChevronRight size={18} />
+          </button>
+        </div>
       </div>
 
       {/* ── Sin evento activo: lista ───────────────────────────────────────── */}
@@ -803,6 +901,41 @@ export default function AsistenciaPage({ color = '#E14924', jugadores = [], club
                   {eliminandoEvento ? <><Loader2 size={14} className="animate-spin" /> Eliminando…</> : 'Sí, eliminar'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Reporte de ranking de asistencia ───────────────────────────── */}
+      {reporteModal && (
+        <div style={S.overlay} onClick={() => !generandoReporte && setReporteModal(false)}>
+          <div style={S.sheet} onClick={e => e.stopPropagation()}>
+            <div style={S.sheetHeader}>
+              <p style={S.sheetTitle}>Reporte de asistencia</p>
+              <button onClick={() => setReporteModal(false)} style={S.closeBtn}><X size={18} /></button>
+            </div>
+            <div style={{ padding: '16px 20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-sec)', lineHeight: 1.5 }}>
+                Ranking de asistencia a <strong>entrenamientos</strong> (los partidos no se incluyen, porque no todos los jugadores son convocados). El top 5 queda resaltado para la premiación.
+              </p>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={S.label}>Año</label>
+                  <input type="number" value={reporteAnio} onChange={e => setReporteAnio(parseInt(e.target.value) || new Date().getFullYear())} className={INPUT} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={S.label}>Mes</label>
+                  <select value={reporteMes} onChange={e => setReporteMes(e.target.value)} className={INPUT} style={{ appearance: 'auto' }}>
+                    <option value="">Todo el año</option>
+                    {MESES.map((m, i) => (
+                      <option key={m} value={i + 1}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <button onClick={generarReporteRanking} disabled={generandoReporte} style={{ ...S.primaryBtn(color), opacity: generandoReporte ? 0.65 : 1 }}>
+                {generandoReporte ? <><Loader2 size={15} className="animate-spin" /> Generando…</> : <><Download size={15} /> Generar PDF</>}
+              </button>
             </div>
           </div>
         </div>

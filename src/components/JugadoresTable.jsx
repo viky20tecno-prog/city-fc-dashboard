@@ -540,7 +540,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       EXENTO:     { bg: 'FF1D4ED8', fg: 'FFFFFFFF', bold: true  },  // azul intenso / blanco
       AL_DIA:     { bg: 'FFD1FAE5', fg: 'FF166534', bold: false },  // verde
       MORA:       { bg: 'FFFEE2E2', fg: 'FFB91C1C', bold: true  },  // rojo / negrita
-      SUSPENDIDO: { bg: 'FFFED7AA', fg: 'FF9A3412', bold: false },  // naranja
+      'NO APLICA': { bg: 'FFFED7AA', fg: 'FF9A3412', bold: false },  // naranja — mes suspendido, no aplica cobro
       PENDIENTE:  { bg: 'FFF3F4F6', fg: 'FF6B7280', bold: false },  // gris suave
       PARCIAL:    { bg: 'FFDBEAFE', fg: 'FF1E40AF', bold: false },  // azul claro
     };
@@ -620,9 +620,9 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       const estadosMes = MESES.map((_, i) => {
         if (esExentoGlobal) return 'EXENTO';
         const mes = i + 1;
-        if (suspMeses?.has(mes)) return 'SUSPENDIDO';
+        if (suspMeses?.has(mes)) return 'NO APLICA';
         const est = mesesJ[mes] || '-';
-        return est === 'EXENTO' ? 'SUSPENDIDO' : est;
+        return est === 'EXENTO' ? 'NO APLICA' : est;
       });
 
       // Observaciones: usar notas del jugador, quitando prefijo "[Exento: ...]" si quedó de lógica anterior

@@ -3,10 +3,15 @@ import {
   ChevronLeft, ChevronRight, Plus, Edit2, Trash2,
   X, Loader2, MapPin, Clock, CalendarDays, List, Users,
   CheckCircle2, XCircle, AlertCircle, ChevronDown, PauseCircle, PlayCircle,
-  DollarSign, Check,
+  DollarSign, Check, Trophy, Download,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
+import { useClubConfig } from '../hooks/useClubConfig';
+import {
+  drawPdfHeader, drawPdfFooter, drawPdfTableHead, drawPdfSectionLabel,
+  hexToRgb, loadLogoDataUrl,
+} from '../lib/pdfHelpers';
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 
@@ -226,6 +231,14 @@ function EventCard({ ev, onEdit, onDelete, onAsistencia, onToggleSuspend, deleti
 export default function Calendario({ color, clubId }) {
   const today    = new Date();
   const todayStr = localDateStr(today);
+
+  const { config: clubConfig } = useClubConfig();
+
+  // ── Reporte de ranking de asistencia (mensual/anual)
+  const [reporteModal,     setReporteModal]     = useState(false);
+  const [reporteAnio,      setReporteAnio]      = useState(today.getFullYear());
+  const [reporteMes,       setReporteMes]       = useState('');
+  const [generandoReporte, setGenerandoReporte] = useState(false);
 
   const [view,           setView]           = useState('mes');
   const [year,           setYear]           = useState(today.getFullYear());
@@ -564,6 +577,131 @@ export default function Calendario({ color, clubId }) {
   const cells       = getCalendarCells(year, month);
   const dayEvs      = eventsByDay[selectedDate] || [];
   const tomorrowStr = localDateStr(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1));
+
+  // ── Reporte de ranking de asistencia (entrenamientos) ──────────────────────
+
+  async function generarReporteRanking() {
+    if (generandoReporte) return;
+    setGenerandoReporte(true);
+    try {
+      const qs = new URLSearchParams({ club_id: clubId, anio: String(reporteAnio) });
+      if (reporteMes) qs.set('mes', reporteMes);
+      const res  = await authFetch(`${API_BASE_URL}/asistencia/ranking-entrenamientos?${qs}`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Error al generar el reporte');
+
+      const { general, por_equipo } = data;
+      if (general.length === 0) {
+        alert('No hay entrenamientos registrados en ese período.');
+        return;
+      }
+
+      const { default: jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      const W = 210, M = 14, H = 297;
+      const accentRgb = hexToRgb(color);
+      const logoData  = await loadLogoDataUrl(clubConfig?.logo_url);
+      const clubName  = clubConfig?.nombre || 'Mi Club';
+      const periodo   = reporteMes ? `${MESES[reporteMes - 1]} ${reporteAnio}` : `Año ${reporteAnio}`;
+
+      let y = drawPdfHeader(doc, {
+        W, M, clubName,
+        title: 'Ranking de asistencia',
+        subtitle: `Entrenamientos · ${periodo}`,
+        logoData, accentRgb, height: 32,
+      });
+
+      const cols = [
+        { label: '#',      x: M + 2   },
+        { label: 'Nombre', x: M + 12  },
+        { label: 'Asist.', x: M + 140 },
+        { label: '%',      x: M + 168 },
+      ];
+
+      function pintarTabla(label, ranking) {
+        if (y > 250) { drawPdfFooter(doc, { W, H, M, clubName }); doc.addPage(); y = 18; }
+        y = drawPdfSectionLabel(doc, { W, M, y, label, count: ranking.length, accentRgb });
+        y = drawPdfTableHead(doc, { W, M, y, columns: cols, accentRgb });
+
+        ranking.forEach((p, idx) => {
+          if (y > 278) {
+            drawPdfFooter(doc, { W, H, M, clubName });
+            doc.addPage();
+            y = drawPdfTableHead(doc, { W, M, y: 18, columns: cols, accentRgb });
+          }
+          const esTop5 = idx < 5;
+          if (esTop5) {
+            doc.setFillColor(255, 247, 230);
+            doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F');
+          } else if (idx % 2 === 0) {
+            doc.setFillColor(248, 249, 250);
+            doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F');
+          }
+
+          doc.setFont('helvetica', esTop5 ? 'bold' : 'normal');
+          doc.setFontSize(8.5);
+          doc.setTextColor(60, 60, 60);
+          doc.text(esTop5 ? `${idx + 1} ★` : String(idx + 1), M + 2, y);
+          doc.text(`${p.nombre || p.cedula}`.toUpperCase().slice(0, 42), M + 12, y);
+          doc.text(`${p.presentes}/${p.total_eventos}`, M + 140, y);
+          doc.setTextColor(...accentRgb);
+          doc.text(`${p.porcentaje}%`, M + 168, y);
+          doc.setTextColor(60, 60, 60);
+          y += 8;
+        });
+        y += 6;
+      }
+
+      pintarTabla('General', general);
+      Object.entries(por_equipo).forEach(([equipo, ranking]) => pintarTabla(equipo, ranking));
+
+      drawPdfFooter(doc, { W, H, M, clubName });
+      doc.save(`ranking-asistencia-${periodo.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+      setReporteModal(false);
+    } catch (e) {
+      alert(e.message || 'Error al generar el reporte');
+    } finally {
+      setGenerandoReporte(false);
+    }
+  }
+
+  const ReporteModal = () => (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="bg-[var(--bg-card)] border border-[var(--cc30)] rounded-2xl w-full max-w-md shadow-2xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--cc30)]">
+          <h2 className="text-[var(--text-pri)] font-bold">Reporte de asistencia</h2>
+          <button onClick={() => !generandoReporte && setReporteModal(false)} className="text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+        <div className="p-6 space-y-4">
+          <p className="text-xs text-[var(--text-sec)] leading-relaxed">
+            Ranking de asistencia a <strong>entrenamientos</strong> (los partidos no se incluyen, porque no todos los jugadores son convocados). El top 5 queda resaltado para la premiación.
+          </p>
+          <div className="flex gap-3">
+            <div className="flex-1 space-y-1.5">
+              <label className="block text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider">Año</label>
+              <input type="number" value={reporteAnio}
+                onChange={e => setReporteAnio(parseInt(e.target.value) || today.getFullYear())}
+                className={INPUT} />
+            </div>
+            <div className="flex-1 space-y-1.5">
+              <label className="block text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider">Mes</label>
+              <select value={reporteMes} onChange={e => setReporteMes(e.target.value)} className={INPUT}>
+                <option value="">Todo el año</option>
+                {MESES.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+              </select>
+            </div>
+          </div>
+          <button onClick={generarReporteRanking} disabled={generandoReporte}
+            style={{ background: color }}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-85 transition-opacity disabled:opacity-60">
+            {generandoReporte ? <><Loader2 size={15} className="animate-spin" /> Generando…</> : <><Download size={15} /> Generar PDF</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   // ── MonthView (función, no componente) ────────────────────────────────────
 
@@ -1296,6 +1434,10 @@ export default function Calendario({ color, clubId }) {
                 </button>
               ))}
             </div>
+            <button onClick={() => setReporteModal(true)} title="Reporte de asistencia"
+              className="shrink-0 p-2 rounded-xl border border-[var(--cc30)] text-[var(--text-sec)] hover:text-[var(--text-pri)] hover:border-[var(--cc)] transition-colors">
+              <Trophy size={16} />
+            </button>
             <button onClick={() => openCreate(view === 'mes' ? selectedDate : null)}
               style={{ background: color }}
               className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold hover:opacity-85 transition-opacity">
@@ -1318,6 +1460,7 @@ export default function Calendario({ color, clubId }) {
 
       {showForm && EventForm()}
       {asistEvento && AsistenciaPanel()}
+      {reporteModal && ReporteModal()}
     </div>
   );
 }

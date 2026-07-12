@@ -328,6 +328,16 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const anioActualTabla = new Date().getFullYear();
 
   const jugadoresConPago = useMemo(() => {
+    // Suspensión ACTIVA por cédula → Set de meses cubiertos (criterio unificado: si se
+    // cancela la suspensión, la deuda de esos meses vuelve a contar de inmediato).
+    const suspIdxTabla = {};
+    (suspensiones || []).forEach(s => {
+      if (!s.activa || parseInt(s.anio) !== anioActualTabla) return;
+      const ced = String(s.cedula);
+      if (!suspIdxTabla[ced]) suspIdxTabla[ced] = new Set();
+      for (let m = s.mes_inicio; m <= s.mes_fin; m++) suspIdxTabla[ced].add(m);
+    });
+
     return jugadores.map(j => {
       const mensJugador = mensualidades.filter(m => (m.cedula || m.player_id) == j.cedula);
 
@@ -339,11 +349,16 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         return anioM < anioActualTabla || (anioM === anioActualTabla && mesM <= mesActualTabla);
       });
 
+      // Meses con suspensión activa no cuentan para el estado ni el saldo pendiente —
+      // pero sí siguen sumando en totalPagado (lo que ya se pagó, se pagó).
+      const suspMeses     = suspIdxTabla[String(j.cedula)];
+      const mensParaDeuda = suspMeses ? mensHastaHoy.filter(m => !suspMeses.has(parseInt(m.numero_mes))) : mensHastaHoy;
+
       // Si el backend lo marca como moroso → MORA; si no, calculamos localmente
       const esMoroso       = cedulasMorosos.has(String(j.cedula));
-      const estadoLocal    = peorEstado(mensHastaHoy);
+      const estadoLocal    = peorEstado(mensParaDeuda);
       const estadoPago     = esMoroso ? 'MORA' : estadoLocal;
-      const saldoPendiente = mensHastaHoy.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
+      const saldoPendiente = mensParaDeuda.reduce((s, m) => s + (parseFloat(m.saldo_pendiente) || 0), 0);
       const totalPagado    = mensHastaHoy.reduce((s, m) => s + (parseFloat(m.valor_pagado)    || 0), 0);
       const nombre = `${j.nombre || j['nombre(s)'] || ''} ${j.apellidos || j['apellido(s)'] || ''}`.trim().toUpperCase();
       return {
@@ -351,7 +366,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         activo: j.activo === true || (j.activo || '').toString().toUpperCase() === 'SI',
       };
     });
-  }, [jugadores, mensualidades, cedulasMorosos]);
+  }, [jugadores, mensualidades, cedulasMorosos, suspensiones]);
 
   const opcionesCategoria = useMemo(() => {
     const equipos = listarEquipos(categoriasJugadores);
@@ -715,14 +730,45 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     const diaHoy     = new Date().getDate();
     const diasGracia = clubConfig?.dias_gracia_mora ?? 0;
 
-    // Índice meses en mora por cédula (solo hasta mes actual)
+    // Suspensión ACTIVA por cédula (si se cancela, la deuda de esos meses vuelve a contar)
+    const suspIdxPdf = {};
+    (suspensiones || []).forEach(s => {
+      if (!s.activa || parseInt(s.anio) !== anio) return;
+      const ced = String(s.cedula);
+      if (!suspIdxPdf[ced]) suspIdxPdf[ced] = new Set();
+      for (let m = s.mes_inicio; m <= s.mes_fin; m++) suspIdxPdf[ced].add(m);
+    });
+    const estaSuspendido = (cedula, mesNum) => suspIdxPdf[String(cedula)]?.has(mesNum) || false;
+
+    // Índice meses en mora por cédula (solo hasta mes actual, excluye meses suspendidos)
     const moraPorCedula = {};
     (mensualidades || [])
       .filter(m => parseInt(m.anio) === anio && m.estado === 'MORA' && parseInt(m.numero_mes) <= mesHoy)
       .forEach(m => {
         const ced = String(m.cedula || m.player_id || '');
+        if (estaSuspendido(ced, parseInt(m.numero_mes))) return;
         moraPorCedula[ced] = (moraPorCedula[ced] || 0) + 1;
       });
+
+    // Deuda de un jugador hasta el mes actual — nunca cuenta un mes con suspensión activa
+    function calcularDeuda(cedula) {
+      const mensJ = (mensualidades || []).filter(m =>
+        String(m.cedula || m.player_id || '') === String(cedula) &&
+        parseInt(m.anio) === anio && parseInt(m.numero_mes) <= mesHoy
+      );
+      let deuda = 0;
+      mensJ.forEach(m => {
+        const numMes = parseInt(m.numero_mes);
+        if (estaSuspendido(cedula, numMes)) return;
+        const saldo = parseFloat(m.saldo_pendiente) || 0;
+        if (m.estado === 'MORA' || m.estado === 'PARCIAL') {
+          deuda += saldo;
+        } else if (m.estado === 'PENDIENTE' && (numMes < mesHoy || (numMes === mesHoy && diaHoy > diasGracia))) {
+          deuda += saldo;
+        }
+      });
+      return deuda;
+    }
 
     const cols = [
       { label: '#',         x: M },
@@ -770,21 +816,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(30, 40, 50);
       doc.text(formatCOP(j.totalPagado), cols[7].x, y);
-      // Deuda solo hasta el mes actual (no meses futuros)
-      const mensJ = (mensualidades || []).filter(m =>
-        String(m.cedula || m.player_id || '') === String(j.cedula) &&
-        parseInt(m.anio) === anio && parseInt(m.numero_mes) <= mesHoy
-      );
-      let deudaJ = 0;
-      mensJ.forEach(m => {
-        const numMes = parseInt(m.numero_mes);
-        const saldo  = parseFloat(m.saldo_pendiente) || 0;
-        if (m.estado === 'MORA' || m.estado === 'PARCIAL') {
-          deudaJ += saldo;
-        } else if (m.estado === 'PENDIENTE' && (numMes < mesHoy || diaHoy > diasGracia)) {
-          deudaJ += saldo;
-        }
-      });
+      const deudaJ = calcularDeuda(j.cedula);
       if (deudaJ > 0) {
         doc.setTextColor(239, 68, 68);
         doc.setFont('helvetica', 'bold');
@@ -807,26 +839,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     // ── Fila de totales ───────────────────────────────────────────
     if (filtered.length) {
       // anio, mesHoy, diaHoy, diasGracia ya definidos arriba
-      const totalDeuda  = filtered.reduce((sum, j) => {
-        const mensJ = (mensualidades || []).filter(m =>
-          String(m.cedula || m.player_id || '') === String(j.cedula) &&
-          parseInt(m.anio) === anio && parseInt(m.numero_mes) <= mesHoy
-        );
-        let deudaJ = 0;
-        mensJ.forEach(m => {
-          const numMes = parseInt(m.numero_mes);
-          const saldo  = parseFloat(m.saldo_pendiente) || 0;
-          if (m.estado === 'MORA' || m.estado === 'PARCIAL') {
-            deudaJ += saldo;
-          } else if (m.estado === 'PENDIENTE') {
-            // Mes pasado → siempre deuda; mes actual → solo si ya pasó gracia
-            if (numMes < mesHoy || (numMes === mesHoy && diaHoy > diasGracia)) {
-              deudaJ += saldo;
-            }
-          }
-        });
-        return sum + deudaJ;
-      }, 0);
+      const totalDeuda = filtered.reduce((sum, j) => sum + calcularDeuda(j.cedula), 0);
 
       const totalPagado = filtered.reduce((s, j) => s + (j.totalPagado || 0), 0);
       const conDeuda    = filtered.filter(j => (j.saldoPendiente || 0) > 0).length;

@@ -24,9 +24,22 @@ function getCC() {
   return getComputedStyle(document.documentElement).getPropertyValue('--cc').trim() || '#E14924';
 }
 
-export default function RecaudacionChart({ mensualidades }) {
+export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
   const mesActualIdx = new Date().getMonth();
+  const anioActual   = new Date().getFullYear();
   const cc = getCC();
+
+  // Solo suspensiones ACTIVAS excusan un mes — si se cancela, la deuda vuelve a contar.
+  const esSuspendido = useMemo(() => {
+    const idx = {};
+    (suspensiones || []).forEach(s => {
+      if (!s.activa || parseInt(s.anio) !== anioActual) return;
+      const ced = String(s.cedula);
+      if (!idx[ced]) idx[ced] = new Set();
+      for (let m = s.mes_inicio; m <= s.mes_fin; m++) idx[ced].add(m);
+    });
+    return (cedula, mesNum) => idx[String(cedula)]?.has(mesNum) || false;
+  }, [suspensiones, anioActual]);
 
   const data = useMemo(() => {
     const meses = {};
@@ -37,8 +50,10 @@ export default function RecaudacionChart({ mensualidades }) {
       const mes    = m.mes || '';
       const mesCap = mes.charAt(0).toUpperCase() + mes.slice(1).toLowerCase();
       if (!meses[mesCap]) return;
-      meses[mesCap].pagado    += parseFloat(m.valor_pagado)    || 0;
-      meses[mesCap].pendiente += parseFloat(m.saldo_pendiente) || 0;
+      meses[mesCap].pagado += parseFloat(m.valor_pagado) || 0;
+      if (!esSuspendido(m.cedula, parseInt(m.numero_mes))) {
+        meses[mesCap].pendiente += parseFloat(m.saldo_pendiente) || 0;
+      }
     });
     return Object.values(meses)
       .slice(0, mesActualIdx + 2)
@@ -50,7 +65,7 @@ export default function RecaudacionChart({ mensualidades }) {
           : 0,
         esActual: m.idx === mesActualIdx,
       }));
-  }, [mensualidades, mesActualIdx]);
+  }, [mensualidades, mesActualIdx, esSuspendido]);
 
   const totalPagado    = data.reduce((s, d) => s + d.pagado,    0);
   const totalPendiente = data.reduce((s, d) => s + d.pendiente, 0);

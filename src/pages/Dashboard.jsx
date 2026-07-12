@@ -1046,6 +1046,7 @@ export default function Dashboard() {
                   jugadores={jugadores}
                   mensualidades={mensualidades}
                   morosos={morosos}
+                  suspensiones={suspensiones}
                   codigoPais={clubConfig?.codigo_pais || '57'}
                   color={c}
                   clubNombre={clubConfig?.nombre}

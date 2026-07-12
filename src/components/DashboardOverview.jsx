@@ -150,7 +150,7 @@ function EmptyDashboard() {
 }
 
 /* ── componente principal ── */
-export default function DashboardOverview({ jugadores, mensualidades, morosos, codigoPais = '57', color = '#60A5FA', clubNombre = 'Mi Club', logoUrl = '' }) {
+export default function DashboardOverview({ jugadores, mensualidades, morosos, suspensiones = [], codigoPais = '57', color = '#60A5FA', clubNombre = 'Mi Club', logoUrl = '' }) {
   const mesActual  = new Date().getMonth() + 1;
   const anioActual = new Date().getFullYear();
 
@@ -174,11 +174,30 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
     [morosos],
   );
 
+  // Solo suspensiones ACTIVAS excusan un mes (si se cancela, la deuda vuelve a contar) —
+  // se consulta la tabla suspensiones directo en vez de confiar en el string `estado` de
+  // la mensualidad, que puede quedar desincronizado tras cancelar/crear una suspensión.
+  const esSuspendido = useMemo(() => {
+    const idx = {};
+    (suspensiones || []).forEach(s => {
+      if (!s.activa || parseInt(s.anio) !== anioActual) return;
+      const ced = String(s.cedula);
+      if (!idx[ced]) idx[ced] = new Set();
+      for (let m = s.mes_inicio; m <= s.mes_fin; m++) idx[ced].add(m);
+    });
+    return (cedula, mesNum) => idx[String(cedula)]?.has(mesNum) || false;
+  }, [suspensiones, anioActual]);
+
   const { stats, alDiaList } = useMemo(() => {
     let alDia = 0, pendientes = 0, parciales = 0, mora = 0;
     const alDiaArr = [];
     activos.forEach(j => {
       const ced = String(j.cedula);
+      if (esSuspendido(ced, mesActual)) {
+        alDia++;
+        alDiaArr.push({ nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase(), cedula: j.cedula });
+        return;
+      }
       if (morososSet.has(ced)) { mora++; return; }
       const inv = mensualidades.find(
         m => String(m.cedula) === ced &&
@@ -192,11 +211,14 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
       else if (inv.estado === 'PENDIENTE') pendientes++;
       else { alDia++; alDiaArr.push({ nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim(), cedula: j.cedula }); }
     });
-    const recaudado     = mensualidades.reduce((s, m) => s + (parseFloat(m.valor_pagado)  || 0), 0);
-    const totalEsperado = mensualidades.reduce((s, m) => s + (parseFloat(m.valor_oficial) || 0), 0);
+    const recaudado     = mensualidades.reduce((s, m) => s + (parseFloat(m.valor_pagado) || 0), 0);
+    const totalEsperado = mensualidades.reduce((s, m) => {
+      if (esSuspendido(m.cedula, parseInt(m.numero_mes))) return s;
+      return s + (parseFloat(m.valor_oficial) || 0);
+    }, 0);
     const pct = activos.length > 0 ? Math.round((alDia / activos.length) * 100) : 0;
     return { stats: { alDia, pendientes, parciales, mora, recaudado, totalEsperado, pct }, alDiaList: alDiaArr };
-  }, [activos, morososSet, mensualidades, mesActual, anioActual]);
+  }, [activos, morososSet, mensualidades, mesActual, anioActual, esSuspendido]);
 
   const pendientesList = useMemo(() => {
     return activos
@@ -204,6 +226,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
         const ced = String(j.cedula);
         // Excluir morosos: el KPI ya los cuenta en MORA, no duplicar en PENDIENTES
         if (morososSet.has(ced)) return null;
+        if (esSuspendido(ced, mesActual)) return null;
         const mens = mensualidades.find(
           m => String(m.cedula) === ced &&
                parseInt(m.numero_mes) === mesActual &&
@@ -222,7 +245,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
       })
       .filter(Boolean)
       .sort((a, b) => b.saldo - a.saldo);
-  }, [activos, morososSet, mensualidades, mesActual, anioActual]);
+  }, [activos, morososSet, mensualidades, mesActual, anioActual, esSuspendido]);
 
   // Conteo de morosos que también tienen cuota del mes sin pagar (info para el admin)
   const morososConCuotaMes = useMemo(() => {
@@ -299,7 +322,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, c
         gap: '16px',
         alignItems: 'start',
       }}>
-        <RecaudacionChart mensualidades={mensualidades} />
+        <RecaudacionChart mensualidades={mensualidades} suspensiones={suspensiones} />
         <div style={{
           borderRadius: '16px',
           outline: activeKpi === 'mora' ? `2px solid rgba(239,68,68,0.5)` : 'none',

@@ -892,7 +892,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     return list;
   }
 
-  const MESES_BALANCE = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const MESES_BALANCE_TODAS = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
   const esCedulaPendBalance = (ced) => String(ced).startsWith('PEND_');
 
   function construirIndicesMensuales(anio) {
@@ -911,11 +911,13 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     return { mensIdx, suspIdx };
   }
 
-  function estadosMesDeJugador(j, mensIdx, suspIdx) {
+  // Solo hasta el mes actual — los meses siguientes aún no se han causado,
+  // mostrarlos es ruido (y ocupan espacio innecesario en la tabla).
+  function estadosMesDeJugador(j, mensIdx, suspIdx, mesesLabels) {
     const esExentoGlobal = Number(j.descuento_pct) >= 100;
     const mesesJ    = mensIdx[String(j.cedula)] || {};
     const suspMeses = suspIdx[String(j.cedula)];
-    return MESES_BALANCE.map((_, i) => {
+    return mesesLabels.map((_, i) => {
       if (esExentoGlobal) return 'EXENTO';
       const mes = i + 1;
       if (suspMeses?.has(mes)) return 'NO APLICA';
@@ -924,11 +926,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     });
   }
 
-  // Consolida por jugador: estado mensual (igual lógica que Estado Actual),
-  // una columna por cada torneo distinto del club, y el total de uniformes
-  // (pedido_uniformes — el ledger "uniformes" suele estar vacío).
+  // Consolida por jugador: estado mensual hasta el mes actual (igual lógica
+  // que Estado Actual), una columna por cada torneo distinto del club, el
+  // total de uniformes (pedido_uniformes — el ledger "uniformes" suele estar
+  // vacío) y la deuda total (mensualidades + torneos + uniformes) al final.
   function construirBalanceCompleto(pedidos) {
-    const anio = new Date().getFullYear();
+    const anio         = new Date().getFullYear();
+    const mesActual     = new Date().getMonth() + 1;
+    const mesesLabels   = MESES_BALANCE_TODAS.slice(0, mesActual);
     const { mensIdx, suspIdx } = construirIndicesMensuales(anio);
 
     const torneoNombres = [...new Set((torneos || []).map(t => t.nombre_torneo).filter(Boolean))]
@@ -956,16 +961,21 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
     const filas = [...activos, ...inactivos].map(j => {
       const ced = String(j.cedula);
+      const torneosJ  = torneoNombres.map(nombre => torneosPorCedula[ced]?.[nombre] || null);
+      const torDeuda  = torneosJ.reduce((s, t) => s + (t?.saldo || 0), 0);
+      const uniDeuda  = uniformesPorCedula[ced]?.deuda || 0;
+      const mensDeuda = j.saldoPendiente || 0;
       return {
         cedula: j.cedula, nombre: j.nombreCompleto, activo: j.activo,
-        estadosMes: estadosMesDeJugador(j, mensIdx, suspIdx),
-        torneosJ:   torneoNombres.map(nombre => torneosPorCedula[ced]?.[nombre] || null),
+        estadosMes: estadosMesDeJugador(j, mensIdx, suspIdx, mesesLabels),
+        torneosJ,
         uniPagado:  uniformesPorCedula[ced]?.pagado || 0,
-        uniDeuda:   uniformesPorCedula[ced]?.deuda  || 0,
+        uniDeuda,
+        deudaTotal: mensDeuda + torDeuda + uniDeuda,
       };
     });
 
-    return { filas, torneoNombres, anio };
+    return { filas, torneoNombres, mesesLabels, anio };
   }
 
   async function exportarBalancePDF() {
@@ -973,10 +983,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     setBalanceLoading(true);
     try {
       const pedidos = await cargarPedidoUniformes();
-      const { filas, torneoNombres, anio } = construirBalanceCompleto(pedidos);
+      const { filas, torneoNombres, mesesLabels, anio } = construirBalanceCompleto(pedidos);
 
       const { default: jsPDF } = await import('jspdf');
-      // A3 apaisado — el grid de 12 meses + columnas por torneo no cabe cómodo en A4.
+      // A3 apaisado — el grid de meses + columnas por torneo no cabe cómodo en A4.
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
       const W = 420, H = 297, M = 12;
       const accentRgb = hexToRgb(color || clubConfig?.color);
@@ -984,9 +994,9 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       const fecha     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
       const logoData  = await loadLogoDataUrl(clubConfig?.logo_url);
 
-      const NOMBRE_W = 46, CED_W = 20, EST_W = 14, UNI_W = 18;
-      const usable   = (W - M * 2) - NOMBRE_W - CED_W - EST_W - UNI_W * 2;
-      const nColsVar = 12 + torneoNombres.length;
+      const NOMBRE_W = 46, CED_W = 20, EST_W = 14, UNI_W = 18, TOTAL_W = 22;
+      const usable   = (W - M * 2) - NOMBRE_W - CED_W - EST_W - UNI_W * 2 - TOTAL_W;
+      const nColsVar = mesesLabels.length + torneoNombres.length;
       const colW     = Math.max(10, usable / nColsVar);
 
       let x = M;
@@ -994,15 +1004,17 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       cols.push({ label: 'JUGADOR', x, w: NOMBRE_W, align: 'left'   }); x += NOMBRE_W;
       cols.push({ label: 'CÉDULA',  x, w: CED_W,    align: 'left'   }); x += CED_W;
       cols.push({ label: 'ESTADO',  x, w: EST_W,    align: 'center' }); x += EST_W;
-      MESES_BALANCE.forEach(m => { cols.push({ label: m, x, w: colW, align: 'center' }); x += colW; });
+      mesesLabels.forEach(m => { cols.push({ label: m, x, w: colW, align: 'center' }); x += colW; });
       torneoNombres.forEach(t => { cols.push({ label: t.toUpperCase().slice(0, 16), x, w: colW, align: 'center' }); x += colW; });
-      cols.push({ label: 'U.PAGADO', x, w: UNI_W, align: 'right' }); x += UNI_W;
-      cols.push({ label: 'U.DEUDA',  x, w: UNI_W, align: 'right' });
+      cols.push({ label: 'U.PAGADO',     x, w: UNI_W,   align: 'right' }); x += UNI_W;
+      cols.push({ label: 'U.DEUDA',      x, w: UNI_W,   align: 'right' }); x += UNI_W;
+      cols.push({ label: 'DEUDA TOTAL',  x, w: TOTAL_W, align: 'right' });
 
       const IDX_MES0     = 3;
-      const IDX_TORNEO0  = 3 + 12;
+      const IDX_TORNEO0  = 3 + mesesLabels.length;
       const IDX_UNI_PAG  = IDX_TORNEO0 + torneoNombres.length;
       const IDX_UNI_DEU  = IDX_UNI_PAG + 1;
+      const IDX_TOTAL    = IDX_UNI_DEU + 1;
 
       const drawPageHeader = () => {
         const y0 = drawPdfHeader(doc, { W, M, clubName, title: `BALANCE GENERAL ${anio}`, date: `${fecha.toUpperCase()} · MENSUALIDADES + TORNEOS + UNIFORMES`, logoData, accentRgb });
@@ -1074,6 +1086,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         doc.setFont('helvetica', f.uniDeuda > 0 ? 'bold' : 'normal');
         doc.text(f.uniDeuda > 0 ? formatCOP(f.uniDeuda) : '—', cols[IDX_UNI_DEU].x + cols[IDX_UNI_DEU].w - 1, y, { align: 'right' });
 
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...(grisInactivo || (f.deudaTotal > 0 ? [220, 38, 38] : [22, 163, 74])));
+        doc.text(f.deudaTotal > 0 ? formatCOP(f.deudaTotal) : 'AL DÍA', cols[IDX_TOTAL].x + cols[IDX_TOTAL].w - 1, y, { align: 'right' });
+
         y += 6.5;
       });
 
@@ -1105,7 +1121,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     setBalanceLoading(true);
     try {
       const pedidos = await cargarPedidoUniformes();
-      const { filas, torneoNombres, anio } = construirBalanceCompleto(pedidos);
+      const { filas, torneoNombres, mesesLabels, anio } = construirBalanceCompleto(pedidos);
       const fecha = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
 
       const ExcelJS = (await import('exceljs')).default ?? (await import('exceljs'));
@@ -1122,14 +1138,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       wb.creator = 'ZenSports';
       const ws = wb.addWorksheet(`BALANCE ${anio}`, { views: [{ state: 'frozen', ySplit: 2 }] });
 
-      const HEADERS = ['JUGADOR', 'CÉDULA', 'ESTADO', ...MESES_BALANCE, ...torneoNombres.map(t => t.toUpperCase()), 'UNIF. PAGADO', 'UNIF. DEUDA'];
+      const HEADERS = ['JUGADOR', 'CÉDULA', 'ESTADO', ...mesesLabels, ...torneoNombres.map(t => t.toUpperCase()), 'UNIF. PAGADO', 'UNIF. DEUDA', 'DEUDA TOTAL'];
       const TOTAL_COLS = HEADERS.length;
 
       ws.columns = [
         { width: 32 }, { width: 16 }, { width: 11 },
-        ...MESES_BALANCE.map(() => ({ width: 9 })),
+        ...mesesLabels.map(() => ({ width: 9 })),
         ...torneoNombres.map(() => ({ width: 18 })),
-        { width: 14 }, { width: 14 },
+        { width: 14 }, { width: 14 }, { width: 16 },
       ];
 
       const titleRow = ws.addRow([`BALANCE GENERAL ${anio} — MENSUALIDADES + TORNEOS + UNIFORMES  ·  ${fecha.toUpperCase()}  ·  ${(clubConfig?.nombre || '').toUpperCase()}`]);
@@ -1150,9 +1166,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: TOTAL_COLS } };
 
       const COL_MES_INI    = 4;
-      const COL_MES_FIN    = 3 + MESES_BALANCE.length;
+      const COL_MES_FIN    = 3 + mesesLabels.length;
       const COL_TORNEO_INI = COL_MES_FIN + 1;
       const COL_TORNEO_FIN = COL_MES_FIN + torneoNombres.length;
+      const COL_TOTAL      = COL_TORNEO_FIN + 3;
 
       filas.forEach((f, idx) => {
         const esPend     = esCedulaPendBalance(f.cedula);
@@ -1167,13 +1184,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
         const row = ws.addRow([
           f.nombre, String(f.cedula), esInactivo ? 'INACTIVO' : 'ACTIVO',
-          ...f.estadosMes, ...torneoValores, f.uniPagado, f.uniDeuda,
+          ...f.estadosMes, ...torneoValores, f.uniPagado, f.uniDeuda, f.deudaTotal,
         ]);
 
         row.eachCell({ includeEmpty: true }, (cell, colNum) => {
           const esMesCol    = colNum >= COL_MES_INI && colNum <= COL_MES_FIN;
           const esTorneoCol = colNum >= COL_TORNEO_INI && colNum <= COL_TORNEO_FIN;
-          const esUniCol    = colNum > COL_TORNEO_FIN;
+          const esUniCol    = colNum > COL_TORNEO_FIN && colNum < COL_TOTAL;
+          const esTotalCol  = colNum === COL_TOTAL;
           const estado      = esMesCol ? f.estadosMes[colNum - COL_MES_INI] : null;
           const estStyle    = estado ? ESTADO_STYLE[estado] : null;
 
@@ -1196,6 +1214,12 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
             cell.font = { size: 9.5, name: 'Calibri', bold: esDeuda, color: { argb: esDeuda ? 'FFB91C1C' : val === 'AL DÍA' ? 'FF166534' : 'FF9CA3AF' } };
             cell.alignment = { horizontal: 'center', vertical: 'middle' };
             if (esDeuda) cell.numFmt = '#,##0';
+          } else if (esTotalCol) {
+            const esDeudaTotal = (cell.value || 0) > 0;
+            cell.fill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: esDeudaTotal ? 'FFFEE2E2' : 'FFD1FAE5' } };
+            cell.numFmt = '#,##0';
+            cell.alignment = { horizontal: 'right', vertical: 'middle' };
+            cell.font = { size: 10, name: 'Calibri', bold: true, color: { argb: esDeudaTotal ? 'FFB91C1C' : 'FF166534' } };
           } else if (esUniCol) {
             const esDeudaCol = colNum === COL_TORNEO_FIN + 2;
             cell.fill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: zebraFg } };

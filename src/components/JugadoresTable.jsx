@@ -874,7 +874,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     alert('Error al generar el PDF: ' + err.message);
   } };
 
-  // ── Balance general: mensualidades + torneos + uniformes ──────────────────
+  // ── Balance general: estado actual (grid 12 meses) + torneos + uniformes ──
+  // Una sola tabla ancha, una fila por jugador — mismo espíritu que "Estado
+  // Actual" pero con una columna por cada torneo del club y el total de
+  // uniformes, en vez de exportarlos aparte.
 
   const [showBalance,    setShowBalance]    = useState(false);
   const [balanceLoading, setBalanceLoading] = useState(false);
@@ -889,44 +892,80 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     return list;
   }
 
-  // Consolida por cédula: mensualidades (ya viene calculado en jugadoresConPago,
-  // hasta el mes actual), torneos y uniformes (pedido_uniformes — el ledger
-  // "uniformes" suele estar vacío, los pedidos reales viven en pedido_uniformes).
-  function construirFilasBalance(pedidos) {
+  const MESES_BALANCE = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const esCedulaPendBalance = (ced) => String(ced).startsWith('PEND_');
+
+  function construirIndicesMensuales(anio) {
+    const mensIdx = {};
+    (mensualidades || []).filter(m => parseInt(m.anio) === anio).forEach(m => {
+      const ced = String(m.cedula || m.player_id || '');
+      if (!mensIdx[ced]) mensIdx[ced] = {};
+      mensIdx[ced][parseInt(m.numero_mes)] = m.estado;
+    });
+    const suspIdx = {};
+    (suspensiones || []).filter(s => s.activa && parseInt(s.anio) === anio).forEach(s => {
+      const ced = String(s.cedula || '');
+      if (!suspIdx[ced]) suspIdx[ced] = new Set();
+      for (let m = s.mes_inicio; m <= s.mes_fin; m++) suspIdx[ced].add(m);
+    });
+    return { mensIdx, suspIdx };
+  }
+
+  function estadosMesDeJugador(j, mensIdx, suspIdx) {
+    const esExentoGlobal = Number(j.descuento_pct) >= 100;
+    const mesesJ    = mensIdx[String(j.cedula)] || {};
+    const suspMeses = suspIdx[String(j.cedula)];
+    return MESES_BALANCE.map((_, i) => {
+      if (esExentoGlobal) return 'EXENTO';
+      const mes = i + 1;
+      if (suspMeses?.has(mes)) return 'NO APLICA';
+      const est = mesesJ[mes] || '-';
+      return est === 'EXENTO' ? 'NO APLICA' : est;
+    });
+  }
+
+  // Consolida por jugador: estado mensual (igual lógica que Estado Actual),
+  // una columna por cada torneo distinto del club, y el total de uniformes
+  // (pedido_uniformes — el ledger "uniformes" suele estar vacío).
+  function construirBalanceCompleto(pedidos) {
+    const anio = new Date().getFullYear();
+    const { mensIdx, suspIdx } = construirIndicesMensuales(anio);
+
+    const torneoNombres = [...new Set((torneos || []).map(t => t.nombre_torneo).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, 'es'));
+
     const torneosPorCedula = {};
     (torneos || []).forEach(t => {
       const ced = String(t.cedula || t.player_id || '');
-      if (!torneosPorCedula[ced]) torneosPorCedula[ced] = { pagado: 0, deuda: 0 };
-      torneosPorCedula[ced].pagado += parseFloat(t.valor_pagado)    || 0;
-      torneosPorCedula[ced].deuda  += parseFloat(t.saldo_pendiente) || 0;
+      if (!torneosPorCedula[ced]) torneosPorCedula[ced] = {};
+      torneosPorCedula[ced][t.nombre_torneo] = { estado: t.estado, saldo: parseFloat(t.saldo_pendiente) || 0 };
     });
 
     const uniformesPorCedula = {};
     (pedidos || []).forEach(p => {
       const ced = String(p.cedula || '');
       if (!uniformesPorCedula[ced]) uniformesPorCedula[ced] = { pagado: 0, deuda: 0 };
-      const total  = parseFloat(p.total)         || 0;
-      const pagado = parseFloat(p.valor_pagado)  || 0;
+      const total  = parseFloat(p.total)        || 0;
+      const pagado = parseFloat(p.valor_pagado) || 0;
       uniformesPorCedula[ced].pagado += pagado;
       uniformesPorCedula[ced].deuda  += Math.max(0, total - pagado);
     });
 
-    return jugadoresConPago
-      .filter(j => j.activo)
-      .map(j => {
-        const ced = String(j.cedula);
-        const tor = torneosPorCedula[ced]    || { pagado: 0, deuda: 0 };
-        const uni = uniformesPorCedula[ced]  || { pagado: 0, deuda: 0 };
-        const deudaTotal = (j.saldoPendiente || 0) + tor.deuda + uni.deuda;
-        return {
-          nombre: j.nombreCompleto, cedula: j.cedula, categoria: j.categoria || '—',
-          mensPagado: j.totalPagado || 0, mensDeuda: j.saldoPendiente || 0,
-          torPagado: tor.pagado, torDeuda: tor.deuda,
-          uniPagado: uni.pagado, uniDeuda: uni.deuda,
-          deudaTotal,
-        };
-      })
-      .sort((a, b) => b.deudaTotal - a.deudaTotal || a.nombre.localeCompare(b.nombre, 'es'));
+    const activos   = jugadoresConPago.filter(j =>  j.activo).sort((a, b) => a.nombreCompleto.localeCompare(b.nombreCompleto, 'es'));
+    const inactivos = jugadoresConPago.filter(j => !j.activo).sort((a, b) => a.nombreCompleto.localeCompare(b.nombreCompleto, 'es'));
+
+    const filas = [...activos, ...inactivos].map(j => {
+      const ced = String(j.cedula);
+      return {
+        cedula: j.cedula, nombre: j.nombreCompleto, activo: j.activo, categoria: j.categoria || '—',
+        estadosMes: estadosMesDeJugador(j, mensIdx, suspIdx),
+        torneosJ:   torneoNombres.map(nombre => torneosPorCedula[ced]?.[nombre] || null),
+        uniPagado:  uniformesPorCedula[ced]?.pagado || 0,
+        uniDeuda:   uniformesPorCedula[ced]?.deuda  || 0,
+      };
+    });
+
+    return { filas, torneoNombres, anio };
   }
 
   async function exportarBalancePDF() {
@@ -934,67 +973,121 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     setBalanceLoading(true);
     try {
       const pedidos = await cargarPedidoUniformes();
-      const filas   = construirFilasBalance(pedidos);
+      const { filas, torneoNombres, anio } = construirBalanceCompleto(pedidos);
 
       const { default: jsPDF } = await import('jspdf');
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      const W = 297, H = 210, M = 12;
+      // A3 apaisado — el grid de 12 meses + columnas por torneo no cabe cómodo en A4.
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
+      const W = 420, H = 297, M = 12;
       const accentRgb = hexToRgb(color || clubConfig?.color);
       const clubName  = clubConfig?.nombre || 'Mi Club';
       const fecha     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
       const logoData  = await loadLogoDataUrl(clubConfig?.logo_url);
 
-      const cols = [
-        { label: '#',            x: M,       align: 'left'  },
-        { label: 'NOMBRE',       x: M + 6,   align: 'left'  },
-        { label: 'CÉDULA',       x: M + 72,  align: 'right' },
-        { label: 'M. PAGADO',    x: M + 98,  align: 'right' },
-        { label: 'M. DEUDA',     x: M + 124, align: 'right' },
-        { label: 'T. PAGADO',    x: M + 150, align: 'right' },
-        { label: 'T. DEUDA',     x: M + 176, align: 'right' },
-        { label: 'U. PAGADO',    x: M + 202, align: 'right' },
-        { label: 'U. DEUDA',     x: M + 228, align: 'right' },
-        { label: 'DEUDA TOTAL',  x: M + 264, align: 'right' },
-      ];
+      const NOMBRE_W = 46, CED_W = 20, EST_W = 14, CAT_W = 22, UNI_W = 18;
+      const usable   = (W - M * 2) - NOMBRE_W - CED_W - EST_W - CAT_W - UNI_W * 2;
+      const nColsVar = 12 + torneoNombres.length;
+      const colW     = Math.max(10, usable / nColsVar);
+
+      let x = M;
+      const cols = [];
+      cols.push({ label: 'JUGADOR', x, w: NOMBRE_W, align: 'left'   }); x += NOMBRE_W;
+      cols.push({ label: 'CÉDULA',  x, w: CED_W,    align: 'left'   }); x += CED_W;
+      cols.push({ label: 'ESTADO',  x, w: EST_W,    align: 'center' }); x += EST_W;
+      MESES_BALANCE.forEach(m => { cols.push({ label: m, x, w: colW, align: 'center' }); x += colW; });
+      cols.push({ label: 'CATEG.',  x, w: CAT_W,    align: 'left'   }); x += CAT_W;
+      torneoNombres.forEach(t => { cols.push({ label: t.toUpperCase().slice(0, 16), x, w: colW, align: 'center' }); x += colW; });
+      cols.push({ label: 'U.PAGADO', x, w: UNI_W, align: 'right' }); x += UNI_W;
+      cols.push({ label: 'U.DEUDA',  x, w: UNI_W, align: 'right' });
+
+      const IDX_MES0     = 3;
+      const IDX_CAT      = 3 + 12;
+      const IDX_TORNEO0  = IDX_CAT + 1;
+      const IDX_UNI_PAG  = IDX_TORNEO0 + torneoNombres.length;
+      const IDX_UNI_DEU  = IDX_UNI_PAG + 1;
 
       const drawPageHeader = () => {
-        const y0 = drawPdfHeader(doc, { W, M, clubName, title: 'BALANCE GENERAL', date: `${fecha.toUpperCase()} · MENSUALIDADES + TORNEOS + UNIFORMES`, logoData, accentRgb });
-        return drawPdfTableHead(doc, { W, M, y: y0, columns: cols.map(c => ({ label: c.label, x: c.x })), accentRgb });
+        const y0 = drawPdfHeader(doc, { W, M, clubName, title: `BALANCE GENERAL ${anio}`, date: `${fecha.toUpperCase()} · MENSUALIDADES + TORNEOS + UNIFORMES`, logoData, accentRgb });
+        doc.setFillColor(243, 244, 246);
+        doc.rect(M - 2, y0 - 4, W - M * 2 + 4, 8, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(5.8);
+        doc.setTextColor(...accentRgb);
+        cols.forEach(c => {
+          const tx = c.align === 'right' ? c.x + c.w - 1 : c.align === 'center' ? c.x + c.w / 2 : c.x;
+          doc.text(c.label, tx, y0, { align: c.align, maxWidth: c.w + 2 });
+        });
+        return y0 + 7;
       };
+
+      const ESTADO_MES_COLOR = {
+        EXENTO: [29, 78, 216], AL_DIA: [22, 163, 74], MORA: [220, 38, 38],
+        'NO APLICA': [180, 83, 9], PENDIENTE: [107, 114, 128], PARCIAL: [37, 99, 235], '-': [195, 195, 195],
+      };
+      const ESTADO_MES_LABEL = { EXENTO: 'EX', AL_DIA: 'OK', MORA: 'MORA', 'NO APLICA': 'N/A', PENDIENTE: 'PEND', PARCIAL: 'PARC', '-': '-' };
 
       let y = drawPageHeader();
 
-      filas.forEach((f, i) => {
-        if (y > H - 20) { doc.addPage(); y = drawPageHeader(); }
-        if (i % 2 === 0) { doc.setFillColor(248, 249, 250); doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F'); }
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
-        doc.setTextColor(30, 40, 50);
-        doc.text(String(i + 1), cols[0].x, y);
-        doc.text(f.nombre.toUpperCase().slice(0, 24), cols[1].x, y);
-        doc.text(String(f.cedula || ''), cols[2].x, y, { align: 'right' });
-        doc.text(formatCOP(f.mensPagado), cols[3].x, y, { align: 'right' });
-        doc.setTextColor(f.mensDeuda > 0 ? 239 : 150, f.mensDeuda > 0 ? 68 : 150, f.mensDeuda > 0 ? 68 : 150);
-        doc.text(f.mensDeuda > 0 ? formatCOP(f.mensDeuda) : '—', cols[4].x, y, { align: 'right' });
-        doc.setTextColor(30, 40, 50);
-        doc.text(formatCOP(f.torPagado), cols[5].x, y, { align: 'right' });
-        doc.setTextColor(f.torDeuda > 0 ? 239 : 150, f.torDeuda > 0 ? 68 : 150, f.torDeuda > 0 ? 68 : 150);
-        doc.text(f.torDeuda > 0 ? formatCOP(f.torDeuda) : '—', cols[6].x, y, { align: 'right' });
-        doc.setTextColor(30, 40, 50);
-        doc.text(formatCOP(f.uniPagado), cols[7].x, y, { align: 'right' });
-        doc.setTextColor(f.uniDeuda > 0 ? 239 : 150, f.uniDeuda > 0 ? 68 : 150, f.uniDeuda > 0 ? 68 : 150);
-        doc.text(f.uniDeuda > 0 ? formatCOP(f.uniDeuda) : '—', cols[8].x, y, { align: 'right' });
+      filas.forEach((f, idx) => {
+        if (y > H - 18) { doc.addPage(); y = drawPageHeader(); }
+        if (idx % 2 === 0) { doc.setFillColor(248, 249, 250); doc.rect(M - 2, y - 3.5, W - M * 2 + 4, 6.5, 'F'); }
+
+        const esPend = esCedulaPendBalance(f.cedula);
+        const grisInactivo = !f.activo ? [165, 165, 165] : null;
+
+        doc.setFontSize(6.3);
+        doc.setFont('helvetica', esPend ? 'bolditalic' : f.activo ? 'normal' : 'italic');
+        doc.setTextColor(...(grisInactivo || (esPend ? [154, 52, 18] : [30, 40, 50])));
+        doc.text(f.nombre.slice(0, 30), cols[0].x, y);
+        doc.text(String(f.cedula), cols[1].x, y);
+
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...(f.deudaTotal > 0 ? [239, 68, 68] : [34, 197, 94]));
-        doc.text(f.deudaTotal > 0 ? formatCOP(f.deudaTotal) : 'AL DÍA', cols[9].x, y, { align: 'right' });
-        y += 8;
+        doc.setTextColor(...(f.activo ? [22, 163, 74] : [165, 165, 165]));
+        doc.text(f.activo ? 'ACTIVO' : 'INACT.', cols[2].x + cols[2].w / 2, y, { align: 'center' });
+
+        f.estadosMes.forEach((est, i) => {
+          const c = cols[IDX_MES0 + i];
+          const rgb = grisInactivo || ESTADO_MES_COLOR[est] || [150, 150, 150];
+          doc.setFont('helvetica', est === 'MORA' ? 'bold' : 'normal');
+          doc.setFontSize(6.3);
+          doc.setTextColor(...rgb);
+          doc.text(ESTADO_MES_LABEL[est] || est, c.x + c.w / 2, y, { align: 'center' });
+        });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...(grisInactivo || [30, 40, 50]));
+        doc.text((f.categoria || '—').slice(0, 13), cols[IDX_CAT].x, y);
+
+        f.torneosJ.forEach((t, i) => {
+          const c = cols[IDX_TORNEO0 + i];
+          doc.setFontSize(6.3);
+          if (!t) {
+            doc.setFont('helvetica', 'normal'); doc.setTextColor(195, 195, 195);
+            doc.text('—', c.x + c.w / 2, y, { align: 'center' });
+          } else if (t.estado === 'AL_DIA' || t.saldo <= 0) {
+            doc.setFont('helvetica', 'normal'); doc.setTextColor(...(grisInactivo || [22, 163, 74]));
+            doc.text('OK', c.x + c.w / 2, y, { align: 'center' });
+          } else {
+            doc.setFont('helvetica', 'bold'); doc.setTextColor(...(grisInactivo || [220, 38, 38]));
+            doc.text(formatCOP(t.saldo).replace(/[^\d.,]/g, ''), c.x + c.w / 2, y, { align: 'center' });
+          }
+        });
+
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(6.3);
+        doc.setTextColor(...(grisInactivo || [30, 40, 50]));
+        doc.text(formatCOP(f.uniPagado), cols[IDX_UNI_PAG].x + cols[IDX_UNI_PAG].w - 1, y, { align: 'right' });
+        doc.setTextColor(...(grisInactivo || (f.uniDeuda > 0 ? [220, 38, 38] : [150, 150, 150])));
+        doc.setFont('helvetica', f.uniDeuda > 0 ? 'bold' : 'normal');
+        doc.text(f.uniDeuda > 0 ? formatCOP(f.uniDeuda) : '—', cols[IDX_UNI_DEU].x + cols[IDX_UNI_DEU].w - 1, y, { align: 'right' });
+
+        y += 6.5;
       });
 
       if (!filas.length) {
         doc.setTextColor(150, 150, 150);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
-        doc.text('No hay jugadores activos.', M, y + 4);
+        doc.text('No hay jugadores.', M, y + 4);
       }
 
       const pages = doc.internal.getNumberOfPages();
@@ -1003,7 +1096,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         drawPdfFooter(doc, { W, H, M, clubName, pageNum: p, totalPages: pages, note: `${filas.length} JUGADORES` });
       }
 
-      doc.save(`balance-general-${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`balance-general-${anio}-${new Date().toISOString().split('T')[0]}.pdf`);
       setShowBalance(false);
     } catch (err) {
       console.error('[balance PDF]', err);
@@ -1018,49 +1111,117 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     setBalanceLoading(true);
     try {
       const pedidos = await cargarPedidoUniformes();
-      const filas   = construirFilasBalance(pedidos);
-      const fecha   = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+      const { filas, torneoNombres, anio } = construirBalanceCompleto(pedidos);
+      const fecha = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
 
       const ExcelJS = (await import('exceljs')).default ?? (await import('exceljs'));
+      const ESTADO_STYLE = {
+        EXENTO:      { bg: 'FF1D4ED8', fg: 'FFFFFFFF', bold: true  },
+        AL_DIA:      { bg: 'FFD1FAE5', fg: 'FF166534', bold: false },
+        MORA:        { bg: 'FFFEE2E2', fg: 'FFB91C1C', bold: true  },
+        'NO APLICA': { bg: 'FFFED7AA', fg: 'FF9A3412', bold: false },
+        PENDIENTE:   { bg: 'FFF3F4F6', fg: 'FF6B7280', bold: false },
+        PARCIAL:     { bg: 'FFDBEAFE', fg: 'FF1E40AF', bold: false },
+      };
+
       const wb = new ExcelJS.Workbook();
       wb.creator = 'ZenSports';
-      const ws = wb.addWorksheet('BALANCE GENERAL', { views: [{ state: 'frozen', ySplit: 2 }] });
+      const ws = wb.addWorksheet(`BALANCE ${anio}`, { views: [{ state: 'frozen', ySplit: 2 }] });
 
-      const HEADERS = ['#', 'NOMBRE', 'CÉDULA', 'CATEGORÍA', 'MENS. PAGADO', 'MENS. DEUDA', 'TORN. PAGADO', 'TORN. DEUDA', 'UNIF. PAGADO', 'UNIF. DEUDA', 'DEUDA TOTAL'];
-      ws.columns = [{ width: 5 }, { width: 30 }, { width: 14 }, { width: 16 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 16 }];
+      const HEADERS = ['JUGADOR', 'CÉDULA', 'ESTADO', ...MESES_BALANCE, 'CATEGORÍA', ...torneoNombres.map(t => t.toUpperCase()), 'UNIF. PAGADO', 'UNIF. DEUDA'];
+      const TOTAL_COLS = HEADERS.length;
 
-      const titleRow = ws.addRow([`BALANCE GENERAL — MENSUALIDADES + TORNEOS + UNIFORMES  ·  ${fecha.toUpperCase()}  ·  ${(clubConfig?.nombre || '').toUpperCase()}`]);
-      ws.mergeCells(1, 1, 1, HEADERS.length);
+      ws.columns = [
+        { width: 32 }, { width: 16 }, { width: 11 },
+        ...MESES_BALANCE.map(() => ({ width: 9 })),
+        { width: 18 },
+        ...torneoNombres.map(() => ({ width: 18 })),
+        { width: 14 }, { width: 14 },
+      ];
+
+      const titleRow = ws.addRow([`BALANCE GENERAL ${anio} — MENSUALIDADES + TORNEOS + UNIFORMES  ·  ${fecha.toUpperCase()}  ·  ${(clubConfig?.nombre || '').toUpperCase()}`]);
+      ws.mergeCells(1, 1, 1, TOTAL_COLS);
       titleRow.getCell(1).fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
       titleRow.getCell(1).font      = { bold: true, color: { argb: 'FFFBBF24' }, size: 11, name: 'Calibri' };
       titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
       titleRow.height = 24;
 
-      const hRow = ws.addRow(HEADERS);
-      hRow.eachCell(cell => {
-        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
-        cell.font      = { bold: true, color: { argb: 'FFFBBF24' }, size: 10, name: 'Calibri' };
-        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      const headerRow = ws.addRow(HEADERS);
+      headerRow.eachCell((cell, col) => {
+        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: col <= 3 ? 'FF1E293B' : 'FF334155' } };
+        cell.font      = { bold: true, color: { argb: 'FFFFFFFF' }, size: 9.5, name: 'Calibri' };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
         cell.border    = { bottom: { style: 'medium', color: { argb: 'FFFBBF24' } } };
       });
-      hRow.height = 22;
-      ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: HEADERS.length } };
+      headerRow.height = 30;
+      ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: TOTAL_COLS } };
+
+      const COL_MES_INI    = 4;
+      const COL_MES_FIN    = 3 + MESES_BALANCE.length;
+      const COL_CAT        = COL_MES_FIN + 1;
+      const COL_TORNEO_INI = COL_CAT + 1;
+      const COL_TORNEO_FIN = COL_CAT + torneoNombres.length;
 
       filas.forEach((f, idx) => {
+        const esPend     = esCedulaPendBalance(f.cedula);
+        const esInactivo = !f.activo;
+        const zebraFg    = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC';
+
+        const torneoValores = f.torneosJ.map(t => {
+          if (!t) return '—';
+          if (t.estado === 'AL_DIA' || t.saldo <= 0) return 'AL DÍA';
+          return t.saldo;
+        });
+
         const row = ws.addRow([
-          idx + 1, f.nombre, f.cedula, f.categoria,
-          f.mensPagado, f.mensDeuda, f.torPagado, f.torDeuda, f.uniPagado, f.uniDeuda, f.deudaTotal,
+          f.nombre, String(f.cedula), esInactivo ? 'INACTIVO' : 'ACTIVO',
+          ...f.estadosMes, f.categoria, ...torneoValores, f.uniPagado, f.uniDeuda,
         ]);
-        const zebra = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC';
-        row.eachCell((cell, colNum) => {
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: zebra } };
-          cell.font = { size: 10, name: 'Calibri', color: { argb: 'FF1E293B' } };
-          if (colNum >= 5) {
+
+        row.eachCell({ includeEmpty: true }, (cell, colNum) => {
+          const esMesCol    = colNum >= COL_MES_INI && colNum <= COL_MES_FIN;
+          const esTorneoCol = colNum >= COL_TORNEO_INI && colNum <= COL_TORNEO_FIN;
+          const esUniCol    = colNum > COL_TORNEO_FIN;
+          const estado      = esMesCol ? f.estadosMes[colNum - COL_MES_INI] : null;
+          const estStyle    = estado ? ESTADO_STYLE[estado] : null;
+
+          if (esMesCol && estStyle) {
+            const bg = esInactivo ? 'FFE5E7EB' : estStyle.bg;
+            const fg = esInactivo ? 'FF9CA3AF' : estStyle.fg;
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+            cell.font = { size: 10, name: 'Calibri', color: { argb: fg }, bold: !esInactivo && estStyle.bold };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          } else if (colNum === 3) {
+            const bg = esInactivo ? 'FFE5E7EB' : 'FFD1FAE5';
+            const fg = esInactivo ? 'FF6B7280' : 'FF166534';
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+            cell.font = { size: 10, name: 'Calibri', bold: true, color: { argb: fg } };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          } else if (esTorneoCol) {
+            const val = cell.value;
+            const esDeuda = typeof val === 'number' && val > 0;
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: esDeuda ? 'FFFEE2E2' : val === 'AL DÍA' ? 'FFD1FAE5' : zebraFg } };
+            cell.font = { size: 9.5, name: 'Calibri', bold: esDeuda, color: { argb: esDeuda ? 'FFB91C1C' : val === 'AL DÍA' ? 'FF166534' : 'FF9CA3AF' } };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            if (esDeuda) cell.numFmt = '#,##0';
+          } else if (esUniCol) {
+            const esDeudaCol = colNum === COL_TORNEO_FIN + 2;
+            cell.fill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: zebraFg } };
             cell.numFmt = '#,##0';
-            cell.alignment = { horizontal: 'right' };
-            if ((colNum === 6 || colNum === 8 || colNum === 10 || colNum === 11) && (cell.value || 0) > 0) {
-              cell.font = { size: 10, name: 'Calibri', bold: colNum === 11, color: { argb: 'FFDC2626' } };
+            cell.alignment = { horizontal: 'right', vertical: 'middle' };
+            cell.font = { size: 10, name: 'Calibri', bold: esDeudaCol && (cell.value || 0) > 0, color: { argb: esDeudaCol && (cell.value || 0) > 0 ? 'FFDC2626' : 'FF1E293B' } };
+          } else {
+            if (esPend) {
+              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF7ED' } };
+              cell.font = { size: 10, name: 'Calibri', bold: true, italic: true, color: { argb: 'FF9A3412' } };
+            } else if (esInactivo) {
+              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
+              cell.font = { size: 10, name: 'Calibri', italic: true, color: { argb: 'FF9CA3AF' } };
+            } else {
+              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: zebraFg } };
+              cell.font = { size: 10, name: 'Calibri', color: { argb: 'FF1E293B' } };
             }
+            cell.alignment = { horizontal: 'left', vertical: 'middle' };
           }
         });
         row.height = 19;
@@ -1071,7 +1232,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       const url    = URL.createObjectURL(blob);
       const a      = document.createElement('a');
       a.href       = url;
-      a.download   = `balance-general-${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.download   = `balance-general-${anio}-${new Date().toISOString().split('T')[0]}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);
       setShowBalance(false);
@@ -1583,7 +1744,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
             </div>
             <div className="p-6 space-y-4">
               <p className="text-xs text-[var(--text-sec)] leading-relaxed">
-                Consolida <strong>mensualidades, torneos y uniformes</strong> por jugador activo, ordenado por deuda total de mayor a menor. Elige el formato:
+                Igual que <strong>Estado Actual</strong> (grid de 12 meses), pero en la misma tabla se agrega una columna por cada torneo del club y el total de uniformes. Elige el formato:
               </p>
               <button onClick={exportarBalancePDF} disabled={balanceLoading}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-60"

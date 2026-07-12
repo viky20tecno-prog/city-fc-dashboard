@@ -947,14 +947,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       const cols = [
         { label: '#',            x: M,       align: 'left'  },
         { label: 'NOMBRE',       x: M + 6,   align: 'left'  },
-        { label: 'CÉDULA',       x: M + 58,  align: 'left'  },
-        { label: 'M. PAGADO',    x: M + 82,  align: 'right' },
-        { label: 'M. DEUDA',     x: M + 110, align: 'right' },
-        { label: 'T. PAGADO',    x: M + 138, align: 'right' },
-        { label: 'T. DEUDA',     x: M + 166, align: 'right' },
-        { label: 'U. PAGADO',    x: M + 194, align: 'right' },
-        { label: 'U. DEUDA',     x: M + 222, align: 'right' },
-        { label: 'DEUDA TOTAL',  x: M + 254, align: 'right' },
+        { label: 'CÉDULA',       x: M + 72,  align: 'right' },
+        { label: 'M. PAGADO',    x: M + 98,  align: 'right' },
+        { label: 'M. DEUDA',     x: M + 124, align: 'right' },
+        { label: 'T. PAGADO',    x: M + 150, align: 'right' },
+        { label: 'T. DEUDA',     x: M + 176, align: 'right' },
+        { label: 'U. PAGADO',    x: M + 202, align: 'right' },
+        { label: 'U. DEUDA',     x: M + 228, align: 'right' },
+        { label: 'DEUDA TOTAL',  x: M + 264, align: 'right' },
       ];
 
       const drawPageHeader = () => {
@@ -972,7 +972,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         doc.setTextColor(30, 40, 50);
         doc.text(String(i + 1), cols[0].x, y);
         doc.text(f.nombre.toUpperCase().slice(0, 24), cols[1].x, y);
-        doc.text(String(f.cedula || ''), cols[2].x, y);
+        doc.text(String(f.cedula || ''), cols[2].x, y, { align: 'right' });
         doc.text(formatCOP(f.mensPagado), cols[3].x, y, { align: 'right' });
         doc.setTextColor(f.mensDeuda > 0 ? 239 : 150, f.mensDeuda > 0 ? 68 : 150, f.mensDeuda > 0 ? 68 : 150);
         doc.text(f.mensDeuda > 0 ? formatCOP(f.mensDeuda) : '—', cols[4].x, y, { align: 'right' });

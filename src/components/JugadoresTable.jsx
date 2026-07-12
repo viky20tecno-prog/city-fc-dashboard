@@ -874,6 +874,215 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     alert('Error al generar el PDF: ' + err.message);
   } };
 
+  // ── Balance general: mensualidades + torneos + uniformes ──────────────────
+
+  const [showBalance,    setShowBalance]    = useState(false);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+  const [pedidoUniformesCache, setPedidoUniformesCache] = useState(null);
+
+  async function cargarPedidoUniformes() {
+    if (pedidoUniformesCache) return pedidoUniformesCache;
+    const res  = await authFetch(`${API_BASE_URL}/uniforms?club_id=${getClubId()}`);
+    const data = await res.json();
+    const list = data.success ? (data.data || []) : [];
+    setPedidoUniformesCache(list);
+    return list;
+  }
+
+  // Consolida por cédula: mensualidades (ya viene calculado en jugadoresConPago,
+  // hasta el mes actual), torneos y uniformes (pedido_uniformes — el ledger
+  // "uniformes" suele estar vacío, los pedidos reales viven en pedido_uniformes).
+  function construirFilasBalance(pedidos) {
+    const torneosPorCedula = {};
+    (torneos || []).forEach(t => {
+      const ced = String(t.cedula || t.player_id || '');
+      if (!torneosPorCedula[ced]) torneosPorCedula[ced] = { pagado: 0, deuda: 0 };
+      torneosPorCedula[ced].pagado += parseFloat(t.valor_pagado)    || 0;
+      torneosPorCedula[ced].deuda  += parseFloat(t.saldo_pendiente) || 0;
+    });
+
+    const uniformesPorCedula = {};
+    (pedidos || []).forEach(p => {
+      const ced = String(p.cedula || '');
+      if (!uniformesPorCedula[ced]) uniformesPorCedula[ced] = { pagado: 0, deuda: 0 };
+      const total  = parseFloat(p.total)         || 0;
+      const pagado = parseFloat(p.valor_pagado)  || 0;
+      uniformesPorCedula[ced].pagado += pagado;
+      uniformesPorCedula[ced].deuda  += Math.max(0, total - pagado);
+    });
+
+    return jugadoresConPago
+      .filter(j => j.activo)
+      .map(j => {
+        const ced = String(j.cedula);
+        const tor = torneosPorCedula[ced]    || { pagado: 0, deuda: 0 };
+        const uni = uniformesPorCedula[ced]  || { pagado: 0, deuda: 0 };
+        const deudaTotal = (j.saldoPendiente || 0) + tor.deuda + uni.deuda;
+        return {
+          nombre: j.nombreCompleto, cedula: j.cedula, categoria: j.categoria || '—',
+          mensPagado: j.totalPagado || 0, mensDeuda: j.saldoPendiente || 0,
+          torPagado: tor.pagado, torDeuda: tor.deuda,
+          uniPagado: uni.pagado, uniDeuda: uni.deuda,
+          deudaTotal,
+        };
+      })
+      .sort((a, b) => b.deudaTotal - a.deudaTotal || a.nombre.localeCompare(b.nombre, 'es'));
+  }
+
+  async function exportarBalancePDF() {
+    if (balanceLoading) return;
+    setBalanceLoading(true);
+    try {
+      const pedidos = await cargarPedidoUniformes();
+      const filas   = construirFilasBalance(pedidos);
+
+      const { default: jsPDF } = await import('jspdf');
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const W = 297, H = 210, M = 12;
+      const accentRgb = hexToRgb(color || clubConfig?.color);
+      const clubName  = clubConfig?.nombre || 'Mi Club';
+      const fecha     = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+      const logoData  = await loadLogoDataUrl(clubConfig?.logo_url);
+
+      const cols = [
+        { label: '#',            x: M,       align: 'left'  },
+        { label: 'NOMBRE',       x: M + 6,   align: 'left'  },
+        { label: 'CÉDULA',       x: M + 58,  align: 'left'  },
+        { label: 'M. PAGADO',    x: M + 82,  align: 'right' },
+        { label: 'M. DEUDA',     x: M + 110, align: 'right' },
+        { label: 'T. PAGADO',    x: M + 138, align: 'right' },
+        { label: 'T. DEUDA',     x: M + 166, align: 'right' },
+        { label: 'U. PAGADO',    x: M + 194, align: 'right' },
+        { label: 'U. DEUDA',     x: M + 222, align: 'right' },
+        { label: 'DEUDA TOTAL',  x: M + 254, align: 'right' },
+      ];
+
+      const drawPageHeader = () => {
+        const y0 = drawPdfHeader(doc, { W, M, clubName, title: 'BALANCE GENERAL', date: `${fecha.toUpperCase()} · MENSUALIDADES + TORNEOS + UNIFORMES`, logoData, accentRgb });
+        return drawPdfTableHead(doc, { W, M, y: y0, columns: cols.map(c => ({ label: c.label, x: c.x })), accentRgb });
+      };
+
+      let y = drawPageHeader();
+
+      filas.forEach((f, i) => {
+        if (y > H - 20) { doc.addPage(); y = drawPageHeader(); }
+        if (i % 2 === 0) { doc.setFillColor(248, 249, 250); doc.rect(M - 2, y - 4, W - M * 2 + 4, 8, 'F'); }
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(30, 40, 50);
+        doc.text(String(i + 1), cols[0].x, y);
+        doc.text(f.nombre.toUpperCase().slice(0, 24), cols[1].x, y);
+        doc.text(String(f.cedula || ''), cols[2].x, y);
+        doc.text(formatCOP(f.mensPagado), cols[3].x, y, { align: 'right' });
+        doc.setTextColor(f.mensDeuda > 0 ? 239 : 150, f.mensDeuda > 0 ? 68 : 150, f.mensDeuda > 0 ? 68 : 150);
+        doc.text(f.mensDeuda > 0 ? formatCOP(f.mensDeuda) : '—', cols[4].x, y, { align: 'right' });
+        doc.setTextColor(30, 40, 50);
+        doc.text(formatCOP(f.torPagado), cols[5].x, y, { align: 'right' });
+        doc.setTextColor(f.torDeuda > 0 ? 239 : 150, f.torDeuda > 0 ? 68 : 150, f.torDeuda > 0 ? 68 : 150);
+        doc.text(f.torDeuda > 0 ? formatCOP(f.torDeuda) : '—', cols[6].x, y, { align: 'right' });
+        doc.setTextColor(30, 40, 50);
+        doc.text(formatCOP(f.uniPagado), cols[7].x, y, { align: 'right' });
+        doc.setTextColor(f.uniDeuda > 0 ? 239 : 150, f.uniDeuda > 0 ? 68 : 150, f.uniDeuda > 0 ? 68 : 150);
+        doc.text(f.uniDeuda > 0 ? formatCOP(f.uniDeuda) : '—', cols[8].x, y, { align: 'right' });
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...(f.deudaTotal > 0 ? [239, 68, 68] : [34, 197, 94]));
+        doc.text(f.deudaTotal > 0 ? formatCOP(f.deudaTotal) : 'AL DÍA', cols[9].x, y, { align: 'right' });
+        y += 8;
+      });
+
+      if (!filas.length) {
+        doc.setTextColor(150, 150, 150);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text('No hay jugadores activos.', M, y + 4);
+      }
+
+      const pages = doc.internal.getNumberOfPages();
+      for (let p = 1; p <= pages; p++) {
+        doc.setPage(p);
+        drawPdfFooter(doc, { W, H, M, clubName, pageNum: p, totalPages: pages, note: `${filas.length} JUGADORES` });
+      }
+
+      doc.save(`balance-general-${new Date().toISOString().split('T')[0]}.pdf`);
+      setShowBalance(false);
+    } catch (err) {
+      console.error('[balance PDF]', err);
+      alert('Error al generar el PDF: ' + err.message);
+    } finally {
+      setBalanceLoading(false);
+    }
+  }
+
+  async function exportarBalanceExcel() {
+    if (balanceLoading) return;
+    setBalanceLoading(true);
+    try {
+      const pedidos = await cargarPedidoUniformes();
+      const filas   = construirFilasBalance(pedidos);
+      const fecha   = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+
+      const ExcelJS = (await import('exceljs')).default ?? (await import('exceljs'));
+      const wb = new ExcelJS.Workbook();
+      wb.creator = 'ZenSports';
+      const ws = wb.addWorksheet('BALANCE GENERAL', { views: [{ state: 'frozen', ySplit: 2 }] });
+
+      const HEADERS = ['#', 'NOMBRE', 'CÉDULA', 'CATEGORÍA', 'MENS. PAGADO', 'MENS. DEUDA', 'TORN. PAGADO', 'TORN. DEUDA', 'UNIF. PAGADO', 'UNIF. DEUDA', 'DEUDA TOTAL'];
+      ws.columns = [{ width: 5 }, { width: 30 }, { width: 14 }, { width: 16 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 15 }, { width: 16 }];
+
+      const titleRow = ws.addRow([`BALANCE GENERAL — MENSUALIDADES + TORNEOS + UNIFORMES  ·  ${fecha.toUpperCase()}  ·  ${(clubConfig?.nombre || '').toUpperCase()}`]);
+      ws.mergeCells(1, 1, 1, HEADERS.length);
+      titleRow.getCell(1).fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F172A' } };
+      titleRow.getCell(1).font      = { bold: true, color: { argb: 'FFFBBF24' }, size: 11, name: 'Calibri' };
+      titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+      titleRow.height = 24;
+
+      const hRow = ws.addRow(HEADERS);
+      hRow.eachCell(cell => {
+        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
+        cell.font      = { bold: true, color: { argb: 'FFFBBF24' }, size: 10, name: 'Calibri' };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border    = { bottom: { style: 'medium', color: { argb: 'FFFBBF24' } } };
+      });
+      hRow.height = 22;
+      ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: HEADERS.length } };
+
+      filas.forEach((f, idx) => {
+        const row = ws.addRow([
+          idx + 1, f.nombre, f.cedula, f.categoria,
+          f.mensPagado, f.mensDeuda, f.torPagado, f.torDeuda, f.uniPagado, f.uniDeuda, f.deudaTotal,
+        ]);
+        const zebra = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC';
+        row.eachCell((cell, colNum) => {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: zebra } };
+          cell.font = { size: 10, name: 'Calibri', color: { argb: 'FF1E293B' } };
+          if (colNum >= 5) {
+            cell.numFmt = '#,##0';
+            cell.alignment = { horizontal: 'right' };
+            if ((colNum === 6 || colNum === 8 || colNum === 10 || colNum === 11) && (cell.value || 0) > 0) {
+              cell.font = { size: 10, name: 'Calibri', bold: colNum === 11, color: { argb: 'FFDC2626' } };
+            }
+          }
+        });
+        row.height = 19;
+      });
+
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob   = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url    = URL.createObjectURL(blob);
+      const a      = document.createElement('a');
+      a.href       = url;
+      a.download   = `balance-general-${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setShowBalance(false);
+    } catch (err) {
+      console.error('[balance Excel]', err);
+      alert('Error al generar el Excel: ' + err.message);
+    } finally {
+      setBalanceLoading(false);
+    }
+  }
+
   return (
     <>
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-sub)', borderRadius: '16px', overflow: 'hidden' }}>
@@ -951,6 +1160,19 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                 >
                   <FileText className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Reporte</span>
+                </button>
+
+                {/* Balance general: mensualidades + torneos + uniformes */}
+                <button
+                  onClick={() => setShowBalance(true)}
+                  title="Balance general por jugador — mensualidades, torneos y uniformes (PDF o Excel)"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
+                  style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.28)', color: '#FBBF24', whiteSpace: 'nowrap', flexShrink: 0 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(251,191,36,0.18)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(251,191,36,0.08)'}
+                >
+                  <DollarSign className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Balance</span>
                 </button>
 
                 {/* Importar jugadores Excel */}
@@ -1347,6 +1569,35 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           onClose={() => setShowImportarMensualidades(false)}
           onSuccess={() => { setShowImportarMensualidades(false); onRefresh(); }}
         />
+      )}
+
+      {/* MODAL BALANCE GENERAL */}
+      {showBalance && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => !balanceLoading && setShowBalance(false)}>
+          <div className="bg-[var(--bg-card)] border border-[var(--cc30)] rounded-2xl w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--cc30)]">
+              <h2 className="text-[var(--text-pri)] font-bold">Balance general</h2>
+              <button onClick={() => setShowBalance(false)} className="text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-xs text-[var(--text-sec)] leading-relaxed">
+                Consolida <strong>mensualidades, torneos y uniformes</strong> por jugador activo, ordenado por deuda total de mayor a menor. Elige el formato:
+              </p>
+              <button onClick={exportarBalancePDF} disabled={balanceLoading}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-60"
+                style={{ background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.35)', color: '#A855F7' }}>
+                {balanceLoading ? <Loader2 size={15} className="animate-spin" /> : <FileText size={15} />} Descargar PDF
+              </button>
+              <button onClick={exportarBalanceExcel} disabled={balanceLoading}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-60"
+                style={{ background: 'rgba(56,189,248,0.12)', border: '1px solid rgba(56,189,248,0.35)', color: '#38bdf8' }}>
+                {balanceLoading ? <Loader2 size={15} className="animate-spin" /> : <ClipboardList size={15} />} Descargar Excel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* DRAWER HOJA DE VIDA */}

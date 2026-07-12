@@ -900,7 +900,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     (mensualidades || []).filter(m => parseInt(m.anio) === anio).forEach(m => {
       const ced = String(m.cedula || m.player_id || '');
       if (!mensIdx[ced]) mensIdx[ced] = {};
-      mensIdx[ced][parseInt(m.numero_mes)] = m.estado;
+      mensIdx[ced][parseInt(m.numero_mes)] = { estado: m.estado, saldo: parseFloat(m.saldo_pendiente) || 0 };
     });
     const suspIdx = {};
     (suspensiones || []).filter(s => s.activa && parseInt(s.anio) === anio).forEach(s => {
@@ -913,17 +913,27 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
 
   // Solo hasta el mes actual — los meses siguientes aún no se han causado,
   // mostrarlos es ruido (y ocupan espacio innecesario en la tabla).
+  // La deuda se suma SOLO de los meses que quedan en MORA/PENDIENTE/PARCIAL
+  // (nunca de un mes exento o suspendido) — así el total siempre cuadra
+  // exactamente con lo que la fila muestra, sin depender de que el saldo_pendiente
+  // guardado en un mes suspendido/exento ya esté en cero en la base de datos.
   function estadosMesDeJugador(j, mensIdx, suspIdx, mesesLabels) {
     const esExentoGlobal = Number(j.descuento_pct) >= 100;
     const mesesJ    = mensIdx[String(j.cedula)] || {};
     const suspMeses = suspIdx[String(j.cedula)];
-    return mesesLabels.map((_, i) => {
-      if (esExentoGlobal) return 'EXENTO';
+    let deuda = 0;
+    const labels = mesesLabels.map((_, i) => {
       const mes = i + 1;
-      if (suspMeses?.has(mes)) return 'NO APLICA';
-      const est = mesesJ[mes] || '-';
-      return est === 'EXENTO' ? 'NO APLICA' : est;
+      if (esExentoGlobal || suspMeses?.has(mes)) {
+        return esExentoGlobal ? 'EXENTO' : 'NO APLICA';
+      }
+      const info = mesesJ[mes];
+      const est  = info?.estado || '-';
+      if (est === 'EXENTO') return 'NO APLICA';
+      if (est === 'MORA' || est === 'PENDIENTE' || est === 'PARCIAL') deuda += info?.saldo || 0;
+      return est;
     });
+    return { labels, deuda };
   }
 
   // Consolida por jugador: estado mensual hasta el mes actual (igual lógica
@@ -964,10 +974,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       const torneosJ  = torneoNombres.map(nombre => torneosPorCedula[ced]?.[nombre] || null);
       const torDeuda  = torneosJ.reduce((s, t) => s + (t?.saldo || 0), 0);
       const uniDeuda  = uniformesPorCedula[ced]?.deuda || 0;
-      const mensDeuda = j.saldoPendiente || 0;
+      const { labels: estadosMes, deuda: mensDeuda } = estadosMesDeJugador(j, mensIdx, suspIdx, mesesLabels);
       return {
         cedula: j.cedula, nombre: j.nombreCompleto, activo: j.activo,
-        estadosMes: estadosMesDeJugador(j, mensIdx, suspIdx, mesesLabels),
+        estadosMes,
         torneosJ,
         uniPagado:  uniformesPorCedula[ced]?.pagado || 0,
         uniDeuda,

@@ -1103,9 +1103,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         });
 
         doc.setFont('helvetica', 'normal'); doc.setFontSize(6.3);
-        doc.setTextColor(...(grisInactivo || [30, 40, 50]));
+        const sinPendienteUni = f.uniDeuda === 0;
+        doc.setTextColor(...(grisInactivo || (sinPendienteUni ? [22, 163, 74] : [30, 40, 50])));
         doc.text(formatCOP(f.uniPagado), cols[IDX_UNI_PAG].x + cols[IDX_UNI_PAG].w - 1, y, { align: 'right' });
-        doc.setTextColor(...(grisInactivo || (f.uniDeuda > 0 ? [220, 38, 38] : [150, 150, 150])));
+        doc.setTextColor(...(grisInactivo || (f.uniDeuda > 0 ? [220, 38, 38] : [22, 163, 74])));
         doc.setFont('helvetica', f.uniDeuda > 0 ? 'bold' : 'normal');
         doc.text(f.uniDeuda > 0 ? formatCOP(f.uniDeuda) : '—', cols[IDX_UNI_DEU].x + cols[IDX_UNI_DEU].w - 1, y, { align: 'right' });
 
@@ -1244,11 +1245,11 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
             cell.alignment = { horizontal: 'right', vertical: 'middle' };
             cell.font = { size: 10, name: 'Calibri', bold: true, color: { argb: esDeudaTotal ? 'FFB91C1C' : 'FF166534' } };
           } else if (esUniCol) {
-            const esDeudaCol = colNum === COL_TORNEO_FIN + 2;
-            cell.fill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: zebraFg } };
+            const sinPendienteUni = f.uniDeuda === 0;
+            cell.fill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: sinPendienteUni ? 'FFD1FAE5' : 'FFFEE2E2' } };
             cell.numFmt = '#,##0';
             cell.alignment = { horizontal: 'right', vertical: 'middle' };
-            cell.font = { size: 10, name: 'Calibri', bold: esDeudaCol && (cell.value || 0) > 0, color: { argb: esDeudaCol && (cell.value || 0) > 0 ? 'FFDC2626' : 'FF1E293B' } };
+            cell.font = { size: 10, name: 'Calibri', bold: !sinPendienteUni, color: { argb: sinPendienteUni ? 'FF166534' : 'FFB91C1C' } };
           } else {
             if (esPend) {
               cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF7ED' } };

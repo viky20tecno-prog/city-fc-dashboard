@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
@@ -48,8 +48,9 @@ function Spinner() {
   return <span style={{ width: 20, height: 20, borderRadius: '50%', border: '2.5px solid rgba(255,255,255,0.25)', borderTopColor: '#fff', display: 'inline-block', animation: 'spin .7s linear infinite' }} />;
 }
 
-// ── Paso 1: Ingresar celular ──────────────────────────────────────────────────
-function StepPhone({ color, clubSlug, onSent }) {
+// ── Paso 1: Ingresar celular — sin código de confirmación (WhatsApp no es confiable
+// ahora mismo, y el código no agregaba una barrera real: el endpoint solo pedía club+celular) ──
+function StepPhone({ color, clubSlug, onEncontrado }) {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -57,20 +58,20 @@ function StepPhone({ color, clubSlug, onSent }) {
 
   useEffect(() => { setTimeout(() => inputRef.current?.focus(), 100); }, []);
 
-  async function solicitar() {
+  async function consultar() {
     const normalized = normalizePhone(phone);
     if (normalized.length < 10) { setError('Ingresa un número de celular válido'); return; }
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/publico/otp/solicitar`, {
+      const res = await fetch(`${API_BASE}/publico/atleta-por-celular`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: normalized, club_slug: clubSlug }),
+        body: JSON.stringify({ celular: normalized, club_slug: clubSlug }),
       });
       const json = await res.json();
-      if (!res.ok || !json.success) { setError(json.error || 'No se pudo enviar el código'); return; }
-      onSent(normalized);
+      if (!res.ok || !json.success) { setError(json.error || 'No encontramos ese celular'); return; }
+      onEncontrado(json);
     } catch {
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
@@ -86,7 +87,7 @@ function StepPhone({ color, clubSlug, onSent }) {
         Consulta tu estado de cuenta
       </p>
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>
-        Ingresa tu celular y te enviamos un código de verificación por WhatsApp
+        Ingresa el celular con el que estás registrado en el club
       </p>
 
       <div style={{ position: 'relative', marginBottom: 10 }}>
@@ -99,7 +100,7 @@ function StepPhone({ color, clubSlug, onSent }) {
           placeholder="300 000 0000"
           value={phone}
           onChange={e => { setPhone(e.target.value.replace(/[^\d\s]/g, '')); setError(null); }}
-          onKeyDown={e => e.key === 'Enter' && valid && !loading && solicitar()}
+          onKeyDown={e => e.key === 'Enter' && valid && !loading && consultar()}
           style={{
             width: '100%', boxSizing: 'border-box',
             background: 'rgba(255,255,255,0.07)', border: `1.5px solid ${error ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.12)'}`,
@@ -111,7 +112,7 @@ function StepPhone({ color, clubSlug, onSent }) {
       </div>
 
       <button
-        onClick={solicitar}
+        onClick={consultar}
         disabled={!valid || loading}
         style={{
           width: '100%', border: 'none', borderRadius: 14, padding: '15px',
@@ -123,12 +124,7 @@ function StepPhone({ color, clubSlug, onSent }) {
           transition: 'background .2s, box-shadow .2s, color .2s',
         }}
       >
-        {loading ? <Spinner /> : (
-          <>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 0C5.372 0 0 5.373 0 12.001c0 2.117.554 4.1 1.523 5.827L0 24l6.335-1.652C8.01 23.085 9.974 23.6 12 23.6 18.628 23.6 24 18.227 24 11.599 24 4.972 18.628-.001 12-.001z"/></svg>
-            Enviar código por WhatsApp
-          </>
-        )}
+        {loading ? <Spinner /> : 'Ver mi estado de cuenta'}
       </button>
 
       {error && (
@@ -144,136 +140,7 @@ function StepPhone({ color, clubSlug, onSent }) {
   );
 }
 
-// ── Paso 2: Ingresar código OTP ───────────────────────────────────────────────
-function StepOTP({ color, phone, clubSlug, onVerified, onBack }) {
-  const [code, setCode] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [resendCooldown, setResendCooldown] = useState(30);
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 100);
-    const t = setInterval(() => setResendCooldown(c => Math.max(0, c - 1)), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  async function verificar() {
-    if (code.length !== 4) { setError('El código tiene 4 dígitos'); return; }
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`${API_BASE}/publico/otp/verificar`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, club_slug: clubSlug, code }),
-      });
-      const json = await res.json();
-      if (!res.ok || !json.success) { setError(json.error || 'Código incorrecto'); return; }
-      onVerified(json);
-    } catch {
-      setError('Error de conexión. Intenta de nuevo.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function reenviar() {
-    if (resendCooldown > 0) return;
-    setResendCooldown(30);
-    setError(null);
-    setCode('');
-    try {
-      await fetch(`${API_BASE}/publico/otp/solicitar`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, club_slug: clubSlug }),
-      });
-    } catch { /* silent */ }
-  }
-
-  const phoneDisplay = `+${phone.slice(0, 2)} ${phone.slice(2, 5)} ${phone.slice(5, 8)} ${phone.slice(8)}`;
-
-  return (
-    <div className="fade-up" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '24px 20px' }}>
-      {/* Icono WhatsApp */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-        <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(37,211,102,0.12)', border: '1px solid rgba(37,211,102,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 0C5.372 0 0 5.373 0 12.001c0 2.117.554 4.1 1.523 5.827L0 24l6.335-1.652C8.01 23.085 9.974 23.6 12 23.6 18.628 23.6 24 18.227 24 11.599 24 4.972 18.628-.001 12-.001z"/></svg>
-        </div>
-      </div>
-
-      <p style={{ fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 6, textAlign: 'center' }}>
-        Revisa tu WhatsApp
-      </p>
-      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>
-        Enviamos un código de 4 dígitos a<br />
-        <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>{phoneDisplay}</span>
-      </p>
-
-      {/* Input código */}
-      <input
-        ref={inputRef}
-        type="tel"
-        inputMode="numeric"
-        aria-label="Código de verificación de 4 dígitos"
-        pattern="[0-9]*"
-        maxLength={4}
-        placeholder="_ _ _ _"
-        value={code}
-        onChange={e => { setCode(e.target.value.replace(/\D/g, '').slice(0, 4)); setError(null); }}
-        onKeyDown={e => e.key === 'Enter' && code.length === 4 && !loading && verificar()}
-        style={{
-          width: '100%', boxSizing: 'border-box',
-          background: 'rgba(255,255,255,0.07)',
-          border: `1.5px solid ${error ? 'rgba(239,68,68,0.5)' : code.length === 4 ? `${color}60` : 'rgba(255,255,255,0.12)'}`,
-          borderRadius: 14, padding: '18px',
-          color: '#fff', fontSize: 28, fontWeight: 800, letterSpacing: 12,
-          textAlign: 'center', marginBottom: 10,
-          transition: 'border-color .15s',
-        }}
-      />
-
-      <button
-        onClick={verificar}
-        disabled={code.length !== 4 || loading}
-        style={{
-          width: '100%', border: 'none', borderRadius: 14, padding: '15px',
-          background: code.length === 4 && !loading ? color : 'rgba(255,255,255,0.08)',
-          color: code.length === 4 && !loading ? '#fff' : 'rgba(255,255,255,0.25)',
-          fontSize: 15, fontWeight: 700, cursor: code.length === 4 && !loading ? 'pointer' : 'not-allowed',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          boxShadow: code.length === 4 && !loading ? `0 4px 24px ${color}35` : 'none',
-          transition: 'background .2s, box-shadow .2s, color .2s',
-          marginBottom: 10,
-        }}
-      >
-        {loading ? <Spinner /> : 'Verificar código'}
-      </button>
-
-      {error && (
-        <div style={{ marginTop: 4, marginBottom: 10, padding: '12px 16px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', borderRadius: 12, fontSize: 13, color: '#FCA5A5', textAlign: 'center' }}>
-          {error}
-        </div>
-      )}
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 13, cursor: 'pointer', padding: '4px 0' }}>
-          ← Cambiar número
-        </button>
-        <button
-          onClick={reenviar}
-          disabled={resendCooldown > 0}
-          style={{ background: 'none', border: 'none', color: resendCooldown > 0 ? 'rgba(255,255,255,0.2)' : color, fontSize: 13, cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer', padding: '4px 0', fontWeight: 600 }}
-        >
-          {resendCooldown > 0 ? `Reenviar (${resendCooldown}s)` : 'Reenviar código'}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Paso 3: Resultado ─────────────────────────────────────────────────────────
+// ── Paso 2: Resultado ─────────────────────────────────────────────────────────
 const UNIFORME_ESTADO = {
   AL_DIA:    { color: '#00D084', label: 'Al día'           },
   PAGADO:    { color: '#00D084', label: 'Pagado'           },
@@ -478,49 +345,63 @@ function Resultado({ datos, color, onNuevaBusqueda }) {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function PortalAtleta() {
-  const { clubSlug } = useParams();
-  const navigate     = useNavigate();
+  const { clubSlug, cedula } = useParams();
 
   const SESSION_KEY = `portal_session_${clubSlug}`;
 
   const [club, setClub]               = useState(null);
   const [clubCargando, setClubCargando] = useState(true);
 
-  // step: 'phone' | 'otp' | 'result'
-  const [step, setStep]   = useState('phone');
-  const [phone, setPhone] = useState('');
+  // step: 'cargando' (link directo con cédula, sin pedir nada) | 'phone' | 'result'
+  const [step, setStep]   = useState(cedula ? 'cargando' : 'phone');
   const [datos, setDatos] = useState(null);
 
   useEffect(() => {
     document.title = 'Estado de Cuenta · ZenSports';
-    // Restaurar sesión guardada si sigue vigente (< 10 min),
-    // luego refrescar datos en background para mostrar cambios recientes
-    try {
-      const saved = localStorage.getItem(SESSION_KEY);
-      if (saved) {
-        const { ts, data: savedData } = JSON.parse(saved);
-        if (Date.now() - ts < SESSION_TTL_MS) {
-          setDatos(savedData);
-          setStep('result');
-          if (savedData?.club) setClub(savedData.club);
-          // Refresco silencioso: actualiza datos sin pedir OTP de nuevo
-          const cedula = savedData?.atleta?.cedula;
-          if (cedula) {
-            fetch(`${API_BASE}/publico/atleta/${clubSlug}/${cedula}`)
-              .then(r => r.ok ? r.json() : null)
-              .then(json => {
-                if (json?.success) {
-                  setDatos(json);
-                  try { localStorage.setItem(SESSION_KEY, JSON.stringify({ ts: Date.now(), data: json })); } catch { /* ignora */ }
-                }
-              })
-              .catch(() => { /* mantiene datos cacheados si falla */ });
+
+    // Link directo con cédula (el que manda Estado de cuenta) — entra sin pedir nada.
+    if (cedula) {
+      fetch(`${API_BASE}/publico/atleta/${clubSlug}/${cedula}`)
+        .then(r => r.json())
+        .then(json => {
+          if (json?.success) {
+            handleEncontrado(json);
+          } else {
+            // Link roto/vencido — que la persona entre con su celular en vez de trabarse acá.
+            setStep('phone');
           }
-        } else {
-          localStorage.removeItem(SESSION_KEY);
+        })
+        .catch(() => setStep('phone'));
+    } else {
+      // Restaurar sesión guardada si sigue vigente (< 10 min),
+      // luego refrescar datos en background para mostrar cambios recientes
+      try {
+        const saved = localStorage.getItem(SESSION_KEY);
+        if (saved) {
+          const { ts, data: savedData } = JSON.parse(saved);
+          if (Date.now() - ts < SESSION_TTL_MS) {
+            setDatos(savedData);
+            setStep('result');
+            if (savedData?.club) setClub(savedData.club);
+            // Refresco silencioso: actualiza datos sin pedir el celular de nuevo
+            const cedulaGuardada = savedData?.atleta?.cedula;
+            if (cedulaGuardada) {
+              fetch(`${API_BASE}/publico/atleta/${clubSlug}/${cedulaGuardada}`)
+                .then(r => r.ok ? r.json() : null)
+                .then(json => {
+                  if (json?.success) {
+                    setDatos(json);
+                    try { localStorage.setItem(SESSION_KEY, JSON.stringify({ ts: Date.now(), data: json })); } catch { /* ignora */ }
+                  }
+                })
+                .catch(() => { /* mantiene datos cacheados si falla */ });
+            }
+          } else {
+            localStorage.removeItem(SESSION_KEY);
+          }
         }
-      }
-    } catch { /* ignora sesión corrupta */ }
+      } catch { /* ignora sesión corrupta */ }
+    }
 
     async function cargarClub() {
       try {
@@ -532,12 +413,7 @@ export default function PortalAtleta() {
     cargarClub();
   }, [clubSlug]); // eslint-disable-line
 
-  function handleSent(normalizedPhone) {
-    setPhone(normalizedPhone);
-    setStep('otp');
-  }
-
-  function handleVerified(json) {
+  function handleEncontrado(json) {
     if (!club && json.club) setClub(json.club);
     setDatos(json);
     setStep('result');
@@ -546,7 +422,6 @@ export default function PortalAtleta() {
 
   function handleReset() {
     setStep('phone');
-    setPhone('');
     setDatos(null);
     try { localStorage.removeItem(SESSION_KEY); } catch { /* ignora */ }
   }
@@ -558,10 +433,9 @@ export default function PortalAtleta() {
   // Indicador de paso
   const steps = [
     { label: 'Celular', icon: '📱' },
-    { label: 'Código',  icon: '🔐' },
     { label: 'Cuenta',  icon: '📋' },
   ];
-  const stepIdx = step === 'phone' ? 0 : step === 'otp' ? 1 : 2;
+  const stepIdx = step === 'phone' ? 0 : 1;
 
   return (
     <div style={{ minHeight: '100dvh', background: '#080C14', fontFamily: "'Inter', system-ui, sans-serif", color: '#fff', display: 'flex', flexDirection: 'column' }}>
@@ -594,7 +468,7 @@ export default function PortalAtleta() {
           </div>
 
           {/* Stepper */}
-          {step !== 'result' && (
+          {step === 'phone' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginTop: 4 }}>
               {steps.map((s, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
@@ -624,11 +498,13 @@ export default function PortalAtleta() {
         </div>
 
         {/* Contenido por paso */}
-        {step === 'phone' && (
-          <StepPhone color={color} clubSlug={clubSlug} onSent={handleSent} />
+        {step === 'cargando' && (
+          <div className="fade-up" style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+            <Spinner />
+          </div>
         )}
-        {step === 'otp' && (
-          <StepOTP color={color} phone={phone} clubSlug={clubSlug} onVerified={handleVerified} onBack={() => setStep('phone')} />
+        {step === 'phone' && (
+          <StepPhone color={color} clubSlug={clubSlug} onEncontrado={handleEncontrado} />
         )}
         {step === 'result' && datos && (
           <Resultado datos={datos} color={color} onNuevaBusqueda={handleReset} />

@@ -578,7 +578,7 @@ export default function Calendario({ color, clubId }) {
   const dayEvs      = eventsByDay[selectedDate] || [];
   const tomorrowStr = localDateStr(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1));
 
-  // ── Reporte de ranking de asistencia (entrenamientos) ──────────────────────
+  // ── Reporte de ranking de asistencia (entrenamientos + partidos) ───────────
 
   async function generarReporteRanking() {
     if (generandoReporte) return;
@@ -586,13 +586,13 @@ export default function Calendario({ color, clubId }) {
     try {
       const qs = new URLSearchParams({ club_id: clubId, anio: String(reporteAnio) });
       if (reporteMes) qs.set('mes', reporteMes);
-      const res  = await authFetch(`${API_BASE_URL}/asistencia/ranking-entrenamientos?${qs}`);
+      const res  = await authFetch(`${API_BASE_URL}/asistencia/ranking?${qs}`);
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Error al generar el reporte');
 
       const { general, por_equipo } = data;
       if (general.length === 0) {
-        alert('No hay entrenamientos registrados en ese período.');
+        alert('No hay entrenamientos ni partidos registrados en ese período.');
         return;
       }
 
@@ -607,7 +607,7 @@ export default function Calendario({ color, clubId }) {
       let y = drawPdfHeader(doc, {
         W, M, clubName,
         title: 'Ranking de asistencia',
-        subtitle: `Entrenamientos · ${periodo}`,
+        subtitle: `Entrenamientos y partidos · ${periodo}`,
         logoData, accentRgb, height: 32,
       });
 
@@ -676,7 +676,7 @@ export default function Calendario({ color, clubId }) {
         </div>
         <div className="p-6 space-y-4">
           <p className="text-xs text-[var(--text-sec)] leading-relaxed">
-            Ranking de asistencia a <strong>entrenamientos</strong> (los partidos no se incluyen, porque no todos los jugadores son convocados). El top 5 queda resaltado para la premiación.
+            Ranking de asistencia a <strong>entrenamientos y partidos</strong>. En los partidos solo cuentan los jugadores convocados. El top 5 queda resaltado para la premiación.
           </p>
           <div className="flex gap-3">
             <div className="flex-1 space-y-1.5">

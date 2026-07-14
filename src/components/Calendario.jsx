@@ -590,8 +590,8 @@ export default function Calendario({ color, clubId }) {
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Error al generar el reporte');
 
-      const { general, por_equipo } = data;
-      if (general.length === 0) {
+      const { entrenamientos, partidos } = data;
+      if (entrenamientos.total === 0 && partidos.total === 0) {
         alert('No hay entrenamientos ni partidos registrados en ese período.');
         return;
       }
@@ -652,8 +652,14 @@ export default function Calendario({ color, clubId }) {
         y += 6;
       }
 
-      pintarTabla('General', general);
-      Object.entries(por_equipo).forEach(([equipo, ranking]) => pintarTabla(equipo, ranking));
+      if (entrenamientos.total > 0) {
+        pintarTabla(`Entrenamientos — General · ${entrenamientos.total} programados`, entrenamientos.general);
+        Object.entries(entrenamientos.por_equipo).forEach(([equipo, ranking]) => pintarTabla(`Entrenamientos — ${equipo}`, ranking));
+      }
+      if (partidos.total > 0) {
+        pintarTabla(`Partidos — General · ${partidos.total} programados`, partidos.general);
+        Object.entries(partidos.por_equipo).forEach(([equipo, ranking]) => pintarTabla(`Partidos — ${equipo}`, ranking));
+      }
 
       drawPdfFooter(doc, { W, H, M, clubName });
       doc.save(`ranking-asistencia-${periodo.toLowerCase().replace(/\s+/g, '-')}.pdf`);
@@ -676,7 +682,7 @@ export default function Calendario({ color, clubId }) {
         </div>
         <div className="p-6 space-y-4">
           <p className="text-xs text-[var(--text-sec)] leading-relaxed">
-            Ranking de asistencia a <strong>entrenamientos y partidos</strong>. En los partidos solo cuentan los jugadores convocados. El top 5 queda resaltado para la premiación.
+            Dos rankings separados: <strong>entrenamientos</strong> (sobre el total programado en el período, ej. 2/50) y <strong>partidos</strong> (sobre los partidos a los que cada jugador fue convocado, ej. 2/4). El top 5 de cada uno queda resaltado para la premiación.
           </p>
           <div className="flex gap-3">
             <div className="flex-1 space-y-1.5">

@@ -70,6 +70,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [resultadoAhora, setResultadoAhora] = useState({});   // { [id]: { ok, msg } }
   const [ecLista, setEcLista] = useState([]);
   const [ecLoading, setEcLoading] = useState(false);
+  const [ecError, setEcError] = useState('');
   const [ecFiltro, setEcFiltro] = useState('');
 
   const authHeaders = async () => {
@@ -92,13 +93,18 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
 
   const loadEstadoCuenta = useCallback(async () => {
     setEcLoading(true);
+    setEcError('');
     try {
       const hdrs = await authHeaders();
       const r = await fetch(`${API}/players/estado-cuenta-lista?club_id=${clubId()}`, { headers: hdrs });
       const d = await r.json();
+      if (!d.success) { setEcError(d.error || 'No se pudo cargar la lista'); setEcLista([]); return; }
       setEcLista(
         (d.data || []).sort((a, b) => `${a.nombre} ${a.apellidos}`.localeCompare(`${b.nombre} ${b.apellidos}`, 'es'))
       );
+    } catch (e) {
+      setEcError(e.message);
+      setEcLista([]);
     } finally { setEcLoading(false); }
   }, []);
 
@@ -301,6 +307,11 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
         <div className="flex flex-col gap-1.5 max-h-[420px] overflow-y-auto">
           {ecLoading ? (
             <p className="text-xs text-[var(--text-mut)] text-center py-6">Cargando…</p>
+          ) : ecError ? (
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium bg-red-500/10 border border-red-500/25 text-red-400">
+              ❌ {ecError}
+              <button onClick={loadEstadoCuenta} className="ml-auto underline opacity-80 hover:opacity-100">Reintentar</button>
+            </div>
           ) : ecLista.length === 0 ? (
             <p className="text-xs text-[var(--text-mut)] text-center py-6">Ningún jugador activo con número registrado.</p>
           ) : (

@@ -499,18 +499,16 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
           {/* PASO 4 — COBROS POR WHATSAPP */}
           {step === 3 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <StepBadge color={c} Icon={MessageCircle} title="Cobro automático por WhatsApp" desc="ZenSports envía recordatorios de pago a tus jugadores automáticamente" />
+              <StepBadge color={c} Icon={MessageCircle} title="Recordatorios de cobro por WhatsApp" desc="ZenSports te prepara el recordatorio de cada jugador — vos lo mandás con un clic desde tu propio WhatsApp" />
 
               {/* Cómo funciona */}
               <div style={{ padding: '14px 16px', background: `${c}08`, borderRadius: 12, border: `1px solid ${c}20` }}>
                 <p style={{ color: '#fff', fontSize: 12, fontWeight: 700, margin: '0 0 8px' }}>⚡ ¿Cómo funciona?</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {[
-                    { dia: 'Día 27', msg: 'Aviso preventivo — se acerca la cuota del próximo mes' },
-                    { dia: 'Día 1',  msg: 'Cuota activa — valor exacto y fecha límite de pago' },
-                    { dia: 'Día 4',  msg: 'Recordatorio — quedan 3 días para pagar sin penalidad' },
-                    { dia: 'Día 7',  msg: 'Último aviso — hoy vence el plazo' },
-                    { dia: 'Día 8',  msg: 'Mora aplicada — se notifica al jugador y al admin' },
+                    { dia: '1',  msg: 'ZenSports calcula automáticamente quién debe cada mes y aplica la mora si corresponde' },
+                    { dia: '2',  msg: 'Te arma el mensaje de cada jugador (mensualidades, uniformes, torneos) en Estado de cuenta' },
+                    { dia: '3',  msg: 'Vos lo mandás con un clic, jugador por jugador, desde tu propio WhatsApp — así protegemos tu número de bloqueos' },
                   ].map(({ dia, msg }) => (
                     <div key={dia} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                       <span style={{ fontSize: 11, fontWeight: 700, color: c, background: `${c}18`, padding: '2px 8px', borderRadius: 6, flexShrink: 0, marginTop: 1 }}>{dia}</span>
@@ -522,7 +520,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
 
               {/* Número WA del admin */}
               <div>
-                <label style={lbl}>Tu número de WhatsApp (recibe alertas de mora)</label>
+                <label style={lbl}>Tu número de WhatsApp de contacto</label>
                 <input
                   value={whatsapp}
                   onChange={e => setWhatsapp(e.target.value.replace(/\D/g, ''))}
@@ -530,7 +528,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                   style={inp} type="tel"
                 />
                 <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 5, marginBottom: 0 }}>
-                  Con código de país (+{club.codigo_pais}), sin el símbolo +. Recibirás el reporte de morosos cada mes.
+                  Con código de país (+{club.codigo_pais}), sin el símbolo +. Aparece en los mensajes que reciben tus jugadores para que te puedan escribir directo.
                 </p>
               </div>
 
@@ -578,11 +576,11 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                 <input ref={qrRef} type="file" accept="image/*" style={{ display: 'none' }}
                   onChange={e => e.target.files?.[0] && uploadQR(e.target.files[0])} />
                 <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 8, marginBottom: 0 }}>
-                  Si subes el QR de Nequi o Bancolombia, se adjunta automáticamente a los mensajes de cobro.
+                  Si subes el QR de Nequi o Bancolombia, podés adjuntarlo a tus recordatorios de eventos y compartirlo desde el perfil del club.
                 </p>
               </div>
 
-              <InfoBox>Todos estos campos son opcionales — puedes completarlos luego desde Configuración. Cuantos más datos configures, más completos serán los mensajes automáticos.</InfoBox>
+              <InfoBox>Todos estos campos son opcionales — puedes completarlos luego desde Configuración. Cuantos más datos configures, más completos serán tus recordatorios y mensajes.</InfoBox>
 
               {/* Redes sociales */}
               <div style={{ marginTop: 4 }}>

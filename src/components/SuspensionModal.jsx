@@ -28,8 +28,8 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
   const [loading, setLoading]               = useState(true);
   const [anio, setAnio]                     = useState(anioActual);
 
-  // Popover para activar un mes
-  const [popoverMes, setPopoverMes]         = useState(null);
+  // Selección de meses para una nueva suspensión — puede ser más de uno a la vez
+  const [mesesSeleccionados, setMesesSeleccionados] = useState([]);
   const [popoverMotivo, setPopoverMotivo]   = useState('');
   const [popoverDetalle, setPopoverDetalle] = useState('');
   const [enviando, setEnviando]             = useState(false);
@@ -75,11 +75,26 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
       } else {
         handleCancelar(suspension.id);
       }
-    } else {
-      setPopoverMes(mes);
-      setPopoverMotivo('');
-      setPopoverDetalle('');
+      return;
     }
+    // Mes libre: toggle en la selección pendiente — se puede elegir varios antes de guardar
+    setMesesSeleccionados(prev =>
+      prev.includes(mes) ? prev.filter(m => m !== mes) : [...prev, mes].sort((a, b) => a - b)
+    );
+  };
+
+  // Agrupa una lista de meses en rangos contiguos — [1,2,3,5,6] → [[1,3],[5,6]].
+  // Cada rango contiguo se guarda como una sola suspensión (mismo modelo que ya
+  // soporta el backend); meses salteados quedan en rangos separados.
+  const agruparEnRangos = (meses) => {
+    const ordenados = [...meses].sort((a, b) => a - b);
+    const rangos = [];
+    for (const mes of ordenados) {
+      const ultimo = rangos[rangos.length - 1];
+      if (ultimo && mes === ultimo[1] + 1) ultimo[1] = mes;
+      else rangos.push([mes, mes]);
+    }
+    return rangos;
   };
 
   const handleCancelar = async (id) => {
@@ -101,28 +116,37 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
   };
 
   const handleConfirmarSuspension = async () => {
-    if (!popoverMotivo) return;
+    if (!popoverMotivo || mesesSeleccionados.length === 0) return;
     setEnviando(true);
+    setErrorMsg('');
     try {
-      const res  = await authFetch(`${API_BASE}/suspensiones?club_id=${getClubId()}`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          cedula:     jugador.cedula,
-          motivo:     popoverMotivo,
-          detalle:    popoverDetalle,
-          mes_inicio: popoverMes,
-          mes_fin:    popoverMes,
-          anio,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setPopoverMes(null);
-        await cargarSuspensiones();
-        onSuccess?.();
+      const rangos = agruparEnRangos(mesesSeleccionados);
+      const resultados = await Promise.all(rangos.map(([mes_inicio, mes_fin]) =>
+        authFetch(`${API_BASE}/suspensiones?club_id=${getClubId()}`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            cedula:  jugador.cedula,
+            motivo:  popoverMotivo,
+            detalle: popoverDetalle,
+            mes_inicio,
+            mes_fin,
+            anio,
+          }),
+        }).then(r => r.json())
+      ));
+      const fallidos = resultados.filter(d => !d.success);
+      if (fallidos.length > 0) {
+        setErrorMsg(fallidos[0].error || 'Algunos meses no se pudieron suspender');
       }
-    } catch { /* silencioso */ } finally { setEnviando(false); }
+      setMesesSeleccionados([]);
+      setPopoverMotivo('');
+      setPopoverDetalle('');
+      await cargarSuspensiones();
+      onSuccess?.();
+    } catch {
+      setErrorMsg('Error de conexión — intenta de nuevo');
+    } finally { setEnviando(false); }
   };
 
   return (
@@ -145,14 +169,14 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
           {/* Selector de año */}
           <div className="flex items-center justify-between">
             <button
-              onClick={() => { setAnio(a => a - 1); setPopoverMes(null); setConfirmarDesactivar(null); }}
+              onClick={() => { setAnio(a => a - 1); setMesesSeleccionados([]); setConfirmarDesactivar(null); }}
               className="p-1.5 rounded-lg hover:bg-white/5 text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <span className="text-sm font-semibold text-[var(--text-pri)]">{anio}</span>
             <button
-              onClick={() => { setAnio(a => a + 1); setPopoverMes(null); setConfirmarDesactivar(null); }}
+              onClick={() => { setAnio(a => a + 1); setMesesSeleccionados([]); setConfirmarDesactivar(null); }}
               className="p-1.5 rounded-lg hover:bg-white/5 text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
@@ -173,7 +197,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                 const suspension = mesesMap[mes];
                 const motivo     = suspension ? MOTIVOS.find(m => m.valor === suspension.motivo) : null;
                 const esCancelando = suspension && cancelando === suspension.id;
-                const esPopover  = popoverMes === mes;
+                const esSeleccionado = mesesSeleccionados.includes(mes);
                 const esConfirmar = confirmarDesactivar?.mes === mes;
 
                 return (
@@ -184,14 +208,16 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                     title={
                       suspension
                         ? `${motivo?.label || suspension.motivo}${suspension.detalle ? ': ' + suspension.detalle : ''}${suspension.mes_inicio !== suspension.mes_fin ? ` (rango ${MESES[suspension.mes_inicio-1]}–${MESES[suspension.mes_fin-1]})` : ''}`
-                        : 'Click para suspender este mes'
+                        : 'Click para seleccionar — podés elegir varios meses antes de guardar'
                     }
                     className={`relative flex flex-col items-center justify-center gap-0.5 py-2.5 px-1 rounded-xl text-xs font-medium border transition-all ${
                       esCancelando
                         ? 'opacity-40 cursor-wait bg-yellow-400/10 border-yellow-400/40 text-yellow-400'
                         : suspension
                           ? `bg-yellow-400/10 border-yellow-400/40 text-yellow-400 ${esConfirmar ? 'ring-2 ring-yellow-400/60' : 'hover:bg-yellow-400/20'}`
-                          : `bg-[var(--bg-app)] border-[var(--border-sub)] text-[var(--text-sec)] hover:border-[var(--cc)]/50 hover:text-[var(--text-pri)] ${esPopover ? 'border-[var(--cc)]/50 text-[var(--text-pri)]' : ''}`
+                          : esSeleccionado
+                            ? 'bg-[var(--cc)]/15 border-[var(--cc)] text-[var(--text-pri)] ring-2 ring-[var(--cc)]/40'
+                            : 'bg-[var(--bg-app)] border-[var(--border-sub)] text-[var(--text-sec)] hover:border-[var(--cc)]/50 hover:text-[var(--text-pri)]'
                     }`}
                   >
                     <span>{nombre.slice(0, 3)}</span>
@@ -206,11 +232,13 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
             </div>
           )}
 
-          {/* Popover: seleccionar motivo para activar un mes */}
-          {popoverMes && (
+          {/* Popover: seleccionar motivo para los meses elegidos */}
+          {mesesSeleccionados.length > 0 && (
             <div className="p-4 rounded-xl bg-[var(--bg-app)] border border-[var(--cc)]/30 space-y-3">
               <p className="text-sm font-semibold text-[var(--text-pri)]">
-                {MESES[popoverMes - 1]} {anio} — ¿Motivo?
+                {agruparEnRangos(mesesSeleccionados).map(([ini, fin]) =>
+                  ini === fin ? MESES[ini - 1] : `${MESES[ini - 1]}–${MESES[fin - 1]}`
+                ).join(', ')} {anio} — ¿Motivo?
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {MOTIVOS.map(m => {
@@ -240,7 +268,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
               />
               <div className="flex gap-2">
                 <button
-                  onClick={() => setPopoverMes(null)}
+                  onClick={() => { setMesesSeleccionados([]); setPopoverMotivo(''); setPopoverDetalle(''); }}
                   className="flex-1 py-2 rounded-xl border border-[var(--border-sub)] text-xs text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors"
                 >
                   Cancelar
@@ -250,7 +278,7 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
                   disabled={!popoverMotivo || enviando}
                   className="flex-1 py-2 rounded-xl bg-yellow-400 text-[#060C18] text-xs font-bold hover:bg-yellow-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {enviando ? 'Guardando...' : 'Suspender mes'}
+                  {enviando ? 'Guardando...' : `Suspender ${mesesSeleccionados.length} mes${mesesSeleccionados.length > 1 ? 'es' : ''}`}
                 </button>
               </div>
             </div>

@@ -374,7 +374,7 @@ const TESTIMONIALS = [
     name: 'Sebastián Torres',
     role: 'Administrador',
     club: 'Escuela Deportiva Norte',
-    text: 'Los cobros automáticos por WhatsApp redujeron la mora en más del 80%. ZenSports se pagó solo en el primer mes.',
+    text: 'Las alertas de cobro automáticas nos avisan quién debe pagar antes de que se atrase. Redujimos la mora más del 80% sin perseguir a nadie.',
     stars: 5,
     avatar: 'ST',
     color: '#F5A623',
@@ -429,8 +429,8 @@ const CASOS = [
     color: '#F5A623',
     avatar: 'AN',
     problema: 'Con 80 inscritos, la mora superaba el 40% mensual. El administrador enviaba más de 60 mensajes manuales por semana y muchos aún ignoraban los cobros.',
-    solucion: 'El ciclo de cobro automático disparó recordatorios en los días 27, 1, 4 y 7. Los jugadores con mora recibieron suspensión automática hasta regularizar su estado.',
-    quote: 'Los cobros automáticos se pagaron solos en el primer mes. Nunca pensé que fuera tan fácil reducir la mora al 8%.',
+    solucion: 'El sistema calcula automáticamente quién debe pagar y arma el recordatorio listo para cada jugador en los días clave del ciclo. El admin los manda con un clic desde su propio WhatsApp — sin escribir nada de cero. Los jugadores con mora quedan suspendidos automáticamente hasta regularizar su estado.',
+    quote: 'Ya no tengo que acordarme de nada ni escribir uno por uno — el sistema me arma todo, yo solo confirmo el envío. Bajé la mora al 8% sin arriesgar mi número de WhatsApp.',
     persona: 'Sebastián T. · Administrador',
     antes: [
       { label: 'Mora mensual',         val: '42%'     },
@@ -611,7 +611,7 @@ function FlowDiagram() {
   const steps = [
     { Icon: Smartphone,    color: '#00AAFF', num: '01', title: 'Jugador se inscribe',  sub: 'Formulario digital desde el celular' },
     { Icon: CreditCard,    color: '#00D084', num: '02', title: 'Paga su mensualidad',  sub: 'PSE, tarjeta o código QR'            },
-    { Icon: MessageCircle, color: '#25D366', num: '03', title: 'WhatsApp confirma',    sub: 'y recuerda pagos automáticamente'    },
+    { Icon: MessageCircle, color: '#25D366', num: '03', title: 'WhatsApp confirma',    sub: 'y te prepara los recordatorios de cobro' },
     { Icon: QrCode,        color: '#F5A623', num: '04', title: 'Carnet QR en cancha',  sub: 'Verificación en segundos'            },
   ];
   return (
@@ -746,7 +746,7 @@ function ImpactTable() {
 function MiniComparisonTable() {
   const rows = [
     { need: 'Inscripciones',         old: 'Formularios manuales + papel',            zs: 'Formulario digital + validación automática' },
-    { need: 'Cobros y morosidad',    old: 'Mensajes 1 a 1 y recordatorios manuales', zs: 'Cobros automáticos por WhatsApp'            },
+    { need: 'Cobros y morosidad',    old: 'Mensajes 1 a 1 y recordatorios manuales', zs: 'Seguimiento automático + recordatorio con un clic' },
     { need: 'Control en cancha',     old: 'Llamadas, discusiones y papeles',          zs: 'Carnet QR verificado en segundos'           },
     { need: 'Dinero perdido al mes', old: 'Hasta $500.000+ en cupos no cobrados',     zs: 'Control en tiempo real · cero cupos fantasma' },
   ];
@@ -1377,7 +1377,7 @@ export default function LandingPage() {
             {
               icon: Bot, color: previewColor,
               title: 'Automatización por WhatsApp',
-              desc: 'Cobros preventivos, confirmaciones y recordatorios enviados automáticamente. Cero intervención manual.',
+              desc: 'El sistema calcula y prepara cada recordatorio de cobro automáticamente. Vos lo enviás con un clic desde tu propio WhatsApp — sin arriesgar tu número.',
               badge: 'IA',
             },
             {
@@ -1437,13 +1437,13 @@ export default function LandingPage() {
               Reduce drásticamente el trabajo manual de admins y coordinadores sin contratar más personal.
             </p>
             <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, marginBottom: 28 }}>
-              ZenSports responde preguntas, confirma pagos, valida inscripciones y envía recordatorios automáticamente por WhatsApp. Sin hojas de cálculo. Sin mensajes manuales.
+              ZenSports responde preguntas, confirma pagos y valida inscripciones automáticamente por WhatsApp. Y te prepara cada recordatorio de cobro listo para enviar con un clic. Sin hojas de cálculo. Sin escribir mensajes de cero.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
               {[
                 'Confirmación automática de inscripciones',
                 'Validación inteligente de comprobantes',
-                'Recordatorios de pago sin intervención',
+                'Recordatorios de pago listos para enviar con un clic',
                 'Respuestas instantáneas a consultas frecuentes',
                 'Seguimiento automático de pagos en mora',
               ].map(item => (
@@ -1655,11 +1655,11 @@ export default function LandingPage() {
               {/* ─ Filas de datos ─ */}
               {[
                 { feature: 'Inscripciones digitales',  sheets: { ok: false,     text: 'Manual, sin validación'              }, wa: { ok: false,     text: 'Por mensaje, sin historial'           }, zs: { ok: true, text: 'Formulario + validación automática' } },
-                { feature: 'Cobros automáticos',        sheets: { ok: false,     text: 'No existe'                           }, wa: { ok: 'partial', text: 'Recordatorio manual, copiar/pegar'    }, zs: { ok: true, text: 'Ciclo completo automático por WA'   } },
+                { feature: 'Cobros automáticos',        sheets: { ok: false,     text: 'No existe'                           }, wa: { ok: 'partial', text: 'Recordatorio manual, copiar/pegar'    }, zs: { ok: true, text: 'Cálculo automático + envío con un clic'} },
                 { feature: 'Carnet digital QR',         sheets: { ok: false,     text: 'No disponible'                       }, wa: { ok: false,     text: 'No disponible'                        }, zs: { ok: true, text: 'QR verificable, descarga PDF'       } },
                 { feature: 'Reporte financiero',        sheets: { ok: 'partial', text: 'Manual, propenso a errores'          }, wa: { ok: false,     text: 'No disponible'                        }, zs: { ok: true, text: 'Dashboard en tiempo real'           } },
                 { feature: 'Portal del atleta',         sheets: { ok: false,     text: 'No disponible'                       }, wa: { ok: false,     text: 'No disponible'                        }, zs: { ok: true, text: 'App web + historial + pagos'        } },
-                { feature: 'Control de morosidad',      sheets: { ok: false,     text: 'Sin automatización'                  }, wa: { ok: 'partial', text: 'Depende de recordar cada caso'        }, zs: { ok: true, text: 'Alertas y ciclos automáticos'       } },
+                { feature: 'Control de morosidad',      sheets: { ok: false,     text: 'Sin automatización'                  }, wa: { ok: 'partial', text: 'Depende de recordar cada caso'        }, zs: { ok: true, text: 'Alertas automáticas + recordatorio con un clic' } },
                 { feature: 'Multi-equipo / categorías', sheets: { ok: 'partial', text: 'Archivo por categoría, desconectado' }, wa: { ok: false,     text: 'Grupos separados sin control'        }, zs: { ok: true, text: 'Todo centralizado en una plataforma'} },
                 { feature: 'Soporte dedicado',          sheets: { ok: false,     text: 'Solo tú'                             }, wa: { ok: false,     text: 'Solo tú'                              }, zs: { ok: true, text: 'Equipo Zenpra por WA siempre'       } },
               ].map(({ feature, sheets, wa, zs }, idx, arr) => {
@@ -1729,7 +1729,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {['Dashboard completo','Gestión de jugadores','Cobro automático WA','Carnet digital QR','Inscripciones digitales','Finanzas y estadísticas','Soporte por WhatsApp'].map(label => (
+                {['Dashboard completo','Gestión de jugadores','Recordatorios de cobro automáticos','Carnet digital QR','Inscripciones digitales','Finanzas y estadísticas','Soporte por WhatsApp'].map(label => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <CheckCircle size={13} color="#00D084" style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)' }}>{label}</span>
@@ -1750,12 +1750,12 @@ export default function LandingPage() {
               <div style={{ fontSize: 36, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$149.000<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginBottom: 14 }}>Clubes que empiezan a profesionalizarse</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-                {['120 jugadores','3 admins','5 entrenadores','1.500 msg WA/mes'].map(l => (
+                {['120 jugadores','3 admins','5 entrenadores'].map(l => (
                   <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.55)' }}>{l}</span>
                 ))}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {[[true,'Dashboard completo'],[true,'Gestión de jugadores'],[true,'Pagos manuales y mora'],[true,'Carnet digital'],[true,'Inscripciones digitales'],[true,'Exportación CSV/PDF'],[false,'Cobranza automática WA'],[false,'Finanzas y estadísticas']].map(([on, label]) => (
+                {[[true,'Dashboard completo'],[true,'Gestión de jugadores'],[true,'Pagos manuales y mora'],[true,'Carnet digital'],[true,'Inscripciones digitales'],[true,'Exportación CSV/PDF'],[false,'Recordatorios de cobro automáticos'],[false,'Finanzas y estadísticas']].map(([on, label]) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9, opacity: on ? 1 : 0.28 }}>
                     <CheckCircle size={13} color={on ? '#00D084' : '#4B5563'} style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 12, color: on ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.35)' }}>{label}</span>
@@ -1784,12 +1784,12 @@ export default function LandingPage() {
               <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 6 }}>Academias competitivas y clubes serios</p>
               <p style={{ fontSize: 11, color: `${previewColor}99`, fontWeight: 600, marginBottom: 14, transition: 'color 0.3s' }}>La mayoría de clubes competitivos empieza aquí.</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-                {['350 jugadores','10 admins','20 entrenadores','8.000 msg WA/mes'].map(l => (
+                {['350 jugadores','10 admins','20 entrenadores'].map(l => (
                   <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: `${previewColor}15`, border: `1px solid ${previewColor}30`, color: previewColor, transition: 'background 0.3s, border-color 0.3s, color 0.3s' }}>{l}</span>
                 ))}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {[[true,'Todo Starter'],[true,'Cobranza automática WhatsApp'],[true,'Finanzas e ingresos/gastos'],[true,'Uniformes y equipamiento'],[true,'Estadísticas avanzadas'],[true,'Automatizaciones'],[true,'Reportes ejecutivos'],[true,'Soporte prioritario']].map(([on, label]) => (
+                {[[true,'Todo Starter'],[true,'Recordatorios de cobro automáticos'],[true,'Finanzas e ingresos/gastos'],[true,'Uniformes y equipamiento'],[true,'Estadísticas avanzadas'],[true,'Automatizaciones'],[true,'Reportes ejecutivos'],[true,'Soporte prioritario']].map(([on, label]) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <CheckCircle size={13} color="#00D084" style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)' }}>{label}</span>
@@ -1813,7 +1813,7 @@ export default function LandingPage() {
               <div style={{ fontSize: 36, fontWeight: 900, marginBottom: 4, letterSpacing: '-1px' }}>$799.000<span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mes</span></div>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginBottom: 14 }}>Academias premium y multi sede</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
-                {['1.000 jugadores','Admins ilimitados','Entrenadores ilimitados','25.000 msg WA/mes'].map(l => (
+                {['1.000 jugadores','Admins ilimitados','Entrenadores ilimitados'].map(l => (
                   <span key={l} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: 'rgba(198,120,255,0.08)', border: '1px solid rgba(198,120,255,0.22)', color: '#C678FF' }}>{l}</span>
                 ))}
               </div>
@@ -1952,7 +1952,7 @@ export default function LandingPage() {
             },
             {
               q: '¿El bot de WhatsApp reemplaza a mi administrador?',
-              a: 'Lo complementa. El bot maneja tareas repetitivas: cobros, confirmaciones y recordatorios. Tu equipo se enfoca en decisiones importantes, no en mensajes manuales.',
+              a: 'Lo complementa. El bot responde preguntas y confirma pagos automáticamente. Para el cobro, te prepara cada recordatorio — vos das el envío final con un clic, así protegemos tu número de WhatsApp.',
             },
           ].map(({ q, a }, i) => (
             <FaqItem key={i} q={q} a={a} delay={i * 50} />

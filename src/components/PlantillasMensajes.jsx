@@ -6,21 +6,6 @@ import WahaConnect from './WahaConnect';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
-const TIPO_PLANTILLA_OPTS = [
-  {
-    value: 'evento',
-    icon: '📅',
-    label: 'Recordatorio de evento',
-    desc: 'Se envía cuando hay un evento hoy a la hora configurada',
-  },
-  {
-    value: 'cobro',
-    icon: '💰',
-    label: 'Cobro de mensualidades',
-    desc: 'Se envía a jugadores con pagos pendientes el día del mes que elijas',
-  },
-];
-
 const TIPO_EVENTO_OPTS = [
   { value: 'ENTRENAMIENTO', label: 'Entrenamiento'     },
   { value: 'PARTIDO',       label: 'Partido'           },
@@ -38,19 +23,10 @@ const VARS_EVENTO = [
   { key: '{llave_pago}',  desc: 'Clave de pago'            },
 ];
 
-const VARS_COBRO = [
-  { key: '{nombre}',      desc: 'Nombre del jugador'        },
-  { key: '{deuda}',       desc: 'Total adeudado — $150.000' },
-  { key: '{meses}',       desc: 'Meses — enero, febrero'    },
-  { key: '{club_nombre}', desc: 'Nombre del club'           },
-  { key: '{llave_pago}',  desc: 'Clave de pago'             },
-];
-
 const EMPTY = {
   nombre: '', mensaje: '', incluir_qr: false, activa: true,
   tipo_plantilla: 'evento',
   hora_envio: '14:00', tipo_evento: 'ENTRENAMIENTO',
-  dia_envio: 5,
 };
 
 const INPUT_CLS = 'w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition placeholder:text-[var(--text-mut)]';
@@ -116,8 +92,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
 
   const save = async () => {
     if (!form.nombre.trim() || !form.mensaje.trim()) { setError('Nombre y mensaje son requeridos'); return; }
-    if (form.tipo_plantilla === 'evento' && !form.hora_envio) { setError('Selecciona la hora de envío'); return; }
-    if (form.tipo_plantilla === 'cobro'  && !form.dia_envio)  { setError('Selecciona el día del mes'); return; }
+    if (!form.hora_envio) { setError('Selecciona la hora de envío'); return; }
     setSaving(true); setError('');
     try {
       const cid  = clubId();
@@ -236,12 +211,10 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const tieneWA  = !!clubConfig?.waha_session;
   const hasQr    = !!clubConfig?.qr_pago_url;
   const limitado = limite !== null && plantillas.length >= limite;
-  const vars     = form.tipo_plantilla === 'cobro' ? VARS_COBRO : VARS_EVENTO;
+  const vars     = VARS_EVENTO;
   const planBloqueado = plan === 'trial' || plan === 'starter';
 
   const labelTipo = p => {
-    const tipo = p.tipo_plantilla || 'evento';
-    if (tipo === 'cobro') return `💰 Cobro · día ${p.dia_envio} de cada mes`;
     const ev = TIPO_EVENTO_OPTS.find(t => t.value === p.tipo_evento)?.label || p.tipo_evento || 'Evento';
     return `📅 ${ev} · ${(p.hora_envio || '').slice(0, 5)}`;
   };
@@ -251,7 +224,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
       <div className="text-5xl mb-4">🔒</div>
       <h2 className="text-lg font-bold text-[var(--text-pri)] mb-2">Plantillas de mensajes automáticos</h2>
       <p className="text-sm text-[var(--text-sec)] mb-1 max-w-md">
-        Envía recordatorios de entrenamientos y cobros automáticamente desde el número de WhatsApp de tu club.
+        Envía recordatorios de entrenamientos automáticamente desde el número de WhatsApp de tu club.
       </p>
       <p className="text-xs text-[var(--text-mut)] mb-6 max-w-sm">
         Disponible en los planes <strong className="text-[var(--text-sec)]">Pro</strong> y <strong className="text-[var(--text-sec)]">Scale</strong>.
@@ -410,7 +383,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
         <div className="border-2 border-dashed border-[var(--cc20)] rounded-2xl p-12 text-center">
           <MessageSquarePlus size={36} className="mx-auto mb-3 text-[var(--text-mut)]" />
           <p className="text-sm font-semibold text-[var(--text-sec)] mb-1">Sin plantillas configuradas</p>
-          <p className="text-xs text-[var(--text-mut)]">Crea una plantilla de evento o de cobro y se enviará automáticamente</p>
+          <p className="text-xs text-[var(--text-mut)]">Crea una plantilla de recordatorio de evento y se enviará automáticamente</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -521,25 +494,6 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
               </button>
             </div>
 
-            {/* Tipo de plantilla */}
-            <p className={LABEL_CLS}>Tipo de plantilla</p>
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              {TIPO_PLANTILLA_OPTS.map(o => (
-                <button
-                  key={o.value}
-                  onClick={() => setForm(f => ({ ...f, tipo_plantilla: o.value }))}
-                  className="text-left p-3 rounded-xl border-2 transition cursor-pointer"
-                  style={{
-                    borderColor:  form.tipo_plantilla === o.value ? color : 'var(--cc20)',
-                    background:   form.tipo_plantilla === o.value ? `${color}12` : 'var(--bg-app)',
-                  }}
-                >
-                  <p className="text-sm font-bold text-[var(--text-pri)] mb-1">{o.icon} {o.label}</p>
-                  <p className="text-[11px] text-[var(--text-sec)] leading-snug">{o.desc}</p>
-                </button>
-              ))}
-            </div>
-
             {/* Nombre */}
             <label className={LABEL_CLS}>Nombre de la plantilla</label>
             <input
@@ -550,48 +504,29 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
             />
 
             {/* Trigger */}
-            {form.tipo_plantilla === 'evento' ? (
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div>
-                  <label className={LABEL_CLS}>Tipo de evento</label>
-                  <select
-                    value={form.tipo_evento}
-                    onChange={e => setForm(f => ({ ...f, tipo_evento: e.target.value }))}
-                    className={INPUT_CLS}
-                    style={{ colorScheme: 'dark' }}
-                  >
-                    {TIPO_EVENTO_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className={LABEL_CLS}>Hora de envío</label>
-                  <input
-                    type="time"
-                    value={form.hora_envio}
-                    onChange={e => setForm(f => ({ ...f, hora_envio: e.target.value }))}
-                    className={INPUT_CLS}
-                    style={{ colorScheme: 'dark' }}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="mb-4">
-                <label className={LABEL_CLS}>Día del mes para enviar</label>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className={LABEL_CLS}>Tipo de evento</label>
                 <select
-                  value={form.dia_envio}
-                  onChange={e => setForm(f => ({ ...f, dia_envio: Number(e.target.value) }))}
+                  value={form.tipo_evento}
+                  onChange={e => setForm(f => ({ ...f, tipo_evento: e.target.value }))}
                   className={INPUT_CLS}
                   style={{ colorScheme: 'dark' }}
                 >
-                  {Array.from({ length: 28 }, (_, i) => i + 1).map(d => (
-                    <option key={d} value={d}>Día {d} de cada mes</option>
-                  ))}
+                  {TIPO_EVENTO_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
-                <p className="text-[11px] text-[var(--text-mut)] mt-1">
-                  Solo recibirán el mensaje los jugadores con mensualidades pendientes o en mora.
-                </p>
               </div>
-            )}
+              <div>
+                <label className={LABEL_CLS}>Hora de envío</label>
+                <input
+                  type="time"
+                  value={form.hora_envio}
+                  onChange={e => setForm(f => ({ ...f, hora_envio: e.target.value }))}
+                  className={INPUT_CLS}
+                  style={{ colorScheme: 'dark' }}
+                />
+              </div>
+            </div>
 
             {/* Variables */}
             <p className={LABEL_CLS}>Variables — clic para insertar</p>
@@ -616,9 +551,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
               onChange={e => setForm(f => ({ ...f, mensaje: e.target.value }))}
               rows={7}
               className={`${INPUT_CLS} font-mono resize-y`}
-              placeholder={form.tipo_plantilla === 'cobro'
-                ? 'Hola {nombre} 👋\n\nTienes pagos pendientes en {club_nombre}:\n📅 Meses: {meses}\n💰 Total: {deuda}\n\n🔑 Paga aquí: {llave_pago}'
-                : '☀️ ¡Buen día!\n\nHOY, {dia}\n📍 {lugar}\n🕘 {hora_inicio} - {hora_fin}\n\n🔑 LLAVE PARA PAGOS:\n{llave_pago}'}
+              placeholder="☀️ ¡Buen día!\n\nHOY, {dia}\n📍 {lugar}\n🕘 {hora_inicio} - {hora_fin}\n\n🔑 LLAVE PARA PAGOS:\n{llave_pago}"
             />
 
             {/* Checkboxes */}

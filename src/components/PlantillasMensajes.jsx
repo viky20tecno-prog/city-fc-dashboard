@@ -72,6 +72,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [ecLoading, setEcLoading] = useState(false);
   const [ecError, setEcError] = useState('');
   const [ecFiltro, setEcFiltro] = useState('');
+  const [ecToast, setEcToast] = useState('');
 
   const authHeaders = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -217,11 +218,19 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     }
   };
 
-  // Abre WhatsApp con el mensaje ya escrito en el chat del jugador — el envío real lo hace
-  // el admin desde su propio WhatsApp con un clic, nunca automático desde el servidor.
-  const abrirEstadoCuenta = jugador => {
+  // Copia el mensaje al portapapeles y abre el chat del jugador (sin prellenar texto — un
+  // link wa.me con ?text= corrompe los emojis en WhatsApp Desktop de Windows). El admin pega
+  // con Ctrl+V y da el envío final desde su propio WhatsApp, nunca automático desde el servidor.
+  const abrirEstadoCuenta = async jugador => {
+    try {
+      await navigator.clipboard.writeText(jugador.texto);
+      setEcToast(`Mensaje de ${jugador.nombre} copiado — pegalo con Ctrl+V en el chat que se abrió`);
+    } catch {
+      setEcToast('No se pudo copiar el mensaje automáticamente — copialo a mano del texto que se abrió');
+    }
     window.open(jugador.wa_link, '_blank', 'noopener,noreferrer');
     if (!jugador.ya_enviado) marcarEnviado(jugador.cedula, true);
+    setTimeout(() => setEcToast(''), 6000);
   };
 
   const tieneWA  = !!clubConfig?.waha_session;
@@ -273,8 +282,14 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
           <span>💬</span> Estado de cuenta
         </p>
         <p className="text-xs text-[var(--text-sec)]">
-          El mensaje ya viene armado (mensualidades, uniformes, torneos + portal). Al hacer clic en "Enviar" se abre WhatsApp con el chat del jugador listo — vos das el envío final desde tu WhatsApp. El check queda a tu criterio, para llevar la cuenta de a quién ya le escribiste este mes.
+          El mensaje ya viene armado (mensualidades, uniformes, torneos + portal). Al hacer clic en "Enviar" se copia al portapapeles y se abre el chat del jugador — pegalo con <strong>Ctrl+V</strong> y confirmá el envío desde tu WhatsApp. El check queda a tu criterio, para llevar la cuenta de a quién ya le escribiste este mes.
         </p>
+
+        {ecToast && (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium bg-[rgba(37,211,102,0.10)] border border-[rgba(37,211,102,0.25)] text-[#25D366]">
+            📋 {ecToast}
+          </div>
+        )}
 
         {/* Progreso del mes */}
         {ecLista.length > 0 && (

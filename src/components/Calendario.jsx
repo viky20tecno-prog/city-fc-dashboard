@@ -590,8 +590,8 @@ export default function Calendario({ color, clubId }) {
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Error al generar el reporte');
 
-      const { entrenamientos, partidos } = data;
-      if (entrenamientos.total === 0 && partidos.total === 0) {
+      const { general, por_equipo, total_entrenamientos, total_partidos } = data;
+      if (total_entrenamientos === 0 && total_partidos === 0) {
         alert('No hay entrenamientos ni partidos registrados en ese período.');
         return;
       }
@@ -607,16 +607,20 @@ export default function Calendario({ color, clubId }) {
       let y = drawPdfHeader(doc, {
         W, M, clubName,
         title: 'Ranking de asistencia',
-        subtitle: `Entrenamientos y partidos · ${periodo}`,
+        subtitle: `${total_entrenamientos} entren. · ${total_partidos} partidos · ${periodo}`,
         logoData, accentRgb, height: 32,
       });
 
       const cols = [
-        { label: '#',      x: M + 2   },
-        { label: 'Nombre', x: M + 12  },
-        { label: 'Asist.', x: M + 140 },
-        { label: '%',      x: M + 168 },
+        { label: '#',        x: M + 2   },
+        { label: 'Nombre',   x: M + 10  },
+        { label: 'Entren.',  x: M + 94  },
+        { label: '%',        x: M + 118 },
+        { label: 'Partidos', x: M + 134 },
+        { label: '%',        x: M + 168 },
       ];
+      const fmtFrac = (pres, tot) => tot > 0 ? `${pres}/${tot}` : '—';
+      const fmtPct  = (pct, tot)  => tot > 0 ? `${pct}%` : '—';
 
       function pintarTabla(label, ranking) {
         if (y > 250) { drawPdfFooter(doc, { W, H, M, clubName }); doc.addPage(); y = 18; }
@@ -642,24 +646,22 @@ export default function Calendario({ color, clubId }) {
           doc.setFontSize(8.5);
           doc.setTextColor(60, 60, 60);
           doc.text(esTop5 ? `${idx + 1} ★` : String(idx + 1), M + 2, y);
-          doc.text(`${p.nombre || p.cedula}`.toUpperCase().slice(0, 42), M + 12, y);
-          doc.text(`${p.presentes}/${p.total_eventos}`, M + 140, y);
+          doc.text(`${p.nombre || p.cedula}`.toUpperCase().slice(0, 27), M + 10, y);
+          doc.text(fmtFrac(p.entren_presentes, p.entren_total), M + 94, y);
           doc.setTextColor(...accentRgb);
-          doc.text(`${p.porcentaje}%`, M + 168, y);
+          doc.text(fmtPct(p.entren_pct, p.entren_total), M + 118, y);
+          doc.setTextColor(60, 60, 60);
+          doc.text(fmtFrac(p.part_presentes, p.part_total), M + 134, y);
+          doc.setTextColor(...accentRgb);
+          doc.text(fmtPct(p.part_pct, p.part_total), M + 168, y);
           doc.setTextColor(60, 60, 60);
           y += 8;
         });
         y += 6;
       }
 
-      if (entrenamientos.total > 0) {
-        pintarTabla(`Entrenamientos — General · ${entrenamientos.total} programados`, entrenamientos.general);
-        Object.entries(entrenamientos.por_equipo).forEach(([equipo, ranking]) => pintarTabla(`Entrenamientos — ${equipo}`, ranking));
-      }
-      if (partidos.total > 0) {
-        pintarTabla(`Partidos — General · ${partidos.total} programados`, partidos.general);
-        Object.entries(partidos.por_equipo).forEach(([equipo, ranking]) => pintarTabla(`Partidos — ${equipo}`, ranking));
-      }
+      pintarTabla('General', general);
+      Object.entries(por_equipo).forEach(([equipo, ranking]) => pintarTabla(equipo, ranking));
 
       drawPdfFooter(doc, { W, H, M, clubName });
       doc.save(`ranking-asistencia-${periodo.toLowerCase().replace(/\s+/g, '-')}.pdf`);
@@ -682,7 +684,7 @@ export default function Calendario({ color, clubId }) {
         </div>
         <div className="p-6 space-y-4">
           <p className="text-xs text-[var(--text-sec)] leading-relaxed">
-            Dos rankings separados: <strong>entrenamientos</strong> (sobre el total programado en el período, ej. 2/50) y <strong>partidos</strong> (sobre los partidos a los que cada jugador fue convocado, ej. 2/4). El top 5 de cada uno queda resaltado para la premiación.
+            Una sola tabla con ambos datos por jugador: <strong>entrenamientos</strong> sobre el total programado en el período (ej. 2/50) y <strong>partidos</strong> sobre los que fue convocado (ej. 2/4). Se ordena por % de entrenamientos y el top 5 queda resaltado para la premiación.
           </p>
           <div className="flex gap-3">
             <div className="flex-1 space-y-1.5">

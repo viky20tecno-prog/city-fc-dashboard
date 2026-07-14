@@ -173,7 +173,7 @@ export default function WahaConnect({ clubConfig, onConectado }) {
             {me?.pushName && <> · <span className="text-[var(--text-pri)]">{me.pushName}</span></>}
           </p>
           <p className="text-xs text-[var(--text-sec)] mt-1">
-            Los recordatorios y plantillas salen desde tu número.
+            El bot y los recordatorios de entrenamientos/partidos salen desde tu número.
           </p>
         </div>
         <button
@@ -307,7 +307,7 @@ export default function WahaConnect({ clubConfig, onConectado }) {
       <div className="flex-1">
         <p className="text-sm font-semibold text-[var(--text-pri)]">Conecta tu WhatsApp</p>
         <p className="text-xs text-[var(--text-sec)] mt-0.5">
-          Los recordatorios y plantillas saldrán desde el número de tu club, no del número central de ZenSports.
+          Activa el bot que responde preguntas de pagos y jugadores, y los recordatorios de entrenamientos/partidos — todo desde el número de tu club, no del número central de ZenSports. (Estado de cuenta no lo necesita: ese es manual.)
         </p>
       </div>
       <button

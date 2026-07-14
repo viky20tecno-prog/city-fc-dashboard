@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { MessageSquarePlus, Pencil, Trash2, ToggleLeft, ToggleRight, Plus, X, QrCode, Send, Check, Search } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
-import WahaConnect from './WahaConnect';
 
 const API = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
@@ -39,11 +38,8 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [loading,    setLoading]    = useState(true);
   const [modal,      setModal]      = useState(null);
   const [saving,     setSaving]     = useState(false);
-  const [probando,   setProbando]   = useState(null);
   const [form,       setForm]       = useState(EMPTY);
   const [error,      setError]      = useState('');
-  const [enviandoAhora, setEnviandoAhora] = useState(null);   // id de plantilla en envío
-  const [resultadoAhora, setResultadoAhora] = useState({});   // { [id]: { ok, msg } }
   const [ecLista, setEcLista] = useState([]);
   const [ecLoading, setEcLoading] = useState(false);
   const [ecError, setEcError] = useState('');
@@ -131,43 +127,6 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     load();
   };
 
-  const enviarAhora = async p => {
-    if (!confirm(`¿Enviar "${p.nombre}" ahora a todos los jugadores del club?`)) return;
-    setEnviandoAhora(p.id);
-    setResultadoAhora(r => ({ ...r, [p.id]: null }));
-    try {
-      const r = await fetch(`${API}/plantillas/${p.id}/enviar?club_id=${clubId()}`, {
-        method: 'POST',
-        headers: await authHeaders(),
-      });
-      const d = await r.json();
-      if (d.success) {
-        setResultadoAhora(r => ({ ...r, [p.id]: { ok: true, msg: 'Enviando en segundo plano…' } }));
-        setTimeout(() => setResultadoAhora(r => ({ ...r, [p.id]: null })), 6000);
-      } else {
-        setResultadoAhora(r => ({ ...r, [p.id]: { ok: false, msg: d.error || 'Error al enviar' } }));
-      }
-    } catch (e) {
-      setResultadoAhora(r => ({ ...r, [p.id]: { ok: false, msg: e.message } }));
-    } finally {
-      setEnviandoAhora(null);
-    }
-  };
-
-  const probar = async p => {
-    setProbando(p.id);
-    try {
-      const r = await fetch(`${API}/plantillas/${p.id}/probar?club_id=${clubId()}`, {
-        method: 'POST',
-        headers: await authHeaders(),
-      });
-      const d = await r.json();
-      if (d.success) alert(`✅ Prueba enviada a ${d.enviado_a}`);
-      else alert(`❌ ${d.error}`);
-    } catch (e) { alert(`Error: ${e.message}`); }
-    finally { setProbando(null); }
-  };
-
   const insertVar = key => {
     const ta = document.getElementById('plantilla-msg');
     if (!ta) { setForm(f => ({ ...f, mensaje: f.mensaje + key })); return; }
@@ -208,7 +167,6 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     setTimeout(() => setEcToast(''), 6000);
   };
 
-  const tieneWA  = !!clubConfig?.waha_session;
   const hasQr    = !!clubConfig?.qr_pago_url;
   const limitado = limite !== null && plantillas.length >= limite;
   const vars     = VARS_EVENTO;
@@ -222,9 +180,9 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   if (planBloqueado) return (
     <div className="p-5 max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[400px] text-center">
       <div className="text-5xl mb-4">🔒</div>
-      <h2 className="text-lg font-bold text-[var(--text-pri)] mb-2">Plantillas de mensajes automáticos</h2>
+      <h2 className="text-lg font-bold text-[var(--text-pri)] mb-2">Plantillas de mensajes</h2>
       <p className="text-sm text-[var(--text-sec)] mb-1 max-w-md">
-        Envía recordatorios de entrenamientos automáticamente desde el número de WhatsApp de tu club.
+        Guarda el texto de tus recordatorios de entrenamientos y partidos, con variables listas para completar.
       </p>
       <p className="text-xs text-[var(--text-mut)] mb-6 max-w-sm">
         Disponible en los planes <strong className="text-[var(--text-sec)]">Pro</strong> y <strong className="text-[var(--text-sec)]">Scale</strong>.
@@ -243,11 +201,6 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
 
   return (
     <div className="p-5 max-w-2xl mx-auto">
-
-      {/* Conexión WhatsApp propio */}
-      <div className="mb-5">
-        <WahaConnect clubConfig={clubConfig} onConectado={load} />
-      </div>
 
       {/* Card — Estado de cuenta, envío manual jugador por jugador */}
       <div className="mb-5 bg-[var(--bg-card)] border border-[rgba(37,211,102,0.25)] rounded-2xl p-5 space-y-3">
@@ -346,7 +299,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
         <div>
           <h2 className="text-lg font-bold text-[var(--text-pri)]">Plantillas de mensajes</h2>
           <p className="text-xs text-[var(--text-sec)] mt-1">
-            Mensajes automáticos que el sistema envía por WhatsApp según el trigger configurado
+            Guarda el texto de tus recordatorios — copialo desde "Editar" y pegalo en tu WhatsApp cuando lo necesites
           </p>
         </div>
         <div className="flex flex-col items-end gap-1.5">
@@ -383,7 +336,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
         <div className="border-2 border-dashed border-[var(--cc20)] rounded-2xl p-12 text-center">
           <MessageSquarePlus size={36} className="mx-auto mb-3 text-[var(--text-mut)]" />
           <p className="text-sm font-semibold text-[var(--text-sec)] mb-1">Sin plantillas configuradas</p>
-          <p className="text-xs text-[var(--text-mut)]">Crea una plantilla de recordatorio de evento y se enviará automáticamente</p>
+          <p className="text-xs text-[var(--text-mut)]">Crea una plantilla de recordatorio de evento para tenerla lista y copiarla cuando la necesites</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -419,29 +372,6 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
                 </div>
 
                 <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                  {/* Enviar ahora — solo si tiene WA conectado */}
-                  {tieneWA && (
-                    <button
-                      onClick={() => enviarAhora(p)}
-                      disabled={enviandoAhora === p.id}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition disabled:opacity-50 cursor-pointer"
-                      style={{
-                        background: 'rgba(37,211,102,0.12)',
-                        border: '1px solid rgba(37,211,102,0.35)',
-                        color: '#25D366',
-                      }}
-                    >
-                      <Send size={11} />
-                      {enviandoAhora === p.id ? 'Enviando…' : 'Enviar ahora'}
-                    </button>
-                  )}
-                  <button
-                    onClick={() => probar(p)}
-                    disabled={probando === p.id}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] text-xs font-semibold hover:text-[var(--text-pri)] hover:border-[var(--cc30)] transition disabled:opacity-50 cursor-pointer"
-                  >
-                    <Send size={11} /> {probando === p.id ? 'Enviando…' : 'Probar'}
-                  </button>
                   <div className="flex items-center gap-0.5">
                     <button onClick={() => toggleActiva(p)} title={p.activa ? 'Pausar' : 'Activar'}
                       className="p-1.5 rounded-lg hover:bg-[var(--cc12)] transition cursor-pointer"
@@ -459,17 +389,6 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
                   </div>
                 </div>
               </div>
-
-              {/* Feedback enviar ahora */}
-              {resultadoAhora[p.id] && (
-                <div className={`mt-2 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium ${
-                  resultadoAhora[p.id].ok
-                    ? 'bg-[rgba(37,211,102,0.10)] border border-[rgba(37,211,102,0.25)] text-[#25D366]'
-                    : 'bg-red-500/10 border border-red-500/25 text-red-400'
-                }`}>
-                  {resultadoAhora[p.id].ok ? '✅' : '❌'} {resultadoAhora[p.id].msg}
-                </div>
-              )}
             </div>
           ))}
         </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { MessageSquarePlus, Pencil, Trash2, ToggleLeft, ToggleRight, Plus, X, QrCode, Send } from 'lucide-react';
+import { MessageSquarePlus, Pencil, Trash2, ToggleLeft, ToggleRight, Plus, X, QrCode, Send, Check, Search } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
 import WahaConnect from './WahaConnect';
@@ -66,14 +66,11 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [probando,   setProbando]   = useState(null);
   const [form,       setForm]       = useState(EMPTY);
   const [error,      setError]      = useState('');
-  const [enviandoEstado, setEnviandoEstado] = useState(false);
-  const [resultadoEstado, setResultadoEstado] = useState(null);
   const [enviandoAhora, setEnviandoAhora] = useState(null);   // id de plantilla en envío
   const [resultadoAhora, setResultadoAhora] = useState({});   // { [id]: { ok, msg } }
-  const [jugadoresLista, setJugadoresLista] = useState([]);
-  const [busqueda, setBusqueda] = useState('');
-  const [jugadorSel, setJugadorSel] = useState(null);
-  const [showSugeridos, setShowSugeridos] = useState(false);
+  const [ecLista, setEcLista] = useState([]);
+  const [ecLoading, setEcLoading] = useState(false);
+  const [ecFiltro, setEcFiltro] = useState('');
 
   const authHeaders = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -85,24 +82,27 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     setLoading(true);
     try {
       const hdrs = await authHeaders();
-      const [rPlant, rPlayers] = await Promise.all([
-        fetch(`${API}/plantillas?club_id=${clubId()}`, { headers: hdrs }),
-        fetch(`${API}/players?club_id=${clubId()}`, { headers: hdrs }),
-      ]);
-      const dPlant = await rPlant.json();
+      const r = await fetch(`${API}/plantillas?club_id=${clubId()}`, { headers: hdrs });
+      const dPlant = await r.json();
       setPlantillas(dPlant.plantillas || []);
       setLimite(dPlant.limite ?? null);
       setPlan(dPlant.plan || '');
-      const dPlayers = await rPlayers.json();
-      setJugadoresLista(
-        (dPlayers.data || [])
-          .filter(j => j.activo)
-          .sort((a, b) => `${a.nombre} ${a.apellidos}`.localeCompare(`${b.nombre} ${b.apellidos}`, 'es'))
-      );
     } finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const loadEstadoCuenta = useCallback(async () => {
+    setEcLoading(true);
+    try {
+      const hdrs = await authHeaders();
+      const r = await fetch(`${API}/players/estado-cuenta-lista?club_id=${clubId()}`, { headers: hdrs });
+      const d = await r.json();
+      setEcLista(
+        (d.data || []).sort((a, b) => `${a.nombre} ${a.apellidos}`.localeCompare(`${b.nombre} ${b.apellidos}`, 'es'))
+      );
+    } finally { setEcLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); loadEstadoCuenta(); }, [load, loadEstadoCuenta]);
 
   const openNew  = () => { setForm(EMPTY); setError(''); setModal({ mode: 'new' }); };
   const openEdit = p  => { setForm({ ...p }); setError(''); setModal({ mode: 'edit', id: p.id }); };
@@ -194,25 +194,28 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     setTimeout(() => { ta.focus(); ta.setSelectionRange(s + key.length, s + key.length); }, 0);
   };
 
-  const enviarEstadoCuenta = async () => {
-    const destino = jugadorSel
-      ? `${jugadorSel.nombre} ${jugadorSel.apellidos}`.trim()
-      : `todos los jugadores activos con número registrado`;
-    if (!confirm(`¿Enviar estado de cuenta por WhatsApp a ${destino}?`)) return;
-    setEnviandoEstado(true);
-    setResultadoEstado(null);
+  // Marca/desmarca en el servidor que el admin ya mandó el estado de cuenta de este mes a
+  // un jugador. Es un registro manual del admin, no una confirmación real de que el mensaje
+  // llegó — eso pasa afuera, dentro de WhatsApp.
+  const marcarEnviado = async (cedula, enviado) => {
+    setEcLista(list => list.map(j => j.cedula === cedula ? { ...j, ya_enviado: enviado } : j));
     try {
       const hdrs = await authHeaders();
-      const url  = `${API}/players/estado-cuenta-masivo?club_id=${clubId()}${jugadorSel ? `&cedula=${jugadorSel.cedula}` : ''}`;
-      const r = await fetch(url, { method: 'POST', headers: hdrs });
-      const d = await r.json();
-      if (d.success) setResultadoEstado({ ok: true, total: d.total, sin_numero: d.sin_numero });
-      else setResultadoEstado({ ok: false, msg: d.error || 'Error desconocido' });
-    } catch (e) {
-      setResultadoEstado({ ok: false, msg: e.message });
-    } finally {
-      setEnviandoEstado(false);
+      await fetch(`${API}/players/estado-cuenta-marcar?club_id=${clubId()}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...hdrs },
+        body: JSON.stringify({ cedula, enviado }),
+      });
+    } catch {
+      setEcLista(list => list.map(j => j.cedula === cedula ? { ...j, ya_enviado: !enviado } : j));
     }
+  };
+
+  // Abre WhatsApp con el mensaje ya escrito en el chat del jugador — el envío real lo hace
+  // el admin desde su propio WhatsApp con un clic, nunca automático desde el servidor.
+  const abrirEstadoCuenta = jugador => {
+    window.open(jugador.wa_link, '_blank', 'noopener,noreferrer');
+    if (!jugador.ya_enviado) marcarEnviado(jugador.cedula, true);
   };
 
   const tieneWA  = !!clubConfig?.waha_session;
@@ -258,85 +261,84 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
         <WahaConnect clubConfig={clubConfig} onConectado={load} />
       </div>
 
-      {/* Card — Estado de cuenta masivo */}
+      {/* Card — Estado de cuenta, envío manual jugador por jugador */}
       <div className="mb-5 bg-[var(--bg-card)] border border-[rgba(37,211,102,0.25)] rounded-2xl p-5 space-y-3">
         <p className="text-sm font-bold text-[var(--text-pri)] flex items-center gap-2">
           <span>💬</span> Estado de cuenta
         </p>
         <p className="text-xs text-[var(--text-sec)]">
-          Envía el estado de cuenta personalizado (mensualidades, uniformes, torneos + portal) a un jugador o a todo el club.
+          El mensaje ya viene armado (mensualidades, uniformes, torneos + portal). Al hacer clic en "Enviar" se abre WhatsApp con el chat del jugador listo — vos das el envío final desde tu WhatsApp. El check queda a tu criterio, para llevar la cuenta de a quién ya le escribiste este mes.
         </p>
 
-        {/* Buscador de jugador */}
-        <div className="relative">
-          {jugadorSel ? (
-            <div className="flex items-center gap-2 bg-[var(--bg-app)] border border-[rgba(37,211,102,0.35)] rounded-xl px-3 py-2">
-              <span className="text-sm text-[var(--text-pri)] flex-1">
-                {jugadorSel.nombre} {jugadorSel.apellidos}
-                <span className="text-[var(--text-mut)] text-xs ml-2">CC {jugadorSel.cedula}</span>
-              </span>
-              <button onClick={() => { setJugadorSel(null); setBusqueda(''); }} className="text-[var(--text-mut)] hover:text-red-400 transition text-lg leading-none">×</button>
-            </div>
-          ) : (
-            <>
-              <input
-                type="search"
-                value={busqueda}
-                onChange={e => { setBusqueda(e.target.value); setShowSugeridos(true); }}
-                onFocus={() => setShowSugeridos(true)}
-                placeholder="Buscar jugador… (vacío = enviar a todos)"
-                className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-[var(--text-pri)] placeholder:text-[var(--text-mut)] focus:outline-none focus:border-[rgba(37,211,102,0.5)] transition"
+        {/* Progreso del mes */}
+        {ecLista.length > 0 && (
+          <div className="flex items-center gap-2 text-xs text-[var(--text-sec)]">
+            <div className="flex-1 h-1.5 rounded-full bg-[var(--cc12)] overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${(ecLista.filter(j => j.ya_enviado).length / ecLista.length) * 100}%`, background: '#25D366' }}
               />
-              {showSugeridos && busqueda.length >= 1 && (() => {
-                const lower = busqueda.toLowerCase();
-                const sugs  = jugadoresLista.filter(j =>
-                  `${j.nombre} ${j.apellidos}`.toLowerCase().includes(lower) ||
-                  String(j.cedula).includes(busqueda)
-                ).slice(0, 6);
-                return sugs.length > 0 ? (
-                  <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl overflow-hidden shadow-xl">
-                    {sugs.map(j => (
-                      <button key={j.cedula} type="button"
-                        onClick={() => { setJugadorSel(j); setBusqueda(''); setShowSugeridos(false); }}
-                        className="w-full text-left px-4 py-2.5 hover:bg-[var(--bg-surface)] transition border-b border-[var(--cc20)] last:border-0">
-                        <p className="text-sm text-[var(--text-pri)]">{j.nombre} {j.apellidos}</p>
-                        <p className="text-xs text-[var(--text-sec)]">CC {j.cedula}{j.celular ? '' : ' · sin número'}</p>
-                      </button>
-                    ))}
-                  </div>
-                ) : null;
-              })()}
-            </>
-          )}
-        </div>
-
-        {/* Resultado */}
-        {resultadoEstado && (
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium ${resultadoEstado.ok ? 'bg-[rgba(37,211,102,0.10)] border border-[rgba(37,211,102,0.25)] text-[#25D366]' : 'bg-red-500/10 border border-red-500/25 text-red-400'}`}>
-            {resultadoEstado.ok
-              ? `✅ Enviando a ${resultadoEstado.total} jugador${resultadoEstado.total !== 1 ? 'es' : ''} en segundo plano${resultadoEstado.sin_numero > 0 ? ` · ${resultadoEstado.sin_numero} sin número excluidos` : ''}`
-              : `❌ ${resultadoEstado.msg}`}
-            <button onClick={() => setResultadoEstado(null)} className="ml-auto opacity-60 hover:opacity-100 text-base leading-none">×</button>
+            </div>
+            <span className="font-semibold text-[var(--text-pri)] whitespace-nowrap">
+              {ecLista.filter(j => j.ya_enviado).length} / {ecLista.length} enviados
+            </span>
           </div>
         )}
 
-        {/* Botón */}
-        <div className="flex justify-end">
-          <button
-            onClick={enviarEstadoCuenta}
-            disabled={enviandoEstado}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-50"
-            style={{ background: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.35)', color: '#25D366' }}
-            onMouseEnter={e => { if (!enviandoEstado) e.currentTarget.style.background = 'rgba(37,211,102,0.25)'; }}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(37,211,102,0.15)'}
-          >
-            <Send size={14} />
-            {enviandoEstado
-              ? 'Enviando…'
-              : jugadorSel
-                ? `Enviar a ${jugadorSel.nombre}`
-                : `Enviar a todos (${jugadoresLista.filter(j => j.celular).length})`}
-          </button>
+        {/* Buscador */}
+        <div className="relative">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-mut)]" />
+          <input
+            type="search"
+            value={ecFiltro}
+            onChange={e => setEcFiltro(e.target.value)}
+            placeholder="Buscar jugador…"
+            className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl pl-9 pr-3 py-2 text-sm text-[var(--text-pri)] placeholder:text-[var(--text-mut)] focus:outline-none focus:border-[rgba(37,211,102,0.5)] transition"
+          />
+        </div>
+
+        {/* Lista */}
+        <div className="flex flex-col gap-1.5 max-h-[420px] overflow-y-auto">
+          {ecLoading ? (
+            <p className="text-xs text-[var(--text-mut)] text-center py-6">Cargando…</p>
+          ) : ecLista.length === 0 ? (
+            <p className="text-xs text-[var(--text-mut)] text-center py-6">Ningún jugador activo con número registrado.</p>
+          ) : (
+            ecLista
+              .filter(j => {
+                const lower = ecFiltro.toLowerCase();
+                return !lower || `${j.nombre} ${j.apellidos}`.toLowerCase().includes(lower) || String(j.cedula).includes(ecFiltro);
+              })
+              .map(j => (
+                <div key={j.cedula} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--cc20)]">
+                  <button
+                    type="button"
+                    onClick={() => marcarEnviado(j.cedula, !j.ya_enviado)}
+                    title={j.ya_enviado ? 'Marcar como no enviado' : 'Marcar como enviado'}
+                    className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center transition"
+                    style={j.ya_enviado
+                      ? { background: '#25D366', border: '1px solid #25D366' }
+                      : { background: 'transparent', border: '1px solid var(--cc30)' }}
+                  >
+                    {j.ya_enviado && <Check size={13} color="#fff" />}
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-[var(--text-pri)] truncate">{j.nombre} {j.apellidos}</p>
+                    <p className="text-xs text-[var(--text-mut)]">CC {j.cedula} · {j.celular}</p>
+                  </div>
+                  <button
+                    onClick={() => abrirEstadoCuenta(j)}
+                    className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+                    style={{ background: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.35)', color: '#25D366' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(37,211,102,0.25)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(37,211,102,0.15)'}
+                  >
+                    <Send size={12} />
+                    {j.ya_enviado ? 'Reenviar' : 'Enviar'}
+                  </button>
+                </div>
+              ))
+          )}
         </div>
       </div>
 

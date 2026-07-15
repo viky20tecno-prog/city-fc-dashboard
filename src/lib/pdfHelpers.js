@@ -117,7 +117,7 @@ export function drawPdfSectionLabel(doc, { W, M, y, label, count, accentRgb }) {
 
 /**
  * Draws a standard table header row.
- * columns: [{ label, x }]
+ * columns: [{ label, x, align? }] — align defaults to 'left'.
  * Returns Y after the header row.
  */
 export function drawPdfTableHead(doc, { W, M, y, columns, accentRgb }) {
@@ -127,6 +127,6 @@ export function drawPdfTableHead(doc, { W, M, y, columns, accentRgb }) {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.5);
   doc.setTextColor(r, g, b);
-  columns.forEach(({ label, x }) => doc.text(label, x, y));
+  columns.forEach(({ label, x, align }) => doc.text(label, x, y, { align: align || 'left' }));
   return y + 7;
 }

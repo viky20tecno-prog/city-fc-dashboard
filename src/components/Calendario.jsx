@@ -614,10 +614,10 @@ export default function Calendario({ color, clubId }) {
       const cols = [
         { label: '#',        x: M + 2   },
         { label: 'Nombre',   x: M + 10  },
-        { label: 'Entren.',  x: M + 94  },
-        { label: '%',        x: M + 118 },
-        { label: 'Partidos', x: M + 134 },
-        { label: '%',        x: M + 168 },
+        { label: 'Entren.',  x: M + 108, align: 'right' },
+        { label: '%',        x: M + 126, align: 'right' },
+        { label: 'Partidos', x: M + 162, align: 'right' },
+        { label: '%',        x: M + 180, align: 'right' },
       ];
       const fmtFrac = (pres, tot) => tot > 0 ? `${pres}/${tot}` : '—';
       const fmtPct  = (pct, tot)  => tot > 0 ? `${pct}%` : '—';
@@ -646,14 +646,14 @@ export default function Calendario({ color, clubId }) {
           doc.setFontSize(8.5);
           doc.setTextColor(60, 60, 60);
           doc.text(esTop5 ? `${idx + 1} ★` : String(idx + 1), M + 2, y);
-          doc.text(`${p.nombre || p.cedula}`.toUpperCase().slice(0, 27), M + 10, y);
-          doc.text(fmtFrac(p.entren_presentes, p.entren_total), M + 94, y);
+          doc.text(`${p.nombre || p.cedula}`.toUpperCase().slice(0, 26), M + 10, y);
+          doc.text(fmtFrac(p.entren_presentes, p.entren_total), M + 108, y, { align: 'right' });
           doc.setTextColor(...accentRgb);
-          doc.text(fmtPct(p.entren_pct, p.entren_total), M + 118, y);
+          doc.text(fmtPct(p.entren_pct, p.entren_total), M + 126, y, { align: 'right' });
           doc.setTextColor(60, 60, 60);
-          doc.text(fmtFrac(p.part_presentes, p.part_total), M + 134, y);
+          doc.text(fmtFrac(p.part_presentes, p.part_total), M + 162, y, { align: 'right' });
           doc.setTextColor(...accentRgb);
-          doc.text(fmtPct(p.part_pct, p.part_total), M + 168, y);
+          doc.text(fmtPct(p.part_pct, p.part_total), M + 180, y, { align: 'right' });
           doc.setTextColor(60, 60, 60);
           y += 8;
         });

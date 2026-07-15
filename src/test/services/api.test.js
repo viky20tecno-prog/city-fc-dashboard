@@ -6,25 +6,25 @@ vi.mock('../../lib/supabase', () => import('../mocks/supabase.js'));
 import { getClubId, setClubId, fetchAllData } from '../../services/api';
 
 beforeEach(() => {
-  localStorage.clear();
+  sessionStorage.clear();
   vi.clearAllMocks();
 });
 
 describe('getClubId', () => {
-  it('devuelve null cuando no hay clubId en localStorage', () => {
+  it('devuelve null cuando no hay clubId en sessionStorage', () => {
     expect(getClubId()).toBeNull();
   });
 
-  it('devuelve el clubId guardado en localStorage', () => {
-    localStorage.setItem('clubId', 'city-fc');
+  it('devuelve el clubId guardado en sessionStorage', () => {
+    sessionStorage.setItem('clubId', 'city-fc');
     expect(getClubId()).toBe('city-fc');
   });
 });
 
 describe('setClubId', () => {
-  it('guarda el clubId en localStorage', () => {
+  it('guarda el clubId en sessionStorage', () => {
     setClubId('atletico-test');
-    expect(localStorage.getItem('clubId')).toBe('atletico-test');
+    expect(sessionStorage.getItem('clubId')).toBe('atletico-test');
   });
 });
 
@@ -34,7 +34,7 @@ describe('fetchAllData', () => {
   });
 
   it('llama a los 7 endpoints cuando hay clubId', async () => {
-    localStorage.setItem('clubId', 'city-fc');
+    sessionStorage.setItem('clubId', 'city-fc');
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ data: [] }),
@@ -54,7 +54,7 @@ describe('fetchAllData', () => {
   });
 
   it('retorna arrays vacíos cuando un endpoint falla (apiCallSafe)', async () => {
-    localStorage.setItem('clubId', 'city-fc');
+    sessionStorage.setItem('clubId', 'city-fc');
     global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
     const result = await fetchAllData();

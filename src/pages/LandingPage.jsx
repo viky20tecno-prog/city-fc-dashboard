@@ -868,6 +868,7 @@ function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
         body: JSON.stringify({ ...form, plan_interes: plan, fuente: 'landing' }),
       });
     } catch { /* continúa aunque falle */ }
+    if (typeof window.gtag === 'function') window.gtag('event', 'generate_lead', { plan_interes: plan });
     setLoading(false);
     if (isDemo) {
       const msg = encodeURIComponent(`¡Hola ZenSports! 👋 Soy ${form.nombre}${form.nombre_club ? ` del ${form.nombre_club}` : ''}${form.ciudad ? ` en ${form.ciudad}` : ''}. Me interesa solicitar una demo gratuita. ¿Cuándo podríamos coordinarla?`);

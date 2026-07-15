@@ -89,7 +89,7 @@ function buildMensajes(form, clubNombre) {
   ];
 }
 
-function WaBubble({ texto, qrUrl, color }) {
+function WaBubble({ texto, qrUrl }) {
   const lines = texto.split('\n');
   return (
     <div style={{

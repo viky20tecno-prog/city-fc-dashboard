@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { CheckCircle, ChevronRight, DollarSign, X, Phone, Palette, Building2, ChevronDown, Camera, Loader2, AlertTriangle, Info, MessageCircle, Instagram, Facebook, Youtube, Globe, Music } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
-import { applyTheme, getStoredTheme, THEMES } from './ThemeSelector';
+import { applyTheme, getStoredTheme, THEMES } from '../lib/themes';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
@@ -182,7 +182,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
     } else if (step === CONTENT_STEPS - 1) {
       // Último paso de contenido → guardar y mostrar done
       setSaving(true);
-      try { await saveToApi(); } catch (_) {} finally { setSaving(false); }
+      try { await saveToApi(); } catch { /* no bloquea el flujo de onboarding */ } finally { setSaving(false); }
       setStep(CONTENT_STEPS); // done
     } else {
       // Pantalla done → cerrar
@@ -592,7 +592,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                     { key: 'tiktok',    Icon: Music,     label: 'TikTok',    placeholder: '@tuclub' },
                     { key: 'youtube',   Icon: Youtube,   label: 'YouTube',   placeholder: 'youtube.com/@tuclub' },
                     { key: 'web',       Icon: Globe,     label: 'Sitio web', placeholder: 'www.tuclub.com' },
-                  ].map(({ key, Icon, label, placeholder }) => (
+                  ].map(({ key, Icon, placeholder }) => (
                     <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <div style={{ width: 32, height: 32, borderRadius: 8, background: `${c}14`, border: `1px solid ${c}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <Icon size={15} color={c} strokeWidth={1.8} />

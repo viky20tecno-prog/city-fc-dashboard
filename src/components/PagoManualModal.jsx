@@ -3,7 +3,6 @@ import { X, DollarSign, Loader2, CheckCircle, AlertCircle, ArrowLeft, Shield, Pl
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
-import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 
 const CONCEPTOS = ['Mensualidad', 'Uniforme', 'Torneo', 'Otro'];
 const METODOS_PAGO = ['Efectivo', 'Transferencia', 'Nequi', 'Daviplata', 'Consignación'];

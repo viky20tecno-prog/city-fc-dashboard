@@ -24,6 +24,60 @@ function getCC() {
   return getComputedStyle(document.documentElement).getPropertyValue('--cc').trim() || '#E14924';
 }
 
+/* ── Tooltip ── */
+function CustomTooltip({ active, payload, cc }) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0]?.payload;
+  return (
+    <div style={{
+      background: 'var(--bg-card)',
+      border: `1px solid ${cc}30`,
+      borderRadius: 10, padding: '12px 14px', minWidth: 160,
+      boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+    }}>
+      <p style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>
+        {d?.mesCompleto}
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12 }}>
+          <span style={{ color: cc }}>Pagado</span>
+          <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d?.pagado || 0)}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12 }}>
+          <span style={{ color: 'var(--text-sec)' }}>Pendiente</span>
+          <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d?.pendiente || 0)}</span>
+        </div>
+        <div style={{
+          borderTop: `1px solid ${cc}20`, paddingTop: 6, marginTop: 2,
+          display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12,
+        }}>
+          <span style={{ color: 'var(--text-mut)' }}>% cobrado</span>
+          <span style={{
+            fontWeight: 700,
+            color: d?.pct >= 80 ? '#22C55E' : d?.pct >= 50 ? cc : '#EF4444',
+          }}>{d?.pct}%</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Etiqueta % encima de barra pagado ── */
+function PctLabel({ x, y, width, index, data, cc }) {
+  const d = data[index];
+  if (!d || d.pct === 0) return null;
+  const labelColor = d.pct >= 80 ? '#22C55E' : d.pct >= 50 ? cc : '#EF4444';
+  return (
+    <text
+      x={x + width / 2} y={y - 5}
+      fill={labelColor}
+      textAnchor="middle" fontSize={10} fontWeight="600"
+    >
+      {d.pct}%
+    </text>
+  );
+}
+
 export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
   const mesActualIdx = new Date().getMonth();
   const anioActual   = new Date().getFullYear();
@@ -79,60 +133,6 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
     : pctGlobal >= 50
     ? { bg: `${cc}18`,               border: `${cc}40`,              text: cc        }
     : { bg: 'rgba(239,68,68,0.10)',  border: 'rgba(239,68,68,0.25)', text: '#EF4444' };
-
-  /* ── Tooltip ── */
-  const CustomTooltip = ({ active, payload }) => {
-    if (!active || !payload?.length) return null;
-    const d = payload[0]?.payload;
-    return (
-      <div style={{
-        background: 'var(--bg-card)',
-        border: `1px solid ${cc}30`,
-        borderRadius: 10, padding: '12px 14px', minWidth: 160,
-        boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-      }}>
-        <p style={{ color: 'var(--text-pri)', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>
-          {d?.mesCompleto}
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12 }}>
-            <span style={{ color: cc }}>Pagado</span>
-            <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d?.pagado || 0)}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12 }}>
-            <span style={{ color: 'var(--text-sec)' }}>Pendiente</span>
-            <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d?.pendiente || 0)}</span>
-          </div>
-          <div style={{
-            borderTop: `1px solid ${cc}20`, paddingTop: 6, marginTop: 2,
-            display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12,
-          }}>
-            <span style={{ color: 'var(--text-mut)' }}>% cobrado</span>
-            <span style={{
-              fontWeight: 700,
-              color: d?.pct >= 80 ? '#22C55E' : d?.pct >= 50 ? cc : '#EF4444',
-            }}>{d?.pct}%</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  /* ── Etiqueta % encima de barra pagado ── */
-  const PctLabel = ({ x, y, width, index }) => {
-    const d = data[index];
-    if (!d || d.pct === 0) return null;
-    const labelColor = d.pct >= 80 ? '#22C55E' : d.pct >= 50 ? cc : '#EF4444';
-    return (
-      <text
-        x={x + width / 2} y={y - 5}
-        fill={labelColor}
-        textAnchor="middle" fontSize={10} fontWeight="600"
-      >
-        {d.pct}%
-      </text>
-    );
-  };
 
   return (
     <div style={{
@@ -229,7 +229,7 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
               axisLine={false} tickLine={false} width={48}
             />
 
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: `${cc}08` }} />
+            <Tooltip content={<CustomTooltip cc={cc} />} cursor={{ fill: `${cc}08` }} />
 
             {/* Barras pendiente — fondo gris neutro */}
             <Bar dataKey="pendiente" name="Pendiente" fill="url(#gradPendiente)" radius={[4, 4, 0, 0]} maxBarSize={32} />
@@ -243,7 +243,7 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
                   style={entry.esActual ? { filter: `drop-shadow(0 0 6px ${cc}80)` } : {}}
                 />
               ))}
-              <LabelList content={<PctLabel />} />
+              <LabelList content={<PctLabel data={data} cc={cc} />} />
             </Bar>
 
             {/* Línea de tendencia — color del club, punteada */}

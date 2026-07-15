@@ -112,7 +112,6 @@ export default function CategoriasJugadoresModal({ categorias: inicial = [], onC
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {categorias.map((cat, catIdx) => {
                   const estaExpandida = expandida === catIdx;
-                  const tieneMultiplesEquipos = cat.equipos.length > 1 || (cat.equipos.length === 1 && cat.equipos[0] !== cat.nombre);
                   return (
                     <div key={catIdx} style={{ borderRadius: 12, border: '1px solid var(--cc20)', overflow: 'hidden' }}>
                       {/* Fila categoría */}

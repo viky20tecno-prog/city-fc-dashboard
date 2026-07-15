@@ -3,7 +3,6 @@ import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
-import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 import ComprobanteLink from './ComprobanteLink';
 
 const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(n) || 0);

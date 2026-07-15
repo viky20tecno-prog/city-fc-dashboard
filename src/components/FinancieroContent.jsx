@@ -7,7 +7,6 @@ import {
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
-import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 import SuspensionModal from './SuspensionModal';
 import ComprobanteLink from './ComprobanteLink';
 
@@ -230,17 +229,23 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
   );
 }
 
+function ordenarMensualidades(datos) {
+  return [...(datos || [])]
+    .filter(m => parseInt(m.numero_mes) >= 1 && parseInt(m.numero_mes) <= 12)
+    .sort((a, b) => parseInt(a.numero_mes) - parseInt(b.numero_mes));
+}
+
 function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, esExentoGlobal = false, cuotaClub = 0, jugador }) {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(() => ordenarMensualidades(datos));
   const [gestionandoSuspension, setGestionandoSuspension] = useState(false);
 
-  useEffect(() => {
-    setItems(
-      [...(datos || [])]
-        .filter(m => parseInt(m.numero_mes) >= 1 && parseInt(m.numero_mes) <= 12)
-        .sort((a, b) => parseInt(a.numero_mes) - parseInt(b.numero_mes))
-    );
-  }, [datos]);
+  // Re-sincroniza items cuando datos cambia (nuevo fetch del padre), preservando
+  // los parches optimistas locales de handleUpdated entre un cambio y otro.
+  const [prevDatos, setPrevDatos] = useState(datos);
+  if (datos !== prevDatos) {
+    setPrevDatos(datos);
+    setItems(ordenarMensualidades(datos));
+  }
 
   if (!items.length) return <EmptySection texto="Sin datos de mensualidades" />;
 
@@ -566,7 +571,7 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
   const [errorExento,     setErrorExento]     = useState('');
 
   useEffect(() => {
-    setEsExento(calcEsExento(jugador));
+    setEsExento(Number(jugador?.descuento_pct) >= 100);
     setMotivoDisplay(extraerMotivoExento(jugador?.notas));
   }, [jugador?.descuento_pct, jugador?.notas]);
 

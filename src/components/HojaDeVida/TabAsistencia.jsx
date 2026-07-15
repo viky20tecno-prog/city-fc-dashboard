@@ -10,7 +10,6 @@ const ESTADOS = {
   AUSENTE:   { label: 'No asistió',  color: '#6B7280', bg: 'transparent', Icon: XCircle    },
 };
 
-const pad2 = n => String(n).padStart(2, '0');
 const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DIAS  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
@@ -44,16 +43,27 @@ export default function TabAsistencia({ jugador }) {
   const clubId = getClubId();
   const [historial,     setHistorial]     = useState([]);
   const [totalEventos,  setTotalEventos]  = useState(0);
-  const [loading,       setLoading]       = useState(true);
+  const [loadedCedula,  setLoadedCedula]  = useState(null);
   const [filtro,        setFiltro]        = useState('TODOS');
+  const loading = loadedCedula !== jugador.cedula;
 
   useEffect(() => {
-    setLoading(true);
+    let cancelado = false;
     authFetch(`${API_BASE_URL}/asistencia/jugador/${jugador.cedula}?club_id=${clubId}`)
       .then(r => r.json())
-      .then(d => { setHistorial(d.data || []); setTotalEventos(d.total_eventos || 0); })
-      .catch(() => { setHistorial([]); setTotalEventos(0); })
-      .finally(() => setLoading(false));
+      .then(d => {
+        if (cancelado) return;
+        setHistorial(d.data || []);
+        setTotalEventos(d.total_eventos || 0);
+        setLoadedCedula(jugador.cedula);
+      })
+      .catch(() => {
+        if (cancelado) return;
+        setHistorial([]);
+        setTotalEventos(0);
+        setLoadedCedula(jugador.cedula);
+      });
+    return () => { cancelado = true; };
   }, [jugador.cedula, clubId]);
 
   const stats = useMemo(() => {

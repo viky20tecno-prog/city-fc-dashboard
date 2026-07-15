@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Pencil, RefreshCw, Clock, AlertCircle, CheckCheck, Wallet, X, Plus } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
@@ -38,22 +38,24 @@ function formatDate(iso) {
 function ImagenComprobante({ url }) {
   const [open, setOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const [resolvedUrl, setResolvedUrl] = useState(esUrlWaha(url) ? null : url);
+  const [resolvedBlobUrl, setResolvedBlobUrl] = useState(null);
+  const isWaha = esUrlWaha(url);
+  const resolvedUrl = isWaha ? resolvedBlobUrl : url;
 
   useEffect(() => {
-    if (!esUrlWaha(url)) { setResolvedUrl(url); return; }
+    if (!isWaha) return;
     let objectUrl;
     let cancelado = false;
     (async () => {
       try {
         objectUrl = await fetchComprobanteBlobUrl(url);
-        if (!cancelado) setResolvedUrl(objectUrl);
+        if (!cancelado) setResolvedBlobUrl(objectUrl);
       } catch {
         if (!cancelado) setImgError(true);
       }
     })();
     return () => { cancelado = true; if (objectUrl) URL.revokeObjectURL(objectUrl); };
-  }, [url]);
+  }, [url, isWaha]);
 
   if (!url) return <span className="text-gray-600 text-xs">Sin imagen</span>;
 
@@ -389,7 +391,7 @@ function PagoRow({ pago, onEdit, onAction, actionLoading }) {
 }
 
 // ─── Componente principal ─────────────────────────────────────────────────────
-export default function Conciliacion({ color = 'var(--cc)', refreshTrigger }) {
+export default function Conciliacion({ refreshTrigger }) {
   const [pagos, setPagos]           = useState([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState('');

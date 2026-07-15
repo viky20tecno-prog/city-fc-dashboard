@@ -7,13 +7,13 @@ export default function VerificarMiembro() {
   const { clubSlug, cedula } = useParams();
   const [searchParams] = useSearchParams();
 
-  const [estado, setEstado]       = useState('cargando'); // 'cargando' | 'verificado' | 'no_encontrado' | 'error'
+  const [estado, setEstado]       = useState(() => (!clubSlug || !cedula) ? 'error' : 'cargando'); // 'cargando' | 'verificado' | 'no_encontrado' | 'error'
   const [clubConfig, setClubConfig] = useState(null);
   const [atleta, setAtleta]       = useState(null);
 
   useEffect(() => {
     document.title = 'Verificación de Miembro · ZenSports';
-    if (!clubSlug || !cedula) { setEstado('error'); return; }
+    if (!clubSlug || !cedula) return;
 
     async function verificar() {
       try {

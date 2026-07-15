@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { X, AlertTriangle, Plane, Clock, HelpCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
@@ -40,16 +40,16 @@ export default function SuspensionModal({ jugador, onClose, onSuccess }) {
   const [cancelando, setCancelando] = useState(null);
   const [errorMsg,   setErrorMsg]   = useState('');
 
-  useEffect(() => { cargarSuspensiones(); }, []);
-
-  const cargarSuspensiones = async () => {
+  const cargarSuspensiones = useCallback(async () => {
     setLoading(true);
     try {
       const res  = await authFetch(`${API_BASE}/suspensiones?club_id=${getClubId()}&cedula=${jugador.cedula}`);
       const data = await res.json();
       if (data.success) setSuspensiones(data.data);
     } catch { /* silencioso */ } finally { setLoading(false); }
-  };
+  }, [jugador.cedula]);
+
+  useEffect(() => { cargarSuspensiones(); }, [cargarSuspensiones]);
 
   // Mapa mes→suspension para el año seleccionado (expande rangos heredados)
   const mesesMap = useMemo(() => {

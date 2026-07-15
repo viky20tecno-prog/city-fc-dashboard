@@ -10,6 +10,46 @@ function esc(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+function TopBar({ clubColor }) {
+  return <div style={{ height: '5px', background: `linear-gradient(90deg,${clubColor},#B68631)` }} />;
+}
+
+function LogoHeader({ small = false, clubColor, th, logoUrl, initials, clubNombre, clubSub }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: small ? '10px 16px 8px' : '11px 16px 9px',
+      borderBottom: `1px solid ${th.divider}`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {logoUrl
+          ? <img src={logoUrl} alt="logo" style={{ width: small ? '22px' : '26px', height: small ? '22px' : '26px', objectFit: 'contain' }} />
+          : <EscudoSVG size={small ? 18 : 22} color={clubColor} initials={initials} />}
+        <div>
+          <div style={{ fontFamily: "'Sport Event',cursive", fontSize: small ? '13px' : '15px', letterSpacing: '2.5px', color: th.textPri, lineHeight: 1 }}>
+            {clubNombre}
+          </div>
+          {!small && clubSub && (
+            <div style={{ fontSize: '7px', letterSpacing: '2px', color: th.textMut, textTransform: 'uppercase', marginTop: '1px' }}>
+              {clubSub}
+            </div>
+          )}
+        </div>
+      </div>
+      <div style={{ textAlign: 'right' }}>
+        <div style={{ fontSize: '7px', letterSpacing: '1.5px', color: th.textMut, textTransform: 'uppercase' }}>
+          {small ? 'INFORMACIÓN OFICIAL' : 'CARNET OFICIAL'}
+        </div>
+        {!small && (
+          <div style={{ fontSize: '10px', color: clubColor, fontWeight: 700, letterSpacing: '1px', marginTop: '1px' }}>
+            {new Date().getFullYear()}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function EscudoSVG({ size = 32, color = 'var(--cc)', initials = 'FC' }) {
   const h = Math.round(size * 44 / 38);
   return (
@@ -93,9 +133,12 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
     ? `${verifyBase}/verificar/${getClubId()}/${jugador.cedula}?${verifyParams.toString()}`
     : null;
 
-  const [qrDataUrl, setQrDataUrl] = useState(null);
+  const [qrData, setQrData] = useState({ url: null, dataUrl: null });
+  const qrDataUrl = (verifyUrl && qrData.url === verifyUrl) ? qrData.dataUrl : null;
+
   useEffect(() => {
-    if (!verifyUrl) { setQrDataUrl(null); return; }
+    if (!verifyUrl) return;
+    let cancelado = false;
     QRCodeLib.toDataURL(verifyUrl, {
       width: 280,
       margin: 2,
@@ -104,7 +147,10 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
         dark:  dark ? '#F0F0F0FF' : '#111111FF',
         light: dark ? '#111111FF' : '#FFFFFFFF',
       },
-    }).then(setQrDataUrl).catch(() => setQrDataUrl(null));
+    })
+      .then(du => { if (!cancelado) setQrData({ url: verifyUrl, dataUrl: du }); })
+      .catch(() => { if (!cancelado) setQrData({ url: verifyUrl, dataUrl: null }); });
+    return () => { cancelado = true; };
   }, [verifyUrl, dark]);
 
   const fmtFecha = (f) => {
@@ -146,44 +192,6 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
     w.focus();
     setTimeout(() => { w.print(); w.close(); }, 600);
   };
-
-  const TopBar = () => (
-    <div style={{ height: '5px', background: `linear-gradient(90deg,${clubColor},#B68631)` }} />
-  );
-
-  const LogoHeader = ({ small = false }) => (
-    <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: small ? '10px 16px 8px' : '11px 16px 9px',
-      borderBottom: `1px solid ${th.divider}`,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {logoUrl
-          ? <img src={logoUrl} alt="logo" style={{ width: small ? '22px' : '26px', height: small ? '22px' : '26px', objectFit: 'contain' }} />
-          : <EscudoSVG size={small ? 18 : 22} color={clubColor} initials={initials} />}
-        <div>
-          <div style={{ fontFamily: "'Sport Event',cursive", fontSize: small ? '13px' : '15px', letterSpacing: '2.5px', color: th.textPri, lineHeight: 1 }}>
-            {clubNombre}
-          </div>
-          {!small && clubSub && (
-            <div style={{ fontSize: '7px', letterSpacing: '2px', color: th.textMut, textTransform: 'uppercase', marginTop: '1px' }}>
-              {clubSub}
-            </div>
-          )}
-        </div>
-      </div>
-      <div style={{ textAlign: 'right' }}>
-        <div style={{ fontSize: '7px', letterSpacing: '1.5px', color: th.textMut, textTransform: 'uppercase' }}>
-          {small ? 'INFORMACIÓN OFICIAL' : 'CARNET OFICIAL'}
-        </div>
-        {!small && (
-          <div style={{ fontSize: '10px', color: clubColor, fontWeight: 700, letterSpacing: '1px', marginTop: '1px' }}>
-            {new Date().getFullYear()}
-          </div>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-4">
@@ -229,8 +237,8 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
       {/* FRENTE */}
       <div style={{ display: lado === 'frente' ? 'flex' : 'none', justifyContent: 'center' }}>
         <div id="zs-carnet-frente" style={cardBase}>
-          <TopBar />
-          <LogoHeader />
+          <TopBar clubColor={clubColor} />
+          <LogoHeader clubColor={clubColor} th={th} logoUrl={logoUrl} initials={initials} clubNombre={clubNombre} clubSub={clubSub} />
           <div style={{ position: 'relative', margin: '12px 16px 0' }}>
             <div style={{
               width: '100%', height: '162px', borderRadius: '10px', overflow: 'hidden',
@@ -286,8 +294,8 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
       {/* DORSO */}
       <div style={{ display: lado === 'dorso' ? 'flex' : 'none', justifyContent: 'center' }}>
         <div id="zs-carnet-dorso" style={cardBase}>
-          <TopBar />
-          <LogoHeader small />
+          <TopBar clubColor={clubColor} />
+          <LogoHeader small clubColor={clubColor} th={th} logoUrl={logoUrl} initials={initials} clubNombre={clubNombre} clubSub={clubSub} />
           <div style={{ display: 'flex', gap: '12px', padding: '12px 16px' }}>
             <div style={{ flex: 1 }}>
               {[

@@ -54,7 +54,7 @@ export default function UniformesTab({ jugadores }) {
       setMessage({ type: 'success', text: `Uniforme registrado: ${data.uniforme.nombre_estampar} #${data.uniforme.numero}` });
       setForm({ cedula: '', tipo_uniforme: 'Uniforme de Competencia (sin medias)', numero: '', nombre_estampar: '', talla: 'M' });
       setTimeout(() => setMostrarModal(false), 2000);
-    } catch (err) {
+    } catch {
       setMessage({ type: 'error', text: 'Error al conectar con el servidor' });
     } finally {
       setLoading(false);

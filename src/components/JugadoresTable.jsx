@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Search, ChevronUp, ChevronDown, BookOpen, Check, DollarSign, Trash2, AlertTriangle, Shirt, Download, Upload, FileText, Users, Tag, X, UserX, Loader2, Archive, RotateCcw, ClipboardList } from 'lucide-react';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { ESTADO_COLORS, API_BASE_URL } from '../config';
@@ -7,8 +7,14 @@ import ImportarJugadoresModal from './ImportarJugadoresModal';
 import MensualidadesImportModal from './MensualidadesImportModal';
 import { deletePlayer, archivePlayer, getClubId } from '../services/api';
 import { authFetch } from '../lib/authFetch';
-import { supabase } from '../lib/supabase';
-import { normalizarCategorias, listarEquipos } from '../lib/categorias';
+import { listarEquipos } from '../lib/categorias';
+
+// Peor estado local (para PENDIENTE / PARCIAL / AL_DIA)
+const PRIORIDAD = { MORA: 4, PENDIENTE: 3, PARCIAL: 2, AL_DIA: 1, SIN_DATOS: 0 };
+const peorEstado = (mensJugador) =>
+  mensJugador.reduce((worst, m) => {
+    return (PRIORIDAD[m.estado] || 0) > (PRIORIDAD[worst] || 0) ? m.estado : worst;
+  }, 'SIN_DATOS');
 
 /* ── colores de cada estado para el dropdown ── */
 const ESTADO_DOT = {
@@ -213,7 +219,7 @@ function EstadoBadge({ estado }) {
 }
 
 /* ── componente principal ── */
-export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, registroPagos, suspensiones = [], morosos = [], onRefresh, categoriasJugadores = [], clubConfig, color }) {
+export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, suspensiones = [], morosos = [], onRefresh, categoriasJugadores = [], clubConfig, color }) {
   const [search, setSearch]               = useState('');
   const [filtroEstado, setFiltroEstado]   = useState('TODOS');
   const [filtroDeporte, setFiltroDeporte] = useState('TODOS');
@@ -317,13 +323,6 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     [morosos]
   );
 
-  // Peor estado local (para PENDIENTE / PARCIAL / AL_DIA)
-  const PRIORIDAD = { MORA: 4, PENDIENTE: 3, PARCIAL: 2, AL_DIA: 1, SIN_DATOS: 0 };
-  const peorEstado = (mensJugador) =>
-    mensJugador.reduce((worst, m) => {
-      return (PRIORIDAD[m.estado] || 0) > (PRIORIDAD[worst] || 0) ? m.estado : worst;
-    }, 'SIN_DATOS');
-
   const mesActualTabla  = new Date().getMonth() + 1;
   const anioActualTabla = new Date().getFullYear();
 
@@ -366,7 +365,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         activo: j.activo === true || (j.activo || '').toString().toUpperCase() === 'SI',
       };
     });
-  }, [jugadores, mensualidades, cedulasMorosos, suspensiones]);
+  }, [jugadores, mensualidades, cedulasMorosos, suspensiones, anioActualTabla, mesActualTabla]);
 
   const opcionesCategoria = useMemo(() => {
     const equipos = listarEquipos(categoriasJugadores);

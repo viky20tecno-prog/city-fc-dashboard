@@ -59,7 +59,6 @@ async function exportCSV(rows, filename) {
 }
 
 export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', clubConfig }) {
-  const c        = color;
   const clubId   = getClubId();
   const codigoPais = clubConfig?.codigo_pais || getCodigoPais();
   const fmt      = (v) => formatMoney(v, codigoPais);
@@ -295,7 +294,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
           img.onerror = resolve;
           img.src = clubConfig.logo_url;
         });
-      } catch (_) {}
+      } catch { /* logo opcional, no bloquea el PDF */ }
     }
 
     let y = 32;
@@ -361,7 +360,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
         });
         doc.addImage(imgData, 'PNG', M, 8, 20, 20);
         textX = M + 24;
-      } catch (_) {}
+      } catch { /* logo opcional, no bloquea el PDF */ }
     }
 
     doc.setTextColor(255, 255, 255);

@@ -36,7 +36,7 @@ export default function DocumentosClub({ color }) {
       const d = await r.json();
       setDocs(d.data || []);
     } finally { setLoading(false); }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => { load(); }, [load]);
 

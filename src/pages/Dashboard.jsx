@@ -22,7 +22,8 @@ import Finanzas from '../components/Finanzas';
 import TorneosPage from '../components/TorneosPage';
 import PagoManualModal from '../components/PagoManualModal';
 import OnboardingWizard from '../components/OnboardingWizard';
-import ThemeSelector, { applyTheme, getStoredTheme } from '../components/ThemeSelector';
+import ThemeSelector from '../components/ThemeSelector';
+import { applyTheme, getStoredTheme } from '../lib/themes';
 import EquiposPage from '../components/EquiposPage';
 import MiEquipoModal from '../components/MiEquipoModal';
 import Calendario from '../components/Calendario';
@@ -113,7 +114,8 @@ export default function Dashboard() {
   const [linkCopied,      setLinkCopied]      = useState(false);
   const [portalCopied,    setPortalCopied]    = useState(false);
   const [showPagoModal,   setShowPagoModal]   = useState(false);
-  const [showOnboarding,   setShowOnboarding]   = useState(false);
+  const [onboardingClosed,     setOnboardingClosed]     = useState(false);
+  const [onboardingManualOpen, setOnboardingManualOpen] = useState(false);
   const [showTheme,        setShowTheme]        = useState(false);
   const [showEquipo,       setShowEquipo]       = useState(false);
   const [showCobro,        setShowCobro]        = useState(false);
@@ -135,7 +137,6 @@ export default function Dashboard() {
     const mq = window.matchMedia('(max-width: 767px)');
     const handler = (e) => setIsMobile(e.matches);
     mq.addEventListener('change', handler);
-    setIsMobile(mq.matches);
     return () => mq.removeEventListener('change', handler);
   }, []);
 
@@ -193,11 +194,8 @@ export default function Dashboard() {
   const trialExpirado  = trialActivo && trialDaysLeft <= 0;
 
   // Mostrar onboarding solo cuando el config ya cargó y no está completado
-  useEffect(() => {
-    if (clubConfig && !clubConfig.onboarding_completed) {
-      setShowOnboarding(true);
-    }
-  }, [clubConfig]);
+  const showOnboarding = onboardingManualOpen
+    || (!!clubConfig && !clubConfig.onboarding_completed && !onboardingClosed);
 
   const c = colorOverride || clubConfig?.color || '#E14924';
 
@@ -1097,7 +1095,7 @@ export default function Dashboard() {
           <OnboardingWizard
             color={c}
             clubConfig={clubConfig}
-            onComplete={() => { setShowOnboarding(false); refetchConfig(); }}
+            onComplete={() => { setOnboardingClosed(true); setOnboardingManualOpen(false); refetchConfig(); }}
           />
         </ErrorBoundary>
       )}
@@ -1106,7 +1104,7 @@ export default function Dashboard() {
         <ThemeSelector
           color={c}
           onClose={() => setShowTheme(false)}
-          onOpenConfig={() => { setShowTheme(false); setShowOnboarding(true); }}
+          onOpenConfig={() => { setShowTheme(false); setOnboardingManualOpen(true); }}
           onOpenEquipo={isAdmin ? () => { setShowTheme(false); setShowEquipo(true); } : undefined}
           onOpenCobro={() => { setShowTheme(false); setShowCobro(true); }}
           onColorChange={handleColorChange}

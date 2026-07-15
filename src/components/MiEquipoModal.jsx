@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Plus, Trash2, Loader2, Copy, Check, UserCheck, ShieldOff, AlertTriangle, Phone } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
@@ -20,7 +20,7 @@ export default function MiEquipoModal({ clubId, onClose }) {
   const [copied,    setCopied]    = useState(false);
   const [error,     setError]     = useState(null);
 
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     setLoading(true);
     try {
       const res  = await authFetch(`${API_BASE_URL}/miembros?club_id=${clubId}`);
@@ -31,9 +31,9 @@ export default function MiEquipoModal({ clubId, onClose }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [clubId]);
 
-  useEffect(() => { fetchMembers(); }, [clubId]);
+  useEffect(() => { fetchMembers(); }, [fetchMembers]);
 
   const handleCreate = async () => {
     setError(null);

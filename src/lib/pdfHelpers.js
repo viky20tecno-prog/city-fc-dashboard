@@ -19,7 +19,7 @@ export async function loadLogoDataUrl(url) {
         canvas.width = img.width; canvas.height = img.height;
         canvas.getContext('2d').drawImage(img, 0, 0);
         resolve(canvas.toDataURL('image/png'));
-      } catch (_) {
+      } catch {
         resolve(null);
       }
     };
@@ -46,7 +46,7 @@ export function drawPdfHeader(doc, { W, M, clubName, title, subtitle, date, logo
       const logoY = (height - logoH) / 2;
       doc.addImage(logoData, 'PNG', M, logoY, logoH, logoH);
       textX = M + logoH + 4;
-    } catch (_) {}
+    } catch { /* logo opcional, no bloquea el PDF */ }
   }
 
   // Club name — left

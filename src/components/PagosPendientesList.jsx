@@ -1,5 +1,4 @@
 import { Clock, Phone, FileDown } from 'lucide-react';
-import { formatMoney } from '../lib/formatMoney';
 
 const formatCOP = (n) => new Intl.NumberFormat('es-CO', {
   style: 'currency', currency: 'COP', maximumFractionDigits: 0,

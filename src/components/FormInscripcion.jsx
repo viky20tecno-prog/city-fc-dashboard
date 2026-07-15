@@ -150,6 +150,21 @@ export default function FormInscripcion() {
   const [showPolitica, setShowPolitica]         = useState(false);
   const photoInputRef = useRef(null);
 
+  const handlePhotoSelect = (file) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) { setError('La foto debe pesar máximo 5 MB.'); return; }
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+    setError('');
+  };
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    setPhotoDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handlePhotoSelect(file);
+  }, []);
+
   if (!clubId) {
     return (
       <div style={{ minHeight: '100vh', background: '#0D1117', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px', fontFamily: "'Inter', system-ui, sans-serif" }}>
@@ -175,21 +190,6 @@ export default function FormInscripcion() {
 
   const handleChange = (key, value) => setForm(p => ({ ...p, [key]: value }));
 
-  const handlePhotoSelect = (file) => {
-    if (!file || !file.type.startsWith('image/')) return;
-    if (file.size > 5 * 1024 * 1024) { setError('La foto debe pesar máximo 5 MB.'); return; }
-    setPhotoFile(file);
-    setPhotoPreview(URL.createObjectURL(file));
-    setError('');
-  };
-
-  const handleDrop = useCallback((e) => {
-    e.preventDefault();
-    setPhotoDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handlePhotoSelect(file);
-  }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('loading');
@@ -208,10 +208,10 @@ export default function FormInscripcion() {
     if (!/^\d{6,12}$/.test((form.celular || '').replace(/\D/g, ''))) {
       setStatus('error'); setError('El celular debe tener entre 6 y 12 dígitos (sin código de país).'); return;
     }
-    if (form.nombre && !/^[A-ZÁÉÍÓÚÑa-záéíóúñ\s'\-]{2,60}$/.test(form.nombre.trim())) {
+    if (form.nombre && !/^[A-ZÁÉÍÓÚÑa-záéíóúñ\s'-]{2,60}$/.test(form.nombre.trim())) {
       setStatus('error'); setError('El nombre solo puede contener letras (mínimo 2 caracteres).'); return;
     }
-    if (form.apellidos && !/^[A-ZÁÉÍÓÚÑa-záéíóúñ\s'\-]{2,60}$/.test(form.apellidos.trim())) {
+    if (form.apellidos && !/^[A-ZÁÉÍÓÚÑa-záéíóúñ\s'-]{2,60}$/.test(form.apellidos.trim())) {
       setStatus('error'); setError('Los apellidos solo pueden contener letras (mínimo 2 caracteres).'); return;
     }
     if (form.eps && form.eps.trim().length < 2) {
@@ -243,7 +243,7 @@ export default function FormInscripcion() {
           const { data: urlData } = supabase.storage.from('player-photos').getPublicUrl(path);
           foto_url = urlData?.publicUrl || null;
         }
-      } catch (_) { /* foto no crítica — seguimos sin ella */ }
+      } catch { /* foto no crítica — seguimos sin ella */ }
     }
 
     const up = v => typeof v === 'string' ? v.trim().toUpperCase() : v;
@@ -869,7 +869,7 @@ export default function FormInscripcion() {
 }
 
 /* ── Field con ícono ─────────────────────────────────────────────────── */
-function FieldBox({ campo, form, onChange, c }) {
+function FieldBox({ campo, form, onChange }) {
   const Icon = campo.icon;
   const isSelect  = campo.type === 'select';
   const isPais    = campo.type === 'pais';

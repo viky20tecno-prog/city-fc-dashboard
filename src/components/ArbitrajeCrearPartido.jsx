@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Plus, X, CheckSquare, Square, Loader2, Search, Calendar, CheckCircle2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
-import { formatMoney, getCodigoPais } from '../lib/formatMoney';
 
 const fmt = (n) =>
   Number(n).toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });

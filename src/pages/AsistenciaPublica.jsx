@@ -31,16 +31,16 @@ export default function AsistenciaPublica() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') || '';
 
-  const [estado,    setEstado]    = useState('cargando'); // cargando | listo | guardando | guardado | error
+  const [estado,    setEstado]    = useState(() => (!clubSlug || !eventoId) ? 'error' : 'cargando'); // cargando | listo | guardando | guardado | error
   const [club,      setClub]      = useState(null);
   const [evento,    setEvento]    = useState(null);
   const [jugadores, setJugadores] = useState([]);
-  const [errorMsg,  setErrorMsg]  = useState('');
+  const [errorMsg,  setErrorMsg]  = useState(() => (!clubSlug || !eventoId) ? 'URL inválida' : '');
 
   // Carga inicial
   useEffect(() => {
     document.title = 'Pasar asistencia · ZenSports';
-    if (!clubSlug || !eventoId) { setEstado('error'); setErrorMsg('URL inválida'); return; }
+    if (!clubSlug || !eventoId) return;
 
     fetch(`${API}/publico/asistencia/${clubSlug}/${eventoId}`)
       .then(r => r.json())

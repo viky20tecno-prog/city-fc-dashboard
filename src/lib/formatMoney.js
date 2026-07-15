@@ -4,7 +4,6 @@ const PAISES = {
   '54':  { locale: 'es-AR', currency: 'ARS', symbol: '$',   label: 'ARS' },
   '51':  { locale: 'es-PE', currency: 'PEN', symbol: 'S/',  label: 'PEN' },
   '56':  { locale: 'es-CL', currency: 'CLP', symbol: '$',   label: 'CLP' },
-  '57':  { locale: 'es-CO', currency: 'COP', symbol: '$',   label: 'COP' },
   '58':  { locale: 'es-VE', currency: 'USD', symbol: '$',   label: 'USD' },
   '593': { locale: 'es-EC', currency: 'USD', symbol: '$',   label: 'USD' },
   '598': { locale: 'es-UY', currency: 'UYU', symbol: '$U',  label: 'UYU' },

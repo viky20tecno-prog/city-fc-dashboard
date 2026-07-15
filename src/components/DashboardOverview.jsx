@@ -95,7 +95,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
 }
 
 /* ── panel al día ── */
-function AlDiaPanel({ jugadores, color }) {
+function AlDiaPanel({ jugadores }) {
   if (!jugadores.length) return null;
   return (
     <div style={{

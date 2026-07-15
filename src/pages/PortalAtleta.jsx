@@ -152,17 +152,13 @@ const UNIFORME_ESTADO = {
 
 function Resultado({ datos, color, onNuevaBusqueda }) {
   const { atleta, mensualidades, torneos = [], uniformes = [], saldo_pendiente, total_pagado, meses_pendientes, esExento } = datos;
-  const [fotoUrl, setFotoUrl] = useState(atleta?.foto_url || null);
   const [imgError, setImgError] = useState(false);
   const nombreCompleto = `${atleta.nombre} ${atleta.apellidos || ''}`.trim();
   const alDia = saldo_pendiente === 0;
 
-  useEffect(() => {
-    if (!fotoUrl && atleta?.cedula) {
-      const { data } = supabase.storage.from('player-photos').getPublicUrl(`city-fc/${atleta.cedula}.jpg`);
-      if (data?.publicUrl) setFotoUrl(data.publicUrl);
-    }
-  }, [atleta?.cedula]); // eslint-disable-line
+  const fotoUrl = atleta?.foto_url
+    || (atleta?.cedula ? supabase.storage.from('player-photos').getPublicUrl(`city-fc/${atleta.cedula}.jpg`).data?.publicUrl : null)
+    || null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

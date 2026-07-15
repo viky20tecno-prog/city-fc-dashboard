@@ -9,7 +9,7 @@ import {
   Timer, Palette, Globe, ShieldCheck,
   MonitorPlay, Paintbrush, KeyRound, Gift,
 } from 'lucide-react';
-import { PALETA } from '../components/ThemeSelector';
+import { PALETA } from '../lib/themes';
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 
 const CYCLE_COLORS = ['#8B5CF6', '#10B981', '#00AAFF', '#0D9488', '#F97316'];

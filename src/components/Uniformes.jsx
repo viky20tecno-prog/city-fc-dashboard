@@ -59,7 +59,6 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const [busqueda, setBusqueda] = useState('');
   const [sugerencias, setSugerencias] = useState([]);
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
-  const [numerosUsados, setNumerosUsados] = useState([]);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState('');
   const [errorEsDuplicado, setErrorEsDuplicado] = useState(false);
@@ -103,20 +102,15 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const cargarDatos = async () => {
     try {
       const clubId = getClubId();
-      const [playersRes, numRes, pedRes, configRes] = await Promise.all([
+      const [playersRes, pedRes, configRes] = await Promise.all([
         authFetch(`${API_BASE}/players?club_id=${clubId}`),
-        authFetch(`${API_BASE}/uniforms/numeros?club_id=${clubId}`),
         authFetch(`${API_BASE}/uniforms?club_id=${clubId}`),
         authFetch(`${API_BASE}/config?club_id=${clubId}`),
       ]);
-      const [playersData, numData, pedData, configData] = await Promise.all([
-        playersRes.json(), numRes.json(), pedRes.json(), configRes.json(),
+      const [playersData, pedData, configData] = await Promise.all([
+        playersRes.json(), pedRes.json(), configRes.json(),
       ]);
       if (playersData.success) setJugadores(playersData.data || []);
-      if (numData.success) {
-        const normalizados = (numData.numeros || []).map(n => String(parseInt(n, 10)));
-        setNumerosUsados(normalizados);
-      }
       if (pedData.success) setPedidos(pedData.data || []);
       if (configData.success) {
         setCatalogo(normalizarCatalogo(configData.prendas_uniforme));
@@ -439,7 +433,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       let y = drawPageHeader();
       y = drawBlock(pendientes,  'PENDIENTES',  y);
       y = drawBlock(pagados,     'PAGADOS',     y);
-      y = drawBlock(entregados,  'ENTREGADOS',  y);
+      drawBlock(entregados,  'ENTREGADOS',  y);
 
       const pages = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pages; i++) {
@@ -594,7 +588,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         }),
       });
       let data = {};
-      try { data = await res.json(); } catch (_) {}
+      try { data = await res.json(); } catch { /* respuesta sin body, data queda {} */ }
       if (res.ok || data.success) { await cargarDatos(); cerrarEditar(); }
       else { setEditError(data.error || data.message || `Error ${res.status}`); }
     } catch (e) { setEditError(`Error: ${e.message}`); }

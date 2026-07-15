@@ -5,7 +5,7 @@ import {
   Users, FileText, Smartphone, AlertTriangle, Zap, MessageCircle,
   ArrowRight, Sparkles, TrendingUp, Star, Sun, Moon, X, Loader2, Menu, QrCode,
 } from 'lucide-react';
-import { PALETA } from '../components/ThemeSelector';
+import { PALETA } from '../lib/themes';
 import { API_BASE_URL } from '../config';
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 
@@ -867,7 +867,7 @@ function LeadModal({ open, onClose, plan = 'free', color = '#00AAFF' }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, plan_interes: plan, fuente: 'landing' }),
       });
-    } catch (_) { /* continúa aunque falle */ }
+    } catch { /* continúa aunque falle */ }
     setLoading(false);
     if (isDemo) {
       const msg = encodeURIComponent(`¡Hola ZenSports! 👋 Soy ${form.nombre}${form.nombre_club ? ` del ${form.nombre_club}` : ''}${form.ciudad ? ` en ${form.ciudad}` : ''}. Me interesa solicitar una demo gratuita. ¿Cuándo podríamos coordinarla?`);
@@ -1789,7 +1789,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {[[true,'Todo Starter'],[true,'Recordatorios de cobro automáticos'],[true,'Finanzas e ingresos/gastos'],[true,'Uniformes y equipamiento'],[true,'Estadísticas avanzadas'],[true,'Automatizaciones'],[true,'Reportes ejecutivos'],[true,'Soporte prioritario']].map(([on, label]) => (
+                {[[true,'Todo Starter'],[true,'Recordatorios de cobro automáticos'],[true,'Finanzas e ingresos/gastos'],[true,'Uniformes y equipamiento'],[true,'Estadísticas avanzadas'],[true,'Automatizaciones'],[true,'Reportes ejecutivos'],[true,'Soporte prioritario']].map(([, label]) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <CheckCircle size={13} color="#00D084" style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)' }}>{label}</span>

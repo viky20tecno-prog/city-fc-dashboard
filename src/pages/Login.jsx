@@ -155,7 +155,7 @@ export default function Login() {
             return;
           }
           setError(`Error cargando clubs: ${json.error || 'intenta de nuevo'}`);
-        } catch (fetchErr) {
+        } catch {
           setError('No se pudo conectar al servidor. Verifica tu conexión e intenta de nuevo.');
         }
         await supabase.auth.signOut();

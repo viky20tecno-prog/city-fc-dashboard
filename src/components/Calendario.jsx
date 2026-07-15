@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ChevronLeft, ChevronRight, Plus, Edit2, Trash2,
   X, Loader2, MapPin, Clock, CalendarDays, List, Users,
@@ -272,7 +272,7 @@ export default function Calendario({ color, clubId }) {
   const [historialJugador, setHistorialJugador] = useState([]);
   const [loadingHistorial, setLoadingHistorial] = useState(false);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
     try {
       const res  = await authFetch(`${API_BASE_URL}/calendario?club_id=${clubId}`);
@@ -280,9 +280,9 @@ export default function Calendario({ color, clubId }) {
       setEvents(data.data || []);
     } catch (e) { console.error(e); }
     finally      { setLoading(false); }
-  };
+  }, [clubId]);
 
-  useEffect(() => { fetchEvents(); }, [clubId]);
+  useEffect(() => { fetchEvents(); }, [fetchEvents]);
 
   const cargarFormPlayers = async () => {
     if (formPlayers.length > 0) return;
@@ -329,7 +329,7 @@ export default function Calendario({ color, clubId }) {
       if (p.pago_arbitraje) s.pagaron++;
     });
     setAsistCache(c => ({ ...c, [asistEvento.id]: { ...s, total: asistPlayers.length, monto_arbitraje: asistEvento.monto_arbitraje || 0 } }));
-  }, [asistPlayers, asistEvento]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [asistPlayers, asistEvento]);
 
   const eventsByDay = useMemo(() => {
     const map = {};

@@ -118,6 +118,28 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
   const guardar = async () => {
     setGuardando(true);
     try {
+      if (form.estado === 'NO_APLICA') {
+        // "No aplica" es un atajo del mismo mecanismo de suspensión — crea la
+        // suspensión (motivo retiro temporal) y el backend sincroniza la
+        // mensualidad a SUSPENDIDO, igual que "Gestionar suspensión".
+        const res  = await authFetch(`${API_BASE_URL}/suspensiones?club_id=${getClubId()}`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            cedula:     m.cedula,
+            motivo:     'RETIRO_TEMPORAL',
+            mes_inicio: m.numero_mes,
+            mes_fin:    m.numero_mes,
+            anio:       m.anio,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setEditando(false);
+          onUpdated({ id: m.id, estado: 'SUSPENDIDO', saldo_pendiente: 0, valor_oficial: 0 });
+        }
+        return;
+      }
       const body = {
         valor_oficial: form.valor_oficial,
         valor_pagado:  form.valor_pagado,
@@ -173,20 +195,22 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
       ) : (
         <div className="space-y-2">
           <p className="text-xs font-semibold text-[var(--text-pri)]">{nombreMes} — Editar</p>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-[10px] text-[var(--text-sec)] mb-1">Valor oficial</label>
-              <input type="number" className={INPUT_SM} value={form.valor_oficial}
-                onFocus={e => e.target.select()}
-                onChange={e => setForm(f => ({ ...f, valor_oficial: parseFloat(e.target.value) || 0 }))} />
+          {form.estado !== 'NO_APLICA' && (
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[10px] text-[var(--text-sec)] mb-1">Valor oficial</label>
+                <input type="number" className={INPUT_SM} value={form.valor_oficial}
+                  onFocus={e => e.target.select()}
+                  onChange={e => setForm(f => ({ ...f, valor_oficial: parseFloat(e.target.value) || 0 }))} />
+              </div>
+              <div>
+                <label className="block text-[10px] text-[var(--text-sec)] mb-1">Valor pagado</label>
+                <input type="number" className={INPUT_SM} value={form.valor_pagado}
+                  onFocus={e => e.target.select()}
+                  onChange={e => setForm(f => ({ ...f, valor_pagado: parseFloat(e.target.value) || 0 }))} />
+              </div>
             </div>
-            <div>
-              <label className="block text-[10px] text-[var(--text-sec)] mb-1">Valor pagado</label>
-              <input type="number" className={INPUT_SM} value={form.valor_pagado}
-                onFocus={e => e.target.select()}
-                onChange={e => setForm(f => ({ ...f, valor_pagado: parseFloat(e.target.value) || 0 }))} />
-            </div>
-          </div>
+          )}
           <div>
             <label className="block text-[10px] text-[var(--text-sec)] mb-1">Estado</label>
             <select className={INPUT_SM} value={form.estado} onChange={e => setForm(f => ({ ...f, estado: e.target.value }))}>
@@ -194,9 +218,14 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
               <option value="PENDIENTE">PENDIENTE</option>
               <option value="PARCIAL">PARCIAL</option>
               <option value="MORA">MORA</option>
+              <option value="NO_APLICA">NO APLICA (retiro temporal)</option>
             </select>
           </div>
-          {penalidad > 0 && (
+          {form.estado === 'NO_APLICA' ? (
+            <p className="text-xs text-yellow-400/80">
+              Se creará una suspensión por retiro temporal para {nombreMes} — la mensualidad queda en $0 y no cuenta como deuda. Para revertirlo, usá "Gestionar suspensión".
+            </p>
+          ) : penalidad > 0 && (
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"

@@ -93,6 +93,7 @@ export default function HojaDeVida({ jugador, mensualidades, torneos, suspension
               torneos={torneos}
               suspensiones={suspensiones}
               onJugadorUpdated={(campos) => { handleUpdate(campos || {}); }}
+              onMensualidadUpdated={onRefresh}
               clubConfig={clubConfig}
             />
           )}

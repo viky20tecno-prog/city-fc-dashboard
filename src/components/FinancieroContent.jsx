@@ -213,7 +213,10 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
           )}
           <div>
             <label className="block text-[10px] text-[var(--text-sec)] mb-1">Estado</label>
-            <select className={INPUT_SM} value={form.estado} onChange={e => setForm(f => ({ ...f, estado: e.target.value }))}>
+            <select className={INPUT_SM} value={form.estado} onChange={e => {
+              const estado = e.target.value;
+              setForm(f => estado === 'AL_DIA' ? { ...f, estado, valor_pagado: f.valor_oficial } : { ...f, estado });
+            }}>
               <option value="AL_DIA">AL_DIA</option>
               <option value="PENDIENTE">PENDIENTE</option>
               <option value="PARCIAL">PARCIAL</option>

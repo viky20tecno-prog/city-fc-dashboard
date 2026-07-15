@@ -83,6 +83,14 @@ function SuspendidoBadge({ motivo, detalle, cancelada }) {
 
 const MESES_LABEL = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
+// AL_DIA implica pagado = oficial; PENDIENTE/MORA implican pagado = 0 (nada
+// pagado). PARCIAL no tiene un monto único correcto — lo define el admin.
+function valorPagadoSegunEstado(estado, valorOficial, valorPagadoActual) {
+  if (estado === 'AL_DIA') return valorOficial;
+  if (estado === 'PENDIENTE' || estado === 'MORA') return 0;
+  return valorPagadoActual;
+}
+
 function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub = 0 }) {
   const [editando, setEditando] = useState(false);
   const [guardando, setGuardando] = useState(false);
@@ -142,9 +150,9 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
       }
       const body = {
         valor_oficial: form.valor_oficial,
-        // Si queda AL_DIA, el pagado siempre iguala al oficial — sin importar si el
-        // dropdown ya venía en AL_DIA al abrir el editor (onChange no dispara en ese caso).
-        valor_pagado:  form.estado === 'AL_DIA' ? form.valor_oficial : form.valor_pagado,
+        // Se recalcula acá (no solo en el onChange del selector) porque si el
+        // dropdown ya abría con este estado preseleccionado, onChange nunca dispara.
+        valor_pagado:  valorPagadoSegunEstado(form.estado, form.valor_oficial, form.valor_pagado),
         estado:        form.estado,
         ...(form.anular_penalidad ? { penalidad: 0 } : {}),
       };
@@ -217,7 +225,7 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
             <label className="block text-[10px] text-[var(--text-sec)] mb-1">Estado</label>
             <select className={INPUT_SM} value={form.estado} onChange={e => {
               const estado = e.target.value;
-              setForm(f => estado === 'AL_DIA' ? { ...f, estado, valor_pagado: f.valor_oficial } : { ...f, estado });
+              setForm(f => ({ ...f, estado, valor_pagado: valorPagadoSegunEstado(estado, f.valor_oficial, f.valor_pagado) }));
             }}>
               <option value="AL_DIA">AL_DIA</option>
               <option value="PENDIENTE">PENDIENTE</option>

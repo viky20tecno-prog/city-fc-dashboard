@@ -1729,7 +1729,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {['Dashboard completo','Gestión de jugadores','Recordatorios de cobro automáticos','Carnet digital QR','Inscripciones digitales','Finanzas y estadísticas','Soporte por WhatsApp'].map(label => (
+                {['Dashboard completo','Gestión de jugadores','Recordatorios de cobro listos en 1 clic','Carnet digital QR','Inscripciones digitales','Finanzas y estadísticas','Soporte por WhatsApp'].map(label => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <CheckCircle size={13} color="#00D084" style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)' }}>{label}</span>
@@ -1755,7 +1755,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {[[true,'Dashboard completo'],[true,'Gestión de jugadores'],[true,'Pagos manuales y mora'],[true,'Carnet digital'],[true,'Inscripciones digitales'],[true,'Exportación CSV/PDF'],[false,'Recordatorios de cobro automáticos'],[false,'Finanzas y estadísticas']].map(([on, label]) => (
+                {[[true,'Dashboard completo'],[true,'Gestión de jugadores'],[true,'Pagos manuales y mora'],[true,'Carnet digital'],[true,'Inscripciones digitales'],[true,'Exportación CSV/PDF'],[true,'Recordatorios de cobro listos en 1 clic'],[false,'Finanzas y estadísticas']].map(([on, label]) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9, opacity: on ? 1 : 0.28 }}>
                     <CheckCircle size={13} color={on ? '#00D084' : '#4B5563'} style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 12, color: on ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.35)' }}>{label}</span>
@@ -1789,7 +1789,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {[[true,'Todo Starter'],[true,'Recordatorios de cobro automáticos'],[true,'Finanzas e ingresos/gastos'],[true,'Uniformes y equipamiento'],[true,'Estadísticas avanzadas'],[true,'Automatizaciones'],[true,'Reportes ejecutivos'],[true,'Soporte prioritario']].map(([, label]) => (
+                {[[true,'Todo Starter'],[true,'Finanzas e ingresos/gastos'],[true,'Uniformes y equipamiento'],[true,'Estadísticas avanzadas'],[true,'Automatizaciones'],[true,'Reportes ejecutivos'],[true,'Soporte prioritario']].map(([, label]) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <CheckCircle size={13} color="#00D084" style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)' }}>{label}</span>

@@ -214,8 +214,12 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
                   onChange={e => setForm(f => ({ ...f, valor_oficial: parseFloat(e.target.value) || 0 }))} />
               </div>
               <div>
-                <label className="block text-[10px] text-[var(--text-sec)] mb-1">Valor pagado</label>
-                <input type="number" className={INPUT_SM} value={form.valor_pagado}
+                <label className="block text-[10px] text-[var(--text-sec)] mb-1">
+                  Valor pagado{form.estado !== 'PARCIAL' ? ' (según estado)' : ''}
+                </label>
+                <input type="number" className={`${INPUT_SM} ${form.estado !== 'PARCIAL' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  value={form.valor_pagado}
+                  disabled={form.estado !== 'PARCIAL'}
                   onFocus={e => e.target.select()}
                   onChange={e => setForm(f => ({ ...f, valor_pagado: parseFloat(e.target.value) || 0 }))} />
               </div>

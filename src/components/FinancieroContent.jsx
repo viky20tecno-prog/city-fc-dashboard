@@ -142,7 +142,9 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
       }
       const body = {
         valor_oficial: form.valor_oficial,
-        valor_pagado:  form.valor_pagado,
+        // Si queda AL_DIA, el pagado siempre iguala al oficial — sin importar si el
+        // dropdown ya venía en AL_DIA al abrir el editor (onChange no dispara en ese caso).
+        valor_pagado:  form.estado === 'AL_DIA' ? form.valor_oficial : form.valor_pagado,
         estado:        form.estado,
         ...(form.anular_penalidad ? { penalidad: 0 } : {}),
       };

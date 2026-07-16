@@ -1438,7 +1438,7 @@ export default function LandingPage() {
               Reduce drásticamente el trabajo manual de admins y coordinadores sin contratar más personal.
             </p>
             <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, marginBottom: 28 }}>
-              ZenSports responde preguntas, confirma pagos y valida inscripciones automáticamente por WhatsApp. Y te prepara cada recordatorio de cobro listo para enviar con un clic. Sin hojas de cálculo. Sin escribir mensajes de cero.
+              ZenSports responde preguntas por WhatsApp y lee automáticamente cada comprobante de pago que te mandan tus jugadores — vos solo confirmás con un clic desde Conciliación. Y te prepara cada recordatorio de cobro listo para enviar. Sin hojas de cálculo. Sin escribir mensajes de cero.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
               {[
@@ -1790,7 +1790,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {[[true,'Todo Starter'],[true,'Finanzas e ingresos/gastos'],[true,'Uniformes y equipamiento'],[true,'Estadísticas avanzadas'],[true,'Automatizaciones'],[true,'Reportes ejecutivos'],[true,'Soporte prioritario']].map(([, label]) => (
+                {[[true,'Todo Starter'],[true,'Finanzas e ingresos/gastos'],[true,'Uniformes y equipamiento'],[true,'Gestión de torneos'],[true,'Soporte prioritario']].map(([, label]) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <CheckCircle size={13} color="#00D084" style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)' }}>{label}</span>
@@ -1819,7 +1819,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 22 }}>
-                {['Todo Pro','IA WhatsApp avanzada','Analytics premium','Multi sede','Roles avanzados','Soporte VIP','Capacitación premium','Acceso beta features'].map(label => (
+                {['Todo Pro','Conciliación bancaria','Jugadores y administradores ilimitados','Soporte VIP','Capacitación personalizada'].map(label => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <CheckCircle size={13} color="#00D084" style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>{label}</span>
@@ -1953,7 +1953,7 @@ export default function LandingPage() {
             },
             {
               q: '¿El bot de WhatsApp reemplaza a mi administrador?',
-              a: 'Lo complementa. El bot responde preguntas y confirma pagos automáticamente. Para el cobro, te prepara cada recordatorio — vos das el envío final con un clic, así protegemos tu número de WhatsApp.',
+              a: 'Lo complementa. El bot responde preguntas y lee cada comprobante de pago automáticamente, dejándolo listo para que lo confirmes con un clic. Para el cobro, te prepara cada recordatorio — vos das el envío final con un clic, así protegemos tu número de WhatsApp.',
             },
           ].map(({ q, a }, i) => (
             <FaqItem key={i} q={q} a={a} delay={i * 50} />

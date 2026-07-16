@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { MessageSquarePlus, Pencil, Trash2, ToggleLeft, ToggleRight, Plus, X, QrCode, Send, Check, Search } from 'lucide-react';
+import { MessageSquarePlus, Pencil, Trash2, ToggleLeft, ToggleRight, Plus, X, QrCode, Send, Check, Search, Copy } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
 
@@ -45,6 +45,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [ecError, setEcError] = useState('');
   const [ecFiltro, setEcFiltro] = useState('');
   const [ecToast, setEcToast] = useState('');
+  const [plantillaToast, setPlantillaToast] = useState('');
 
   const authHeaders = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -125,6 +126,20 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
       headers: await authHeaders(),
     });
     load();
+  };
+
+  // No hay envío automático de plantillas de evento (se quitó por riesgo de baneo
+  // de WhatsApp, ver PlantillasMensajes/plantillas.js) — esto le da al admin al
+  // menos una forma de un clic de llevarse el texto a su WhatsApp y completar las
+  // variables ({nombre}, {dia}, {lugar}...) a mano antes de pegarlo.
+  const copiarPlantilla = async p => {
+    try {
+      await navigator.clipboard.writeText(p.mensaje);
+      setPlantillaToast(`Mensaje de "${p.nombre}" copiado — completa las variables y pegalo en WhatsApp`);
+    } catch {
+      setPlantillaToast('No se pudo copiar automáticamente — seleccioná el texto desde "Editar"');
+    }
+    setTimeout(() => setPlantillaToast(''), 6000);
   };
 
   const insertVar = key => {
@@ -320,6 +335,12 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
         </div>
       </div>
 
+      {plantillaToast && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium bg-[rgba(37,211,102,0.10)] border border-[rgba(37,211,102,0.25)] text-[#25D366] mb-4">
+          📋 {plantillaToast}
+        </div>
+      )}
+
       {/* Banner límite */}
       {limitado && (
         <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 mb-4 text-amber-300 text-sm">
@@ -373,6 +394,10 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
 
                 <div className="flex flex-col items-end gap-2 flex-shrink-0">
                   <div className="flex items-center gap-0.5">
+                    <button onClick={() => copiarPlantilla(p)} title="Copiar mensaje"
+                      className="p-1.5 rounded-lg hover:bg-[rgba(37,211,102,0.12)] text-[var(--text-sec)] hover:text-[#25D366] transition cursor-pointer">
+                      <Copy size={14} />
+                    </button>
                     <button onClick={() => toggleActiva(p)} title={p.activa ? 'Pausar' : 'Activar'}
                       className="p-1.5 rounded-lg hover:bg-[var(--cc12)] transition cursor-pointer"
                       style={{ color: p.activa ? color : 'var(--text-mut)' }}>

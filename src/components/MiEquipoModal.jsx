@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import { X, Plus, Trash2, Loader2, Copy, Check, UserCheck, ShieldOff, AlertTriangle, Phone } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { X, Plus, Trash2, Loader2, Copy, Check, UserCheck, ShieldOff, AlertTriangle, Phone, ChevronDown } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
+import { PAISES_TEL } from '../lib/paises';
 
 const ROLE_LABELS = {
   ADMIN:      { label: 'Admin',      color: 'text-[var(--cc)] bg-[var(--cc12)] border-[var(--cc)]/20' },
@@ -9,6 +10,60 @@ const ROLE_LABELS = {
 };
 
 const INPUT = 'w-full bg-[var(--bg-surface)] border border-[var(--cc20)] focus:border-[var(--cc)] text-[var(--text-pri)] placeholder-[var(--text-mut)] rounded-lg px-3 py-2.5 text-sm outline-none transition-colors';
+
+function parsePhone(full) {
+  const digits = String(full || '').replace(/\D/g, '');
+  for (const c of [...PAISES_TEL].sort((a, b) => b.code.length - a.code.length)) {
+    if (digits.startsWith(c.code) && digits.length > c.code.length) {
+      return { code: c.code, local: digits.slice(c.code.length) };
+    }
+  }
+  return { code: '57', local: digits };
+}
+
+function CountryPicker({ code, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const sel = PAISES_TEL.find(p => p.code === code) || PAISES_TEL[0];
+
+  useEffect(() => {
+    if (!open) return;
+    function onDoc(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative shrink-0" style={{ width: 90 }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-1 px-2 py-2.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-sm text-[var(--text-pri)] cursor-pointer"
+      >
+        <span style={{ fontSize: 18, lineHeight: 1 }}>{sel.flag}</span>
+        <span className="text-xs text-[var(--text-mut)]">+{sel.code}</span>
+        <ChevronDown size={10} className="ml-auto shrink-0 text-[var(--text-mut)]" />
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 rounded-lg border border-[var(--cc20)] overflow-auto"
+             style={{ background: 'var(--bg-card)', boxShadow: '0 12px 32px rgba(0,0,0,0.6)', maxHeight: 240, width: 200 }}>
+          {PAISES_TEL.map(p => (
+            <button
+              key={p.code}
+              type="button"
+              onClick={() => { onChange(p.code); setOpen(false); }}
+              className={`flex items-center gap-2 w-full px-3 py-1.5 text-left text-xs border-none cursor-pointer hover:bg-white/5 ${p.code === code ? 'bg-white/10' : 'bg-transparent'}`}
+            >
+              <span style={{ fontSize: 16, lineHeight: 1 }}>{p.flag}</span>
+              <span className="text-[var(--text-mut)] shrink-0">+{p.code}</span>
+              <span className="text-[var(--text-sec)] truncate">{p.nombre || ''}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function MiEquipoModal({ clubId, onClose }) {
   const [members,   setMembers]   = useState([]);
@@ -211,13 +266,22 @@ export default function MiEquipoModal({ clubId, onClose }) {
                 <label className="block text-xs text-[var(--text-sec)] mb-1">
                   Celular WhatsApp <span className="text-[var(--text-mut)]">(para bot WA)</span>
                 </label>
-                <input
-                  type="tel"
-                  value={newMember.celular}
-                  onChange={(e) => setNewMember(p => ({ ...p, celular: e.target.value.replace(/\D/g, '') }))}
-                  placeholder="Ej: 3001234567"
-                  className={INPUT}
-                />
+                <div className="flex gap-1.5">
+                  <CountryPicker
+                    code={parsePhone(newMember.celular).code}
+                    onChange={(c) => setNewMember(p => ({ ...p, celular: c + parsePhone(p.celular).local }))}
+                  />
+                  <input
+                    type="tel"
+                    value={parsePhone(newMember.celular).local}
+                    onChange={(e) => {
+                      const local = e.target.value.replace(/\D/g, '');
+                      setNewMember(p => ({ ...p, celular: parsePhone(p.celular).code + local }));
+                    }}
+                    placeholder="Ej: 3001234567"
+                    className={INPUT + ' flex-1'}
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-xs text-[var(--text-sec)] mb-1">Rol</label>

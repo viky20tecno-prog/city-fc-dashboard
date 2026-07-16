@@ -372,7 +372,7 @@ function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, 
 }
 
 function SeccionPedidoUniforme({ cedula }) {
-  const [pedido, setPedido]     = useState(null);
+  const [pedidos, setPedidos]   = useState([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
@@ -380,18 +380,16 @@ function SeccionPedidoUniforme({ cedula }) {
       .then(r => r.json())
       .then(data => {
         if (data.success) {
-          const encontrado = (data.data || []).find(p => String(p.cedula) === String(cedula));
-          setPedido(encontrado || null);
+          // Un jugador puede tener más de un pedido (el suyo propio + el de
+          // cada familiar, que comparte su cédula) — antes solo se mostraba
+          // el primero que encontraba y el resto quedaba invisible acá.
+          const encontrados = (data.data || []).filter(p => String(p.cedula) === String(cedula));
+          setPedidos(encontrados);
         }
       })
       .catch(console.error)
       .finally(() => setCargando(false));
   }, [cedula]);
-
-  const cfg    = pedido ? (ESTADO_PEDIDO[pedido.estado] || ESTADO_PEDIDO.PENDIENTE) : null;
-  const prendas = pedido?.prendas
-    ? pedido.prendas.split(',').map(s => s.trim()).filter(Boolean)
-    : [];
 
   return (
     <div>
@@ -404,43 +402,78 @@ function SeccionPedidoUniforme({ cedula }) {
           <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-sm">Cargando pedido...</span>
         </div>
-      ) : !pedido ? (
+      ) : pedidos.length === 0 ? (
         <EmptySection texto="Sin pedido de uniforme registrado" />
       ) : (
-        <div className="bg-[var(--bg-surface)] border border-[var(--bg-surface)] rounded-xl p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.color}`}>
-              {pedido.estado === 'PENDIENTE' && <Clock className="w-3 h-3" />}
-              {pedido.estado === 'PAGADO'    && <CheckCircle className="w-3 h-3" />}
-              {pedido.estado === 'ENTREGADO' && <Package className="w-3 h-3" />}
-              {cfg.label}
-            </span>
-            <span className="text-sm font-bold text-[var(--cc)]">{formatCOP(pedido.total)}</span>
-          </div>
-          {prendas.length > 0 && (
-            <div>
-              <p className="text-xs text-[var(--text-sec)] mb-1.5">Prendas</p>
-              <div className="flex flex-wrap gap-1.5">
-                {prendas.map((p, i) => (
-                  <span key={i} className="px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--bg-surface)] text-xs text-[var(--text-pri)]">{p}</span>
-                ))}
+        <div className="space-y-3">
+          {pedidos.map(pedido => {
+            const cfg = ESTADO_PEDIDO[pedido.estado] || ESTADO_PEDIDO.PENDIENTE;
+            const prendasDetalle = pedido.prendas_detalle || [];
+            const prendasPlano = pedido.prendas
+              ? pedido.prendas.split(',').map(s => s.trim()).filter(Boolean)
+              : [];
+            return (
+              <div key={pedido.id} className="bg-[var(--bg-surface)] border border-[var(--bg-surface)] rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {pedido.tipo && pedido.tipo !== 'Jugador' && (
+                      <span className="px-2 py-0.5 rounded-lg text-[10px] font-medium bg-[rgba(198,120,255,0.12)] text-[#C678FF] border border-[#C678FF]/20">{pedido.tipo}</span>
+                    )}
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.color}`}>
+                      {pedido.estado === 'PENDIENTE' && <Clock className="w-3 h-3" />}
+                      {pedido.estado === 'PAGADO'    && <CheckCircle className="w-3 h-3" />}
+                      {pedido.estado === 'ENTREGADO' && <Package className="w-3 h-3" />}
+                      {cfg.label}
+                    </span>
+                  </div>
+                  <span className="text-sm font-bold text-[var(--cc)]">{formatCOP(pedido.total)}</span>
+                </div>
+                {prendasDetalle.length > 0 ? (
+                  <div>
+                    <p className="text-xs text-[var(--text-sec)] mb-1.5">Prendas</p>
+                    <div className="space-y-1.5">
+                      {prendasDetalle.map(pr => {
+                        const totalItem = (Number(pr.precio_unitario) || 0) * (pr.cantidad || 1);
+                        const saldoItem = totalItem - (Number(pr.valor_pagado) || 0);
+                        return (
+                          <div key={pr.id} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--bg-surface)] text-xs">
+                            <span className="text-[var(--text-pri)]">{pr.nombre}{pr.cantidad > 1 ? ` x${pr.cantidad}` : ''}</span>
+                            <span className="text-[var(--text-sec)]">
+                              {formatCOP(pr.valor_pagado)} / {formatCOP(totalItem)}
+                              {saldoItem > 0 && <span className="text-[#F5A623] ml-1.5">· Saldo {formatCOP(saldoItem)}</span>}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : prendasPlano.length > 0 && (
+                  <div>
+                    <p className="text-xs text-[var(--text-sec)] mb-1.5">Prendas</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {prendasPlano.map((p, i) => (
+                        <span key={i} className="px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--bg-surface)] text-xs text-[var(--text-pri)]">{p}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-3 gap-2 pt-1 border-t border-[var(--bg-surface)]">
+                  <div>
+                    <p className="text-xs text-[var(--text-sec)]">Talla</p>
+                    <p className="text-sm font-semibold text-[var(--text-pri)]">{pedido.talla || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[var(--text-sec)]">Número</p>
+                    <p className="text-sm font-semibold text-[var(--text-pri)] font-mono">#{pedido.numero_estampar || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[var(--text-sec)]">Estampa</p>
+                    <p className="text-sm font-semibold text-[var(--text-pri)] truncate">{pedido.nombre_estampar || '—'}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
-          <div className="grid grid-cols-3 gap-2 pt-1 border-t border-[var(--bg-surface)]">
-            <div>
-              <p className="text-xs text-[var(--text-sec)]">Talla</p>
-              <p className="text-sm font-semibold text-[var(--text-pri)]">{pedido.talla || '—'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-[var(--text-sec)]">Número</p>
-              <p className="text-sm font-semibold text-[var(--text-pri)] font-mono">#{pedido.numero_estampar || '—'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-[var(--text-sec)]">Estampa</p>
-              <p className="text-sm font-semibold text-[var(--text-pri)] truncate">{pedido.nombre_estampar || '—'}</p>
-            </div>
-          </div>
+            );
+          })}
         </div>
       )}
     </div>

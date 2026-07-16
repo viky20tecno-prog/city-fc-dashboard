@@ -280,19 +280,40 @@ function Resultado({ datos, color, onNuevaBusqueda }) {
             {uniformes.map((u, i) => {
               const cfg = UNIFORME_ESTADO[u.estado] || { color: '#9CA3AF', label: u.estado || 'Pendiente' };
               const prendas = u.descripcion ? u.descripcion.split(',').map(p => p.trim()).filter(Boolean) : [];
+              const prendasDetalle = u.prendas_detalle || [];
               return (
                 <div key={u.id || i} style={{ padding: '10px 16px 14px', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: `${cfg.color}18`, border: `1px solid ${cfg.color}40`, borderRadius: 999, padding: '3px 9px', fontSize: 10, fontWeight: 700, color: cfg.color }}>
-                      <span style={{ width: 4, height: 4, borderRadius: '50%', background: cfg.color }} />
-                      {cfg.label}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {u.tipo && u.tipo !== 'Jugador' && (
+                        <span style={{ fontSize: 10, fontWeight: 700, color: '#C678FF', background: 'rgba(198,120,255,0.14)', border: '1px solid rgba(198,120,255,0.3)', borderRadius: 999, padding: '3px 9px' }}>{u.tipo}</span>
+                      )}
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: `${cfg.color}18`, border: `1px solid ${cfg.color}40`, borderRadius: 999, padding: '3px 9px', fontSize: 10, fontWeight: 700, color: cfg.color }}>
+                        <span style={{ width: 4, height: 4, borderRadius: '50%', background: cfg.color }} />
+                        {cfg.label}
+                      </span>
+                    </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: 15, fontWeight: 800, color: '#F59E0B' }}>{fmt(u.valor_oficial)}</div>
                       {u.saldo_pendiente > 0 && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>Saldo: {fmt(u.saldo_pendiente)}</div>}
                     </div>
                   </div>
-                  {prendas.length > 0 && (
+                  {prendasDetalle.length > 0 ? (
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.28)', fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 }}>Prendas</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {prendasDetalle.map(pr => (
+                          <div key={pr.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '5px 9px' }}>
+                            <span style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>{pr.nombre}{pr.cantidad > 1 ? ` x${pr.cantidad}` : ''}</span>
+                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                              {fmt(pr.valor_pagado)} / {fmt(pr.valor)}
+                              {pr.saldo > 0 && <span style={{ color: '#F59E0B', marginLeft: 6 }}>· Saldo {fmt(pr.saldo)}</span>}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : prendas.length > 0 && (
                     <div style={{ marginBottom: 8 }}>
                       <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.28)', fontWeight: 600, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 }}>Prendas</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>

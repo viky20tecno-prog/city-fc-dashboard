@@ -67,6 +67,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   // — Pedidos list —
   const [pedidos, setPedidos] = useState([]);
   const [tabPedidos, setTabPedidos] = useState('PENDIENTE');
+  const [gruposExpandidos, setGruposExpandidos] = useState(() => new Set());
   const [cambiandoEstado, setCambiandoEstado] = useState(null);
   const [generandoPDF, setGenerandoPDF] = useState(false);
   const [pedidoEditando, setPedidoEditando] = useState(null);
@@ -304,6 +305,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
             talla: p.talla,
             numero: p.numero ? p.numero.padStart(3, '0') : '',
             prendas: p.prendas.map(x => (x.cantidad || 1) > 1 ? `${x.nombre} x${x.cantidad}` : x.nombre).join(', '),
+            items: p.prendas.map(x => ({ nombre: x.nombre, cantidad: x.cantidad || 1, precio_unitario: x.precio })),
             total: totalPersona(p),
             club_id: clubId,
           }),
@@ -472,26 +474,75 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   };
 
   // — Abonos —
-  const [pedidoAbonando, setPedidoAbonando] = useState(null);
-  const [montoAbono, setMontoAbono]         = useState('');
-  const [abonoError, setAbonoError]         = useState('');
-  const [guardandoAbono, setGuardandoAbono] = useState(false);
+  const [pedidoAbonando, setPedidoAbonando]     = useState(null);
+  const [montosPorPrenda, setMontosPorPrenda]   = useState({}); // { [prenda_id]: string }
+  const [montoAbonoSimple, setMontoAbonoSimple] = useState(''); // fallback: pedido sin desglose de prendas
+  const [abonoError, setAbonoError]             = useState('');
+  const [guardandoAbono, setGuardandoAbono]     = useState(false);
 
-  const abrirAbono = (pedido) => { setPedidoAbonando(pedido); setMontoAbono(''); setAbonoError(''); };
+  const abrirAbono = (pedido) => {
+    setPedidoAbonando(pedido);
+    setMontosPorPrenda({});
+    setMontoAbonoSimple('');
+    setAbonoError('');
+  };
   const cerrarAbono = () => { setPedidoAbonando(null); setAbonoError(''); };
+
+  // Prendas de este pedido que todavía tienen saldo — si el pedido no tiene
+  // desglose por prenda (no migrado aún, o creado antes de esta función),
+  // esta lista queda vacía y se usa el flujo simple de siempre.
+  const prendasAbonables = (pedidoAbonando?.prendas_detalle || []).filter(pr => {
+    const totalItem = (Number(pr.precio_unitario) || 0) * (pr.cantidad || 1);
+    return totalItem - (Number(pr.valor_pagado) || 0) > 0;
+  });
+  const totalAbonoDiscriminado = Object.values(montosPorPrenda).reduce((s, v) => s + (Number(v) || 0), 0);
 
   const handleGuardarAbono = async () => {
     if (!pedidoAbonando) return;
-    const monto        = Number(montoAbono);
-    const totalPedido   = Number(pedidoAbonando.total) || 0;
-    const yaAbonado     = Number(pedidoAbonando.valor_pagado) || 0;
-    const saldoActual   = totalPedido - yaAbonado;
-    if (!monto || monto <= 0)      { setAbonoError('Ingresá un monto válido.'); return; }
-    if (monto > saldoActual)       { setAbonoError(`El abono no puede superar el saldo pendiente ($${saldoActual.toLocaleString('es-CO')}).`); return; }
+    setAbonoError('');
+    const pedidoId = pedidoAbonando.id ?? pedidoAbonando._id;
+
+    if (prendasAbonables.length > 0) {
+      const abonos = Object.entries(montosPorPrenda)
+        .map(([prenda_id, monto]) => ({ prenda_id, monto: Number(monto) }))
+        .filter(a => a.monto > 0);
+      if (abonos.length === 0) { setAbonoError('Ingresá al menos un monto en alguna prenda.'); return; }
+      for (const a of abonos) {
+        const pr = prendasAbonables.find(p => String(p.id) === String(a.prenda_id));
+        const totalItem = (Number(pr.precio_unitario) || 0) * (pr.cantidad || 1);
+        const saldoItem = totalItem - (Number(pr.valor_pagado) || 0);
+        if (a.monto > saldoItem) {
+          setAbonoError(`El abono a "${pr.nombre}" ($${a.monto.toLocaleString('es-CO')}) supera su saldo pendiente ($${saldoItem.toLocaleString('es-CO')}).`);
+          return;
+        }
+      }
+      setGuardandoAbono(true);
+      try {
+        const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}/abono-prendas?club_id=${getClubId()}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ abonos }),
+        });
+        const data = await res.json();
+        if (res.ok || data.success) { await cargarDatos(); cerrarAbono(); }
+        else setAbonoError(data.error || 'Error registrando el abono');
+      } catch (e) {
+        console.error('[Uniformes] Error registrando abono:', e);
+        setAbonoError('Error de conexión');
+      } finally { setGuardandoAbono(false); }
+      return;
+    }
+
+    // Fallback: pedido sin desglose por prenda todavía — abono simple al total
+    const monto       = Number(montoAbonoSimple);
+    const totalPedido = Number(pedidoAbonando.total) || 0;
+    const yaAbonado    = Number(pedidoAbonando.valor_pagado) || 0;
+    const saldoActual  = totalPedido - yaAbonado;
+    if (!monto || monto <= 0) { setAbonoError('Ingresá un monto válido.'); return; }
+    if (monto > saldoActual)  { setAbonoError(`El abono no puede superar el saldo pendiente ($${saldoActual.toLocaleString('es-CO')}).`); return; }
 
     setGuardandoAbono(true);
     try {
-      const pedidoId = pedidoAbonando.id ?? pedidoAbonando._id;
       const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}?club_id=${getClubId()}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -581,6 +632,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prendas: editForm.prendas.map(p => (p.cantidad || 1) > 1 ? `${p.nombre} x${p.cantidad}` : p.nombre).join(', '),
+          items: editForm.prendas.map(p => ({ nombre: p.nombre, cantidad: p.cantidad || 1, precio_unitario: p.precio })),
           talla: editForm.talla,
           numero: editForm.numero ? editForm.numero.padStart(3, '0') : '',
           nombre_estampar: editForm.nombre_estampar,
@@ -599,6 +651,14 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     if (!iso) return '—';
     try { return new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }); }
     catch { return '—'; }
+  };
+
+  const toggleGrupo = (cedula) => {
+    setGruposExpandidos(prev => {
+      const next = new Set(prev);
+      if (next.has(cedula)) next.delete(cedula); else next.add(cedula);
+      return next;
+    });
   };
 
   // — Shared styles —
@@ -948,30 +1008,48 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           TAB: PEDIDOS
       ══════════════════════════════════════════════ */}
       {tabPrincipal === 'pedidos' && (() => {
-        const pendientes  = sortByName(pedidos.filter(p => p.estado === 'PENDIENTE' || p.estado === 'ABONO'));
-        const pagados     = sortByName(pedidos.filter(p => p.estado === 'PAGADO'));
-        const entregados  = sortByName(pedidos.filter(p => p.estado === 'ENTREGADO'));
-        const vistaActual = tabPedidos === 'PENDIENTE' ? pendientes : tabPedidos === 'PAGADO' ? pagados : entregados;
-        const TAB_CFG = [
-          { key: 'PENDIENTE', label: 'Pendientes', count: pendientes.length, activeClass: 'bg-[rgba(245,166,35,0.12)] text-[#F5A623] border-[#F5A623]/30' },
-          { key: 'PAGADO',    label: 'Pagados',    count: pagados.length,    activeClass: 'bg-[rgba(34,197,94,0.12)] text-green-400 border-green-400/30' },
-          { key: 'ENTREGADO', label: 'Entregados', count: entregados.length, activeClass: 'bg-[var(--cc12)] text-[var(--cc)] border-[var(--cc)]/30' },
-        ];
+        const PRIORIDAD_ESTADO = { PENDIENTE: 4, ABONO: 3, PAGADO: 2, ENTREGADO: 1 };
+        const grupoMatchesTab = (subpedidos, tab) => subpedidos.some(p =>
+          tab === 'PENDIENTE' ? (p.estado === 'PENDIENTE' || p.estado === 'ABONO')
+          : tab === 'PAGADO' ? p.estado === 'PAGADO'
+          : p.estado === 'ENTREGADO'
+        );
 
-        // Resumen por jugador agrupado por cédula y tipo
-        const resumenMap = {};
+        // Agrupar por cédula: un jugador y los pedidos de sus familiares comparten
+        // cédula (los familiares no tienen cédula propia en el sistema) — antes
+        // aparecían como filas sueltas repitiendo el mismo nombre con prendas
+        // distintas; ahora quedan bajo una sola tarjeta expandible.
+        const gruposMap = {};
         pedidos.forEach(p => {
           const key = p.cedula;
-          if (!resumenMap[key]) resumenMap[key] = { nombre: p.nombre, cedula: p.cedula, tipos: {}, total: 0 };
-          const tipo = p.tipo || 'Jugador';
-          resumenMap[key].tipos[tipo] = (resumenMap[key].tipos[tipo] || 0) + Number(p.total || 0);
-          resumenMap[key].total += Number(p.total || 0);
+          if (!gruposMap[key]) gruposMap[key] = { cedula: p.cedula, nombre: null, subpedidos: [] };
+          gruposMap[key].subpedidos.push(p);
+          if ((p.tipo || 'Jugador') === 'Jugador') gruposMap[key].nombre = p.nombre;
         });
-        const resumenLista = Object.values(resumenMap).sort((a, b) => b.total - a.total);
-        const TIPO_STYLE = {
-          'Jugador':           { label: 'Jugador',    color: 'text-[var(--cc)]',  bg: 'bg-[var(--cc12)]' },
-          'Familiar - Hombre': { label: 'Familiar ♂', color: 'text-blue-400',     bg: 'bg-blue-400/10'   },
-          'Familiar - Mujer':  { label: 'Familiar ♀', color: 'text-pink-400',     bg: 'bg-pink-400/10'   },
+        const grupos = Object.values(gruposMap).map(g => {
+          if (!g.nombre) g.nombre = g.subpedidos[0]?.nombre || '—';
+          g.total  = g.subpedidos.reduce((s, p) => s + Number(p.total || 0), 0);
+          g.pagado = g.subpedidos.reduce((s, p) => s + Number(p.valor_pagado || 0), 0);
+          g.saldo  = g.total - g.pagado;
+          g.estado = g.subpedidos.reduce((peor, p) => (PRIORIDAD_ESTADO[p.estado] > PRIORIDAD_ESTADO[peor] ? p.estado : peor), g.subpedidos[0].estado);
+          return g;
+        });
+
+        const pendGrupos = grupos.filter(g => grupoMatchesTab(g.subpedidos, 'PENDIENTE'));
+        const pagGrupos  = grupos.filter(g => grupoMatchesTab(g.subpedidos, 'PAGADO'));
+        const entGrupos  = grupos.filter(g => grupoMatchesTab(g.subpedidos, 'ENTREGADO'));
+        const TAB_CFG = [
+          { key: 'PENDIENTE', label: 'Pendientes', count: pendGrupos.length, activeClass: 'bg-[rgba(245,166,35,0.12)] text-[#F5A623] border-[#F5A623]/30' },
+          { key: 'PAGADO',    label: 'Pagados',    count: pagGrupos.length,  activeClass: 'bg-[rgba(34,197,94,0.12)] text-green-400 border-green-400/30' },
+          { key: 'ENTREGADO', label: 'Entregados', count: entGrupos.length,  activeClass: 'bg-[var(--cc12)] text-[var(--cc)] border-[var(--cc)]/30' },
+        ];
+        const gruposVista = sortByName(tabPedidos === 'PENDIENTE' ? pendGrupos : tabPedidos === 'PAGADO' ? pagGrupos : entGrupos);
+
+        const ESTADO_BADGE = {
+          PENDIENTE: 'bg-[rgba(245,166,35,0.12)] text-[#F5A623] border-[#F5A623]/20',
+          ABONO:     'bg-[rgba(74,158,255,0.12)] text-[#4A9EFF] border-[#4A9EFF]/20',
+          PAGADO:    'bg-[rgba(34,197,94,0.12)] text-green-400 border-green-400/20',
+          ENTREGADO: 'bg-[rgba(34,197,94,0.12)] text-green-400 border-green-400/20',
         };
 
         return (
@@ -988,7 +1066,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 </button>
               ))}
               <div className="ml-auto flex items-center gap-3">
-                <span className="text-xs text-[var(--text-sec)]">{pedidos.length} total</span>
+                <span className="text-xs text-[var(--text-sec)]">{grupos.length} jugador{grupos.length !== 1 ? 'es' : ''} · {pedidos.length} pedido{pedidos.length !== 1 ? 's' : ''}</span>
                 <button onClick={generarPDF} disabled={generandoPDF || pedidos.length === 0}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] text-xs font-medium hover:bg-[var(--cc20)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
@@ -997,146 +1075,140 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
               </div>
             </div>
 
-            {/* Resumen por jugador */}
-            {resumenLista.length > 0 && (
-              <details className="mb-5 group">
-                <summary className="cursor-pointer flex items-center gap-2 text-xs text-[var(--text-sec)] hover:text-[var(--text-pri)] transition-colors select-none list-none mb-0">
-                  <span className="w-4 h-4 flex items-center justify-center rounded border border-[var(--cc20)] text-[10px] group-open:rotate-90 transition-transform">▶</span>
-                  <span className="font-medium">Resumen por jugador</span>
-                  <span className="text-[10px] text-[var(--text-mut)]">({resumenLista.length} jugador{resumenLista.length !== 1 ? 'es' : ''})</span>
-                  <span className="ml-auto text-[var(--cc)] font-semibold">
-                    Total: ${pedidos.reduce((s, p) => s + Number(p.total || 0), 0).toLocaleString('es-CO')}
-                  </span>
-                </summary>
-                <div className="mt-3 space-y-2">
-                  {resumenLista.map(j => (
-                    <div key={j.cedula} className="bg-[var(--bg-surface)] rounded-xl px-4 py-3 border border-[var(--cc20)]">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <span className="text-sm font-semibold text-[var(--text-pri)]">{j.nombre}</span>
-                          <span className="text-xs text-[var(--text-sec)] ml-2">CC {j.cedula}</span>
-                        </div>
-                        <span className="text-sm font-bold text-[var(--cc)]">${j.total.toLocaleString('es-CO')}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(j.tipos).map(([tipo, valor]) => {
-                          const s = TIPO_STYLE[tipo] || { label: tipo, color: 'text-gray-400', bg: 'bg-gray-400/10' };
-                          return (
-                            <span key={tipo} className={`px-2.5 py-1 rounded-lg text-xs font-medium border border-white/5 ${s.bg} ${s.color}`}>
-                              {s.label}: <span className="font-bold">${valor.toLocaleString('es-CO')}</span>
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </details>
-            )}
-
             {pedidos.length === 0 ? (
               <p className="text-center text-sm text-[var(--text-sec)] py-8">Aún no hay pedidos registrados</p>
-            ) : vistaActual.length === 0 ? (
+            ) : gruposVista.length === 0 ? (
               <p className="text-center text-sm text-[var(--text-sec)] py-8">No hay pedidos en este estado</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-max text-sm">
-                  <thead>
-                    <tr className="border-b border-[var(--cc20)]">
-                      {['Cédula','Nombre','Prendas','Estampar','Talla','Número','Total','Fecha','Estado',''].map(h => (
-                        <th key={h} className="text-left py-2 px-3 text-xs text-[var(--text-sec)] font-medium">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {vistaActual.map((p, i) => {
-                      const pid = p.id ?? p._id;
-                      const cargando = cambiandoEstado === pid;
-                      return (
-                        <tr key={i} className="border-b border-[var(--cc20)] hover:bg-[var(--bg-surface)] transition-colors">
-                          <td className="py-2 px-3 text-[var(--text-sec)]">{p.cedula}</td>
-                          <td className="py-2 px-3 text-[var(--text-pri)]">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {p.nombre}
-                              {p.tipo && p.tipo !== 'Jugador' && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[rgba(198,120,255,0.12)] text-[#C678FF] border border-[#C678FF]/20 whitespace-nowrap">{p.tipo}</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-2 px-3 text-[var(--text-pri)] max-w-[180px]">
-                            <span className="block truncate" title={p.prendas || p.prenda}>{p.prendas || p.prenda || '—'}</span>
-                          </td>
-                          <td className="py-2 px-3 text-[var(--text-pri)]">{p.nombre_estampar || '—'}</td>
-                          <td className="py-2 px-3 text-[var(--text-pri)]">{p.talla}</td>
-                          <td className="py-2 px-3 text-[var(--text-pri)] font-mono font-bold">{p.numero_estampar}</td>
-                          <td className="py-2 px-3 text-[var(--cc)] font-semibold">
-                            {p.total ? `$${Number(p.total).toLocaleString('es-CO')}` : '—'}
-                            {p.estado === 'ABONO' && (
-                              <div className="text-[10px] font-normal text-[var(--text-sec)] mt-0.5">
-                                Abonado ${Number(p.valor_pagado || 0).toLocaleString('es-CO')} · Saldo ${(Number(p.total || 0) - Number(p.valor_pagado || 0)).toLocaleString('es-CO')}
+              <div className="space-y-2">
+                {gruposVista.map(g => {
+                  const abierto = gruposExpandidos.has(g.cedula);
+                  return (
+                    <div key={g.cedula} className="rounded-xl border border-[var(--cc20)] overflow-hidden">
+                      {/* Cabecera del grupo: jugador + total consolidado (incl. familiares) */}
+                      <button type="button" onClick={() => toggleGrupo(g.cedula)}
+                        className="w-full flex items-center gap-3 px-4 py-3 bg-[var(--bg-surface)] hover:bg-[var(--bg-app)] transition-colors text-left"
+                      >
+                        <span className={`w-4 h-4 flex items-center justify-center text-[10px] text-[var(--text-mut)] transition-transform shrink-0 ${abierto ? 'rotate-90' : ''}`}>▶</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-semibold text-[var(--text-pri)]">{g.nombre}</span>
+                            <span className="text-xs text-[var(--text-sec)]">CC {g.cedula}</span>
+                            {g.subpedidos.length > 1 && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[rgba(198,120,255,0.12)] text-[#C678FF] border border-[#C678FF]/20">
+                                {g.subpedidos.length} pedidos
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <span className={`px-2 py-1 rounded-lg text-xs font-semibold border shrink-0 ${ESTADO_BADGE[g.estado] || ''}`}>{g.estado}</span>
+                        <div className="text-right w-32 shrink-0">
+                          <p className="text-sm font-bold text-[var(--cc)]">${g.total.toLocaleString('es-CO')}</p>
+                          {g.saldo > 0 && <p className="text-[10px] text-[#F5A623]">Saldo: ${g.saldo.toLocaleString('es-CO')}</p>}
+                        </div>
+                      </button>
+
+                      {/* Detalle expandido: cada sub-pedido (jugador / familiar) con sus prendas */}
+                      {abierto && (
+                        <div className="divide-y divide-[var(--cc20)]">
+                          {g.subpedidos.map((p, i) => {
+                            const pid = p.id ?? p._id;
+                            const cargando = cambiandoEstado === pid;
+                            const prendasDetalle = p.prendas_detalle || [];
+                            return (
+                              <div key={pid ?? i} className="p-4 bg-[var(--bg-card)]">
+                                <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-xs font-semibold text-[var(--text-pri)]">
+                                      {p.tipo && p.tipo !== 'Jugador' ? p.tipo : 'Jugador'}
+                                    </span>
+                                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${ESTADO_BADGE[p.estado] || ''}`}>{p.estado}</span>
+                                    <span className="text-[10px] text-[var(--text-sec)]">{formatFecha(p.created_at)}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    {(p.estado === 'PENDIENTE' || p.estado === 'ABONO') && (
+                                      <button onClick={() => abrirAbono(p)} disabled={cargando} title="Registrar abono"
+                                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#4A9EFF]/30 text-[#4A9EFF] hover:bg-[rgba(74,158,255,0.12)] transition-all text-xs disabled:opacity-50"
+                                      >
+                                        <Plus className="w-3.5 h-3.5" /> Abonar
+                                      </button>
+                                    )}
+                                    {p.estado === 'PAGADO' && (
+                                      <button onClick={() => handleCambiarEstado(p, 'ENTREGADO')} disabled={cargando}
+                                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc)]/30 text-[var(--cc)] hover:bg-[var(--cc12)] transition-all text-xs disabled:opacity-50"
+                                      >
+                                        {cargando ? <Loader className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />} Entregar
+                                      </button>
+                                    )}
+                                    {(p.estado === 'PAGADO' || p.estado === 'ABONO') && (
+                                      <button onClick={() => handleRevertirPago(p)} disabled={cargando} title="Revertir a pendiente"
+                                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] hover:text-[#F5A623] hover:border-[#F5A623]/40 transition-all text-xs disabled:opacity-50"
+                                      >
+                                        {cargando ? <Loader className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />} Revertir
+                                      </button>
+                                    )}
+                                    {p.estado !== 'ENTREGADO' && (
+                                      <button onClick={() => abrirEditar(p)}
+                                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition-all text-xs"
+                                      >
+                                        <Pencil className="w-3.5 h-3.5" /> Editar
+                                      </button>
+                                    )}
+                                    <span className="w-px h-5 bg-[var(--cc20)] mx-0.5" />
+                                    <button onClick={() => handleEliminar(p)} disabled={cargando} title="Eliminar pedido"
+                                      className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/40 transition-all text-xs disabled:opacity-50"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-4 text-xs text-[var(--text-sec)] mb-3">
+                                  <span>Talla: <span className="text-[var(--text-pri)] font-medium">{p.talla || '—'}</span></span>
+                                  <span>Número: <span className="text-[var(--text-pri)] font-mono font-bold">{p.numero_estampar || '—'}</span></span>
+                                  <span>Estampar: <span className="text-[var(--text-pri)] font-medium">{p.nombre_estampar || '—'}</span></span>
+                                </div>
+
+                                {/* Desglose por prenda (si ya está migrado); si no, el resumen plano de siempre */}
+                                {prendasDetalle.length > 0 ? (
+                                  <div className="space-y-1.5">
+                                    {prendasDetalle.map(pr => {
+                                      const totalItem = (Number(pr.precio_unitario) || 0) * (pr.cantidad || 1);
+                                      const saldoItem = totalItem - (Number(pr.valor_pagado) || 0);
+                                      return (
+                                        <div key={pr.id} className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] text-xs">
+                                          <span className="text-[var(--text-pri)]">{pr.nombre}{pr.cantidad > 1 ? ` x${pr.cantidad}` : ''}</span>
+                                          <span className="text-[var(--text-sec)]">
+                                            ${Number(pr.valor_pagado || 0).toLocaleString('es-CO')} / ${totalItem.toLocaleString('es-CO')}
+                                            {saldoItem > 0 && <span className="text-[#F5A623] ml-1.5">· Saldo ${saldoItem.toLocaleString('es-CO')}</span>}
+                                          </span>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-[var(--text-pri)]">{p.prendas || p.prenda || '—'}</p>
+                                )}
+
+                                <div className="flex items-center justify-between mt-3 pt-2 border-t border-[var(--cc20)]">
+                                  <span className="text-xs text-[var(--text-sec)]">Total del pedido</span>
+                                  <span className="text-sm font-bold text-[var(--cc)]">
+                                    ${Number(p.total || 0).toLocaleString('es-CO')}
+                                    {p.estado === 'ABONO' && (
+                                      <span className="text-[10px] font-normal text-[var(--text-sec)] ml-2">
+                                        Abonado ${Number(p.valor_pagado || 0).toLocaleString('es-CO')} · Saldo ${(Number(p.total || 0) - Number(p.valor_pagado || 0)).toLocaleString('es-CO')}
+                                      </span>
+                                    )}
+                                  </span>
+                                </div>
                               </div>
-                            )}
-                          </td>
-                          <td className="py-2 px-3 text-[var(--text-sec)] text-xs">{formatFecha(p.created_at)}</td>
-                          <td className="py-2 px-3">
-                            {p.estado === 'PENDIENTE' && (
-                              <button onClick={() => handleCambiarEstado(p, 'PAGADO')} disabled={cargando}
-                                className="px-2 py-1 rounded-lg text-xs bg-[rgba(245,166,35,0.12)] text-[#F5A623] border border-[#F5A623]/20 hover:bg-[rgba(34,197,94,0.12)] hover:text-green-400 hover:border-green-400/20 transition-all disabled:opacity-50 cursor-pointer"
-                              >{cargando ? '...' : 'PENDIENTE'}</button>
-                            )}
-                            {p.estado === 'ABONO' && (
-                              <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(74,158,255,0.12)] text-[#4A9EFF] border border-[#4A9EFF]/20">ABONO</span>
-                            )}
-                            {p.estado === 'PAGADO' && (
-                              <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(34,197,94,0.12)] text-green-400 border border-green-400/20">PAGADO</span>
-                            )}
-                            {p.estado === 'ENTREGADO' && (
-                              <span className="px-2 py-1 rounded-lg text-xs bg-[rgba(34,197,94,0.12)] text-green-400 border border-green-400/20">ENTREGADO</span>
-                            )}
-                          </td>
-                          <td className="py-2 px-3">
-                            <div className="flex items-center gap-1.5">
-                              {(p.estado === 'PENDIENTE' || p.estado === 'ABONO') && (
-                                <button onClick={() => abrirAbono(p)} disabled={cargando} title="Registrar abono"
-                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#4A9EFF]/30 text-[#4A9EFF] hover:bg-[rgba(74,158,255,0.12)] transition-all text-xs disabled:opacity-50"
-                                >
-                                  <Plus className="w-3.5 h-3.5" /> Abonar
-                                </button>
-                              )}
-                              {p.estado === 'PAGADO' && (
-                                <button onClick={() => handleCambiarEstado(p, 'ENTREGADO')} disabled={cargando}
-                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc)]/30 text-[var(--cc)] hover:bg-[var(--cc12)] transition-all text-xs disabled:opacity-50"
-                                >
-                                  {cargando ? <Loader className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />} Entregar
-                                </button>
-                              )}
-                              {(p.estado === 'PAGADO' || p.estado === 'ABONO') && (
-                                <button onClick={() => handleRevertirPago(p)} disabled={cargando} title="Revertir a pendiente"
-                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] hover:text-[#F5A623] hover:border-[#F5A623]/40 transition-all text-xs disabled:opacity-50"
-                                >
-                                  {cargando ? <Loader className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />} Revertir
-                                </button>
-                              )}
-                              {p.estado !== 'ENTREGADO' && (
-                                <button onClick={() => abrirEditar(p)}
-                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition-all text-xs"
-                                >
-                                  <Pencil className="w-3.5 h-3.5" /> Editar
-                                </button>
-                              )}
-                              <span className="w-px h-5 bg-[var(--cc20)] mx-0.5" />
-                              <button onClick={() => handleEliminar(p)} disabled={cargando} title="Eliminar pedido"
-                                className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/40 transition-all text-xs disabled:opacity-50"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1455,17 +1527,47 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs text-[var(--text-sec)] mb-1.5">Monto a abonar *</label>
-                  <input
-                    type="number"
-                    value={montoAbono}
-                    onChange={e => { setMontoAbono(e.target.value); setAbonoError(''); }}
-                    placeholder="Ej: 50000"
-                    className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
-                    autoFocus
-                  />
-                </div>
+                {prendasAbonables.length > 0 ? (
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs text-[var(--text-sec)]">Monto a abonar por prenda *</label>
+                      <span className="text-xs font-semibold text-[#4A9EFF]">Total: ${totalAbonoDiscriminado.toLocaleString('es-CO')}</span>
+                    </div>
+                    <div className="space-y-2">
+                      {prendasAbonables.map(pr => {
+                        const totalItem = (Number(pr.precio_unitario) || 0) * (pr.cantidad || 1);
+                        const saldoItem = totalItem - (Number(pr.valor_pagado) || 0);
+                        return (
+                          <div key={pr.id} className="flex items-center gap-2 p-2.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)]">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-[var(--text-pri)] truncate">{pr.nombre}{pr.cantidad > 1 ? ` x${pr.cantidad}` : ''}</p>
+                              <p className="text-[10px] text-[var(--text-sec)]">Saldo: ${saldoItem.toLocaleString('es-CO')}</p>
+                            </div>
+                            <input
+                              type="number"
+                              value={montosPorPrenda[pr.id] || ''}
+                              onChange={e => { setMontosPorPrenda(m => ({ ...m, [pr.id]: e.target.value })); setAbonoError(''); }}
+                              placeholder="0"
+                              className="w-28 px-2.5 py-1.5 rounded-lg bg-[var(--bg-app)] border border-[var(--cc20)] text-sm text-[var(--text-pri)] text-right focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-xs text-[var(--text-sec)] mb-1.5">Monto a abonar *</label>
+                    <input
+                      type="number"
+                      value={montoAbonoSimple}
+                      onChange={e => { setMontoAbonoSimple(e.target.value); setAbonoError(''); }}
+                      placeholder="Ej: 50000"
+                      className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                      autoFocus
+                    />
+                  </div>
+                )}
 
                 {abonoError && (
                   <div className="flex items-start gap-2 p-2.5 rounded-lg bg-[rgba(255,94,94,0.1)] border border-[#FF5E5E]/20">

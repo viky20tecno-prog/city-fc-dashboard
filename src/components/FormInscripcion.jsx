@@ -15,26 +15,8 @@ import {
 import { API_BASE_URL } from '../config';
 import { useClubConfigPublic } from '../hooks/useClubConfigPublic';
 import PoliticaPrivacidadModal from './PoliticaPrivacidadModal';
-import { PAISES_NACIMIENTO } from '../lib/paises';
+import { PAISES_NACIMIENTO, PAISES_TEL } from '../lib/paises';
 import { normalizarCategorias } from '../lib/categorias';
-
-const PAISES_TEL = [
-  { code: '57',  flag: '🇨🇴', label: '+57 Colombia' },
-  { code: '1',   flag: '🇺🇸', label: '+1  EE.UU./CA' },
-  { code: '52',  flag: '🇲🇽', label: '+52 México' },
-  { code: '34',  flag: '🇪🇸', label: '+34 España' },
-  { code: '54',  flag: '🇦🇷', label: '+54 Argentina' },
-  { code: '56',  flag: '🇨🇱', label: '+56 Chile' },
-  { code: '51',  flag: '🇵🇪', label: '+51 Perú' },
-  { code: '593', flag: '🇪🇨', label: '+593 Ecuador' },
-  { code: '58',  flag: '🇻🇪', label: '+58 Venezuela' },
-  { code: '55',  flag: '🇧🇷', label: '+55 Brasil' },
-  { code: '598', flag: '🇺🇾', label: '+598 Uruguay' },
-  { code: '595', flag: '🇵🇾', label: '+595 Paraguay' },
-  { code: '591', flag: '🇧🇴', label: '+591 Bolivia' },
-  { code: '506', flag: '🇨🇷', label: '+506 Costa Rica' },
-  { code: '507', flag: '🇵🇦', label: '+507 Panamá' },
-];
 
 function CountryCodePicker({ value, onChange }) {
   const [open, setOpen] = useState(false);
@@ -72,7 +54,7 @@ function CountryCodePicker({ value, onChange }) {
         }}>
           {PAISES_TEL.map(p => (
             <button
-              key={p.code}
+              key={p.code + p.nombre}
               type="button"
               onClick={() => { onChange(p.code); setOpen(false); }}
               style={{
@@ -85,7 +67,7 @@ function CountryCodePicker({ value, onChange }) {
               <span style={{ fontSize: 18, lineHeight: 1 }}>{p.flag}</span>
               <span style={{ color: 'var(--text-sec)', fontSize: 12 }}>+{p.code}</span>
               <span style={{ fontSize: 12, color: 'var(--text-pri)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                {p.label.split(' ').slice(1).join(' ')}
+                {p.nombre}
               </span>
             </button>
           ))}

@@ -8,7 +8,7 @@ import { supabase } from '../../lib/supabase';
 import { authFetch } from '../../lib/authFetch';
 import { API_BASE_URL } from '../../config';
 import { getClubId } from '../../services/api';
-import { PAISES_NACIMIENTO } from '../../lib/paises';
+import { PAISES_NACIMIENTO, PAISES_TEL } from '../../lib/paises';
 import { normalizarCategorias } from '../../lib/categorias';
 
 const POSICIONES_POR_DEPORTE = {
@@ -36,24 +36,6 @@ function Seccion({ titulo, children }) {
 }
 
 const INPUT_CLS = "w-full px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]/50 placeholder-[var(--text-mut)]";
-
-const PAISES_TEL = [
-  { code: '57',  flag: '🇨🇴', label: '+57',  nombre: 'Colombia'    },
-  { code: '1',   flag: '🇺🇸', label: '+1',   nombre: 'EE.UU.'      },
-  { code: '52',  flag: '🇲🇽', label: '+52',  nombre: 'México'      },
-  { code: '34',  flag: '🇪🇸', label: '+34',  nombre: 'España'      },
-  { code: '54',  flag: '🇦🇷', label: '+54',  nombre: 'Argentina'   },
-  { code: '56',  flag: '🇨🇱', label: '+56',  nombre: 'Chile'       },
-  { code: '51',  flag: '🇵🇪', label: '+51',  nombre: 'Perú'        },
-  { code: '593', flag: '🇪🇨', label: '+593', nombre: 'Ecuador'     },
-  { code: '58',  flag: '🇻🇪', label: '+58',  nombre: 'Venezuela'   },
-  { code: '55',  flag: '🇧🇷', label: '+55',  nombre: 'Brasil'      },
-  { code: '598', flag: '🇺🇾', label: '+598', nombre: 'Uruguay'     },
-  { code: '595', flag: '🇵🇾', label: '+595', nombre: 'Paraguay'    },
-  { code: '591', flag: '🇧🇴', label: '+591', nombre: 'Bolivia'     },
-  { code: '506', flag: '🇨🇷', label: '+506', nombre: 'Costa Rica'  },
-  { code: '507', flag: '🇵🇦', label: '+507', nombre: 'Panamá'      },
-];
 
 function parsePhone(full) {
   const digits = String(full || '').replace(/\D/g, '');
@@ -85,7 +67,7 @@ function CountryPicker({ code, onChange }) {
         className="w-full flex items-center gap-1 px-2 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] cursor-pointer"
       >
         <span style={{ fontSize: 18, lineHeight: 1 }}>{sel.flag}</span>
-        <span className="text-xs text-[var(--text-mut)]">{sel.label}</span>
+        <span className="text-xs text-[var(--text-mut)]">+{sel.code}</span>
         <ChevronDown size={10} className="ml-auto shrink-0 text-[var(--text-mut)]" />
       </button>
       {open && (
@@ -99,7 +81,7 @@ function CountryPicker({ code, onChange }) {
               className={`flex items-center gap-2 w-full px-3 py-1.5 text-left text-xs border-none cursor-pointer hover:bg-white/5 ${p.code === code ? 'bg-white/10' : 'bg-transparent'}`}
             >
               <span style={{ fontSize: 16, lineHeight: 1 }}>{p.flag}</span>
-              <span className="text-[var(--text-mut)] shrink-0">{p.label}</span>
+              <span className="text-[var(--text-mut)] shrink-0">+{p.code}</span>
               <span className="text-[var(--text-sec)] truncate">{p.nombre || ''}</span>
             </button>
           ))}

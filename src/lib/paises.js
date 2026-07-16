@@ -1,3 +1,36 @@
+// Códigos de marcación telefónica — reutiliza la cobertura de países de PAISES_NACIMIENTO
+// para que un jugador nacido en un país listado siempre pueda elegir su código de celular.
+export const PAISES_TEL = [
+  { code: '57',  flag: '🇨🇴', nombre: 'Colombia'         },
+  { code: '52',  flag: '🇲🇽', nombre: 'México'           },
+  { code: '54',  flag: '🇦🇷', nombre: 'Argentina'        },
+  { code: '51',  flag: '🇵🇪', nombre: 'Perú'             },
+  { code: '56',  flag: '🇨🇱', nombre: 'Chile'            },
+  { code: '593', flag: '🇪🇨', nombre: 'Ecuador'          },
+  { code: '58',  flag: '🇻🇪', nombre: 'Venezuela'        },
+  { code: '595', flag: '🇵🇾', nombre: 'Paraguay'         },
+  { code: '598', flag: '🇺🇾', nombre: 'Uruguay'          },
+  { code: '591', flag: '🇧🇴', nombre: 'Bolivia'          },
+  { code: '506', flag: '🇨🇷', nombre: 'Costa Rica'       },
+  { code: '502', flag: '🇬🇹', nombre: 'Guatemala'        },
+  { code: '503', flag: '🇸🇻', nombre: 'El Salvador'      },
+  { code: '504', flag: '🇭🇳', nombre: 'Honduras'         },
+  { code: '505', flag: '🇳🇮', nombre: 'Nicaragua'        },
+  { code: '507', flag: '🇵🇦', nombre: 'Panamá'           },
+  { code: '53',  flag: '🇨🇺', nombre: 'Cuba'             },
+  { code: '509', flag: '🇭🇹', nombre: 'Haití'            },
+  { code: '592', flag: '🇬🇾', nombre: 'Guyana'           },
+  { code: '597', flag: '🇸🇷', nombre: 'Surinam'          },
+  { code: '34',  flag: '🇪🇸', nombre: 'España'           },
+  { code: '351', flag: '🇵🇹', nombre: 'Portugal'         },
+  { code: '55',  flag: '🇧🇷', nombre: 'Brasil'           },
+  { code: '1',   flag: '🇺🇸', nombre: 'EE.UU. / Canadá / Rep. Dominicana' },
+  { code: '44',  flag: '🇬🇧', nombre: 'Reino Unido'      },
+  { code: '33',  flag: '🇫🇷', nombre: 'Francia'          },
+  { code: '39',  flag: '🇮🇹', nombre: 'Italia'           },
+  { code: '49',  flag: '🇩🇪', nombre: 'Alemania'         },
+];
+
 export const PAISES_NACIMIENTO = [
   { codigo: '57',  bandera: '🇨🇴', nombre: 'Colombia'         },
   { codigo: '52',  bandera: '🇲🇽', nombre: 'México'           },

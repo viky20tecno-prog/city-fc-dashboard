@@ -296,15 +296,24 @@ function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, 
   if (!items.length) return <EmptySection texto="Sin datos de mensualidades" />;
 
   const anioActual = new Date().getFullYear();
+  const mesActual  = new Date().getMonth() + 1;
 
   const isMesSuspendido = (numero_mes) => {
     const n = parseInt(numero_mes);
     return suspensiones.some(s => s.activa && s.anio === anioActual && s.mes_inicio <= n && n <= s.mes_fin);
   };
 
+  // Solo cuenta como pendiente lo ya causado (mes actual o anterior) — los meses
+  // futuros del año aún no se han facturado y no deben sumar al saldo pendiente.
+  const yaCausado = (m) => {
+    const anioM = parseInt(m.anio) || anioActual;
+    const mesM  = parseInt(m.numero_mes);
+    return anioM < anioActual || (anioM === anioActual && mesM <= mesActual);
+  };
+
   const totalPagado    = items.reduce((s, m) => s + (parseFloat(m.valor_pagado) || 0), 0);
   const totalPendiente = items.reduce((s, m) =>
-    s + (isMesSuspendido(m.numero_mes) ? 0 : (parseFloat(m.saldo_pendiente) || 0)), 0);
+    s + (!yaCausado(m) || isMesSuspendido(m.numero_mes) ? 0 : (parseFloat(m.saldo_pendiente) || 0)), 0);
   const totalSusp = items.filter(m => isMesSuspendido(m.numero_mes)).length;
 
   const getSuspension = (numero_mes) => {

@@ -2,6 +2,9 @@ node_modules
 dist
 .env
 .env.local
+.env.*
+!.env.example
+!.env.local.example
 
 # Herramientas de desarrollo local — no subir al repo
 .claude/

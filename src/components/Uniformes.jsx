@@ -75,7 +75,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const [cambiandoEstado, setCambiandoEstado] = useState(null);
   const [generandoPDF, setGenerandoPDF] = useState(false);
   const [pedidoEditando, setPedidoEditando] = useState(null);
-  const [editForm, setEditForm] = useState({ prendas: [], talla: '', numero: '', nombre_estampar: '', categoria: 'Hombre' });
+  const [editForm, setEditForm] = useState({ prendas: [], talla: '', numero: '', nombre_estampar: '', categoria: 'Hombre', aPrecioProveedor: false });
   const [editError, setEditError] = useState('');
   const [guardandoEdit, setGuardandoEdit] = useState(false);
 
@@ -649,6 +649,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       numero: pedido.numero_estampar ? String(parseInt(pedido.numero_estampar, 10)) : '',
       nombre_estampar: pedido.nombre_estampar || '',
       categoria: TALLAS_NINO.includes(pedido.talla) ? 'Niño' : 'Hombre',
+      aPrecioProveedor: !!pedido.a_precio_proveedor,
     });
     setEditError('');
     setPedidoEditando(pedido);
@@ -680,7 +681,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     if (editForm.prendas.length === 0) { setEditError('Seleccioná al menos una prenda.'); return; }
     if (!editForm.talla)               { setEditError('Seleccioná una talla.'); return; }
     if (!editForm.numero && requiereNumero(editForm.prendas)) { setEditError('Ingresá el número de camiseta.'); return; }
-    const totalEdit = editForm.prendas.reduce((s, p) => s + p.precio * (p.cantidad || 1), 0);
+    const totalEdit = editForm.prendas.reduce((s, p) => s + precioEfectivo(editForm, p) * (p.cantidad || 1), 0);
     const pedidoId = pedidoEditando.id ?? pedidoEditando._id ?? pedidoEditando.rowId ?? pedidoEditando.row_id;
     if (!pedidoId) { setEditError('No se encontró el ID del pedido.'); return; }
     setGuardandoEdit(true);
@@ -690,11 +691,12 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prendas: editForm.prendas.map(p => (p.cantidad || 1) > 1 ? `${p.nombre} x${p.cantidad}` : p.nombre).join(', '),
-          items: editForm.prendas.map(p => ({ nombre: p.nombre, cantidad: p.cantidad || 1, precio_unitario: p.precio })),
+          items: editForm.prendas.map(p => ({ nombre: p.nombre, cantidad: p.cantidad || 1, precio_unitario: precioEfectivo(editForm, p) })),
           talla: editForm.talla,
           numero: editForm.numero ? editForm.numero.padStart(3, '0') : '',
           nombre_estampar: editForm.nombre_estampar,
           total: totalEdit,
+          a_precio_proveedor: editForm.aPrecioProveedor,
         }),
       });
       let data = {};
@@ -1908,6 +1910,13 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 </div>
               )}
 
+              <label className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[rgba(245,166,35,0.08)] border border-[#F5A623]/25 cursor-pointer">
+                <input type="checkbox" checked={!!editForm.aPrecioProveedor}
+                  onChange={e => setEditForm(f => ({ ...f, aPrecioProveedor: e.target.checked }))}
+                  className="w-4 h-4 accent-[#F5A623]" />
+                <span className="text-xs text-[#F5A623] font-medium">Cobrar a precio de proveedor (costo, sin margen — staff)</span>
+              </label>
+
               {/* Prendas */}
               <div>
                 <label className="block text-xs text-[var(--text-sec)] mb-2">Prendas <span className="font-normal">(podés agregar o quitar)</span></label>
@@ -1937,7 +1946,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                               onClick={() => cambiarCantidadEdit(p.nombre, 1)}
                               className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none"
                             >+</button>
-                            <span className="font-mono text-xs w-16 text-right">${(p.precio * cantidad).toLocaleString('es-CO')}</span>
+                            <span className="font-mono text-xs w-16 text-right">${(precioEfectivo(editForm, p) * cantidad).toLocaleString('es-CO')}</span>
                             <button
                               onClick={() => toggleEditPrenda(p)}
                               title="Quitar prenda"
@@ -1945,7 +1954,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                             ><X className="w-3.5 h-3.5" /></button>
                           </div>
                         ) : (
-                          <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
+                          <span className="font-mono text-xs">${precioEfectivo(editForm, p).toLocaleString('es-CO')}</span>
                         )}
                       </div>
                     );
@@ -1964,7 +1973,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 {editForm.prendas.length > 0 && (
                   <div className="mt-2 flex items-center justify-between px-4 py-2.5 rounded-xl bg-[var(--bg-app)] border border-[var(--cc)]/30">
                     <span className="text-xs text-[var(--text-sec)]">{editForm.prendas.reduce((s, p) => s + (p.cantidad || 1), 0)} unidades · {editForm.prendas.length} prenda{editForm.prendas.length > 1 ? 's' : ''} distinta{editForm.prendas.length > 1 ? 's' : ''}</span>
-                    <span className="text-sm font-bold text-[var(--cc)]">Total: ${editForm.prendas.reduce((s, p) => s + p.precio * (p.cantidad || 1), 0).toLocaleString('es-CO')}</span>
+                    <span className="text-sm font-bold text-[var(--cc)]">Total: ${editForm.prendas.reduce((s, p) => s + precioEfectivo(editForm, p) * (p.cantidad || 1), 0).toLocaleString('es-CO')}</span>
                   </div>
                 )}
               </div>

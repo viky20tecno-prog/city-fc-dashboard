@@ -61,13 +61,13 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState('');
-  const [errorEsDuplicado, setErrorEsDuplicado] = useState(false);
   const [exito, setExito] = useState(false);
 
   // — Pedidos list —
   const [pedidos, setPedidos] = useState([]);
   const [tabPedidos, setTabPedidos] = useState('PENDIENTE');
   const [gruposExpandidos, setGruposExpandidos] = useState(() => new Set());
+  const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
   const [cambiandoEstado, setCambiandoEstado] = useState(null);
   const [generandoPDF, setGenerandoPDF] = useState(false);
   const [pedidoEditando, setPedidoEditando] = useState(null);
@@ -220,7 +220,6 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     setSugerencias([]);
     setMostrarSugerencias(false);
     setError('');
-    setErrorEsDuplicado(false);
     setPersonas([nuevaPersona(false, categoriaDefaultJugador(jugador))]);
     setStep(2);
   };
@@ -230,7 +229,6 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     setJugadorEncontrado(null); setStep(1);
     setPersonas([]);
     setError('');
-    setErrorEsDuplicado(false);
   };
 
   const agregarFamiliar = () => {
@@ -271,7 +269,6 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   const handleSubmit = async () => {
     setError('');
-    setErrorEsDuplicado(false);
     if (personas.length === 0) { setError('Agregá al menos un pedido.'); return; }
     const errores = [];
     personas.forEach((p, i) => {
@@ -291,7 +288,6 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     setEnviando(true);
     const fallidos = [];
     let exitosos = 0;
-    let huboDuplicado = false;
     for (const p of personas) {
       try {
         const res = await authFetch(`${API_BASE}/uniforms?club_id=${clubId}`, {
@@ -312,10 +308,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         });
         const data = await res.json();
         if (data.success) exitosos++;
-        else {
-          if (res.status === 409) huboDuplicado = true;
-          fallidos.push({ key: p.key, msg: data.error || data.message || 'Error al registrar' });
-        }
+        else fallidos.push({ key: p.key, msg: data.error || data.message || 'Error al registrar' });
       } catch {
         fallidos.push({ key: p.key, msg: 'Error de conexión' });
       }
@@ -323,21 +316,19 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     await cargarDatos();
     if (fallidos.length === 0) {
       setExito(exitosos);
+      setFechaSeleccionada(null); // el pedido nuevo cae en la fecha de hoy — volver al listado por fecha para que se vea
       setTimeout(() => { setExito(false); limpiarBusqueda(); }, 3000);
     } else {
       setPersonas(ps => ps.filter(p => fallidos.some(f => f.key === p.key)));
-      if (huboDuplicado) {
-        setErrorEsDuplicado(true);
-        setError('Este jugador ya tiene un pedido de uniforme activo (pendiente, con abono o pagado). Para sumarle más prendas no crees un pedido nuevo: abrí la pestaña "Pedidos", buscá el pedido existente y usá "Editar".');
-      } else {
-        setError(`${exitosos} pedido(s) registrado(s). ${fallidos.length} con error: ${fallidos.map(f => f.msg).join(' · ')}`);
-      }
+      setError(`${exitosos} pedido(s) registrado(s). ${fallidos.length} con error: ${fallidos.map(f => f.msg).join(' · ')}`);
     }
     setEnviando(false);
   };
 
   // — PDF —
-  const generarPDF = async () => {
+  // `lista` opcional: permite generar el PDF de todos los pedidos o solo los
+  // de una fecha puntual (drill-down de la tarjeta de fecha).
+  const generarPDF = async (lista = pedidos) => {
     setGenerandoPDF(true);
     try {
       const { default: jsPDF } = await import('jspdf');
@@ -351,9 +342,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       const fmtCOP   = (n) => `$${parseFloat(n || 0).toLocaleString('es-CO')}`;
       const logoData = await loadLogoDataUrl(clubConfig?.logo_url);
 
-      const pendientes = sortByName(pedidos.filter(p => p.estado === 'PENDIENTE' || p.estado === 'ABONO'));
-      const pagados    = sortByName(pedidos.filter(p => p.estado === 'PAGADO'));
-      const entregados = sortByName(pedidos.filter(p => p.estado === 'ENTREGADO'));
+      const pendientes = sortByName(lista.filter(p => p.estado === 'PENDIENTE' || p.estado === 'ABONO'));
+      const pagados    = sortByName(lista.filter(p => p.estado === 'PAGADO'));
+      const entregados = sortByName(lista.filter(p => p.estado === 'ENTREGADO'));
       const getPrendas = (p) => String(p.prendas || p.prenda || p.tipo_uniforme || p.tipo || '—');
 
       const C = {
@@ -440,7 +431,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       const pages = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pages; i++) {
         doc.setPage(i);
-        drawPdfFooter(doc, { W, H, M, clubName: clubNombre, pageNum: i, totalPages: pages, note: `${pedidos.length} pedidos` });
+        drawPdfFooter(doc, { W, H, M, clubName: clubNombre, pageNum: i, totalPages: pages, note: `${lista.length} pedidos` });
       }
 
       doc.save(`${clubNombre.toLowerCase().replace(/\s+/g, '-')}-uniformes-${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -653,6 +644,15 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     catch { return '—'; }
   };
 
+  // Agrupa pedidos por día calendario local (no UTC) de creación — cada
+  // "ronda" de pedidos (jugadores que pidieron en la misma fecha) queda como
+  // su propia tarjeta, igual que un torneo agrupa a sus inscritos.
+  const fechaKey = (iso) => {
+    const d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d.getTime())) return 'sin-fecha';
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
   const toggleGrupo = (cedula) => {
     setGruposExpandidos(prev => {
       const next = new Set(prev);
@@ -723,18 +723,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
             {error && (
               <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(255,94,94,0.12)] border border-[#FF5E5E]/30 mb-6">
                 <AlertCircle className="w-5 h-5 text-[#FF5E5E] flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm text-[#FF5E5E]">{error}</p>
-                  {errorEsDuplicado && (
-                    <button
-                      type="button"
-                      onClick={() => { setTabPrincipal('pedidos'); setError(''); setErrorEsDuplicado(false); }}
-                      className="mt-2 text-xs font-semibold text-[#FF5E5E] underline hover:no-underline"
-                    >
-                      Ir a la pestaña "Pedidos" →
-                    </button>
-                  )}
-                </div>
+                <p className="text-sm text-[#FF5E5E]">{error}</p>
               </div>
             )}
 
@@ -1015,12 +1004,70 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           : p.estado === 'ENTREGADO'
         );
 
+        // Nivel 1: agrupar por fecha (día calendario en que se registró el
+        // pedido) — cada ronda de pedidos queda como su propia tarjeta con
+        // su propio total/saldo, igual que un torneo agrupa a sus inscritos.
+        const gruposFechaMap = {};
+        pedidos.forEach(p => {
+          const key = fechaKey(p.created_at);
+          if (!gruposFechaMap[key]) gruposFechaMap[key] = { fecha: key, subpedidos: [] };
+          gruposFechaMap[key].subpedidos.push(p);
+        });
+        const gruposFecha = Object.values(gruposFechaMap).map(g => {
+          g.total      = g.subpedidos.reduce((s, p) => s + Number(p.total || 0), 0);
+          g.pagado     = g.subpedidos.reduce((s, p) => s + Number(p.valor_pagado || 0), 0);
+          g.saldo      = g.total - g.pagado;
+          g.pendientes = g.subpedidos.filter(p => p.estado === 'PENDIENTE' || p.estado === 'ABONO').length;
+          return g;
+        }).sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+        if (!fechaSeleccionada) {
+          return (
+            <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--cc20)] p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-sm font-bold text-[var(--text-pri)]">Pedidos por fecha</h2>
+                <span className="text-xs text-[var(--text-sec)]">{gruposFecha.length} fecha{gruposFecha.length !== 1 ? 's' : ''} · {pedidos.length} pedido{pedidos.length !== 1 ? 's' : ''}</span>
+              </div>
+              {pedidos.length === 0 ? (
+                <p className="text-center text-sm text-[var(--text-sec)] py-8">Aún no hay pedidos registrados</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {gruposFecha.map(g => (
+                    <div key={g.fecha} className="bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-2xl p-5 space-y-3">
+                      <div>
+                        <p className="text-sm font-bold text-[var(--text-pri)]">📅 {formatFecha(g.subpedidos[0].created_at)}</p>
+                        <div className="flex gap-3 mt-1.5">
+                          <span className="text-[10px] text-[var(--text-mut)]">Total: <span className="text-[var(--text-sec)] font-semibold">${g.total.toLocaleString('es-CO')}</span></span>
+                          {g.saldo > 0 && <span className="text-[10px] text-[var(--text-mut)]">Saldo: <span className="font-semibold text-[#F5A623]">${g.saldo.toLocaleString('es-CO')}</span></span>}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-[var(--bg-app)] text-[var(--text-sec)]">{g.subpedidos.length} pedido{g.subpedidos.length !== 1 ? 's' : ''}</span>
+                        {g.pendientes > 0 && <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-500/12 text-red-400">{g.pendientes} pendiente{g.pendientes !== 1 ? 's' : ''}</span>}
+                      </div>
+                      <button onClick={() => { setFechaSeleccionada(g.fecha); setTabPedidos('PENDIENTE'); }}
+                        className="w-full py-2 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] text-xs font-semibold hover:bg-[var(--cc20)] transition">
+                        Ver pedidos →
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // Nivel 2: detalle de la fecha seleccionada — misma vista de siempre
+        // (tabs Pendientes/Pagados/Entregados agrupada por cédula), filtrada
+        // a los pedidos de ese día.
+        const pedidosDeFecha = gruposFechaMap[fechaSeleccionada]?.subpedidos || [];
+
         // Agrupar por cédula: un jugador y los pedidos de sus familiares comparten
         // cédula (los familiares no tienen cédula propia en el sistema) — antes
         // aparecían como filas sueltas repitiendo el mismo nombre con prendas
         // distintas; ahora quedan bajo una sola tarjeta expandible.
         const gruposMap = {};
-        pedidos.forEach(p => {
+        pedidosDeFecha.forEach(p => {
           const key = p.cedula;
           if (!gruposMap[key]) gruposMap[key] = { cedula: p.cedula, nombre: null, subpedidos: [] };
           gruposMap[key].subpedidos.push(p);
@@ -1054,6 +1101,14 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
         return (
           <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--cc20)] p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <button onClick={() => setFechaSeleccionada(null)}
+                className="text-xs font-semibold text-[var(--text-sec)] hover:text-[var(--cc)] transition">
+                ← Volver a fechas
+              </button>
+              <span className="text-xs text-[var(--text-mut)]">·</span>
+              <h2 className="text-sm font-bold text-[var(--text-pri)]">📅 {formatFecha(pedidosDeFecha[0]?.created_at)}</h2>
+            </div>
             <div className="flex items-center gap-2 mb-5 flex-wrap">
               {TAB_CFG.map(t => (
                 <button key={t.key} onClick={() => setTabPedidos(t.key)}
@@ -1066,8 +1121,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 </button>
               ))}
               <div className="ml-auto flex items-center gap-3">
-                <span className="text-xs text-[var(--text-sec)]">{grupos.length} jugador{grupos.length !== 1 ? 'es' : ''} · {pedidos.length} pedido{pedidos.length !== 1 ? 's' : ''}</span>
-                <button onClick={generarPDF} disabled={generandoPDF || pedidos.length === 0}
+                <span className="text-xs text-[var(--text-sec)]">{grupos.length} jugador{grupos.length !== 1 ? 'es' : ''} · {pedidosDeFecha.length} pedido{pedidosDeFecha.length !== 1 ? 's' : ''}</span>
+                <button onClick={() => generarPDF(pedidosDeFecha)} disabled={generandoPDF || pedidosDeFecha.length === 0}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] text-xs font-medium hover:bg-[var(--cc20)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {generandoPDF ? <><Loader className="w-3.5 h-3.5 animate-spin" />Generando...</> : <><Download className="w-3.5 h-3.5" />Descargar PDF</>}
@@ -1075,7 +1130,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
               </div>
             </div>
 
-            {pedidos.length === 0 ? (
+            {pedidosDeFecha.length === 0 ? (
               <p className="text-center text-sm text-[var(--text-sec)] py-8">Aún no hay pedidos registrados</p>
             ) : gruposVista.length === 0 ? (
               <p className="text-center text-sm text-[var(--text-sec)] py-8">No hay pedidos en este estado</p>

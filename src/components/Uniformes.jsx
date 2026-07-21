@@ -38,7 +38,7 @@ const categoriaDefaultJugador = (jugador) => {
 };
 
 let personaKeySeq = 0;
-const nuevaPersona = (esFamiliar, categoria) => ({
+const nuevaPersona = (esFamiliar, categoria, aPrecioProveedor = false) => ({
   key: `p${Date.now()}_${personaKeySeq++}`,
   esFamiliar,
   categoria,
@@ -46,6 +46,7 @@ const nuevaPersona = (esFamiliar, categoria) => ({
   nombre_estampar: '',
   talla: '',
   numero: '',
+  aPrecioProveedor,
 });
 
 export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club', clubConfig }) {
@@ -57,6 +58,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const [jugadorEncontrado, setJugadorEncontrado] = useState(null);
   const [jugadores, setJugadores] = useState([]);
   const [busqueda, setBusqueda] = useState('');
+  const [modoPersonal, setModoPersonal] = useState(false); // pedido de personal/staff, sin jugador asociado
+  const [personalNombre, setPersonalNombre] = useState('');
+  const [personalCedula, setPersonalCedula] = useState('');
   const [sugerencias, setSugerencias] = useState([]);
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -224,11 +228,23 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     setStep(2);
   };
 
+  // Pedido de personal/staff: no hay jugador que buscar — el admin escribe
+  // nombre y cédula a mano. Por defecto se cobra a precio de proveedor
+  // (el caso de uso real), pero queda editable persona por persona.
+  const iniciarPedidoPersonal = () => {
+    if (!personalNombre.trim() || !personalCedula.trim()) return;
+    setJugadorEncontrado({ nombre: personalNombre.trim(), apellidos: '', cedula: personalCedula.trim(), esPersonal: true });
+    setError('');
+    setPersonas([nuevaPersona(false, 'Hombre', true)]);
+    setStep(2);
+  };
+
   const limpiarBusqueda = () => {
     setBusqueda(''); setSugerencias([]); setMostrarSugerencias(false);
     setJugadorEncontrado(null); setStep(1);
     setPersonas([]);
     setError('');
+    setModoPersonal(false); setPersonalNombre(''); setPersonalCedula('');
   };
 
   const agregarFamiliar = () => {
@@ -263,7 +279,12 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
   const formatNumero = (val) => val.replace(/\D/g, '').slice(0, 3);
 
-  const totalPersona = (p) => p.prendas.reduce((sum, x) => sum + x.precio * (x.cantidad || 1), 0);
+  // Precio de proveedor (costo) si la persona quedó marcada "a precio de
+  // proveedor" y la prenda tiene ese precio configurado en el catálogo;
+  // si no lo tiene, cae al precio normal para no cobrar $0 por accidente.
+  const precioEfectivo = (persona, prenda) =>
+    persona.aPrecioProveedor && prenda.precio_proveedor > 0 ? prenda.precio_proveedor : prenda.precio;
+  const totalPersona = (p) => p.prendas.reduce((sum, x) => sum + precioEfectivo(p, x) * (x.cantidad || 1), 0);
   const totalGeneral = personas.reduce((sum, p) => sum + totalPersona(p), 0);
   const requiereNumero = (prendas) => prendas.length === 0 || prendas.some(x => x.requiere_numero !== false);
 
@@ -277,7 +298,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       if (!p.talla) faltantes.push('talla');
       if (!p.numero && requiereNumero(p.prendas)) faltantes.push('número');
       if (faltantes.length > 0) {
-        const etiqueta = p.esFamiliar ? `Familiar ${i + 1}` : 'Jugador';
+        const etiqueta = p.esFamiliar ? `Familiar ${i + 1}` : (jugadorEncontrado?.esPersonal ? 'Personal' : 'Jugador');
         errores.push(`${etiqueta}: falta ${faltantes.join(', ')}`);
       }
     });
@@ -296,12 +317,14 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           body: JSON.stringify({
             cedula: jugadorEncontrado.cedula,
             nombre: nombreCompleto,
-            tipo: p.esFamiliar ? `Familiar - ${p.categoria}` : 'Jugador',
+            tipo: p.esFamiliar ? `Familiar - ${p.categoria}` : (jugadorEncontrado.esPersonal ? 'Personal' : 'Jugador'),
+            cedula_libre: !!jugadorEncontrado.esPersonal,
+            a_precio_proveedor: !!p.aPrecioProveedor,
             nombre_estampar: p.nombre_estampar,
             talla: p.talla,
             numero: p.numero ? p.numero.padStart(3, '0') : '',
             prendas: p.prendas.map(x => (x.cantidad || 1) > 1 ? `${x.nombre} x${x.cantidad}` : x.nombre).join(', '),
-            items: p.prendas.map(x => ({ nombre: x.nombre, cantidad: x.cantidad || 1, precio_unitario: x.precio })),
+            items: p.prendas.map(x => ({ nombre: x.nombre, cantidad: x.cantidad || 1, precio_unitario: precioEfectivo(p, x) })),
             total: totalPersona(p),
             club_id: clubId,
           }),
@@ -758,7 +781,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
               <div>
                 <h2 className="text-lg font-bold text-[var(--text-pri)]">Pedido de Uniforme</h2>
                 <p className="text-xs text-[var(--text-sec)]">
-                  {step === 1 ? 'Paso 1 — Buscá el jugador por nombre o cédula' : 'Paso 2 — Datos del uniforme'}
+                  {step === 1
+                    ? (modoPersonal ? 'Paso 1 — Nombre y cédula del personal/staff' : 'Paso 1 — Buscá el jugador por nombre o cédula')
+                    : 'Paso 2 — Datos del uniforme'}
                 </p>
               </div>
             </div>
@@ -793,6 +818,46 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
             {/* Paso 1: Buscador */}
             {step === 1 && (
               <div className="space-y-4">
+                <div className="flex gap-2 p-1 rounded-xl bg-[var(--bg-surface)] border border-[var(--cc20)]">
+                  <button type="button" onClick={() => setModoPersonal(false)}
+                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${!modoPersonal ? 'bg-[var(--cc)] text-white' : 'text-[var(--text-sec)] hover:text-[var(--text-pri)]'}`}
+                  >⚽ Jugador</button>
+                  <button type="button" onClick={() => setModoPersonal(true)}
+                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${modoPersonal ? 'bg-[var(--cc)] text-white' : 'text-[var(--text-sec)] hover:text-[var(--text-pri)]'}`}
+                  >👔 Personal / Staff</button>
+                </div>
+
+                {modoPersonal ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-[var(--text-sec)] mb-1.5">Nombre completo *</label>
+                      <input
+                        type="text"
+                        value={personalNombre}
+                        onChange={e => setPersonalNombre(e.target.value)}
+                        placeholder="Ej: Carlos Pérez (técnico)"
+                        className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-[var(--text-sec)] mb-1.5">Cédula *</label>
+                      <input
+                        type="text" inputMode="numeric"
+                        value={personalCedula}
+                        onChange={e => setPersonalCedula(e.target.value.replace(/\D/g, ''))}
+                        placeholder="Sin puntos ni espacios"
+                        className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                      />
+                    </div>
+                    <p className="text-xs text-[var(--text-sec)]">No se busca contra la lista de jugadores — pensado para técnicos y personal del club.</p>
+                    <button
+                      onClick={iniciarPedidoPersonal}
+                      disabled={!personalNombre.trim() || !personalCedula.trim()}
+                      className="w-full py-2.5 rounded-xl bg-[var(--cc)] text-white text-sm font-bold hover:bg-[var(--cc)]/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >Continuar →</button>
+                  </div>
+                ) : (
+                <>
                 <div ref={searchRef} className="relative">
                   <label className="block text-xs text-[var(--text-sec)] mb-1.5">Buscar jugador *</label>
                   <div className="relative">
@@ -837,6 +902,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                   )}
                 </div>
                 <p className="text-xs text-[var(--text-sec)]">Escribe al menos 2 caracteres para ver sugerencias</p>
+                </>
+                )}
               </div>
             )}
 
@@ -865,7 +932,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                     <div key={persona.key} className="rounded-xl border border-[var(--cc20)] bg-[var(--bg-app)] p-4 space-y-4">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-semibold text-[var(--text-pri)]">
-                          {persona.esFamiliar ? `👨‍👩‍👦 Familiar ${personas.slice(0, idx).filter(p => p.esFamiliar).length + 1}` : '⚽ Jugador'}
+                          {persona.esFamiliar
+                            ? `👨‍👩‍👦 Familiar ${personas.slice(0, idx).filter(p => p.esFamiliar).length + 1}`
+                            : (jugadorEncontrado?.esPersonal ? '👔 Personal' : '⚽ Jugador')}
                         </p>
                         <button type="button" onClick={() => quitarPersona(persona.key)}
                           className="flex items-center gap-1 text-xs text-[var(--text-sec)] hover:text-[#FF5E5E] transition-colors"
@@ -873,6 +942,13 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                           <Trash2 className="w-3.5 h-3.5" /> Quitar
                         </button>
                       </div>
+
+                      <label className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[rgba(245,166,35,0.08)] border border-[#F5A623]/25 cursor-pointer">
+                        <input type="checkbox" checked={!!persona.aPrecioProveedor}
+                          onChange={e => actualizarPersona(persona.key, { aPrecioProveedor: e.target.checked })}
+                          className="w-4 h-4 accent-[#F5A623]" />
+                        <span className="text-xs text-[#F5A623] font-medium">Cobrar a precio de proveedor (costo, sin margen)</span>
+                      </label>
 
                       {/* Categoría */}
                       <div>
@@ -939,7 +1015,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                         onClick={() => cambiarCantidadPersona(persona.key, p.nombre, 1)}
                                         className="w-6 h-6 rounded-lg border border-[var(--cc)]/40 text-[var(--cc)] font-bold leading-none"
                                       >+</button>
-                                      <span className="font-mono text-xs w-16 text-right">${(p.precio * cantidad).toLocaleString('es-CO')}</span>
+                                      <span className="font-mono text-xs w-16 text-right">${(precioEfectivo(persona, p) * cantidad).toLocaleString('es-CO')}</span>
                                       <button
                                         onClick={() => togglePrendaPersona(persona.key, p)}
                                         title="Quitar prenda"
@@ -947,7 +1023,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                       ><X className="w-3.5 h-3.5" /></button>
                                     </div>
                                   ) : (
-                                    <span className="font-mono text-xs">${p.precio.toLocaleString('es-CO')}</span>
+                                    <span className="font-mono text-xs">${precioEfectivo(persona, p).toLocaleString('es-CO')}</span>
                                   )}
                                 </div>
                               );
@@ -1249,6 +1325,9 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                       {p.tipo && p.tipo !== 'Jugador' ? p.tipo : 'Jugador'}
                                     </span>
                                     <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${ESTADO_BADGE[p.estado] || ''}`}>{p.estado}</span>
+                                    {p.a_precio_proveedor && (
+                                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[rgba(245,166,35,0.12)] text-[#F5A623] border border-[#F5A623]/20" title="Cobrado a precio de proveedor (costo)">💰 Costo</span>
+                                    )}
                                     <span className="text-[10px] text-[var(--text-sec)]">{formatFecha(p.created_at)}</span>
                                   </div>
                                   <div className="flex items-center gap-1.5">

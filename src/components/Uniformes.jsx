@@ -615,6 +615,31 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     } finally { setEnviandoLote(false); }
   };
 
+  // — Editar fecha de una ronda ya armada —
+  const [rondaEditando, setRondaEditando]       = useState(null); // fecha original (key) de la tarjeta en edición
+  const [rondaNuevaFecha, setRondaNuevaFecha]   = useState('');
+  const [guardandoRonda, setGuardandoRonda]     = useState(false);
+
+  const abrirEditarRonda = (g) => { setRondaEditando(g.fecha); setRondaNuevaFecha(g.fecha); };
+  const cerrarEditarRonda = () => setRondaEditando(null);
+
+  const guardarNuevaFechaRonda = async (g) => {
+    if (!rondaNuevaFecha) return;
+    if (rondaNuevaFecha === g.fecha) { cerrarEditarRonda(); return; }
+    setGuardandoRonda(true);
+    try {
+      const res = await authFetch(`${API_BASE}/uniforms/asignar-ronda?club_id=${getClubId()}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: g.subpedidos.map(p => p.id ?? p._id), fecha: rondaNuevaFecha }),
+      });
+      const data = await res.json();
+      if (res.ok || data.success) { await cargarDatos(); cerrarEditarRonda(); }
+    } catch (e) {
+      console.error('[Uniformes] Error editando fecha de ronda:', e);
+    } finally { setGuardandoRonda(false); }
+  };
+
   const handleEliminar = async (pedido) => {
     const pid = pedido.id ?? pedido._id;
     if (!pid) return;
@@ -1183,21 +1208,57 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {gruposRonda.map(g => (
                     <div key={g.fecha} className="bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-2xl p-5 space-y-3">
-                      <div>
-                        <p className="text-sm font-bold text-[var(--text-pri)]">📅 {formatFechaRonda(g.fecha)}</p>
-                        <div className="flex gap-3 mt-1.5">
-                          <span className="text-[10px] text-[var(--text-mut)]">Total: <span className="text-[var(--text-sec)] font-semibold">${g.total.toLocaleString('es-CO')}</span></span>
-                          {g.saldo > 0 && <span className="text-[10px] text-[var(--text-mut)]">Saldo: <span className="font-semibold text-[#F5A623]">${g.saldo.toLocaleString('es-CO')}</span></span>}
+                      {rondaEditando === g.fecha ? (
+                        <div className="flex items-center gap-2">
+                          <input type="date" value={rondaNuevaFecha} onChange={e => setRondaNuevaFecha(e.target.value)}
+                            className="flex-1 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-lg px-2.5 py-1.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
+                            style={{ colorScheme: 'dark' }} autoFocus />
+                          <button onClick={() => guardarNuevaFechaRonda(g)} disabled={guardandoRonda}
+                            title="Guardar fecha"
+                            className="w-8 h-8 shrink-0 rounded-lg border border-green-500/30 text-green-400 hover:bg-green-500/10 flex items-center justify-center disabled:opacity-50">
+                            {guardandoRonda ? <Loader className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                          </button>
+                          <button onClick={cerrarEditarRonda} disabled={guardandoRonda} title="Cancelar"
+                            className="w-8 h-8 shrink-0 rounded-lg border border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)] flex items-center justify-center disabled:opacity-50">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-bold text-[var(--text-pri)]">📅 {formatFechaRonda(g.fecha)}</p>
+                          <button onClick={() => abrirEditarRonda(g)} title="Editar fecha"
+                            className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-[var(--bg-app)] rounded-lg p-2.5 border border-[var(--cc20)]">
+                          <p className="text-[10px] text-[var(--text-sec)] uppercase tracking-wide">Total</p>
+                          <p className="text-lg font-bold text-[var(--text-pri)]">${g.total.toLocaleString('es-CO')}</p>
+                        </div>
+                        <div className="bg-[var(--bg-app)] rounded-lg p-2.5 border border-[var(--cc20)]">
+                          <p className="text-[10px] text-[var(--text-sec)] uppercase tracking-wide">Saldo</p>
+                          <p className={`text-lg font-bold ${g.saldo > 0 ? 'text-[#F5A623]' : 'text-green-400'}`}>${g.saldo.toLocaleString('es-CO')}</p>
                         </div>
                       </div>
+
                       <div className="flex gap-2 flex-wrap">
                         <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-[var(--bg-app)] text-[var(--text-sec)]">{g.subpedidos.length} pedido{g.subpedidos.length !== 1 ? 's' : ''}</span>
                         {g.pendientes > 0 && <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-red-500/12 text-red-400">{g.pendientes} pendiente{g.pendientes !== 1 ? 's' : ''}</span>}
                       </div>
-                      <button onClick={() => { setFechaSeleccionada(g.fecha); setTabPedidos('PENDIENTE'); }}
-                        className="w-full py-2 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] text-xs font-semibold hover:bg-[var(--cc20)] transition">
-                        Ver pedidos →
-                      </button>
+
+                      <div className="flex gap-2">
+                        <button onClick={() => { setFechaSeleccionada(g.fecha); setTabPedidos('PENDIENTE'); }}
+                          className="flex-1 py-2 rounded-xl bg-[var(--cc12)] border border-[var(--cc)]/30 text-[var(--cc)] text-xs font-semibold hover:bg-[var(--cc20)] transition">
+                          Ver pedidos →
+                        </button>
+                        <button onClick={() => generarPDF(g.subpedidos)} disabled={generandoPDF} title="Descargar PDF de este lote"
+                          className="w-9 shrink-0 rounded-xl border border-[var(--cc)]/30 text-[var(--cc)] hover:bg-[var(--cc20)] transition disabled:opacity-40 flex items-center justify-center">
+                          {generandoPDF ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

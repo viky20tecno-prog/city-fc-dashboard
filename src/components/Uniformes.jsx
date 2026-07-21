@@ -487,6 +487,58 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     handleCambiarEstado(pedido, 'PENDIENTE', { valor_pagado: 0 });
   };
 
+  // Marca el pedido como pagado de un clic, conciliando el saldo real contra
+  // cada prenda (no solo cambia el estado) — si se limitara a `estado:
+  // 'PAGADO'` sin tocar valor_pagado, el pedido quedaría marcado pagado sin
+  // plata real registrada (y el desglose por prenda quedaría desincronizado
+  // del total). El saldo restante se reparte prenda por prenda en orden hasta
+  // agotarlo, así nunca se manda de más aunque el pedido tenga abono_legacy.
+  const handleMarcarPagado = async (pedido) => {
+    const pedidoId = pedido.id ?? pedido._id;
+    if (!pedidoId) return;
+    const saldoPedido = (Number(pedido.total) || 0) - (Number(pedido.valor_pagado) || 0);
+    if (saldoPedido <= 0) return;
+    setCambiandoEstado(pedidoId);
+    try {
+      const prendasDetalle = pedido.prendas_detalle || [];
+      if (prendasDetalle.length > 0) {
+        let restante = saldoPedido;
+        const abonos = [];
+        for (const pr of prendasDetalle) {
+          if (restante <= 0) break;
+          const totalItem = (Number(pr.precio_unitario) || 0) * (pr.cantidad || 1);
+          const saldoItem = totalItem - (Number(pr.valor_pagado) || 0);
+          if (saldoItem <= 0) continue;
+          const monto = Math.min(saldoItem, restante);
+          abonos.push({ prenda_id: pr.id, monto });
+          restante -= monto;
+        }
+        if (abonos.length > 0) {
+          const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}/abono-prendas?club_id=${getClubId()}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ abonos }),
+          });
+          const data = await res.json();
+          if (!(res.ok || data.success)) { console.error('[Uniformes] Error marcando pagado:', data.error || data.message); return; }
+        }
+      } else {
+        const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}?club_id=${getClubId()}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ valor_pagado: Number(pedido.total) || 0 }),
+        });
+        const data = await res.json();
+        if (!(res.ok || data.success)) { console.error('[Uniformes] Error marcando pagado:', data.error || data.message); return; }
+      }
+      await cargarDatos();
+    } catch (e) {
+      console.error('[Uniformes] Error marcando pagado:', e);
+    } finally {
+      setCambiandoEstado(null);
+    }
+  };
+
   // — Abonos —
   const [pedidoAbonando, setPedidoAbonando]     = useState(null);
   const [montosPorPrenda, setMontosPorPrenda]   = useState({}); // { [prenda_id]: string }
@@ -1399,6 +1451,13 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                         className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#4A9EFF]/30 text-[#4A9EFF] hover:bg-[rgba(74,158,255,0.12)] transition-all text-xs disabled:opacity-50"
                                       >
                                         <Plus className="w-3.5 h-3.5" /> Abonar
+                                      </button>
+                                    )}
+                                    {(p.estado === 'PENDIENTE' || p.estado === 'ABONO') && (
+                                      <button onClick={() => handleMarcarPagado(p)} disabled={cargando} title="Marcar como pagado (concilia el saldo completo)"
+                                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-green-500/30 text-green-400 hover:bg-green-500/10 transition-all text-xs disabled:opacity-50"
+                                      >
+                                        {cargando ? <Loader className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />} Pagado
                                       </button>
                                     )}
                                     {p.estado === 'PAGADO' && (

@@ -548,6 +548,50 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     } finally { setGuardandoAbono(false); }
   };
 
+  // — Armar lote (asignar ronda_fecha a varios pedidos pendientes a la vez) —
+  const [loteAbierto, setLoteAbierto]           = useState(false);
+  const [loteSeleccion, setLoteSeleccion]       = useState(() => new Set());
+  const [loteFecha, setLoteFecha]               = useState('');
+  const [loteError, setLoteError]               = useState('');
+  const [enviandoLote, setEnviandoLote]         = useState(false);
+
+  const abrirLote = (pendientes) => {
+    setLoteSeleccion(new Set(pendientes.map(p => p.id ?? p._id)));
+    setLoteFecha(new Date().toISOString().slice(0, 10));
+    setLoteError('');
+    setLoteAbierto(true);
+  };
+
+  const cerrarLote = () => { setLoteAbierto(false); setLoteError(''); };
+
+  const toggleLoteSeleccion = (pid) => {
+    setLoteSeleccion(prev => {
+      const next = new Set(prev);
+      if (next.has(pid)) next.delete(pid); else next.add(pid);
+      return next;
+    });
+  };
+
+  const confirmarLote = async () => {
+    setLoteError('');
+    if (loteSeleccion.size === 0) { setLoteError('Seleccioná al menos un pedido.'); return; }
+    if (!loteFecha) { setLoteError('Elegí una fecha.'); return; }
+    setEnviandoLote(true);
+    try {
+      const res = await authFetch(`${API_BASE}/uniforms/asignar-ronda?club_id=${getClubId()}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(loteSeleccion), fecha: loteFecha }),
+      });
+      const data = await res.json();
+      if (res.ok || data.success) { await cargarDatos(); cerrarLote(); }
+      else setLoteError(data.error || 'Error armando el lote');
+    } catch (e) {
+      console.error('[Uniformes] Error armando lote:', e);
+      setLoteError('Error de conexión');
+    } finally { setEnviandoLote(false); }
+  };
+
   const handleEliminar = async (pedido) => {
     const pid = pedido.id ?? pedido._id;
     if (!pid) return;
@@ -644,13 +688,15 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     catch { return '—'; }
   };
 
-  // Agrupa pedidos por día calendario local (no UTC) de creación — cada
-  // "ronda" de pedidos (jugadores que pidieron en la misma fecha) queda como
-  // su propia tarjeta, igual que un torneo agrupa a sus inscritos.
-  const fechaKey = (iso) => {
-    const d = iso ? new Date(iso) : null;
-    if (!d || isNaN(d.getTime())) return 'sin-fecha';
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  // Formatea un date-only 'YYYY-MM-DD' (ronda_fecha) por texto plano, sin
+  // pasar por Date() — new Date('2026-07-06') se interpreta como medianoche
+  // UTC y en Colombia (UTC-5) toLocaleDateString lo corre un día para atrás
+  // (mismo bug de huso horario ya visto en el ranking de asistencia).
+  const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const formatFechaRonda = (fechaStr) => {
+    const [y, m, d] = String(fechaStr || '').split('-');
+    if (!y || !m || !d) return '—';
+    return `${d} ${MESES_CORTOS[Number(m) - 1] || '?'} ${y}`;
   };
 
   const toggleGrupo = (cedula) => {
@@ -667,6 +713,11 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       ? 'bg-[var(--cc12)] border-[var(--cc)]/40 text-[var(--cc)]'
       : 'border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
   }`;
+
+  // Pedidos sin ronda_fecha asignada todavía (pendientes de enviar a
+  // fábrica) — se calcula a nivel de componente porque lo usan tanto la
+  // pestaña Pedidos como la modal "Armar lote".
+  const pendientesSinRondaGlobal = pedidos.filter(p => !p.ronda_fecha);
 
   // — Render —
   return (
@@ -1004,16 +1055,18 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           : p.estado === 'ENTREGADO'
         );
 
-        // Nivel 1: agrupar por fecha (día calendario en que se registró el
-        // pedido) — cada ronda de pedidos queda como su propia tarjeta con
-        // su propio total/saldo, igual que un torneo agrupa a sus inscritos.
-        const gruposFechaMap = {};
+        // Nivel 1: agrupar por ronda_fecha — la fecha del pedido REAL que se
+        // manda al fabricante, no el día en que cada admin cargó cada pedido
+        // al sistema. Un pedido nuevo entra "sin ronda" (pendiente de enviar)
+        // hasta que se arma un lote explícitamente (ver abrirLote).
+        const pendientesSinRonda = pendientesSinRondaGlobal;
+        const gruposRondaMap = {};
         pedidos.forEach(p => {
-          const key = fechaKey(p.created_at);
-          if (!gruposFechaMap[key]) gruposFechaMap[key] = { fecha: key, subpedidos: [] };
-          gruposFechaMap[key].subpedidos.push(p);
+          if (!p.ronda_fecha) return;
+          if (!gruposRondaMap[p.ronda_fecha]) gruposRondaMap[p.ronda_fecha] = { fecha: p.ronda_fecha, subpedidos: [] };
+          gruposRondaMap[p.ronda_fecha].subpedidos.push(p);
         });
-        const gruposFecha = Object.values(gruposFechaMap).map(g => {
+        const gruposRonda = Object.values(gruposRondaMap).map(g => {
           g.total      = g.subpedidos.reduce((s, p) => s + Number(p.total || 0), 0);
           g.pagado     = g.subpedidos.reduce((s, p) => s + Number(p.valor_pagado || 0), 0);
           g.saldo      = g.total - g.pagado;
@@ -1022,20 +1075,38 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         }).sort((a, b) => b.fecha.localeCompare(a.fecha));
 
         if (!fechaSeleccionada) {
+          const totalSinRonda = pendientesSinRonda.reduce((s, p) => s + Number(p.total || 0), 0);
           return (
             <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--cc20)] p-6">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-sm font-bold text-[var(--text-pri)]">Pedidos por fecha</h2>
-                <span className="text-xs text-[var(--text-sec)]">{gruposFecha.length} fecha{gruposFecha.length !== 1 ? 's' : ''} · {pedidos.length} pedido{pedidos.length !== 1 ? 's' : ''}</span>
+                <h2 className="text-sm font-bold text-[var(--text-pri)]">Pedidos por fecha de fábrica</h2>
+                <span className="text-xs text-[var(--text-sec)]">{gruposRonda.length} lote{gruposRonda.length !== 1 ? 's' : ''} · {pedidos.length} pedido{pedidos.length !== 1 ? 's' : ''}</span>
               </div>
+
+              {pendientesSinRonda.length > 0 && (
+                <div className="bg-[rgba(245,166,35,0.08)] border border-[#F5A623]/30 rounded-2xl p-5 space-y-3 mb-4">
+                  <div>
+                    <p className="text-sm font-bold text-[#F5A623]">📦 Pendientes de enviar a fábrica</p>
+                    <p className="text-xs text-[var(--text-mut)] mt-1">Total: ${totalSinRonda.toLocaleString('es-CO')}</p>
+                  </div>
+                  <span className="inline-block px-2 py-1 rounded-lg text-[10px] font-bold bg-[var(--bg-app)] text-[var(--text-sec)]">{pendientesSinRonda.length} pedido{pendientesSinRonda.length !== 1 ? 's' : ''} sin agrupar</span>
+                  <button onClick={() => abrirLote(pendientesSinRonda)}
+                    className="w-full py-2 rounded-xl bg-[rgba(245,166,35,0.15)] border border-[#F5A623]/40 text-[#F5A623] text-xs font-semibold hover:bg-[rgba(245,166,35,0.25)] transition">
+                    Armar lote →
+                  </button>
+                </div>
+              )}
+
               {pedidos.length === 0 ? (
                 <p className="text-center text-sm text-[var(--text-sec)] py-8">Aún no hay pedidos registrados</p>
+              ) : gruposRonda.length === 0 ? (
+                <p className="text-center text-sm text-[var(--text-sec)] py-4">Todavía no armaste ningún lote — usá "Armar lote" arriba.</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {gruposFecha.map(g => (
+                  {gruposRonda.map(g => (
                     <div key={g.fecha} className="bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-2xl p-5 space-y-3">
                       <div>
-                        <p className="text-sm font-bold text-[var(--text-pri)]">📅 {formatFecha(g.subpedidos[0].created_at)}</p>
+                        <p className="text-sm font-bold text-[var(--text-pri)]">📅 {formatFechaRonda(g.fecha)}</p>
                         <div className="flex gap-3 mt-1.5">
                           <span className="text-[10px] text-[var(--text-mut)]">Total: <span className="text-[var(--text-sec)] font-semibold">${g.total.toLocaleString('es-CO')}</span></span>
                           {g.saldo > 0 && <span className="text-[10px] text-[var(--text-mut)]">Saldo: <span className="font-semibold text-[#F5A623]">${g.saldo.toLocaleString('es-CO')}</span></span>}
@@ -1057,10 +1128,10 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           );
         }
 
-        // Nivel 2: detalle de la fecha seleccionada — misma vista de siempre
+        // Nivel 2: detalle de la ronda seleccionada — misma vista de siempre
         // (tabs Pendientes/Pagados/Entregados agrupada por cédula), filtrada
-        // a los pedidos de ese día.
-        const pedidosDeFecha = gruposFechaMap[fechaSeleccionada]?.subpedidos || [];
+        // a los pedidos de ese lote.
+        const pedidosDeFecha = gruposRondaMap[fechaSeleccionada]?.subpedidos || [];
 
         // Agrupar por cédula: un jugador y los pedidos de sus familiares comparten
         // cédula (los familiares no tienen cédula propia en el sistema) — antes
@@ -1107,7 +1178,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 ← Volver a fechas
               </button>
               <span className="text-xs text-[var(--text-mut)]">·</span>
-              <h2 className="text-sm font-bold text-[var(--text-pri)]">📅 {formatFecha(pedidosDeFecha[0]?.created_at)}</h2>
+              <h2 className="text-sm font-bold text-[var(--text-pri)]">📅 {formatFechaRonda(fechaSeleccionada)}</h2>
             </div>
             <div className="flex items-center gap-2 mb-5 flex-wrap">
               {TAB_CFG.map(t => (
@@ -1646,6 +1717,87 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           </div>
         );
       })()}
+
+      {/* ══════════════════════════════════════════════
+          MODAL: ARMAR LOTE (asignar ronda_fecha)
+      ══════════════════════════════════════════════ */}
+      {loteAbierto && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={cerrarLote}>
+          <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-md shadow-[0_8px_40px_rgba(0,50,150,0.4)] max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-[var(--cc20)]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[rgba(245,166,35,0.12)] flex items-center justify-center">
+                  <Package className="w-4 h-4 text-[#F5A623]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[var(--text-pri)]">Armar lote para fábrica</h3>
+                  <p className="text-xs text-[var(--text-sec)]">Elegí qué pedidos van juntos y la fecha del pedido real</p>
+                </div>
+              </div>
+              <button onClick={cerrarLote} className="p-2 rounded-lg text-[var(--text-sec)] hover:text-[var(--text-pri)] hover:bg-[var(--bg-surface)] transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs text-[var(--text-sec)] mb-1.5">Fecha del pedido a fábrica *</label>
+                <input
+                  type="date"
+                  value={loteFecha}
+                  onChange={e => { setLoteFecha(e.target.value); setLoteError(''); }}
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                  style={{ colorScheme: 'dark' }}
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs text-[var(--text-sec)]">Pedidos incluidos ({loteSeleccion.size})</label>
+                  <button type="button" onClick={() => setLoteSeleccion(new Set(pendientesSinRondaGlobal.map(p => p.id ?? p._id)))}
+                    className="text-[10px] font-semibold text-[var(--cc)] hover:underline">
+                    Seleccionar todos
+                  </button>
+                </div>
+                <div className="space-y-1.5 max-h-64 overflow-y-auto">
+                  {pendientesSinRondaGlobal.map(p => {
+                    const pid = p.id ?? p._id;
+                    const marcado = loteSeleccion.has(pid);
+                    return (
+                      <label key={pid} className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] cursor-pointer">
+                        <input type="checkbox" checked={marcado} onChange={() => toggleLoteSeleccion(pid)} className="w-4 h-4 accent-[var(--cc)]" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-[var(--text-pri)] truncate">{p.nombre}{p.tipo && p.tipo !== 'Jugador' ? ` · ${p.tipo}` : ''}</p>
+                          <p className="text-[10px] text-[var(--text-sec)]">{p.prendas || p.prenda || '—'}</p>
+                        </div>
+                        <span className="text-xs font-semibold text-[var(--text-sec)] shrink-0">${Number(p.total || 0).toLocaleString('es-CO')}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {loteError && (
+                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-[rgba(255,94,94,0.1)] border border-[#FF5E5E]/20">
+                  <AlertCircle className="w-4 h-4 text-[#FF5E5E] shrink-0 mt-0.5" />
+                  <span className="text-xs text-[#FF5E5E]">{loteError}</span>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-1">
+                <button onClick={cerrarLote} disabled={enviandoLote}
+                  className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-sec)] border border-[var(--cc20)] hover:bg-[var(--bg-surface)] transition-colors disabled:opacity-50"
+                >Cancelar</button>
+                <button onClick={confirmarLote} disabled={enviandoLote}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-[#F5A623] text-white hover:bg-[#F5A623]/80 transition-colors disabled:opacity-50"
+                >
+                  {enviandoLote ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Armar lote
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════
           MODAL: EDITAR PEDIDO

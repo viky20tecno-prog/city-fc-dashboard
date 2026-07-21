@@ -45,6 +45,7 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [ecError, setEcError] = useState('');
   const [ecFiltro, setEcFiltro] = useState('');
   const [ecToast, setEcToast] = useState('');
+  const [limpiandoEc, setLimpiandoEc] = useState(false);
   const [plantillaToast, setPlantillaToast] = useState('');
 
   const authHeaders = async () => {
@@ -167,6 +168,29 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     }
   };
 
+  // Quita el check de "enviado" a todos los jugadores del mes actual, para
+  // reiniciar el ciclo de cobro (ej. si se quiere volver a escribirle a todos).
+  const limpiarTodoEnviado = async () => {
+    const enviados = ecLista.filter(j => j.ya_enviado).length;
+    if (enviados === 0) return;
+    if (!window.confirm(`¿Quitar el check de "enviado" a los ${enviados} jugadores marcados? Reinicia el conteo del mes, no borra ningún mensaje.`)) return;
+    setLimpiandoEc(true);
+    try {
+      const hdrs = await authHeaders();
+      const r = await fetch(`${API}/players/estado-cuenta-limpiar?club_id=${clubId()}`, {
+        method: 'POST', headers: hdrs,
+      });
+      const d = await r.json();
+      if (d.success) setEcLista(list => list.map(j => ({ ...j, ya_enviado: false })));
+      else setEcToast(d.error || 'No se pudo limpiar la lista');
+    } catch {
+      setEcToast('Error de conexión al limpiar la lista');
+    } finally {
+      setLimpiandoEc(false);
+      setTimeout(() => setEcToast(''), 6000);
+    }
+  };
+
   // Copia el mensaje al portapapeles y abre el chat del jugador (sin prellenar texto — un
   // link wa.me con ?text= corrompe los emojis en WhatsApp Desktop de Windows). El admin pega
   // con Ctrl+V y da el envío final desde su propio WhatsApp, nunca automático desde el servidor.
@@ -244,6 +268,12 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
             <span className="font-semibold text-[var(--text-pri)] whitespace-nowrap">
               {ecLista.filter(j => j.ya_enviado).length} / {ecLista.length} enviados
             </span>
+            <button onClick={limpiarTodoEnviado} disabled={limpiandoEc || ecLista.every(j => !j.ya_enviado)}
+              title="Quitar el check de enviado a todos, para reiniciar el cobro del mes"
+              className="whitespace-nowrap underline decoration-dotted opacity-70 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+            >
+              {limpiandoEc ? 'Limpiando…' : '🧹 Limpiar todo'}
+            </button>
           </div>
         )}
 

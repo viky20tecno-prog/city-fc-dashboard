@@ -12,7 +12,7 @@ import { authFetch } from '../lib/authFetch';
 import { useAppData } from '../hooks/useAppData';
 import { useClubConfig } from '../hooks/useClubConfig';
 import { useRole } from '../hooks/useRole';
-import { getClubId } from '../services/api';
+import { getClubId, generarLinkBoldClub } from '../services/api';
 import { API_BASE_URL } from '../config';
 import DashboardOverview from '../components/DashboardOverview';
 import JugadoresTable from '../components/JugadoresTable';
@@ -124,6 +124,9 @@ export default function Dashboard() {
   const [showBell,         setShowBell]         = useState(false);
   const [showMasMenu,      setShowMasMenu]      = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('sidebarCollapsed') === 'true');
+  const [planElegido,      setPlanElegido]      = useState('starter');
+  const [pagandoBold,      setPagandoBold]      = useState(false);
+  const [errorPagoBold,    setErrorPagoBold]    = useState('');
   const bellRef = useRef(null);
 
   const toggleSidebar = () => setSidebarCollapsed(v => {
@@ -380,6 +383,24 @@ export default function Dashboard() {
     setRefreshing(true);
     await refresh();
     setRefreshing(false);
+  };
+
+  const PLANES_AUTOSERVICIO = [
+    { id: 'starter', nombre: 'Starter', precio: '$149.000' },
+    { id: 'pro',      nombre: 'Pro',     precio: '$399.000' },
+    { id: 'scale',    nombre: 'Scale',   precio: '$799.000' },
+  ];
+
+  const handlePagarConBold = async () => {
+    setPagandoBold(true);
+    setErrorPagoBold('');
+    try {
+      const record = await generarLinkBoldClub(planElegido);
+      window.location.href = record.bold_link_url;
+    } catch (err) {
+      setErrorPagoBold(err.message || 'Error generando el link de pago.');
+      setPagandoBold(false);
+    }
   };
 
   const clubId = getClubId();
@@ -869,16 +890,35 @@ export default function Dashboard() {
                 Activa un plan para seguir usando la plataforma.
               </div>
             </div>
-            <div style={{
-              background: 'var(--bg-card)', borderRadius: '12px', padding: '16px 20px',
-              border: '1px solid var(--border-sub)', width: '100%', textAlign: 'left',
-              display: 'flex', flexDirection: 'column', gap: '6px',
-            }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-mut)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>¿Qué hacer ahora?</div>
-              <div style={{ fontSize: '13px', color: 'var(--text-sec)' }}>1. Elige un plan en zensports.zenpra.ai</div>
-              <div style={{ fontSize: '13px', color: 'var(--text-sec)' }}>2. Envíanos tu comprobante de pago</div>
-              <div style={{ fontSize: '13px', color: 'var(--text-sec)' }}>3. Activamos tu cuenta en minutos</div>
+            <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+              {PLANES_AUTOSERVICIO.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => setPlanElegido(p.id)}
+                  style={{
+                    flex: 1, padding: '10px 6px', borderRadius: '10px', cursor: 'pointer',
+                    border: planElegido === p.id ? '1.5px solid #22C55E' : '1px solid var(--border-sub)',
+                    background: planElegido === p.id ? 'rgba(34,197,94,0.10)' : 'var(--bg-card)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-pri)' }}>{p.nombre}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-sec)' }}>{p.precio}/mes</div>
+                </button>
+              ))}
             </div>
+            {errorPagoBold && <div style={{ fontSize: '12px', color: '#EF4444' }}>{errorPagoBold}</div>}
+            <button
+              onClick={handlePagarConBold}
+              disabled={pagandoBold}
+              style={{
+                width: '100%', padding: '12px', borderRadius: '10px', border: 'none',
+                background: '#22C55E', color: '#fff', fontSize: '14px', fontWeight: 700,
+                cursor: pagandoBold ? 'default' : 'pointer', opacity: pagandoBold ? 0.6 : 1,
+              }}
+            >
+              {pagandoBold ? 'Generando link de pago…' : `Pagar plan ${PLANES_AUTOSERVICIO.find(p => p.id === planElegido)?.nombre} con Bold`}
+            </button>
             <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
               <button
                 onClick={handleLogout}

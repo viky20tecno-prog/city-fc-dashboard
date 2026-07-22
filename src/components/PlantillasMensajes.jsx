@@ -270,9 +270,9 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
             </span>
             <button onClick={limpiarTodoEnviado} disabled={limpiandoEc || ecLista.every(j => !j.ya_enviado)}
               title="Quitar el check de enviado a todos, para reiniciar el cobro del mes"
-              className="whitespace-nowrap underline decoration-dotted opacity-70 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+              className="flex items-center gap-1 whitespace-nowrap text-sm font-medium underline decoration-dotted opacity-70 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
             >
-              {limpiandoEc ? 'Limpiando…' : '🧹 Limpiar todo'}
+              {limpiandoEc ? 'Limpiando…' : <><span className="text-base leading-none">🧹</span> Limpiar todo</>}
             </button>
           </div>
         )}

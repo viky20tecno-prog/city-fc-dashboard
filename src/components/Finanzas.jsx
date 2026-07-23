@@ -675,7 +675,12 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
                             {r.tipo === 'ingreso' ? '↑ Ingreso' : '↓ Gasto'}
                           </span>
                         </td>
-                        <td className="py-2 px-3 text-[var(--text-sec)] text-xs">{r.categoria}</td>
+                        <td className="py-2 px-3 text-[var(--text-sec)] text-xs">
+                          {r.categoria}
+                          {r.automatico && (
+                            <span className="ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[var(--cc12)] text-[var(--cc)]" title="Calculado automáticamente a partir de mensualidades/uniformes/torneos — no se carga a mano">auto</span>
+                          )}
+                        </td>
                         <td className="py-2 px-3 text-[var(--text-pri)] max-w-[200px]">
                           <span className="block truncate" title={r.descripcion}>{r.descripcion || '—'}</span>
                         </td>
@@ -683,10 +688,12 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
                           {r.tipo === 'gasto' ? '-' : ''}{fmt(r.monto)}
                         </td>
                         <td className="py-2 px-3">
-                          <button onClick={() => eliminarMovimiento(r.id)}
-                            className="p-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {!r.automatico && (
+                            <button onClick={() => eliminarMovimiento(r.id)}
+                              className="p-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}

@@ -46,15 +46,50 @@ function rangoMes(ym) {
   return { desde, hasta };
 }
 
-async function exportCSV(rows, filename) {
+const FUENTE_LABEL = { mensualidades: 'Mensualidades', uniformes: 'Uniformes (ganancia)', torneos: 'Torneos (ganancia)', otros: 'Otros ingresos' };
+
+// Desglose de ingresos por fuente a partir de un set de movimientos ya
+// filtrado por período — mismo criterio en pantalla, PDF y Excel para que
+// los tres siempre muestren el mismo número.
+function desgloseIngresos(rows) {
+  const suma = (cat) => rows.reduce((s, m) => (m.tipo === 'ingreso' && m.categoria === cat) ? s + Number(m.monto) : s, 0);
+  const ingresos      = rows.reduce((s, m) => m.tipo === 'ingreso' ? s + Number(m.monto) : s, 0);
+  const mensualidades = suma('Mensualidades cobradas');
+  const uniformes     = suma('Uniformes — ganancia');
+  const torneos        = suma('Torneos — ganancia');
+  const otros          = Math.max(0, ingresos - mensualidades - uniformes - torneos);
+  return { ingresos, mensualidades, uniformes, torneos, otros };
+}
+
+async function exportCSV(rows, filename, resumen) {
   const XLSX = await import('xlsx');
+  const wb = XLSX.utils.book_new();
+
+  if (resumen) {
+    const { mesTexto, ingresos, gastos, saldo, desglose } = resumen;
+    const filas = [
+      ['Estado financiero', mesTexto],
+      [],
+      ['Total ingresos',  ingresos],
+      ['Total gastos',    gastos],
+      ['Saldo neto',      saldo],
+      [],
+      ['Ingresos por fuente', 'Monto', '% del total'],
+      ...['mensualidades', 'uniformes', 'torneos', 'otros']
+        .filter(k => desglose[k] > 0)
+        .map(k => [FUENTE_LABEL[k], desglose[k], desglose.ingresos > 0 ? `${Math.round(desglose[k] / desglose.ingresos * 100)}%` : '0%']),
+    ];
+    const wsResumen = XLSX.utils.aoa_to_sheet(filas);
+    wsResumen['!cols'] = [{ wch: 24 }, { wch: 16 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
+  }
+
   const headers = ['Fecha', 'Tipo', 'Categoría', 'Descripción', 'Monto'];
   const data = rows.map(r => [r.fecha, r.tipo, r.categoria, r.descripcion, r.monto]);
-
   const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
   ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 18 }, { wch: 35 }, { wch: 14 }];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Finanzas');
+  XLSX.utils.book_append_sheet(wb, ws, 'Movimientos');
+
   XLSX.writeFile(wb, filename.replace('.csv', '.xlsx'));
 }
 
@@ -398,8 +433,41 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
       doc.text(val, bx + bW / 2, bY + 18, { align: 'center' });
     });
 
+    // ── Ingresos por fuente ────────────────────────────────
+    const desglose = desgloseIngresos(rows);
+    const fuentesConDatos = ['mensualidades', 'uniformes', 'torneos', 'otros'].filter(k => desglose[k] > 0);
+    const FUENTE_RGB = { mensualidades: [34,197,94], uniformes: [74,158,255], torneos: [245,166,35], otros: [167,139,250] };
+
+    let y = bY + bH + 12;
+    if (fuentesConDatos.length > 0) {
+      doc.setTextColor(cr, cg, cb_); doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+      doc.text('INGRESOS POR FUENTE', M, y);
+      doc.setDrawColor(cr, cg, cb_); doc.setLineWidth(0.3);
+      doc.line(M, y + 2, W - M, y + 2);
+      y += 10;
+
+      const barX = M + 52; const barMaxW = 78; const rowH = 8.5;
+      fuentesConDatos.forEach(k => {
+        const [r, g, b] = FUENTE_RGB[k];
+        const pct = desglose.ingresos > 0 ? desglose[k] / desglose.ingresos : 0;
+        doc.setFillColor(r, g, b);
+        doc.rect(M, y - 3.2, 3, 3, 'F');
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(70, 70, 70);
+        doc.text(FUENTE_LABEL[k], M + 6, y);
+        doc.setFillColor(240, 242, 246);
+        doc.rect(barX, y - 3, barMaxW, 4, 'F');
+        doc.setFillColor(r, g, b);
+        doc.rect(barX, y - 3, barMaxW * pct, 4, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setTextColor(r, g, b); doc.setFontSize(8);
+        doc.text(fmt(desglose[k]), W - M - 12, y, { align: 'right' });
+        doc.setFont('helvetica', 'normal'); doc.setTextColor(120, 120, 120); doc.setFontSize(7.5);
+        doc.text(`${Math.round(pct * 100)}%`, W - M, y, { align: 'right' });
+        y += rowH;
+      });
+      y += 4;
+    }
+
     // ── Table ─────────────────────────────────────────────
-    let y = 74;
     doc.setTextColor(cr, cg, cb_); doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
     doc.text('MOVIMIENTOS DEL PERÍODO', M, y);
     doc.setDrawColor(cr, cg, cb_); doc.setLineWidth(0.3);
@@ -449,25 +517,25 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
 
   /* ── Derivados ───────────────────────────────────────── */
   const { desde: desdeFiltro, hasta: hastaFiltro } = rangoMes(filtroMes);
-  const movFiltrados = movimientos.filter(m => {
-    const enMes   = m.fecha >= desdeFiltro && m.fecha <= hastaFiltro;
-    const enTipo  = filtroTipo === 'todos' || m.tipo === filtroTipo;
-    return enMes && enTipo;
-  });
+  // Todos los movimientos del mes seleccionado (ingresos y gastos, sin
+  // filtrar por tipo) — es la base del tab Balance y de los reportes;
+  // movFiltrados además aplica filtroTipo, solo para la tabla de Movimientos.
+  const movimientosDelMes = movimientos.filter(m => m.fecha >= desdeFiltro && m.fecha <= hastaFiltro);
+  const movFiltrados = movimientosDelMes.filter(m => filtroTipo === 'todos' || m.tipo === filtroTipo);
 
-  const totalIngresos = movimientos.reduce((s, m) => m.tipo === 'ingreso' ? s + Number(m.monto) : s, 0);
-  const totalGastos   = movimientos.reduce((s, m) => m.tipo === 'gasto'   ? s + Number(m.monto) : s, 0);
+  const totalIngresos = movimientosDelMes.reduce((s, m) => m.tipo === 'ingreso' ? s + Number(m.monto) : s, 0);
+  const totalGastos   = movimientosDelMes.reduce((s, m) => m.tipo === 'gasto'   ? s + Number(m.monto) : s, 0);
   const saldo         = totalIngresos - totalGastos;
 
-  // Desglose de ingresos por fuente — mensualidades y ganancia de
+  // Desglose de ingresos por fuente del mes — mensualidades y ganancia de
   // uniformes/torneos llegan discriminadas por categoría desde los
   // movimientos automáticos; todo lo demás (donaciones, patrocinios,
   // movimientos manuales) cae en "Otros ingresos".
-  const sumaPorCategoria = (cat) => movimientos.reduce((s, m) => (m.tipo === 'ingreso' && m.categoria === cat) ? s + Number(m.monto) : s, 0);
-  const totalMensualidades     = sumaPorCategoria('Mensualidades cobradas');
-  const totalUniformesGanancia = sumaPorCategoria('Uniformes — ganancia');
-  const totalTorneosGanancia   = sumaPorCategoria('Torneos — ganancia');
-  const totalOtrosIngresos     = Math.max(0, totalIngresos - totalMensualidades - totalUniformesGanancia - totalTorneosGanancia);
+  const desgloseMes = desgloseIngresos(movimientosDelMes);
+  const totalMensualidades     = desgloseMes.mensualidades;
+  const totalUniformesGanancia = desgloseMes.uniformes;
+  const totalTorneosGanancia   = desgloseMes.torneos;
+  const totalOtrosIngresos     = desgloseMes.otros;
 
   const FUENTE_COLOR = { mensualidades: '#22C55E', uniformes: '#4A9EFF', torneos: '#F5A623', otros: '#A78BFA' };
   const pieIngresos = [
@@ -476,6 +544,8 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
     { key: 'torneos',       label: 'Torneos (ganancia)',   value: totalTorneosGanancia },
     { key: 'otros',         label: 'Otros ingresos',       value: totalOtrosIngresos },
   ].filter(d => d.value > 0);
+
+  const resumenMes = { mesTexto: mesLabel(filtroMes), ingresos: totalIngresos, gastos: totalGastos, saldo, desglose: desgloseMes };
 
   // Datos del gráfico — últimos 6 meses
   const chartData = (() => {
@@ -554,10 +624,22 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
       {tab === 'balance' && (
         <div className="space-y-5">
 
+          {/* Selector de mes — todo el tab responde a este período */}
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <p className="text-sm font-semibold text-[var(--text-pri)]">{mesLabel(filtroMes)}</p>
+            <select value={filtroMes} onChange={e => setFiltroMes(e.target.value)} className={`${selectCls} w-auto`}>
+              {Array.from({ length: 12 }, (_, i) => {
+                const d  = new Date(); d.setMonth(d.getMonth() - i);
+                const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                return <option key={ym} value={ym}>{mesLabel(ym)}</option>;
+              })}
+            </select>
+          </div>
+
           {/* KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <KpiCard icon={TrendingUp} label="Total Ingresos" value={fmt(totalIngresos)} color="#22C55E" sub="Todos los tiempos" />
-            <KpiCard icon={TrendingDown} label="Total Gastos"  value={fmt(totalGastos)}  color="#EF4444" sub="Todos los tiempos" />
+            <KpiCard icon={TrendingUp} label="Total Ingresos" value={fmt(totalIngresos)} color="#22C55E" sub={mesLabel(filtroMes)} />
+            <KpiCard icon={TrendingDown} label="Total Gastos"  value={fmt(totalGastos)}  color="#EF4444" sub={mesLabel(filtroMes)} />
             <KpiCard icon={Wallet} label="Saldo neto" value={fmt(saldo)} color={saldo >= 0 ? '#22C55E' : '#EF4444'} sub={saldo >= 0 ? 'Superávit' : 'Déficit'} />
           </div>
 
@@ -622,20 +704,14 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
           <div className={`${cardCls} flex items-center justify-between flex-wrap gap-3`}>
             <div>
               <p className="text-sm font-semibold text-[var(--text-pri)] mb-1">Exportar estado financiero</p>
-              <select value={filtroMes} onChange={e => setFiltroMes(e.target.value)} className={`${selectCls} w-auto`}>
-                {Array.from({ length: 12 }, (_, i) => {
-                  const d  = new Date(); d.setMonth(d.getMonth() - i);
-                  const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-                  return <option key={ym} value={ym}>{mesLabel(ym)}</option>;
-                })}
-              </select>
+              <p className="text-xs text-[var(--text-sec)]">{mesLabel(filtroMes)} — reporte ejecutivo con el desglose de arriba</p>
             </div>
             <div className="flex gap-2">
               <button onClick={exportarPDF}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-sub)] text-sm font-semibold text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition">
                 <FileText className="w-4 h-4" /> PDF
               </button>
-              <button onClick={() => exportCSV(movFiltrados, `finanzas-${filtroMes}.csv`)}
+              <button onClick={() => exportCSV(movimientosDelMes, `finanzas-${filtroMes}.csv`, resumenMes)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-sub)] text-sm font-semibold text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition">
                 <Download className="w-4 h-4" /> Excel
               </button>
@@ -672,7 +748,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-sub)] text-xs font-semibold text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition">
                 <FileText className="w-3.5 h-3.5" /> PDF
               </button>
-              <button onClick={() => exportCSV(movFiltrados, `finanzas-${filtroMes}.csv`)}
+              <button onClick={() => exportCSV(movFiltrados, `finanzas-${filtroMes}.csv`, resumenMes)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-sub)] text-xs font-semibold text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition">
                 <Download className="w-3.5 h-3.5" /> Excel
               </button>

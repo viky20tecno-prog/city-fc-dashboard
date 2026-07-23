@@ -14,6 +14,19 @@ const formatCOP = (n) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
     .format(parseFloat(n) || 0);
 
+// Mismo criterio que `torneosYaIniciados` en api/routes/publico.js: un torneo
+// futuro no debería aparecer como deuda/pendiente en el estado de cuenta. Si
+// no se puede determinar la fecha (inscripción vieja sin torneo_id, o torneo
+// sin fecha configurada), se muestra igual para no ocultar una deuda real.
+function torneosYaIniciados(torneosConfig, torneosJugador) {
+  const hoyStr = new Date(Date.now() - 5 * 3600000).toISOString().slice(0, 10);
+  const fechaTorneo = (torneoId) => (torneosConfig || []).find(td => String(td.id) === String(torneoId))?.fecha || null;
+  return (torneosJugador || []).filter(t => {
+    const f = fechaTorneo(t.torneo_id);
+    return !f || f <= hoyStr;
+  });
+}
+
 const ESTADO_ICON = {
   AL_DIA:    { icon: CheckCircle,   color: 'text-green-400',  bg: 'bg-green-400/10 border border-green-400/20'   },
   PENDIENTE: { icon: Clock,         color: 'text-[#F59E0B]',  bg: 'bg-yellow-500/10 border border-yellow-500/20' },
@@ -642,7 +655,7 @@ function extraerMotivoExento(notas) {
 
 export default function FinancieroContent({ cedula, jugador, mensualidades = [], torneos = [], suspensiones = [], onMensualidadUpdated, onJugadorUpdated, clubConfig }) {
   const misMensualidades = mensualidades.filter(m => String(m.cedula || m.player_id || '') === String(cedula));
-  const misTorneos       = torneos.filter(t => String(t.cedula || t.player_id || '') === String(cedula));
+  const misTorneos       = torneosYaIniciados(clubConfig?.torneos_iniciales, torneos.filter(t => String(t.cedula || t.player_id || '') === String(cedula)));
   const misSuspensiones  = suspensiones.filter(s => s.cedula === String(cedula));
 
   const descuento = Number(jugador?.descuento_pct ?? 0);

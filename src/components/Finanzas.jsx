@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import {
   ComposedChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
+  Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell,
 } from 'recharts';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
@@ -459,6 +459,24 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
   const totalGastos   = movimientos.reduce((s, m) => m.tipo === 'gasto'   ? s + Number(m.monto) : s, 0);
   const saldo         = totalIngresos - totalGastos;
 
+  // Desglose de ingresos por fuente — mensualidades y ganancia de
+  // uniformes/torneos llegan discriminadas por categoría desde los
+  // movimientos automáticos; todo lo demás (donaciones, patrocinios,
+  // movimientos manuales) cae en "Otros ingresos".
+  const sumaPorCategoria = (cat) => movimientos.reduce((s, m) => (m.tipo === 'ingreso' && m.categoria === cat) ? s + Number(m.monto) : s, 0);
+  const totalMensualidades     = sumaPorCategoria('Mensualidades cobradas');
+  const totalUniformesGanancia = sumaPorCategoria('Uniformes — ganancia');
+  const totalTorneosGanancia   = sumaPorCategoria('Torneos — ganancia');
+  const totalOtrosIngresos     = Math.max(0, totalIngresos - totalMensualidades - totalUniformesGanancia - totalTorneosGanancia);
+
+  const FUENTE_COLOR = { mensualidades: '#22C55E', uniformes: '#4A9EFF', torneos: '#F5A623', otros: '#A78BFA' };
+  const pieIngresos = [
+    { key: 'mensualidades', label: 'Mensualidades',      value: totalMensualidades },
+    { key: 'uniformes',     label: 'Uniformes (ganancia)', value: totalUniformesGanancia },
+    { key: 'torneos',       label: 'Torneos (ganancia)',   value: totalTorneosGanancia },
+    { key: 'otros',         label: 'Otros ingresos',       value: totalOtrosIngresos },
+  ].filter(d => d.value > 0);
+
   // Datos del gráfico — últimos 6 meses
   const chartData = (() => {
     const meses = [];
@@ -542,6 +560,38 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
             <KpiCard icon={TrendingDown} label="Total Gastos"  value={fmt(totalGastos)}  color="#EF4444" sub="Todos los tiempos" />
             <KpiCard icon={Wallet} label="Saldo neto" value={fmt(saldo)} color={saldo >= 0 ? '#22C55E' : '#EF4444'} sub={saldo >= 0 ? 'Superávit' : 'Déficit'} />
           </div>
+
+          {/* Desglose de ingresos por fuente */}
+          {pieIngresos.length > 0 && (
+            <div className={cardCls}>
+              <p className="text-sm font-semibold text-[var(--text-pri)] mb-4">Ingresos por fuente</p>
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-center">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {pieIngresos.map(d => (
+                    <div key={d.key} className="rounded-xl border border-[var(--border-sub)] p-3.5">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: FUENTE_COLOR[d.key] }} />
+                        <p className="text-[11px] text-[var(--text-sec)] leading-tight">{d.label}</p>
+                      </div>
+                      <p className="text-base font-bold text-[var(--text-pri)]">{fmt(d.value)}</p>
+                      <p className="text-[11px] text-[var(--text-sec)] mt-0.5">{totalIngresos > 0 ? Math.round(d.value / totalIngresos * 100) : 0}%</p>
+                    </div>
+                  ))}
+                </div>
+                <ResponsiveContainer width={180} height={180}>
+                  <PieChart>
+                    <Pie data={pieIngresos} dataKey="value" nameKey="label" innerRadius={48} outerRadius={78} paddingAngle={2} stroke="none">
+                      {pieIngresos.map(d => <Cell key={d.key} fill={FUENTE_COLOR[d.key]} />)}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-sub)', borderRadius: 10, fontSize: 12 }}
+                      formatter={(val, name) => [fmt(val), name]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
 
           {/* Gráfica */}
           <div className={cardCls}>

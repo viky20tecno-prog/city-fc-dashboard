@@ -532,20 +532,32 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
   // movimientos automáticos; todo lo demás (donaciones, patrocinios,
   // movimientos manuales) cae en "Otros ingresos".
   const desgloseMes = desgloseIngresos(movimientosDelMes);
-  const totalMensualidades     = desgloseMes.mensualidades;
-  const totalUniformesGanancia = desgloseMes.uniformes;
-  const totalTorneosGanancia   = desgloseMes.torneos;
-  const totalOtrosIngresos     = desgloseMes.otros;
 
   const FUENTE_COLOR = { mensualidades: '#22C55E', uniformes: '#4A9EFF', torneos: '#F5A623', otros: '#A78BFA' };
-  const pieIngresos = [
-    { key: 'mensualidades', label: 'Mensualidades',      value: totalMensualidades },
-    { key: 'uniformes',     label: 'Uniformes (ganancia)', value: totalUniformesGanancia },
-    { key: 'torneos',       label: 'Torneos (ganancia)',   value: totalTorneosGanancia },
-    { key: 'otros',         label: 'Otros ingresos',       value: totalOtrosIngresos },
+  const armarPie = (desglose) => [
+    { key: 'mensualidades', label: 'Mensualidades',        value: desglose.mensualidades },
+    { key: 'uniformes',     label: 'Uniformes (ganancia)', value: desglose.uniformes },
+    { key: 'torneos',       label: 'Torneos (ganancia)',   value: desglose.torneos },
+    { key: 'otros',         label: 'Otros ingresos',       value: desglose.otros },
   ].filter(d => d.value > 0);
+  const pieIngresos = armarPie(desgloseMes);
 
   const resumenMes = { mesTexto: mesLabel(filtroMes), ingresos: totalIngresos, gastos: totalGastos, saldo, desglose: desgloseMes };
+
+  // Año que corresponde al mes seleccionado — así si el admin elige un mes
+  // de un año anterior, el bloque "año" de arriba lo sigue automáticamente.
+  const anioSeleccionado  = filtroMes.split('-')[0];
+  const movimientosDelAnio = movimientos.filter(m => m.fecha.startsWith(anioSeleccionado));
+  const totalIngresosAnio = movimientosDelAnio.reduce((s, m) => m.tipo === 'ingreso' ? s + Number(m.monto) : s, 0);
+  const totalGastosAnio   = movimientosDelAnio.reduce((s, m) => m.tipo === 'gasto'   ? s + Number(m.monto) : s, 0);
+  const saldoAnio         = totalIngresosAnio - totalGastosAnio;
+  const desgloseAnio      = desgloseIngresos(movimientosDelAnio);
+  const pieIngresosAnio   = armarPie(desgloseAnio);
+  // Promedio mensual sobre los meses del año que ya tienen algún movimiento
+  // registrado (no /12 fijo — un club que arrancó en mayo no debería verse
+  // como si llevara medio año flojo).
+  const mesesConDatosAnio  = new Set(movimientosDelAnio.map(m => m.fecha.slice(0, 7))).size || 1;
+  const promedioMensualIngresos = totalIngresosAnio / mesesConDatosAnio;
 
   // Datos del gráfico — últimos 6 meses
   const chartData = (() => {
@@ -624,9 +636,53 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
       {tab === 'balance' && (
         <div className="space-y-5">
 
-          {/* Selector de mes — todo el tab responde a este período */}
+          {/* ── Año completo ── */}
+          <div>
+            <p className="text-xs font-semibold text-[var(--text-mut)] uppercase tracking-wide mb-3">Año {anioSeleccionado}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
+              <KpiCard icon={TrendingUp} label="Ingresos del año" value={fmt(totalIngresosAnio)} color="#22C55E" sub={`Año ${anioSeleccionado}`} />
+              <KpiCard icon={TrendingDown} label="Gastos del año"  value={fmt(totalGastosAnio)}  color="#EF4444" sub={`Año ${anioSeleccionado}`} />
+              <KpiCard icon={Wallet} label="Saldo del año" value={fmt(saldoAnio)} color={saldoAnio >= 0 ? '#22C55E' : '#EF4444'} sub={saldoAnio >= 0 ? 'Superávit' : 'Déficit'} />
+              <KpiCard icon={CalendarDays} label="Promedio mensual" value={fmt(promedioMensualIngresos)} color="var(--cc)" sub={`Ingresos · ${mesesConDatosAnio} mes${mesesConDatosAnio !== 1 ? 'es' : ''} con datos`} />
+            </div>
+
+            {pieIngresosAnio.length > 0 && (
+              <div className={cardCls}>
+                <p className="text-sm font-semibold text-[var(--text-pri)] mb-4">Ingresos por fuente — año {anioSeleccionado}</p>
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-center">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {pieIngresosAnio.map(d => (
+                      <div key={d.key} className="rounded-xl border border-[var(--border-sub)] p-3.5">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: FUENTE_COLOR[d.key] }} />
+                          <p className="text-[11px] text-[var(--text-sec)] leading-tight">{d.label}</p>
+                        </div>
+                        <p className="text-base font-bold text-[var(--text-pri)]">{fmt(d.value)}</p>
+                        <p className="text-[11px] text-[var(--text-sec)] mt-0.5">{totalIngresosAnio > 0 ? Math.round(d.value / totalIngresosAnio * 100) : 0}%</p>
+                      </div>
+                    ))}
+                  </div>
+                  <ResponsiveContainer width={180} height={180}>
+                    <PieChart>
+                      <Pie data={pieIngresosAnio} dataKey="value" nameKey="label" innerRadius={48} outerRadius={78} paddingAngle={2} stroke="none">
+                        {pieIngresosAnio.map(d => <Cell key={d.key} fill={FUENTE_COLOR[d.key]} />)}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-sub)', borderRadius: 10, fontSize: 12 }}
+                        formatter={(val, name) => [fmt(val), name]}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="h-px bg-[var(--border-sub)]" />
+
+          {/* ── Mes seleccionado ── */}
           <div className="flex items-center justify-between flex-wrap gap-3">
-            <p className="text-sm font-semibold text-[var(--text-pri)]">{mesLabel(filtroMes)}</p>
+            <p className="text-xs font-semibold text-[var(--text-mut)] uppercase tracking-wide">{mesLabel(filtroMes)}</p>
             <select value={filtroMes} onChange={e => setFiltroMes(e.target.value)} className={`${selectCls} w-auto`}>
               {Array.from({ length: 12 }, (_, i) => {
                 const d  = new Date(); d.setMonth(d.getMonth() - i);

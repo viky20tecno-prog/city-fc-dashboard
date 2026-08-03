@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import QRCodeLib from 'qrcode';
 import { getClubId } from '../../services/api';
+import { temaCarnet } from '../../lib/carnetFondos';
 
 function esc(str) {
   if (str === null || str === undefined) return '';
@@ -100,7 +101,6 @@ function SelloHolograma({ color, initials, logoUrl, dark }) {
 }
 
 export default function TabCarnet({ jugador, clubConfig = {} }) {
-  const [plantilla, setPlantilla] = useState('oscuro');
   const [lado, setLado] = useState('frente');
 
   const nombre    = (jugador['nombre(s)']  || jugador.nombre    || '').trim();
@@ -112,12 +112,10 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
   const redes      = clubConfig?.redes_sociales || {};
   const initials   = clubNombre.split(' ').slice(0, 3).map(w => w[0]).join('').toUpperCase().slice(0, 3) || 'FC';
 
-  const dark = plantilla === 'oscuro';
-  const th = dark
-    ? { bgCard: 'linear-gradient(155deg,#111111 0%,#0E0E16 100%)', textPri: '#F0F0F0', textSec: '#AAAAAA', textMut: '#666666',
-        border: `${clubColor}40`, borderImg: `${clubColor}55`, divider: '#1E1E28', photoBg: '#1A1A26' }
-    : { bgCard: 'linear-gradient(155deg,#FFFFFF 0%,#F5F5F5 100%)', textPri: '#111111', textSec: '#444444', textMut: '#888888',
-        border: `${clubColor}50`, borderImg: `${clubColor}60`, divider: '#EBEBEB', photoBg: '#E0E0E0' };
+  // El fondo del carnet es UNA elección por club (no por jugador) — se configura
+  // en el wizard "Configura tu club" y aplica igual a todos, ver lib/carnetFondos.js.
+  const th = temaCarnet(clubConfig?.carnet_fondo || 'oscuro', clubColor);
+  const dark = th.dark;
 
   const verifyBase = typeof window !== 'undefined' ? window.location.origin : 'https://zensports.zenpra.ai';
   const verifyParams = new URLSearchParams({
@@ -195,26 +193,6 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
 
   return (
     <div className="space-y-4">
-      {/* Template selector */}
-      <div>
-        <p className="text-xs text-[var(--text-mut)] uppercase tracking-wider mb-2">Plantilla</p>
-        <div className="flex gap-2">
-          {[{ key: 'oscuro', label: 'Oscuro', swatch: '#111111' }, { key: 'claro', label: 'Claro', swatch: '#FFFFFF' }].map(({ key, label, swatch }) => (
-            <button
-              key={key}
-              onClick={() => setPlantilla(key)}
-              className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold border transition"
-              style={plantilla === key
-                ? { borderColor: clubColor, color: clubColor, background: `${clubColor}12` }
-                : { borderColor: 'var(--border-sub)', color: 'var(--text-mut)' }}
-            >
-              <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: swatch, border: '1px solid rgba(128,128,128,0.3)', flexShrink: 0 }} />
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Side toggle */}
       <div>
         <p className="text-xs text-[var(--text-mut)] uppercase tracking-wider mb-2">Vista</p>
@@ -371,7 +349,7 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
         style={{ borderColor: `${clubColor}40` }}
       >
         <Printer className="w-4 h-4" style={{ color: clubColor }} />
-        Imprimir {lado === 'frente' ? 'Frente' : 'Dorso'} — {dark ? 'Oscuro' : 'Claro'}
+        Imprimir {lado === 'frente' ? 'Frente' : 'Dorso'} — {th.label}
       </button>
     </div>
   );

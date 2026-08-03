@@ -3,6 +3,7 @@ import { CheckCircle, ChevronRight, DollarSign, X, Phone, Palette, Building2, Ch
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
 import { applyTheme, getStoredTheme, THEMES } from '../lib/themes';
+import { CARNET_FONDOS, temaCarnet } from '../lib/carnetFondos';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 
@@ -91,6 +92,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
   const [colorClub,      setColorClub]      = useState(clubConfig?.color   || '#E14924');
   const [logoUrl,        setLogoUrl]        = useState(clubConfig?.logo_url || '');
   const [selectedTheme,  setSelectedTheme]  = useState(getStoredTheme);
+  const [carnetFondo,    setCarnetFondo]    = useState(clubConfig?.carnet_fondo || 'oscuro');
 
   const [mensualidad, setMensualidad] = useState({
     valor:       clubConfig?.valor_mensualidad ?? 0,
@@ -164,6 +166,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
         deporte:              deportesSeleccionados[0] || 'futbol',
         color:                colorClub,
         logo_url:             logoUrl || null,
+        carnet_fondo:         carnetFondo,
         valor_mensualidad:    mensualidad.valor,
         dias_gracia_mora:     mensualidad.dias_gracia,
         penalidad_mora:       mensualidad.penalidad,
@@ -462,6 +465,33 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                 <input ref={logoRef} type="file" accept="image/*" style={{ display: 'none' }}
                   onChange={e => e.target.files?.[0] && uploadLogo(e.target.files[0])} />
                 <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 8, marginBottom: 0 }}>PNG, JPG o SVG. Recomendado: fondo transparente.</p>
+              </div>
+
+              {/* Fondo del carnet de jugador */}
+              <div>
+                <label style={lbl}>Diseño del carnet de jugador</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                  {CARNET_FONDOS.map(f => {
+                    const isActive = carnetFondo === f.key;
+                    const bgCard = temaCarnet(f.key, colorClub).bgCard;
+                    return (
+                      <button key={f.key} type="button" onClick={() => setCarnetFondo(f.key)}
+                        style={{
+                          padding: '6px', borderRadius: 10,
+                          border: `2px solid ${isActive ? c : 'rgba(255,255,255,0.08)'}`,
+                          background: isActive ? `${c}10` : 'rgba(255,255,255,0.02)',
+                          cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 5,
+                          transition: 'border-color 0.2s, background 0.2s',
+                        }}>
+                        <div style={{ width: '100%', height: 40, borderRadius: 6, background: bgCard, border: '1px solid rgba(255,255,255,0.08)' }} />
+                        <span style={{ fontSize: 10, color: isActive ? c : '#8B95A3', fontWeight: isActive ? 700 : 500, transition: 'color 0.2s', textAlign: 'center' }}>
+                          {f.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p style={{ fontSize: 11, color: '#8B95A3', marginTop: 8, marginBottom: 0 }}>Aplica al carnet oficial de todos los jugadores del club — se puede cambiar cuando quieras.</p>
               </div>
             </div>
           )}

@@ -92,7 +92,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
   const [colorClub,      setColorClub]      = useState(clubConfig?.color   || '#E14924');
   const [logoUrl,        setLogoUrl]        = useState(clubConfig?.logo_url || '');
   const [selectedTheme,  setSelectedTheme]  = useState(getStoredTheme);
-  const [carnetFondo,    setCarnetFondo]    = useState(clubConfig?.carnet_fondo || 'oscuro');
+  const [carnetFondo,    setCarnetFondo]    = useState(clubConfig?.carnet_fondo || 'onyx');
 
   const [mensualidad, setMensualidad] = useState({
     valor:       clubConfig?.valor_mensualidad ?? 0,

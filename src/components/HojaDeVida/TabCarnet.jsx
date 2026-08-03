@@ -114,7 +114,7 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
 
   // El fondo del carnet es UNA elección por club (no por jugador) — se configura
   // en el wizard "Configura tu club" y aplica igual a todos, ver lib/carnetFondos.js.
-  const th = temaCarnet(clubConfig?.carnet_fondo || 'oscuro', clubColor);
+  const th = temaCarnet(clubConfig?.carnet_fondo || 'onyx', clubColor);
   const dark = th.dark;
 
   const verifyBase = typeof window !== 'undefined' ? window.location.origin : 'https://zensports.zenpra.ai';

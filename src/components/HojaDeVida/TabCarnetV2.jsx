@@ -192,7 +192,9 @@ export default function TabCarnetV2({ jugador, clubConfig = {} }) {
 
   const redesEntries = Object.entries(redes || {}).filter(([, v]) => v);
   const RED_ICONS = { instagram: Instagram, facebook: Facebook, youtube: Youtube, twitter: Globe, tiktok: Music, web: Globe };
-  const RedIcon = ({ red }) => { const Ic = RED_ICONS[red] || Link; return <Ic size={9} />; };
+  // Sin `color` explícito, lucide hereda currentColor del contexto — en el
+  // fondo oscuro del carnet eso lo dejaba casi invisible.
+  const RedIcon = ({ red }) => { const Ic = RED_ICONS[red] || Link; return <Ic size={10} color={th.textSec} strokeWidth={2} />; };
 
   const anio = new Date().getFullYear();
   const idCarnet = jugador.numero_camiseta ? String(jugador.numero_camiseta).padStart(3, '0') : (jugador.cedula || '—').slice(-5);
@@ -349,7 +351,7 @@ export default function TabCarnetV2({ jugador, clubConfig = {} }) {
           <LogoHeader variant="dorso" clubColor={clubColor} th={th} logoUrl={logoUrl} initials={initials} clubNombre={clubNombre} clubSub={clubSub} />
           <div style={{ height: '1px', margin: '0 16px', background: th.divider, position: 'relative', zIndex: 1 }} />
 
-          <div style={{ position: 'relative', zIndex: 1, display: 'flex', gap: '12px', padding: '12px 16px' }}>
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', gap: '16px', padding: '12px 16px' }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {[
                 { Icon: User,       label: 'Nombre',      value: `${nombre} ${apellidos}`.trim() || '—' },
@@ -369,8 +371,12 @@ export default function TabCarnetV2({ jugador, clubConfig = {} }) {
               ))}
             </div>
             {verifyUrl && (
-              <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                <div style={{ width: '84px', height: '84px', borderRadius: '8px', overflow: 'hidden', border: `1.5px solid ${th.border}`, background: '#111111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              // justifyContent:center — esta columna queda estirada por la fila
+              // (la columna de datos, a la izquierda, es más alta con sus 6
+              // filas), sin centrar el QR quedaba pegado arriba y dejaba un
+              // hueco vacío abajo, muy cerca del borde derecho de la tarjeta.
+              <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <div style={{ width: '100px', height: '100px', borderRadius: '8px', overflow: 'hidden', border: `1.5px solid ${th.border}`, background: '#111111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {qrDataUrl
                     ? <img src={qrDataUrl} alt="QR" style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated' }} />
                     : <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${clubColor}`, borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />

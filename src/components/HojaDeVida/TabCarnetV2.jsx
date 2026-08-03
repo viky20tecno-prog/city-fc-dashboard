@@ -47,6 +47,9 @@ function LogoHeader({ variant, clubColor, th, logoUrl, initials, clubNombre, clu
       position: 'relative', zIndex: 1,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: variant === 'dorso' ? '12px 16px 9px' : '13px 16px 0',
+      // Scrim para que el nombre/subtítulo del club se lean siempre, sin
+      // importar si las rayas diagonales del fondo pasan justo por debajo.
+      background: 'linear-gradient(180deg,rgba(3,3,4,0.6) 0%,rgba(3,3,4,0.28) 70%,transparent 100%)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {logoUrl
@@ -273,19 +276,22 @@ export default function TabCarnetV2({ jugador, clubConfig = {} }) {
           <LogoHeader variant="frente" clubColor={clubColor} th={th} logoUrl={logoUrl} initials={initials} clubNombre={clubNombre} clubSub={clubSub} />
 
           <div style={{ position: 'relative', zIndex: 1, display: 'flex', gap: '10px', padding: '14px 16px 0' }}>
-            {/* Número + posición */}
-            <div style={{ flexShrink: 0, width: '58px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: '4px' }}>
-              {jugador.numero_camiseta && (
-                <div style={{ fontFamily: "'Sport Event',cursive", fontSize: '34px', color: th.textPri, lineHeight: 0.85 }}>
-                  {jugador.numero_camiseta}
-                </div>
-              )}
-              {jugador.posicion && (
-                <div style={{ fontSize: '8px', fontWeight: 700, color: clubColor, letterSpacing: '0.5px', textTransform: 'uppercase', marginTop: '4px', lineHeight: 1.25 }}>
-                  {jugador.posicion}
-                </div>
-              )}
-            </div>
+            {/* Número + posición — solo si hay al menos uno de los dos, para
+                no dejar una columna vacía cuando el jugador no los tiene. */}
+            {(jugador.numero_camiseta || jugador.posicion) && (
+              <div style={{ flexShrink: 0, width: '58px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: '4px' }}>
+                {jugador.numero_camiseta && (
+                  <div style={{ fontFamily: "'Sport Event',cursive", fontSize: '34px', color: th.textPri, lineHeight: 0.85 }}>
+                    {jugador.numero_camiseta}
+                  </div>
+                )}
+                {jugador.posicion && (
+                  <div style={{ fontSize: '8px', fontWeight: 700, color: clubColor, letterSpacing: '0.5px', textTransform: 'uppercase', marginTop: '4px', lineHeight: 1.25 }}>
+                    {jugador.posicion}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Foto */}
             <div style={{

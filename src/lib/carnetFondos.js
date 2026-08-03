@@ -112,6 +112,10 @@ const HALFTONE_V2 = 'radial-gradient(rgba(255,255,255,0.09) 0.7px,transparent 0.
 // la banda "holograma" de v1: un linear-gradient con cortes duros, acotado
 // con background-size/position/no-repeat para que no invada el resto de la
 // tarjeta (zona segura: nombre/apellido no pasan nunca por ahí).
+// Acotadas a 58%/42% (antes 85%/65%) para que se queden en la esquina y no
+// crucen por debajo del nombre/subtítulo del club en el header — esa zona
+// además ahora tiene su propio scrim (ver LogoHeader en TabCarnetV2.jsx),
+// pero conviene que las rayas ya no invadan tanto de entrada.
 const stripesV2 = (c) => `linear-gradient(112deg,
     transparent 0%, transparent 6%,
     ${c} 6%, ${c} 15%,
@@ -119,7 +123,7 @@ const stripesV2 = (c) => `linear-gradient(112deg,
     ${c} 19%, ${c} 26%,
     transparent 26%, transparent 29%,
     rgba(255,255,255,0.5) 29%, rgba(255,255,255,0.5) 30.5%,
-    transparent 30.5%, transparent 100%) top left/85% 65% no-repeat`;
+    transparent 30.5%, transparent 100%) top left/58% 42% no-repeat`;
 
 const BASE_V2 = 'linear-gradient(165deg,#131316 0%,#0A0A0C 55%,#050506 100%)';
 
@@ -134,8 +138,8 @@ export function fondoCarnetV2(clubColor) {
 // para que la opacidad baja se lea como un grabado, sin importar los colores
 // reales del logo.
 export const WATERMARK_LOGO_STYLE = {
-  position: 'absolute', right: '-6%', top: '32%', width: '58%', maxWidth: '220px',
-  opacity: 0.07, filter: 'brightness(0) invert(1)', pointerEvents: 'none', zIndex: 0,
+  position: 'absolute', right: '-8%', top: '40%', width: '46%', maxWidth: '170px',
+  opacity: 0.045, filter: 'brightness(0) invert(1)', pointerEvents: 'none', zIndex: 0,
 };
 
 // Paleta completa derivada del color del club — usada por TabCarnetV2.jsx y

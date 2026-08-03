@@ -64,7 +64,7 @@ function NoVerificadoV2({ color, clubNombre, clubSub, logoUrl, initials, estado,
       <div style={{ position: 'relative', background: bgCard, border: '1px solid rgba(239,68,68,0.35)', borderRadius: 24, overflow: 'hidden', boxShadow: '0 0 60px rgba(239,68,68,0.10), 0 24px 64px rgba(0,0,0,0.5)' }}>
         {logoUrl && <img src={logoUrl} alt="" style={WATERMARK_LOGO_STYLE} />}
 
-        <div style={{ position: 'relative', zIndex: 1, padding: '18px 24px 14px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ position: 'relative', zIndex: 1, padding: '18px 24px 14px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 12, background: 'linear-gradient(180deg,rgba(3,3,4,0.6) 0%,rgba(3,3,4,0.28) 70%,transparent 100%)' }}>
           {logoUrl
             ? <img src={logoUrl} alt="logo" style={{ width: 38, height: 38, objectFit: 'contain', borderRadius: 8 }} />
             : (
@@ -227,7 +227,7 @@ function VerificadoV2({ color, clubNombre, clubSub, logoUrl, initials, temporada
       <div style={{ position: 'relative', background: bgCard, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, overflow: 'hidden', boxShadow: `0 0 60px ${color}18, 0 24px 64px rgba(0,0,0,0.5)` }}>
         {logoUrl && <img src={logoUrl} alt="" style={WATERMARK_LOGO_STYLE} />}
 
-        <div style={{ position: 'relative', zIndex: 1, padding: '18px 24px 14px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ position: 'relative', zIndex: 1, padding: '18px 24px 14px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(180deg,rgba(3,3,4,0.6) 0%,rgba(3,3,4,0.28) 70%,transparent 100%)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {logoUrl
               ? <img src={logoUrl} alt="logo" style={{ width: 38, height: 38, objectFit: 'contain', borderRadius: 8 }} />

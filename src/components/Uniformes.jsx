@@ -72,6 +72,8 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
   const [tabPedidos, setTabPedidos] = useState('PENDIENTE');
   const [gruposExpandidos, setGruposExpandidos] = useState(() => new Set());
   const [fechaSeleccionada, setFechaSeleccionada] = useState(null);
+  const [buscaPedido, setBuscaPedido] = useState('');
+  const [filtroTalla, setFiltroTalla] = useState('TODAS');
   const [cambiandoEstado, setCambiandoEstado] = useState(null);
   const [generandoPDF, setGenerandoPDF] = useState(false);
   const [pedidoEditando, setPedidoEditando] = useState(null);
@@ -1352,7 +1354,15 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
           { key: 'PAGADO',    label: 'Pagados',    count: pagGrupos.length,  activeClass: 'bg-[rgba(34,197,94,0.12)] text-green-400 border-green-400/30' },
           { key: 'ENTREGADO', label: 'Entregados', count: entGrupos.length,  activeClass: 'bg-[var(--cc12)] text-[var(--cc)] border-[var(--cc)]/30' },
         ];
-        const gruposVista = sortByName(tabPedidos === 'PENDIENTE' ? pendGrupos : tabPedidos === 'PAGADO' ? pagGrupos : entGrupos);
+        const tallasDisponibles = [...new Set(pedidosDeFecha.map(p => p.talla).filter(Boolean))].sort();
+        const qPedido = buscaPedido.trim().toLowerCase();
+        const gruposBase = tabPedidos === 'PENDIENTE' ? pendGrupos : tabPedidos === 'PAGADO' ? pagGrupos : entGrupos;
+        const gruposFiltrados = gruposBase.filter(g => {
+          if (filtroTalla !== 'TODAS' && !g.subpedidos.some(p => p.talla === filtroTalla)) return false;
+          if (!qPedido) return true;
+          return (g.nombre || '').toLowerCase().includes(qPedido) || String(g.cedula || '').includes(qPedido);
+        });
+        const gruposVista = sortByName(gruposFiltrados);
 
         const ESTADO_BADGE = {
           PENDIENTE: 'bg-[rgba(245,166,35,0.12)] text-[#F5A623] border-[#F5A623]/20',
@@ -1392,10 +1402,37 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
               </div>
             </div>
 
+            {pedidosDeFecha.length > 0 && (
+              <div className="flex gap-2 flex-wrap mb-4">
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-mut)]" />
+                  <input
+                    type="search"
+                    value={buscaPedido}
+                    onChange={e => setBuscaPedido(e.target.value)}
+                    placeholder="Buscar por nombre o cédula..."
+                    className="w-full bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl pl-8 pr-3 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition"
+                  />
+                </div>
+                {tallasDisponibles.length > 0 && (
+                  <select
+                    value={filtroTalla}
+                    onChange={e => setFiltroTalla(e.target.value)}
+                    className="bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-3 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition"
+                  >
+                    <option value="TODAS">Todas las tallas</option>
+                    {tallasDisponibles.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                )}
+              </div>
+            )}
+
             {pedidosDeFecha.length === 0 ? (
               <p className="text-center text-sm text-[var(--text-sec)] py-8">Aún no hay pedidos registrados</p>
             ) : gruposVista.length === 0 ? (
-              <p className="text-center text-sm text-[var(--text-sec)] py-8">No hay pedidos en este estado</p>
+              <p className="text-center text-sm text-[var(--text-sec)] py-8">
+                {gruposBase.length === 0 ? 'No hay pedidos en este estado' : 'Sin resultados para el filtro aplicado'}
+              </p>
             ) : (
               <div className="space-y-2">
                 {gruposVista.map(g => {

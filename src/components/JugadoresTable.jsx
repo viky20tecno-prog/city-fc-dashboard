@@ -18,16 +18,19 @@ const peorEstado = (mensJugador) =>
 
 /* ── colores de cada estado para el dropdown ── */
 const ESTADO_DOT = {
-  TODOS:    '#6A6A6A',
-  AL_DIA:   '#22C55E',
-  PENDIENTE:'#F59E0B',
-  PARCIAL:  '#60A5FA',
-  MORA:     '#EF4444',
-  EXENTO:   '#38bdf8',
+  TODOS:      '#6A6A6A',
+  AL_DIA:     '#22C55E',
+  PENDIENTE:  '#F59E0B',
+  PARCIAL:    '#60A5FA',
+  MORA:       '#EF4444',
+  EXENTO:     '#38bdf8',
+  CON_DEUDA:  '#F59E0B',
+  ENTREGADO:  '#22C55E',
+  SIN_PEDIDO: '#6A6A6A',
 };
 
-/* ── dropdown para filtro de estado de pago ── */
-function FiltroEstadoDropdown({ value, onChange, opciones }) {
+/* ── dropdown para filtro de estado de pago (reusado también para uniforme) ── */
+function FiltroEstadoDropdown({ value, onChange, opciones, placeholder = 'Estado', todosLabel = 'Todos los estados', labels = {} }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -46,7 +49,7 @@ function FiltroEstadoDropdown({ value, onChange, opciones }) {
       >
         <span className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ESTADO_DOT[value] || '#6A6A6A' }} />
-          {value === 'TODOS' ? 'Estado' : value}
+          {value === 'TODOS' ? placeholder : (labels[value] || value)}
         </span>
         <ChevronDown className={`w-4 h-4 text-[var(--text-sec)] transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -64,7 +67,7 @@ function FiltroEstadoDropdown({ value, onChange, opciones }) {
               style={{ color: value === opt ? 'var(--cc)' : 'var(--text-pri)' }}
             >
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ESTADO_DOT[opt] || '#6A6A6A' }} />
-              <span className="flex-1">{opt === 'TODOS' ? 'Todos los estados' : opt}</span>
+              <span className="flex-1">{opt === 'TODOS' ? todosLabel : (labels[opt] || opt)}</span>
               {value === opt && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
             </button>
           ))}
@@ -224,6 +227,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
   const [filtroEstado, setFiltroEstado]   = useState('TODOS');
   const [filtroDeporte, setFiltroDeporte] = useState('TODOS');
   const [filtroCategoria, setFiltroCategoria] = useState('TODOS');
+  const [filtroUniforme, setFiltroUniforme] = useState('TODOS'); // TODOS | CON_DEUDA | ENTREGADO | SIN_PEDIDO
   const [sortField, setSortField]         = useState('nombreCompleto');
   const [sortDir, setSortDir]             = useState('asc');
   const [jugadorDetalle, setJugadorDetalle]       = useState(null);
@@ -392,13 +396,21 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
               c => c.categoria === filtroCategoria || c.equipo === filtroCategoria
             ));
         const matchDeporte = filtroDeporte === 'TODOS' || j.deporte === filtroDeporte;
-        return matchSearch && matchEstado && matchCategoria && matchDeporte;
+        const matchUniforme = filtroUniforme === 'TODOS' || (() => {
+          const pedidos = (uniformes || []).filter(u => String(u.cedula) === String(j.cedula));
+          if (filtroUniforme === 'SIN_PEDIDO') return pedidos.length === 0;
+          const conDeuda = pedidos.some(u => u.estado === 'PENDIENTE' || u.estado === 'MORA' || u.estado === 'PARCIAL' || u.estado === 'ABONO');
+          if (filtroUniforme === 'CON_DEUDA') return conDeuda;
+          if (filtroUniforme === 'ENTREGADO') return pedidos.length > 0 && !conDeuda;
+          return true;
+        })();
+        return matchSearch && matchEstado && matchCategoria && matchDeporte && matchUniforme;
       })
       .sort((a, b) => {
         const cmp = (a[sortField] || '').toString().localeCompare((b[sortField] || '').toString(), 'es', { numeric: true });
         return sortDir === 'asc' ? cmp : -cmp;
       });
-  }, [jugadoresConPago, search, filtroEstado, filtroDeporte, filtroCategoria, sortField, sortDir, verArchivados]);
+  }, [jugadoresConPago, search, filtroEstado, filtroDeporte, filtroCategoria, filtroUniforme, uniformes, sortField, sortDir, verArchivados]);
 
   const toggleSort = (field) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -1323,6 +1335,18 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   <FiltroCategoriaDropdown value={filtroCategoria} onChange={setFiltroCategoria} opciones={opcionesCategoria} />
                 )}
 
+                {/* Filtro de deuda de uniforme */}
+                {(uniformes || []).length > 0 && (
+                  <FiltroEstadoDropdown
+                    value={filtroUniforme}
+                    onChange={setFiltroUniforme}
+                    opciones={['TODOS', 'CON_DEUDA', 'ENTREGADO', 'SIN_PEDIDO']}
+                    placeholder="Uniforme"
+                    todosLabel="Todos (uniforme)"
+                    labels={{ CON_DEUDA: 'Con deuda', ENTREGADO: 'Al día / Entregado', SIN_PEDIDO: 'Sin pedido' }}
+                  />
+                )}
+
                 {/* Exportar Excel */}
                 <button
                   onClick={exportarCSV}
@@ -1415,7 +1439,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
             </div>
 
             {/* Fila 2: chips de filtros activos */}
-            {(filtroEstado !== 'TODOS' || filtroCategoria !== 'TODOS' || search) && (
+            {(filtroEstado !== 'TODOS' || filtroCategoria !== 'TODOS' || filtroUniforme !== 'TODOS' || search) && (
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-[var(--text-mut)]">Filtros activos:</span>
                 {filtroCategoria !== 'TODOS' && (
@@ -1439,6 +1463,17 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   >
                     <span className="w-2 h-2 rounded-full" style={{ background: ESTADO_DOT[filtroEstado] }} />
                     {filtroEstado}
+                    <X className="w-3 h-3" />
+                  </span>
+                )}
+                {filtroUniforme !== 'TODOS' && (
+                  <span
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition hover:opacity-80"
+                    style={{ background: `${ESTADO_DOT[filtroUniforme]}20`, border: `1px solid ${ESTADO_DOT[filtroUniforme]}50`, color: ESTADO_DOT[filtroUniforme] }}
+                    onClick={() => setFiltroUniforme('TODOS')}
+                  >
+                    <Shirt className="w-3 h-3" />
+                    {{ CON_DEUDA: 'Uniforme: con deuda', ENTREGADO: 'Uniforme: al día', SIN_PEDIDO: 'Uniforme: sin pedido' }[filtroUniforme]}
                     <X className="w-3 h-3" />
                   </span>
                 )}

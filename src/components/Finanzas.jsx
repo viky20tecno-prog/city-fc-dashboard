@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp, TrendingDown, Wallet, Plus, Trash2, Loader2,
   Users, ChevronDown, ChevronUp, Download, FileText, X,
-  CheckCircle, AlertCircle, Pencil, CalendarDays,
+  CheckCircle, AlertCircle, Pencil, CalendarDays, Search,
 } from 'lucide-react';
 import {
   ComposedChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -179,6 +179,7 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
   // Filtro movimientos
   const [filtroTipo,   setFiltroTipo]   = useState('todos');
   const [filtroMes,    setFiltroMes]    = useState(mesActual());
+  const [buscaMov,     setBuscaMov]     = useState('');
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -521,7 +522,11 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
   // filtrar por tipo) — es la base del tab Balance y de los reportes;
   // movFiltrados además aplica filtroTipo, solo para la tabla de Movimientos.
   const movimientosDelMes = movimientos.filter(m => m.fecha >= desdeFiltro && m.fecha <= hastaFiltro);
-  const movFiltrados = movimientosDelMes.filter(m => filtroTipo === 'todos' || m.tipo === filtroTipo);
+  const qMov = buscaMov.trim().toLowerCase();
+  const movFiltrados = movimientosDelMes.filter(m =>
+    (filtroTipo === 'todos' || m.tipo === filtroTipo)
+    && (!qMov || (m.descripcion || '').toLowerCase().includes(qMov) || (m.categoria || '').toLowerCase().includes(qMov))
+  );
 
   const totalIngresos = movimientosDelMes.reduce((s, m) => m.tipo === 'ingreso' ? s + Number(m.monto) : s, 0);
   const totalGastos   = movimientosDelMes.reduce((s, m) => m.tipo === 'gasto'   ? s + Number(m.monto) : s, 0);
@@ -799,6 +804,16 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
                 </button>
               ))}
             </div>
+            <div className="relative w-full sm:w-56">
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-mut)]" />
+              <input
+                type="search"
+                value={buscaMov}
+                onChange={e => setBuscaMov(e.target.value)}
+                placeholder="Buscar por descripción o categoría..."
+                className="w-full pl-8 pr-3 py-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-sub)] text-[var(--text-pri)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30 focus:border-[var(--cc)]"
+              />
+            </div>
             <div className="ml-auto flex gap-2">
               <button onClick={() => exportarPDF()}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border-sub)] text-xs font-semibold text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition">
@@ -837,7 +852,9 @@ export default function Finanzas({ color = 'var(--cc)', clubNombre = 'Mi Club', 
           {/* Tabla */}
           <div className={cardCls}>
             {movFiltrados.length === 0 ? (
-              <p className="text-center text-sm text-[var(--text-sec)] py-8">No hay movimientos en este período</p>
+              <p className="text-center text-sm text-[var(--text-sec)] py-8">
+                {movimientosDelMes.length === 0 ? 'No hay movimientos en este período' : 'Sin resultados para el filtro aplicado'}
+              </p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-max text-sm">

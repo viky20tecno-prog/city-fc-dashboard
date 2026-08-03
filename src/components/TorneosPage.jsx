@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, Fragment } from 'react';
 import {
   Trophy, Plus, ArrowLeft, UserPlus, Save,
   Loader2, Pencil, Trash2, X, Users, Download, AlertTriangle,
-  ArrowUpAZ, ArrowDownAZ, ArrowUp01, ArrowDown01, Tag,
+  ArrowUpAZ, ArrowDownAZ, ArrowUp01, ArrowDown01, Tag, Search,
 } from 'lucide-react';
 import { hexToRgb, loadLogoDataUrl, drawPdfHeader, drawPdfFooter, drawPdfTableHead } from '../lib/pdfHelpers';
 import { authFetch } from '../lib/authFetch';
@@ -37,6 +37,8 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   const [editIdx,           setEditIdx]            = useState(null);
   const [editForm,          setEditForm]           = useState({ nombre: '', fecha: '', valor_oficial: '', valor_inscrito: '', descripcion: '' });
   const [sortCol,           setSortCol]            = useState({ campo: null, dir: 'asc' }); // campo: 'nombre'|'oficial'|'inscrito'|'pagado'|'saldo'
+  const [filtroEstadoInscritos, setFiltroEstadoInscritos] = useState('TODOS'); // 'TODOS'|'AL_DIA'|'ABONO'|'PENDIENTE'
+  const [buscaInscrito,     setBuscaInscrito]      = useState('');
   const [torneosSort,       setTorneosSort]        = useState({ campo: 'nombre', dir: 'asc' }); // campo: 'nombre' | 'monto'
   const [descOpen,          setDescOpen]           = useState(null);
   const [descEdit,          setDescEdit]           = useState({});
@@ -66,6 +68,10 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
   }, [clubId]);
 
   useEffect(() => { cargarEnrollments(); cargarJugadores(); }, [cargarEnrollments, cargarJugadores]);
+
+  // Al cambiar de torneo (o volver al listado), arrancar limpio en vez de
+  // arrastrar el filtro/búsqueda del torneo anterior.
+  useEffect(() => { setFiltroEstadoInscritos('TODOS'); setBuscaInscrito(''); }, [torneoSeleccionado]);
 
   const patchConfig = useCallback(async (body) => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -627,6 +633,16 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
         const abonos      = inscritosDelTorneo.filter(e => e.estado === 'ABONO').length;
         const pendientes  = inscritosDelTorneo.filter(e => e.estado === 'PENDIENTE').length;
         const totalRec    = inscritosDelTorneo.reduce((s, e) => s + parseFloat(e.valor_pagado || 0), 0);
+        const qInscrito   = buscaInscrito.trim().toLowerCase();
+        const inscritosConNombre = inscritosDelTorneo.map(e => {
+          const jug = jugadoresClub.find(j => String(j.cedula) === String(e.cedula));
+          return { ...e, _nombre: jug ? `${jug.nombre} ${jug.apellidos || ''}`.trim().toUpperCase() : `CC ${e.cedula}` };
+        });
+        const inscritosFiltrados = inscritosConNombre.filter(e => {
+          if (filtroEstadoInscritos !== 'TODOS' && e.estado !== filtroEstadoInscritos) return false;
+          if (!qInscrito) return true;
+          return e._nombre.toLowerCase().includes(qInscrito) || String(e.cedula || '').includes(qInscrito);
+        });
         const renderSortTh = (campo, label, tipo) => {
           const activo = sortCol.campo === campo;
           const desc   = activo && sortCol.dir === 'desc';
@@ -674,22 +690,37 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl p-4">
+              <button type="button" onClick={() => setFiltroEstadoInscritos('TODOS')}
+                className={`text-left bg-[var(--bg-card)] border rounded-xl p-4 transition ${filtroEstadoInscritos === 'TODOS' ? 'border-[var(--cc)]' : 'border-[var(--cc20)] hover:border-[var(--cc)]/50'}`}>
                 <p className="text-xs text-[var(--text-sec)]">Inscritos</p>
                 <p className="text-2xl font-bold text-[var(--text-pri)] mt-1">{inscritosDelTorneo.length}</p>
-              </div>
-              <div className="bg-[var(--bg-card)] border border-green-500/20 rounded-xl p-4">
+              </button>
+              <button type="button" onClick={() => setFiltroEstadoInscritos(filtroEstadoInscritos === 'AL_DIA' ? 'TODOS' : 'AL_DIA')}
+                className={`text-left bg-[var(--bg-card)] border rounded-xl p-4 transition ${filtroEstadoInscritos === 'AL_DIA' ? 'border-green-500' : 'border-green-500/20 hover:border-green-500/50'}`}>
                 <p className="text-xs text-green-400">Al día</p>
                 <p className="text-2xl font-bold text-green-400 mt-1">{pagados}</p>
-              </div>
-              <div className="bg-[var(--bg-card)] border border-yellow-500/20 rounded-xl p-4">
+              </button>
+              <button type="button" onClick={() => setFiltroEstadoInscritos(filtroEstadoInscritos === 'ABONO' ? 'TODOS' : 'ABONO')}
+                className={`text-left bg-[var(--bg-card)] border rounded-xl p-4 transition ${filtroEstadoInscritos === 'ABONO' ? 'border-yellow-500' : 'border-yellow-500/20 hover:border-yellow-500/50'}`}>
                 <p className="text-xs text-yellow-400">Abono</p>
                 <p className="text-2xl font-bold text-yellow-400 mt-1">{abonos}</p>
-              </div>
-              <div className="bg-[var(--bg-card)] border border-red-500/20 rounded-xl p-4">
+              </button>
+              <button type="button" onClick={() => setFiltroEstadoInscritos(filtroEstadoInscritos === 'PENDIENTE' ? 'TODOS' : 'PENDIENTE')}
+                className={`text-left bg-[var(--bg-card)] border rounded-xl p-4 transition ${filtroEstadoInscritos === 'PENDIENTE' ? 'border-red-500' : 'border-red-500/20 hover:border-red-500/50'}`}>
                 <p className="text-xs text-red-400">Pendiente</p>
                 <p className="text-2xl font-bold text-red-400 mt-1">{pendientes}</p>
-              </div>
+              </button>
+            </div>
+
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-mut)]" />
+              <input
+                type="search"
+                value={buscaInscrito}
+                onChange={e => setBuscaInscrito(e.target.value)}
+                placeholder="Buscar inscrito por nombre o cédula..."
+                className="w-full bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl pl-9 pr-3 py-2 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition"
+              />
             </div>
 
             <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl px-5 py-3 flex items-center gap-3">
@@ -775,6 +806,11 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                 <Users className="w-8 h-8 text-[var(--text-mut)] mx-auto mb-2" />
                 <p className="text-sm text-[var(--text-sec)]">Ningún jugador inscrito aún.</p>
               </div>
+            ) : inscritosFiltrados.length === 0 ? (
+              <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl p-10 text-center">
+                <Users className="w-8 h-8 text-[var(--text-mut)] mx-auto mb-2" />
+                <p className="text-sm text-[var(--text-sec)]">Sin resultados para el filtro aplicado.</p>
+              </div>
             ) : (
               <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl overflow-hidden">
                 <div className="overflow-x-auto">
@@ -793,11 +829,7 @@ export default function TorneosPage({ color, clubNombre, clubConfig }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {[...inscritosDelTorneo]
-                        .map(e => {
-                          const jug = jugadoresClub.find(j => String(j.cedula) === String(e.cedula));
-                          return { ...e, _nombre: jug ? `${jug.nombre} ${jug.apellidos || ''}`.trim().toUpperCase() : `CC ${e.cedula}` };
-                        })
+                      {[...inscritosFiltrados]
                         .sort((a, b) => {
                           if (!sortCol.campo) return 0;
                           const dirMul = sortCol.dir === 'asc' ? 1 : -1;

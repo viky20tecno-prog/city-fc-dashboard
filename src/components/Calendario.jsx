@@ -244,6 +244,7 @@ export default function Calendario({ color, clubId }) {
   const [year,           setYear]           = useState(today.getFullYear());
   const [month,          setMonth]          = useState(today.getMonth());
   const [events,         setEvents]         = useState([]);
+  const [filtroEquipo,   setFiltroEquipo]   = useState('TODOS');
   const [loading,        setLoading]        = useState(true);
   const [selectedDate,   setSelectedDate]   = useState(todayStr);
   const [showForm,       setShowForm]       = useState(false);
@@ -331,18 +332,28 @@ export default function Calendario({ color, clubId }) {
     setAsistCache(c => ({ ...c, [asistEvento.id]: { ...s, total: asistPlayers.length, monto_arbitraje: asistEvento.monto_arbitraje || 0 } }));
   }, [asistPlayers, asistEvento]);
 
+  const equiposDisponibles = useMemo(
+    () => [...new Set(events.map(ev => ev.equipo).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es')),
+    [events]
+  );
+
+  const eventsVisibles = useMemo(
+    () => filtroEquipo === 'TODOS' ? events : events.filter(ev => ev.equipo === filtroEquipo),
+    [events, filtroEquipo]
+  );
+
   const eventsByDay = useMemo(() => {
     const map = {};
-    events.forEach(ev => {
+    eventsVisibles.forEach(ev => {
       const key = toDateStr(ev.fecha_inicio);
       if (!map[key]) map[key] = [];
       map[key].push(ev);
     });
     return map;
-  }, [events]);
+  }, [eventsVisibles]);
 
   const agendaEvents = useMemo(() => {
-    return events
+    return eventsVisibles
       .filter(ev => toDateStr(ev.fecha_inicio) >= todayStr)
       .reduce((acc, ev) => {
         const key = toDateStr(ev.fecha_inicio);
@@ -350,7 +361,7 @@ export default function Calendario({ color, clubId }) {
         acc[key].push(ev);
         return acc;
       }, {});
-  }, [events, todayStr]);
+  }, [eventsVisibles, todayStr]);
 
   const agendaDates = useMemo(() => Object.keys(agendaEvents).sort(), [agendaEvents]);
 
@@ -1453,6 +1464,21 @@ export default function Calendario({ color, clubId }) {
             </button>
           </div>
         </div>
+
+        {/* Filtro por equipo/categoría */}
+        {equiposDisponibles.length > 0 && (
+          <div className="w-full max-w-2xl flex items-center gap-2 mb-3">
+            <Users size={13} className="text-[var(--text-mut)] shrink-0" />
+            <select
+              value={filtroEquipo}
+              onChange={e => setFiltroEquipo(e.target.value)}
+              className="bg-[var(--bg-surface)] border border-[var(--cc30)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)] transition"
+            >
+              <option value="TODOS">Todos los equipos</option>
+              {equiposDisponibles.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+            </select>
+          </div>
+        )}
 
         {/* Card principal */}
         <div className="w-full max-w-2xl bg-[var(--bg-app)] rounded-2xl border border-[var(--cc30)] shadow-xl overflow-hidden">

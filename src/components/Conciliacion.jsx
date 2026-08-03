@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, Pencil, RefreshCw, Clock, AlertCircle, CheckCheck, Wallet, X, Plus } from 'lucide-react';
+import { CheckCircle, XCircle, Pencil, RefreshCw, Clock, AlertCircle, CheckCheck, Wallet, X, Plus, Search } from 'lucide-react';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import { esUrlWaha, fetchComprobanteBlobUrl } from '../lib/comprobanteUrl';
@@ -396,6 +396,8 @@ export default function Conciliacion({ refreshTrigger }) {
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState('');
   const [filtroEstado, setFiltro]   = useState('pendiente');
+  const [busqueda, setBusqueda]     = useState('');
+  const [filtroConcepto, setFiltroConcepto] = useState('todos');
   const [editando, setEditando]     = useState(null);
   const [actionLoading, setActionL] = useState(null);
   const [toast, setToast]           = useState(null);
@@ -471,6 +473,16 @@ export default function Conciliacion({ refreshTrigger }) {
 
   const pendienteCount = (filtroEstado === 'pendiente' || filtroEstado === 'excedente_pendiente') ? pagos.length : null;
 
+  const q = busqueda.trim().toLowerCase();
+  const pagosFiltrados = pagos.filter(p => {
+    if (filtroConcepto !== 'todos' && p.concepto !== filtroConcepto) return false;
+    if (!q) return true;
+    const nombre = p.players ? `${p.players.nombre} ${p.players.apellidos}` : '';
+    return nombre.toLowerCase().includes(q)
+      || String(p.cedula || '').includes(q)
+      || String(p.referencia || '').toLowerCase().includes(q);
+  });
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -516,6 +528,28 @@ export default function Conciliacion({ refreshTrigger }) {
         ))}
       </div>
 
+      {/* Buscador + filtro por concepto */}
+      <div className="flex gap-2 flex-wrap">
+        <div className="relative flex-1 min-w-[220px]">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+          <input
+            type="search"
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+            placeholder="Buscar por nombre, cédula o referencia..."
+            className="w-full bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl pl-9 pr-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-[var(--cc)] transition"
+          />
+        </div>
+        <select
+          value={filtroConcepto}
+          onChange={e => setFiltroConcepto(e.target.value)}
+          className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[var(--cc)] transition"
+        >
+          <option value="todos">Todos los conceptos</option>
+          {CONCEPTOS.map(c => <option key={c} value={c}>{c[0].toUpperCase() + c.slice(1)}</option>)}
+        </select>
+      </div>
+
       {/* Tabla */}
       <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl overflow-hidden">
         {error && (
@@ -528,10 +562,10 @@ export default function Conciliacion({ refreshTrigger }) {
           <div className="flex items-center justify-center py-16">
             <RefreshCw className="w-6 h-6 text-[var(--cc)] animate-spin" />
           </div>
-        ) : pagos.length === 0 ? (
+        ) : pagosFiltrados.length === 0 ? (
           <div className="text-center py-16 text-gray-500">
             <CheckCircle className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">No hay pagos en este estado</p>
+            <p className="text-sm">{pagos.length === 0 ? 'No hay pagos en este estado' : 'Sin resultados para el filtro aplicado'}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -546,7 +580,7 @@ export default function Conciliacion({ refreshTrigger }) {
                 </tr>
               </thead>
               <tbody>
-                {pagos.map(p => (
+                {pagosFiltrados.map(p => (
                   <PagoRow
                     key={p.id}
                     pago={p}
@@ -561,11 +595,13 @@ export default function Conciliacion({ refreshTrigger }) {
         )}
 
         {/* Footer con total */}
-        {pagos.length > 0 && (
+        {pagosFiltrados.length > 0 && (
           <div className="px-4 py-3 border-t border-[var(--cc20)] flex items-center justify-between">
-            <span className="text-xs text-gray-500">{pagos.length} registros</span>
+            <span className="text-xs text-gray-500">
+              {pagosFiltrados.length !== pagos.length ? `${pagosFiltrados.length} de ${pagos.length} registros` : `${pagos.length} registros`}
+            </span>
             <span className="text-sm font-semibold text-white">
-              Total: {formatMoney(pagos.reduce((s, p) => s + Number(p.monto || 0), 0))}
+              Total: {formatMoney(pagosFiltrados.reduce((s, p) => s + Number(p.monto || 0), 0))}
             </span>
           </div>
         )}

@@ -1,4 +1,5 @@
-import { AlertCircle, Phone, FileDown } from 'lucide-react';
+import { useState } from 'react';
+import { AlertCircle, Phone, FileDown, Search, ArrowUpDown } from 'lucide-react';
 
 const formatCOP = (n) => new Intl.NumberFormat('es-CO', {
   style: 'currency', currency: 'COP', maximumFractionDigits: 0,
@@ -132,7 +133,16 @@ function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoU
   ventana.focus();
 }
 
+const ORDEN_OPCIONES = [
+  { id: 'saldo_desc', label: 'Mayor saldo' },
+  { id: 'meses_desc', label: 'Más meses en mora' },
+  { id: 'nombre_asc',  label: 'Nombre (A-Z)' },
+];
+
 export default function MorososList({ morosos, codigoPais = '57', clubNombre = 'Mi Club', color = 'var(--cc)', logoUrl = '' }) {
+  const [busqueda, setBusqueda] = useState('');
+  const [orden, setOrden]       = useState('saldo_desc');
+
   if (!morosos || morosos.length === 0) {
     return (
       <div style={{
@@ -155,6 +165,15 @@ export default function MorososList({ morosos, codigoPais = '57', clubNombre = '
   }
 
   const totalSaldo = morosos.reduce((sum, m) => sum + (parseInt(m.saldo_total) || 0), 0);
+
+  const q = busqueda.trim().toLowerCase();
+  const visibles = morosos
+    .filter(m => !q || (m.nombre || '').toLowerCase().includes(q) || String(m.cedula || '').includes(q))
+    .sort((a, b) => {
+      if (orden === 'meses_desc') return (b.meses_mora || 0) - (a.meses_mora || 0);
+      if (orden === 'nombre_asc') return (a.nombre || '').localeCompare((b.nombre || ''), 'es');
+      return (parseInt(b.saldo_total) || 0) - (parseInt(a.saldo_total) || 0);
+    });
 
   return (
     <div style={{
@@ -183,11 +202,11 @@ export default function MorososList({ morosos, codigoPais = '57', clubNombre = '
             padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 600,
             background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)',
           }}>
-            {morosos.length} jugadores
+            {visibles.length !== morosos.length ? `${visibles.length} de ${morosos.length}` : morosos.length} jugadores
           </span>
         </div>
         <button
-          onClick={() => exportarPDF(morosos, clubNombre, color, logoUrl)}
+          onClick={() => exportarPDF(visibles, clubNombre, color, logoUrl)}
           style={{
             display: 'flex', alignItems: 'center', gap: '6px',
             padding: '6px 12px', borderRadius: '8px', cursor: 'pointer',
@@ -201,9 +220,45 @@ export default function MorososList({ morosos, codigoPais = '57', clubNombre = '
         </button>
       </div>
 
+      {/* Buscador + orden */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', position: 'relative' }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <Search size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-mut)' }} />
+          <input
+            type="search"
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+            placeholder="Buscar por nombre o cédula..."
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--bg-app)', border: '1px solid var(--cc20)', borderRadius: '8px',
+              padding: '7px 10px 7px 30px', fontSize: '12px', color: 'var(--text-pri)', outline: 'none',
+            }}
+          />
+        </div>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <ArrowUpDown size={13} style={{ color: 'var(--text-mut)', flexShrink: 0 }} />
+          <select
+            value={orden}
+            onChange={e => setOrden(e.target.value)}
+            style={{
+              background: 'var(--bg-app)', border: '1px solid var(--cc20)', borderRadius: '8px',
+              padding: '7px 8px', fontSize: '12px', color: 'var(--text-pri)', outline: 'none', cursor: 'pointer',
+            }}
+          >
+            {ORDEN_OPCIONES.map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
+          </select>
+        </div>
+      </div>
+
       {/* Lista */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto', position: 'relative' }}>
-        {morosos.map((m, i) => (
+        {visibles.length === 0 && (
+          <p style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-mut)', padding: '20px 0' }}>
+            Sin resultados para "{busqueda}"
+          </p>
+        )}
+        {visibles.map((m, i) => (
           <div key={m.cedula || i} style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '12px 14px', borderRadius: '10px',

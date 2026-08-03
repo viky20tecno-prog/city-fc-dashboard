@@ -352,7 +352,11 @@ export default function TabCarnetV2({ jugador, clubConfig = {} }) {
           <div style={{ height: '1px', margin: '0 16px', background: th.divider, position: 'relative', zIndex: 1 }} />
 
           <div style={{ position: 'relative', zIndex: 1, display: 'flex', gap: '16px', padding: '12px 16px' }}>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {/* minWidth:0 es obligatorio en un flex:1 con texto nowrap adentro
+                (la fila "Nombre") — sin esto un nombre largo fuerza la columna
+                a crecer más allá del espacio disponible y empuja el QR fuera
+                de la tarjeta, cortado por el border-radius. */}
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {[
                 { Icon: User,       label: 'Nombre',      value: `${nombre} ${apellidos}`.trim() || '—' },
                 { Icon: IdCard,     label: 'Documento',   value: jugador.cedula ? `CC ${jugador.cedula}` : '—' },

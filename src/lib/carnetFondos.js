@@ -11,7 +11,13 @@
 // Es UNA sola elección por club (no por jugador) — se guarda en `clubConfig.carnet_fondo`
 // y aplica a los carnets de todos los jugadores del club, para mantener una identidad
 // visual consistente. Se configura desde el wizard "Configura tu club" (paso Identidad
-// visual) y se usa en HojaDeVida/TabCarnet.jsx.
+// visual) y se usa en HojaDeVida/TabCarnetV1.jsx.
+//
+// v1 (este archivo, exports originales) sigue siendo el diseño por defecto para
+// todos los clubes. v2 (exports con sufijo, más abajo) es el rediseño tipo
+// carnet deportivo/jersey (rayas + halftone + escudo fantasma) — se activa por
+// club vía `clubConfig.carnet_v2 === true`, mientras se define el rollout
+// completo (ver HojaDeVida/TabCarnet.jsx y pages/VerificarMiembro.jsx).
 
 // Grano — SVG feTurbulence como data-URI, en mosaico. Dos variantes (claro/oscuro)
 // porque ruido blanco es invisible sobre fondo blanco y viceversa.
@@ -85,4 +91,66 @@ export function temaCarnet(fondoKey, clubColor) {
     : { dark: false, label: fondo.label, bgCard,
         textPri: '#111111', textSec: '#444444', textMut: '#888888',
         border: `${clubColor}50`, borderImg: `${clubColor}60`, divider: '#EBEBEB', photoBg: '#E0E0E0' };
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// v2 — carnet tipo deportivo/jersey (rayas diagonales + halftone + escudo
+// fantasma), siempre derivado del color del club, sin nada que elegir.
+// Activado por club vía `clubConfig.carnet_v2 === true` (ver TabCarnet.jsx y
+// VerificarMiembro.jsx). Referencia: mockup generado con otra IA que Diego
+// compartió el 3 ago 2026 (estilo FIFA/2K player card).
+// ─────────────────────────────────────────────────────────────────────────
+
+const GRAIN_V2 = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/140px 140px`;
+
+// Trama halftone (puntos), muy sutil, cubre toda la tarjeta — lenguaje visual
+// de jersey/impreso deportivo.
+const HALFTONE_V2 = 'radial-gradient(rgba(255,255,255,0.09) 0.7px,transparent 0.7px) 0 0/7px 7px';
+
+// 2 franjas diagonales sólidas del color del club + 1 línea clara de
+// "velocidad", confinadas a la esquina superior izquierda. Misma técnica que
+// la banda "holograma" de v1: un linear-gradient con cortes duros, acotado
+// con background-size/position/no-repeat para que no invada el resto de la
+// tarjeta (zona segura: nombre/apellido no pasan nunca por ahí).
+const stripesV2 = (c) => `linear-gradient(112deg,
+    transparent 0%, transparent 6%,
+    ${c} 6%, ${c} 15%,
+    transparent 15%, transparent 19%,
+    ${c} 19%, ${c} 26%,
+    transparent 26%, transparent 29%,
+    rgba(255,255,255,0.5) 29%, rgba(255,255,255,0.5) 30.5%,
+    transparent 30.5%, transparent 100%) top left/85% 65% no-repeat`;
+
+const BASE_V2 = 'linear-gradient(165deg,#131316 0%,#0A0A0C 55%,#050506 100%)';
+
+export function fondoCarnetV2(clubColor) {
+  return `${GRAIN_V2}, ${HALFTONE_V2}, ${stripesV2(clubColor)}, ${BASE_V2}`;
+}
+
+// Escudo del club muy oscurecido y agrandado, recostado del lado derecho —
+// se aplica como <img> posicionado encima de este fondo (depende del logoUrl
+// real del club, por eso vive como estilo de elemento y no como parte del
+// string de `background`). `brightness(0) invert(1)` lo vuelve blanco puro
+// para que la opacidad baja se lea como un grabado, sin importar los colores
+// reales del logo.
+export const WATERMARK_LOGO_STYLE = {
+  position: 'absolute', right: '-6%', top: '32%', width: '58%', maxWidth: '220px',
+  opacity: 0.07, filter: 'brightness(0) invert(1)', pointerEvents: 'none', zIndex: 0,
+};
+
+// Paleta completa derivada del color del club — usada por TabCarnetV2.jsx y
+// VerificarMiembro.jsx para que ambos compartan exactamente los mismos tonos.
+export function temaCarnetV2(clubColor) {
+  return {
+    bgCard: fondoCarnetV2(clubColor),
+    textPri: '#F2F2F2',
+    textSec: '#AEAEB4',
+    textMut: '#68686E',
+    border: 'rgba(255,255,255,0.07)',
+    borderImg: `${clubColor}55`,
+    divider: 'rgba(255,255,255,0.08)',
+    photoBg: '#15151B',
+    badgeBg: `${clubColor}14`,
+    badgeBorder: `${clubColor}45`,
+  };
 }

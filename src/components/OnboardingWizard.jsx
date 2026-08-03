@@ -473,7 +473,6 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                   {CARNET_FONDOS.map(f => {
                     const isActive = carnetFondo === f.key;
-                    const bgCard = temaCarnet(f.key, colorClub).bgCard;
                     return (
                       <button key={f.key} type="button" onClick={() => setCarnetFondo(f.key)}
                         style={{
@@ -483,7 +482,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
                           cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 5,
                           transition: 'border-color 0.2s, background 0.2s',
                         }}>
-                        <div style={{ width: '100%', height: 40, borderRadius: 6, background: bgCard, border: '1px solid rgba(255,255,255,0.08)' }} />
+                        <CarnetMini fondoKey={f.key} clubColor={colorClub} />
                         <span style={{ fontSize: 10, color: isActive ? c : '#8B95A3', fontWeight: isActive ? 700 : 500, transition: 'color 0.2s', textAlign: 'center' }}>
                           {f.label}
                         </span>
@@ -860,6 +859,38 @@ function DashboardMini({ theme: t, accent }) {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+// Mini-maqueta del carnet real (foto + nombre + pie de color) para el selector de
+// fondo — un cuadrito de color plano no deja ver cómo se comporta el texto encima
+// del fondo elegido. Usa exactamente la misma paleta que TabCarnet.jsx.
+function CarnetMini({ fondoKey, clubColor }) {
+  const th = temaCarnet(fondoKey, clubColor);
+  return (
+    <div style={{
+      width: '100%', height: 76, borderRadius: 8, overflow: 'hidden',
+      background: th.bgCard, border: `1px solid ${th.border}`,
+      display: 'flex', flexDirection: 'column',
+    }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: '0 10px' }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: 6, flexShrink: 0,
+          background: th.photoBg, border: `1px solid ${th.borderImg}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={th.dark ? '#3A3A3A' : '#C0C0C0'} strokeWidth="1.3">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ height: 6, width: '68%', borderRadius: 2, background: th.textPri, marginBottom: 5 }} />
+          <div style={{ height: 5, width: '50%', borderRadius: 2, background: clubColor }} />
+        </div>
+      </div>
+      <div style={{ height: 9, background: clubColor, flexShrink: 0 }} />
     </div>
   );
 }

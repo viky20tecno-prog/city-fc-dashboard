@@ -658,9 +658,50 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
   const misTorneos       = torneosYaIniciados(clubConfig?.torneos_iniciales, torneos.filter(t => String(t.cedula || t.player_id || '') === String(cedula)));
   const misSuspensiones  = suspensiones.filter(s => s.cedula === String(cedula));
 
+  const cuotaClub = parseFloat(clubConfig?.valor_mensualidad ?? 0);
   const descuento = Number(jugador?.descuento_pct ?? 0);
   const tipoLabel = { BECA_DEPORTIVA: 'Beca Deportiva', BECA_SOCIAL: 'Beca Social', CONDICION_ESPECIAL: 'Condición Especial' };
   const tipoTexto = tipoLabel[jugador?.tipo_descuento] ?? '';
+
+  const [editandoDescuento,  setEditandoDescuento]  = useState(false);
+  const [guardandoDescuento, setGuardandoDescuento] = useState(false);
+  const [errorDescuento,     setErrorDescuento]     = useState('');
+  const [modoDescuento,      setModoDescuento]      = useState('pct'); // 'pct' | 'fijo'
+  const [formDescuento,      setFormDescuento]      = useState({
+    tipo_descuento: jugador?.tipo_descuento || 'NA',
+    descuento_pct:  jugador?.descuento_pct  ?? 0,
+  });
+
+  const abrirEdicionDescuento = () => {
+    setFormDescuento({ tipo_descuento: jugador?.tipo_descuento || 'NA', descuento_pct: jugador?.descuento_pct ?? 0 });
+    setErrorDescuento('');
+    setEditandoDescuento(true);
+  };
+
+  const guardarDescuento = async () => {
+    setGuardandoDescuento(true);
+    setErrorDescuento('');
+    try {
+      const tipo_descuento = formDescuento.tipo_descuento;
+      const descuento_pct  = tipo_descuento === 'NA' ? 0 : Math.max(0, Math.min(100, Number(formDescuento.descuento_pct) || 0));
+      const res  = await authFetch(`${API_BASE_URL}/players/${cedula}?club_id=${getClubId()}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo_descuento, descuento_pct }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        onJugadorUpdated?.({ tipo_descuento, descuento_pct });
+        setEditandoDescuento(false);
+      } else {
+        setErrorDescuento(data.error || 'No se pudo guardar el descuento');
+      }
+    } catch (e) {
+      console.error(e);
+      setErrorDescuento('Error de conexión — intenta de nuevo');
+    } finally {
+      setGuardandoDescuento(false);
+    }
+  };
 
   const calcEsExento = (j) => Number(j?.descuento_pct) >= 100;
   const [esExento,        setEsExento]        = useState(() => calcEsExento(jugador));
@@ -824,11 +865,126 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
         )}
       </div>
 
-      {descuento > 0 && tipoTexto && !esExento && (
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium"
-          style={{ background: 'var(--cc)1a', border: '1px solid var(--cc)33', color: 'var(--cc)' }}>
-          <span>🎓</span>
-          <span>{tipoTexto} · {descuento}% de descuento aplicado</span>
+      {/* Beca / Descuento — oculto bajo EXENTO (ya cubre el caso de 100%) */}
+      {!esExento && (
+        <div className="rounded-xl border bg-[var(--bg-surface)] border-[var(--bg-surface)]">
+          <div className="flex items-center justify-between gap-3 px-4 py-3">
+            {descuento > 0 && tipoTexto ? (
+              <div className="flex items-center gap-2 min-w-0 text-sm font-medium" style={{ color: 'var(--cc)' }}>
+                <span>🎓</span>
+                <span>{tipoTexto} · {descuento}% de descuento aplicado</span>
+              </div>
+            ) : (
+              <span className="text-xs text-[var(--text-sec)]">¿Aplica alguna beca o descuento a este jugador?</span>
+            )}
+            {!editandoDescuento && (
+              <button
+                onClick={abrirEdicionDescuento}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border bg-[var(--bg-card)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--cc)] hover:border-[var(--cc)]/40 transition"
+              >
+                <Pencil className="w-3 h-3" /> {descuento > 0 && tipoTexto ? 'Editar' : 'Configurar'}
+              </button>
+            )}
+          </div>
+
+          {editandoDescuento && (
+            <div className="border-t border-[var(--cc20)] px-4 py-3 space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Tipo</label>
+                <select
+                  value={formDescuento.tipo_descuento}
+                  onChange={e => {
+                    const tipo = e.target.value;
+                    setFormDescuento(f => ({ ...f, tipo_descuento: tipo, descuento_pct: tipo === 'NA' ? 0 : f.descuento_pct }));
+                  }}
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]/50"
+                >
+                  <option value="NA">Sin descuento</option>
+                  <option value="BECA_DEPORTIVA">Beca Deportiva</option>
+                  <option value="BECA_SOCIAL">Beca Social</option>
+                  <option value="CONDICION_ESPECIAL">Condición Especial</option>
+                </select>
+              </div>
+
+              {formDescuento.tipo_descuento !== 'NA' && (
+                <>
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => setModoDescuento('pct')}
+                      className="px-3 py-1 rounded-lg text-xs font-semibold transition"
+                      style={modoDescuento === 'pct'
+                        ? { background: 'var(--cc)', color: '#fff' }
+                        : { background: 'var(--bg-card)', color: 'var(--text-sec)', border: '1px solid var(--border-sub)' }}>
+                      Por %
+                    </button>
+                    <button type="button" onClick={() => setModoDescuento('fijo')}
+                      disabled={!cuotaClub}
+                      title={!cuotaClub ? 'Configura primero la cuota base del club (Ciclo de Cobro)' : ''}
+                      className="px-3 py-1 rounded-lg text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={modoDescuento === 'fijo'
+                        ? { background: 'var(--cc)', color: '#fff' }
+                        : { background: 'var(--bg-card)', color: 'var(--text-sec)', border: '1px solid var(--border-sub)' }}>
+                      Valor fijo ($)
+                    </button>
+                  </div>
+
+                  {modoDescuento === 'pct' ? (
+                    <div className="space-y-1">
+                      <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Descuento (%)</label>
+                      <input type="number" min="0" max="100" step="1"
+                        value={formDescuento.descuento_pct}
+                        onChange={e => setFormDescuento(f => ({ ...f, descuento_pct: e.target.value }))}
+                        placeholder="0"
+                        className="w-full px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]/50" />
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <label className="text-xs text-[var(--text-mut)] uppercase tracking-wider">Valor mensual fijo ($)</label>
+                      <input type="number" min="0" step="1000"
+                        value={cuotaClub ? Math.round(cuotaClub * (1 - (Number(formDescuento.descuento_pct) || 0) / 100)) : 0}
+                        onChange={e => {
+                          const valorFijo = Math.max(0, Number(e.target.value) || 0);
+                          const pct = cuotaClub > 0 ? Math.max(0, Math.min(100, (1 - valorFijo / cuotaClub) * 100)) : 0;
+                          setFormDescuento(f => ({ ...f, descuento_pct: Math.round(pct * 10000) / 10000 }));
+                        }}
+                        placeholder="ej: 45000"
+                        className="w-full px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-sub)] text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]/50" />
+                    </div>
+                  )}
+
+                  <p className="text-xs" style={{ color: 'var(--text-mut)' }}>
+                    {cuotaClub > 0 && (
+                      <>Este jugador pagará <strong>${Math.round(cuotaClub * (1 - (Number(formDescuento.descuento_pct) || 0) / 100)).toLocaleString('es-CO')}</strong>/mes. </>
+                    )}
+                    Al guardar se aplica a <strong>los 12 meses de este año</strong> (los meses ya pagados en su totalidad no se tocan).
+                  </p>
+                </>
+              )}
+
+              {errorDescuento && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-400">
+                  <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                  {errorDescuento}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <button
+                  onClick={guardarDescuento}
+                  disabled={guardandoDescuento}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--cc)] text-white text-xs font-semibold rounded-lg hover:opacity-90 transition disabled:opacity-50"
+                >
+                  {guardandoDescuento ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Guardar
+                </button>
+                <button
+                  onClick={() => setEditandoDescuento(false)}
+                  disabled={guardandoDescuento}
+                  className="flex items-center gap-1.5 px-3 py-1.5 border border-[var(--cc20)] text-[var(--text-sec)] text-xs rounded-lg hover:text-[var(--text-pri)] transition disabled:opacity-50"
+                >
+                  <X className="w-3 h-3" /> Cancelar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
       <SeccionMensualidades
@@ -836,7 +992,7 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
         suspensiones={misSuspensiones}
         onMensualidadUpdated={onMensualidadUpdated}
         esExentoGlobal={esExento}
-        cuotaClub={parseFloat(clubConfig?.valor_mensualidad ?? 0)}
+        cuotaClub={cuotaClub}
         jugador={jugador}
       />
       <SeccionPedidoUniforme cedula={cedula} />

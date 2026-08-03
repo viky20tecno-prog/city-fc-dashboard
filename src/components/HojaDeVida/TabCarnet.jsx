@@ -179,16 +179,36 @@ export default function TabCarnet({ jugador, clubConfig = {} }) {
     const cssVars = dark
       ? '--text-pri:#F0F0F0;--text-sec:#AAAAAA;--text-mut:#666666;--bg-surface:#1A1A2A;'
       : '--text-pri:#111111;--text-sec:#444444;--text-mut:#888888;--bg-surface:#F5F5F5;';
+    // Nombre, apellido y número usan la fuente propia "Sport Event" (font-face
+    // declarado en index.html, no en Google Fonts) — esta ventana es un
+    // documento en blanco aparte, así que hay que declararla de nuevo acá o el
+    // navegador cae al genérico "cursive" y el carnet impreso no se parece al
+    // que se ve en pantalla.
+    const origin = window.location.origin;
     w.document.write(`<!DOCTYPE html><html><head>
       <title>Carnet — ${esc(nombre)} ${esc(apellidos)}</title>
       <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-      <style>*{box-sizing:border-box;margin:0;padding:0;}:root{${cssVars}}
+      <style>
+      @font-face { font-family:'Sport Event'; src:url('${origin}/fonts/sportevent-display.otf') format('opentype'); font-weight:400; font-style:normal; font-display:block; }
+      @font-face { font-family:'Sport Event'; src:url('${origin}/fonts/sportevent-italic.otf') format('opentype'); font-weight:400; font-style:italic; font-display:block; }
+      *{box-sizing:border-box;margin:0;padding:0;}:root{${cssVars}}
       body{background:${dark ? '#111' : '#fff'};display:flex;justify-content:center;padding:32px;font-family:Inter,sans-serif;}
       @media print{body{padding:0;}}</style>
       </head><body>${el.outerHTML}</body></html>`);
     w.document.close();
     w.focus();
-    setTimeout(() => { w.print(); w.close(); }, 600);
+    // font-display:block + fonts.ready evita imprimir con la fuente a medio
+    // cargar (que dispararía el mismo problema de fallback a cursive). Guard
+    // `impreso` porque fonts.ready Y el timeout de respaldo pueden dispararse
+    // los dos — sin el guard se abriría el diálogo de impresión dos veces.
+    let impreso = false;
+    const disparar = () => { if (impreso) return; impreso = true; w.print(); w.close(); };
+    if (w.document.fonts?.ready) {
+      w.document.fonts.ready.then(disparar).catch(disparar);
+      setTimeout(disparar, 1500); // tope por si fonts.ready nunca resuelve
+    } else {
+      setTimeout(disparar, 700);
+    }
   };
 
   return (

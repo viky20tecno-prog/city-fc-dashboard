@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { CLUB_LOGOS } from './clubLogos';
 import DashboardMockup from './DashboardMockup';
+import LightningOverlay from './LightningOverlay';
 
 /* ── Grid + glow background ──────────────────────────────────────────────── */
 function GridBg({ color }) {
@@ -183,15 +184,20 @@ export default function Hero({ previewColor, openLead }) {
           boxShadow: `0 0 0 1px rgba(106,0,255,0.25), 0 32px 80px rgba(106,0,255,0.30), 0 8px 32px rgba(0,0,0,0.6)`,
         }}>
           <motion.div style={{ y: imgY, borderRadius: 20, overflow: 'hidden' }}>
-            <img
-              src="/og-image.jpg"
-              alt="ZenSports — AI Powering Performance"
-              fetchpriority="high"
-              width="1200"
-              height="630"
-              className="hero-kenburns"
-              style={{ width: '100%', display: 'block', borderRadius: 20 }}
-            />
+            {/* .hero-kenburns en el wrapper (no en el <img>) para que la
+                imagen y el overlay de rayos escalen pegados, cuadro a
+                cuadro — si cada uno tuviera su propio scale se desalinean. */}
+            <div className="hero-kenburns" style={{ position: 'relative' }}>
+              <img
+                src="/og-image.jpg"
+                alt="ZenSports — AI Powering Performance"
+                fetchpriority="high"
+                width="1200"
+                height="630"
+                style={{ width: '100%', display: 'block', borderRadius: 20 }}
+              />
+              <LightningOverlay />
+            </div>
           </motion.div>
           {/* Gradient bottom overlay para los CTAs */}
           <div style={{

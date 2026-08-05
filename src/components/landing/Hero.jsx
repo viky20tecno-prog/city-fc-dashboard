@@ -6,10 +6,24 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import {
   Sparkles, ArrowRight, CheckCircle, Users, CreditCard, MessageCircle, ChevronDown,
+  BarChart2, Target, Brain, TrendingUp, Database,
 } from 'lucide-react';
 import { CLUB_LOGOS } from './clubLogos';
 import DashboardMockup from './DashboardMockup';
 import LightningOverlay from './LightningOverlay';
+import ZenSportsLogo from '../brand/ZenSportsLogo';
+
+/* ── Iconos "Análisis / Precisión / IA / Rendimiento / Datos" ────────────────
+   Antes vivían quemados como píxeles dentro de og-image.jpg (junto con el
+   logo y el copy) — ahora son DOM real: se pueden animar por separado,
+   Google los indexa, y no se ven borrosos en pantallas grandes. */
+const HERO_STATS = [
+  { Icon: BarChart2,  label: 'Análisis'    },
+  { Icon: Target,     label: 'Precisión'   },
+  { Icon: Brain,      label: 'IA'          },
+  { Icon: TrendingUp, label: 'Rendimiento' },
+  { Icon: Database,   label: 'Datos'       },
+];
 
 /* ── Grid + glow background ──────────────────────────────────────────────── */
 function GridBg({ color }) {
@@ -203,100 +217,130 @@ export default function Hero({ previewColor, openLead }) {
           </span>
         </motion.div>
 
-        {/* OG Image hero — Ken Burns continuo (CSS, en el <img>) + parallax de scroll (framer, en el wrapper) */}
-        <motion.div variants={staggerItem} style={{
-          position: 'relative',
-          borderRadius: 20,
-          overflow: 'hidden',
-          boxShadow: `0 0 0 1px rgba(106,0,255,0.25), 0 32px 80px rgba(106,0,255,0.30), 0 8px 32px rgba(0,0,0,0.6)`,
+        {/* Dos columnas: texto/logo/íconos reales (izq) + foto recortada de
+            atletas + rayos animados (der). Antes todo esto era una sola
+            imagen plana (og-image.jpg) con el texto quemado como píxeles —
+            separarlo lo hace indexable por SEO, editable y animable pieza
+            por pieza. */}
+        <motion.div variants={staggerItem} className="hero-two-col" style={{
+          display: 'flex', alignItems: 'center', gap: 40,
         }}>
-          <motion.div style={{ y: imgY, borderRadius: 20, overflow: 'hidden' }}>
-            {/* .hero-kenburns en el wrapper (no en el <img>) para que la
-                imagen y el overlay de rayos escalen pegados, cuadro a
-                cuadro — si cada uno tuviera su propio scale se desalinean. */}
-            <div className="hero-kenburns" style={{ position: 'relative' }}>
-              <img
-                src="/og-image.jpg"
-                alt="ZenSports — AI Powering Performance"
-                fetchpriority="high"
-                width="1200"
-                height="630"
-                style={{ width: '100%', display: 'block', borderRadius: 20 }}
-              />
-              <LightningOverlay />
-            </div>
+          {/* Columna de texto */}
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="show"
+            className="hero-text-col"
+            style={{ flex: '1 1 420px', minWidth: 0 }}
+          >
+            <motion.div variants={staggerItem} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <ZenSportsLogo variant="zz" size={60} />
+              <div>
+                <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 32, letterSpacing: 1, color: '#fff', lineHeight: 1 }}>
+                  <span style={{ opacity: 0.82 }}>ZEN</span><span style={{ color: previewColor }}>SPORTS</span>
+                </div>
+                <div style={{ fontSize: 10.5, letterSpacing: 3, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                  — AI POWERING PERFORMANCE —
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.p variants={staggerItem} style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,0.55)', maxWidth: 380, marginTop: 20 }}>
+              Transformamos datos en rendimiento. Potenciamos atletas, equipos y organizaciones con inteligencia artificial de vanguardia.
+            </motion.p>
+
+            <motion.div variants={staggerItem} style={{ display: 'flex', gap: 18, marginTop: 22 }}>
+              {HERO_STATS.map(({ Icon, label }) => (
+                <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  <div style={{
+                    width: 34, height: 34, borderRadius: 9,
+                    background: `${previewColor}1F`, border: `1px solid ${previewColor}4D`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Icon size={15} color={previewColor} strokeWidth={2} />
+                  </div>
+                  <span style={{ fontSize: 8.5, letterSpacing: 1, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </motion.div>
+
+            <motion.button
+              variants={staggerItem}
+              onClick={() => document.getElementById('producto')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              style={{
+                marginTop: 26, display: 'inline-flex', alignItems: 'center', gap: 8,
+                background: 'rgba(255,255,255,0.05)', border: `1px solid ${previewColor}59`,
+                color: 'rgba(255,255,255,0.8)', fontSize: 11.5, letterSpacing: 1.5, textTransform: 'uppercase',
+                borderRadius: 999, padding: '11px 22px', cursor: 'pointer',
+              }}
+            >
+              Descubre el futuro del deporte
+              <ArrowRight size={13} />
+            </motion.button>
+
+            {/* CTAs primarios */}
+            <motion.div variants={staggerItem} className="hero-cta-wrap" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 22 }}>
+              <button
+                className="btn-primary hero-cta-btn"
+                onClick={() => openLead('free')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 9,
+                  background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`,
+                  border: 'none', color: '#fff', fontSize: 15, fontWeight: 700,
+                  borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
+                  boxShadow: `0 8px 32px ${previewColor}60`,
+                }}
+              >
+                Comenzar prueba gratis de 5 días <ArrowRight size={16} />
+              </button>
+              <button
+                className="btn-ghost hero-cta-btn"
+                onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.18)',
+                  backdropFilter: 'blur(12px)',
+                  color: '#fff', fontSize: 15, borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
+                }}
+              >
+                Ver cómo funciona en 2 min
+              </button>
+            </motion.div>
           </motion.div>
-          {/* Gradient bottom overlay para los CTAs */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%',
-            background: 'linear-gradient(to top, rgba(6,8,16,0.95) 0%, rgba(6,8,16,0.6) 50%, transparent 100%)',
-            borderRadius: '0 0 20px 20px',
-          }} />
 
-          {/* CTAs overlaid en la imagen */}
-          <div className="hero-cta-wrap" style={{
-            position: 'absolute', bottom: 32, left: 0, right: 0,
-            display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap',
-            padding: '0 24px',
+          {/* Columna de foto — Ken Burns continuo (CSS, en el wrapper) +
+              parallax de scroll (framer) + rayos animados encima. El recorte
+              es matemático, no manual: a 500×630 con aspect-ratio fijo, el
+              object-position:100% siempre muestra exactamente x:700→1200 del
+              original a escala 1:1 (sin upscale) — ahí termina el texto
+              quemado en la imagen y empiezan los deportistas limpios. */}
+          <motion.div className="hero-photo-col" style={{
+            flex: '0 0 500px',
+            maxWidth: '100%',
+            aspectRatio: '500 / 630',
+            position: 'relative',
+            borderRadius: 20,
+            overflow: 'hidden',
+            boxShadow: `0 0 0 1px rgba(106,0,255,0.25), 0 32px 80px rgba(106,0,255,0.30), 0 8px 32px rgba(0,0,0,0.6)`,
           }}>
-            <button
-              className="btn-primary hero-cta-btn"
-              onClick={() => openLead('free')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 9,
-                background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`,
-                border: 'none', color: '#fff', fontSize: 15, fontWeight: 700,
-                borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
-                boxShadow: `0 8px 32px ${previewColor}60`,
-              }}
-            >
-              Comenzar prueba gratis de 5 días <ArrowRight size={16} />
-            </button>
-            <button
-              className="btn-ghost hero-cta-btn"
-              onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.18)',
-                backdropFilter: 'blur(12px)',
-                color: '#fff', fontSize: 15, borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
-              }}
-            >
-              Ver cómo funciona en 2 min
-            </button>
-          </div>
+            <motion.div style={{ y: imgY, position: 'absolute', inset: 0 }}>
+              {/* .hero-kenburns en el wrapper (no en el <img>) para que la
+                  imagen y el overlay de rayos escalen pegados, cuadro a
+                  cuadro — si cada uno tuviera su propio scale se desalinean. */}
+              <div className="hero-kenburns" style={{ position: 'absolute', inset: 0 }}>
+                <img
+                  src="/og-image.jpg"
+                  alt="ZenSports — atletas potenciados por IA"
+                  fetchpriority="high"
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '100% center' }}
+                />
+                <LightningOverlay viewBox="700 0 500 630" />
+              </div>
+            </motion.div>
+          </motion.div>
         </motion.div>
-
-        {/* CTAs mobile — fuera del overflow:hidden del hero image */}
-        <div className="hero-cta-mobile" style={{
-          flexDirection: 'column', gap: 10, marginTop: 16, padding: '0 8px',
-        }}>
-          <button
-            className="btn-primary hero-cta-btn"
-            onClick={() => openLead('free')}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`,
-              border: 'none', color: '#fff', fontWeight: 700,
-              borderRadius: 12, padding: '13px 20px', cursor: 'pointer', width: '100%',
-              boxShadow: `0 8px 32px ${previewColor}60`,
-            }}
-          >
-            Comenzar prueba gratis de 5 días <ArrowRight size={15} />
-          </button>
-          <button
-            className="btn-ghost hero-cta-btn"
-            onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.16)',
-              backdropFilter: 'blur(12px)',
-              color: '#fff', borderRadius: 12, padding: '13px 20px', cursor: 'pointer', width: '100%',
-            }}
-          >
-            Ver cómo funciona en 2 min
-          </button>
-        </div>
 
         {/* Sub-texto + social proof */}
         <motion.div variants={staggerItem} style={{ textAlign: 'center', marginTop: 28 }}>

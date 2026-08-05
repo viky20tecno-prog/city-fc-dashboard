@@ -7,9 +7,12 @@
 // con una línea sólida encima — así la energía se lee como si pasara por
 // detrás/alrededor de ellos, igual que el efecto original de la imagen.
 //
-// Coordenadas en el mismo espacio que el JPG (viewBox 1200×630), trazadas
-// a mano sobre la zona donde ya está la trama eléctrica de la imagen
-// (detrás de los jugadores, mitad derecha).
+// Coordenadas en el mismo espacio que el JPG completo (1200×630), trazadas a
+// mano sobre la zona donde ya está la trama eléctrica de la imagen (detrás
+// de los jugadores, mitad derecha) — el prop `viewBox` solo recorta qué
+// ventana de ese mismo sistema de coordenadas se muestra (ver Hero.jsx,
+// donde se le pasa el recorte "700 0 500 630" para la foto ya cropeada);
+// las coordenadas de los rayos no cambian.
 const BOLTS = [
   { id: 'b1', d: 'M760,260 L820,180 L800,140 L860,60 L840,20',                    delay: '0s',    dur: '3.2s' },
   { id: 'b2', d: 'M760,260 L900,220 L960,240 L1080,180 L1160,150',                delay: '0.6s',  dur: '3.6s' },
@@ -30,7 +33,7 @@ const SPARKS = [
   { cx: 1160, cy: 380, delay: '1.2s',  dur: '4.6s' },
 ];
 
-export default function LightningOverlay() {
+export default function LightningOverlay({ viewBox = '0 0 1200 630' }) {
   return (
     <>
       <style>{`
@@ -71,7 +74,7 @@ export default function LightningOverlay() {
         }
       `}</style>
       <svg
-        viewBox="0 0 1200 630"
+        viewBox={viewBox}
         preserveAspectRatio="xMidYMid slice"
         style={{
           position: 'absolute', inset: 0, width: '100%', height: '100%',

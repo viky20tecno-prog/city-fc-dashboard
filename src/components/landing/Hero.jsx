@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, useScroll, useTransform } from 'framer-motion';
 import {
-  Sparkles, ArrowRight, CheckCircle, Users, CreditCard, MessageCircle,
+  Sparkles, ArrowRight, CheckCircle, Users, CreditCard, MessageCircle, ChevronDown,
 } from 'lucide-react';
 import { CLUB_LOGOS } from './clubLogos';
 import DashboardMockup from './DashboardMockup';
@@ -127,6 +127,33 @@ function FloatingCard({ emoji, text, color, pos, delay, dur }) {
       <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.78)' }}>{text}</span>
       <div style={{ width: 6, height: 6, borderRadius: '50%', background: color, boxShadow: `0 0 8px ${color}`, flexShrink: 0, animation: 'pulse-dot 2s ease-in-out infinite' }} />
     </div>
+  );
+}
+
+/* ── Scroll indicator ─────────────────────────────────────────────────────
+   Fijo a la ventana (no a la sección) — se desvanece apenas el usuario
+   empieza a scrollear y reaparece si vuelve arriba del todo. */
+function ScrollIndicator() {
+  const { scrollY } = useScroll();
+  const opacity = useTransform(scrollY, [0, 140], [1, 0]);
+  return (
+    <motion.div
+      style={{
+        opacity, position: 'fixed', left: '50%', bottom: 22, zIndex: 150,
+        pointerEvents: 'none', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', gap: 4, x: '-50%',
+      }}
+    >
+      <span style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>
+        Descubre más
+      </span>
+      <motion.div
+        animate={{ y: [0, 7, 0] }}
+        transition={{ duration: 1.6, ease: 'easeInOut', repeat: Infinity }}
+      >
+        <ChevronDown size={18} color="rgba(255,255,255,0.35)" />
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -307,6 +334,8 @@ export default function Hero({ previewColor, openLead }) {
           <DashboardMockup color={previewColor} />
         </div>
       </div>
+
+      <ScrollIndicator />
     </section>
   );
 }

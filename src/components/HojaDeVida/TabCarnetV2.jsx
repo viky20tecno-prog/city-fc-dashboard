@@ -46,7 +46,7 @@ function LogoHeader({ variant, clubColor, th, logoUrl, initials, clubNombre, clu
     <div style={{
       position: 'relative', zIndex: 1,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: variant === 'dorso' ? '12px 16px 9px' : '13px 16px 0',
+      padding: variant === 'dorso' ? '12px 16px 9px' : '15px 16px 0',
       // Scrim para que el nombre/subtítulo del club se lean siempre, sin
       // importar si las rayas diagonales del fondo pasan justo por debajo.
       background: 'linear-gradient(180deg,rgba(3,3,4,0.6) 0%,rgba(3,3,4,0.28) 70%,transparent 100%)',
@@ -205,7 +205,7 @@ export default function TabCarnetV2({ jugador, clubConfig = {} }) {
     width: '100%',
     maxWidth: '320px',
     background: th.bgCard,
-    borderRadius: '16px',
+    borderRadius: '12px',
     border: `1px solid ${th.border}`,
     overflow: 'hidden',
     position: 'relative',
@@ -297,7 +297,7 @@ export default function TabCarnetV2({ jugador, clubConfig = {} }) {
 
             {/* Foto */}
             <div style={{
-              flex: 1, height: '164px', borderRadius: '10px', overflow: 'hidden',
+              flex: 1, height: '214px', borderRadius: '10px', overflow: 'hidden',
               background: th.photoBg, border: `1.5px solid ${th.borderImg}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
@@ -310,26 +310,26 @@ export default function TabCarnetV2({ jugador, clubConfig = {} }) {
             </div>
           </div>
 
-          <div style={{ position: 'relative', zIndex: 1, padding: '12px 16px 4px' }}>
-            <div style={{ fontSize: '10px', fontWeight: 600, color: th.textSec, letterSpacing: '2px', textTransform: 'uppercase' }}>
+          <div style={{ position: 'relative', zIndex: 1, padding: '14px 16px 4px' }}>
+            <div style={{ fontFamily: "'Sport Event',cursive", fontSize: '15px', color: th.textSec, letterSpacing: '1.5px', textTransform: 'uppercase', lineHeight: 1 }}>
               {nombre || '—'}
             </div>
-            <div style={{ fontFamily: "'Sport Event',cursive", fontSize: '32px', color: clubColor, lineHeight: 0.95, letterSpacing: '1.5px' }}>
+            <div style={{ fontFamily: "'Sport Event',cursive", fontSize: '30px', color: clubColor, lineHeight: 0.95, letterSpacing: '1.2px', textTransform: 'uppercase', marginTop: '3px' }}>
               {apellidos}
             </div>
-            <div style={{ fontSize: '8px', color: th.textMut, letterSpacing: '2px', textTransform: 'uppercase', marginTop: '3px' }}>
+            <div style={{ fontSize: '8px', color: th.textMut, letterSpacing: '2px', textTransform: 'uppercase', marginTop: '5px' }}>
               JUGADOR OFICIAL
             </div>
           </div>
 
-          <div style={{ position: 'relative', zIndex: 1, marginTop: '12px', background: clubColor, display: 'flex' }}>
+          <div style={{ position: 'relative', zIndex: 1, marginTop: '14px', background: clubColor, display: 'flex' }}>
             {[
               { Icon: Hash,          label: 'ID',           value: idCarnet },
               { Icon: Shield,        label: 'EQUIPO',       value: equipo },
               { Icon: CalendarCheck, label: 'VÁLIDO HASTA', value: `31/12/${anio}` },
             ].map((col, i) => (
               <div key={col.label} style={{
-                flex: 1, padding: '7px 8px', display: 'flex', alignItems: 'center', gap: '5px',
+                flex: 1, padding: '10px 8px', display: 'flex', alignItems: 'center', gap: '5px',
                 borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.28)' : 'none',
                 minWidth: 0,
               }}>

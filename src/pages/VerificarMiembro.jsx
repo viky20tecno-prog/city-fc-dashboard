@@ -286,8 +286,8 @@ function VerificadoV2({ color, clubNombre, clubSub, logoUrl, initials, temporada
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#AEAEB4', letterSpacing: 2, textTransform: 'uppercase' }}>{nombreAt || '—'}</div>
-            <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 26, color, lineHeight: 1, letterSpacing: 1 }}>{apellidoAt}</div>
+            <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 13, color: '#AEAEB4', letterSpacing: 1.5, textTransform: 'uppercase', lineHeight: 1 }}>{nombreAt || '—'}</div>
+            <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 24, color, lineHeight: 0.95, letterSpacing: 1, textTransform: 'uppercase', marginTop: 3 }}>{apellidoAt}</div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>CC {cedula}</div>
           </div>
         </div>

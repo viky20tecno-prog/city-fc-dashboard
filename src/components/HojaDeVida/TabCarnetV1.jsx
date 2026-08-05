@@ -165,7 +165,7 @@ export default function TabCarnetV1({ jugador, clubConfig = {} }) {
     width: '100%',
     maxWidth: '320px',
     background: th.bgCard,
-    borderRadius: '16px',
+    borderRadius: '12px',
     border: `1px solid ${th.border}`,
     overflow: 'hidden',
     boxShadow: dark ? `0 0 48px ${clubColor}18,0 4px 20px rgba(0,0,0,0.4)` : '0 4px 24px rgba(0,0,0,0.1)',
@@ -239,7 +239,7 @@ export default function TabCarnetV1({ jugador, clubConfig = {} }) {
           <LogoHeader clubColor={clubColor} th={th} logoUrl={logoUrl} initials={initials} clubNombre={clubNombre} clubSub={clubSub} />
           <div style={{ position: 'relative', margin: '12px 16px 0' }}>
             <div style={{
-              width: '100%', height: '162px', borderRadius: '10px', overflow: 'hidden',
+              width: '100%', height: '210px', borderRadius: '10px', overflow: 'hidden',
               background: th.photoBg, border: `1.5px solid ${th.borderImg}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
@@ -270,7 +270,7 @@ export default function TabCarnetV1({ jugador, clubConfig = {} }) {
               </div>
             )}
           </div>
-          <div style={{ padding: '10px 16px 4px' }}>
+          <div style={{ padding: '12px 16px 4px' }}>
             <div style={{ fontFamily: "'Sport Event',cursive", fontSize: '26px', color: th.textPri, lineHeight: 1, letterSpacing: '2px' }}>
               {nombre || '—'}
             </div>
@@ -281,7 +281,7 @@ export default function TabCarnetV1({ jugador, clubConfig = {} }) {
               JUGADOR OFICIAL
             </div>
           </div>
-          <div style={{ marginTop: '12px', background: clubColor, padding: '7px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ marginTop: '14px', background: clubColor, padding: '9px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.82)', letterSpacing: '1px' }}>CC {jugador.cedula || '—'}</div>
             <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.82)', letterSpacing: '1.5px', textTransform: 'uppercase', fontWeight: 600 }}>{clubNombre}</div>
             <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.82)', letterSpacing: '1px' }}>{new Date().getFullYear()}</div>

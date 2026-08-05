@@ -1,13 +1,16 @@
-import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bot, BarChart2, CreditCard, Shield, ChevronRight, CheckCircle,
   Users, FileText, Smartphone, AlertTriangle, Zap, MessageCircle,
-  ArrowRight, Sparkles, TrendingUp, Star, Sun, Moon, X, Loader2, Menu, QrCode,
+  ArrowRight, TrendingUp, Star, Sun, Moon, X, Loader2, Menu, QrCode,
 } from 'lucide-react';
 import { PALETA } from '../lib/themes';
 import { API_BASE_URL } from '../config';
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
+import Hero from '../components/landing/Hero';
+import DashboardMockup from '../components/landing/DashboardMockup';
+import { CLUB_LOGOS } from '../components/landing/clubLogos';
 
 /* ── Scroll Reveal Hook ─────────────────────────────────────────────────── */
 function useReveal() {
@@ -72,236 +75,6 @@ function Counter({ target, prefix = '', suffix = '' }) {
   }, [visible, targetNum]);
   const display = targetNum >= 1000 ? `${Math.round(val / 100) / 10}k`.replace('.0k', 'k') : `${val}`;
   return <span ref={ref}>{prefix}{display}{suffix}</span>;
-}
-
-/* ── Live Activity Feed ──────────────────────────────────────────────────── */
-const ACTIVITY = [
-  { Icon: CheckCircle,  color: '#22C55E', text: 'Pago confirmado — Club Atlético Verde', time: 'hace 2 min' },
-  { Icon: Users,        color: '#AE68FF', text: 'Nuevo jugador inscrito — FC Medellín Sur', time: 'hace 5 min' },
-  { Icon: CreditCard,   color: '#06B6D4', text: 'QR de carnet generado — Deportivo Norte', time: 'hace 8 min' },
-  { Icon: MessageCircle,color: '#25D366', text: 'WhatsApp enviado — Pago pendiente × 3', time: 'hace 11 min' },
-  { Icon: CheckCircle,  color: '#22C55E', text: 'Inscripción validada — Barranquilla FC', time: 'hace 14 min' },
-];
-
-function ActivityFeed() {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setIdx(i => (i + 1) % ACTIVITY.length), 3000);
-    return () => clearInterval(id);
-  }, []);
-  const item = ACTIVITY[idx];
-  return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 10,
-      background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)',
-      borderRadius: 999, padding: '8px 18px',
-      backdropFilter: 'blur(10px)', maxWidth: '100%',
-    }}>
-      <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 8px #22C55E', flexShrink: 0 }} />
-      <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'rgba(255,255,255,0.65)', lineHeight: 1.4 }}>
-        <item.Icon size={13} color={item.color} strokeWidth={2.2} style={{ flexShrink: 0 }} />
-        {item.text}
-      </span>
-      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', flexShrink: 0 }}>{item.time}</span>
-    </div>
-  );
-}
-
-/* ── AnimatedGrid Background ─────────────────────────────────────────────── */
-function GridBg({ color }) {
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-      <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, opacity: 0.038 }}>
-        <defs>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="0.5" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
-      </svg>
-      {/* Glow central — respira */}
-      <div style={{ position: 'absolute', top: '5%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 620, background: `radial-gradient(ellipse at center, ${color}14 0%, transparent 65%)`, filter: 'blur(48px)', animation: 'glow-pulse 6s ease-in-out infinite', transition: 'background 0.5s' }} />
-      {/* Glow secundario derecho */}
-      <div style={{ position: 'absolute', top: '5%', right: '-10%', width: 450, height: 450, background: 'radial-gradient(ellipse, rgba(0,208,132,0.07) 0%, transparent 70%)', filter: 'blur(24px)', animation: 'glow-pulse 8s ease-in-out 2s infinite' }} />
-      {/* Glow izquierdo inferior */}
-      <div style={{ position: 'absolute', bottom: '10%', left: '-5%', width: 380, height: 380, background: `radial-gradient(ellipse, ${color}07 0%, transparent 70%)`, filter: 'blur(24px)', animation: 'glow-pulse 7s ease-in-out 4s infinite', transition: 'background 0.5s' }} />
-      {/* Línea horizontal sutil */}
-      <div style={{ position: 'absolute', top: '48%', left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent 0%, ${color}10 25%, ${color}06 50%, ${color}10 75%, transparent 100%)`, transition: 'background 0.5s' }} />
-    </div>
-  );
-}
-
-/* ── Particle Field ──────────────────────────────────────────────────────── */
-function ParticleField({ color }) {
-  const particles = useMemo(() =>
-    Array.from({ length: 26 }, (_, i) => ({
-      id: i,
-      left: `${6 + (i * 37 + 13) % 86}%`,
-      top: `${6 + (i * 53 + 7) % 86}%`,
-      size: ((i * 17 + 5) % 25) / 10 + 1,
-      delay: `${((i * 1.3) % 7).toFixed(1)}s`,
-      duration: `${(((i * 2.1) % 5) + 5).toFixed(1)}s`,
-      opacity: (((i * 7 + 3) % 35) / 100 + 0.08).toFixed(2),
-    })), []);
-  return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-      {particles.map(p => (
-        <div key={p.id} style={{
-          position: 'absolute',
-          left: p.left, top: p.top,
-          width: p.size, height: p.size,
-          borderRadius: '50%',
-          background: color,
-          opacity: p.opacity,
-          animation: `particle-float ${p.duration} ease-in-out ${p.delay} infinite`,
-          boxShadow: `0 0 ${parseFloat(p.size) * 3}px ${color}`,
-          transition: 'background 0.5s, box-shadow 0.5s',
-        }} />
-      ))}
-    </div>
-  );
-}
-
-/* ── Floating Card ────────────────────────────────────────────────────────── */
-const FLOAT_CARDS = [
-  { emoji: '✅', text: 'Pago confirmado — $60.000', color: '#22C55E', pos: { top: '12%', right: '2%' },   delay: '0s',   dur: '7s'   },
-  { emoji: '👤', text: 'Nuevo jugador inscrito',    color: '#00AAFF', pos: { top: '52%', right: '-2%' },  delay: '1.8s', dur: '8s'   },
-  { emoji: '🪪', text: 'Carnet QR generado',        color: '#F5A623', pos: { top: '28%', left: '1%'  },  delay: '2.4s', dur: '7.5s' },
-  { emoji: '💬', text: 'WhatsApp enviado × 8',      color: '#25D366', pos: { bottom: '18%', left: '2%' }, delay: '0.9s', dur: '6.5s' },
-];
-
-function FloatingCard({ emoji, text, color, pos, delay, dur }) {
-  return (
-    <div className="float-badge" style={{
-      position: 'absolute', ...pos,
-      background: 'rgba(6,8,20,0.88)',
-      backdropFilter: 'blur(16px)',
-      border: `1px solid ${color}30`,
-      borderRadius: 12,
-      padding: '9px 14px',
-      alignItems: 'center',
-      gap: 8,
-      boxShadow: `0 8px 32px rgba(0,0,0,0.45), 0 0 24px ${color}08`,
-      animation: `float-card ${dur} ease-in-out ${delay} infinite`,
-      zIndex: 3,
-      whiteSpace: 'nowrap',
-    }}>
-      <span style={{ fontSize: 13 }}>{emoji}</span>
-      <span style={{ fontSize: 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.78)' }}>{text}</span>
-      <div style={{ width: 6, height: 6, borderRadius: '50%', background: color, boxShadow: `0 0 8px ${color}`, flexShrink: 0, animation: 'pulse-dot 2s ease-in-out infinite' }} />
-    </div>
-  );
-}
-
-/* ── Dashboard Mockup ─────────────────────────────────────────────────────── */
-function DashboardMockup({ color, modo = 'dark' }) {
-  const dark = modo !== 'light';
-  const T = dark ? {
-    bg:      `linear-gradient(160deg, ${color}20 0%, #080808 50%, ${color}10 100%)`,
-    topbar:  `linear-gradient(90deg, ${color}18, rgba(12,12,12,0.97))`,
-    topBdr:  `${color}30`,
-    sidebar: `linear-gradient(180deg, ${color}14, rgba(8,8,8,0.98))`,
-    sideBdr: `${color}20`,
-    card:    'rgba(255,255,255,0.025)', cardBdr: 'rgba(255,255,255,0.06)',
-    subTxt:  'rgba(255,255,255,0.4)',   rowTxt:  'rgba(255,255,255,0.55)',
-    rowBdr:  'rgba(255,255,255,0.03)',  navDot:  '#282828',
-    liveBg:  'rgba(255,255,255,0.05)', liveBdr: 'rgba(255,255,255,0.08)',
-    liveTxt: 'rgba(255,255,255,0.5)',  barFill: 'rgba(255,255,255,0.08)',
-    border:  `${color}40`,
-    shadow:  `0 32px 80px rgba(0,0,0,0.6), 0 0 60px ${color}22`,
-  } : {
-    // Fondo azul-gris medio — topbar y cards en blanco crean la profundidad (estilo Apple/Linear)
-    bg:      `linear-gradient(160deg, ${color}22 0%, #C8D8EC 50%, ${color}15 100%)`,
-    topbar:  'rgba(255,255,255,0.97)',
-    topBdr:  'rgba(0,20,80,0.10)',
-    sidebar: 'rgba(236,244,255,0.95)',
-    sideBdr: 'rgba(0,20,80,0.08)',
-    card:    'rgba(255,255,255,0.90)',  cardBdr: 'rgba(0,20,80,0.11)',
-    subTxt:  'rgba(0,20,60,0.46)',     rowTxt:  'rgba(0,20,60,0.72)',
-    rowBdr:  'rgba(0,20,80,0.06)',     navDot:  '#B0C4DA',
-    liveBg:  'rgba(255,255,255,0.80)', liveBdr: 'rgba(0,20,80,0.12)',
-    liveTxt: 'rgba(0,20,60,0.52)',     barFill: 'rgba(0,20,80,0.09)',
-    border:  `${color}55`,
-    shadow:  `0 24px 60px rgba(0,30,80,0.18), 0 0 40px ${color}25`,
-  };
-
-  return (
-    <div style={{
-      width: '100%', maxWidth: 460,
-      borderRadius: 16, overflow: 'hidden',
-      border: `1px solid ${T.border}`,
-      boxShadow: T.shadow,
-      background: T.bg, flexShrink: 0,
-      transition: 'background 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s, box-shadow 0.4s',
-    }}>
-      {/* Topbar */}
-      <div style={{ height: 48, background: T.topbar, borderBottom: `1px solid ${T.topBdr}`, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10, position: 'relative', transition: 'background 0.5s' }}>
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${color}60, transparent)` }} />
-        <div style={{ display: 'flex', gap: 5 }}>
-          {['#FF5F57', '#FFBD2E', '#28C840'].map(c => (
-            <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c, opacity: 0.7 }} />
-          ))}
-        </div>
-        <div style={{ flex: 1 }} />
-        <div style={{ height: 22, background: T.liveBg, border: `1px solid ${T.liveBdr}`, borderRadius: 6, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6 }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px #22C55E' }} />
-          <span style={{ fontSize: 10, color: T.liveTxt, letterSpacing: 1 }}>EN VIVO</span>
-        </div>
-        <div style={{ width: 24, height: 24, borderRadius: 7, background: `${color}28`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s' }}>
-          <Zap size={12} color={color} />
-        </div>
-      </div>
-      {/* Cuerpo */}
-      <div style={{ display: 'flex', height: 260 }}>
-        {/* Sidebar */}
-        <div style={{ width: 44, background: T.sidebar, borderRight: `1px solid ${T.sideBdr}`, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 0', gap: 6, transition: 'background 0.5s' }}>
-          {[true, false, false, false, false].map((active, i) => (
-            <div key={i} style={{ width: 30, height: 30, borderRadius: 8, background: active ? `${color}18` : 'transparent', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.4s' }}>
-              {active && <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', width: 2.5, height: 16, background: color, borderRadius: '0 3px 3px 0', boxShadow: `0 0 10px ${color}` }} />}
-              <div style={{ width: 12, height: 12, borderRadius: 3, background: active ? color : T.navDot, transition: 'background 0.4s' }} />
-            </div>
-          ))}
-        </div>
-        {/* Main */}
-        <div style={{ flex: 1, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12, overflow: 'hidden' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 9 }}>
-            {[
-              { label: 'Inscritos', val: '24', c: color },
-              { label: 'Al día',    val: '18', c: '#22C55E' },
-              { label: 'Pendiente', val: '6',  c: '#FF5E5E' },
-            ].map(s => (
-              <div key={s.label} style={{ background: `${s.c}09`, border: `1px solid ${s.c}25`, borderRadius: 9, padding: '8px 10px', transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s' }}>
-                <div style={{ fontSize: 10, color: T.subTxt, marginBottom: 4, letterSpacing: 0.5 }}>{s.label}</div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: s.c, lineHeight: 1, transition: 'color 0.4s' }}>{s.val}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ background: T.card, border: `1px solid ${T.cardBdr}`, borderRadius: 9, overflow: 'hidden', flex: 1 }}>
-            <div style={{ height: 26, background: `${color}0A`, borderBottom: `1px solid ${color}18`, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 60, height: 5, borderRadius: 3, background: `${color}45` }} />
-              <div style={{ width: 40, height: 5, borderRadius: 3, background: T.barFill }} />
-              <div style={{ flex: 1 }} />
-              <div style={{ padding: '1px 8px', background: `${color}15`, border: `1px solid ${color}30`, borderRadius: 4, fontSize: 9, color, fontWeight: 700, letterSpacing: 0.5 }}>HOY</div>
-            </div>
-            {[
-              { badge: '#22C55E', text: 'CONFIRMADO', name: 'Carlos M.' },
-              { badge: color,     text: 'PENDIENTE',  name: 'Laura V.'  },
-              { badge: '#FF5E5E', text: 'VENCIDO',    name: 'Juan P.'   },
-              { badge: color,     text: 'PENDIENTE',  name: 'Ana R.'    },
-            ].map((row, i) => (
-              <div key={i} style={{ height: 28, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: `1px solid ${T.rowBdr}` }}>
-                <div style={{ width: 18, height: 18, borderRadius: '50%', background: `${row.badge}15`, border: `1px solid ${row.badge}40`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: row.badge }} />
-                </div>
-                <div style={{ fontSize: 10, color: T.rowTxt, flex: 1 }}>{row.name}</div>
-                <div style={{ padding: '2px 7px', borderRadius: 4, background: `${row.badge}15`, border: `1px solid ${row.badge}35`, fontSize: 9, color: row.badge, fontWeight: 700, letterSpacing: 0.5 }}>{row.text}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 /* ── WhatsApp / IA Mockup ─────────────────────────────────────────────────── */
@@ -503,20 +276,6 @@ function CasoExito({ caso, delay }) {
 }
 
 /* ── Trust Logos ─────────────────────────────────────────────────────────── */
-const CLUB_LOGOS = [
-  { name: 'City FC Medellín',        abbr: 'CFC',  color: '#E14924', country: '🇨🇴' },
-  { name: 'Academia Medellín',       abbr: 'ACM',  color: '#00D084', country: '🇨🇴' },
-  { name: 'Deportivo Cali Sur',      abbr: 'DCS',  color: '#F5A623', country: '🇨🇴' },
-  { name: 'Club Atlético Rosario',   abbr: 'CAR',  color: '#0088EE', country: '🇦🇷' },
-  { name: 'Academia Buenos Aires',   abbr: 'ABA',  color: '#C678FF', country: '🇦🇷' },
-  { name: 'Deportivo Monterrey FC',  abbr: 'DMF',  color: '#FF5E5E', country: '🇲🇽' },
-  { name: 'Club Guadalajara Norte',  abbr: 'CGN',  color: '#F5A623', country: '🇲🇽' },
-  { name: 'Academia Santiago',       abbr: 'ASG',  color: '#00AAFF', country: '🇨🇱' },
-  { name: 'Liga Lima FC',            abbr: 'LLF',  color: '#FFFFFF', country: '🇵🇪' },
-  { name: 'Deportivo Quito',         abbr: 'DQT',  color: '#FFD700', country: '🇪🇨' },
-  { name: 'Club Atlético Madrid Sur',abbr: 'CMS',  color: '#EF4444', country: '🇪🇸' },
-];
-
 function TrustLogos() {
   return (
     <section style={{ padding: '0 24px 72px', maxWidth: 960, margin: '0 auto' }}>
@@ -991,6 +750,8 @@ export default function LandingPage() {
           66%{transform:translateY(-8px) translateX(-12px)}
         }
         @keyframes border-breathe { 0%,100%{opacity:0.3} 50%{opacity:0.7} }
+        @keyframes hero-kenburns { 0%,100%{transform:scale(1.03)} 50%{transform:scale(1.08)} }
+        .hero-kenburns { animation: hero-kenburns 22s ease-in-out infinite; transform-origin: center; will-change: transform; }
         .btn-primary:hover { opacity:0.9; transform:translateY(-2px); box-shadow: 0 12px 36px rgba(0,0,0,0.4); }
         .btn-primary { transition:all var(--dur-med) var(--ease-out); }
         .btn-ghost:hover { background:rgba(255,255,255,0.09) !important; border-color:rgba(255,255,255,0.22) !important; color:rgba(255,255,255,0.95) !important; }
@@ -1117,153 +878,7 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* ── HERO ────────────────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', padding: '100px 24px 80px', overflow: 'hidden' }}>
-        <GridBg color={previewColor} />
-        <ParticleField color={previewColor} />
-
-        <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-
-          {/* Badge */}
-          <div style={{ textAlign: 'center', marginBottom: 32, animation: 'slide-up 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both' }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: 'linear-gradient(90deg, rgba(106,0,255,0.10), rgba(6,182,212,0.07), rgba(106,0,255,0.10))',
-              border: '1px solid rgba(106,0,255,0.30)',
-              borderRadius: 999, padding: '6px 20px',
-              fontSize: 12, color: 'var(--brand-secondary, #AE68FF)', fontWeight: 600, letterSpacing: 0.5,
-              boxShadow: '0 0 20px rgba(106,0,255,0.10), inset 0 1px 0 rgba(106,0,255,0.15)',
-            }}>
-              <Sparkles size={13} />
-              Plataforma líder en gestión deportiva digital · 5 días gratis
-            </span>
-          </div>
-
-          {/* OG Image hero */}
-          <div style={{
-            position: 'relative',
-            borderRadius: 20,
-            overflow: 'hidden',
-            animation: 'slide-up 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s both',
-            boxShadow: `0 0 0 1px rgba(106,0,255,0.25), 0 32px 80px rgba(106,0,255,0.30), 0 8px 32px rgba(0,0,0,0.6)`,
-          }}>
-            <img
-              src="/og-image.jpg"
-              alt="ZenSports — AI Powering Performance"
-              fetchpriority="high"
-              width="1200"
-              height="630"
-              style={{ width: '100%', display: 'block', borderRadius: 20 }}
-            />
-            {/* Gradient bottom overlay para los CTAs */}
-            <div style={{
-              position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%',
-              background: 'linear-gradient(to top, rgba(6,8,16,0.95) 0%, rgba(6,8,16,0.6) 50%, transparent 100%)',
-              borderRadius: '0 0 20px 20px',
-            }} />
-
-            {/* CTAs overlaid en la imagen */}
-            <div className="hero-cta-wrap" style={{
-              position: 'absolute', bottom: 32, left: 0, right: 0,
-              display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap',
-              padding: '0 24px',
-            }}>
-              <button
-                className="btn-primary hero-cta-btn"
-                onClick={() => openLead('free')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 9,
-                  background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`,
-                  border: 'none', color: '#fff', fontSize: 15, fontWeight: 700,
-                  borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
-                  boxShadow: `0 8px 32px ${previewColor}60`,
-                }}
-              >
-                Comenzar prueba gratis de 5 días <ArrowRight size={16} />
-              </button>
-              <button
-                className="btn-ghost hero-cta-btn"
-                onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.18)',
-                  backdropFilter: 'blur(12px)',
-                  color: '#fff', fontSize: 15, borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
-                }}
-              >
-                Ver cómo funciona en 2 min
-              </button>
-            </div>
-          </div>
-
-          {/* CTAs mobile — fuera del overflow:hidden del hero image */}
-          <div className="hero-cta-mobile" style={{
-            flexDirection: 'column', gap: 10, marginTop: 16, padding: '0 8px',
-          }}>
-            <button
-              className="btn-primary hero-cta-btn"
-              onClick={() => openLead('free')}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`,
-                border: 'none', color: '#fff', fontWeight: 700,
-                borderRadius: 12, padding: '13px 20px', cursor: 'pointer', width: '100%',
-                boxShadow: `0 8px 32px ${previewColor}60`,
-              }}
-            >
-              Comenzar prueba gratis de 5 días <ArrowRight size={15} />
-            </button>
-            <button
-              className="btn-ghost hero-cta-btn"
-              onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.16)',
-                backdropFilter: 'blur(12px)',
-                color: '#fff', borderRadius: 12, padding: '13px 20px', cursor: 'pointer', width: '100%',
-              }}
-            >
-              Ver cómo funciona en 2 min
-            </button>
-          </div>
-
-          {/* Sub-texto + social proof */}
-          <div style={{ textAlign: 'center', marginTop: 28, animation: 'slide-up 0.7s cubic-bezier(0.16,1,0.3,1) 0.4s both' }}>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '0 0 6px', fontStyle: 'italic' }}>
-              En menos de 20 minutos tu club completamente digitalizado, sin hojas de cálculo.
-            </p>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', margin: '0 0 20px' }}>
-              5 días gratis · Sin tarjeta · Sin permanencia
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>Clubes en Colombia y Latam ya confían en ZenSports</span>
-              <div style={{ display: 'flex', gap: 5 }}>
-                {CLUB_LOGOS.slice(0, 5).map(club => (
-                  <div key={club.abbr} style={{ width: 26, height: 26, borderRadius: 6, background: `${club.color}16`, border: `1px solid ${club.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 7, fontWeight: 900, color: club.color }}>
-                    {club.abbr}
-                  </div>
-                ))}
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.18)', alignSelf: 'center', marginLeft: 3 }}>+6 más</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Live Activity */}
-          <div style={{ animation: 'slide-up 0.6s ease 0.5s both', marginTop: 24 }}>
-            <ActivityFeed />
-          </div>
-        </div>
-
-        {/* Hero dashboard mockup */}
-        <div style={{ maxWidth: 940, margin: '64px auto 0', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 1, animation: 'slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both' }}>
-          {FLOAT_CARDS.map(c => <FloatingCard key={c.text} {...c} />)}
-          <div style={{ position: 'relative', animation: 'float 7s ease-in-out infinite' }}>
-            <div style={{ position: 'absolute', inset: -2, borderRadius: 18, background: `linear-gradient(135deg, ${previewColor}35, transparent 50%, rgba(0,208,132,0.18))`, filter: 'blur(1px)', animation: 'border-breathe 5s ease-in-out infinite', transition: 'background 0.5s' }} />
-            <div style={{ position: 'absolute', bottom: -40, left: '10%', right: '10%', height: 60, background: `radial-gradient(ellipse at center, ${previewColor}25 0%, transparent 70%)`, filter: 'blur(20px)', transition: 'background 0.5s' }} />
-            <DashboardMockup color={previewColor} />
-          </div>
-        </div>
-      </section>
+      <Hero previewColor={previewColor} openLead={openLead} />
 
       {/* ── DISCIPLINAS ─────────────────────────────────────────────────── */}
       <section style={{ padding: '0 24px 72px', maxWidth: 860, margin: '0 auto' }}>

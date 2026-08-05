@@ -223,91 +223,101 @@ export default function Hero({ previewColor, openLead }) {
             separarlo lo hace indexable por SEO, editable y animable pieza
             por pieza. */}
         <motion.div variants={staggerItem} className="hero-two-col" style={{
-          display: 'flex', alignItems: 'center', gap: 40,
+          display: 'flex', alignItems: 'stretch', gap: 40,
         }}>
-          {/* Columna de texto */}
+          {/* Columna de texto — se centra como un solo bloque contra la
+              altura completa de la foto (stretch en la fila + justifyContent
+              center acá). Antes quedaba pegada arriba y dejaba un vacío
+              abajo; probé repartir con space-between pero el hueco solo se
+              movía al medio entre los íconos y el botón — se veía a
+              contenido faltante, no a diseño. Centrado como bloque único es
+              lo que de verdad se ve intencional. */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="show"
             className="hero-text-col"
-            style={{ flex: '1 1 420px', minWidth: 0 }}
+            style={{ flex: '1 1 420px', minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 36 }}
           >
-            <motion.div variants={staggerItem} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <ZenSportsLogo variant="zz" size={60} />
-              <div>
-                <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 32, letterSpacing: 1, color: '#fff', lineHeight: 1 }}>
-                  <span style={{ opacity: 0.82 }}>ZEN</span><span style={{ color: previewColor }}>SPORTS</span>
-                </div>
-                <div style={{ fontSize: 10.5, letterSpacing: 3, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-                  — AI POWERING PERFORMANCE —
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.p variants={staggerItem} style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,0.55)', maxWidth: 380, marginTop: 20 }}>
-              Transformamos datos en rendimiento. Potenciamos atletas, equipos y organizaciones con inteligencia artificial de vanguardia.
-            </motion.p>
-
-            <motion.div variants={staggerItem} style={{ display: 'flex', gap: 18, marginTop: 22 }}>
-              {HERO_STATS.map(({ Icon, label }) => (
-                <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                  <div style={{
-                    width: 34, height: 34, borderRadius: 9,
-                    background: `${previewColor}1F`, border: `1px solid ${previewColor}4D`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <Icon size={15} color={previewColor} strokeWidth={2} />
+            <div>
+              <motion.div variants={staggerItem} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <ZenSportsLogo variant="zz" size={76} />
+                <div>
+                  <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 40, letterSpacing: 1, color: '#fff', lineHeight: 1 }}>
+                    <span style={{ opacity: 0.82 }}>ZEN</span><span style={{ color: previewColor }}>SPORTS</span>
                   </div>
-                  <span style={{ fontSize: 8.5, letterSpacing: 1, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-                    {label}
-                  </span>
+                  <div style={{ fontSize: 11.5, letterSpacing: 3, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
+                    — AI POWERING PERFORMANCE —
+                  </div>
                 </div>
-              ))}
-            </motion.div>
+              </motion.div>
 
-            <motion.button
-              variants={staggerItem}
-              onClick={() => document.getElementById('producto')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              style={{
-                marginTop: 26, display: 'inline-flex', alignItems: 'center', gap: 8,
-                background: 'rgba(255,255,255,0.05)', border: `1px solid ${previewColor}59`,
-                color: 'rgba(255,255,255,0.8)', fontSize: 11.5, letterSpacing: 1.5, textTransform: 'uppercase',
-                borderRadius: 999, padding: '11px 22px', cursor: 'pointer',
-              }}
-            >
-              Descubre el futuro del deporte
-              <ArrowRight size={13} />
-            </motion.button>
+              <motion.p variants={staggerItem} style={{ fontSize: 16, lineHeight: 1.7, color: 'rgba(255,255,255,0.55)', maxWidth: 400, marginTop: 28 }}>
+                Transformamos datos en rendimiento. Potenciamos atletas, equipos y organizaciones con inteligencia artificial de vanguardia.
+              </motion.p>
 
-            {/* CTAs primarios */}
-            <motion.div variants={staggerItem} className="hero-cta-wrap" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 22 }}>
-              <button
-                className="btn-primary hero-cta-btn"
-                onClick={() => openLead('free')}
+              <motion.div variants={staggerItem} style={{ display: 'flex', gap: 20, marginTop: 32 }}>
+                {HERO_STATS.map(({ Icon, label }) => (
+                  <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7 }}>
+                    <div style={{
+                      width: 38, height: 38, borderRadius: 10,
+                      background: `${previewColor}1F`, border: `1px solid ${previewColor}4D`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Icon size={17} color={previewColor} strokeWidth={2} />
+                    </div>
+                    <span style={{ fontSize: 9, letterSpacing: 1, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                      {label}
+                    </span>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+
+            <div>
+              <motion.button
+                variants={staggerItem}
+                onClick={() => document.getElementById('producto')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 9,
-                  background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`,
-                  border: 'none', color: '#fff', fontSize: 15, fontWeight: 700,
-                  borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
-                  boxShadow: `0 8px 32px ${previewColor}60`,
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  background: 'rgba(255,255,255,0.05)', border: `1px solid ${previewColor}59`,
+                  color: 'rgba(255,255,255,0.8)', fontSize: 11.5, letterSpacing: 1.5, textTransform: 'uppercase',
+                  borderRadius: 999, padding: '11px 22px', cursor: 'pointer',
                 }}
               >
-                Comenzar prueba gratis de 5 días <ArrowRight size={16} />
-              </button>
-              <button
-                className="btn-ghost hero-cta-btn"
-                onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.18)',
-                  backdropFilter: 'blur(12px)',
-                  color: '#fff', fontSize: 15, borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
-                }}
-              >
-                Ver cómo funciona en 2 min
-              </button>
-            </motion.div>
+                Descubre el futuro del deporte
+                <ArrowRight size={13} />
+              </motion.button>
+
+              {/* CTAs primarios */}
+              <motion.div variants={staggerItem} className="hero-cta-wrap" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 18 }}>
+                <button
+                  className="btn-primary hero-cta-btn"
+                  onClick={() => openLead('free')}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 9,
+                    background: `linear-gradient(135deg, ${previewColor}, ${previewColor}cc)`,
+                    border: 'none', color: '#fff', fontSize: 15, fontWeight: 700,
+                    borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
+                    boxShadow: `0 8px 32px ${previewColor}60`,
+                  }}
+                >
+                  Comenzar prueba gratis de 5 días <ArrowRight size={16} />
+                </button>
+                <button
+                  className="btn-ghost hero-cta-btn"
+                  onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.18)',
+                    backdropFilter: 'blur(12px)',
+                    color: '#fff', fontSize: 15, borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
+                  }}
+                >
+                  Ver cómo funciona en 2 min
+                </button>
+              </motion.div>
+            </div>
           </motion.div>
 
           {/* Columna de foto — Ken Burns continuo (CSS, en el wrapper) +

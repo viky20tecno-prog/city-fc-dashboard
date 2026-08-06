@@ -290,7 +290,7 @@ export default function Hero({ previewColor, openLead }) {
           position: 'absolute', inset: 0, pointerEvents: 'none',
           background: 'linear-gradient(90deg, rgba(6,8,20,0.92) 0%, rgba(6,8,20,0.72) 30%, rgba(6,8,20,0.24) 54%, transparent 70%)',
         }} />
-        <div style={{ position: 'absolute', inset: '0 0 auto 0', height: 130, pointerEvents: 'none', background: 'linear-gradient(to bottom, rgba(4,5,12,0.6), transparent)' }} />
+        <div style={{ position: 'absolute', inset: '0 0 auto 0', height: 130, pointerEvents: 'none', background: 'linear-gradient(to bottom, rgba(20,0,40,0.55), transparent)' }} />
         <div style={{ position: 'absolute', inset: 'auto 0 0 0', height: 190, pointerEvents: 'none', background: 'linear-gradient(to top, #060810 0%, rgba(6,8,16,0) 100%)' }} />
 
         {/* Contenido superpuesto */}
@@ -398,6 +398,18 @@ export default function Hero({ previewColor, openLead }) {
       {/* ── Debajo de la foto: prueba social + actividad en vivo + mockup,
           ya sobre el fondo normal de la página (no sobre la imagen). */}
       <div style={{ position: 'relative', padding: '48px 24px 80px' }}>
+        {/* Resplandor morado que se derrama desde atrás de la foto hacia
+            esta sección — antes lo daba el boxShadow de la tarjeta vieja
+            (0 32px 80px rgba(106,0,255,.3)); con la foto full-bleed no hay
+            borde de tarjeta del cual salir, así que se recrea acá, cruzando
+            el límite entre las dos secciones. */}
+        <div style={{
+          position: 'absolute', top: -260, left: '50%', transform: 'translateX(-50%)',
+          width: 1300, height: 520, pointerEvents: 'none',
+          background: `radial-gradient(ellipse at center, ${previewColor}ff 0%, ${previewColor}90 30%, ${previewColor}30 55%, transparent 78%)`,
+          filter: 'blur(30px)', transition: 'background 0.5s', mixBlendMode: 'screen',
+          animation: 'glow-pulse 6s ease-in-out infinite',
+        }} />
         <GridBg color={previewColor} />
         <ParticleField color={previewColor} />
 

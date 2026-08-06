@@ -1,14 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
-    <linearGradient id="zbg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#6A00FF"/>
+    <radialGradient id="zbg" cx="30%" cy="26%" r="95%">
+      <stop offset="0%" stop-color="#9B4DFF"/>
+      <stop offset="42%" stop-color="#6A00FF"/>
+      <stop offset="100%" stop-color="#140028"/>
+    </radialGradient>
+    <linearGradient id="zbolt" x1="14" y1="14" x2="86" y2="86" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FBF5FF"/>
+      <stop offset="45%" stop-color="#E4CCFF"/>
       <stop offset="100%" stop-color="#AE68FF"/>
     </linearGradient>
-    <filter id="gf" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="1.5" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    <filter id="zglow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
   </defs>
-  <rect width="36" height="36" rx="9" fill="url(#zbg)"/>
-  <path filter="url(#gf)" d="M9 12H27L9 24H27" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="100" height="100" rx="24" fill="url(#zbg)"/>
+  <path d="M24,24 L76,24 L52,48 L24,72 L76,72" stroke="#AE68FF" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" filter="url(#zglow)" opacity="0.55"/>
+  <path d="M24,24 L76,24 L52,48 L24,72 L76,72" stroke="url(#zbolt)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24,24 L76,24 L52,48 L24,72 L76,72" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
 </svg>

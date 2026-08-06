@@ -6,22 +6,24 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import {
   Sparkles, ArrowRight, CheckCircle, Users, CreditCard, MessageCircle, ChevronDown,
-  BarChart2, Target, Brain, TrendingUp, Database,
+  BarChart2, QrCode,
 } from 'lucide-react';
 import { CLUB_LOGOS } from './clubLogos';
 import DashboardMockup from './DashboardMockup';
 import ZenSportsLogo from '../brand/ZenSportsLogo';
 
-/* ── Iconos "Análisis / Precisión / IA / Rendimiento / Datos" ────────────────
-   Antes vivían quemados como píxeles dentro de og-image.jpg (junto con el
-   logo y el copy) — ahora son DOM real: se pueden animar por separado,
-   Google los indexa, y no se ven borrosos en pantallas grandes. */
+/* ── Iconos "Jugadores / Pagos / Carnets / WhatsApp / Reportes" ──────────────
+   Mapeados 1:1 a features que existen de verdad en el producto (mismas
+   4 que aparecen en ACTIVITY más abajo, + Reportes de Finanzas.jsx) — antes
+   decían "IA"/"Precisión"/"Rendimiento", prometiendo analítica de
+   rendimiento deportivo con inteligencia artificial que no existe en el
+   dashboard real. */
 const HERO_STATS = [
-  { Icon: BarChart2,  label: 'Análisis'    },
-  { Icon: Target,     label: 'Precisión'   },
-  { Icon: Brain,      label: 'IA'          },
-  { Icon: TrendingUp, label: 'Rendimiento' },
-  { Icon: Database,   label: 'Datos'       },
+  { Icon: Users,         label: 'Jugadores' },
+  { Icon: CreditCard,    label: 'Pagos'     },
+  { Icon: QrCode,        label: 'Carnets'   },
+  { Icon: MessageCircle, label: 'WhatsApp'  },
+  { Icon: BarChart2,     label: 'Reportes'  },
 ];
 
 /* ── Chispas sobre la foto del Hero ───────────────────────────────────────
@@ -321,13 +323,13 @@ export default function Hero({ previewColor, openLead }) {
                   <span style={{ opacity: 0.82 }}>ZEN</span><span style={{ color: previewColor }}>SPORTS</span>
                 </div>
                 <div style={{ fontSize: 11.5, letterSpacing: 3, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
-                  — AI POWERING PERFORMANCE —
+                  — GESTIÓN DEPORTIVA DIGITAL —
                 </div>
               </div>
             </motion.div>
 
             <motion.p variants={staggerItem} style={{ fontSize: 16, lineHeight: 1.7, color: 'rgba(255,255,255,0.6)', margin: 0 }}>
-              Transformamos datos en rendimiento. Potenciamos atletas, equipos y organizaciones con inteligencia artificial de vanguardia.
+              Digitalizamos la gestión de tu club: inscripciones, pagos, carnets con QR, uniformes y automatización por WhatsApp — todo en un solo panel, sin hojas de cálculo.
             </motion.p>
 
             <motion.div variants={staggerItem} style={{ display: 'flex', gap: 20 }}>

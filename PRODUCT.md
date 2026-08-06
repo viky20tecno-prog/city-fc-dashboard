@@ -10,11 +10,13 @@ Presidentes y administradores de clubes deportivos en Colombia y Latam (fútbol,
 
 ## Product Purpose
 
-ZenSports digitaliza la gestión de un club deportivo: inscripciones, mensualidades/pagos, carnets con QR, uniformes, automatización por WhatsApp y analítica de rendimiento con IA. Existe para que un club pase de hojas de cálculo desordenadas a un panel único en menos de 20 minutos. Éxito = el admin del club arranca la prueba gratis de 5 días desde el hero.
+ZenSports digitaliza la gestión de un club deportivo: inscripciones, mensualidades/pagos, carnets con QR, uniformes, reportes financieros y automatización por WhatsApp. Existe para que un club pase de hojas de cálculo desordenadas a un panel único en menos de 20 minutos. Éxito = el admin del club arranca la prueba gratis de 5 días desde el hero.
+
+**Nota (6 ago 2026):** el copy original de esta landing prometía "IA" y "analítica de rendimiento deportivo" — auditado contra el código real y no existe (sin integración de IA/LLM, sin tracking de métricas deportivas). Se corrigió el copy del Hero para reflejar solo features reales. No usar "IA"/"inteligencia artificial" como claim de producto hasta que haya una feature real que lo respalde.
 
 ## Brand Personality
 
-Tech de punta / IA de vanguardia + energía y potencia deportiva + premium y pulido. Se siente como una marca deportiva de alto rendimiento con un cerebro de datos detrás, no como un SaaS B2B genérico. El morado y la fotografía de atletas cargan la emoción; el mockup del dashboard carga la prueba (datos reales, no ilustraciones).
+Energía y potencia deportiva + premium y pulido + confiable/directo (le habla a un admin de club escéptico de "otra herramienta más", no a un comprador técnico). Se siente como una marca deportiva de alto rendimiento, no como un SaaS B2B genérico. El morado y la fotografía de atletas cargan la emoción; el mockup del dashboard carga la prueba (datos reales, no ilustraciones) — y esos datos deben ser features que existen de verdad.
 
 ## Anti-references
 

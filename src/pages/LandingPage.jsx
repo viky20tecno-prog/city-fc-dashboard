@@ -1719,7 +1719,7 @@ export default function LandingPage() {
           {/* Barra inferior */}
           <div style={{ paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12, margin: 0 }}>© 2026 ZenSports · <span style={{ color: 'rgba(255,255,255,0.18)' }}>Creado por</span> <span style={{ color: previewColor, fontWeight: 600, transition: 'color 0.4s' }}>Zenpra</span></p>
-            <p style={{ color: 'rgba(255,255,255,0.18)', fontSize: 11, margin: 0, fontStyle: 'italic', letterSpacing: 0.5 }}>AI Powering Performance</p>
+            <p style={{ color: 'rgba(255,255,255,0.18)', fontSize: 11, margin: 0, fontStyle: 'italic', letterSpacing: 0.5 }}>Gestión Deportiva Digital</p>
           </div>
         </div>
       </footer>

@@ -19,7 +19,9 @@
     </filter>
   </defs>
   <rect width="100" height="100" rx="24" fill="url(#zbg)"/>
-  <path d="M24,24 L76,24 L52,48 L24,72 L76,72" stroke="#AE68FF" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" filter="url(#zglow)" opacity="0.55"/>
-  <path d="M24,24 L76,24 L52,48 L24,72 L76,72" stroke="url(#zbolt)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M24,24 L76,24 L52,48 L24,72 L76,72" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+  <g transform="rotate(-40.2 50 50)">
+    <path d="M24,24 L76,24 L52,48 L24,72 L76,72" stroke="#AE68FF" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" filter="url(#zglow)" opacity="0.55"/>
+    <path d="M24,24 L76,24 L52,48 L24,72 L76,72" stroke="url(#zbolt)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M24,24 L76,24 L52,48 L24,72 L76,72" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+  </g>
 </svg>

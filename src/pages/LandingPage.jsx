@@ -1002,7 +1002,7 @@ export default function LandingPage() {
       {/* ── FEATURES ─────────────────────────────────────────────────────── */}
       <section id="producto" style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto' }}>
         <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>La solución</p>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Producto</p>
           <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>
             ZenSports automatiza toda la experiencia.
           </h2>

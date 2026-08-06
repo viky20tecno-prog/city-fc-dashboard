@@ -784,7 +784,7 @@ export default function LandingPage() {
           100% { stroke-dashoffset: 0; }
         }
         .hero-bolt {
-          fill:none; stroke:url(#hero-bolt-grad); stroke-width:1.1;
+          fill:none; stroke:url(#hero-bolt-grad); stroke-width:1.9;
           stroke-linecap:round; stroke-linejoin:round;
           filter:url(#hero-bolt-glow);
           animation:hero-bolt-flicker var(--dur) ease-in-out var(--delay) infinite,

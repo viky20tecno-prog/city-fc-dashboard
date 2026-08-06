@@ -127,7 +127,7 @@ function HeroLightning() {
           <stop offset="100%" stopColor="#8B2CFF" />
         </linearGradient>
         <filter id="hero-bolt-glow" x="-80%" y="-80%" width="260%" height="260%">
-          <feGaussianBlur stdDeviation="0.8" result="blur" />
+          <feGaussianBlur stdDeviation="1.3" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />

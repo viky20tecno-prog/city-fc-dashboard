@@ -56,6 +56,58 @@ function HeroSparks() {
   );
 }
 
+/* ── Rayos animados sobre la foto del Hero ────────────────────────────────
+   Líneas que "viajan" (stroke-dashoffset) en vez de un resplandor estático
+   — lo que se pidió fue justo esto: "rayitos de luz que se movían", no un
+   glow tapando la foto (ese experimento se descartó). Cada rayo sale de un
+   punto central y pasa por uno de los HERO_SPARKS de arriba, así que
+   quedan pegados a los núcleos brillantes reales de la imagen en vez de
+   flotar sueltos como el LightningOverlay viejo (trazado a mano sobre la
+   imagen anterior, coordenadas que ya no aplican). Coordenadas en % del
+   contenedor (viewBox 0-100, preserveAspectRatio="none") — mismo sistema
+   que ya usan los HERO_SPARKS. */
+const HERO_BOLTS = [
+  { id: 'b1', d: 'M63,42 L66,36 L64,33 L67.6,32.3 L70,26',   delay: '0s',    dur: '3.2s' },
+  { id: 'b2', d: 'M63,42 L70,46 L74,50 L79.8,55.9 L84,60',   delay: '0.6s',  dur: '3.6s' },
+  { id: 'b3', d: 'M63,42 L66,52 L70,63 L73.6,73.5 L76,80',   delay: '1.3s',  dur: '3.4s' },
+  { id: 'b4', d: 'M63,42 L67,30 L70,24 L73.5,19.7 L76,13',   delay: '1.9s',  dur: '3.8s' },
+  { id: 'b5', d: 'M63,42 L56,48 L51,55 L47.9,60.8 L44,66',   delay: '0.3s',  dur: '3.0s' },
+  { id: 'b6', d: 'M63,42 L58,28 L54,18 L50.7,10.5 L48,4',    delay: '2.2s',  dur: '2.8s' },
+];
+
+function HeroLightning() {
+  return (
+    <svg
+      className="hero-bolts"
+      viewBox="0 0 100 100" preserveAspectRatio="none"
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', mixBlendMode: 'screen', pointerEvents: 'none' }}
+    >
+      <defs>
+        <linearGradient id="hero-bolt-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#F3E8FF" />
+          <stop offset="45%"  stopColor="#C4B5FD" />
+          <stop offset="100%" stopColor="#8B2CFF" />
+        </linearGradient>
+        <filter id="hero-bolt-glow" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="1.4" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      {HERO_BOLTS.map(b => (
+        <path
+          key={b.id}
+          d={b.d}
+          className="hero-bolt"
+          style={{ '--delay': b.delay, '--dur': b.dur }}
+        />
+      ))}
+    </svg>
+  );
+}
+
 /* ── Grid + glow background ──────────────────────────────────────────────── */
 function GridBg({ color }) {
   return (
@@ -274,6 +326,7 @@ export default function Hero({ previewColor, openLead }) {
                 fetchpriority="high"
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '58% center' }}
               />
+              <HeroLightning />
               <HeroSparks />
               <div className="hero-sweep" />
             </div>
@@ -398,18 +451,6 @@ export default function Hero({ previewColor, openLead }) {
       {/* ── Debajo de la foto: prueba social + actividad en vivo + mockup,
           ya sobre el fondo normal de la página (no sobre la imagen). */}
       <div style={{ position: 'relative', padding: '48px 24px 80px' }}>
-        {/* Resplandor morado que se derrama desde atrás de la foto hacia
-            esta sección — antes lo daba el boxShadow de la tarjeta vieja
-            (0 32px 80px rgba(106,0,255,.3)); con la foto full-bleed no hay
-            borde de tarjeta del cual salir, así que se recrea acá, cruzando
-            el límite entre las dos secciones. */}
-        <div style={{
-          position: 'absolute', top: -260, left: '50%', transform: 'translateX(-50%)',
-          width: 1300, height: 520, pointerEvents: 'none',
-          background: `radial-gradient(ellipse at center, ${previewColor}ff 0%, ${previewColor}90 30%, ${previewColor}30 55%, transparent 78%)`,
-          filter: 'blur(30px)', transition: 'background 0.5s', mixBlendMode: 'screen',
-          animation: 'glow-pulse 6s ease-in-out infinite',
-        }} />
         <GridBg color={previewColor} />
         <ParticleField color={previewColor} />
 

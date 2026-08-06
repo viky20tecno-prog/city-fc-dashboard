@@ -324,7 +324,7 @@ export default function Login() {
               ZenSports
             </span>
             <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: '0.22em', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
-              AI Powering Performance
+              Gestión Deportiva Digital
             </span>
           </div>
 

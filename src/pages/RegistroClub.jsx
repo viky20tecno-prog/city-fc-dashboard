@@ -11,6 +11,15 @@ import {
 } from 'lucide-react';
 import { PALETA } from '../lib/themes';
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
+import { generarLinkBoldClub } from '../services/api';
+
+// Mismos planes/precios que el muro de "trial vencido" en Dashboard.jsx —
+// el plan ya viene elegido desde la landing, acá solo se muestra + cobra.
+const PLANES_PAGOS = {
+  starter: { nombre: 'Starter', precio: '$149.000' },
+  pro:     { nombre: 'Pro',     precio: '$399.000' },
+  scale:   { nombre: 'Scale',   precio: '$799.000' },
+};
 
 const CYCLE_COLORS = ['#8B5CF6', '#10B981', '#00AAFF', '#0D9488', '#F97316'];
 
@@ -74,6 +83,7 @@ export default function RegistroClub() {
   const ciudadFromLanding   = dec('ciudad');
   const planFromLanding     = dec('plan');
   const esFree              = planFromLanding === 'free';
+  const planPago            = PLANES_PAGOS[planFromLanding]; // undefined si es free/demo/sin plan
 
   const [form, setForm] = useState({
     ...INITIAL,
@@ -91,6 +101,8 @@ export default function RegistroClub() {
   const [exito, setExito]       = useState(false);
   const [showPwd, setShowPwd]   = useState(false);
   const [showConf, setShowConf] = useState(false);
+  const [pagandoBold, setPagandoBold]     = useState(false);
+  const [errorPagoBold, setErrorPagoBold] = useState('');
 
   const ac = CYCLE_COLORS[colorIdx];
 
@@ -146,7 +158,11 @@ export default function RegistroClub() {
         sessionStorage.setItem('clubId', data.club_slug);
       }
       setExito(true);
-      setTimeout(() => navigate('/app'), 2000);
+      // Si eligió un plan pago desde la landing, la pantalla de éxito ofrece
+      // pagarlo con Bold antes de entrar — no redirigir solo todavía.
+      if (!planPago) {
+        setTimeout(() => navigate('/app'), 2000);
+      }
     } catch (err) {
       if (err.name === 'AbortError') {
         setError('El servidor tardó demasiado en responder. Verifica tu conexión e intenta de nuevo.');
@@ -161,6 +177,18 @@ export default function RegistroClub() {
     }
   };
 
+  const handlePagarConBold = async () => {
+    setPagandoBold(true);
+    setErrorPagoBold('');
+    try {
+      const record = await generarLinkBoldClub(planFromLanding);
+      window.location.href = record.bold_link_url;
+    } catch (err) {
+      setErrorPagoBold(err.message || 'No se pudo generar el link de pago.');
+      setPagandoBold(false);
+    }
+  };
+
   const showForm = !!nombreFromLanding;
 
   if (exito) {
@@ -169,10 +197,45 @@ export default function RegistroClub() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
           <div style={{ position: 'absolute', top: '20%', left: '30%', width: '40vw', height: '40vw', borderRadius: '50%', background: 'radial-gradient(circle, #00D08422 0%, transparent 70%)', filter: 'blur(60px)' }} />
         </div>
-        <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '48px 56px', background: 'rgba(8,10,20,0.72)', backdropFilter: 'blur(32px)', borderRadius: 24, border: '1px solid rgba(0,208,132,0.25)', boxShadow: '0 0 60px rgba(0,208,132,0.1)' }}>
+        <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '48px 56px', background: 'rgba(8,10,20,0.72)', backdropFilter: 'blur(32px)', borderRadius: 24, border: '1px solid rgba(0,208,132,0.25)', boxShadow: '0 0 60px rgba(0,208,132,0.1)', maxWidth: 420, width: '100%' }}>
           <CheckCircle size={60} color="#00D084" style={{ marginBottom: 20, filter: 'drop-shadow(0 0 16px #00D08488)' }} />
           <h2 style={{ color: '#fff', fontSize: 24, fontWeight: 800, marginBottom: 10 }}>¡Club registrado con éxito!</h2>
-          <p style={{ color: 'var(--text-sec)', fontSize: 15 }}>Redirigiendo a tu dashboard…</p>
+
+          {!planPago ? (
+            <p style={{ color: 'var(--text-sec)', fontSize: 15 }}>Redirigiendo a tu dashboard…</p>
+          ) : (
+            <>
+              <p style={{ color: 'var(--text-sec)', fontSize: 15, marginBottom: 24 }}>
+                Elegiste el plan <strong style={{ color: '#fff' }}>{planPago.nombre}</strong> ({planPago.precio}/mes). Activalo ahora con Bold para desbloquear todo desde el primer día.
+              </p>
+              {errorPagoBold && (
+                <p style={{ color: '#EF4444', fontSize: 13, marginBottom: 14 }}>{errorPagoBold}</p>
+              )}
+              <button
+                onClick={handlePagarConBold}
+                disabled={pagandoBold}
+                style={{
+                  width: '100%', padding: '13px', borderRadius: 11, border: 'none',
+                  background: '#22C55E', color: '#fff', fontSize: 14, fontWeight: 700,
+                  cursor: pagandoBold ? 'default' : 'pointer', opacity: pagandoBold ? 0.6 : 1,
+                  marginBottom: 12,
+                }}
+              >
+                {pagandoBold ? 'Generando link de pago…' : `Pagar plan ${planPago.nombre} con Bold`}
+              </button>
+              <button
+                onClick={() => navigate('/app')}
+                disabled={pagandoBold}
+                style={{
+                  width: '100%', padding: '11px', borderRadius: 11,
+                  border: '1px solid rgba(255,255,255,0.14)', background: 'transparent',
+                  color: 'var(--text-sec)', fontSize: 13, cursor: pagandoBold ? 'default' : 'pointer',
+                }}
+              >
+                Prefiero empezar la prueba gratis por ahora
+              </button>
+            </>
+          )}
         </div>
       </div>
     );
@@ -245,7 +308,7 @@ export default function RegistroClub() {
               ZenSports
             </span>
             <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: '0.22em', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
-              AI Powering Performance
+              Gestión Deportiva Digital
             </span>
           </div>
 

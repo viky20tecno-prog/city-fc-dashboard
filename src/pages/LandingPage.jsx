@@ -706,7 +706,7 @@ export default function LandingPage() {
 
   const openLead = useCallback((plan) => setLeadModal({ open: true, plan, color: previewColor }), [previewColor]);
 
-  useEffect(() => { document.title = 'ZenSports — Gestión Deportiva Inteligente'; }, []);
+  useEffect(() => { document.title = 'ZenSports — Gestión Deportiva Digital'; }, []);
 
   const colorActivo = PALETA.find(p => p.hex === previewColor) || PALETA[0];
 

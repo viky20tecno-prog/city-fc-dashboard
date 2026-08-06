@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { CLUB_LOGOS } from './clubLogos';
 import DashboardMockup from './DashboardMockup';
-import LightningOverlay from './LightningOverlay';
 import ZenSportsLogo from '../brand/ZenSportsLogo';
 
 /* ── Iconos "Análisis / Precisión / IA / Rendimiento / Datos" ────────────────
@@ -321,32 +320,32 @@ export default function Hero({ previewColor, openLead }) {
           </motion.div>
 
           {/* Columna de foto — Ken Burns continuo (CSS, en el wrapper) +
-              parallax de scroll (framer) + rayos animados encima. El recorte
-              es matemático, no manual: a 500×630 con aspect-ratio fijo, el
-              object-position:100% siempre muestra exactamente x:700→1200 del
-              original a escala 1:1 (sin upscale) — ahí termina el texto
-              quemado en la imagen y empiezan los deportistas limpios. */}
+              parallax de scroll (framer). Foto nueva (hero-athletes.png,
+              1716×917): el clúster de atletas + rayos ya vienen pintados en
+              la imagen, pegados al borde derecho, en un cuadro ~1:1. El
+              recorte sigue siendo matemático vía object-position:100% +
+              cover — a 560×500 (ratio 1.12) siempre queda dentro del ancho
+              real del clúster, así que no hace falta el LightningOverlay
+              (esa capa se trazó a mano sobre las coordenadas de la imagen
+              vieja; con esta imagen quedaría desalineada y encima
+              duplicaría el efecto que ya trae la foto). */}
           <motion.div className="hero-photo-col" style={{
-            flex: '0 0 500px',
+            flex: '0 0 560px',
             maxWidth: '100%',
-            aspectRatio: '500 / 630',
+            aspectRatio: '560 / 500',
             position: 'relative',
             borderRadius: 20,
             overflow: 'hidden',
             boxShadow: `0 0 0 1px rgba(106,0,255,0.25), 0 32px 80px rgba(106,0,255,0.30), 0 8px 32px rgba(0,0,0,0.6)`,
           }}>
             <motion.div style={{ y: imgY, position: 'absolute', inset: 0 }}>
-              {/* .hero-kenburns en el wrapper (no en el <img>) para que la
-                  imagen y el overlay de rayos escalen pegados, cuadro a
-                  cuadro — si cada uno tuviera su propio scale se desalinean. */}
               <div className="hero-kenburns" style={{ position: 'absolute', inset: 0 }}>
                 <img
-                  src="/og-image.jpg"
+                  src="/hero-athletes.png"
                   alt="ZenSports — atletas potenciados por IA"
                   fetchpriority="high"
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '100% center' }}
                 />
-                <LightningOverlay viewBox="700 0 500 630" />
               </div>
             </motion.div>
           </motion.div>

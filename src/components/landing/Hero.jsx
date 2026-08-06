@@ -388,7 +388,7 @@ export default function Hero({ previewColor, openLead }) {
                   color: '#fff', fontSize: 15, borderRadius: 12, padding: '14px 28px', cursor: 'pointer',
                 }}
               >
-                Ver cómo funciona en 2 min
+                Ver cómo funciona
               </button>
             </motion.div>
           </div>

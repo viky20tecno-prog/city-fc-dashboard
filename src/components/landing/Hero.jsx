@@ -315,7 +315,7 @@ export default function Hero({ previewColor, openLead }) {
             </motion.div>
 
             <motion.div variants={staggerItem} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <ZenSportsLogo variant="zz" size={76} />
+              <ZenSportsLogo variant="icon-svg" size={76} />
               <div>
                 <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 40, letterSpacing: 1, color: '#fff', lineHeight: 1 }}>
                   <span style={{ opacity: 0.82 }}>ZEN</span><span style={{ color: previewColor }}>SPORTS</span>

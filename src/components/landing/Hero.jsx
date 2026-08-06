@@ -56,6 +56,100 @@ function HeroSparks() {
   );
 }
 
+/* ── Rayos animados sobre la foto del Hero ────────────────────────────────
+   La primera versión de esto (coordenadas de zigzag puestas a mano, 2-3
+   puntos por rayo) quedó fea — se veía a tiras sueltas, no a rayos. En vez
+   de seguir adivinando curvas a ojo, cada rayo ahora se genera con
+   desplazamiento de punto medio recursivo: el mismo algoritmo fractal que
+   se usa para terreno/costas/rayos en gráficos por computador (partir de
+   una línea recta, desplazar el punto medio perpendicular por un monto
+   aleatorio, repetir en cada mitad con el desplazamiento reducido). El
+   resultado sale matemáticamente irregular — no depende de mi criterio
+   estético para "verse eléctrico". Los destinos siguen siendo los mismos
+   HERO_SPARKS (núcleos brillantes reales de la foto), así que los rayos
+   quedan pegados al arte en vez de flotar sueltos. */
+function seededRandom(seed) {
+  let s = seed;
+  return () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+}
+
+function generateBolt(x1, y1, x2, y2, seed, roughness = 6.5, depth = 5) {
+  const rand = seededRandom(seed);
+  const points = [[x1, y1]];
+  const segment = (ax, ay, bx, by, displace, level) => {
+    if (level <= 0) { points.push([bx, by]); return; }
+    const mx = (ax + bx) / 2;
+    const my = (ay + by) / 2;
+    const dx = bx - ax;
+    const dy = by - ay;
+    const len = Math.hypot(dx, dy) || 1;
+    const offset = (rand() - 0.5) * displace;
+    const nx = mx + (-dy / len) * offset;
+    const ny = my + (dx / len) * offset;
+    segment(ax, ay, nx, ny, displace * 0.55, level - 1);
+    segment(nx, ny, bx, by, displace * 0.55, level - 1);
+  };
+  segment(x1, y1, x2, y2, roughness, depth);
+  let length = 0;
+  for (let i = 1; i < points.length; i++) {
+    length += Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]);
+  }
+  const d = `M${points.map(p => `${p[0].toFixed(2)},${p[1].toFixed(2)}`).join(' L')}`;
+  return { d, length };
+}
+
+const BOLT_SOURCE = { x: 63, y: 42 };
+const HERO_BOLTS = HERO_SPARKS.map((s, i) => {
+  const { d, length } = generateBolt(BOLT_SOURCE.x, BOLT_SOURCE.y, s.x, s.y, 1000 + i * 137);
+  return {
+    id: `bolt-${i}`, d,
+    dash: Math.round(length * 0.45),
+    gap: Math.round(length * 1.3),
+    delay: `${(i * 0.55).toFixed(2)}s`,
+    dur: `${(3.4 + (i % 3) * 0.5).toFixed(1)}s`,
+  };
+});
+
+function HeroLightning() {
+  return (
+    <svg
+      className="hero-bolts"
+      viewBox="0 0 100 100" preserveAspectRatio="none"
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', mixBlendMode: 'screen', pointerEvents: 'none' }}
+    >
+      <defs>
+        <linearGradient id="hero-bolt-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#F3E8FF" />
+          <stop offset="45%"  stopColor="#C4B5FD" />
+          <stop offset="100%" stopColor="#8B2CFF" />
+        </linearGradient>
+        <filter id="hero-bolt-glow" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="0.8" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      {HERO_BOLTS.map(b => (
+        <path
+          key={b.id}
+          d={b.d}
+          className="hero-bolt"
+          vectorEffect="non-scaling-stroke"
+          style={{
+            '--delay': b.delay, '--dur': b.dur, '--dash-total': b.dash + b.gap,
+            strokeDasharray: `${b.dash} ${b.gap}`,
+          }}
+        />
+      ))}
+    </svg>
+  );
+}
+
 /* ── Grid + glow background ──────────────────────────────────────────────── */
 function GridBg({ color }) {
   return (
@@ -274,6 +368,7 @@ export default function Hero({ previewColor, openLead }) {
                 fetchpriority="high"
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '58% center' }}
               />
+              <HeroLightning />
               <HeroSparks />
               <div className="hero-sweep" />
             </div>

@@ -822,7 +822,7 @@ export default function LandingPage() {
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 10 }}
             aria-label="Ir al inicio"
           >
-            <ZenSportsLogo variant="icon-svg" size={32} />
+            <ZenSportsLogo variant="icon" size={32} />
             <span style={{ fontFamily: "'Sport Event', sans-serif", fontSize: 20, letterSpacing: 3, color: '#fff', lineHeight: 1 }}>ZENSPORTS</span>
           </button>
           <div className="hide-mobile" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
@@ -1651,11 +1651,11 @@ export default function LandingPage() {
             {/* Marca */}
             <div>
               <div style={{ marginBottom: 16 }}>
-                <ZenSportsLogo variant="icon-svg" size={40} />
+                <ZenSportsLogo variant="icon" size={40} />
               </div>
               <p style={{ fontSize: 18, fontFamily: "'Sport Event','Space Grotesk',sans-serif", letterSpacing: 3, color: '#fff', margin: '0 0 8px' }}>ZENSPORTS</p>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6, margin: '0 0 20px', maxWidth: 220 }}>
-                La plataforma de gestión deportiva con IA para clubes de toda Latinoamérica.
+                La plataforma de gestión deportiva digital para clubes de toda Latinoamérica.
               </p>
               {/* Stats mini */}
               <div style={{ display: 'flex', gap: 20 }}>

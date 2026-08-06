@@ -270,7 +270,7 @@ export default function Hero({ previewColor, openLead }) {
             <div className="hero-kenburns" style={{ position: 'absolute', inset: 0 }}>
               <img
                 src="/hero-athletes.png"
-                alt="ZenSports — atletas de fútbol, básquet, ciclismo, natación, tenis y voleibol potenciados por IA, con energía morada"
+                alt="ZenSports — atletas de fútbol, básquet, ciclismo, natación, tenis y voleibol con energía morada"
                 fetchpriority="high"
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '58% center' }}
               />
@@ -317,7 +317,7 @@ export default function Hero({ previewColor, openLead }) {
             </motion.div>
 
             <motion.div variants={staggerItem} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <ZenSportsLogo variant="icon-svg" size={76} />
+              <ZenSportsLogo variant="icon" size={76} />
               <div>
                 <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 40, letterSpacing: 1, color: '#fff', lineHeight: 1 }}>
                   <span style={{ opacity: 0.82 }}>ZEN</span><span style={{ color: previewColor }}>SPORTS</span>

@@ -625,6 +625,46 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
     } finally { setGuardandoAbono(false); }
   };
 
+  // — Corrección del pago de una prenda puntual (no suma, fija el valor) —
+  // Sirve para cuando un abono quedó mal distribuido entre prendas y hay que
+  // reasignarlo sin revertir el pedido completo.
+  const [prendaPagoEditando, setPrendaPagoEditando] = useState(null); // { pedidoId, prenda }
+  const [valorPagoEdit, setValorPagoEdit]           = useState('');
+  const [pagoEditError, setPagoEditError]           = useState('');
+  const [guardandoPagoEdit, setGuardandoPagoEdit]   = useState(false);
+
+  const abrirEditarPagoPrenda = (pedidoId, prenda) => {
+    setPrendaPagoEditando({ pedidoId, prenda });
+    setValorPagoEdit(String(Number(prenda.valor_pagado) || 0));
+    setPagoEditError('');
+  };
+  const cerrarEditarPagoPrenda = () => { setPrendaPagoEditando(null); setPagoEditError(''); };
+
+  const handleGuardarPagoPrenda = async () => {
+    if (!prendaPagoEditando) return;
+    setPagoEditError('');
+    const { pedidoId, prenda } = prendaPagoEditando;
+    const monto = Number(valorPagoEdit);
+    const totalItem = (Number(prenda.precio_unitario) || 0) * (prenda.cantidad || 1);
+    if (valorPagoEdit === '' || isNaN(monto) || monto < 0) { setPagoEditError('Ingresá un monto válido.'); return; }
+    if (monto > totalItem) { setPagoEditError(`No puede superar el precio de la prenda ($${totalItem.toLocaleString('es-CO')}).`); return; }
+
+    setGuardandoPagoEdit(true);
+    try {
+      const res = await authFetch(`${API_BASE}/uniforms/${pedidoId}/prendas/${prenda.id}?club_id=${getClubId()}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valor_pagado: monto }),
+      });
+      const data = await res.json();
+      if (res.ok || data.success) { await cargarDatos(); cerrarEditarPagoPrenda(); }
+      else setPagoEditError(data.error || 'Error actualizando el pago de la prenda');
+    } catch (e) {
+      console.error('[Uniformes] Error editando pago de prenda:', e);
+      setPagoEditError('Error de conexión');
+    } finally { setGuardandoPagoEdit(false); }
+  };
+
   // — Armar lote (asignar ronda_fecha a varios pedidos pendientes a la vez) —
   const [loteAbierto, setLoteAbierto]           = useState(false);
   const [loteSeleccion, setLoteSeleccion]       = useState(() => new Set());
@@ -1542,9 +1582,18 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                       return (
                                         <div key={pr.id} className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] text-xs">
                                           <span className="text-[var(--text-pri)]">{pr.nombre}{pr.cantidad > 1 ? ` x${pr.cantidad}` : ''}</span>
-                                          <span className="text-[var(--text-sec)]">
-                                            ${Number(pr.valor_pagado || 0).toLocaleString('es-CO')} / ${totalItem.toLocaleString('es-CO')}
-                                            {saldoItem > 0 && <span className="text-[#F5A623] ml-1.5">· Saldo ${saldoItem.toLocaleString('es-CO')}</span>}
+                                          <span className="flex items-center gap-2">
+                                            <span className="text-[var(--text-sec)]">
+                                              ${Number(pr.valor_pagado || 0).toLocaleString('es-CO')} / ${totalItem.toLocaleString('es-CO')}
+                                              {saldoItem > 0 && <span className="text-[#F5A623] ml-1.5">· Saldo ${saldoItem.toLocaleString('es-CO')}</span>}
+                                            </span>
+                                            {p.estado !== 'ENTREGADO' && (
+                                              <button onClick={() => abrirEditarPagoPrenda(p.id, pr)} title="Corregir el valor pagado de esta prenda"
+                                                className="p-1 rounded text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors"
+                                              >
+                                                <Pencil className="w-3 h-3" />
+                                              </button>
+                                            )}
                                           </span>
                                         </div>
                                       );
@@ -1948,6 +1997,70 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                     className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-[#4A9EFF] text-white hover:bg-[#4A9EFF]/80 transition-colors disabled:opacity-50"
                   >
                     {guardandoAbono ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ══════════════════════════════════════════════
+          MODAL: CORREGIR PAGO DE UNA PRENDA
+      ══════════════════════════════════════════════ */}
+      {prendaPagoEditando && (() => {
+        const { prenda } = prendaPagoEditando;
+        const totalItem = (Number(prenda.precio_unitario) || 0) * (prenda.cantidad || 1);
+        return (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={cerrarEditarPagoPrenda}>
+            <div className="bg-[var(--bg-card)] border border-[var(--cc20)] rounded-2xl w-full max-w-sm shadow-[0_8px_40px_rgba(0,50,150,0.4)]" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-5 border-b border-[var(--cc20)]">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--cc12)] flex items-center justify-center">
+                    <Pencil className="w-4 h-4 text-[var(--cc)]" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-[var(--text-pri)]">Corregir pago de prenda</h3>
+                    <p className="text-xs text-[var(--text-sec)]">{prenda.nombre}{prenda.cantidad > 1 ? ` x${prenda.cantidad}` : ''}</p>
+                  </div>
+                </div>
+                <button onClick={cerrarEditarPagoPrenda} className="p-2 rounded-lg text-[var(--text-sec)] hover:text-[var(--text-pri)] hover:bg-[var(--bg-surface)] transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-5 space-y-4">
+                <p className="text-xs text-[var(--text-sec)]">
+                  Escribí el valor pagado real de esta prenda. Corrige un abono mal distribuido sin afectar el pago de las demás prendas del pedido — el total del pedido se recalcula solo.
+                </p>
+
+                <div>
+                  <label className="block text-xs text-[var(--text-sec)] mb-1.5">Valor pagado * (precio de la prenda: ${totalItem.toLocaleString('es-CO')})</label>
+                  <input
+                    type="number"
+                    value={valorPagoEdit}
+                    onChange={e => { setValorPagoEdit(e.target.value); setPagoEditError(''); }}
+                    placeholder="0"
+                    className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--cc20)] text-[var(--text-pri)] focus:outline-none focus:ring-2 focus:ring-[var(--cc)]/30"
+                    autoFocus
+                  />
+                </div>
+
+                {pagoEditError && (
+                  <div className="flex items-start gap-2 p-2.5 rounded-lg bg-[rgba(255,94,94,0.1)] border border-[#FF5E5E]/20">
+                    <AlertCircle className="w-4 h-4 text-[#FF5E5E] shrink-0 mt-0.5" />
+                    <span className="text-xs text-[#FF5E5E]">{pagoEditError}</span>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-1">
+                  <button onClick={cerrarEditarPagoPrenda} disabled={guardandoPagoEdit}
+                    className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-sec)] border border-[var(--cc20)] hover:bg-[var(--bg-surface)] transition-colors disabled:opacity-50"
+                  >Cancelar</button>
+                  <button onClick={handleGuardarPagoPrenda} disabled={guardandoPagoEdit}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--cc)] text-white hover:opacity-90 transition-colors disabled:opacity-50"
+                  >
+                    {guardandoPagoEdit ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar
                   </button>
                 </div>
               </div>

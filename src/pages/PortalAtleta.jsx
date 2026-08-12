@@ -321,6 +321,74 @@ function StepPhone({ color, clubSlug, onEncontrado }) {
   );
 }
 
+// ── Directorio de afiliados/patrocinadores ──────────────────────────────────
+// Se muestran acá (Portal del Atleta) y en la Landing pública — nunca en el
+// bot de WhatsApp (decisión explícita, para no sentirse invasivo). Prioridad
+// visual: oro > plata > bronce, máximo un afiliado por tier (rotación simple:
+// si hay varios del mismo tier se elige uno al azar en cada render).
+function AfiliadosCard() {
+  const [destacados, setDestacados] = useState([]);
+
+  // La elección aleatoria (rotación simple dentro de un mismo tier) es un
+  // efecto secundario, no un cálculo puro de render — por eso Math.random()
+  // vive acá adentro del efecto de fetch (react-hooks/purity la rechaza en
+  // useMemo) y setDestacados se llama una sola vez, directo desde el fetch,
+  // sin un segundo efecto derivando de otro estado (react-hooks/set-state-in-effect).
+  useEffect(() => {
+    fetch(`${API_BASE}/publico/afiliados`)
+      .then(r => r.ok ? r.json() : null)
+      .then(json => {
+        if (!json?.success || !Array.isArray(json.afiliados)) return;
+        const porTier = { oro: [], plata: [], bronce: [] };
+        json.afiliados.forEach(a => { if (porTier[a.tier]) porTier[a.tier].push(a); });
+        const elegirUno = (lista) => lista.length ? lista[Math.floor(Math.random() * lista.length)] : null;
+        setDestacados([elegirUno(porTier.oro), elegirUno(porTier.plata), elegirUno(porTier.bronce)].filter(Boolean));
+      })
+      .catch(() => { /* sección opcional: si falla, simplemente no se muestra */ });
+  }, []);
+
+  if (destacados.length === 0) return null;
+
+  return (
+    <div className="fade-up" style={{ animationDelay: '.22s' }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8, paddingLeft: 2 }}>
+        Aliados de tu club
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {destacados.map(a => (
+          <a
+            key={a.id}
+            href={a.link_web || undefined}
+            target={a.link_web ? '_blank' : undefined}
+            rel={a.link_web ? 'noopener noreferrer' : undefined}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', cursor: a.link_web ? 'pointer' : 'default',
+              padding: '10px 12px', borderRadius: 14,
+              background: a.tier === 'oro' ? 'rgba(245,166,35,0.06)' : 'rgba(255,255,255,0.025)',
+              border: `1px solid ${a.tier === 'oro' ? 'rgba(245,166,35,0.25)' : 'rgba(255,255,255,0.08)'}`,
+            }}
+          >
+            {a.logo_url ? (
+              <img src={a.logo_url} alt={a.nombre} style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'contain', background: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
+            ) : (
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+                {a.nombre.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.nombre}</div>
+              <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.categoria || a.ciudad || 'Aliado ZenSports'}</div>
+            </div>
+            {a.tier === 'oro' && (
+              <span style={{ fontSize: 9, fontWeight: 800, color: '#F5A623', background: 'rgba(245,166,35,0.12)', border: '1px solid rgba(245,166,35,0.3)', borderRadius: 999, padding: '2px 7px', flexShrink: 0 }}>★ Destacado</span>
+            )}
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Paso 2: Resultado ─────────────────────────────────────────────────────────
 const UNIFORME_ESTADO = {
   AL_DIA:    { color: '#00D084', label: 'Al día'           },
@@ -541,6 +609,9 @@ function Resultado({ datos, color, clubSlug, onNuevaBusqueda, onRefrescar }) {
           onPedidoCreado={onRefrescar}
         />
       </div>
+
+      {/* Aliados/patrocinadores del club */}
+      <AfiliadosCard />
 
       {/* Botón cerrar sesión */}
       <div className="fade-up" style={{ animationDelay: '.24s', paddingBottom: 8 }}>

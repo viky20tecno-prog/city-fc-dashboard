@@ -10,6 +10,7 @@ import { API_BASE_URL } from '../config';
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 import Hero from '../components/landing/Hero';
 import DashboardMockup from '../components/landing/DashboardMockup';
+import AliadosSection from '../components/landing/AliadosSection';
 import { CLUB_LOGOS } from '../components/landing/clubLogos';
 
 /* ── Scroll Reveal Hook ─────────────────────────────────────────────────── */
@@ -1580,6 +1581,9 @@ export default function LandingPage() {
 
       {/* ── SEGURIDAD Y CONFIANZA ────────────────────────────────────────── */}
       <SecuritySection />
+
+      {/* ── ALIADOS / PATROCINADORES ─────────────────────────────────────── */}
+      <AliadosSection />
 
       {/* ── FAQ ─────────────────────────────────────────────────────────── */}
       <section style={{ padding: '0 24px 88px', maxWidth: 760, margin: '0 auto' }}>

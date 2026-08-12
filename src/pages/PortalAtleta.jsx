@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
@@ -7,12 +7,6 @@ const SESSION_TTL_MS = 10 * 60 * 1000; // 10 minutos
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(n) || 0);
-
-function normalizePhone(raw) {
-  const digits = raw.replace(/\D/g, '');
-  if (digits.length === 10 && digits.startsWith('3')) return `57${digits}`;
-  return digits;
-}
 
 // ── Constantes de estados ─────────────────────────────────────────────────────
 const ESTADO_CFG = {
@@ -229,91 +223,44 @@ function PedidoUniformeCard({ color, clubSlug, cedula, catalogo, onPedidoCreado 
   );
 }
 
-// ── Paso 1: Ingresar celular — sin código de confirmación (WhatsApp no es confiable
-// ahora mismo, y el código no agregaba una barrera real: el endpoint solo pedía club+celular) ──
-function StepPhone({ color, clubSlug, onEncontrado }) {
-  const [phone, setPhone] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const inputRef = useRef(null);
+// ── Paso 1: Sin link directo — pedir el estado de cuenta por WhatsApp ──────────
+// Antes este paso tenía un campo de celular que el SISTEMA usaba para escribirle
+// primero a ese número (un mensaje "iniciado por el negocio", no una respuesta).
+// Ese formulario era público y sin autenticar: cualquiera podía escribir números
+// al azar y disparar mensajes no solicitados en ráfaga — exactamente el patrón
+// que ya causó un baneo real de WhatsApp una vez. Se quitó por completo (12 ago
+// 2026). Ahora es al revés: quien no tiene su link le escribe primero al bot por
+// WhatsApp, y el bot —que resuelve la identidad por el número real de quien
+// escribe— responde con el link. Nunca se envía nada no solicitado.
+const BOT_WHATSAPP = '573204409015';
 
-  useEffect(() => { setTimeout(() => inputRef.current?.focus(), 100); }, []);
-
-  async function consultar() {
-    const normalized = normalizePhone(phone);
-    if (normalized.length < 10) { setError('Ingresa un número de celular válido'); return; }
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`${API_BASE}/publico/atleta-por-celular`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ celular: normalized, club_slug: clubSlug }),
-      });
-      const json = await res.json();
-      if (!res.ok || !json.success) { setError(json.error || 'No encontramos ese celular'); return; }
-      onEncontrado(json);
-    } catch {
-      setError('Error de conexión. Intenta de nuevo.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const valid = phone.replace(/\D/g, '').length >= 10;
+function StepPhone({ color, clubNombre }) {
+  const mensaje = encodeURIComponent(
+    `Hola, quiero ver mi estado de cuenta${clubNombre ? ` en ${clubNombre}` : ''} 👋`
+  );
 
   return (
-    <div className="fade-up" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '24px 20px' }}>
-      <p style={{ fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 4, textAlign: 'center' }}>
+    <div className="fade-up" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '28px 22px', textAlign: 'center' }}>
+      <div style={{ fontSize: 30, marginBottom: 12 }}>💬</div>
+      <p style={{ fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 8 }}>
         Consulta tu estado de cuenta
       </p>
-      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>
-        Ingresa el celular con el que estás registrado en el club
+      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.42)', lineHeight: 1.6, marginBottom: 20 }}>
+        Escríbele a nuestro WhatsApp desde el número con el que estás registrado en el club y te mandamos tu link personal.
       </p>
-
-      <div style={{ position: 'relative', marginBottom: 10 }}>
-        <div style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 15, color: 'rgba(255,255,255,0.35)', fontWeight: 600, userSelect: 'none' }}>+57</div>
-        <input
-          ref={inputRef}
-          type="tel"
-          inputMode="numeric"
-          aria-label="Número de celular"
-          placeholder="300 000 0000"
-          value={phone}
-          onChange={e => { setPhone(e.target.value.replace(/[^\d\s]/g, '')); setError(null); }}
-          onKeyDown={e => e.key === 'Enter' && valid && !loading && consultar()}
-          style={{
-            width: '100%', boxSizing: 'border-box',
-            background: 'rgba(255,255,255,0.07)', border: `1.5px solid ${error ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.12)'}`,
-            borderRadius: 14, padding: '15px 18px 15px 52px',
-            color: '#fff', fontSize: 18, fontWeight: 600, letterSpacing: 1.5,
-            transition: 'border-color .15s',
-          }}
-        />
-      </div>
-
-      <button
-        onClick={consultar}
-        disabled={!valid || loading}
+      <a
+        href={`https://wa.me/${BOT_WHATSAPP}?text=${mensaje}`}
+        target="_blank"
+        rel="noopener noreferrer"
         style={{
-          width: '100%', border: 'none', borderRadius: 14, padding: '15px',
-          background: valid && !loading ? color : 'rgba(255,255,255,0.08)',
-          color: valid && !loading ? '#fff' : 'rgba(255,255,255,0.25)',
-          fontSize: 15, fontWeight: 700, cursor: valid && !loading ? 'pointer' : 'not-allowed',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          boxShadow: valid && !loading ? `0 4px 24px ${color}35` : 'none',
-          transition: 'background .2s, box-shadow .2s, color .2s',
+          width: '100%', boxSizing: 'border-box', border: 'none', borderRadius: 14, padding: '15px',
+          background: color, color: '#fff', fontSize: 15, fontWeight: 700, textDecoration: 'none',
+          boxShadow: `0 4px 24px ${color}35`,
         }}
       >
-        {loading ? <Spinner /> : 'Ver mi estado de cuenta'}
-      </button>
-
-      {error && (
-        <div style={{ marginTop: 12, padding: '12px 16px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', borderRadius: 12, fontSize: 13, color: '#FCA5A5', textAlign: 'center' }}>
-          {error}
-        </div>
-      )}
-
+        Escribirle al WhatsApp de ZenSports
+      </a>
       <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 16, lineHeight: 1.5 }}>
         El número debe estar registrado en tu club
       </p>
@@ -625,23 +572,25 @@ function Resultado({ datos, color, clubSlug, onNuevaBusqueda, onRefrescar }) {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function PortalAtleta() {
-  const { clubSlug, cedula } = useParams();
+  const { clubSlug, token } = useParams();
 
   const SESSION_KEY = `portal_session_${clubSlug}`;
 
   const [club, setClub]               = useState(null);
   const [clubCargando, setClubCargando] = useState(true);
 
-  // step: 'cargando' (link directo con cédula, sin pedir nada) | 'phone' | 'result'
-  const [step, setStep]   = useState(cedula ? 'cargando' : 'phone');
+  // step: 'cargando' (link directo con token, sin pedir nada) | 'phone' | 'result'
+  const [step, setStep]   = useState(token ? 'cargando' : 'phone');
   const [datos, setDatos] = useState(null);
 
   useEffect(() => {
     document.title = 'Estado de Cuenta · ZenSports';
 
-    // Link directo con cédula (el que manda Estado de cuenta) — entra sin pedir nada.
-    if (cedula) {
-      fetch(`${API_BASE}/publico/atleta/${clubSlug}/${cedula}`)
+    // Link directo con token (el que manda Estado de cuenta) — entra sin pedir nada.
+    // El token es un HMAC opaco, no la cédula — un link viejo con cédula en texto
+    // plano ya no matchea nada y cae al mismo "roto/vencido" de abajo.
+    if (token) {
+      fetch(`${API_BASE}/publico/atleta/${clubSlug}/${token}`)
         .then(r => r.json())
         .then(json => {
           if (json?.success) {
@@ -664,9 +613,9 @@ export default function PortalAtleta() {
             setStep('result');
             if (savedData?.club) setClub(savedData.club);
             // Refresco silencioso: actualiza datos sin pedir el celular de nuevo
-            const cedulaGuardada = savedData?.atleta?.cedula;
-            if (cedulaGuardada) {
-              fetch(`${API_BASE}/publico/atleta/${clubSlug}/${cedulaGuardada}`)
+            const tokenGuardado = savedData?.portal_token;
+            if (tokenGuardado) {
+              fetch(`${API_BASE}/publico/atleta/${clubSlug}/${tokenGuardado}`)
                 .then(r => r.ok ? r.json() : null)
                 .then(json => {
                   if (json?.success) {
@@ -710,10 +659,10 @@ export default function PortalAtleta() {
   // después de que el atleta crea un pedido de uniforme, para que aparezca
   // reflejado de inmediato en la sección "Uniforme".
   async function refrescarDatos() {
-    const cedulaActual = datos?.atleta?.cedula;
-    if (!cedulaActual) return;
+    const tokenActual = datos?.portal_token;
+    if (!tokenActual) return;
     try {
-      const res  = await fetch(`${API_BASE}/publico/atleta/${clubSlug}/${cedulaActual}`);
+      const res  = await fetch(`${API_BASE}/publico/atleta/${clubSlug}/${tokenActual}`);
       const json = await res.json();
       if (json?.success) {
         setDatos(json);
@@ -800,7 +749,7 @@ export default function PortalAtleta() {
           </div>
         )}
         {step === 'phone' && (
-          <StepPhone color={color} clubSlug={clubSlug} onEncontrado={handleEncontrado} />
+          <StepPhone color={color} clubNombre={clubNombre} />
         )}
         {step === 'result' && datos && (
           <Resultado datos={datos} color={color} clubSlug={clubSlug} onNuevaBusqueda={handleReset} onRefrescar={refrescarDatos} />

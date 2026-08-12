@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
@@ -7,12 +7,6 @@ const SESSION_TTL_MS = 10 * 60 * 1000; // 10 minutos
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(n) || 0);
-
-function normalizePhone(raw) {
-  const digits = raw.replace(/\D/g, '');
-  if (digits.length === 10 && digits.startsWith('3')) return `57${digits}`;
-  return digits;
-}
 
 // ── Constantes de estados ─────────────────────────────────────────────────────
 const ESTADO_CFG = {
@@ -229,117 +223,44 @@ function PedidoUniformeCard({ color, clubSlug, cedula, catalogo, onPedidoCreado 
   );
 }
 
-// ── Paso 1: Ingresar celular — el backend ya NO devuelve el estado de cuenta acá
-// (ese era el segundo hueco de seguridad: cualquiera que supiera el celular de un
-// jugador podía ver sus datos financieros con solo escribirlo). Ahora este paso
-// solo dispara el envío del link personal por WhatsApp AL NÚMERO escrito — si de
-// verdad es el dueño, lo recibe ahí. La respuesta del backend es siempre la misma
-// exista o no el celular en el club, así que acá tampoco se puede distinguir un
-// caso del otro (eso es intencional, evita enumeración de números registrados).
-function StepPhone({ color, clubSlug }) {
-  const [phone, setPhone] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [enviado, setEnviado] = useState(false);
-  const inputRef = useRef(null);
+// ── Paso 1: Sin link directo — pedir el estado de cuenta por WhatsApp ──────────
+// Antes este paso tenía un campo de celular que el SISTEMA usaba para escribirle
+// primero a ese número (un mensaje "iniciado por el negocio", no una respuesta).
+// Ese formulario era público y sin autenticar: cualquiera podía escribir números
+// al azar y disparar mensajes no solicitados en ráfaga — exactamente el patrón
+// que ya causó un baneo real de WhatsApp una vez. Se quitó por completo (12 ago
+// 2026). Ahora es al revés: quien no tiene su link le escribe primero al bot por
+// WhatsApp, y el bot —que resuelve la identidad por el número real de quien
+// escribe— responde con el link. Nunca se envía nada no solicitado.
+const BOT_WHATSAPP = '573204409015';
 
-  useEffect(() => { setTimeout(() => inputRef.current?.focus(), 100); }, []);
-
-  async function consultar() {
-    const normalized = normalizePhone(phone);
-    if (normalized.length < 10) { setError('Ingresa un número de celular válido'); return; }
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`${API_BASE}/publico/atleta-por-celular`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ celular: normalized, club_slug: clubSlug }),
-      });
-      const json = await res.json();
-      if (!res.ok || !json.success) { setError(json.error || 'No se pudo procesar la solicitud'); return; }
-      setEnviado(true);
-    } catch {
-      setError('Error de conexión. Intenta de nuevo.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const valid = phone.replace(/\D/g, '').length >= 10;
-
-  if (enviado) {
-    return (
-      <div className="fade-up" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '28px 22px', textAlign: 'center' }}>
-        <div style={{ fontSize: 30, marginBottom: 12 }}>📲</div>
-        <p style={{ fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 8 }}>
-          Revisa tu WhatsApp
-        </p>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.42)', lineHeight: 1.6 }}>
-          Si el número está registrado en el club, te llegó un mensaje de WhatsApp con tu link personal — ábrelo desde ahí para ver tu estado de cuenta.
-        </p>
-        <button
-          onClick={() => { setEnviado(false); setPhone(''); setError(null); }}
-          style={{ marginTop: 18, background: 'transparent', border: 'none', color, fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: 4 }}
-        >
-          ← Probar con otro número
-        </button>
-      </div>
-    );
-  }
+function StepPhone({ color, clubNombre }) {
+  const mensaje = encodeURIComponent(
+    `Hola, quiero ver mi estado de cuenta${clubNombre ? ` en ${clubNombre}` : ''} 👋`
+  );
 
   return (
-    <div className="fade-up" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '24px 20px' }}>
-      <p style={{ fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 4, textAlign: 'center' }}>
+    <div className="fade-up" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '28px 22px', textAlign: 'center' }}>
+      <div style={{ fontSize: 30, marginBottom: 12 }}>💬</div>
+      <p style={{ fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 8 }}>
         Consulta tu estado de cuenta
       </p>
-      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>
-        Ingresa el celular con el que estás registrado en el club y te enviamos tu link por WhatsApp
+      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.42)', lineHeight: 1.6, marginBottom: 20 }}>
+        Escríbele a nuestro WhatsApp desde el número con el que estás registrado en el club y te mandamos tu link personal.
       </p>
-
-      <div style={{ position: 'relative', marginBottom: 10 }}>
-        <div style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 15, color: 'rgba(255,255,255,0.35)', fontWeight: 600, userSelect: 'none' }}>+57</div>
-        <input
-          ref={inputRef}
-          type="tel"
-          inputMode="numeric"
-          aria-label="Número de celular"
-          placeholder="300 000 0000"
-          value={phone}
-          onChange={e => { setPhone(e.target.value.replace(/[^\d\s]/g, '')); setError(null); }}
-          onKeyDown={e => e.key === 'Enter' && valid && !loading && consultar()}
-          style={{
-            width: '100%', boxSizing: 'border-box',
-            background: 'rgba(255,255,255,0.07)', border: `1.5px solid ${error ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.12)'}`,
-            borderRadius: 14, padding: '15px 18px 15px 52px',
-            color: '#fff', fontSize: 18, fontWeight: 600, letterSpacing: 1.5,
-            transition: 'border-color .15s',
-          }}
-        />
-      </div>
-
-      <button
-        onClick={consultar}
-        disabled={!valid || loading}
+      <a
+        href={`https://wa.me/${BOT_WHATSAPP}?text=${mensaje}`}
+        target="_blank"
+        rel="noopener noreferrer"
         style={{
-          width: '100%', border: 'none', borderRadius: 14, padding: '15px',
-          background: valid && !loading ? color : 'rgba(255,255,255,0.08)',
-          color: valid && !loading ? '#fff' : 'rgba(255,255,255,0.25)',
-          fontSize: 15, fontWeight: 700, cursor: valid && !loading ? 'pointer' : 'not-allowed',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          boxShadow: valid && !loading ? `0 4px 24px ${color}35` : 'none',
-          transition: 'background .2s, box-shadow .2s, color .2s',
+          width: '100%', boxSizing: 'border-box', border: 'none', borderRadius: 14, padding: '15px',
+          background: color, color: '#fff', fontSize: 15, fontWeight: 700, textDecoration: 'none',
+          boxShadow: `0 4px 24px ${color}35`,
         }}
       >
-        {loading ? <Spinner /> : 'Enviarme mi link por WhatsApp'}
-      </button>
-
-      {error && (
-        <div style={{ marginTop: 12, padding: '12px 16px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', borderRadius: 12, fontSize: 13, color: '#FCA5A5', textAlign: 'center' }}>
-          {error}
-        </div>
-      )}
-
+        Escribirle al WhatsApp de ZenSports
+      </a>
       <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 16, lineHeight: 1.5 }}>
         El número debe estar registrado en tu club
       </p>
@@ -828,7 +749,7 @@ export default function PortalAtleta() {
           </div>
         )}
         {step === 'phone' && (
-          <StepPhone color={color} clubSlug={clubSlug} />
+          <StepPhone color={color} clubNombre={clubNombre} />
         )}
         {step === 'result' && datos && (
           <Resultado datos={datos} color={color} clubSlug={clubSlug} onNuevaBusqueda={handleReset} onRefrescar={refrescarDatos} />

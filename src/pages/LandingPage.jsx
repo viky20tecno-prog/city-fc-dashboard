@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Bot, BarChart2, CreditCard, Shield, ChevronRight, CheckCircle,
   Users, FileText, Smartphone, AlertTriangle, Zap, MessageCircle,
-  ArrowRight, TrendingUp, Star, Sun, Moon, X, Loader2, Menu, QrCode,
+  ArrowRight, TrendingUp, Sun, Moon, X, Loader2, Menu, QrCode,
 } from 'lucide-react';
 import { PALETA } from '../lib/themes';
 import { API_BASE_URL } from '../config';
@@ -125,156 +125,17 @@ function WhatsAppMockup() {
 }
 
 /* ── Testimonials ─────────────────────────────────────────────────────────── */
-const TESTIMONIALS = [
-  {
-    name: 'Alejandro Ríos',
-    role: 'Director Técnico',
-    club: 'FC Barranquilla Sur',
-    text: 'Antes perdíamos horas revisando pagos en WhatsApp. Ahora todo queda registrado automáticamente y los jugadores reciben confirmación al instante.',
-    stars: 5,
-    avatar: 'AR',
-    color: '#00AAFF',
-  },
-  {
-    name: 'Valentina Mora',
-    role: 'Coordinadora',
-    club: 'Club Atlético Medellín',
-    text: 'El carnet digital fue un cambio total. Los padres se sienten seguros, y nosotros podemos verificar cualquier jugador desde el celular.',
-    stars: 5,
-    avatar: 'VM',
-    color: '#00D084',
-  },
-  {
-    name: 'Sebastián Torres',
-    role: 'Administrador',
-    club: 'Escuela Deportiva Norte',
-    text: 'Las alertas de cobro automáticas nos avisan quién debe pagar antes de que se atrase. Redujimos la mora más del 80% sin perseguir a nadie.',
-    stars: 5,
-    avatar: 'ST',
-    color: '#F5A623',
-  },
-];
-
-/* ── Casos de éxito ──────────────────────────────────────────────────────── */
-const CASOS = [
-  {
-    club: 'Escuela Deportiva Barranquilla Sur',
-    deporte: 'Fútbol',
-    color: '#00AAFF',
-    avatar: 'EB',
-    problema: 'El director pasaba 4 horas diarias revisando pagos en WhatsApp y actualizando hojas de cálculo. Cada mes perdían entre 2 y 4 cupos por pagos no registrados.',
-    solucion: 'Implementaron ZenSports en 20 minutos. El bot de WhatsApp comenzó a confirmar pagos automáticamente desde el primer día y el carnet QR eliminó los cobros duplicados.',
-    quote: 'En la primera semana recuperamos dos inscripciones que antes se perdían. El bot trabaja mientras yo duermo.',
-    persona: 'Alejandro R. · Director Técnico',
-    antes: [
-      { label: 'Horas/día en cobros', val: '4 h' },
-      { label: 'Mora promedio',        val: '38%' },
-      { label: 'Cupos perdidos/mes',   val: '3'   },
-    ],
-    despues: [
-      { label: 'Horas/día en cobros', val: '20 min' },
-      { label: 'Mora promedio',        val: '7%'    },
-      { label: 'Cupos perdidos/mes',   val: '0'     },
-    ],
-  },
-  {
-    club: 'Club Atlético Medellín Central',
-    deporte: 'Fútbol · Natación',
-    color: '#00D084',
-    avatar: 'AM',
-    problema: 'No tenían forma de verificar si un jugador estaba al día antes de un partido. Los padres discutían con los coordinadores en la cancha cada fin de semana.',
-    solucion: 'El carnet digital QR resolvió la verificación en segundos. Cualquier coordinador confirma el estado de un jugador desde el celular sin llamar a nadie.',
-    quote: 'La primera vez que usamos el QR en un partido, los padres quedaron impresionados. Fue un cambio inmediato de imagen del club.',
-    persona: 'Valentina M. · Coordinadora',
-    antes: [
-      { label: 'Tiempo verificación', val: '10 min'  },
-      { label: 'Conflictos de pago',  val: 'Semanal' },
-      { label: 'Imagen del club',     val: 'Baja'    },
-    ],
-    despues: [
-      { label: 'Tiempo verificación', val: '5 seg' },
-      { label: 'Conflictos de pago',  val: 'Cero'  },
-      { label: 'Imagen del club',     val: 'Alta'  },
-    ],
-  },
-  {
-    club: 'Academia Deportiva Norte',
-    deporte: 'Múltiples disciplinas',
-    color: '#F5A623',
-    avatar: 'AN',
-    problema: 'Con 80 inscritos, la mora superaba el 40% mensual. El administrador enviaba más de 60 mensajes manuales por semana y muchos aún ignoraban los cobros.',
-    solucion: 'El sistema calcula automáticamente quién debe pagar y arma el recordatorio listo para cada jugador en los días clave del ciclo. El admin los manda con un clic desde su propio WhatsApp — sin escribir nada de cero. Los jugadores con mora quedan suspendidos automáticamente hasta regularizar su estado.',
-    quote: 'Ya no tengo que acordarme de nada ni escribir uno por uno — el sistema me arma todo, yo solo confirmo el envío. Bajé la mora al 8% sin arriesgar mi número de WhatsApp.',
-    persona: 'Sebastián T. · Administrador',
-    antes: [
-      { label: 'Mora mensual',         val: '42%'     },
-      { label: 'Mensajes manuales',    val: '+60/mes' },
-      { label: 'Tiempo admin. cobros', val: '6 h/sem' },
-    ],
-    despues: [
-      { label: 'Mora mensual',         val: '8%'      },
-      { label: 'Mensajes manuales',    val: '0'       },
-      { label: 'Tiempo admin. cobros', val: '30 min'  },
-    ],
-  },
-];
-
-function CasoExito({ caso, delay }) {
-  return (
-    <Reveal delay={delay}>
-      <div className="card-hover" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, overflow: 'hidden' }}>
-        <div style={{ height: 3, background: `linear-gradient(90deg, ${caso.color}, ${caso.color}60, transparent)` }} />
-        <div style={{ padding: '28px 32px', display: 'flex', flexWrap: 'wrap', gap: 32, alignItems: 'flex-start' }}>
-          <div style={{ flex: 1, minWidth: 260 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-              <div style={{ width: 46, height: 46, borderRadius: 13, background: `${caso.color}16`, border: `1px solid ${caso.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color: caso.color, flexShrink: 0 }}>
-                {caso.avatar}
-              </div>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 700 }}>{caso.club}</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{caso.deporte}</div>
-              </div>
-            </div>
-            <div style={{ marginBottom: 14 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: '#FF5E5E', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>El problema</p>
-              <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, margin: 0 }}>{caso.problema}</p>
-            </div>
-            <div style={{ marginBottom: 18 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: caso.color, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>Con ZenSports</p>
-              <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, margin: 0 }}>{caso.solucion}</p>
-            </div>
-            <div style={{ background: `${caso.color}08`, border: `1px solid ${caso.color}20`, borderRadius: 12, padding: '14px 18px' }}>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', fontStyle: 'italic', lineHeight: 1.65, margin: '0 0 10px' }}>"{caso.quote}"</p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: 0 }}>{caso.persona}</p>
-            </div>
-          </div>
-          <div style={{ flexShrink: 0, minWidth: 280 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div>
-                <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,94,94,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' }}>Antes</p>
-                {caso.antes.map(m => (
-                  <div key={m.label} style={{ textAlign: 'center', marginBottom: 10, background: 'rgba(255,94,94,0.05)', border: '1px solid rgba(255,94,94,0.14)', borderRadius: 12, padding: '13px 8px' }}>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: '#FF5E5E', marginBottom: 4 }}>{m.val}</div>
-                    <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.35)', lineHeight: 1.3 }}>{m.label}</div>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p style={{ fontSize: 10, fontWeight: 700, color: '#00D084', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10, textAlign: 'center' }}>Después</p>
-                {caso.despues.map(m => (
-                  <div key={m.label} style={{ textAlign: 'center', marginBottom: 10, background: 'rgba(0,208,132,0.05)', border: '1px solid rgba(0,208,132,0.20)', borderRadius: 12, padding: '13px 8px' }}>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: '#00D084', marginBottom: 4 }}>{m.val}</div>
-                    <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.35)', lineHeight: 1.3 }}>{m.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Reveal>
-  );
-}
+// Caso real en producción — no un testimonio inventado. City FC es, a la
+// fecha, el único club real corriendo sobre ZenSports; estos números salen
+// directo de Supabase, no son una cifra de marketing redondeada al ojo.
+const CASO_REAL = {
+  club: 'City FC',
+  stats: [
+    { label: 'Jugadores activos gestionados', val: '98' },
+    { label: 'Pagos y carnets', val: '100% digital' },
+    { label: 'Hojas de cálculo', val: '0' },
+  ],
+};
 
 /* ── Trust Logos ─────────────────────────────────────────────────────────── */
 function TrustLogos() {
@@ -433,38 +294,6 @@ function TechTrust() {
         </div>
       </div>
     </Reveal>
-  );
-}
-
-/* ── Highlighted Testimonial ─────────────────────────────────────────────── */
-function HighlightedTestimonial() {
-  const t = TESTIMONIALS[0];
-  return (
-    <section style={{ padding: '0 24px 72px', maxWidth: 800, margin: '0 auto' }}>
-      <Reveal>
-        <div style={{ background: `linear-gradient(135deg, ${t.color}08, rgba(255,255,255,0.02))`, border: `1px solid ${t.color}22`, borderRadius: 24, padding: '52px 48px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${t.color}60, transparent)` }} />
-          <div style={{ fontSize: 72, lineHeight: 1, color: `${t.color}30`, marginBottom: 16, fontFamily: 'Georgia, serif' }}>"</div>
-          <p style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: 700, color: '#fff', lineHeight: 1.5, maxWidth: 600, margin: '0 auto 32px' }}>
-            Desde que usamos ZenSports dejamos de discutir pagos en la cancha.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: `linear-gradient(135deg, ${t.color}22, ${t.color}08)`, border: `2px solid ${t.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14, color: t.color }}>
-                {t.avatar}
-              </div>
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: 14, fontWeight: 700 }}>{t.name}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{t.role} · {t.club}</div>
-              </div>
-            </div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${t.color}12`, border: `1px solid ${t.color}28`, borderRadius: 999, padding: '4px 14px', fontSize: 11, fontWeight: 700, color: t.color, letterSpacing: 0.5 }}>
-              ✅ Resultado real · Colombia
-            </div>
-          </div>
-        </div>
-      </Reveal>
-    </section>
   );
 }
 
@@ -1240,41 +1069,37 @@ export default function LandingPage() {
       {/* ── IMPACTO ANTES/DESPUÉS ─────────────────────────────────────────── */}
       <ImpactTable />
 
-      {/* ── TESTIMONIOS ──────────────────────────────────────────────────── */}
+      {/* ── CASO REAL ──────────────────────────────────────────────────── */}
       <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
         <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Testimonios</p>
-          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Lo que dicen los clubes.</h2>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Caso real</p>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Ya funciona todos los días, no es una demo.</h2>
         </Reveal>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
-          {TESTIMONIALS.map((t, i) => (
-            <Reveal key={t.name} delay={i * 100}>
-              <div className="card-hover" style={{
-                background: 'rgba(255,255,255,0.025)', borderRadius: 20, padding: '28px 26px',
-                border: `1px solid rgba(255,255,255,0.07)`,
-                position: 'relative', overflow: 'hidden',
-              }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${t.color}55, transparent)`, animation: 'border-breathe 5s ease-in-out infinite' }} />
-                <div style={{ position: 'absolute', top: 0, right: 0, width: 120, height: 120, background: `radial-gradient(circle, ${t.color}05 0%, transparent 70%)`, pointerEvents: 'none' }} />
-                <div style={{ display: 'flex', gap: 3, marginBottom: 18 }}>
-                  {Array(t.stars).fill(0).map((_, si) => <Star key={si} size={13} fill="#F5A623" color="#F5A623" />)}
+        <Reveal>
+          <div className="card-hover" style={{
+            background: 'rgba(255,255,255,0.025)', borderRadius: 20, padding: '36px 32px',
+            border: `1px solid rgba(255,255,255,0.07)`, maxWidth: 640, margin: '0 auto',
+            position: 'relative', overflow: 'hidden', textAlign: 'center',
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${previewColor}55, transparent)` }} />
+            <div style={{
+              width: 52, height: 52, borderRadius: 14, margin: '0 auto 18px',
+              background: `linear-gradient(135deg, ${previewColor}22, ${previewColor}08)`, border: `1.5px solid ${previewColor}40`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 15, color: previewColor,
+            }}>
+              {CASO_REAL.club.split(' ').map(w => w[0]).join('').slice(0, 3).toUpperCase()}
+            </div>
+            <div style={{ fontSize: 17, fontWeight: 800, marginBottom: 28 }}>{CASO_REAL.club}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 18 }}>
+              {CASO_REAL.stats.map(s => (
+                <div key={s.label}>
+                  <div style={{ fontSize: 26, fontWeight: 800, color: previewColor, marginBottom: 4 }}>{s.val}</div>
+                  <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>{s.label}</div>
                 </div>
-                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.68)', lineHeight: 1.8, marginBottom: 22, fontStyle: 'italic', letterSpacing: 0.1 }}>
-                  "{t.text}"
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ width: 42, height: 42, borderRadius: '50%', background: `linear-gradient(135deg, ${t.color}22, ${t.color}08)`, border: `1.5px solid ${t.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 12, color: t.color, flexShrink: 0, boxShadow: `0 0 16px ${t.color}15` }}>
-                    {t.avatar}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>{t.name}</div>
-                    <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.38)' }}>{t.role} · {t.club}</div>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
       </section>
 
       {/* ── COMPARATIVA ──────────────────────────────────────────────────── */}

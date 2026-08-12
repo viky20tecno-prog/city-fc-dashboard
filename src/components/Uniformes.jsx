@@ -2122,6 +2122,14 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                           <p className="text-[10px] text-[var(--text-sec)]">{p.prendas || p.prenda || '—'}</p>
                         </div>
                         <span className="text-xs font-semibold text-[var(--text-sec)] shrink-0">${Number(p.total || 0).toLocaleString('es-CO')}</span>
+                        <button
+                          type="button"
+                          title="Eliminar pedido"
+                          onClick={e => { e.preventDefault(); e.stopPropagation(); handleEliminar(p); }}
+                          className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[#FF5E5E] hover:bg-[rgba(255,94,94,0.1)] transition-colors shrink-0"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </label>
                     );
                   })}

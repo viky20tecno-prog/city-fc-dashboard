@@ -229,12 +229,18 @@ function PedidoUniformeCard({ color, clubSlug, cedula, catalogo, onPedidoCreado 
   );
 }
 
-// ── Paso 1: Ingresar celular — sin código de confirmación (WhatsApp no es confiable
-// ahora mismo, y el código no agregaba una barrera real: el endpoint solo pedía club+celular) ──
-function StepPhone({ color, clubSlug, onEncontrado }) {
+// ── Paso 1: Ingresar celular — el backend ya NO devuelve el estado de cuenta acá
+// (ese era el segundo hueco de seguridad: cualquiera que supiera el celular de un
+// jugador podía ver sus datos financieros con solo escribirlo). Ahora este paso
+// solo dispara el envío del link personal por WhatsApp AL NÚMERO escrito — si de
+// verdad es el dueño, lo recibe ahí. La respuesta del backend es siempre la misma
+// exista o no el celular en el club, así que acá tampoco se puede distinguir un
+// caso del otro (eso es intencional, evita enumeración de números registrados).
+function StepPhone({ color, clubSlug }) {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [enviado, setEnviado] = useState(false);
   const inputRef = useRef(null);
 
   useEffect(() => { setTimeout(() => inputRef.current?.focus(), 100); }, []);
@@ -251,8 +257,8 @@ function StepPhone({ color, clubSlug, onEncontrado }) {
         body: JSON.stringify({ celular: normalized, club_slug: clubSlug }),
       });
       const json = await res.json();
-      if (!res.ok || !json.success) { setError(json.error || 'No encontramos ese celular'); return; }
-      onEncontrado(json);
+      if (!res.ok || !json.success) { setError(json.error || 'No se pudo procesar la solicitud'); return; }
+      setEnviado(true);
     } catch {
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
@@ -262,13 +268,33 @@ function StepPhone({ color, clubSlug, onEncontrado }) {
 
   const valid = phone.replace(/\D/g, '').length >= 10;
 
+  if (enviado) {
+    return (
+      <div className="fade-up" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '28px 22px', textAlign: 'center' }}>
+        <div style={{ fontSize: 30, marginBottom: 12 }}>📲</div>
+        <p style={{ fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 8 }}>
+          Revisa tu WhatsApp
+        </p>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.42)', lineHeight: 1.6 }}>
+          Si el número está registrado en el club, te llegó un mensaje de WhatsApp con tu link personal — ábrelo desde ahí para ver tu estado de cuenta.
+        </p>
+        <button
+          onClick={() => { setEnviado(false); setPhone(''); setError(null); }}
+          style={{ marginTop: 18, background: 'transparent', border: 'none', color, fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: 4 }}
+        >
+          ← Probar con otro número
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="fade-up" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, padding: '24px 20px' }}>
       <p style={{ fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.85)', marginBottom: 4, textAlign: 'center' }}>
         Consulta tu estado de cuenta
       </p>
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>
-        Ingresa el celular con el que estás registrado en el club
+        Ingresa el celular con el que estás registrado en el club y te enviamos tu link por WhatsApp
       </p>
 
       <div style={{ position: 'relative', marginBottom: 10 }}>
@@ -305,7 +331,7 @@ function StepPhone({ color, clubSlug, onEncontrado }) {
           transition: 'background .2s, box-shadow .2s, color .2s',
         }}
       >
-        {loading ? <Spinner /> : 'Ver mi estado de cuenta'}
+        {loading ? <Spinner /> : 'Enviarme mi link por WhatsApp'}
       </button>
 
       {error && (
@@ -625,23 +651,25 @@ function Resultado({ datos, color, clubSlug, onNuevaBusqueda, onRefrescar }) {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function PortalAtleta() {
-  const { clubSlug, cedula } = useParams();
+  const { clubSlug, token } = useParams();
 
   const SESSION_KEY = `portal_session_${clubSlug}`;
 
   const [club, setClub]               = useState(null);
   const [clubCargando, setClubCargando] = useState(true);
 
-  // step: 'cargando' (link directo con cédula, sin pedir nada) | 'phone' | 'result'
-  const [step, setStep]   = useState(cedula ? 'cargando' : 'phone');
+  // step: 'cargando' (link directo con token, sin pedir nada) | 'phone' | 'result'
+  const [step, setStep]   = useState(token ? 'cargando' : 'phone');
   const [datos, setDatos] = useState(null);
 
   useEffect(() => {
     document.title = 'Estado de Cuenta · ZenSports';
 
-    // Link directo con cédula (el que manda Estado de cuenta) — entra sin pedir nada.
-    if (cedula) {
-      fetch(`${API_BASE}/publico/atleta/${clubSlug}/${cedula}`)
+    // Link directo con token (el que manda Estado de cuenta) — entra sin pedir nada.
+    // El token es un HMAC opaco, no la cédula — un link viejo con cédula en texto
+    // plano ya no matchea nada y cae al mismo "roto/vencido" de abajo.
+    if (token) {
+      fetch(`${API_BASE}/publico/atleta/${clubSlug}/${token}`)
         .then(r => r.json())
         .then(json => {
           if (json?.success) {
@@ -664,9 +692,9 @@ export default function PortalAtleta() {
             setStep('result');
             if (savedData?.club) setClub(savedData.club);
             // Refresco silencioso: actualiza datos sin pedir el celular de nuevo
-            const cedulaGuardada = savedData?.atleta?.cedula;
-            if (cedulaGuardada) {
-              fetch(`${API_BASE}/publico/atleta/${clubSlug}/${cedulaGuardada}`)
+            const tokenGuardado = savedData?.portal_token;
+            if (tokenGuardado) {
+              fetch(`${API_BASE}/publico/atleta/${clubSlug}/${tokenGuardado}`)
                 .then(r => r.ok ? r.json() : null)
                 .then(json => {
                   if (json?.success) {
@@ -710,10 +738,10 @@ export default function PortalAtleta() {
   // después de que el atleta crea un pedido de uniforme, para que aparezca
   // reflejado de inmediato en la sección "Uniforme".
   async function refrescarDatos() {
-    const cedulaActual = datos?.atleta?.cedula;
-    if (!cedulaActual) return;
+    const tokenActual = datos?.portal_token;
+    if (!tokenActual) return;
     try {
-      const res  = await fetch(`${API_BASE}/publico/atleta/${clubSlug}/${cedulaActual}`);
+      const res  = await fetch(`${API_BASE}/publico/atleta/${clubSlug}/${tokenActual}`);
       const json = await res.json();
       if (json?.success) {
         setDatos(json);
@@ -800,7 +828,7 @@ export default function PortalAtleta() {
           </div>
         )}
         {step === 'phone' && (
-          <StepPhone color={color} clubSlug={clubSlug} onEncontrado={handleEncontrado} />
+          <StepPhone color={color} clubSlug={clubSlug} />
         )}
         {step === 'result' && datos && (
           <Resultado datos={datos} color={color} clubSlug={clubSlug} onNuevaBusqueda={handleReset} onRefrescar={refrescarDatos} />

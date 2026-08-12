@@ -37,7 +37,7 @@ export default function App() {
           <Route path="/inscripcion"     element={<FormInscripcion />} />
           <Route path="/verificar/:clubSlug/:cedula" element={<VerificarMiembro />} />
           <Route path="/p/:clubSlug"                         element={<PortalAtleta />} />
-          <Route path="/p/:clubSlug/:cedula"               element={<PortalAtleta />} />
+          <Route path="/p/:clubSlug/:token"                element={<PortalAtleta />} />
           <Route path="/asistencia/:clubSlug/:eventoId"    element={<AsistenciaPublica />} />
 
           {/* Rutas protegidas */}

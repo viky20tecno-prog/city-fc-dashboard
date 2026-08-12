@@ -48,6 +48,187 @@ function Spinner() {
   return <span style={{ width: 20, height: 20, borderRadius: '50%', border: '2.5px solid rgba(255,255,255,0.25)', borderTopColor: '#fff', display: 'inline-block', animation: 'spin .7s linear infinite' }} />;
 }
 
+// ── Pedido de uniforme por el propio atleta ────────────────────────────────
+const TALLAS_NINO   = ['4', '6', '8', '10', '12', '14', '16'];
+const TALLAS_ADULTO = ['S', 'M', 'L', 'XL', '2XL', '3XL'];
+const CATEGORIAS    = ['Niño', 'Hombre', 'Mujer'];
+
+function PedidoUniformeCard({ color, clubSlug, cedula, catalogo, onPedidoCreado }) {
+  const [abierto, setAbierto]               = useState(false);
+  const [categoria, setCategoria]           = useState('Hombre');
+  const [talla, setTalla]                   = useState('');
+  const [numero, setNumero]                 = useState('');
+  const [nombreEstampar, setNombreEstampar] = useState('');
+  const [cantidades, setCantidades]         = useState({}); // { nombrePrenda: cantidad }
+  const [enviando, setEnviando]             = useState(false);
+  const [error, setError]                   = useState('');
+  const [exito, setExito]                   = useState(false);
+
+  if (!catalogo || catalogo.length === 0) return null;
+
+  const tallas = categoria === 'Niño' ? TALLAS_NINO : TALLAS_ADULTO;
+  const seleccionadas = Object.entries(cantidades).filter(([, c]) => c > 0);
+  const total = seleccionadas.reduce((s, [nombre, c]) => {
+    const p = catalogo.find(x => x.nombre === nombre);
+    return s + (p ? p.precio * c : 0);
+  }, 0);
+  const requiereNumero = seleccionadas.some(([nombre]) => catalogo.find(p => p.nombre === nombre)?.requiere_numero !== false);
+
+  const toggle = (nombre) => setCantidades(c => ({ ...c, [nombre]: c[nombre] ? 0 : 1 }));
+  const cambiarCantidad = (nombre, delta) => setCantidades(c => ({ ...c, [nombre]: Math.max(0, (c[nombre] || 0) + delta) }));
+
+  async function enviar() {
+    setError('');
+    if (seleccionadas.length === 0) { setError('Elegí al menos una prenda'); return; }
+    if (!talla)                     { setError('Elegí una talla'); return; }
+    if (requiereNumero && !numero)  { setError('Ingresá el número para estampar'); return; }
+
+    setEnviando(true);
+    try {
+      const res = await fetch(`${API_BASE}/publico/uniforme/${clubSlug}/${cedula}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          talla,
+          numero:          numero || undefined,
+          nombre_estampar: nombreEstampar || undefined,
+          items:            seleccionadas.map(([nombre, cantidad]) => ({ nombre, cantidad })),
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) { setError(json.error || 'No se pudo enviar el pedido'); return; }
+      setExito(true);
+      onPedidoCreado?.();
+    } catch {
+      setError('Error de conexión. Intenta de nuevo.');
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  if (exito) {
+    return (
+      <div className="fade-up" style={{ background: 'rgba(0,208,132,0.08)', border: '1px solid rgba(0,208,132,0.3)', borderRadius: 16, padding: '16px 18px', textAlign: 'center' }}>
+        <div style={{ fontSize: 24, marginBottom: 6 }}>✅</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#00D084', marginBottom: 4 }}>¡Pedido enviado!</div>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>Tu club lo va a revisar. Lo vas a ver reflejado arriba, en "Uniforme".</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fade-up" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
+      <button onClick={() => setAbierto(a => !a)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>👕 Pedir uniforme</span>
+        <span style={{ fontSize: 12, color, fontWeight: 700 }}>{abierto ? 'Cerrar' : 'Abrir'}</span>
+      </button>
+
+      {abierto && (
+        <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* Categoría (define el set de tallas) */}
+          <div style={{ display: 'flex', gap: 6 }}>
+            {CATEGORIAS.map(cat => (
+              <button key={cat} onClick={() => { setCategoria(cat); setTalla(''); }}
+                style={{
+                  flex: 1, padding: '8px', borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  background: categoria === cat ? color : 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${categoria === cat ? color : 'rgba(255,255,255,0.1)'}`,
+                  color: categoria === cat ? '#fff' : 'rgba(255,255,255,0.5)',
+                }}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Prendas del catálogo */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {catalogo.map(p => {
+              const cant = cantidades[p.nombre] || 0;
+              return (
+                <div key={p.nombre} style={{
+                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 10,
+                  background: cant > 0 ? `${color}12` : 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${cant > 0 ? color + '40' : 'rgba(255,255,255,0.08)'}`,
+                }}>
+                  <div onClick={() => toggle(p.nombre)} style={{ flex: 1, cursor: 'pointer', minWidth: 0 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>{p.nombre}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{fmt(p.precio)}</div>
+                  </div>
+                  {cant > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <button onClick={() => cambiarCantidad(p.nombre, -1)} style={{ width: 24, height: 24, borderRadius: 6, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer' }}>−</button>
+                      <span style={{ fontSize: 12, fontWeight: 700, minWidth: 14, textAlign: 'center' }}>{cant}</span>
+                      <button onClick={() => cambiarCantidad(p.nombre, 1)} style={{ width: 24, height: 24, borderRadius: 6, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer' }}>+</button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Talla */}
+          <div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6 }}>Talla</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {tallas.map(t => (
+                <button key={t} onClick={() => setTalla(t)}
+                  style={{
+                    padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    background: talla === t ? color : 'rgba(255,255,255,0.05)',
+                    border: `1px solid ${talla === t ? color : 'rgba(255,255,255,0.1)'}`,
+                    color: talla === t ? '#fff' : 'rgba(255,255,255,0.5)',
+                  }}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {requiereNumero && (
+            <div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6 }}>Número para estampar</div>
+              <input type="number" inputMode="numeric" value={numero} onChange={e => setNumero(e.target.value)} placeholder="Ej: 10"
+                style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 12px', color: '#fff', fontSize: 13 }} />
+            </div>
+          )}
+
+          <div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 6 }}>Nombre para estampar (opcional)</div>
+            <input type="text" value={nombreEstampar} onChange={e => setNombreEstampar(e.target.value)} placeholder="Ej: PÉREZ"
+              style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 12px', color: '#fff', fontSize: 13 }} />
+          </div>
+
+          {total > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: `${color}0D`, border: `1px solid ${color}28`, borderRadius: 10 }}>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>Total del pedido</span>
+              <span style={{ fontSize: 15, fontWeight: 800, color }}>{fmt(total)}</span>
+            </div>
+          )}
+
+          {error && (
+            <div style={{ padding: '10px 12px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', borderRadius: 10, fontSize: 12, color: '#FCA5A5' }}>
+              {error}
+            </div>
+          )}
+
+          <button onClick={enviar} disabled={enviando}
+            style={{
+              width: '100%', border: 'none', borderRadius: 12, padding: '13px',
+              background: enviando ? 'rgba(255,255,255,0.08)' : color, color: '#fff',
+              fontSize: 14, fontWeight: 700, cursor: enviando ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            {enviando ? <Spinner /> : 'Enviar pedido'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Paso 1: Ingresar celular — sin código de confirmación (WhatsApp no es confiable
 // ahora mismo, y el código no agregaba una barrera real: el endpoint solo pedía club+celular) ──
 function StepPhone({ color, clubSlug, onEncontrado }) {
@@ -150,8 +331,8 @@ const UNIFORME_ESTADO = {
   ABONO:     { color: '#4A9EFF', label: 'Abono'            },
 };
 
-function Resultado({ datos, color, onNuevaBusqueda }) {
-  const { atleta, mensualidades, torneos = [], uniformes = [], saldo_pendiente, total_pagado, meses_pendientes, esExento } = datos;
+function Resultado({ datos, color, clubSlug, onNuevaBusqueda, onRefrescar }) {
+  const { atleta, mensualidades, torneos = [], uniformes = [], catalogo_uniformes = [], saldo_pendiente, total_pagado, meses_pendientes, esExento } = datos;
   const [imgError, setImgError] = useState(false);
   const nombreCompleto = `${atleta.nombre} ${atleta.apellidos || ''}`.trim();
   const alDia = saldo_pendiente === 0;
@@ -350,8 +531,19 @@ function Resultado({ datos, color, onNuevaBusqueda }) {
         </div>
       )}
 
+      {/* Pedir uniforme (self-service) */}
+      <div className="fade-up" style={{ animationDelay: '.20s' }}>
+        <PedidoUniformeCard
+          color={color}
+          clubSlug={clubSlug}
+          cedula={atleta.cedula}
+          catalogo={catalogo_uniformes}
+          onPedidoCreado={onRefrescar}
+        />
+      </div>
+
       {/* Botón cerrar sesión */}
-      <div className="fade-up" style={{ animationDelay: '.22s', paddingBottom: 8 }}>
+      <div className="fade-up" style={{ animationDelay: '.24s', paddingBottom: 8 }}>
         <button onClick={onNuevaBusqueda} style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 12, padding: '13px', color: 'rgba(255,255,255,0.45)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
           ← Cerrar sesión
         </button>
@@ -443,6 +635,22 @@ export default function PortalAtleta() {
     try { localStorage.removeItem(SESSION_KEY); } catch { /* ignora */ }
   }
 
+  // Refresca los datos del portal sin pedirle el celular de nuevo — se usa
+  // después de que el atleta crea un pedido de uniforme, para que aparezca
+  // reflejado de inmediato en la sección "Uniforme".
+  async function refrescarDatos() {
+    const cedulaActual = datos?.atleta?.cedula;
+    if (!cedulaActual) return;
+    try {
+      const res  = await fetch(`${API_BASE}/publico/atleta/${clubSlug}/${cedulaActual}`);
+      const json = await res.json();
+      if (json?.success) {
+        setDatos(json);
+        try { localStorage.setItem(SESSION_KEY, JSON.stringify({ ts: Date.now(), data: json })); } catch { /* ignora */ }
+      }
+    } catch { /* mantiene datos actuales si falla */ }
+  }
+
   const color      = club?.color || '#00AAFF';
   const clubNombre = club?.nombre || clubSlug || 'Club';
   const initials   = clubNombre.split(' ').slice(0, 3).map(w => w[0]).join('').toUpperCase().slice(0, 3) || 'FC';
@@ -524,7 +732,7 @@ export default function PortalAtleta() {
           <StepPhone color={color} clubSlug={clubSlug} onEncontrado={handleEncontrado} />
         )}
         {step === 'result' && datos && (
-          <Resultado datos={datos} color={color} onNuevaBusqueda={handleReset} />
+          <Resultado datos={datos} color={color} clubSlug={clubSlug} onNuevaBusqueda={handleReset} onRefrescar={refrescarDatos} />
         )}
 
         <div style={{ flex: 1, minHeight: 40 }} />

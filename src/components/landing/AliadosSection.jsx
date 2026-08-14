@@ -1,21 +1,27 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ExternalLink, Handshake } from 'lucide-react';
 import { API_BASE_URL } from '../../config';
 
 /* ── Reveal local (mismo patrón que useReveal/Reveal en LandingPage.jsx,
    duplicado acá porque este componente vive en su propio archivo, igual
    que Hero.jsx no importa nada de LandingPage.jsx) ─────────────────────── */
+// Ref de callback en vez de useRef+useEffect: acá el <div ref> solo se monta
+// DESPUÉS de que llega /publico/afiliados (antes de eso el componente entero
+// devuelve null), así que un efecto con deps [] corre demasiado temprano —
+// ref.current todavía es null en ese momento y el observer nunca se arma. El
+// ref de callback se re-ejecuta la primera vez que el nodo realmente aparece
+// en el DOM, sin importar cuándo sea eso.
 function useReveal() {
-  const ref = useRef(null);
   const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
+  const obsRef = useRef(null);
+  const setRef = useCallback((el) => {
+    if (obsRef.current) { obsRef.current.disconnect(); obsRef.current = null; }
     if (!el) return;
     const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold: 0.12 });
     obs.observe(el);
-    return () => obs.disconnect();
+    obsRef.current = obs;
   }, []);
-  return [ref, visible];
+  return [setRef, visible];
 }
 
 const TIER_STYLE = {

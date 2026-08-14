@@ -273,6 +273,11 @@ function StepPhone({ color, clubNombre }) {
 // bot de WhatsApp (decisión explícita, para no sentirse invasivo). Prioridad
 // visual: oro > plata > bronce, máximo un afiliado por tier (rotación simple:
 // si hay varios del mismo tier se elige uno al azar en cada render).
+// Antes solo Oro tenía color propio (Plata/Bronce eran gris genérico, por
+// eso la fila se veía plana) — ahora las 3 usan su propio acento, mismo
+// criterio que la tarjeta espejo de la Landing (AliadosSection.jsx).
+const TIER_ACCENT = { oro: '#F5A623', plata: '#C7CBD1', bronce: '#CD8A5A' };
+
 function AfiliadosCard() {
   const [destacados, setDestacados] = useState([]);
 
@@ -302,35 +307,46 @@ function AfiliadosCard() {
         Aliados de tu club
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {destacados.map(a => (
-          <a
-            key={a.id}
-            href={a.link_web || undefined}
-            target={a.link_web ? '_blank' : undefined}
-            rel={a.link_web ? 'noopener noreferrer' : undefined}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', cursor: a.link_web ? 'pointer' : 'default',
-              padding: '10px 12px', borderRadius: 14,
-              background: a.tier === 'oro' ? 'rgba(245,166,35,0.06)' : 'rgba(255,255,255,0.025)',
-              border: `1px solid ${a.tier === 'oro' ? 'rgba(245,166,35,0.25)' : 'rgba(255,255,255,0.08)'}`,
-            }}
-          >
-            {a.logo_url ? (
-              <img src={a.logo_url} alt={a.nombre} style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'contain', background: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
-            ) : (
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
-                {a.nombre.charAt(0).toUpperCase()}
+        {destacados.map(a => {
+          const accent = TIER_ACCENT[a.tier] || TIER_ACCENT.bronce;
+          const featured = a.tier === 'oro';
+          return (
+            <a
+              key={a.id}
+              href={a.link_web || undefined}
+              target={a.link_web ? '_blank' : undefined}
+              rel={a.link_web ? 'noopener noreferrer' : undefined}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', cursor: a.link_web ? 'pointer' : 'default',
+                padding: '11px 13px', borderRadius: 14,
+                background: `linear-gradient(135deg, ${accent}16, ${accent}05)`,
+                border: `1px solid ${accent}${featured ? '4a' : '2a'}`,
+                boxShadow: featured ? `0 0 18px ${accent}22` : 'none',
+                transition: 'transform .2s, box-shadow .2s',
+              }}
+            >
+              {a.logo_url ? (
+                <img src={a.logo_url} alt={a.nombre} style={{ width: 36, height: 36, borderRadius: 9, objectFit: 'contain', background: 'rgba(255,255,255,0.06)', border: `1.5px solid ${accent}40`, flexShrink: 0 }} />
+              ) : (
+                <div style={{
+                  width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+                  background: `linear-gradient(160deg, ${accent}2a, rgba(255,255,255,0.03))`,
+                  border: `1.5px solid ${accent}40`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: accent,
+                }}>
+                  {a.nombre.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.nombre}</div>
+                <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.categoria || a.ciudad || 'Aliado ZenSports'}</div>
               </div>
-            )}
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.nombre}</div>
-              <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.categoria || a.ciudad || 'Aliado ZenSports'}</div>
-            </div>
-            {a.tier === 'oro' && (
-              <span style={{ fontSize: 9, fontWeight: 800, color: '#F5A623', background: 'rgba(245,166,35,0.12)', border: '1px solid rgba(245,166,35,0.3)', borderRadius: 999, padding: '2px 7px', flexShrink: 0 }}>★ Destacado</span>
-            )}
-          </a>
-        ))}
+              {featured && (
+                <span style={{ fontSize: 9, fontWeight: 800, color: accent, background: `${accent}20`, border: `1px solid ${accent}4a`, borderRadius: 999, padding: '2px 7px', flexShrink: 0 }}>★ Destacado</span>
+              )}
+            </a>
+          );
+        })}
       </div>
     </div>
   );

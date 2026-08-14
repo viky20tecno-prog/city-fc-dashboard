@@ -24,10 +24,15 @@ function useReveal() {
   return [setRef, visible];
 }
 
+// Cada tier tiene su propio color de acento (antes solo Oro tenía color real,
+// Plata/Bronce usaban gris genérico — por eso se veían planas). `featured`
+// solo lo lleva Oro: borde más grueso, glow de sombra y el badge "★ Destacado"
+// en vez de la etiqueta simple, mismo lenguaje que la tarjeta Pro destacada
+// de la sección de precios (gradiente + borde de color + glow + badge).
 const TIER_STYLE = {
-  oro:    { border: 'rgba(245,166,35,0.28)', glow: 'rgba(245,166,35,0.08)', badge: '#F5A623', label: 'Aliado Oro' },
-  plata:  { border: 'rgba(255,255,255,0.16)', glow: 'rgba(255,255,255,0.03)', badge: '#C7CBD1', label: 'Aliado Plata' },
-  bronce: { border: 'rgba(255,255,255,0.09)', glow: 'rgba(255,255,255,0.015)', badge: '#CD8A5A', label: 'Aliado' },
+  oro:    { border: 'rgba(245,166,35,0.45)',  badge: '#F5A623', label: 'Aliado Oro',   featured: true  },
+  plata:  { border: 'rgba(199,203,209,0.35)', badge: '#C7CBD1', label: 'Aliado Plata', featured: false },
+  bronce: { border: 'rgba(205,138,90,0.32)',  badge: '#CD8A5A', label: 'Aliado',       featured: false },
 };
 
 const TIER_ORDER = { oro: 0, plata: 1, bronce: 2 };
@@ -79,42 +84,61 @@ export default function AliadosSection() {
               ? { href: a.link_web, target: '_blank', rel: 'noopener noreferrer' }
               : {};
             return (
-              <Wrapper key={a.id} {...wrapperProps} style={{
-                display: 'block', textDecoration: 'none',
-                background: tierStyle.glow, border: `1px solid ${tierStyle.border}`, borderRadius: 18,
-                padding: '22px 20px', position: 'relative', transition: 'transform .2s, border-color .2s',
+              <Wrapper key={a.id} className="card-hover" {...wrapperProps} style={{
+                display: 'block', textDecoration: 'none', cursor: a.link_web ? 'pointer' : 'default',
+                background: `linear-gradient(160deg, ${tierStyle.badge}15 0%, ${tierStyle.badge}05 55%, rgba(255,255,255,0.015) 100%)`,
+                border: `${tierStyle.featured ? 2 : 1}px solid ${tierStyle.border}`, borderRadius: 20,
+                padding: '26px 20px 22px', position: 'relative', overflow: 'hidden',
+                boxShadow: tierStyle.featured
+                  ? `0 0 44px ${tierStyle.badge}26, 0 10px 30px rgba(0,0,0,0.4)`
+                  : '0 6px 20px rgba(0,0,0,0.22)',
+                transition: 'transform .25s, box-shadow .25s, border-color .25s',
               }}>
-                {a.tier === 'oro' && (
-                  <span style={{
-                    position: 'absolute', top: 14, right: 14, fontSize: 9, fontWeight: 800, color: tierStyle.badge,
-                    background: `${tierStyle.badge}18`, border: `1px solid ${tierStyle.badge}40`, borderRadius: 999,
-                    padding: '3px 8px', letterSpacing: 0.5, textTransform: 'uppercase',
-                  }}>
-                    ★ Destacado
-                  </span>
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                {/* barra de acento — mismo tono que el resto de la tarjeta, más marcada en Oro */}
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+                  background: `linear-gradient(90deg, transparent, ${tierStyle.badge}, transparent)`,
+                  opacity: tierStyle.featured ? 0.9 : 0.4,
+                }} />
+
+                {/* pill de tier — antes solo Oro tenía distintivo, ahora las 3 lo llevan */}
+                <span style={{
+                  position: 'absolute', top: 16, right: 16, display: 'inline-flex', alignItems: 'center',
+                  fontSize: 9.5, fontWeight: 800, color: tierStyle.badge,
+                  background: `${tierStyle.badge}1c`, border: `1px solid ${tierStyle.badge}45`, borderRadius: 999,
+                  padding: '4px 9px', letterSpacing: 0.5, textTransform: 'uppercase', whiteSpace: 'nowrap',
+                  boxShadow: tierStyle.featured ? `0 0 16px ${tierStyle.badge}45` : 'none',
+                }}>
+                  {tierStyle.featured ? '★ Destacado' : tierStyle.label}
+                </span>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 13, paddingRight: 64 }}>
                   {a.logo_url ? (
-                    <img src={a.logo_url} alt={a.nombre} style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'contain', background: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
+                    <img src={a.logo_url} alt={a.nombre} style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'contain', background: 'rgba(255,255,255,0.06)', border: `1.5px solid ${tierStyle.badge}35`, flexShrink: 0 }} />
                   ) : (
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Handshake size={18} color="rgba(255,255,255,0.4)" />
+                    <div style={{
+                      width: 48, height: 48, borderRadius: 12, flexShrink: 0,
+                      background: `linear-gradient(160deg, ${tierStyle.badge}22, rgba(255,255,255,0.03))`,
+                      border: `1.5px solid ${tierStyle.badge}35`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Handshake size={20} color={tierStyle.badge} strokeWidth={2} />
                     </div>
                   )}
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.nombre}</div>
-                    <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.4)' }}>
+                    <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.42)' }}>
                       {[a.categoria, a.ciudad].filter(Boolean).join(' · ') || 'Aliado ZenSports'}
                     </div>
                   </div>
                 </div>
                 {a.descripcion && (
-                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: 0, marginBottom: a.link_web ? 10 : 0 }}>
+                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.52)', lineHeight: 1.6, margin: 0, marginBottom: a.link_web ? 12 : 0 }}>
                     {a.descripcion}
                   </p>
                 )}
                 {a.link_web && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.55)' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: tierStyle.badge }}>
                     Visitar <ExternalLink size={11} />
                   </span>
                 )}

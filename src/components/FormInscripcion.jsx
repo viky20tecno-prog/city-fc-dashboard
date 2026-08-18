@@ -532,6 +532,7 @@ export default function FormInscripcion() {
           .fi-body { flex-direction: column !important; }
           .fi-photo-col { width: 100% !important; }
           .fi-photo-zone { height: 180px !important; aspect-ratio: unset !important; }
+          .fi-row2 { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
@@ -656,7 +657,7 @@ export default function FormInscripcion() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {rows.map((row, ri) => (
                       <>
-                        <div key={ri} style={{ display: 'grid', gridTemplateColumns: row.length === 2 ? '1fr 1fr' : '1fr', gap: 10 }}>
+                        <div key={ri} className={row.length === 2 ? 'fi-row2' : undefined} style={{ display: 'grid', gridTemplateColumns: row.length === 2 ? '1fr 1fr' : '1fr', gap: 10 }}>
                           {row.map(key => {
                             const campo = campos.find(f => f.key === key);
                             if (!campo) return null;
@@ -748,7 +749,7 @@ export default function FormInscripcion() {
                       Categoría
                     </span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div className="fi-row2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                     <div>
                       <label style={{ display: 'block', fontSize: 12, color: 'var(--text-sec)', marginBottom: 5, fontWeight: 500 }}>
                         Categoría

@@ -281,8 +281,12 @@ export default function FormInscripcion() {
       ? `<tr><td style="padding:6px 10px;font-size:12px;color:#6b7280;width:45%">${esc(label)}</td><td style="padding:6px 10px;font-size:12px;font-weight:600;color:#111">${esc(value)}</td></tr>`
       : '';
 
-    const fotoHtml = f.fotoPreview
-      ? `<img src="${f.fotoPreview}" alt="Foto" style="width:90px;height:90px;object-fit:cover;border-radius:50%;border:3px solid ${c};float:right;margin-left:16px" />`
+    // La ventana del PDF es un documento nuevo (window.open) — un blob: URL
+    // (fotoPreview) solo existe en el documento que lo creó y no carga ahí.
+    // foto_url (la subida real a Supabase Storage) sí es una URL pública normal.
+    const fotoSrc  = f.foto_url || f.fotoPreview;
+    const fotoHtml = fotoSrc
+      ? `<img src="${esc(fotoSrc)}" alt="Foto" style="width:90px;height:90px;object-fit:cover;border-radius:50%;border:3px solid ${c};float:right;margin-left:16px" />`
       : '';
 
     const logoUrl   = clubConfig?.logo_url || '';

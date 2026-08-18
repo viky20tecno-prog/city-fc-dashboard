@@ -1261,7 +1261,7 @@ export default function LandingPage() {
           {/* PRO ⭐ MOST POPULAR */}
           <Reveal delay={120}>
             <div className="card-hover" style={{ background: `linear-gradient(160deg, ${previewColor}10 0%, ${previewColor}06 100%)`, border: `2px solid ${previewColor}45`, borderRadius: 22, padding: '32px 22px', position: 'relative', boxShadow: `0 0 40px ${previewColor}20, 0 8px 32px rgba(0,0,0,0.4)`, transform: 'scale(1.03)', transition: 'background 0.4s, border-color 0.4s, box-shadow 0.4s, transform 0.4s' }}>
-              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: `linear-gradient(90deg, ${previewColor}, ${previewColor}cc)`, color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 999, padding: '5px 18px', letterSpacing: 1, whiteSpace: 'nowrap', boxShadow: `0 4px 20px ${previewColor}70`, transition: 'background 0.3s, box-shadow 0.3s' }}>
+              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', width: 'calc(100% - 20px)', maxWidth: 320, background: `linear-gradient(90deg, ${previewColor}, ${previewColor}cc)`, color: '#fff', fontSize: 11, fontWeight: 800, borderRadius: 16, padding: '5px 18px', letterSpacing: 1, textAlign: 'center', lineHeight: 1.4, boxShadow: `0 4px 20px ${previewColor}70`, transition: 'background 0.3s, box-shadow 0.3s' }}>
                 ⭐ Más elegido · Recomendado para clubes en crecimiento
               </div>
               <p style={{ color: previewColor, fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8, transition: 'color 0.3s' }}>Pro</p>

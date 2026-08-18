@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ExternalLink, Handshake } from 'lucide-react';
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL, SUPPORT_WHATSAPP } from '../../config';
 
 /* ── Reveal local (mismo patrón que useReveal/Reveal en LandingPage.jsx,
    duplicado acá porque este componente vive en su propio archivo, igual
    que Hero.jsx no importa nada de LandingPage.jsx) ─────────────────────── */
-// Ref de callback en vez de useRef+useEffect: acá el <div ref> solo se monta
-// DESPUÉS de que llega /publico/afiliados (antes de eso el componente entero
-// devuelve null), así que un efecto con deps [] corre demasiado temprano —
-// ref.current todavía es null en ese momento y el observer nunca se arma. El
-// ref de callback se re-ejecuta la primera vez que el nodo realmente aparece
-// en el DOM, sin importar cuándo sea eso.
+// Ref de callback en vez de useRef+useEffect: se re-ejecuta la primera vez
+// que el nodo realmente aparece en el DOM, sin depender de en qué render
+// ocurra eso — más robusto que un efecto con deps [] si el componente algún
+// día vuelve a tener un camino que retrase el montado del div.
 function useReveal() {
   const [visible, setVisible] = useState(false);
   const obsRef = useRef(null);
@@ -37,11 +35,22 @@ const TIER_STYLE = {
 
 const TIER_ORDER = { oro: 0, plata: 1, bronce: 2 };
 
-/* ── Sección "Aliados" — patrocinadores/anunciantes (no clubes) que pagan
-   una membresía mensual por aparecer en la plataforma. Se muestra en la
-   Landing pública y en el Portal del Atleta — nunca en el bot de WhatsApp
-   (decisión explícita, para no sentirse invasivo). Si no hay afiliados
-   activos, la sección no se renderiza. ───────────────────────────────────── */
+// Precio de referencia por tier — solo para el texto del espacio vacío
+// ("Espacio disponible"). El precio real y editable de cada afiliado vive en
+// `afiliados.precio_mensual` (admin console) — si cambia el precio de venta,
+// actualizar también `AFILIADO_TIER_PRICE` en admin/lib/utils.ts.
+const TIER_PRECIO_REF = { oro: 149900, plata: 99900, bronce: 49900 };
+
+/* ── Sección "Aliados" — organizaciones, tiendas deportivas o de servicios
+   relacionados con el deporte que pagan una membresía mensual por aparecer
+   ante los jugadores de los clubes en ZenSports (no son clubes ni tienen
+   relación con los planes que paga un club). Se muestra en la Landing
+   pública y en el Portal del Atleta — nunca en el bot de WhatsApp (decisión
+   explícita, para no sentirse invasivo).
+   Siempre se renderizan los 3 espacios (Oro/Plata/Bronce): el que no tenga
+   un afiliado real todavía se ve como "Espacio disponible" — así se puede
+   ver la sección completa desde el día uno y se va llenando sola a medida
+   que se cargan afiliados reales, sin tocar este componente de nuevo. ────── */
 export default function AliadosSection() {
   const [ref, visible] = useReveal();
   const [afiliados, setAfiliados] = useState([]);
@@ -53,9 +62,12 @@ export default function AliadosSection() {
       .catch(() => { /* sección opcional: si falla, simplemente no se muestra */ });
   }, []);
 
-  if (afiliados.length === 0) return null;
-
-  const ordenados = [...afiliados].sort((a, b) => (TIER_ORDER[a.tier] ?? 3) - (TIER_ORDER[b.tier] ?? 3));
+  const reales = [...afiliados].sort((a, b) => (TIER_ORDER[a.tier] ?? 3) - (TIER_ORDER[b.tier] ?? 3));
+  const tiersConReal = new Set(reales.map(a => a.tier));
+  const placeholders = ['oro', 'plata', 'bronce']
+    .filter(t => !tiersConReal.has(t))
+    .map(t => ({ id: `placeholder-${t}`, tier: t, placeholder: true }));
+  const ordenados = [...reales, ...placeholders].sort((a, b) => (TIER_ORDER[a.tier] ?? 3) - (TIER_ORDER[b.tier] ?? 3));
 
   return (
     <section style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto' }}>
@@ -79,6 +91,52 @@ export default function AliadosSection() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
           {ordenados.map(a => {
             const tierStyle = TIER_STYLE[a.tier] || TIER_STYLE.bronce;
+
+            if (a.placeholder) {
+              const mensaje = `¡Hola! Vi el espacio de Aliado ${tierStyle.label.replace('Aliado ', '') || a.tier} en ZenSports y quiero información para anunciar mi negocio ahí.`;
+              return (
+                <a key={a.id}
+                  href={`https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent(mensaje)}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="card-hover"
+                  style={{
+                    display: 'block', textDecoration: 'none', cursor: 'pointer',
+                    background: 'rgba(255,255,255,0.02)',
+                    border: `1.5px dashed ${tierStyle.border}`, borderRadius: 20,
+                    padding: '26px 20px 22px', position: 'relative', overflow: 'hidden',
+                    transition: 'border-color .25s, background .25s',
+                  }}>
+                  <span style={{
+                    position: 'absolute', top: 16, right: 16, display: 'inline-flex', alignItems: 'center',
+                    fontSize: 9.5, fontWeight: 800, color: tierStyle.badge,
+                    background: `${tierStyle.badge}1c`, border: `1px solid ${tierStyle.badge}45`, borderRadius: 999,
+                    padding: '4px 9px', letterSpacing: 0.5, textTransform: 'uppercase', whiteSpace: 'nowrap',
+                  }}>
+                    {tierStyle.label}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 13, paddingRight: 64 }}>
+                    <div style={{
+                      width: 48, height: 48, borderRadius: 12, flexShrink: 0,
+                      background: 'rgba(255,255,255,0.03)', border: `1.5px dashed ${tierStyle.badge}35`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Handshake size={20} color={`${tierStyle.badge}80`} strokeWidth={2} />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.55)' }}>Espacio disponible</div>
+                      <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.32)' }}>Tu marca acá</div>
+                    </div>
+                  </div>
+                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, margin: 0, marginBottom: 12 }}>
+                    Desde {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(TIER_PRECIO_REF[a.tier])}/mes
+                  </p>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: tierStyle.badge }}>
+                    Reservar por WhatsApp <ExternalLink size={11} />
+                  </span>
+                </a>
+              );
+            }
+
             const Wrapper = a.link_web ? 'a' : 'div';
             const wrapperProps = a.link_web
               ? { href: a.link_web, target: '_blank', rel: 'noopener noreferrer' }

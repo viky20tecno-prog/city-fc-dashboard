@@ -277,7 +277,13 @@ function StepPhone({ color, clubNombre }) {
 // eso la fila se veía plana) — ahora las 3 usan su propio acento, mismo
 // criterio que la tarjeta espejo de la Landing (AliadosSection.jsx).
 const TIER_ACCENT = { oro: '#F5A623', plata: '#C7CBD1', bronce: '#CD8A5A' };
+const TIER_ORDER  = { oro: 0, plata: 1, bronce: 2 };
 
+// Siempre se muestran los 3 espacios (Oro/Plata/Bronce): el tier que no
+// tenga todavía un afiliado real se ve como una fila "Espacio disponible" —
+// mismo criterio que AliadosSection.jsx en la Landing, para poder ver los 3
+// espacios publicitarios desde el día uno y que se llenen solos a medida que
+// se cargan afiliados reales.
 function AfiliadosCard() {
   const [destacados, setDestacados] = useState([]);
 
@@ -299,7 +305,11 @@ function AfiliadosCard() {
       .catch(() => { /* sección opcional: si falla, simplemente no se muestra */ });
   }, []);
 
-  if (destacados.length === 0) return null;
+  const tiersConReal = new Set(destacados.map(a => a.tier));
+  const filas = [
+    ...destacados,
+    ...['oro', 'plata', 'bronce'].filter(t => !tiersConReal.has(t)).map(t => ({ id: `placeholder-${t}`, tier: t, placeholder: true })),
+  ].sort((a, b) => TIER_ORDER[a.tier] - TIER_ORDER[b.tier]);
 
   return (
     <div className="fade-up" style={{ animationDelay: '.22s' }}>
@@ -307,9 +317,30 @@ function AfiliadosCard() {
         Aliados de tu club
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {destacados.map(a => {
+        {filas.map(a => {
           const accent = TIER_ACCENT[a.tier] || TIER_ACCENT.bronce;
           const featured = a.tier === 'oro';
+
+          if (a.placeholder) {
+            return (
+              <div key={a.id} style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '11px 13px', borderRadius: 14,
+                background: 'rgba(255,255,255,0.015)',
+                border: `1px dashed ${accent}2a`,
+              }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+                  background: 'rgba(255,255,255,0.02)', border: `1.5px dashed ${accent}30`,
+                }} />
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>Espacio disponible</div>
+                  <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.28)' }}>Aliado {a.tier}</div>
+                </div>
+              </div>
+            );
+          }
+
           return (
             <a
               key={a.id}

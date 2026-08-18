@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle, XCircle, Eye, EyeOff, Loader2, PauseCircle, Package, MessageCircle, Wallet, Pencil } from 'lucide-react';
+import { X, Calendar, Shirt, Trophy, FileText, CheckCircle, Clock, AlertTriangle, XCircle, Eye, EyeOff, Loader2, PauseCircle, Package, MessageCircle, Wallet, Pencil, MinusCircle } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
@@ -12,6 +12,7 @@ const ESTADO_ICON = {
   PENDIENTE: { icon: Clock,         color: 'text-[#F59E0B]',  bg: 'bg-yellow-500/10 border border-yellow-500/20' },
   PARCIAL:   { icon: AlertTriangle, color: 'text-[var(--cc)]',  bg: 'bg-[var(--cc)]/10 border border-[var(--cc)]/20'  },
   MORA:      { icon: XCircle,       color: 'text-[#EF4444]',  bg: 'bg-red-500/10 border border-red-500/20'      },
+  NO_APLICA: { icon: MinusCircle,   color: 'text-slate-400',  bg: 'bg-slate-400/10 border border-slate-400/20'  },
 };
 
 const ESTADO_PEDIDO = {

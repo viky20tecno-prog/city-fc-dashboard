@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Calendar, Shirt, Trophy, FileText, CheckCircle, Clock,
   AlertTriangle, XCircle, Eye, EyeOff, Loader2, PauseCircle, Package,
-  MessageCircle, Wallet, Pencil, Check, X,
+  MessageCircle, Wallet, Pencil, Check, X, MinusCircle,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
@@ -33,6 +33,7 @@ const ESTADO_ICON = {
   PARCIAL:   { icon: AlertTriangle, color: 'text-[var(--cc)]',  bg: 'bg-[var(--cc)]/10 border border-[var(--cc)]/20'   },
   MORA:      { icon: XCircle,       color: 'text-[#EF4444]',  bg: 'bg-red-500/10 border border-red-500/20'       },
   EXENTO:    { icon: CheckCircle,   color: 'text-sky-400',    bg: 'bg-sky-400/10 border border-sky-400/20'       },
+  NO_APLICA: { icon: MinusCircle,   color: 'text-slate-400',  bg: 'bg-slate-400/10 border border-slate-400/20'   },
 };
 
 const ESTADO_PEDIDO = {
@@ -208,7 +209,12 @@ function FilaMensualidad({ m, susp, onUpdated, esExentoGlobal = false, cuotaClub
                   ? <><span>$0</span><span className="text-[var(--text-sec)]"> / $0</span></>
                   : <>{formatCOP(m.valor_pagado)}<span className="text-[var(--text-sec)]"> / {formatCOP(totalDeuda)}</span></>}
             </p>
-            {!susp && (
+            {/* NO_APLICA = mes anterior a la fecha de inscripción del jugador: no hubo
+                cobro, nada que corregir. No se deja editar porque el mismo valor
+                'NO_APLICA' en el selector de estado dispara el atajo de "retiro
+                temporal" (crea una suspensión real) — abriría y podría guardar
+                una suspensión falsa para un mes que nunca fue una obligación. */}
+            {!susp && m.estado !== 'NO_APLICA' && (
               <button onClick={abrirEdit} className="p-1 rounded-lg text-[var(--text-mut)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors">
                 <Pencil className="w-3 h-3" />
               </button>

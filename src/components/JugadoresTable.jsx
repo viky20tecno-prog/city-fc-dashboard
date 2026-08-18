@@ -10,7 +10,7 @@ import { authFetch } from '../lib/authFetch';
 import { listarEquipos } from '../lib/categorias';
 
 // Peor estado local (para PENDIENTE / PARCIAL / AL_DIA)
-const PRIORIDAD = { MORA: 4, PENDIENTE: 3, PARCIAL: 2, AL_DIA: 1, SIN_DATOS: 0 };
+const PRIORIDAD = { MORA: 4, PENDIENTE: 3, PARCIAL: 2, AL_DIA: 1, NO_APLICA: 0, SIN_DATOS: 0 };
 const peorEstado = (mensJugador) =>
   mensJugador.reduce((worst, m) => {
     return (PRIORIDAD[m.estado] || 0) > (PRIORIDAD[worst] || 0) ? m.estado : worst;
@@ -24,6 +24,7 @@ const ESTADO_DOT = {
   PARCIAL:    '#60A5FA',
   MORA:       '#EF4444',
   EXENTO:     '#38bdf8',
+  NO_APLICA:  '#94A3B8',
   CON_DEUDA:  '#F59E0B',
   ENTREGADO:  '#22C55E',
   SIN_PEDIDO: '#6A6A6A',

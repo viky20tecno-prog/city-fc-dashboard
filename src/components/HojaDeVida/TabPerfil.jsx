@@ -307,6 +307,11 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
         <div>
           <p className="text-base font-bold text-[var(--text-pri)]">{nombreDisplay || '—'}</p>
           <p className="text-sm text-[var(--text-mut)]">CC {jugador.cedula}</p>
+          {jugador.created_at && (
+            <p className="text-xs text-[var(--text-mut)] mt-0.5">
+              Miembro desde {new Date(jugador.created_at).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+          )}
           {fotoUrl && <p className="text-xs text-[var(--text-mut)] mt-0.5 flex items-center gap-1"><ZoomIn className="w-3 h-3" /> Clic en la foto para ver</p>}
         </div>
 

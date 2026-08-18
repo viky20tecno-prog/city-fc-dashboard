@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { CheckCircle, ChevronRight, DollarSign, X, Phone, Palette, Building2, ChevronDown, Camera, Loader2, AlertTriangle, Info, MessageCircle, Instagram, Facebook, Youtube, Globe, Music } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
-import { applyTheme, getStoredTheme, THEMES } from '../lib/themes';
+import { applyTheme, getStoredTheme, THEMES_VISIBLES } from '../lib/themes';
 import { CARNET_FONDOS, temaCarnet } from '../lib/carnetFondos';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
@@ -412,7 +412,7 @@ export default function OnboardingWizard({ color = '#E14924', clubConfig, onComp
               <div>
                 <label style={lbl}>Fondo de la aplicación</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                  {THEMES.map(t => {
+                  {THEMES_VISIBLES.map(t => {
                     const isActive = selectedTheme === t.id;
                     return (
                       <button key={t.id} onClick={() => { setSelectedTheme(t.id); applyTheme(t.id); }}

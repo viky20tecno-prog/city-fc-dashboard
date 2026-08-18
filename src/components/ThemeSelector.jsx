@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Monitor, SlidersHorizontal, Palette, Check, Tag, Users, MessageCircle } from 'lucide-react';
-import { PALETA, THEMES, applyTheme, getStoredTheme } from '../lib/themes';
+import { PALETA, THEMES_VISIBLES, applyTheme, getStoredTheme } from '../lib/themes';
 
 export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig, onOpenEquipo, onOpenCobro, onColorChange }) {
   const [activeTheme, setActiveTheme] = useState(getStoredTheme);
@@ -114,9 +114,9 @@ export default function ThemeSelector({ color = '#00AAFF', onClose, onOpenConfig
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, maxHeight: 320, overflowY: 'auto', paddingRight: 2 }}>
-        {THEMES.map((t, idx) => {
+        {THEMES_VISIBLES.map((t, idx) => {
           const isActive = activeTheme === t.id;
-          const prevGroup = idx > 0 ? THEMES[idx - 1].group : null;
+          const prevGroup = idx > 0 ? THEMES_VISIBLES[idx - 1].group : null;
           return (
             <div key={t.id}>
               {t.group && t.group !== prevGroup && (

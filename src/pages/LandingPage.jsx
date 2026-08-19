@@ -858,7 +858,7 @@ export default function LandingPage() {
             ZenSports automatiza toda la experiencia.
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>
-            Desde la inscripción hasta el cobro, sin procesos manuales. Eficiencia desde el día uno.
+            Desde la inscripción hasta el cobro, sin procesos manuales. Configurado y funcionando el mismo día.
           </p>
         </Reveal>
         <div className="bento-grid">
@@ -1462,10 +1462,10 @@ export default function LandingPage() {
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 500, height: 300, background: `radial-gradient(ellipse, ${previewColor}06 0%, transparent 70%)`, pointerEvents: 'none', transition: 'background-color 0.4s, border-color 0.4s, box-shadow 0.4s, color 0.4s' }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
               <h2 style={{ fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 900, lineHeight: 1.15, marginBottom: 18, letterSpacing: '-1px' }}>
-                Moderniza la experiencia<br />deportiva de tu organización.
+                Deja de perseguir pagos por WhatsApp.<br />Empieza a organizarlos hoy.
               </h2>
               <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16, lineHeight: 1.7, marginBottom: 40 }}>
-                Únete a los clubes que ya gestionan inscripciones y pagos de forma profesional y automatizada.
+                5 minutos para configurar tu club. 5 días gratis para probarlo todo — sin tarjeta, sin compromiso.
               </p>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button

@@ -138,8 +138,9 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
     <div style={{
       position: 'relative',
       background: 'var(--bg-card)',
-      borderRadius: 16,
+      borderRadius: 'var(--radius-card)',
       border: `1px solid ${cc}22`,
+      boxShadow: 'var(--shadow-card)',
       padding: 24,
       overflow: 'hidden',
     }}>

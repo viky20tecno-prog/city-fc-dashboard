@@ -22,10 +22,10 @@ const COLORS = {
 
 function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, delay = 0, wide, onClick, active, isMobile }) {
   const c = colorObj || COLORS[color];
-  const pad    = isMobile ? '12px' : '20px';
-  const gap    = isMobile ? '10px' : '16px';
-  const icoSz  = isMobile ? 34 : 48;
-  const icoR   = isMobile ? '8px' : '12px';
+  const pad    = isMobile ? '14px' : '26px';
+  const gap    = isMobile ? '10px' : '18px';
+  const icoSz  = isMobile ? 34 : 52;
+  const icoR   = isMobile ? '10px' : 'var(--radius-icon)';
   const iconSz = isMobile ? 15 : 22;
   const lblSz  = isMobile ? '9px' : '11px';
   const subSz  = isMobile ? '9px' : '11px';
@@ -42,7 +42,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
       style={{
         background: 'var(--bg-card)',
         border: `1px solid ${active ? c.icon : c.border}`,
-        borderRadius: '14px',
+        borderRadius: 'var(--radius-card)',
         padding: pad,
         display: 'flex',
         alignItems: 'center',
@@ -53,7 +53,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
         transition: 'border-color 0.25s, box-shadow 0.25s, transform 0.25s',
         gridColumn: wide ? 'span 2' : undefined,
         cursor: onClick ? 'pointer' : 'default',
-        boxShadow: active ? `0 0 0 2px ${c.icon}40, 0 4px 16px ${c.glow}` : undefined,
+        boxShadow: active ? `0 0 0 2px ${c.icon}40, 0 4px 16px ${c.glow}` : 'var(--shadow-card)',
         transform: active ? 'translateY(-1px)' : undefined,
       }}
     >
@@ -99,9 +99,9 @@ function AlDiaPanel({ jugadores }) {
   if (!jugadores.length) return null;
   return (
     <div style={{
-      background: 'var(--bg-card)', borderRadius: '14px', padding: '20px',
+      background: 'var(--bg-card)', borderRadius: 'var(--radius-card)', padding: '22px',
       border: `1px solid rgba(34,197,94,0.3)`,
-      boxShadow: '0 0 0 1px rgba(34,197,94,0.12)',
+      boxShadow: '0 0 0 1px rgba(34,197,94,0.12), var(--shadow-card)',
       position: 'relative', overflow: 'hidden',
     }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(34,197,94,0.5), transparent)', pointerEvents: 'none' }} />

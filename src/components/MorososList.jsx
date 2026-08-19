@@ -146,8 +146,9 @@ export default function MorososList({ morosos, codigoPais = '57', clubNombre = '
   if (!morosos || morosos.length === 0) {
     return (
       <div style={{
-        background: 'var(--bg-card)', borderRadius: '16px',
+        background: 'var(--bg-card)', borderRadius: 'var(--radius-card)',
         border: '1px solid var(--cc20)', padding: '24px',
+        boxShadow: 'var(--shadow-card)',
         position: 'relative', overflow: 'hidden',
       }}>
         <div style={{
@@ -177,8 +178,9 @@ export default function MorososList({ morosos, codigoPais = '57', clubNombre = '
 
   return (
     <div style={{
-      background: 'var(--bg-card)', borderRadius: '16px',
+      background: 'var(--bg-card)', borderRadius: 'var(--radius-card)',
       border: '1px solid var(--cc20)', padding: '24px',
+      boxShadow: 'var(--shadow-card)',
       position: 'relative', overflow: 'hidden',
     }}>
       {/* top accent line */}

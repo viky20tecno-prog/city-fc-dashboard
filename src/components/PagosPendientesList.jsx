@@ -128,8 +128,9 @@ export default function PagosPendientesList({ pendientes, codigoPais = '57', clu
   if (!pendientes || pendientes.length === 0) {
     return (
       <div style={{
-        background: 'var(--bg-card)', borderRadius: '16px',
+        background: 'var(--bg-card)', borderRadius: 'var(--radius-card)',
         border: '1px solid var(--cc20)', padding: '24px',
+        boxShadow: 'var(--shadow-card)',
         position: 'relative', overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, var(--cc50), transparent)', pointerEvents: 'none' }} />

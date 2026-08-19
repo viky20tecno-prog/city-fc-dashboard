@@ -18,6 +18,8 @@ export const PALETA = [
 // `applyTheme`/CSS vars no cambian) pero no aparecen para elegir — quedan
 // reservados para el futuro paquete de personalización.
 export const THEMES = [
+  // — Insignia — el tema de marca de ZenSports, negro violeta con brillo neón en los bordes.
+  { id: 'zensports', label: 'ZenSports', group: 'Insignia', app: '#0A0614', card: '#150B28', surface: '#20123D', text: '#F3EEFF', preview: ['#0A0614', '#150B28', '#20123D'], visible: true },
   // — Neutrales —
   { id: 'dark',     label: 'Negro',      group: 'Neutral',  app: '#0A0A0A', card: '#111111', surface: '#1A1A1A', text: '#FFFFFF',  preview: ['#0A0A0A', '#111111', '#1A1A1A'] },
   { id: 'carbon',   label: 'Carbón',     group: 'Neutral',  app: '#0D1117', card: '#161B22', surface: '#21262D', text: '#E6EDF3', preview: ['#0D1117', '#161B22', '#21262D'] },

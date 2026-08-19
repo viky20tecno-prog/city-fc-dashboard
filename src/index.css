@@ -21,14 +21,20 @@
   --border-sub:  rgba(255,255,255,0.07);
 }
 [data-theme="zensports"] {
-  --bg-app:      #0B0D1A;
-  --bg-card:     #12152A;
-  --bg-surface:  #1A1F29;
-  --bg-input:    #0E1120;
-  --text-pri:    #EFFFFF;
-  --text-sec:    #AE68FF;
-  --text-mut:    #4B3D6E;
-  --border-sub:  rgba(106,0,255,0.12);
+  /* Insignia de marca: negro casi puro (para que el violeta realmente resalte,
+     no un morado desteñido) + brillo reservado a bordes/sombras, no al fondo. */
+  --bg-app:      #0A0614;
+  --bg-card:     #150B28;
+  --bg-surface:  #20123D;
+  --bg-input:    #0D0720;
+  --text-pri:    #F3EEFF;
+  --text-sec:    #B48CFF;
+  --text-mut:    #5B4A80;
+  --border-sub:  rgba(155,92,255,0.16);
+  /* Sombra con halo violeta debajo de la sombra normal — se apoya en --cc (el
+     acento del club) con fallback a violeta, así el glow sigue el color que
+     el club haya elegido en vez de forzar siempre el mismo morado. */
+  --shadow-card: 0 1px 0 rgba(255,255,255,0.06) inset, 0 2px 4px rgba(0,0,0,0.4), 0 16px 40px rgba(0,0,0,0.45), 0 0 32px -6px var(--cc50, rgba(155,92,255,0.4));
 }
 [data-theme="carbon"] {
   --bg-app:      #0D1117;

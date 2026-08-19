@@ -230,19 +230,19 @@ function FaqItem({ q, a, delay }) {
 /* ── Flow Diagram ──────────────────────────────────────────────────────────── */
 function FlowDiagram() {
   const steps = [
-    { Icon: Smartphone,    color: '#00AAFF', num: '01', title: 'Jugador se inscribe',  sub: 'Formulario digital desde el celular' },
-    { Icon: CreditCard,    color: '#00D084', num: '02', title: 'Paga su mensualidad',  sub: 'PSE, tarjeta o código QR'            },
-    { Icon: MessageCircle, color: '#25D366', num: '03', title: 'WhatsApp confirma',    sub: 'y te prepara los recordatorios de cobro' },
-    { Icon: QrCode,        color: '#F5A623', num: '04', title: 'Carnet QR en cancha',  sub: 'Verificación en segundos'            },
+    { Icon: Smartphone,    color: '#00AAFF', num: '01', title: 'Jugador se inscribe',  sub: 'Desde el celular, sin planillas que nadie llena bien ni PDFs que se pierden.' },
+    { Icon: CreditCard,    color: '#00D084', num: '02', title: 'Paga su mensualidad',  sub: 'PSE, tarjeta o QR — el dinero entra directo a tu cuenta, no a un chat que se acumula.' },
+    { Icon: MessageCircle, color: '#25D366', num: '03', title: 'WhatsApp confirma',    sub: 'El comprobante queda listo para conciliar: ves quién pagó, no persigues a quién falta.' },
+    { Icon: QrCode,        color: '#F5A623', num: '04', title: 'Carnet QR en cancha',  sub: 'Se verifica en segundos en la entrada, sin carnet físico que alguien "olvidó en la casa".' },
   ];
   return (
     <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
       <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
-        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Cómo funciona</p>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Cómo funciona · de principio a fin</p>
         <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>
-          Cuatro pasos para que tu club cobre a tiempo.
+          Se inscribe, paga y entra a la cancha. Tú solo lo ves pasar.
         </h2>
-        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>Y elimine el desorden administrativo de una vez por todas.</p>
+        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 15, margin: 0 }}>Cuatro pasos que hoy le cuestan horas de WhatsApp y Excel a tu club — acá corren solos, mientras tú ves el resultado desde un solo lugar.</p>
       </Reveal>
       <Reveal>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', flexWrap: 'wrap', gap: 0 }}>

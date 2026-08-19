@@ -301,7 +301,7 @@ function TechTrust() {
 function ImpactTable() {
   const rows = [
     { metric: 'Tiempo en cobros diarios',  antes: '4 h/día',   despues: '20 min/día' },
-    { metric: 'Mora mensual promedio',      antes: '38%',       despues: '7%'         },
+    { metric: 'Mora mensual promedio',      antes: '39%',       despues: '20%'        },
     { metric: 'Cupos perdidos por mes',     antes: '2-4 cupos', despues: '0 cupos'    },
   ];
   return (
@@ -793,7 +793,7 @@ export default function LandingPage() {
             {[
               { target: String(publicStats.jugadores), prefix: '+', suffix: '', label: 'jugadores gestionados', color: previewColor, icon: Users },
               { target: '8',   prefix: '',  suffix: 'h',   label: 'ahorradas por semana por club',        color: '#00D084',   icon: TrendingUp  },
-              { target: '100', prefix: '',  suffix: '%',   label: 'cobros con seguimiento automático',    color: '#F5A623',   icon: CreditCard  },
+              { target: '100', prefix: '',  suffix: '%',   label: 'de los pagos, visibles en un solo lugar', color: '#F5A623',   icon: CreditCard  },
               { target: '5',   prefix: '',  suffix: ' min',label: 'para configurar e iniciar',            color: '#AE68FF',   icon: Zap         },
             ].map((s, i) => (
               <Reveal key={s.label} delay={i * 80}>

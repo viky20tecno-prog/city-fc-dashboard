@@ -12,12 +12,12 @@ const formatCOP = (n) => formatMoney(n, getCodigoPais());
 
 /* ── KPI card ── */
 const COLORS = {
-  blue:   { icon: '#60A5FA', bg: 'rgba(96,165,250,0.08)',   border: 'rgba(96,165,250,0.2)',   glow: 'rgba(96,165,250,0.12)'   },
-  green:  { icon: '#22C55E', bg: 'rgba(34,197,94,0.08)',    border: 'rgba(34,197,94,0.2)',    glow: 'rgba(34,197,94,0.12)'    },
-  yellow: { icon: '#F59E0B', bg: 'rgba(245,158,11,0.08)',   border: 'rgba(245,158,11,0.2)',   glow: 'rgba(245,158,11,0.12)'   },
-  red:    { icon: '#EF4444', bg: 'rgba(239,68,68,0.08)',    border: 'rgba(239,68,68,0.2)',    glow: 'rgba(239,68,68,0.12)'    },
-  purple: { icon: '#C678FF', bg: 'rgba(198,120,255,0.08)',  border: 'rgba(198,120,255,0.2)',  glow: 'rgba(198,120,255,0.12)'  },
-  gold:   { icon: '#B68631', bg: 'rgba(182,134,49,0.08)',   border: 'rgba(182,134,49,0.2)',   glow: 'rgba(182,134,49,0.12)'   },
+  blue:   { icon: '#60A5FA', bg: 'rgba(96,165,250,0.12)',   border: 'rgba(96,165,250,0.3)',   glow: 'rgba(96,165,250,0.22)'   },
+  green:  { icon: '#22C55E', bg: 'rgba(34,197,94,0.12)',    border: 'rgba(34,197,94,0.3)',    glow: 'rgba(34,197,94,0.22)'    },
+  yellow: { icon: '#F59E0B', bg: 'rgba(245,158,11,0.12)',   border: 'rgba(245,158,11,0.3)',   glow: 'rgba(245,158,11,0.22)'   },
+  red:    { icon: '#EF4444', bg: 'rgba(239,68,68,0.12)',    border: 'rgba(239,68,68,0.3)',    glow: 'rgba(239,68,68,0.22)'    },
+  purple: { icon: '#C678FF', bg: 'rgba(198,120,255,0.12)',  border: 'rgba(198,120,255,0.3)',  glow: 'rgba(198,120,255,0.22)'  },
+  gold:   { icon: '#F5B93D', bg: 'rgba(245,185,61,0.12)',   border: 'rgba(245,185,61,0.3)',   glow: 'rgba(245,185,61,0.22)'   },
 };
 
 function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, delay = 0, wide, onClick, active, isMobile }) {
@@ -25,7 +25,6 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
   const pad    = isMobile ? '14px' : '26px';
   const gap    = isMobile ? '10px' : '18px';
   const icoSz  = isMobile ? 34 : 52;
-  const icoR   = isMobile ? '10px' : 'var(--radius-icon)';
   const iconSz = isMobile ? 15 : 22;
   const lblSz  = isMobile ? '9px' : '11px';
   const subSz  = isMobile ? '9px' : '11px';
@@ -53,7 +52,9 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
         transition: 'border-color 0.25s, box-shadow 0.25s, transform 0.25s',
         gridColumn: wide ? 'span 2' : undefined,
         cursor: onClick ? 'pointer' : 'default',
-        boxShadow: active ? `0 0 0 2px ${c.icon}40, 0 4px 16px ${c.glow}` : 'var(--shadow-card)',
+        boxShadow: active
+          ? `0 0 0 2px ${c.icon}40, 0 4px 16px ${c.glow}, var(--shadow-card)`
+          : `0 0 0 1px ${c.icon}18, 0 0 32px -8px ${c.icon}70, var(--shadow-card)`,
         transform: active ? 'translateY(-1px)' : undefined,
       }}
     >
@@ -71,9 +72,11 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
       }} />
 
       <div style={{
-        width: `${icoSz}px`, height: `${icoSz}px`, borderRadius: icoR, flexShrink: 0,
+        width: `${icoSz}px`, height: `${icoSz}px`, borderRadius: '50%', flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: c.bg, border: `1px solid ${c.border}`,
+        background: `linear-gradient(135deg, ${c.icon}35, ${c.icon}12)`,
+        border: `1px solid ${c.icon}55`,
+        boxShadow: `0 0 20px -2px ${c.icon}80, inset 0 1px 0 ${c.icon}30`,
         position: 'relative',
       }}>
         <Icon size={iconSz} color={c.icon} strokeWidth={1.8} />
@@ -267,9 +270,9 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
 
   const clubColor = {
     icon:   color,
-    bg:     `${color}14`,
-    border: `${color}33`,
-    glow:   `${color}18`,
+    bg:     `${color}22`,
+    border: `${color}4D`,
+    glow:   `${color}38`,
   };
 
   if (jugadores.length === 0) return <EmptyDashboard />;

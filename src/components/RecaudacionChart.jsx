@@ -196,15 +196,15 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} barGap={4} margin={{ top: 20, right: 4, left: 0, bottom: 0 }}>
             <defs>
-              {/* Barra pagado — color del club, sólido arriba, suave abajo */}
+              {/* Barra pagado — color del club, brillante arriba, con cuerpo abajo (antes se apagaba casi a la mitad) */}
               <linearGradient id="gradPagado" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor={cc} stopOpacity={0.95} />
-                <stop offset="100%" stopColor={cc} stopOpacity={0.55} />
+                <stop offset="0%"   stopColor={cc} stopOpacity={1}    />
+                <stop offset="100%" stopColor={cc} stopOpacity={0.7}  />
               </linearGradient>
-              {/* Barra mes actual — más brillante */}
+              {/* Barra mes actual — al tope, con más cuerpo todavía */}
               <linearGradient id="gradPagadoActual" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%"   stopColor={cc} stopOpacity={1}    />
-                <stop offset="100%" stopColor={cc} stopOpacity={0.75} />
+                <stop offset="100%" stopColor={cc} stopOpacity={0.85} />
               </linearGradient>
               {/* Barra pendiente — gris neutro muy sutil */}
               <linearGradient id="gradPendiente" x1="0" y1="0" x2="0" y2="1">
@@ -241,7 +241,7 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
                 <Cell
                   key={i}
                   fill={entry.esActual ? 'url(#gradPagadoActual)' : 'url(#gradPagado)'}
-                  style={entry.esActual ? { filter: `drop-shadow(0 0 6px ${cc}80)` } : {}}
+                  style={{ filter: entry.esActual ? `drop-shadow(0 0 14px ${cc}B0)` : `drop-shadow(0 0 6px ${cc}50)` }}
                 />
               ))}
               <LabelList content={<PctLabel data={data} cc={cc} />} />

@@ -317,7 +317,7 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
 
         {lightbox && fotoUrl && createPortal(
           <div
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-sm"
+            className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/85 backdrop-blur-sm"
             onClick={() => setLightbox(false)}
           >
             <button

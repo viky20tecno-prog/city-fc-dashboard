@@ -898,8 +898,8 @@ export default function Dashboard() {
                   onClick={() => setPlanElegido(p.id)}
                   style={{
                     flex: 1, padding: '10px 6px', borderRadius: '10px', cursor: 'pointer',
-                    border: planElegido === p.id ? '1.5px solid #22C55E' : '1px solid var(--border-sub)',
-                    background: planElegido === p.id ? 'rgba(34,197,94,0.10)' : 'var(--bg-card)',
+                    border: planElegido === p.id ? '1.5px solid var(--brand-secondary)' : '1px solid var(--border-sub)',
+                    background: planElegido === p.id ? 'var(--brand-surface)' : 'var(--bg-card)',
                     textAlign: 'center',
                   }}
                 >
@@ -925,13 +925,18 @@ export default function Dashboard() {
                     style={{
                       flex: 1, padding: '8px 0', borderRadius: '8px', border: 'none', cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-                      background: periodoTipo === 'anual' ? 'rgba(34,197,94,0.18)' : 'transparent',
-                      color: periodoTipo === 'anual' ? '#4ADE80' : 'var(--text-sec)',
+                      background: periodoTipo === 'anual' ? 'var(--brand-gradient)' : 'transparent',
+                      color: periodoTipo === 'anual' ? '#fff' : 'var(--text-sec)',
+                      boxShadow: periodoTipo === 'anual' ? '0 2px 14px var(--brand-glow)' : 'none',
                       fontSize: '12px', fontWeight: 600,
                     }}
                   >
                     Anual
-                    <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 999, background: 'rgba(34,197,94,0.25)', color: '#4ADE80' }}>
+                    <span style={{
+                      fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 999,
+                      background: periodoTipo === 'anual' ? 'rgba(255,255,255,0.22)' : 'var(--brand-surface)',
+                      color: periodoTipo === 'anual' ? '#fff' : 'var(--brand-secondary)',
+                    }}>
                       2 meses gratis
                     </span>
                   </button>

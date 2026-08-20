@@ -227,13 +227,18 @@ export default function RegistroClub() {
                       style={{
                         flex: 1, padding: '9px 0', borderRadius: 9, border: 'none', cursor: 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                        background: periodoTipo === 'anual' ? 'rgba(34,197,94,0.18)' : 'transparent',
-                        color: periodoTipo === 'anual' ? '#4ADE80' : 'var(--text-sec)',
-                        fontSize: 13, fontWeight: 600, transition: 'background 0.2s, color 0.2s',
+                        background: periodoTipo === 'anual' ? 'var(--brand-gradient)' : 'transparent',
+                        color: periodoTipo === 'anual' ? '#fff' : 'var(--text-sec)',
+                        boxShadow: periodoTipo === 'anual' ? '0 2px 14px var(--brand-glow)' : 'none',
+                        fontSize: 13, fontWeight: 600, transition: 'background 0.2s, color 0.2s, box-shadow 0.2s',
                       }}
                     >
                       Anual
-                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: 'rgba(34,197,94,0.25)', color: '#4ADE80', letterSpacing: 0.3 }}>
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, letterSpacing: 0.3,
+                        background: periodoTipo === 'anual' ? 'rgba(255,255,255,0.22)' : 'var(--brand-surface)',
+                        color: periodoTipo === 'anual' ? '#fff' : 'var(--brand-secondary)',
+                      }}>
                         2 meses gratis
                       </span>
                     </button>

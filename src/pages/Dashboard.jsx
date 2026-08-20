@@ -13,7 +13,7 @@ import { useAppData } from '../hooks/useAppData';
 import { useClubConfig } from '../hooks/useClubConfig';
 import { useRole } from '../hooks/useRole';
 import { getClubId, generarLinkBoldClub } from '../services/api';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, OFERTA_ANUAL_LANZAMIENTO, PLANES_PRECIO_ANUAL } from '../config';
 import DashboardOverview from '../components/DashboardOverview';
 import JugadoresTable from '../components/JugadoresTable';
 import Uniformes from '../components/Uniformes';
@@ -127,6 +127,7 @@ export default function Dashboard() {
   const [planElegido,      setPlanElegido]      = useState('starter');
   const [pagandoBold,      setPagandoBold]      = useState(false);
   const [errorPagoBold,    setErrorPagoBold]    = useState('');
+  const [periodoTipo,      setPeriodoTipo]      = useState('mensual');
   const bellRef = useRef(null);
 
   const toggleSidebar = () => setSidebarCollapsed(v => {
@@ -395,7 +396,7 @@ export default function Dashboard() {
     setPagandoBold(true);
     setErrorPagoBold('');
     try {
-      const record = await generarLinkBoldClub(planElegido);
+      const record = await generarLinkBoldClub(planElegido, periodoTipo);
       window.location.href = record.bold_link_url;
     } catch (err) {
       setErrorPagoBold(err.message || 'Error generando el link de pago.');
@@ -907,6 +908,41 @@ export default function Dashboard() {
                 </button>
               ))}
             </div>
+            {OFERTA_ANUAL_LANZAMIENTO && (
+              <div style={{ width: '100%' }}>
+                <div style={{ display: 'flex', gap: 4, padding: 4, background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border-sub)' }}>
+                  <button type="button" onClick={() => setPeriodoTipo('mensual')}
+                    style={{
+                      flex: 1, padding: '8px 0', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                      background: periodoTipo === 'mensual' ? 'rgba(255,255,255,0.08)' : 'transparent',
+                      color: periodoTipo === 'mensual' ? 'var(--text-pri)' : 'var(--text-sec)',
+                      fontSize: '12px', fontWeight: 600,
+                    }}
+                  >
+                    Mensual
+                  </button>
+                  <button type="button" onClick={() => setPeriodoTipo('anual')}
+                    style={{
+                      flex: 1, padding: '8px 0', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                      background: periodoTipo === 'anual' ? 'rgba(34,197,94,0.18)' : 'transparent',
+                      color: periodoTipo === 'anual' ? '#4ADE80' : 'var(--text-sec)',
+                      fontSize: '12px', fontWeight: 600,
+                    }}
+                  >
+                    Anual
+                    <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 999, background: 'rgba(34,197,94,0.25)', color: '#4ADE80' }}>
+                      2 meses gratis
+                    </span>
+                  </button>
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--text-mut)', textAlign: 'center', margin: '6px 0 0' }}>
+                  {periodoTipo === 'anual'
+                    ? `${PLANES_PRECIO_ANUAL[planElegido]}/año · oferta de lanzamiento, por tiempo limitado`
+                    : 'Oferta de lanzamiento: pagando anual te llevás 2 meses gratis'}
+                </div>
+              </div>
+            )}
             {errorPagoBold && <div style={{ fontSize: '12px', color: '#EF4444' }}>{errorPagoBold}</div>}
             <button
               onClick={handlePagarConBold}
@@ -917,7 +953,9 @@ export default function Dashboard() {
                 cursor: pagandoBold ? 'default' : 'pointer', opacity: pagandoBold ? 0.6 : 1,
               }}
             >
-              {pagandoBold ? 'Generando link de pago…' : `Pagar plan ${PLANES_AUTOSERVICIO.find(p => p.id === planElegido)?.nombre} con Bold`}
+              {pagandoBold
+                ? 'Generando link de pago…'
+                : `Pagar plan ${PLANES_AUTOSERVICIO.find(p => p.id === planElegido)?.nombre}${periodoTipo === 'anual' ? ' anual' : ''} con Bold`}
             </button>
             <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
               <button

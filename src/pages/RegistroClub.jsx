@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { API_BASE_URL, SUPPORT_WHATSAPP } from '../config';
+import { API_BASE_URL, SUPPORT_WHATSAPP, OFERTA_ANUAL_LANZAMIENTO, PLANES_PRECIO_ANUAL } from '../config';
 import {
   Loader2, CheckCircle, AlertCircle, Check,
   Lock, Mail, User, Phone, Building2, MapPin, ChevronLeft,
@@ -103,6 +103,7 @@ export default function RegistroClub() {
   const [showConf, setShowConf] = useState(false);
   const [pagandoBold, setPagandoBold]     = useState(false);
   const [errorPagoBold, setErrorPagoBold] = useState('');
+  const [periodoTipo, setPeriodoTipo]     = useState('mensual');
 
   const ac = CYCLE_COLORS[colorIdx];
 
@@ -181,7 +182,7 @@ export default function RegistroClub() {
     setPagandoBold(true);
     setErrorPagoBold('');
     try {
-      const record = await generarLinkBoldClub(planFromLanding);
+      const record = await generarLinkBoldClub(planFromLanding, periodoTipo);
       window.location.href = record.bold_link_url;
     } catch (err) {
       setErrorPagoBold(err.message || 'No se pudo generar el link de pago.');
@@ -205,9 +206,46 @@ export default function RegistroClub() {
             <p style={{ color: 'var(--text-sec)', fontSize: 15 }}>Redirigiendo a tu dashboard…</p>
           ) : (
             <>
-              <p style={{ color: 'var(--text-sec)', fontSize: 15, marginBottom: 24 }}>
-                Elegiste el plan <strong style={{ color: '#fff' }}>{planPago.nombre}</strong> ({planPago.precio}/mes). Activalo ahora con Bold para desbloquear todo desde el primer día.
+              <p style={{ color: 'var(--text-sec)', fontSize: 15, marginBottom: 18 }}>
+                Elegiste el plan <strong style={{ color: '#fff' }}>{planPago.nombre}</strong>. Activalo ahora con Bold para desbloquear todo desde el primer día.
               </p>
+
+              {OFERTA_ANUAL_LANZAMIENTO && (
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ display: 'flex', gap: 4, padding: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <button type="button" onClick={() => setPeriodoTipo('mensual')}
+                      style={{
+                        flex: 1, padding: '9px 0', borderRadius: 9, border: 'none', cursor: 'pointer',
+                        background: periodoTipo === 'mensual' ? 'rgba(255,255,255,0.10)' : 'transparent',
+                        color: periodoTipo === 'mensual' ? '#fff' : 'var(--text-sec)',
+                        fontSize: 13, fontWeight: 600, transition: 'background 0.2s, color 0.2s',
+                      }}
+                    >
+                      Mensual — {planPago.precio}
+                    </button>
+                    <button type="button" onClick={() => setPeriodoTipo('anual')}
+                      style={{
+                        flex: 1, padding: '9px 0', borderRadius: 9, border: 'none', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                        background: periodoTipo === 'anual' ? 'rgba(34,197,94,0.18)' : 'transparent',
+                        color: periodoTipo === 'anual' ? '#4ADE80' : 'var(--text-sec)',
+                        fontSize: 13, fontWeight: 600, transition: 'background 0.2s, color 0.2s',
+                      }}
+                    >
+                      Anual
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: 'rgba(34,197,94,0.25)', color: '#4ADE80', letterSpacing: 0.3 }}>
+                        2 meses gratis
+                      </span>
+                    </button>
+                  </div>
+                  <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-mut)', margin: '8px 0 0' }}>
+                    {periodoTipo === 'anual'
+                      ? `${PLANES_PRECIO_ANUAL[planFromLanding]}/año · Oferta de lanzamiento, por tiempo limitado`
+                      : 'Oferta de lanzamiento: pagando anual te llevás 2 meses gratis'}
+                  </p>
+                </div>
+              )}
+
               {errorPagoBold && (
                 <p style={{ color: '#EF4444', fontSize: 13, marginBottom: 14 }}>{errorPagoBold}</p>
               )}
@@ -221,7 +259,11 @@ export default function RegistroClub() {
                   marginBottom: 12,
                 }}
               >
-                {pagandoBold ? 'Generando link de pago…' : `Pagar plan ${planPago.nombre} con Bold`}
+                {pagandoBold
+                  ? 'Generando link de pago…'
+                  : periodoTipo === 'anual'
+                  ? `Pagar plan ${planPago.nombre} anual con Bold`
+                  : `Pagar plan ${planPago.nombre} con Bold`}
               </button>
               <button
                 onClick={() => navigate('/app')}

@@ -116,14 +116,14 @@ export async function archivePlayer(cedula, activo) {
 
 const ADMIN_API_BASE_URL = import.meta.env.VITE_ADMIN_API_BASE_URL || 'https://admin-zensports.zenpra.ai/api';
 
-export async function generarLinkBoldClub(plan) {
+export async function generarLinkBoldClub(plan, periodoTipo = 'mensual') {
   const clubId = getClubId();
   if (!clubId) throw new Error('No hay club activo en sesión.');
   const authHeaders = await getAuthHeaders();
   const res = await fetch(`${ADMIN_API_BASE_URL}/public/clubs/${clubId}/billing/bold-link`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders },
-    body: JSON.stringify({ plan }),
+    body: JSON.stringify({ plan, periodoTipo }),
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.error || `Error generando el link: ${res.status}`);

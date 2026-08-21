@@ -404,6 +404,16 @@ export default function Dashboard() {
     }
   };
 
+  // Si el usuario vuelve con "atrás" desde Bold, el navegador puede restaurar
+  // la página desde el bfcache con pagandoBold todavía en true — hay que resetearlo.
+  useEffect(() => {
+    const handlePageShow = (event) => {
+      if (event.persisted) setPagandoBold(false);
+    };
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
+
   const clubId = getClubId();
   const inscripcionUrl = `${window.location.origin}/inscripcion?club_id=${clubId}`;
   const portalUrl = `${window.location.origin}/p/${clubId}`;

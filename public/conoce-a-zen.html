@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conocé a Zen · ZenSports</title>
+<meta name="description" content="Guía paso a paso para ver tu estado de cuenta en City FC, con el WhatsApp de Zen para agregarlo de contacto.">
+<meta name="robots" content="noindex">
+
+<meta property="og:title" content="Conocé a Zen · ZenSports">
+<meta property="og:description" content="Así de fácil ves tu estado de cuenta en City FC — 4 pasos con Zen.">
+<meta property="og:image" content="https://zensports.zenpra.ai/zen-mascota.png">
+<meta property="og:type" content="website">
+
+<link rel="icon" type="image/png" href="/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap">
+<style>
+  @font-face {
+    font-family: 'Sport Event';
+    src: url('/fonts/sportevent-display.otf') format('opentype');
+    font-weight: 400;
+    font-display: swap;
+  }
+
+  :root {
+    --bg: #F7F5FB; --surface: #FFFFFF; --surface-2: #F0ECFA; --border: #E3DAF3;
+    --text-pri: #201A38; --text-sec: #635C7E; --text-mut: #948DB0;
+    --violet: #6A00FF; --violet-2: #AE68FF;
+    --coral: #FF6B4A; --coral-soft: #FFE7DF;
+    --mint: #0EBF8F; --mint-soft: #DDF7EE;
+    --amber: #F5A623; --amber-soft: #FFF0D6;
+    --wa: #25D366;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0A0714; --surface: #16112A; --surface-2: #1E1836; --border: #322A50;
+      --text-pri: #F6F3FF; --text-sec: #B4ACD1; --text-mut: #7C7499;
+      --violet: #AE68FF; --violet-2: #C9A3FF;
+      --coral: #FF8A6B; --coral-soft: #3A2015;
+      --mint: #3EE3B0; --mint-soft: #12352A;
+      --amber: #FFC24B; --amber-soft: #3A2A0C;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0A0714; --surface: #16112A; --surface-2: #1E1836; --border: #322A50;
+    --text-pri: #F6F3FF; --text-sec: #B4ACD1; --text-mut: #7C7499;
+    --violet: #AE68FF; --violet-2: #C9A3FF;
+    --coral: #FF8A6B; --coral-soft: #3A2015;
+    --mint: #3EE3B0; --mint-soft: #12352A;
+    --amber: #FFC24B; --amber-soft: #3A2A0C;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text-pri);
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased; line-height: 1.5;
+  }
+  .page { max-width: 480px; margin: 0 auto; padding: 34px 20px 70px; }
+
+  .fade { opacity: 0; transform: translateY(14px); animation: rise 0.6s ease forwards; }
+  @media (prefers-reduced-motion: reduce) { .fade { animation: none; opacity: 1; transform: none; } }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  .zen-face { display: block; margin: 0 auto; border-radius: 50%; object-fit: cover; }
+  .zen-hero { text-align: center; margin-bottom: 26px; }
+  .zen-hero .zen-face { width: 96px; height: 96px; margin-bottom: 16px; }
+
+  h1 {
+    font-family: 'Sport Event', 'Space Grotesk', sans-serif;
+    font-weight: 400;
+    font-size: clamp(32px, 9vw, 42px);
+    line-height: 1.05;
+    text-align: center;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+  h1 em { font-style: normal; color: var(--violet); }
+
+  .lede {
+    text-align: center;
+    font-size: 15px;
+    color: var(--text-sec);
+    max-width: 34ch;
+    margin: 0 auto 30px;
+  }
+
+  .contact-card {
+    background: linear-gradient(155deg, var(--violet) 0%, var(--violet-2) 100%);
+    border-radius: 24px;
+    padding: 22px 22px 24px;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 34px;
+    box-shadow: 0 16px 40px -18px rgba(106,0,255,0.55);
+  }
+  .contact-card .tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    background: rgba(255,255,255,0.18);
+    padding: 5px 12px; border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .contact-card .number {
+    font-family: 'Sport Event', 'Space Grotesk', sans-serif;
+    font-size: clamp(26px, 8vw, 32px);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .contact-card .caption { font-size: 12.5px; opacity: 0.85; margin-bottom: 18px; }
+  .contact-card .wa-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: #fff; color: #0B7A4C;
+    font-weight: 800; font-size: 14.5px;
+    padding: 14px; border-radius: 14px;
+    text-decoration: none;
+  }
+
+  .steps { display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px; }
+
+  .step {
+    display: flex; gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 18px;
+  }
+
+  .step-icon {
+    flex-shrink: 0;
+    width: 52px; height: 52px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .step-body { flex: 1; min-width: 0; }
+  .step-kicker {
+    font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-mut); margin-bottom: 3px;
+  }
+  .step-title { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+  .step-desc { font-size: 13.5px; color: var(--text-sec); margin: 0; }
+  .step-desc b { color: var(--text-pri); }
+
+  .chat {
+    background: var(--surface-2);
+    border-radius: 20px;
+    padding: 16px;
+    margin: 8px 0 4px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .bubble {
+    max-width: 82%;
+    font-size: 13px;
+    padding: 9px 13px;
+    border-radius: 14px;
+    line-height: 1.4;
+  }
+  .bubble.out {
+    align-self: flex-end;
+    background: var(--wa);
+    color: #04140D;
+    border-bottom-right-radius: 4px;
+    font-weight: 600;
+  }
+  .bubble.in {
+    align-self: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-pri);
+    border-bottom-left-radius: 4px;
+  }
+  .bubble.in .link { color: var(--violet); font-weight: 700; word-break: break-all; }
+
+  .tip {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--amber-soft);
+    border-radius: 18px;
+    padding: 16px 18px;
+    margin-bottom: 30px;
+  }
+  .tip-icon { flex-shrink: 0; width: 32px; height: 32px; }
+  .tip p { margin: 0; font-size: 13.5px; color: var(--text-pri); }
+  .tip b { color: var(--amber); }
+
+  footer { text-align: center; }
+  footer .zen-face { width: 44px; height: 44px; margin-bottom: 10px; }
+  footer .sign { font-size: 14px; color: var(--text-sec); }
+  footer .sign b { color: var(--text-pri); }
+  footer .brand { margin-top: 18px; font-size: 11px; color: var(--text-mut); letter-spacing: 0.06em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="zen-hero fade" style="animation-delay:.02s">
+    <img class="zen-face" src="/zen-mascota.png" alt="Zen">
+    <h1>¡Hola! Soy <em>Zen</em> 👋</h1>
+    <p class="lede">Te muestro en 4 pasitos cómo ver tu estado de cuenta de City FC.</p>
+  </div>
+
+  <div class="contact-card fade" style="animation-delay:.08s">
+    <span class="tag">📱 Primero, guardame</span>
+    <div class="number">+57 320 440 9015</div>
+    <p class="caption">Agregame como "Zen · ZenSports" en tus contactos</p>
+    <a class="wa-btn" href="https://wa.me/573204409015?text=Hola%20Zen%2C%20quiero%20ver%20mi%20estado%20de%20cuenta%20en%20City%20FC" target="_blank" rel="noopener noreferrer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><circle cx="12" cy="12" r="12"/></svg>
+      Escribirme por WhatsApp
+    </a>
+  </div>
+
+  <div class="steps">
+
+    <div class="step fade" style="animation-delay:.14s">
+      <div class="step-icon" style="background:var(--coral-soft)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="14" height="20" rx="3" stroke="var(--coral)" stroke-width="2"/><circle cx="12" cy="18" r="1.2" fill="var(--coral)"/><path d="M9 6h6" stroke="var(--coral)" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="step-body">
+        <div class="step-kicker">Paso 1</div>
+        <p class="step-title">Abrí WhatsApp</p>
+        <p class="step-desc">Y tocá el botón de arriba, o buscame por mi número.</p>
+      </div>
+    </div>
+
+    <div class="step fade" style="animation-delay:.20s">
+      <div class="step-icon" style="background:var(--mint-soft)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 5a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H10l-5 4v-4H6a2 2 0 01-2-2V5z" stroke="var(--mint)" stroke-width="2" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-body">
+        <div class="step-kicker">Paso 2</div>
+        <p class="step-title">Escribime esto</p>
+        <p class="step-desc">Así, tal cual: <b>"Quiero ver mi estado de cuenta"</b></p>
+      </div>
+    </div>
+
+    <div class="step fade" style="animation-delay:.26s">
+      <div class="step-icon" style="background:color-mix(in srgb, var(--violet) 14%, transparent)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="var(--violet)"/></svg>
+      </div>
+      <div class="step-body">
+        <div class="step-kicker">Paso 3</div>
+        <p class="step-title">Te respondo al toque</p>
+        <p class="step-desc">Así se ve nuestra charla:</p>
+        <div class="chat">
+          <div class="bubble out">Quiero ver mi estado de cuenta</div>
+          <div class="bubble in">¡Hola! 👋 Acá está tu link: <span class="link">zensports.zenpra.ai/p/city-fc/...</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step fade" style="animation-delay:.32s">
+      <div class="step-icon" style="background:var(--amber-soft)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="var(--amber)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="step-body">
+        <div class="step-kicker">Paso 4</div>
+        <p class="step-title">Tocá el link y listo</p>
+        <p class="step-desc">Ahí ves <b>cuánto debés</b>, <b>qué meses pagaste</b> y <b>cómo pagar</b> si te falta algo.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tip fade" style="animation-delay:.38s">
+    <svg class="tip-icon" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" fill="none" stroke="var(--amber)" stroke-width="2.5"/><path d="M16 10v8" stroke="var(--amber)" stroke-width="2.5" stroke-linecap="round"/><circle cx="16" cy="22" r="1.6" fill="var(--amber)"/></svg>
+    <p><b>Un secreto:</b> escribime desde el mismo WhatsApp con el que jugás en el club — así te reconozco al toque. ¿Cambiaste de número? Avisale a tu entrenador o admin primero.</p>
+  </div>
+
+  <footer class="fade" style="animation-delay:.44s">
+    <img class="zen-face" src="/zen-mascota.png" alt="Zen">
+    <p class="sign">¿Dudas? Escribime, para eso estoy —<br><b>Zen 💜</b></p>
+    <p class="brand">ZenSports · City FC</p>
+  </footer>
+
+</div>
+</body>
+</html>

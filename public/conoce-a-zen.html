@@ -107,11 +107,12 @@
     content: '';
     position: absolute;
     z-index: 0;
-    top: -50px; left: 50%;
-    width: 230px; height: 230px;
-    transform: translateX(-50%);
-    background: radial-gradient(circle, rgba(232,214,255,0.95) 0%, rgba(155,77,255,0.5) 45%, transparent 72%);
-    filter: blur(26px);
+    inset: -15% -10%;
+    background:
+      radial-gradient(circle at 12% 78%, rgba(0,225,255,0.55) 0%, transparent 42%),
+      radial-gradient(circle at 48% 45%, rgba(130,90,255,0.4) 0%, transparent 48%),
+      radial-gradient(circle at 88% 15%, rgba(255,35,195,0.5) 0%, transparent 42%);
+    filter: blur(34px);
     pointer-events: none;
   }
   .stage::after {
@@ -206,17 +207,27 @@
   }
   .tap-label {
     position: relative; z-index: 1;
-    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 18px;
     font-weight: 800;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.01em;
     text-transform: uppercase;
-    margin: 0 0 10px;
+    margin: 0 0 14px;
     color: var(--gold-2);
     background: linear-gradient(90deg, var(--gold-1), var(--gold-2));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: tap-label-pulse 1.3s ease-in-out infinite;
+  }
+  .tap-label::before {
+    content: '';
+    flex-shrink: 0;
+    width: 4px; height: 20px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--gold-1), var(--gold-2));
   }
   @keyframes tap-label-pulse {
     0%, 100% { opacity: 0.8; transform: scale(1); }

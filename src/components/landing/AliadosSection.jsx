@@ -190,15 +190,20 @@ export default function AliadosSection() {
                     </div>
                   </div>
                 </div>
+                {a.link_web && (
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    fontSize: 11.5, fontWeight: 800, color: tierStyle.badge,
+                    background: `${tierStyle.badge}1c`, border: `1px solid ${tierStyle.badge}50`,
+                    borderRadius: 999, padding: '5px 11px', marginBottom: 13, letterSpacing: 0.2,
+                  }}>
+                    Conocé más <ExternalLink size={11} />
+                  </span>
+                )}
                 {a.descripcion && (
-                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.52)', lineHeight: 1.6, margin: 0, marginBottom: a.link_web ? 12 : 0 }}>
+                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.52)', lineHeight: 1.6, margin: 0 }}>
                     {a.descripcion}
                   </p>
-                )}
-                {a.link_web && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: tierStyle.badge }}>
-                    Visitar <ExternalLink size={11} />
-                  </span>
                 )}
               </Wrapper>
             );

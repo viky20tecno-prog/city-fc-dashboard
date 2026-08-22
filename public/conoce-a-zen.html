@@ -124,27 +124,47 @@
   .tap-arrow {
     position: absolute;
     top: 50%;
-    width: 56px; height: 34px;
+    width: 40px; height: 25px;
     pointer-events: none;
     filter:
-      drop-shadow(0 0 4px var(--neon-pink))
-      drop-shadow(0 0 10px var(--neon-violet))
-      drop-shadow(0 0 18px var(--neon-pink));
+      drop-shadow(0 0 3px var(--neon-pink))
+      drop-shadow(0 0 8px var(--neon-violet))
+      drop-shadow(0 0 14px var(--neon-pink));
   }
   .tap-arrow svg { display: block; width: 100%; height: 100%; }
-  .tap-arrow-left { left: -38px; animation: tap-nudge-left 1.3s ease-in-out infinite; }
-  .tap-arrow-right { right: -38px; animation: tap-nudge-right 1.3s ease-in-out infinite; }
+  .tap-arrow-left { left: -28px; animation: tap-nudge-left 1.3s ease-in-out infinite; }
+  .tap-arrow-right { right: -28px; animation: tap-nudge-right 1.3s ease-in-out infinite; }
   .tap-arrow-right svg { transform: scaleX(-1); }
   @keyframes tap-nudge-left {
     0%, 100% { transform: translateY(-50%) translateX(0); opacity: 0.85; }
-    50% { transform: translateY(-50%) translateX(10px); opacity: 1; }
+    50% { transform: translateY(-50%) translateX(6px); opacity: 1; }
   }
   @keyframes tap-nudge-right {
     0%, 100% { transform: translateY(-50%) translateX(0); opacity: 0.85; }
-    50% { transform: translateY(-50%) translateX(-10px); opacity: 1; }
+    50% { transform: translateY(-50%) translateX(-6px); opacity: 1; }
   }
   @media (prefers-reduced-motion: reduce) {
     .tap-arrow-left, .tap-arrow-right { animation: none; }
+  }
+  .tap-label {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+    color: var(--neon-pink);
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-violet));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: tap-label-pulse 1.3s ease-in-out infinite;
+  }
+  @keyframes tap-label-pulse {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.06); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tap-label { animation: none; }
   }
 
   .steps { display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px; }
@@ -235,6 +255,7 @@
     <span class="tag">📱 Primero, guardame</span>
     <div class="number">+57 320 440 9015</div>
     <p class="caption">Agregame como "Zen · ZenSports" en tus contactos</p>
+    <p class="tap-label">¡Presióname!</p>
     <div class="wa-wrap">
       <div class="tap-arrow tap-arrow-left" aria-hidden="true">
         <svg viewBox="0 0 64 40" fill="none">

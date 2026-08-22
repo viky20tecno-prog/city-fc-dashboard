@@ -123,41 +123,41 @@
     font-variant-numeric: tabular-nums;
   }
   .contact-card .caption { font-size: 12.5px; opacity: 0.85; margin-bottom: 18px; }
+  .wa-wrap { position: relative; }
   .contact-card .wa-btn {
+    position: relative;
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    background: #fff; color: #0B7A4C;
+    background: linear-gradient(155deg, #2CE07A 0%, #1DA851 100%);
+    color: #fff;
     font-weight: 800; font-size: clamp(13px, 3.6vw, 14.5px);
     white-space: nowrap;
     padding: 14px; border-radius: 14px;
     text-decoration: none;
-    border: 1px solid rgba(0,0,0,0.04);
-    box-shadow: 0 12px 26px -12px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.14);
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow: 0 14px 28px -12px rgba(9,90,45,0.6), 0 2px 6px rgba(0,0,0,0.18);
+    animation: wa-breathe 2.2s ease-in-out infinite;
   }
-  .wa-wrap { position: relative; }
-  .tap-arrow {
+  .contact-card .wa-btn::after {
+    content: '';
     position: absolute;
-    top: 50%;
-    width: 40px; height: 25px;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 0 0 rgba(46,224,122,0.55);
+    animation: wa-ring 2.2s ease-out infinite;
     pointer-events: none;
-    filter:
-      drop-shadow(0 0 3px var(--gold-1))
-      drop-shadow(0 0 7px var(--gold-2))
-      drop-shadow(0 0 12px rgba(232,169,58,0.55));
   }
-  .tap-arrow svg { display: block; width: 100%; height: 100%; }
-  .tap-arrow-left { left: -28px; animation: tap-nudge-left 1.3s ease-in-out infinite; }
-  .tap-arrow-right { right: -28px; animation: tap-nudge-right 1.3s ease-in-out infinite; }
-  .tap-arrow-right svg { transform: scaleX(-1); }
-  @keyframes tap-nudge-left {
-    0%, 100% { transform: translateY(-50%) translateX(0); opacity: 0.85; }
-    50% { transform: translateY(-50%) translateX(6px); opacity: 1; }
+  .contact-card .wa-btn svg { flex-shrink: 0; }
+  @keyframes wa-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.035); }
   }
-  @keyframes tap-nudge-right {
-    0%, 100% { transform: translateY(-50%) translateX(0); opacity: 0.85; }
-    50% { transform: translateY(-50%) translateX(-6px); opacity: 1; }
+  @keyframes wa-ring {
+    0% { box-shadow: 0 0 0 0 rgba(46,224,122,0.55); }
+    70% { box-shadow: 0 0 0 16px rgba(46,224,122,0); }
+    100% { box-shadow: 0 0 0 0 rgba(46,224,122,0); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .tap-arrow-left, .tap-arrow-right { animation: none; }
+    .contact-card .wa-btn, .contact-card .wa-btn::after { animation: none; }
   }
   .tap-label {
     font-size: 13px;
@@ -270,37 +270,13 @@
     <p class="caption">Agregame como "Zen · ZenSports" en tus contactos</p>
     <p class="tap-label">¡Presióname!</p>
     <div class="wa-wrap">
-      <div class="tap-arrow tap-arrow-left" aria-hidden="true">
-        <svg viewBox="0 0 64 40" fill="none">
-          <defs>
-            <linearGradient id="neonGradL" x1="0" y1="0" x2="64" y2="0">
-              <stop offset="0" stop-color="var(--gold-1)"/>
-              <stop offset="1" stop-color="var(--gold-2)"/>
-            </linearGradient>
-          </defs>
-          <path d="M2 20H24M24 11L38 20L24 29" stroke="url(#neonGradL)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
-          <path d="M4 20H38M38 4L60 20L38 36" stroke="url(#neonGradL)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
       <a class="wa-btn" href="https://wa.me/573204409015?text=Hola%20Zen%2C%20quiero%20ver%20mi%20estado%20de%20cuenta%20en%20City%20FC" target="_blank" rel="noopener noreferrer">
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="12" r="12" fill="#25D366"/>
-          <path fill="#fff" transform="translate(4,4) scale(0.667)" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          <circle cx="12" cy="12" r="12" fill="#fff"/>
+          <path fill="#1DA851" transform="translate(4,4) scale(0.667)" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
         </svg>
         Escribirme por WhatsApp
       </a>
-      <div class="tap-arrow tap-arrow-right" aria-hidden="true">
-        <svg viewBox="0 0 64 40" fill="none">
-          <defs>
-            <linearGradient id="neonGradR" x1="0" y1="0" x2="64" y2="0">
-              <stop offset="0" stop-color="var(--gold-1)"/>
-              <stop offset="1" stop-color="var(--gold-2)"/>
-            </linearGradient>
-          </defs>
-          <path d="M2 20H24M24 11L38 20L24 29" stroke="url(#neonGradR)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
-          <path d="M4 20H38M38 4L60 20L38 36" stroke="url(#neonGradR)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
     </div>
   </div>
 

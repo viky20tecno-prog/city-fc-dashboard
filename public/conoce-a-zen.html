@@ -90,7 +90,7 @@
   .contact-card {
     background: linear-gradient(155deg, var(--violet) 0%, var(--violet-2) 100%);
     border-radius: 24px;
-    padding: 22px 22px 24px;
+    padding: 22px 22px 46px;
     color: #fff;
     text-align: center;
     margin-bottom: 34px;
@@ -117,6 +117,22 @@
     font-weight: 800; font-size: 14.5px;
     padding: 14px; border-radius: 14px;
     text-decoration: none;
+  }
+  .wa-wrap { position: relative; }
+  .tap-arrow {
+    position: absolute;
+    bottom: -30px;
+    right: 6px;
+    width: 34px; height: 36px;
+    pointer-events: none;
+    animation: tap-bounce 1.5s ease-in-out infinite;
+  }
+  @keyframes tap-bounce {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(-6deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tap-arrow { animation: none; }
   }
 
   .steps { display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px; }
@@ -207,10 +223,15 @@
     <span class="tag">📱 Primero, guardame</span>
     <div class="number">+57 320 440 9015</div>
     <p class="caption">Agregame como "Zen · ZenSports" en tus contactos</p>
-    <a class="wa-btn" href="https://wa.me/573204409015?text=Hola%20Zen%2C%20quiero%20ver%20mi%20estado%20de%20cuenta%20en%20City%20FC" target="_blank" rel="noopener noreferrer">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><circle cx="12" cy="12" r="12"/></svg>
-      Escribirme por WhatsApp
-    </a>
+    <div class="wa-wrap">
+      <a class="wa-btn" href="https://wa.me/573204409015?text=Hola%20Zen%2C%20quiero%20ver%20mi%20estado%20de%20cuenta%20en%20City%20FC" target="_blank" rel="noopener noreferrer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><circle cx="12" cy="12" r="12"/></svg>
+        Escribirme por WhatsApp
+      </a>
+      <svg class="tap-arrow" viewBox="0 0 42 44" fill="none" aria-hidden="true">
+        <path d="M36 38C30 20 14 16 8 4M8 4L4 14M8 4L18 8" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+      </svg>
+    </div>
   </div>
 
   <div class="steps">

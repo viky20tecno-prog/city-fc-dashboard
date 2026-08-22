@@ -89,71 +89,87 @@
     margin: 0 auto 30px;
   }
 
-  .wallet { position: relative; margin-bottom: 34px; }
-  .contact-card {
+  .stage {
     position: relative;
-    background:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Ccircle cx='130' cy='130' r='104' fill='none' stroke='white' stroke-width='2' opacity='0.08'/%3E%3Cpath d='M130 30 L162 68 L146 116 L114 116 L98 68 Z' fill='none' stroke='white' stroke-width='2' opacity='0.08'/%3E%3Cpath d='M130 230 L162 192 L146 144 L114 144 L98 192 Z' fill='none' stroke='white' stroke-width='2' opacity='0.08'/%3E%3Cpath d='M26 130 L64 98 L114 116 L114 144 L64 162 Z' fill='none' stroke='white' stroke-width='2' opacity='0.08'/%3E%3Cpath d='M234 130 L196 162 L146 144 L146 116 L196 98 Z' fill='none' stroke='white' stroke-width='2' opacity='0.08'/%3E%3C/svg%3E") no-repeat calc(100% + 34px) calc(100% + 34px) / 210px 210px,
-      radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1.4px) 0 0 / 15px 15px,
-      linear-gradient(155deg, #8A2BFF 0%, #6A00FF 52%, #2B0A5E 130%);
-    border: 1px solid rgba(255,255,255,0.14);
-    border-radius: 26px;
-    padding: 64px 22px 24px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #140C2C 0%, #07040F 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 28px;
+    padding: 34px 20px 26px;
     color: #fff;
     text-align: center;
+    margin-bottom: 34px;
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.18),
-      0 26px 50px -20px rgba(32,0,72,0.65),
-      0 10px 22px -14px rgba(0,0,0,0.4);
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      0 30px 60px -24px rgba(0,0,0,0.75);
   }
-  .peek-card {
-    position: absolute;
-    z-index: 1;
-    top: -26px; left: 20px; right: 20px;
-    height: 82px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, #D9BFFF 0%, #9B4DFF 50%, #6E1FE0 100%);
-    border: 1px solid rgba(255,255,255,0.4);
-    box-shadow: 0 18px 30px -14px rgba(30,0,70,0.55), inset 0 1px 0 rgba(255,255,255,0.45);
-    padding: 12px 16px;
-    display: flex; flex-direction: column; justify-content: space-between;
-    overflow: hidden;
-  }
-  .peek-card::before {
+  .stage::before {
     content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(115deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.06) 32%, rgba(255,255,255,0) 55%);
+    position: absolute;
+    z-index: 0;
+    top: -50px; left: 50%;
+    width: 230px; height: 230px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(232,214,255,0.95) 0%, rgba(155,77,255,0.5) 45%, transparent 72%);
+    filter: blur(26px);
     pointer-events: none;
   }
-  .peek-card-top {
-    position: relative; z-index: 1;
-    display: flex; align-items: flex-start; justify-content: space-between;
+  .stage::after {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Ccircle cx='130' cy='130' r='104' fill='none' stroke='white' stroke-width='2' opacity='0.07'/%3E%3Cpath d='M130 30 L162 68 L146 116 L114 116 L98 68 Z' fill='none' stroke='white' stroke-width='2' opacity='0.07'/%3E%3Cpath d='M130 230 L162 192 L146 144 L114 144 L98 192 Z' fill='none' stroke='white' stroke-width='2' opacity='0.07'/%3E%3Cpath d='M26 130 L64 98 L114 116 L114 144 L64 162 Z' fill='none' stroke='white' stroke-width='2' opacity='0.07'/%3E%3Cpath d='M234 130 L196 162 L146 144 L146 116 L196 98 Z' fill='none' stroke='white' stroke-width='2' opacity='0.07'/%3E%3C/svg%3E") no-repeat calc(100% + 20px) calc(100% + 24px) / 190px 190px,
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Ccircle cx='90' cy='90' r='55' fill='none' stroke='white' stroke-width='1.5' opacity='0.06'/%3E%3Cline x1='0' y1='90' x2='180' y2='90' stroke='white' stroke-width='1.5' opacity='0.06'/%3E%3Ccircle cx='90' cy='90' r='3' fill='white' opacity='0.06'/%3E%3C/svg%3E") no-repeat -30px -30px / 170px 170px,
+      radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1.4px) 0 0 / 16px 16px;
+    pointer-events: none;
   }
-  .peek-name { font-size: 12.5px; font-weight: 700; color: #fff; }
-  .peek-badge {
-    display: flex; align-items: center; justify-content: center;
-    width: 22px; height: 22px;
-    background: #fff; border-radius: 7px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  }
-  .peek-number {
-    position: relative; z-index: 1;
+  .glass-card {
+    position: relative;
+    z-index: 1;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 20px;
+    padding: 16px 18px;
     text-align: left;
-    font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
-    color: rgba(255,255,255,0.88);
-    font-variant-numeric: tabular-nums;
+    margin-bottom: 22px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.22),
+      0 20px 40px -20px rgba(0,0,0,0.65);
   }
-  .contact-card .number {
+  .glass-card-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .glass-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+  }
+  .glass-badge {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px;
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+  }
+  .glass-name { font-size: 14.5px; font-weight: 700; margin-bottom: 4px; }
+  .glass-number {
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
-    font-size: clamp(26px, 8vw, 32px);
-    letter-spacing: 0.02em;
-    margin-bottom: 4px;
+    font-size: clamp(17px, 5.2vw, 20px);
+    letter-spacing: 0.03em;
     font-variant-numeric: tabular-nums;
+    color: rgba(255,255,255,0.92);
   }
-  .contact-card .caption { font-size: 12.5px; opacity: 0.85; margin-bottom: 18px; }
-  .wa-wrap { position: relative; }
-  .contact-card .wa-btn {
+  .stage .caption {
+    position: relative; z-index: 1;
+    font-size: 12.5px; opacity: 0.7; margin-bottom: 18px;
+  }
+  .wa-wrap { position: relative; z-index: 1; }
+  .stage .wa-btn {
     position: relative;
     display: flex; align-items: center; justify-content: center; gap: 8px;
     background: linear-gradient(155deg, #2CE07A 0%, #1DA851 100%);
@@ -166,7 +182,7 @@
     box-shadow: 0 14px 28px -12px rgba(9,90,45,0.6), 0 2px 6px rgba(0,0,0,0.18);
     animation: wa-breathe 2.2s ease-in-out infinite;
   }
-  .contact-card .wa-btn::after {
+  .stage .wa-btn::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -175,7 +191,7 @@
     animation: wa-ring 2.2s ease-out infinite;
     pointer-events: none;
   }
-  .contact-card .wa-btn svg { flex-shrink: 0; }
+  .stage .wa-btn svg { flex-shrink: 0; }
   @keyframes wa-breathe {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.035); }
@@ -186,9 +202,10 @@
     100% { box-shadow: 0 0 0 0 rgba(46,224,122,0); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .contact-card .wa-btn, .contact-card .wa-btn::after { animation: none; }
+    .stage .wa-btn, .stage .wa-btn::after { animation: none; }
   }
   .tap-label {
+    position: relative; z-index: 1;
     font-size: 13px;
     font-weight: 800;
     letter-spacing: 0.03em;
@@ -293,31 +310,29 @@
     <p class="lede">Te muestro en 4 pasitos cómo ver tu estado de cuenta de City FC.</p>
   </div>
 
-  <div class="wallet fade" style="animation-delay:.08s">
-    <div class="peek-card">
-      <div class="peek-card-top">
-        <span class="peek-name">Zen · ZenSports</span>
-        <span class="peek-badge">
-          <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true">
+  <div class="stage fade" style="animation-delay:.08s">
+    <div class="glass-card">
+      <div class="glass-card-top">
+        <span class="glass-label">Contacto Zen</span>
+        <span class="glass-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
             <path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
           </svg>
         </span>
       </div>
-      <div class="peek-number">•••• •••• 9015</div>
+      <div class="glass-name">Zen · ZenSports</div>
+      <div class="glass-number">+57 320 440 9015</div>
     </div>
-    <div class="contact-card">
-      <div class="number">+57 320 440 9015</div>
-      <p class="caption">Agregame como "Zen · ZenSports" en tus contactos</p>
-      <p class="tap-label">¡Presióname!</p>
-      <div class="wa-wrap">
-        <a class="wa-btn" href="https://wa.me/573204409015?text=Hola%20Zen%2C%20quiero%20ver%20mi%20estado%20de%20cuenta%20en%20City%20FC" target="_blank" rel="noopener noreferrer">
+    <p class="caption">Agregame como "Zen · ZenSports" en tus contactos</p>
+    <p class="tap-label">¡Presióname!</p>
+    <div class="wa-wrap">
+      <a class="wa-btn" href="https://wa.me/573204409015?text=Hola%20Zen%2C%20quiero%20ver%20mi%20estado%20de%20cuenta%20en%20City%20FC" target="_blank" rel="noopener noreferrer">
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="12" cy="12" r="12" fill="#fff"/>
           <path fill="#1DA851" transform="translate(4,4) scale(0.667)" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
         </svg>
         Escribirme por WhatsApp
       </a>
-      </div>
     </div>
   </div>
 

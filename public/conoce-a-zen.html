@@ -107,7 +107,9 @@
   .stage {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(180deg, #140C2C 0%, #07040F 100%);
+    background:
+      linear-gradient(180deg, rgba(14,8,30,0.5) 0%, rgba(9,5,19,0.72) 55%, rgba(5,3,10,0.88) 100%),
+      url('/zen-card-bg.jpg') center 20% / cover no-repeat;
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 28px;
     padding: 34px 20px 26px;
@@ -117,27 +119,6 @@
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.06),
       0 30px 60px -24px rgba(0,0,0,0.75);
-  }
-  .stage::before {
-    content: '';
-    position: absolute;
-    z-index: 0;
-    inset: -15% -10%;
-    background:
-      radial-gradient(circle at 15% 80%, rgba(255,45,200,0.42) 0%, transparent 42%),
-      radial-gradient(circle at 50% 42%, rgba(150,60,255,0.45) 0%, transparent 50%),
-      radial-gradient(circle at 85% 12%, rgba(190,90,255,0.4) 0%, transparent 44%);
-    filter: blur(34px);
-    pointer-events: none;
-  }
-  .stage::after {
-    content: '';
-    position: absolute;
-    z-index: 0;
-    inset: 0;
-    background:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='340' viewBox='0 0 170 340'%3E%3Cdefs%3E%3ClinearGradient id='d' x1='0' y1='0' x2='0' y2='340' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23E29CFF'/%3E%3Cstop offset='1' stop-color='%23FF3FD8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M40,0 C40,42 130,42 130,85 C130,128 40,128 40,170 C40,212 130,212 130,255 C130,298 40,298 40,340' fill='none' stroke='url(%23d)' stroke-width='3' opacity='0.22'/%3E%3Cpath d='M130,0 C130,42 40,42 40,85 C40,128 130,128 130,170 C130,212 40,212 40,255 C40,298 130,298 130,340' fill='none' stroke='url(%23d)' stroke-width='3' opacity='0.22'/%3E%3Cg stroke='url(%23d)' stroke-width='1.8' opacity='0.16'%3E%3Cline x1='40' y1='0' x2='130' y2='0'/%3E%3Cline x1='40' y1='85' x2='130' y2='85'/%3E%3Cline x1='40' y1='170' x2='130' y2='170'/%3E%3Cline x1='40' y1='255' x2='130' y2='255'/%3E%3Cline x1='40' y1='340' x2='130' y2='340'/%3E%3C/g%3E%3C/svg%3E") no-repeat calc(100% + 30px) -20px / 190px 380px;
-    pointer-events: none;
   }
   .hud-corner {
     position: absolute;

@@ -209,12 +209,14 @@
     position: relative; z-index: 1;
     display: inline-flex;
     align-items: center;
-    gap: 9px;
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: 0.01em;
-    text-transform: uppercase;
-    margin: 0 0 14px;
+    gap: 10px;
+    max-width: 27ch;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0;
+    margin: 0 0 16px;
     color: var(--gold-2);
     background: linear-gradient(90deg, var(--gold-1), var(--gold-2));
     -webkit-background-clip: text;
@@ -224,8 +226,9 @@
   }
   .tap-label::before {
     content: '';
+    align-self: stretch;
     flex-shrink: 0;
-    width: 4px; height: 20px;
+    width: 4px;
     border-radius: 2px;
     background: linear-gradient(180deg, var(--gold-1), var(--gold-2));
   }
@@ -335,7 +338,7 @@
       <div class="glass-number">+57 320 440 9015</div>
     </div>
     <p class="caption">Agregame como "Zen · ZenSports" en tus contactos</p>
-    <p class="tap-label">¡Presióname!</p>
+    <p class="tap-label">Presioná el botón de abajo y charlamos</p>
     <div class="wa-wrap">
       <a class="wa-btn" href="https://wa.me/573204409015?text=Hola%20Zen%2C%20quiero%20ver%20mi%20estado%20de%20cuenta%20en%20City%20FC" target="_blank" rel="noopener noreferrer">
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">

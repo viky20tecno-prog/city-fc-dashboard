@@ -81,6 +81,21 @@
   }
   h1 em { font-style: normal; color: var(--violet); }
 
+  .zen-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 14px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(174,104,255,0.18), rgba(255,63,216,0.18));
+    border: 1px solid rgba(226,156,255,0.4);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #E29CFF;
+    text-wrap: balance;
+  }
+
   .lede {
     text-align: center;
     font-size: 15px;
@@ -121,6 +136,7 @@
     z-index: 0;
     inset: 0;
     background:
+      url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDQwIiB2aWV3Qm94PSIwIDAgNDAwIDQ0MCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJyIiB4MT0iMCIgeTE9IjAiIHgyPSI0MDAiIHkyPSI0MDAiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNGRjNGRDgiLz48c3RvcCBvZmZzZXQ9IjAuNSIgc3RvcC1jb2xvcj0iI0FFNjhGRiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzdDM0FFRCIvPjwvbGluZWFyR3JhZGllbnQ+PHJhZGlhbEdyYWRpZW50IGlkPSJnIiBjeD0iMjAwIiBjeT0iMTUwIiByPSI1NSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI0YwQzZGRiIgc3RvcC1vcGFjaXR5PSIwLjM1Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjRjBDNkZGIiBzdG9wLW9wYWNpdHk9IjAiLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIxNTAiIHI9IjU1IiBmaWxsPSJ1cmwoI2cpIi8+PHBhdGggZD0iTTIwMCwxNTAgTDMyNCwxNDcgTDQxMiwxNDciIHN0cm9rZT0idXJsKCNyKSIgc3Ryb2tlLXdpZHRoPSIxLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIgb3BhY2l0eT0iMC4xNiIvPjxwYXRoIGQ9Ik0yMDAsMTUwIEwyOTMsMTk1IEw0MTAsMjYxIiBzdHJva2U9InVybCgjcikiIHN0cm9rZS13aWR0aD0iMS44IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiIG9wYWNpdHk9IjAuMjIiLz48cGF0aCBkPSJNMjkzLDE5NSBMMzA4LDI0OCIgc3Ryb2tlPSJ1cmwoI3IpIiBzdHJva2Utd2lkdGg9IjEuMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIiBvcGFjaXR5PSIwLjE3Ii8+PHBhdGggZD0iTTIwMCwxNTAgTDIzNywyMTAgTDI5OCwyODYiIHN0cm9rZT0idXJsKCNyKSIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIgb3BhY2l0eT0iMC4xNyIvPjxwYXRoIGQ9Ik0yMzcsMjEwIEwyMzcsMjYzIiBzdHJva2U9InVybCgjcikiIHN0cm9rZS13aWR0aD0iMC44IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiIG9wYWNpdHk9IjAuMTMiLz48cGF0aCBkPSJNMjAwLDE1MCBMMjM4LDIyNiBMMjQ5LDMxOSIgc3Ryb2tlPSJ1cmwoI3IpIiBzdHJva2Utd2lkdGg9IjEuNyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIiBvcGFjaXR5PSIwLjE5Ii8+PHBhdGggZD0iTTIwMCwxNTAgTDE1NSwyMTAgTDEyMiwyODgiIHN0cm9rZT0idXJsKCNyKSIgc3Ryb2tlLXdpZHRoPSIxLjAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIgb3BhY2l0eT0iMC4yMSIvPjxwYXRoIGQ9Ik0xNTUsMjEwIEwxMTgsMjM4IiBzdHJva2U9InVybCgjcikiIHN0cm9rZS13aWR0aD0iMC43IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiIG9wYWNpdHk9IjAuMTYiLz48cGF0aCBkPSJNMjAwLDE1MCBMMTIwLDIxNSBMLTExLDI3MiIgc3Ryb2tlPSJ1cmwoI3IpIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIiBvcGFjaXR5PSIwLjI2Ii8+PHBhdGggZD0iTTEyMCwyMTUgTDg2LDI2MiIgc3Ryb2tlPSJ1cmwoI3IpIiBzdHJva2Utd2lkdGg9IjEuMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIiBvcGFjaXR5PSIwLjIiLz48cGF0aCBkPSJNMjAwLDE1MCBMMTIxLDE1NyBMNDcsMTk1IiBzdHJva2U9InVybCgjcikiIHN0cm9rZS13aWR0aD0iMS4xIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiIG9wYWNpdHk9IjAuMTciLz48cGF0aCBkPSJNMTIxLDE1NyBMODEsMTU0IiBzdHJva2U9InVybCgjcikiIHN0cm9rZS13aWR0aD0iMC44IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiIG9wYWNpdHk9IjAuMTMiLz48cGF0aCBkPSJNMjAwLDE1MCBMMTE1LDExOCBMNSwxMDciIHN0cm9rZT0idXJsKCNyKSIgc3Ryb2tlLXdpZHRoPSIxLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIgb3BhY2l0eT0iMC4xNSIvPjxwYXRoIGQ9Ik0xMTUsMTE4IEw2OSw3OCIgc3Ryb2tlPSJ1cmwoI3IpIiBzdHJva2Utd2lkdGg9IjEuMSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIiBvcGFjaXR5PSIwLjExIi8+PHBhdGggZD0iTTIwMCwxNTAgTDEwNCw2MiBMNTksLTEzIiBzdHJva2U9InVybCgjcikiIHN0cm9rZS13aWR0aD0iMi4wIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiIG9wYWNpdHk9IjAuMjEiLz48cGF0aCBkPSJNMjAwLDE1MCBMMTQyLDg4IEwxMTksNSIgc3Ryb2tlPSJ1cmwoI3IpIiBzdHJva2Utd2lkdGg9IjEuOCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIiBvcGFjaXR5PSIwLjE5Ii8+PHBhdGggZD0iTTE0Miw4OCBMMTEzLDY4IiBzdHJva2U9InVybCgjcikiIHN0cm9rZS13aWR0aD0iMS4zIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiIG9wYWNpdHk9IjAuMTQiLz48cGF0aCBkPSJNMjAwLDE1MCBMMjExLDU0IEwyMjQsLTY3IiBzdHJva2U9InVybCgjcikiIHN0cm9rZS13aWR0aD0iMS4xIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiIG9wYWNpdHk9IjAuMTkiLz48cGF0aCBkPSJNMjAwLDE1MCBMMjU1LDc1IEwyODMsLTUiIHN0cm9rZT0idXJsKCNyKSIgc3Ryb2tlLXdpZHRoPSIxLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIgb3BhY2l0eT0iMC4yMSIvPjxwYXRoIGQ9Ik0yMDAsMTUwIEwyNjcsOTAgTDM3MSw0MSIgc3Ryb2tlPSJ1cmwoI3IpIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIiBvcGFjaXR5PSIwLjE3Ii8+PC9zdmc+") no-repeat 50% -6% / 128% auto,
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='340' viewBox='0 0 170 340'%3E%3Cdefs%3E%3ClinearGradient id='d' x1='0' y1='0' x2='0' y2='340' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23E29CFF'/%3E%3Cstop offset='1' stop-color='%23FF3FD8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M40,0 C40,42 130,42 130,85 C130,128 40,128 40,170 C40,212 130,212 130,255 C130,298 40,298 40,340' fill='none' stroke='url(%23d)' stroke-width='3' opacity='0.22'/%3E%3Cpath d='M130,0 C130,42 40,42 40,85 C40,128 130,128 130,170 C130,212 40,212 40,255 C40,298 130,298 130,340' fill='none' stroke='url(%23d)' stroke-width='3' opacity='0.22'/%3E%3Cg stroke='url(%23d)' stroke-width='1.8' opacity='0.16'%3E%3Cline x1='40' y1='0' x2='130' y2='0'/%3E%3Cline x1='40' y1='85' x2='130' y2='85'/%3E%3Cline x1='40' y1='170' x2='130' y2='170'/%3E%3Cline x1='40' y1='255' x2='130' y2='255'/%3E%3Cline x1='40' y1='340' x2='130' y2='340'/%3E%3C/g%3E%3C/svg%3E") no-repeat calc(100% + 30px) -20px / 190px 380px;
     pointer-events: none;
   }
@@ -189,14 +205,7 @@
     letter-spacing: 0.02em;
     font-variant-numeric: tabular-nums;
     color: rgba(255,255,255,0.96);
-    margin-bottom: 10px;
-  }
-  .glass-bio {
-    position: relative; z-index: 1;
-    font-size: 12.5px;
-    line-height: 1.4;
-    color: #E29CFF;
-    font-weight: 600;
+    text-align: center;
   }
   .stage .caption {
     position: relative; z-index: 1;
@@ -358,6 +367,7 @@
   <div class="zen-hero fade" style="animation-delay:.02s">
     <img class="zen-face" src="/zen-mascota-clean.png" alt="Zen">
     <h1>¡Hola! Soy <em>Zen</em> 👋</h1>
+    <p class="zen-role">🤖 Tu agente IA del equipo — cuentas claras, cero vueltas</p>
     <p class="lede">Te muestro en 4 pasitos cómo ver tu estado de cuenta de City FC.</p>
   </div>
 
@@ -377,7 +387,6 @@
       </div>
       <div class="glass-name">Zen · ZenSports</div>
       <div class="glass-number">+57 320 440 9015</div>
-      <p class="glass-bio">🤖 Tu agente IA del equipo — cuentas claras, cero vueltas</p>
     </div>
     <p class="tap-label">Presioná el botón de abajo y charlamos</p>
     <div class="wa-wrap">

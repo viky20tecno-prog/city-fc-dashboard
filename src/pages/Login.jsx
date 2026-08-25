@@ -6,6 +6,7 @@ import {
   ArrowLeft, ArrowRight, MessageCircle, Zap, BarChart2, Globe, Medal, Shield, AlertTriangle,
 } from 'lucide-react';
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
+import fondoLoginMovil from '../assets/brand/Fondo_Login_movil.webp';
 
 const WHATSAPP_SOPORTE = '573023903192';
 const SUPER_ADMIN_EMAILS = ['diego31escobar@gmail.com'];
@@ -428,39 +429,32 @@ export default function Login() {
         {/* ── PANEL DER: formulario ── */}
         <div className="login-panel-der" style={{ padding: '44px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
 
-          {/* Cabecera de marca — solo visible en mobile, donde se oculta el panel izq. */}
+          {/* Hero de marca con arte del club — solo visible en mobile, donde se oculta el panel izq. */}
           <div className="login-mobile-header" style={{
-            display: 'none', flexDirection: 'column', alignItems: 'center', gap: 4,
-            marginBottom: 8, position: 'relative',
+            display: 'none', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
+            marginLeft: -22, marginRight: -22, marginBottom: 20, marginTop: -28,
+            height: 320, position: 'relative', overflow: 'hidden',
+            backgroundImage: `url(${fondoLoginMovil})`,
+            backgroundSize: 'cover', backgroundPosition: 'center 32%',
           }}>
-            {/* Halo ambiente grande detrás del logo */}
+            {/* Funde la imagen hacia el fondo de la tarjeta, para que el wordmark sea legible */}
             <div style={{
-              position: 'absolute', top: -20, left: '50%', transform: 'translateX(-50%)',
-              width: 220, height: 220, borderRadius: '50%',
-              background: `radial-gradient(circle, ${color}40 0%, transparent 68%)`,
-              filter: 'blur(28px)', animation: 'blob-drift-3 9s ease-in-out infinite',
-              transition: 'background 0.7s', pointerEvents: 'none',
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(180deg, rgba(3,5,13,0.05) 0%, rgba(3,5,13,0.35) 62%, #060714 100%)',
             }} />
-            <div style={{ position: 'relative', width: 76, height: 76 }}>
-              <div style={{
-                position: 'absolute', inset: -14, borderRadius: '50%',
-                background: `radial-gradient(circle, ${color}55 0%, transparent 70%)`,
-                filter: 'blur(10px)', animation: 'pulse-glow 2.2s ease-in-out infinite',
-                transition: 'background 0.7s',
-              }} />
-              <ZenSportsLogo variant="zz" size={76} style={{ position: 'relative' }} />
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 16 }}>
+              <span style={{ fontFamily: "'Sport Event', sans-serif", fontSize: 26, letterSpacing: '0.1em', lineHeight: 1 }}>
+                <span style={{ color: '#fff' }}>ZEN</span><span style={{ color, transition: 'color 0.7s' }}>SPORTS</span>
+              </span>
+              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9.5, letterSpacing: '0.24em', color: 'var(--text-mut)', textTransform: 'uppercase', marginTop: 2 }}>
+                Gestión Deportiva Digital
+              </span>
             </div>
-            <span style={{ position: 'relative', fontFamily: "'Sport Event', sans-serif", fontSize: 27, letterSpacing: '0.1em', lineHeight: 1, marginTop: 6 }}>
-              <span style={{ color: '#fff' }}>ZEN</span><span style={{ color, transition: 'color 0.7s' }}>SPORTS</span>
-            </span>
-            <span style={{ position: 'relative', fontFamily: "'Space Grotesk', sans-serif", fontSize: 9.5, letterSpacing: '0.24em', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
-              Gestión Deportiva Digital
-            </span>
           </div>
 
           {/* Bienvenida grande — solo mobile, solo en la vista de login */}
           {vista === 'login' && (
-            <div className="login-mobile-welcome" style={{ display: 'none', marginBottom: 22, position: 'relative' }}>
+            <div className="login-mobile-welcome" style={{ display: 'none', marginBottom: 22, marginTop: -12, position: 'relative' }}>
               <h2 style={{ color: '#fff', fontSize: 30, fontWeight: 800, margin: 0, lineHeight: 1.15, letterSpacing: '-0.5px' }}>
                 Bienvenido
               </h2>

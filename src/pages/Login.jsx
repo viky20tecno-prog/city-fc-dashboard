@@ -40,8 +40,13 @@ const FEATURES = [
 export default function Login() {
   const navigate = useNavigate();
   const [colorIdx, setColorIdx]   = useState(0);
+  const [featureIdx, setFeatureIdx] = useState(0);
 
   useEffect(() => { document.title = 'ZenSports — Iniciar sesión'; }, []);
+  useEffect(() => {
+    const timer = setInterval(() => setFeatureIdx(i => (i + 1) % FEATURES.length), 2600);
+    return () => clearInterval(timer);
+  }, []);
   const [vista, setVista]         = useState('login');
   const [clubs, setClubs]           = useState([]);
   const [clubSearch, setClubSearch] = useState('');
@@ -416,15 +421,48 @@ export default function Login() {
         <div className="login-panel-der" style={{ padding: '44px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
 
           {/* Cabecera de marca — solo visible en mobile, donde se oculta el panel izq. */}
-          <div className="login-mobile-header" style={{ display: 'none', flexDirection: 'column', alignItems: 'center', gap: 3, marginBottom: 26 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-              <ZenSportsLogo variant="icon" size={34} />
-              <span style={{ fontFamily: "'Sport Event', sans-serif", fontSize: 24, letterSpacing: '0.1em', color: '#fff', lineHeight: 1 }}>
+          <div className="login-mobile-header" style={{
+            display: 'none', flexDirection: 'column', alignItems: 'center', gap: 10,
+            marginBottom: 26, padding: '22px 16px 18px', borderRadius: 18,
+            background: `linear-gradient(180deg, ${color}16, rgba(255,255,255,0.02))`,
+            border: `1px solid ${color}30`, position: 'relative',
+            transition: 'background 0.7s, border-color 0.7s',
+          }}>
+            {/* Halo ambiente detrás del logo */}
+            <div style={{
+              position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
+              width: 130, height: 130, borderRadius: '50%',
+              background: `radial-gradient(circle, ${color}38 0%, transparent 70%)`,
+              filter: 'blur(18px)', animation: 'blob-drift-3 9s ease-in-out infinite',
+              transition: 'background 0.7s', pointerEvents: 'none',
+            }} />
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 9 }}>
+              <div style={{ position: 'relative', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{
+                  position: 'absolute', inset: -8, borderRadius: '50%',
+                  background: `radial-gradient(circle, ${color}55 0%, transparent 70%)`,
+                  filter: 'blur(5px)', animation: 'pulse-glow 2.2s ease-in-out infinite',
+                  transition: 'background 0.7s',
+                }} />
+                <ZenSportsLogo variant="icon" size={36} />
+              </div>
+              <span style={{ fontFamily: "'Sport Event', sans-serif", fontSize: 25, letterSpacing: '0.1em', color: '#fff', lineHeight: 1 }}>
                 ZenSports
               </span>
             </div>
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: '0.2em', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
-              Gestión Deportiva Digital
+            <div style={{ position: 'relative', width: 72, height: 2, borderRadius: 2, overflow: 'hidden', background: 'rgba(255,255,255,0.08)' }}>
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
+                backgroundSize: '200% 100%', animation: 'shimmer-line 2.4s linear infinite',
+                transition: 'background-color 0.7s',
+              }} />
+            </div>
+            <span key={featureIdx} style={{
+              position: 'relative', fontSize: 11.5, fontWeight: 500, color: 'var(--text-sec)',
+              textAlign: 'center', minHeight: 14, animation: 'fade-in-up 0.4s ease',
+            }}>
+              {FEATURES[featureIdx].text}
             </span>
           </div>
 
@@ -778,6 +816,18 @@ export default function Login() {
         @keyframes spin {
           from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.5; transform: scale(0.9); }
+          50%      { opacity: 1;   transform: scale(1.18); }
+        }
+        @keyframes shimmer-line {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(3px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
         input::placeholder { color: #374151; }
         input:focus {

@@ -1,6 +1,5 @@
-import logoIcon     from '../../assets/brand/Logo_1.webp';
+import logoZDigital from '../../assets/brand/Z_Digital.webp';
 import logoFull     from '../../assets/brand/Logo_2.webp';
-import logoZZ       from '../../assets/brand/Logo_ZZ.webp';
 import logoDarkSvg  from '../../assets/brand/logo-dark.svg';
 import logoWhiteSvg from '../../assets/brand/logo-white.svg';
 import logoIconSvg  from '../../assets/brand/logo-icon.svg';
@@ -10,9 +9,9 @@ import logoIconSvg  from '../../assets/brand/logo-icon.svg';
  *
  * Props:
  *   variant  — 'full'   (Logo_2.png — wordmark, fondo blanco)
- *              'icon'   (Logo_1.png — isotipo, fondo blanco)
- *              'zz'     (Logo_ZZ.png — isotipo 3D violet, fondo negro → blend lighten para dark UI)
- *              'zz-full' (Logo_ZZ + wordmark ZENSPORTS en Clash Display, inline)
+ *              'icon'   (Z_Digital.png — isotipo 3D, alpha real, sirve en fondo claro u oscuro)
+ *              'zz'     (alias de 'icon' — mismo archivo, se mantiene por compatibilidad)
+ *              'zz-full' (Z_Digital + wordmark ZENSPORTS en Clash Display, inline)
  *              'white'  (SVG wordmark blanco, para dark BG)
  *              'dark'   (SVG wordmark oscuro, para light BG)
  *   size     — 'sm'(24px) | 'md'(32px) | 'lg'(44px) | 'xl'(56px) | número (px de altura)
@@ -23,7 +22,7 @@ export default function ZenSportsLogo({ variant = 'white', size = 'md', classNam
   const HEIGHTS = { sm: 24, md: 32, lg: 44, xl: 56 };
   const height = typeof size === 'number' ? size : (HEIGHTS[size] || HEIGHTS.md);
 
-  // Variante inline con Logo_ZZ + wordmark texto
+  // Variante inline con el isotipo + wordmark texto
   if (variant === 'zz-full') {
     return (
       <div
@@ -31,17 +30,11 @@ export default function ZenSportsLogo({ variant = 'white', size = 'md', classNam
         style={{ display: 'inline-flex', alignItems: 'center', gap: height * 0.3, ...style }}
       >
         <img
-          src={logoZZ}
+          src={logoZDigital}
           alt=""
           aria-hidden
           draggable={false}
-          style={{
-            height,
-            width: height,
-            objectFit: 'contain',
-            mixBlendMode: 'lighten',
-            flexShrink: 0,
-          }}
+          style={{ height, width: height, objectFit: 'contain', flexShrink: 0 }}
         />
         <span style={{
           fontFamily: "'Sport Event', 'Space Grotesk', sans-serif",
@@ -60,18 +53,15 @@ export default function ZenSportsLogo({ variant = 'white', size = 'md', classNam
 
   const SRC_MAP = {
     full:      logoFull,
-    icon:      logoIcon,
+    icon:      logoZDigital,
     'icon-svg': logoIconSvg,
-    zz:        logoZZ,
+    zz:        logoZDigital,
     dark:      logoDarkSvg,
     white:     logoWhiteSvg,
   };
 
   const src = SRC_MAP[variant] || logoWhiteSvg;
   const isSquare = variant === 'icon' || variant === 'zz' || variant === 'icon-svg';
-
-  // Logo_ZZ tiene fondo negro — mix-blend-mode: lighten lo hace transparente en dark UIs
-  const isZZ = variant === 'zz';
 
   return (
     <img
@@ -85,7 +75,6 @@ export default function ZenSportsLogo({ variant = 'white', size = 'md', classNam
         maxHeight: height,
         objectFit: 'contain',
         flexShrink: 0,
-        ...(isZZ ? { mixBlendMode: 'lighten' } : {}),
         ...style,
       }}
       draggable={false}

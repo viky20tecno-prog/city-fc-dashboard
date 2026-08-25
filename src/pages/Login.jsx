@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import {
   Loader2, Eye, EyeOff, Mail, Lock, CheckCircle, KeyRound,
-  ArrowLeft, MessageCircle, Zap, BarChart2, Globe, Medal, AlertTriangle,
+  ArrowLeft, ArrowRight, MessageCircle, Zap, BarChart2, Globe, Medal, Shield, AlertTriangle,
 } from 'lucide-react';
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 
@@ -37,16 +37,21 @@ const FEATURES = [
   { Icon: Medal,     text: 'Fútbol, basket, gimnasio y más' },
 ];
 
+// Versión corta (2 líneas) de los mismos features, para la grilla mobile
+const TRUST_FEATURES = [
+  { Icon: Shield,    title: 'Seguro',     sub: 'y confiable' },
+  { Icon: Zap,       title: 'Pagos',      sub: 'automáticos' },
+  { Icon: BarChart2, title: 'Dashboard',  sub: 'en tiempo real' },
+  { Icon: Globe,     title: 'Disponible', sub: 'en todo el mundo' },
+];
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function Login() {
   const navigate = useNavigate();
   const [colorIdx, setColorIdx]   = useState(0);
-  const [featureIdx, setFeatureIdx] = useState(0);
 
   useEffect(() => { document.title = 'ZenSports — Iniciar sesión'; }, []);
-  useEffect(() => {
-    const timer = setInterval(() => setFeatureIdx(i => (i + 1) % FEATURES.length), 2600);
-    return () => clearInterval(timer);
-  }, []);
   const [vista, setVista]         = useState('login');
   const [clubs, setClubs]           = useState([]);
   const [clubSearch, setClubSearch] = useState('');
@@ -300,7 +305,10 @@ export default function Login() {
           .login-divider     { display: none !important; }
           .login-card        { grid-template-columns: 1fr !important; min-height: auto !important; }
           .login-panel-der   { padding: 28px 22px !important; }
-          .login-mobile-header { display: flex !important; }
+          .login-mobile-header   { display: flex !important; }
+          .login-mobile-welcome  { display: block !important; }
+          .login-mobile-footer   { display: flex !important; }
+          .login-desktop-heading { display: none !important; }
         }
       `}</style>
 
@@ -422,49 +430,50 @@ export default function Login() {
 
           {/* Cabecera de marca — solo visible en mobile, donde se oculta el panel izq. */}
           <div className="login-mobile-header" style={{
-            display: 'none', flexDirection: 'column', alignItems: 'center', gap: 10,
-            marginBottom: 26, padding: '22px 16px 18px', borderRadius: 18,
-            background: `linear-gradient(180deg, ${color}16, rgba(255,255,255,0.02))`,
-            border: `1px solid ${color}30`, position: 'relative',
-            transition: 'background 0.7s, border-color 0.7s',
+            display: 'none', flexDirection: 'column', alignItems: 'center', gap: 4,
+            marginBottom: 8, position: 'relative',
           }}>
-            {/* Halo ambiente detrás del logo */}
+            {/* Halo ambiente grande detrás del logo */}
             <div style={{
-              position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
-              width: 130, height: 130, borderRadius: '50%',
-              background: `radial-gradient(circle, ${color}38 0%, transparent 70%)`,
-              filter: 'blur(18px)', animation: 'blob-drift-3 9s ease-in-out infinite',
+              position: 'absolute', top: -20, left: '50%', transform: 'translateX(-50%)',
+              width: 220, height: 220, borderRadius: '50%',
+              background: `radial-gradient(circle, ${color}40 0%, transparent 68%)`,
+              filter: 'blur(28px)', animation: 'blob-drift-3 9s ease-in-out infinite',
               transition: 'background 0.7s', pointerEvents: 'none',
             }} />
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 9 }}>
-              <div style={{ position: 'relative', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{
-                  position: 'absolute', inset: -8, borderRadius: '50%',
-                  background: `radial-gradient(circle, ${color}55 0%, transparent 70%)`,
-                  filter: 'blur(5px)', animation: 'pulse-glow 2.2s ease-in-out infinite',
-                  transition: 'background 0.7s',
-                }} />
-                <ZenSportsLogo variant="icon" size={36} />
-              </div>
-              <span style={{ fontFamily: "'Sport Event', sans-serif", fontSize: 25, letterSpacing: '0.1em', color: '#fff', lineHeight: 1 }}>
-                ZenSports
-              </span>
-            </div>
-            <div style={{ position: 'relative', width: 72, height: 2, borderRadius: 2, overflow: 'hidden', background: 'rgba(255,255,255,0.08)' }}>
+            <div style={{ position: 'relative', width: 76, height: 76 }}>
               <div style={{
-                position: 'absolute', inset: 0,
-                background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
-                backgroundSize: '200% 100%', animation: 'shimmer-line 2.4s linear infinite',
-                transition: 'background-color 0.7s',
+                position: 'absolute', inset: -14, borderRadius: '50%',
+                background: `radial-gradient(circle, ${color}55 0%, transparent 70%)`,
+                filter: 'blur(10px)', animation: 'pulse-glow 2.2s ease-in-out infinite',
+                transition: 'background 0.7s',
               }} />
+              <ZenSportsLogo variant="zz" size={76} style={{ position: 'relative' }} />
             </div>
-            <span key={featureIdx} style={{
-              position: 'relative', fontSize: 11.5, fontWeight: 500, color: 'var(--text-sec)',
-              textAlign: 'center', minHeight: 14, animation: 'fade-in-up 0.4s ease',
-            }}>
-              {FEATURES[featureIdx].text}
+            <span style={{ position: 'relative', fontFamily: "'Sport Event', sans-serif", fontSize: 27, letterSpacing: '0.1em', lineHeight: 1, marginTop: 6 }}>
+              <span style={{ color: '#fff' }}>ZEN</span><span style={{ color, transition: 'color 0.7s' }}>SPORTS</span>
+            </span>
+            <span style={{ position: 'relative', fontFamily: "'Space Grotesk', sans-serif", fontSize: 9.5, letterSpacing: '0.24em', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
+              Gestión Deportiva Digital
             </span>
           </div>
+
+          {/* Bienvenida grande — solo mobile, solo en la vista de login */}
+          {vista === 'login' && (
+            <div className="login-mobile-welcome" style={{ display: 'none', marginBottom: 22, position: 'relative' }}>
+              <h2 style={{ color: '#fff', fontSize: 30, fontWeight: 800, margin: 0, lineHeight: 1.15, letterSpacing: '-0.5px' }}>
+                Bienvenido
+              </h2>
+              <h2 style={{ color, fontSize: 30, fontWeight: 800, margin: '0 0 4px', lineHeight: 1.15, letterSpacing: '-0.5px', transition: 'color 0.7s' }}>
+                a tu club
+              </h2>
+              <div style={{ width: 46, height: 3, borderRadius: 2, background: color, marginBottom: 12, transition: 'background 0.7s' }} />
+              <p style={{ color: 'var(--text-sec)', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+                Inicia sesión para gestionar tu club, jugadores, equipos y{' '}
+                <strong style={{ color, fontWeight: 700, transition: 'color 0.7s' }}>mucho más</strong>.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div style={{
@@ -480,13 +489,28 @@ export default function Login() {
           {/* ══ LOGIN ══ */}
           {vista === 'login' && (
             <>
-              <h3 style={{ color: '#fff', fontSize: 22, fontWeight: 800, margin: '0 0 4px' }}>Iniciar Sesión</h3>
-              <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: '0 0 26px' }}>Accede a tu club deportivo</p>
+              <div className="login-desktop-heading">
+                <h3 style={{ color: '#fff', fontSize: 22, fontWeight: 800, margin: '0 0 4px' }}>Iniciar Sesión</h3>
+                <p style={{ color: 'var(--text-sec)', fontSize: 13, margin: '0 0 26px' }}>Accede a tu club deportivo</p>
+              </div>
 
               <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <Campo label="Email" icon={<Mail size={15} color="var(--text-sec)" />}
-                  type="email" value={email} onChange={setEmail}
-                  placeholder="tu@email.com" autoComplete="email" required />
+                <div>
+                  <label style={lbl}>Email</label>
+                  <div style={{ position: 'relative' }}>
+                    <span style={icoL}><Mail size={15} color="var(--text-sec)" /></span>
+                    <input
+                      type="email" value={email} onChange={e => setEmail(e.target.value)}
+                      placeholder="tu@email.com" autoComplete="email" required
+                      style={{ ...inp, paddingRight: EMAIL_RE.test(email) ? 44 : 16 }}
+                    />
+                    {EMAIL_RE.test(email) && (
+                      <span style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', display: 'flex' }}>
+                        <CheckCircle size={16} color={color} style={{ transition: 'color 0.7s' }} />
+                      </span>
+                    )}
+                  </div>
+                </div>
 
                 <div>
                   <label style={lbl}>Contraseña</label>
@@ -521,7 +545,7 @@ export default function Login() {
                 <button type="submit" disabled={loading} style={btn(BTN_COLOR, loading)}>
                   {loading
                     ? <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Ingresando...</>
-                    : 'Ingresar al Club'}
+                    : <>Ingresar al Club <ArrowRight size={16} /></>}
                 </button>
               </form>
 
@@ -566,6 +590,29 @@ export default function Login() {
                   Regístrate aquí
                 </button>
               </p>
+
+              {/* Grilla de confianza + footer — solo mobile */}
+              <div className="login-mobile-footer" style={{ display: 'none', flexDirection: 'column', gap: 16, marginTop: 26 }}>
+                <div style={{
+                  display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14,
+                  padding: '18px 16px', borderRadius: 16,
+                  background: `${color}0C`, border: `1px solid ${color}25`,
+                  transition: 'background 0.7s, border-color 0.7s',
+                }}>
+                  {TRUST_FEATURES.map(f => (
+                    <div key={f.title} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textAlign: 'center' }}>
+                      <f.Icon size={20} color={color} strokeWidth={1.8} style={{ transition: 'color 0.7s' }} />
+                      <div>
+                        <p style={{ color: '#fff', fontSize: 12.5, fontWeight: 700, margin: 0, lineHeight: 1.3 }}>{f.title}</p>
+                        <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0, lineHeight: 1.3 }}>{f.sub}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: 'var(--text-mut)', fontSize: 11, margin: 0, textAlign: 'center' }}>
+                  <Lock size={11} /> Tus datos están protegidos con encriptación de nivel bancario.
+                </p>
+              </div>
             </>
           )}
 
@@ -821,14 +868,6 @@ export default function Login() {
           0%, 100% { opacity: 0.5; transform: scale(0.9); }
           50%      { opacity: 1;   transform: scale(1.18); }
         }
-        @keyframes shimmer-line {
-          0%   { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-        @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(3px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
         input::placeholder { color: #374151; }
         input:focus {
           outline: none;
@@ -885,7 +924,7 @@ const inp = {
 
 const btn = (color, disabled) => ({
   width: '100%', padding: '13px',
-  background: disabled ? 'rgba(255,255,255,0.07)' : color,
+  background: disabled ? 'rgba(255,255,255,0.07)' : `linear-gradient(135deg, ${color}, ${color}CC)`,
   border: 'none', borderRadius: 12,
   color: '#fff', fontSize: 15, fontWeight: 700,
   cursor: disabled ? 'not-allowed' : 'pointer',

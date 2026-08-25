@@ -128,6 +128,7 @@ export default function FormInscripcion() {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [photoDragging, setPhotoDragging] = useState(false);
   const [savedForm, setSavedForm]     = useState(null);
+  const [photoUploadFailed, setPhotoUploadFailed] = useState(false);
   const [aceptaPrivacidad, setAceptaPrivacidad] = useState(false);
   const [showPolitica, setShowPolitica]         = useState(false);
   const photoInputRef = useRef(null);
@@ -214,6 +215,7 @@ export default function FormInscripcion() {
     }
 
     let foto_url = null;
+    let fotoFailed = false;
     if (photoFile) {
       try {
         const ext  = photoFile.name.split('.').pop();
@@ -224,9 +226,18 @@ export default function FormInscripcion() {
         if (!upErr) {
           const { data: urlData } = supabase.storage.from('player-photos').getPublicUrl(path);
           foto_url = urlData?.publicUrl || null;
+        } else {
+          fotoFailed = true;
+          console.error('[FormInscripcion] Error subiendo foto:', upErr.message);
         }
-      } catch { /* foto no crítica — seguimos sin ella */ }
+      } catch (e) {
+        // La inscripción no debe bloquearse por esto — el jugador puede agregar
+        // la foto después desde su Hoja de Vida — pero sí queda visible el aviso.
+        fotoFailed = true;
+        console.error('[FormInscripcion] Error subiendo foto:', e.message);
+      }
     }
+    setPhotoUploadFailed(fotoFailed);
 
     const up = v => typeof v === 'string' ? v.trim().toUpperCase() : v;
 
@@ -390,6 +401,14 @@ export default function FormInscripcion() {
               </div>
             ))}
           </div>
+          {photoUploadFailed && (
+            <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 12, padding: '12px 16px', textAlign: 'left', marginBottom: 20, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <AlertCircle size={16} color="#F59E0B" style={{ flexShrink: 0, marginTop: 1 }} />
+              <span style={{ color: 'var(--text-sec)', fontSize: 12.5, lineHeight: 1.5 }}>
+                Tu registro quedó guardado, pero no pudimos subir tu foto. Puedes agregarla más tarde desde tu Hoja de Vida.
+              </span>
+            </div>
+          )}
           {/* Redes sociales del club */}
           {(() => {
             const rs = clubConfig?.redes_sociales || {};

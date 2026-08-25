@@ -150,7 +150,8 @@ function EmptyDashboard() {
 }
 
 /* ── componente principal ── */
-export default function DashboardOverview({ jugadores, mensualidades, morosos, suspensiones = [], codigoPais = '57', color = '#60A5FA', clubNombre = 'Mi Club', logoUrl = '' }) {
+export default function DashboardOverview({ jugadores, mensualidades, morosos, suspensiones = [], valorMensualidad = 0, codigoPais = '57', color = '#60A5FA', clubNombre = 'Mi Club', logoUrl = '' }) {
+  const mensualidadConfigurada = Number(valorMensualidad) > 0;
   const mesActual  = new Date().getMonth() + 1;
   const anioActual = new Date().getFullYear();
 
@@ -191,6 +192,11 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
   const { stats, alDiaList } = useMemo(() => {
     let alDia = 0, pendientes = 0, parciales = 0, mora = 0;
     const alDiaArr = [];
+    // Sin valor_mensualidad configurado no hay deuda real que reportar — no marcar
+    // a nadie como pendiente/mora/al día hasta que el club configure el cobro.
+    if (!mensualidadConfigurada) {
+      return { stats: { alDia: 0, pendientes: 0, parciales: 0, mora: 0, recaudado: 0, totalEsperado: 0, pct: 0 }, alDiaList: [] };
+    }
     activos.forEach(j => {
       const ced = String(j.cedula);
       if (esSuspendido(ced, mesActual)) {
@@ -218,9 +224,10 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
     }, 0);
     const pct = activos.length > 0 ? Math.round((alDia / activos.length) * 100) : 0;
     return { stats: { alDia, pendientes, parciales, mora, recaudado, totalEsperado, pct }, alDiaList: alDiaArr };
-  }, [activos, morososSet, mensualidades, mesActual, anioActual, esSuspendido]);
+  }, [activos, morososSet, mensualidades, mesActual, anioActual, esSuspendido, mensualidadConfigurada]);
 
   const pendientesList = useMemo(() => {
+    if (!mensualidadConfigurada) return [];
     return activos
       .map(j => {
         const ced = String(j.cedula);
@@ -245,7 +252,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
       })
       .filter(Boolean)
       .sort((a, b) => b.saldo - a.saldo);
-  }, [activos, morososSet, mensualidades, mesActual, anioActual, esSuspendido]);
+  }, [activos, morososSet, mensualidades, mesActual, anioActual, esSuspendido, mensualidadConfigurada]);
 
   // Conteo de morosos que también tienen cuota del mes sin pagar (info para el admin)
   const morososConCuotaMes = useMemo(() => {

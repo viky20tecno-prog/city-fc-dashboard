@@ -291,10 +291,11 @@ export default function Login() {
 
       <style>{`
         @media (max-width: 640px) {
-          .login-panel-izq { display: none !important; }
-          .login-divider    { display: none !important; }
-          .login-card       { grid-template-columns: 1fr !important; }
-          .login-panel-der  { padding: 32px 20px !important; }
+          .login-panel-izq   { display: none !important; }
+          .login-divider     { display: none !important; }
+          .login-card        { grid-template-columns: 1fr !important; min-height: auto !important; }
+          .login-panel-der   { padding: 28px 22px !important; }
+          .login-mobile-header { display: flex !important; }
         }
       `}</style>
 
@@ -413,6 +414,19 @@ export default function Login() {
 
         {/* ── PANEL DER: formulario ── */}
         <div className="login-panel-der" style={{ padding: '44px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+
+          {/* Cabecera de marca — solo visible en mobile, donde se oculta el panel izq. */}
+          <div className="login-mobile-header" style={{ display: 'none', flexDirection: 'column', alignItems: 'center', gap: 3, marginBottom: 26 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+              <ZenSportsLogo variant="icon" size={34} />
+              <span style={{ fontFamily: "'Sport Event', sans-serif", fontSize: 24, letterSpacing: '0.1em', color: '#fff', lineHeight: 1 }}>
+                ZenSports
+              </span>
+            </div>
+            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, letterSpacing: '0.2em', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
+              Gestión Deportiva Digital
+            </span>
+          </div>
 
           {error && (
             <div style={{

@@ -305,7 +305,7 @@ export default function Login() {
           .login-panel-izq   { display: none !important; }
           .login-divider     { display: none !important; }
           .login-card        { grid-template-columns: 1fr !important; min-height: auto !important; }
-          .login-panel-der   { padding: 28px 22px !important; }
+          .login-panel-der   { padding: 28px 22px !important; min-width: 0 !important; }
           .login-mobile-header   { display: flex !important; }
           .login-mobile-welcome  { display: block !important; }
           .login-mobile-footer   { display: flex !important; }
@@ -588,20 +588,26 @@ export default function Login() {
               {/* Grilla de confianza + footer — solo mobile */}
               <div className="login-mobile-footer" style={{ display: 'none', flexDirection: 'column', gap: 16, marginTop: 26 }}>
                 <div style={{
-                  display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14,
-                  padding: '18px 16px', borderRadius: 16,
-                  background: `${color}0C`, border: `1px solid ${color}25`,
+                  position: 'relative', overflow: 'hidden', borderRadius: 16, minWidth: 0,
+                  padding: '16px 0', background: `${color}0C`, border: `1px solid ${color}25`,
                   transition: 'background 0.7s, border-color 0.7s',
+                  WebkitMaskImage: 'linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent)',
+                  maskImage: 'linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent)',
                 }}>
-                  {TRUST_FEATURES.map(f => (
-                    <div key={f.title} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textAlign: 'center' }}>
-                      <f.Icon size={20} color={color} strokeWidth={1.8} style={{ transition: 'color 0.7s' }} />
-                      <div>
-                        <p style={{ color: '#fff', fontSize: 12.5, fontWeight: 700, margin: 0, lineHeight: 1.3 }}>{f.title}</p>
-                        <p style={{ color: 'var(--text-mut)', fontSize: 11, margin: 0, lineHeight: 1.3 }}>{f.sub}</p>
+                  <div style={{ display: 'flex', width: 'max-content', animation: 'marquee-scroll 16s linear infinite' }}>
+                    {[...TRUST_FEATURES, ...TRUST_FEATURES].map((f, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 24, flexShrink: 0, paddingLeft: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <f.Icon size={17} color={color} strokeWidth={1.8} style={{ transition: 'color 0.7s', flexShrink: 0 }} />
+                          <span style={{ whiteSpace: 'nowrap', fontSize: 12.5 }}>
+                            <strong style={{ color: '#fff', fontWeight: 700 }}>{f.title}</strong>{' '}
+                            <span style={{ color: 'var(--text-mut)' }}>{f.sub}</span>
+                          </span>
+                        </div>
+                        <span style={{ width: 4, height: 4, borderRadius: '50%', background: `${color}70`, flexShrink: 0, transition: 'background 0.7s' }} />
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
                 <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: 'var(--text-mut)', fontSize: 11, margin: 0, textAlign: 'center' }}>
                   <Lock size={11} /> Tus datos están protegidos con encriptación de nivel bancario.
@@ -861,6 +867,10 @@ export default function Login() {
         @keyframes pulse-glow {
           0%, 100% { opacity: 0.5; transform: scale(0.9); }
           50%      { opacity: 1;   transform: scale(1.18); }
+        }
+        @keyframes marquee-scroll {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
         }
         input::placeholder { color: #374151; }
         input:focus {

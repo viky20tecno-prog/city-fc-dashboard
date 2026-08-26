@@ -20,22 +20,25 @@ const COLORS = {
   gold:   { icon: '#B68631', bg: 'rgba(182,134,49,0.08)',   border: 'rgba(182,134,49,0.2)',   glow: 'rgba(182,134,49,0.12)'   },
 };
 
-function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, delay = 0, wide, onClick, active, isMobile }) {
+function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, delay = 0, wide, onClick, active, isMobile, isLaptop }) {
   const c = colorObj || COLORS[color];
-  const pad    = isMobile ? '12px' : '20px';
-  const gap    = isMobile ? '10px' : '16px';
-  const icoSz  = isMobile ? 34 : 48;
+  // 3 tamaños, no 2 — con 3 tarjetas por fila en laptop (en vez de las 6 que
+  // caben en un monitor grande) el tamaño "desktop" completo se sentía igual
+  // de pesado que antes, aunque ya no se desbordara.
+  const pad    = isMobile ? '12px' : isLaptop ? '15px' : '20px';
+  const gap    = isMobile ? '10px' : isLaptop ? '12px' : '16px';
+  const icoSz  = isMobile ? 34 : isLaptop ? 38 : 48;
   const icoR   = isMobile ? '8px' : '12px';
-  const iconSz = isMobile ? 15 : 22;
-  const lblSz  = isMobile ? '9px' : '11px';
-  const subSz  = isMobile ? '9px' : '11px';
+  const iconSz = isMobile ? 15 : isLaptop ? 18 : 22;
+  const lblSz  = isMobile ? '9px' : isLaptop ? '10px' : '11px';
+  const subSz  = isMobile ? '9px' : isLaptop ? '10px' : '11px';
   // Reducir fuente si el valor es largo (montos formateados, ej: "$ 8.710.000")
   const valLen = String(value).replace(/\s/g, '').length;
   const numSz  = valLen > 9
-    ? (isMobile ? '15px' : '20px')
+    ? (isMobile ? '15px' : isLaptop ? '17px' : '20px')
     : valLen > 6
-      ? (isMobile ? '18px' : '28px')
-      : (isMobile ? '24px' : '38px');
+      ? (isMobile ? '18px' : isLaptop ? '22px' : '28px')
+      : (isMobile ? '24px' : isLaptop ? '28px' : '38px');
   return (
     <div
       onClick={onClick}
@@ -300,14 +303,14 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
         gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : isLaptop ? 'repeat(3, 1fr)' : 'repeat(3, 1fr) repeat(3, 1fr)',
         gap: '10px',
       }}>
-        <KpiCard icon={Users}         label="Jugadores"  value={activos.length}   sub="Activos"                  colorObj={clubColor} delay={0.05} isMobile={isMobile} />
-        <KpiCard icon={CheckCircle}   label="Al Día"     value={stats.alDia}      sub={`${stats.pct}%`}          color="green"  delay={0.10} isMobile={isMobile}
+        <KpiCard icon={Users}         label="Jugadores"  value={activos.length}   sub="Activos"                  colorObj={clubColor} delay={0.05} isMobile={isMobile} isLaptop={isLaptop} />
+        <KpiCard icon={CheckCircle}   label="Al Día"     value={stats.alDia}      sub={`${stats.pct}%`}          color="green"  delay={0.10} isMobile={isMobile} isLaptop={isLaptop}
           onClick={() => kpiToggle('aldia')} active={activeKpi === 'aldia'} />
-        <KpiCard icon={Clock}         label="Pendientes" value={stats.pendientes} sub="Por cobrar"               color="yellow" delay={0.15} isMobile={isMobile}
+        <KpiCard icon={Clock}         label="Pendientes" value={stats.pendientes} sub="Por cobrar"               color="yellow" delay={0.15} isMobile={isMobile} isLaptop={isLaptop}
           onClick={() => kpiToggle('pendientes')} active={activeKpi === 'pendientes'} />
-        <KpiCard icon={XCircle}       label="En Mora"    value={stats.mora}       sub={`${stats.mora} jugadores`} color="red"   delay={0.20} isMobile={isMobile}
+        <KpiCard icon={XCircle}       label="En Mora"    value={stats.mora}       sub={`${stats.mora} jugadores`} color="red"   delay={0.20} isMobile={isMobile} isLaptop={isLaptop}
           onClick={() => kpiToggle('mora')} active={activeKpi === 'mora'} />
-        <KpiCard icon={AlertTriangle} label="Parciales"  value={stats.parciales}  sub="Abonos"                   color="purple" delay={0.25} isMobile={isMobile}
+        <KpiCard icon={AlertTriangle} label="Parciales"  value={stats.parciales}  sub="Abonos"                   color="purple" delay={0.25} isMobile={isMobile} isLaptop={isLaptop}
           onClick={() => kpiToggle('parciales')} active={activeKpi === 'parciales'} />
         <KpiCard
           icon={DollarSign}
@@ -316,7 +319,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
           sub={`de ${formatCOP(stats.totalEsperado)}`}
           color="gold"
           delay={0.30}
-          isMobile={isMobile}
+          isMobile={isMobile} isLaptop={isLaptop}
         />
       </div>
 

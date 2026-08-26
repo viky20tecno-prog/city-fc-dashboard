@@ -320,7 +320,9 @@ export default function Dashboard() {
     main: {
       gridColumn: isMobile ? '1' : '2',
       gridRow: isMobile ? '2' : '2',
+      minWidth: 0,
       overflowY: 'auto',
+      overflowX: 'hidden',
       padding: isMobile ? '12px 12px 16px' : '16px 18px 24px',
       background: 'var(--bg-app)',
       scrollbarWidth: 'thin',

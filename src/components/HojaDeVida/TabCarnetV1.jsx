@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import QRCodeLib from 'qrcode';
 import { getClubId } from '../../services/api';
-import { temaCarnet } from '../../lib/carnetFondos';
+import { temaCarnet, textoSobre } from '../../lib/carnetFondos';
 
 function esc(str) {
   if (str === null || str === undefined) return '';
@@ -116,6 +116,10 @@ export default function TabCarnetV1({ jugador, clubConfig = {} }) {
   // en el wizard "Configura tu club" y aplica igual a todos, ver lib/carnetFondos.js.
   const th = temaCarnet(clubConfig?.carnet_fondo || 'onyx', clubColor);
   const dark = th.dark;
+  // Las barras con fondo sólido clubColor necesitan texto claro u oscuro según
+  // qué tan claro sea el color del club — blanco fijo se vuelve ilegible con
+  // colores claros como un verde lima (caso real: club Cancheroapp).
+  const barText = textoSobre(clubColor);
 
   const verifyBase = typeof window !== 'undefined' ? window.location.origin : 'https://zensports.zenpra.ai';
   const verifyParams = new URLSearchParams({
@@ -282,9 +286,9 @@ export default function TabCarnetV1({ jugador, clubConfig = {} }) {
             </div>
           </div>
           <div style={{ marginTop: '14px', background: clubColor, padding: '9px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.82)', letterSpacing: '1px' }}>CC {jugador.cedula || '—'}</div>
-            <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.82)', letterSpacing: '1.5px', textTransform: 'uppercase', fontWeight: 600 }}>{clubNombre}</div>
-            <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.82)', letterSpacing: '1px' }}>{new Date().getFullYear()}</div>
+            <div style={{ fontSize: '8px', color: barText, letterSpacing: '1px' }}>CC {jugador.cedula || '—'}</div>
+            <div style={{ fontSize: '8px', color: barText, letterSpacing: '1.5px', textTransform: 'uppercase', fontWeight: 600 }}>{clubNombre}</div>
+            <div style={{ fontSize: '8px', color: barText, letterSpacing: '1px' }}>{new Date().getFullYear()}</div>
           </div>
         </div>
       </div>
@@ -342,15 +346,18 @@ export default function TabCarnetV1({ jugador, clubConfig = {} }) {
           )}
 
           {clubSub && (
+            // whiteSpace:nowrap + ellipsis — un subtítulo largo (ej. "Donde nace
+            // el futbol amateur en Colombia") envolvía a 2 líneas y la segunda
+            // quedaba tapada por el brillo decorativo del fondo, pegado al pie.
             <div style={{ padding: redesEntries.length > 0 ? '0 16px 7px' : '7px 16px', textAlign: 'center' }}>
-              <div style={{ fontSize: '8px', color: th.textMut, letterSpacing: '2px', textTransform: 'uppercase', fontStyle: 'italic' }}>
+              <div style={{ fontSize: '8px', color: th.textMut, letterSpacing: '2px', textTransform: 'uppercase', fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 "{clubSub}"
               </div>
             </div>
           )}
 
           <div style={{ background: clubColor, padding: '6px 16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div style={{ fontSize: '7px', color: 'rgba(255,255,255,0.85)', letterSpacing: '2px', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '7px', color: barText, letterSpacing: '2px', textTransform: 'uppercase' }}>
               {clubNombre} · TEMPORADA {new Date().getFullYear()}
             </div>
           </div>

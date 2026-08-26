@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import QRCodeLib from 'qrcode';
 import { getClubId } from '../../services/api';
-import { temaCarnetV2 as temaCarnet, WATERMARK_LOGO_STYLE } from '../../lib/carnetFondos';
+import { temaCarnetV2 as temaCarnet, WATERMARK_LOGO_STYLE, textoSobre } from '../../lib/carnetFondos';
 
 function esc(str) {
   if (str === null || str === undefined) return '';
@@ -152,6 +152,13 @@ export default function TabCarnetV2({ jugador, clubConfig = {} }) {
   // Identidad visual del carnet: un solo diseño (rayas + halftone + escudo
   // fantasma), siempre derivado del color del club — ver lib/carnetFondos.js.
   const th = temaCarnet(clubColor);
+  // La barra ID/EQUIPO/VÁLIDO va con fondo sólido clubColor — blanco fijo se
+  // vuelve ilegible con colores claros como un verde lima (caso real: club
+  // Cancheroapp). Ver TabCarnetV1.jsx para el mismo arreglo.
+  const barText = textoSobre(clubColor);
+  const barTextDim = barText === '#FFFFFF' ? 'rgba(255,255,255,0.85)' : 'rgba(20,20,20,0.75)';
+  const barTextMut = barText === '#FFFFFF' ? 'rgba(255,255,255,0.7)'  : 'rgba(20,20,20,0.6)';
+  const barDivider = barText === '#FFFFFF' ? 'rgba(255,255,255,0.28)' : 'rgba(20,20,20,0.2)';
 
   const verifyBase = typeof window !== 'undefined' ? window.location.origin : 'https://zensports.zenpra.ai';
   const verifyParams = new URLSearchParams({
@@ -330,13 +337,13 @@ export default function TabCarnetV2({ jugador, clubConfig = {} }) {
             ].map((col, i) => (
               <div key={col.label} style={{
                 flex: 1, padding: '10px 8px', display: 'flex', alignItems: 'center', gap: '5px',
-                borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.28)' : 'none',
+                borderLeft: i > 0 ? `1px solid ${barDivider}` : 'none',
                 minWidth: 0,
               }}>
-                <col.Icon size={11} color="rgba(255,255,255,0.85)" strokeWidth={2.2} style={{ flexShrink: 0 }} />
+                <col.Icon size={11} color={barTextDim} strokeWidth={2.2} style={{ flexShrink: 0 }} />
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: '5.5px', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{col.label}</div>
-                  <div style={{ fontSize: '8.5px', color: '#fff', fontWeight: 700, letterSpacing: '0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{col.value}</div>
+                  <div style={{ fontSize: '5.5px', color: barTextMut, letterSpacing: '0.5px', textTransform: 'uppercase' }}>{col.label}</div>
+                  <div style={{ fontSize: '8.5px', color: barText, fontWeight: 700, letterSpacing: '0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{col.value}</div>
                 </div>
               </div>
             ))}
@@ -408,7 +415,7 @@ export default function TabCarnetV2({ jugador, clubConfig = {} }) {
 
           {clubSub && (
             <div style={{ position: 'relative', zIndex: 1, padding: redesEntries.length > 0 ? '0 16px 7px' : '0 16px 7px', textAlign: 'center' }}>
-              <div style={{ fontSize: '8px', color: th.textMut, letterSpacing: '2px', textTransform: 'uppercase', fontStyle: 'italic' }}>
+              <div style={{ fontSize: '8px', color: th.textMut, letterSpacing: '2px', textTransform: 'uppercase', fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 "{clubSub}"
               </div>
             </div>

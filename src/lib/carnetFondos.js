@@ -79,6 +79,23 @@ export function getFondoCarnet(key) {
   return CARNET_FONDOS.find(f => f.key === key) || CARNET_FONDOS[0];
 }
 
+// Las barras del carnet (footer, columnas de datos) van con fondo sólido
+// `clubColor` y texto blanco fijo — se ve bien con colores oscuros/saturados
+// (rojos, azules, morados), pero con un color claro como un verde lima
+// (#84CC16, caso real: club Cancheroapp) el texto blanco queda casi
+// ilegible. Esta función elige blanco o casi-negro según la luminancia real
+// del color, para que el texto siempre se lea sin importar el color del club.
+export function textoSobre(hexColor) {
+  const hex = (hexColor || '').replace('#', '');
+  if (hex.length !== 6) return '#FFFFFF';
+  const r = parseInt(hex.slice(0, 2), 16) / 255;
+  const g = parseInt(hex.slice(2, 4), 16) / 255;
+  const b = parseInt(hex.slice(4, 6), 16) / 255;
+  const lin = (c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  const luminancia = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  return luminancia > 0.5 ? '#141414' : '#FFFFFF';
+}
+
 // Deriva la paleta completa (fondo + colores de texto/bordes) para un fondo + color
 // de club dados. `dark` decide si el texto es claro sobre oscuro o al revés.
 export function temaCarnet(fondoKey, clubColor) {

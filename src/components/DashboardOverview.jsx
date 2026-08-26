@@ -83,7 +83,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'blue', colorObj, dela
         <div style={{ fontSize: lblSz, letterSpacing: isMobile ? '0.8px' : '1.5px', textTransform: 'uppercase', color: 'var(--text-mut)', marginBottom: isMobile ? '3px' : '6px', fontWeight: 500 }}>
           {label}
         </div>
-        <div style={{ fontFamily: "'Sport Event', cursive", fontSize: numSz, lineHeight: 1, color: 'var(--text-pri)', letterSpacing: '1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 700, fontSize: numSz, lineHeight: 1, color: 'var(--text-pri)', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {value}
         </div>
         {sub != null && (
@@ -131,7 +131,7 @@ function EmptyDashboard() {
       <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--cc12)', border: '1px solid var(--cc20)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Users size={32} color="var(--cc)" strokeWidth={1.3} />
       </div>
-      <div style={{ fontFamily: "'Sport Event', cursive", fontSize: '26px', letterSpacing: '2px', color: 'var(--text-sec)' }}>
+      <div style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 700, fontSize: '26px', letterSpacing: '-0.3px', color: 'var(--text-sec)' }}>
         Sin jugadores registrados
       </div>
       <div style={{ color: 'var(--text-mut)', fontSize: '14px', lineHeight: 1.7, maxWidth: 320 }}>

@@ -284,9 +284,12 @@
   --text:         var(--text-pri);
   --muted:        var(--text-sec);
   --border-dim:   var(--border-sub);
-  --font-display: 'Sport Event', 'Space Grotesk', system-ui, sans-serif;
-  --font-body:    'Space Grotesk', 'Inter', system-ui, sans-serif;
-  --font-brand:   'Sport Event', 'Space Grotesk', system-ui, sans-serif;
+  /* Brand Book v1.0 (26 ago): Exo 2 = impacto (hero/H1/H2/H3/metrics),
+     Inter = claridad (body/UI). Sport Event queda reservado solo para el
+     wordmark "ZenSports" — no es un heading genérico. */
+  --font-display: 'Exo 2', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-brand:   'Sport Event', 'Inter', system-ui, sans-serif;
   --text-primary: var(--text-pri);
   --text-muted:   var(--text-sec);
   --yellow:       #F59E0B;

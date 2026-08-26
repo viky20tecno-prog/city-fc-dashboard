@@ -351,10 +351,10 @@ export default function RegistroClub() {
 
           <div style={{ marginBottom: 28, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
             <ZenSportsLogo variant="icon" size={100} />
-            <span style={{ fontFamily: "'Sport Event', sans-serif", fontSize: 42, letterSpacing: '0.12em', color: '#fff', lineHeight: 1, marginTop: 6 }}>
+            <span style={{ fontFamily: 'var(--font-brand)', fontSize: 42, letterSpacing: '0.12em', color: '#fff', lineHeight: 1, marginTop: 6 }}>
               ZenSports
             </span>
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: '0.22em', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: '0.22em', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
               Gestión Deportiva Digital
             </span>
           </div>

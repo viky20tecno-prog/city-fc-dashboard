@@ -335,10 +335,10 @@ export default function Login() {
           {/* Logo */}
           <div style={{ marginBottom: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
             <ZenSportsLogo variant="icon" size={100} />
-            <span style={{ fontFamily: "'Sport Event', sans-serif", fontSize: 42, letterSpacing: '0.12em', color: '#fff', lineHeight: 1, marginTop: 6 }}>
+            <span style={{ fontFamily: 'var(--font-brand)', fontSize: 42, letterSpacing: '0.12em', color: '#fff', lineHeight: 1, marginTop: 6 }}>
               ZenSports
             </span>
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 10, letterSpacing: '0.22em', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: '0.22em', color: 'var(--text-mut)', textTransform: 'uppercase' }}>
               Gestión Deportiva Digital
             </span>
           </div>
@@ -443,10 +443,10 @@ export default function Login() {
               background: 'linear-gradient(180deg, rgba(3,5,13,0.05) 0%, rgba(3,5,13,0.35) 62%, #060714 100%)',
             }} />
             <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 16 }}>
-              <span style={{ fontFamily: "'Sport Event', sans-serif", fontSize: 26, letterSpacing: '0.1em', lineHeight: 1 }}>
+              <span style={{ fontFamily: 'var(--font-brand)', fontSize: 26, letterSpacing: '0.1em', lineHeight: 1 }}>
                 <span style={{ color: '#fff' }}>ZEN</span><span style={{ color, transition: 'color 0.7s' }}>SPORTS</span>
               </span>
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9.5, letterSpacing: '0.24em', color: 'var(--text-mut)', textTransform: 'uppercase', marginTop: 2 }}>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9.5, letterSpacing: '0.24em', color: 'var(--text-mut)', textTransform: 'uppercase', marginTop: 2 }}>
                 Gestión Deportiva Digital
               </span>
             </div>

@@ -20,7 +20,7 @@ function NoVerificadoV1({ color, clubNombre, clubSub, logoUrl, initials, estado,
           {logoUrl
             ? <img src={logoUrl} alt="logo" style={{ width: 38, height: 38, objectFit: 'contain', borderRadius: 8 }} />
             : (
-              <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}20`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color, fontFamily: "'Sport Event', cursive", letterSpacing: 1 }}>{initials}</div>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}20`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color, fontFamily: "'Exo 2', sans-serif", letterSpacing: 1 }}>{initials}</div>
             )
           }
           <div>
@@ -68,11 +68,11 @@ function NoVerificadoV2({ color, clubNombre, clubSub, logoUrl, initials, estado,
           {logoUrl
             ? <img src={logoUrl} alt="logo" style={{ width: 38, height: 38, objectFit: 'contain', borderRadius: 8 }} />
             : (
-              <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}20`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color, fontFamily: "'Sport Event', cursive", letterSpacing: 1 }}>{initials}</div>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}20`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 900, color, fontFamily: "'Exo 2', sans-serif", letterSpacing: 1 }}>{initials}</div>
             )
           }
           <div>
-            <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 16, letterSpacing: 2, color: '#fff' }}>{clubNombre}</div>
+            <div style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 700, fontSize: 16, letterSpacing: 2, color: '#fff' }}>{clubNombre}</div>
             {clubSub && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, textTransform: 'uppercase', marginTop: 1 }}>{clubSub}</div>}
           </div>
         </div>
@@ -118,7 +118,7 @@ function VerificadoV1({ color, clubNombre, clubSub, logoUrl, initials, temporada
               ? <img src={logoUrl} alt="logo" style={{ width: 38, height: 38, objectFit: 'contain', borderRadius: 8 }} />
               : (
                 <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}20`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: 13, fontWeight: 900, color, fontFamily: "'Sport Event', cursive", letterSpacing: 1 }}>{initials}</span>
+                  <span style={{ fontSize: 13, fontWeight: 900, color, fontFamily: "'Exo 2', sans-serif", letterSpacing: 1 }}>{initials}</span>
                 </div>
               )
             }
@@ -233,12 +233,12 @@ function VerificadoV2({ color, clubNombre, clubSub, logoUrl, initials, temporada
               ? <img src={logoUrl} alt="logo" style={{ width: 38, height: 38, objectFit: 'contain', borderRadius: 8 }} />
               : (
                 <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}20`, border: `1px solid ${color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: 13, fontWeight: 900, color, fontFamily: "'Sport Event', cursive", letterSpacing: 1 }}>{initials}</span>
+                  <span style={{ fontSize: 13, fontWeight: 900, color, fontFamily: "'Exo 2', sans-serif", letterSpacing: 1 }}>{initials}</span>
                 </div>
               )
             }
             <div>
-              <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 16, letterSpacing: 2, color: '#fff' }}>{clubNombre}</div>
+              <div style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 700, fontSize: 16, letterSpacing: 2, color: '#fff' }}>{clubNombre}</div>
               {clubSub && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, textTransform: 'uppercase', marginTop: 1 }}>{clubSub}</div>}
             </div>
           </div>
@@ -286,8 +286,8 @@ function VerificadoV2({ color, clubNombre, clubSub, logoUrl, initials, temporada
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 13, color: '#AEAEB4', letterSpacing: 1.5, textTransform: 'uppercase', lineHeight: 1 }}>{nombreAt || '—'}</div>
-            <div style={{ fontFamily: "'Sport Event',cursive", fontSize: 24, color, lineHeight: 0.95, letterSpacing: 1, textTransform: 'uppercase', marginTop: 3 }}>{apellidoAt}</div>
+            <div style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 600, fontSize: 13, color: '#AEAEB4', letterSpacing: 1.5, textTransform: 'uppercase', lineHeight: 1 }}>{nombreAt || '—'}</div>
+            <div style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 700, fontSize: 24, color, lineHeight: 0.95, letterSpacing: 1, textTransform: 'uppercase', marginTop: 3 }}>{apellidoAt}</div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>CC {cedula}</div>
           </div>
         </div>

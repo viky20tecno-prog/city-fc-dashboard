@@ -1305,7 +1305,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
           <div className="flex flex-col gap-3">
             {/* Fila 1: título + acciones */}
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-              <h2 style={{ fontFamily: "'Sport Event', cursive", fontSize: '22px', letterSpacing: '2px', color: 'var(--text-pri)' }}>
+              <h2 style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 700, fontSize: '22px', letterSpacing: '-0.2px', color: 'var(--text-pri)' }}>
                 Jugadores
               </h2>
 

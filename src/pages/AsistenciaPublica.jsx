@@ -249,7 +249,7 @@ const styles = {
   page: {
     minHeight: '100vh',
     background: '#0B0D1A',
-    fontFamily: "'Space Grotesk', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     paddingBottom: 0,
   },
   card: {

@@ -136,6 +136,7 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
     qr_pago_url:       clubConfig?.qr_pago_url        || '',
     valor_mensualidad: clubConfig?.valor_mensualidad  ?? 0,
     penalidad_mora:    clubConfig?.penalidad_mora      ?? 0,
+    penalidad_habilitada: clubConfig?.penalidad_habilitada === true,
     dias_gracia_mora:  clubConfig?.dias_gracia_mora    ?? 0,
     dia_cobro:         clubConfig?.dia_cobro           ?? 1,
     cuenta_banco:      clubConfig?.cuenta_bancaria?.banco  || '',
@@ -202,6 +203,7 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
           qr_pago_url:       form.qr_pago_url        || null,
           valor_mensualidad: Number(form.valor_mensualidad),
           penalidad_mora:    Number(form.penalidad_mora),
+          penalidad_habilitada: !!form.penalidad_habilitada,
           dias_gracia_mora:  Number(form.dias_gracia_mora),
           dia_cobro:         Math.min(25, Math.max(1, Number(form.dia_cobro) || 1)),
           cuenta_bancaria:   (form.cuenta_numero || form.cuenta_banco)
@@ -345,6 +347,17 @@ export default function CobroConfigModal({ color = '#E14924', clubConfig, onClos
                   onChange={e => set('dias_gracia_mora', e.target.value)} style={inp} />
               </div>
             </div>
+
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, padding: '10px 13px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, cursor: 'pointer' }}>
+              <input type="checkbox" checked={form.penalidad_habilitada}
+                onChange={e => set('penalidad_habilitada', e.target.checked)}
+                style={{ marginTop: 2, cursor: 'pointer' }} />
+              <span style={{ fontSize: 12, color: '#CBD5E1', lineHeight: 1.5 }}>
+                <strong>Aplicar la penalidad por mora automáticamente.</strong> Mientras esté apagado, la mensualidad
+                se marca en mora igual, pero nunca se le suma el monto de penalidad. Se puede prender o apagar
+                en cualquier momento — el mes que quede prendido, se aplica; el mes que quede apagado, no.
+              </span>
+            </label>
 
             {valorCambio && (
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, padding: '10px 13px', background: `${c}0d`, border: `1px solid ${c}30`, borderRadius: 10, cursor: 'pointer' }}>

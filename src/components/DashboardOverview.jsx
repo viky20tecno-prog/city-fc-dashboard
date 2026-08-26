@@ -157,11 +157,20 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
 
   const [activeKpi, setActiveKpi] = useState(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  // Nivel intermedio para laptop (768–1399px) — sin esto, las 6 tarjetas de KPI se
+  // apretaban en una sola fila en cualquier pantalla no-mobile, incluidas laptops.
+  const [isLaptop, setIsLaptop] = useState(() => window.innerWidth >= 768 && window.innerWidth < 1400);
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    const h = (e) => setIsMobile(e.matches);
-    mq.addEventListener('change', h);
-    return () => mq.removeEventListener('change', h);
+    const mqMobile = window.matchMedia('(max-width: 767px)');
+    const mqLaptop = window.matchMedia('(min-width: 768px) and (max-width: 1399px)');
+    const hMobile = (e) => setIsMobile(e.matches);
+    const hLaptop = (e) => setIsLaptop(e.matches);
+    mqMobile.addEventListener('change', hMobile);
+    mqLaptop.addEventListener('change', hLaptop);
+    return () => {
+      mqMobile.removeEventListener('change', hMobile);
+      mqLaptop.removeEventListener('change', hLaptop);
+    };
   }, []);
   const kpiToggle = (key) => setActiveKpi(prev => prev === key ? null : key);
 
@@ -288,7 +297,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
       <div style={{
         position: 'relative', zIndex: 1,
         display: 'grid',
-        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr) repeat(3, 1fr)',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : isLaptop ? 'repeat(3, 1fr)' : 'repeat(3, 1fr) repeat(3, 1fr)',
         gap: '10px',
       }}>
         <KpiCard icon={Users}         label="Jugadores"  value={activos.length}   sub="Activos"                  colorObj={clubColor} delay={0.05} isMobile={isMobile} />

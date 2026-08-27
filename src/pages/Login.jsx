@@ -437,7 +437,7 @@ export default function Login() {
           <div className="login-mobile-header" style={{
             display: 'none', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
             marginLeft: -22, marginRight: -22, marginBottom: 20, marginTop: -28,
-            height: 320, position: 'relative', overflow: 'hidden',
+            height: 430, position: 'relative', overflow: 'hidden',
             backgroundImage: LOGIN_USAR_VIDEO ? undefined : `url(${fondoLoginMovil})`,
             backgroundSize: 'cover', backgroundPosition: 'center 32%',
           }}>

@@ -8,7 +8,7 @@ import {
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 import fondoLoginMovil from '../assets/brand/Fondo_Login_movil.webp';
 
-/* Prueba: cabecera mobile del login en video (public/login-mobile.mp4) en vez
+/* Prueba: cabecera mobile del login en video (public/fondo_movil_2.mp4) en vez
    de la imagen estática. Poné en false para volver a Fondo_Login_movil.webp. */
 const LOGIN_USAR_VIDEO = true;
 
@@ -443,7 +443,7 @@ export default function Login() {
           }}>
             {LOGIN_USAR_VIDEO && (
               <video
-                src="/login-mobile.mp4"
+                src="/fondo_movil_2.mp4"
                 poster={fondoLoginMovil}
                 autoPlay
                 muted

@@ -449,7 +449,7 @@ export default function Login() {
                 muted
                 loop
                 playsInline
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 32%' }}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 15%' }}
               />
             )}
             {/* Funde la imagen hacia el fondo de la tarjeta, para que el wordmark sea legible */}

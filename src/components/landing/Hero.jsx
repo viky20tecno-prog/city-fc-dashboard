@@ -385,8 +385,14 @@ export default function Hero({ previewColor, openLead }) {
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '58% center' }}
                 />
               )}
-              <HeroLightning />
-              <HeroSparks />
+              {/* Los rayos/chispas dibujados encima solo tienen sentido sobre
+                  la imagen estática — el video ya trae su propia energía. */}
+              {!HERO_USAR_VIDEO && (
+                <>
+                  <HeroLightning />
+                  <HeroSparks />
+                </>
+              )}
               <div className="hero-sweep" />
             </div>
           </motion.div>

@@ -8,6 +8,10 @@ import {
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 import fondoLoginMovil from '../assets/brand/Fondo_Login_movil.webp';
 
+/* Prueba: cabecera mobile del login en video (public/login-mobile.mp4) en vez
+   de la imagen estática. Poné en false para volver a Fondo_Login_movil.webp. */
+const LOGIN_USAR_VIDEO = true;
+
 const WHATSAPP_SOPORTE = '573023903192';
 const SUPER_ADMIN_EMAILS = ['diego31escobar@gmail.com'];
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
@@ -434,9 +438,20 @@ export default function Login() {
             display: 'none', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
             marginLeft: -22, marginRight: -22, marginBottom: 20, marginTop: -28,
             height: 320, position: 'relative', overflow: 'hidden',
-            backgroundImage: `url(${fondoLoginMovil})`,
+            backgroundImage: LOGIN_USAR_VIDEO ? undefined : `url(${fondoLoginMovil})`,
             backgroundSize: 'cover', backgroundPosition: 'center 32%',
           }}>
+            {LOGIN_USAR_VIDEO && (
+              <video
+                src="/login-mobile.mp4"
+                poster={fondoLoginMovil}
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 32%' }}
+              />
+            )}
             {/* Funde la imagen hacia el fondo de la tarjeta, para que el wordmark sea legible */}
             <div style={{
               position: 'absolute', inset: 0,

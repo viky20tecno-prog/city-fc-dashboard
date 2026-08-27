@@ -12,6 +12,10 @@ import { CLUB_LOGOS } from './clubLogos';
 import DashboardMockup from './DashboardMockup';
 import ZenSportsLogo from '../brand/ZenSportsLogo';
 
+/* Prueba: fondo del hero en video (public/hero-athletes.mp4) en vez de la
+   imagen estática. Poné en false para volver a hero-athletes.png sin más. */
+const HERO_USAR_VIDEO = true;
+
 /* ── Iconos "Jugadores / Pagos / Carnets / WhatsApp / Reportes" ──────────────
    Mapeados 1:1 a features que existen de verdad en el producto (mismas
    4 que aparecen en ACTIVITY más abajo, + Reportes de Finanzas.jsx) — antes
@@ -362,12 +366,25 @@ export default function Hero({ previewColor, openLead }) {
         <motion.div style={{ y: scrollShiftY, position: 'absolute', inset: 0 }}>
           <motion.div style={{ x: mouseShiftX, y: mouseShiftY, position: 'absolute', inset: 0 }}>
             <div className="hero-kenburns" style={{ position: 'absolute', inset: 0 }}>
-              <img
-                src="/hero-athletes.png"
-                alt="ZenSports — atletas de fútbol, básquet, ciclismo, natación, tenis y voleibol con energía morada"
-                fetchpriority="high"
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '58% center' }}
-              />
+              {HERO_USAR_VIDEO ? (
+                <video
+                  src="/hero-athletes.mp4"
+                  poster="/hero-athletes.png"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  aria-label="ZenSports — atletas de fútbol, básquet, ciclismo, natación, tenis y voleibol con energía morada"
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '58% center' }}
+                />
+              ) : (
+                <img
+                  src="/hero-athletes.png"
+                  alt="ZenSports — atletas de fútbol, básquet, ciclismo, natación, tenis y voleibol con energía morada"
+                  fetchpriority="high"
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '58% center' }}
+                />
+              )}
               <HeroLightning />
               <HeroSparks />
               <div className="hero-sweep" />

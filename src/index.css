@@ -421,6 +421,30 @@ select {
   to   { transform: rotate(360deg); }
 }
 
+/* Fondo animado + marquee del Login / Registro.
+   Viven acá (y no en un <style> inline de la página) a propósito: el <style>
+   de Login se re-renderiza cada 4s al ciclar el color del club, y si las
+   @keyframes viven ahí adentro algunos WebView de Android reinician la
+   animación en cada re-parseo — el marquee "salta" y se ve acelerado. */
+@keyframes blob-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(-4%, 6%) scale(1.06); }
+  66%      { transform: translate(5%, -3%) scale(0.96); }
+}
+@keyframes blob-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(5%, -5%) scale(1.08); }
+  66%      { transform: translate(-3%, 4%) scale(0.94); }
+}
+@keyframes blob-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-6%, 6%) scale(1.12); }
+}
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 @keyframes toast-in {
   from { opacity: 0; transform: translateY(16px) scale(0.95); }
   to   { opacity: 1; transform: translateY(0) scale(1); }

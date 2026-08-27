@@ -860,33 +860,11 @@ export default function Login() {
         </div>
       </div>
 
+      {/* Las @keyframes (blob-drift-*, marquee-scroll) viven en index.css.
+          Este <style> se re-renderiza cada 4s al ciclar el color del club, así
+          que solo debe tener reglas dependientes del color — nada de keyframes,
+          o el marquee se reinicia en cada re-parseo (bug de WebView Android). */}
       <style>{`
-        @keyframes blob-drift-1 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33%       { transform: translate(-4%, 6%) scale(1.06); }
-          66%       { transform: translate(5%, -3%) scale(0.96); }
-        }
-        @keyframes blob-drift-2 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33%       { transform: translate(5%, -5%) scale(1.08); }
-          66%       { transform: translate(-3%, 4%) scale(0.94); }
-        }
-        @keyframes blob-drift-3 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50%       { transform: translate(-6%, 6%) scale(1.12); }
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.5; transform: scale(0.9); }
-          50%      { opacity: 1;   transform: scale(1.18); }
-        }
-        @keyframes marquee-scroll {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-50%); }
-        }
         input::placeholder { color: #374151; }
         input:focus {
           outline: none;

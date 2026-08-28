@@ -135,6 +135,13 @@ describe('archivos machine-readable y páginas de confianza', () => {
     expect(h2s.length).toBeGreaterThanOrEqual(6);
   });
 
+  it('el archivo de verificación de Google Search Console sigue presente', () => {
+    // Si se borra, GSC pierde la verificación y el sitio deja de indexarse.
+    const f = 'public/google7d920d728340c45f.html';
+    expect(existsSync(root + f), `falta ${f} (verificación de Search Console)`).toBe(true);
+    expect(read(f).trim()).toBe('google-site-verification: google7d920d728340c45f.html');
+  });
+
   it('security.txt cumple RFC 9116 (Contact + Expires)', () => {
     const sec = read('public/.well-known/security.txt');
     expect(sec).toMatch(/^Contact:\s*mailto:/m);

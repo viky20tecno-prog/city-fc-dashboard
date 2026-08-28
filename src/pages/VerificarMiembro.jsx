@@ -362,8 +362,11 @@ export default function VerificarMiembro() {
           .single();
         if (clubRow?.config) setClubConfig(clubRow.config);
 
-        // 2. Verificación real del atleta contra la API pública
-        const res = await fetch(`${API_BASE_URL}/publico/atleta/${clubSlug}/${cedula}`);
+        // 2. Verificación real del atleta contra la API pública.
+        // Endpoint dedicado del carnet: confirma membresía + identidad básica por
+        // cédula, SIN estado de cuenta. NO reusar /publico/atleta/:slug/:token —
+        // ese exige un token HMAC opaco (link del Portal) y rechaza la cédula cruda.
+        const res = await fetch(`${API_BASE_URL}/publico/verificar/${clubSlug}/${cedula}`);
         const json = await res.json().catch(() => ({}));
 
         if (!res.ok || !json.success || !json.atleta) {

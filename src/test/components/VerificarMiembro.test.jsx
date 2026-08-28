@@ -75,6 +75,11 @@ describe('VerificarMiembro', () => {
       expect(screen.getByText(/miembro verificado/i)).toBeInTheDocument();
     });
     expect(screen.getByText(/Juan Pérez/i)).toBeInTheDocument();
+    // Debe pegarle al endpoint dedicado del carnet (verificación por cédula),
+    // NO a /publico/atleta/:slug/:token (Portal, exige token HMAC).
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/publico/verificar/city-fc/12345678'),
+    );
   });
 
   it('muestra "Miembro Verificado" cuando activo === "SI"', async () => {

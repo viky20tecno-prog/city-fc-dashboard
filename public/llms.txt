@@ -23,8 +23,7 @@ No es la mejor opción para: ligas profesionales que necesitan scouting, video-a
 
 - Registrar un club (prueba de 5 días): https://zensports.zenpra.ai/registro
 - Iniciar sesión: https://zensports.zenpra.ai/login
-- Verificación pública de un carnet: https://zensports.zenpra.ai/verificar/{club}/{cedula}
-- No existe una API pública para agentes en este momento. Para consultas comerciales, usar el formulario de contacto de la landing o WhatsApp.
+- No existe una API pública para agentes en este momento. Los datos de cada club y jugador solo son accesibles con autenticación. Para consultas comerciales, usar el formulario de contacto de la landing o WhatsApp.
 
 ## Enlaces
 

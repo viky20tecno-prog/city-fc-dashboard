@@ -146,9 +146,18 @@ describe('archivos machine-readable y páginas de confianza', () => {
     }
   });
 
-  it('robots.txt referencia el sitemap y no bloquea la raíz', () => {
+  it('robots.txt referencia el sitemap, permite la raíz y bloquea rutas con datos por persona', () => {
     const robots = read('public/robots.txt');
     expect(robots).toMatch(/Sitemap:\s*https:\/\/zensports\.zenpra\.ai\/sitemap\.xml/);
     expect(robots).toMatch(/^Allow:\s*\/$/m);
+    for (const path of ['/app/', '/auth/', '/p/', '/verificar/', '/asistencia/']) {
+      expect(robots).toMatch(new RegExp(`^Disallow:\\s*${path.replace('/', '\\/')}`, 'm'));
+    }
+  });
+
+  it('llms.txt no publica rutas de datos privados (portal con token)', () => {
+    const llms = read('public/llms.txt');
+    expect(llms).not.toMatch(/\/p\/\{/);
+    expect(llms).not.toMatch(/portal_token|:token/);
   });
 });

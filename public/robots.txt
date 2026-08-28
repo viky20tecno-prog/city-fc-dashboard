@@ -2,5 +2,8 @@ User-agent: *
 Allow: /
 Disallow: /app/
 Disallow: /auth/
+Disallow: /p/
+Disallow: /verificar/
+Disallow: /asistencia/
 
 Sitemap: https://zensports.zenpra.ai/sitemap.xml

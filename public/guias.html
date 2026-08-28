@@ -13,45 +13,66 @@
   <meta property="og:image" content="https://zensports.zenpra.ai/og-image.jpg">
   <title>Guías para administrar un club deportivo · ZenSports</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-  <style>
-    :root { color-scheme: dark; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background:#060810; color:#E7E9F0; padding:56px 20px 80px; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.7; }
-    main { max-width:680px; margin:0 auto; }
-    .wordmark { font-size:12px; font-weight:800; letter-spacing:4px; color:#8b5cf6; }
-    h1 { font-size:clamp(26px,4vw,34px); font-weight:800; margin:14px 0 10px; letter-spacing:-0.5px; }
-    .lead { color:rgba(231,233,240,0.6); margin-bottom:30px; }
-    article { padding:18px 0; border-top:1px solid rgba(255,255,255,0.08); }
-    article h2 { font-size:18px; font-weight:700; margin-bottom:4px; }
-    article h2 a { color:#E7E9F0; text-decoration:none; }
-    article h2 a:hover { color:#c4b5fd; }
-    article p { color:rgba(231,233,240,0.6); font-size:14px; }
-    nav.crumbs { margin-top:44px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.08); font-size:14px; display:flex; gap:18px; flex-wrap:wrap; }
-    nav.crumbs a { color:#a78bfa; text-decoration:none; }
-  </style>
+  <link rel="stylesheet" href="/guias.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Guías para administrar un club deportivo",
+    "url": "https://zensports.zenpra.ai/guias",
+    "inLanguage": "es",
+    "isPartOf": { "@id": "https://zensports.zenpra.ai/#website" },
+    "about": "Administración de clubes deportivos amateur: cobros, inscripciones, carnets y torneos",
+    "hasPart": [
+      { "@type": "Article", "headline": "Cómo cobrar las mensualidades de un club por WhatsApp sin perseguir a nadie", "url": "https://zensports.zenpra.ai/guias/cobro-de-mensualidades-por-whatsapp" },
+      { "@type": "Article", "headline": "Qué debe tener el carnet de un jugador de un club de fútbol amateur", "url": "https://zensports.zenpra.ai/guias/carnet-de-jugador-club-de-futbol" }
+    ]
+  }
+  </script>
 </head>
 <body>
-  <main>
-    <div class="wordmark">ZENSPORTS</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/><path d="M21 12a2 2 0 0 0-2-2h-4a2 2 0 0 0 0 4h4a2 2 0 0 0 2-2Z"/></symbol>
+  <symbol id="i-id" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="9" cy="10" r="2.5"/><path d="M6 16c.7-1.6 4.3-1.6 5 0M15 9h4M15 13h4"/></symbol>
+</svg>
+
+<div class="wrap">
+  <div class="topbar">
+    <span class="wordmark">ZENSPORTS</span><span class="sep">·</span>
+    <a class="crumb" href="/">Inicio</a>
+  </div>
+
+  <header class="hero">
+    <span class="kicker">Guías</span>
     <h1>Guías para administrar un club deportivo</h1>
     <p class="lead">Cómo resolver las tareas que a un club amateur le quitan horas cada semana: cobrar, inscribir, carnetizar y organizar torneos. Escritas para directores de club, no para técnicos.</p>
+  </header>
 
-    <article>
-      <h2><a href="/guias/cobro-de-mensualidades-por-whatsapp">Cómo cobrar las mensualidades de un club por WhatsApp sin perseguir a nadie</a></h2>
-      <p>El problema de la mora en los clubes amateur, por qué el grupo de WhatsApp no alcanza, y un método para que los pagos lleguen solos sin quemar tu número.</p>
-    </article>
+  <div class="guide-list">
+    <div class="guide-card">
+      <span class="thumb"><svg class="ico"><use href="#i-wallet"/></svg></span>
+      <div>
+        <h2><a href="/guias/cobro-de-mensualidades-por-whatsapp">Cómo cobrar las mensualidades de un club por WhatsApp sin perseguir a nadie</a></h2>
+        <p>Por qué se genera la mora, qué falla en el grupo de WhatsApp, y un método para que los pagos lleguen solos sin quemar tu número.</p>
+      </div>
+    </div>
 
-    <article>
-      <h2><a href="/guias/carnet-de-jugador-club-de-futbol">Qué debe tener el carnet de un jugador de un club de fútbol amateur</a></h2>
-      <p>Datos mínimos, foto, vigencia y verificación. Carnet impreso vs. carnet digital con QR, y cómo evitar que alguien juegue con el carnet de otro.</p>
-    </article>
+    <div class="guide-card">
+      <span class="thumb"><svg class="ico"><use href="#i-id"/></svg></span>
+      <div>
+        <h2><a href="/guias/carnet-de-jugador-club-de-futbol">Qué debe tener el carnet de un jugador de un club de fútbol amateur</a></h2>
+        <p>Datos mínimos, foto, vigencia y verificación. Carnet impreso vs. carnet digital con QR, y cómo evitar que alguien juegue con el carnet de otro.</p>
+      </div>
+    </div>
+  </div>
 
-    <nav class="crumbs">
-      <a href="/">Inicio</a>
-      <a href="/nosotros">Nosotros</a>
-      <a href="/faq">Preguntas frecuentes</a>
-      <a href="/contacto">Contacto</a>
-    </nav>
-  </main>
+  <nav class="crumbs">
+    <a href="/">Inicio</a>
+    <a href="/nosotros">Nosotros</a>
+    <a href="/faq">Preguntas frecuentes</a>
+    <a href="/contacto">Contacto</a>
+  </nav>
+</div>
 </body>
 </html>

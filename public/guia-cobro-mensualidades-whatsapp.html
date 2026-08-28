@@ -13,23 +13,7 @@
   <meta property="og:image" content="https://zensports.zenpra.ai/og-image.jpg">
   <title>Cómo cobrar las mensualidades de un club por WhatsApp · Guías ZenSports</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-  <style>
-    :root { color-scheme: dark; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background:#060810; color:#E7E9F0; padding:56px 20px 80px; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.75; }
-    main { max-width:680px; margin:0 auto; }
-    .wordmark { font-size:12px; font-weight:800; letter-spacing:4px; color:#8b5cf6; }
-    .kicker { color:rgba(231,233,240,0.4); font-size:13px; margin-top:14px; }
-    h1 { font-size:clamp(25px,4vw,33px); font-weight:800; margin:6px 0 20px; letter-spacing:-0.5px; line-height:1.25; }
-    h2 { font-size:19px; font-weight:700; margin:32px 0 10px; }
-    h3 { font-size:15px; font-weight:700; margin:20px 0 6px; color:rgba(231,233,240,0.9); }
-    p, li { color:rgba(231,233,240,0.74); margin-bottom:13px; }
-    ul, ol { margin:0 0 14px 22px; }
-    a { color:#a78bfa; text-decoration:none; }
-    a:hover { color:#c4b5fd; }
-    .note { border-left:2px solid #8b5cf6; padding:2px 0 2px 16px; color:rgba(231,233,240,0.6); margin:16px 0; }
-    nav.crumbs { margin-top:48px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.08); font-size:14px; display:flex; gap:18px; flex-wrap:wrap; }
-  </style>
+  <link rel="stylesheet" href="/guias.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -57,73 +41,166 @@
   </script>
 </head>
 <body>
-  <main>
-    <div class="wordmark">ZENSPORTS</div>
-    <p class="kicker">Guía · Administración de club</p>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1V2l-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M8 7h8M8 11h8M8 15h5"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/><path d="M21 12a2 2 0 0 0-2-2h-4a2 2 0 0 0 0 4h4a2 2 0 0 0 2-2Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M21.8 10A10 10 0 1 1 17 3.3"/><path d="m9 11 3 3L22 4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1 1 0 0 1 1.5 0C15.6 3.8 18 5 20 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9Z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9Z"/></symbol>
+</svg>
+
+<div class="wrap">
+  <div class="topbar">
+    <span class="wordmark">ZENSPORTS</span><span class="sep">·</span>
+    <a class="crumb" href="/guias">Guías</a>
+  </div>
+
+  <header class="hero">
+    <span class="kicker"><svg class="ico ico-sm"><use href="#i-wallet"/></svg> Administración de club</span>
     <h1>Cómo cobrar las mensualidades de un club por WhatsApp sin perseguir a nadie</h1>
+    <p class="lead">En la mayoría de los clubes deportivos amateur el cobro recae en una sola persona que cada mes reescribe el mismo mensaje, revisa capturas de comprobantes una por una y lleva la cuenta en su cabeza. Funciona hasta los 30 o 40 jugadores. Después, la mora sube y el que cobra termina quemado.</p>
 
-    <p>En la mayoría de los clubes deportivos amateur el cobro de la mensualidad recae en una sola persona —el presidente, un padre voluntario, el administrador— que cada mes reescribe el mismo mensaje, revisa capturas de comprobantes una por una y lleva la cuenta de quién pagó en una hoja de cálculo o en su cabeza. Funciona hasta los 30 o 40 jugadores. Después, la mora sube y el que cobra termina quemado.</p>
+    <div class="hero-art">
+      <svg viewBox="0 0 720 240" role="img" aria-label="El flujo del cobro: la familia manda el comprobante por WhatsApp, el asistente lo lee, el administrador confirma con un clic y el estado de cuenta queda al día.">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#8b5cf6" stop-opacity="0"/><stop offset=".5" stop-color="#8b5cf6" stop-opacity=".9"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- 1. teléfono familia -->
+          <rect x="40" y="70" width="86" height="150" rx="14" stroke="#3b3b52" fill="#0d0d18"/>
+          <rect x="54" y="88" width="58" height="26" rx="6" fill="#25D366" fill-opacity=".15" stroke="#25D366"/>
+          <text x="83" y="105" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" fill="#25D366" stroke="none">$ 149.000</text>
+          <rect x="54" y="124" width="42" height="14" rx="5" fill="#1c1c2b" stroke="#2a2a3d"/>
+          <rect x="70" y="146" width="42" height="14" rx="5" fill="#1c1c2b" stroke="#2a2a3d"/>
+          <text x="83" y="212" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#9a9ab0" stroke="none">Familia · WhatsApp</text>
 
-    <p>Esta guía explica por qué pasa y cómo montar un proceso de cobro por WhatsApp que se sostenga aunque el club crezca.</p>
+          <!-- flecha -->
+          <path d="M138 145h58" stroke="url(#g1)"/><path d="m190 139 8 6-8 6" stroke="#8b5cf6"/>
 
-    <h2>Por qué se genera la mora</h2>
-    <p>La mora rara vez es por falta de plata. En clubes amateur casi siempre es por fricción y por falta de recordatorio a tiempo:</p>
-    <ul>
-      <li><strong>El pago no tiene fecha visible.</strong> Si nadie recuerda que "se paga los primeros 5 días", el pago se posterga y se acumula.</li>
-      <li><strong>El recordatorio es incómodo de mandar.</strong> Escribirle uno por uno a 60 familias, con el monto y los datos de pago, es tan tedioso que se hace tarde o no se hace.</li>
-      <li><strong>El comprobante se pierde.</strong> La familia paga, manda la captura al grupo, y entre 200 mensajes nadie la registra. A fin de mes esa familia aparece como morosa y se genera un roce.</li>
-      <li><strong>No hay un estado de cuenta.</strong> Cuando un papá pregunta "¿yo qué debo?", la respuesta tarda días porque hay que reconstruirla a mano.</li>
-    </ul>
+          <!-- 2. Zen lee -->
+          <circle cx="270" cy="145" r="44" fill="#8b5cf6" fill-opacity=".1" stroke="#8b5cf6"/>
+          <path d="M258 145l8 8 16-16" stroke="#8b5cf6"/>
+          <text x="270" y="212" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#c4b5fd" stroke="none">Zen lee el comprobante</text>
 
-    <h2>Qué falla cuando el cobro vive en el grupo de WhatsApp</h2>
-    <p>El grupo sirve para avisar del partido del sábado, no para cobrar. Tres problemas concretos:</p>
-    <ol>
-      <li><strong>Todo es público.</strong> Recordarle a una familia que debe dos meses delante de las demás genera vergüenza y resentimiento.</li>
-      <li><strong>No hay registro.</strong> El grupo no te dice cuánto entró este mes ni quién falta; hay que contarlo aparte.</li>
-      <li><strong>Riesgo para el número.</strong> Mandar el mismo mensaje a decenas de contactos que no te escribieron primero es exactamente el patrón que WhatsApp penaliza con bloqueos. Un club que pierde su número pierde su canal.</li>
-    </ol>
+          <path d="M326 145h58" stroke="url(#g1)"/><path d="m378 139 8 6-8 6" stroke="#8b5cf6"/>
 
-    <h2>Un método de cobro que se sostiene</h2>
+          <!-- 3. admin 1 clic -->
+          <rect x="410" y="112" width="96" height="66" rx="12" fill="#0d0d18" stroke="#3b3b52"/>
+          <circle cx="458" cy="145" r="17" fill="#34d399" fill-opacity=".15" stroke="#34d399"/>
+          <path d="M451 145l5 5 9-10" stroke="#34d399"/>
+          <text x="458" y="212" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#9a9ab0" stroke="none">Confirmás con 1 clic</text>
 
-    <h3>1. Fija una fecha y comunícala una sola vez</h3>
-    <p>Define el día de corte (por ejemplo, del 1 al 5 de cada mes) y un período de gracia antes de considerar la cuota en mora. Escríbelo en el reglamento y en el mensaje de bienvenida de cada jugador nuevo. Que la fecha sea conocida hace la mitad del trabajo.</p>
+          <path d="M518 145h48" stroke="url(#g1)"/><path d="m560 139 8 6-8 6" stroke="#8b5cf6"/>
 
-    <h3>2. Cobro individual, nunca en el grupo</h3>
-    <p>Cada recordatorio va al chat privado de la familia, con su nombre, el mes que debe, el monto exacto y los datos de pago (transferencia, llave, QR). Un mensaje individualizado se paga; un mensaje al grupo se ignora.</p>
+          <!-- 4. estado de cuenta -->
+          <rect x="588" y="86" width="94" height="118" rx="12" fill="#0d0d18" stroke="#3b3b52"/>
+          <path d="M600 104h70M600 120h70M600 136h70M600 152h50" stroke="#2a2a3d"/>
+          <rect x="600" y="98" width="46" height="10" rx="3" fill="#34d399" fill-opacity=".8" stroke="none"/>
+          <rect x="600" y="114" width="58" height="10" rx="3" fill="#34d399" fill-opacity=".8" stroke="none"/>
+          <rect x="600" y="130" width="40" height="10" rx="3" fill="#fbbf24" fill-opacity=".8" stroke="none"/>
+          <text x="635" y="196" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#9a9ab0" stroke="none">Estado de cuenta</text>
+        </g>
+      </svg>
+    </div>
+  </header>
 
-    <h3>3. Registra el comprobante el mismo día</h3>
-    <p>Cuando llega la captura, márcala como "por validar" al instante y confírmala cuando cuadre con el banco. Así el estado de cuenta siempre está al día y nadie aparece como moroso por error.</p>
+  <h2><svg class="ico"><use href="#i-alert"/></svg>Por qué se genera la mora</h2>
+  <p>La mora rara vez es por falta de plata. En clubes amateur casi siempre es por fricción y por falta de recordatorio a tiempo:</p>
+  <div class="feats">
+    <div class="feat"><span class="badge"><svg class="ico"><use href="#i-calendar"/></svg></span><div><p class="ft-title">El pago no tiene fecha visible</p><p>Si nadie recuerda que "se paga los primeros 5 días", el pago se posterga y se acumula.</p></div></div>
+    <div class="feat"><span class="badge"><svg class="ico"><use href="#i-message"/></svg></span><div><p class="ft-title">El recordatorio es incómodo de mandar</p><p>Escribirle uno por uno a 60 familias, con el monto y los datos de pago, es tan tedioso que se hace tarde o no se hace.</p></div></div>
+    <div class="feat"><span class="badge"><svg class="ico"><use href="#i-receipt"/></svg></span><div><p class="ft-title">El comprobante se pierde</p><p>La familia paga, manda la captura al grupo, y entre 200 mensajes nadie la registra. A fin de mes esa familia aparece como morosa y se genera un roce.</p></div></div>
+    <div class="feat"><span class="badge"><svg class="ico"><use href="#i-help"/></svg></span><div><p class="ft-title">No hay un estado de cuenta</p><p>Cuando un papá pregunta "¿yo qué debo?", la respuesta tarda días porque hay que reconstruirla a mano.</p></div></div>
+  </div>
 
-    <h3>4. Ten un estado de cuenta que la familia pueda consultar sola</h3>
-    <p>Un enlace donde cada familia ve sus meses al día, sus meses pendientes y el saldo, sin tener que preguntarle a nadie, elimina la mitad de los mensajes que recibe el que cobra.</p>
+  <h2><svg class="ico"><use href="#i-message"/></svg>Qué falla cuando el cobro vive en el grupo</h2>
+  <p>El grupo sirve para avisar del partido del sábado, no para cobrar. Tres problemas concretos:</p>
+  <ol>
+    <li><strong>Todo es público.</strong> Recordarle a una familia que debe dos meses delante de las demás genera vergüenza y resentimiento.</li>
+    <li><strong>No hay registro.</strong> El grupo no te dice cuánto entró este mes ni quién falta; hay que contarlo aparte.</li>
+    <li><strong>Riesgo para el número.</strong> Mandar el mismo mensaje a decenas de contactos que no te escribieron primero es exactamente el patrón que WhatsApp penaliza con bloqueos. Un club que pierde su número pierde su canal.</li>
+  </ol>
 
-    <h3>5. Protege el número del club</h3>
-    <p>Si automatizas el envío, hazlo con moderación: mensajes espaciados, solo a familias del club, y de preferencia con confirmación humana antes del envío masivo. No mandes ráfagas.</p>
+  <div class="diagram">
+    <svg viewBox="0 0 720 200" role="img" aria-label="Comparación: a la izquierda, un grupo con muchos mensajes donde el comprobante se pierde; a la derecha, un mensaje privado individual con el monto y los datos de pago.">
+      <g font-family="Inter,sans-serif" font-size="11">
+        <text x="150" y="24" text-anchor="middle" fill="#9a9ab0">Grupo del club</text>
+        <g fill="#1c1c2b" stroke="#2a2a3d" stroke-width="1.5">
+          <rect x="40" y="36" width="150" height="20" rx="8"/><rect x="70" y="62" width="180" height="20" rx="8"/>
+          <rect x="40" y="88" width="120" height="20" rx="8"/><rect x="90" y="114" width="160" height="20" rx="8"/>
+          <rect x="40" y="140" width="140" height="20" rx="8"/>
+        </g>
+        <rect x="60" y="62" width="200" height="20" rx="8" fill="#25D366" fill-opacity=".14" stroke="#25D366" stroke-width="1.5"/>
+        <text x="160" y="76" text-anchor="middle" fill="#25D366">comprobante perdido entre 200 msjs</text>
 
-    <h2>Cómo lo resuelve ZenSports</h2>
+        <path d="M300 20v160" stroke="#2a2a3d" stroke-width="1.5"/>
+
+        <text x="530" y="24" text-anchor="middle" fill="#c4b5fd">Chat privado de la familia</text>
+        <rect x="380" y="44" width="300" height="110" rx="12" fill="#0d0d18" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="400" y="72" fill="#e7e9f0">Hola María 👋</text>
+        <text x="400" y="94" fill="#b9b9cc">Cuota de marzo · $149.000</text>
+        <text x="400" y="116" fill="#b9b9cc">Llave: 300 000 0000 · o QR adjunto</text>
+        <rect x="400" y="128" width="120" height="16" rx="6" fill="#25D366" fill-opacity=".15" stroke="#25D366" stroke-width="1.2"/>
+        <text x="460" y="140" text-anchor="middle" fill="#25D366">se paga, no se ignora</text>
+      </g>
+    </svg>
+    <p class="cap">El mismo mensaje: al grupo se ignora, al chat privado se paga.</p>
+  </div>
+
+  <h2><svg class="ico"><use href="#i-shield"/></svg>Un método de cobro que se sostiene</h2>
+
+  <h3>1. Fija una fecha y comunícala una sola vez</h3>
+  <p>Define el día de corte (por ejemplo, del 1 al 5 de cada mes) y un período de gracia antes de considerar la cuota en mora. Escríbelo en el reglamento y en el mensaje de bienvenida de cada jugador nuevo. Que la fecha sea conocida hace la mitad del trabajo.</p>
+
+  <h3>2. Cobro individual, nunca en el grupo</h3>
+  <p>Cada recordatorio va al chat privado de la familia, con su nombre, el mes que debe, el monto exacto y los datos de pago (transferencia, llave, QR). Un mensaje individualizado se paga; un mensaje al grupo se ignora.</p>
+
+  <h3>3. Registra el comprobante el mismo día</h3>
+  <p>Cuando llega la captura, márcala como "por validar" al instante y confírmala cuando cuadre con el banco. Así el estado de cuenta siempre está al día y nadie aparece como moroso por error.</p>
+
+  <h3>4. Ten un estado de cuenta que la familia pueda consultar sola</h3>
+  <p>Un enlace donde cada familia ve sus meses al día, sus meses pendientes y el saldo, sin tener que preguntarle a nadie, elimina la mitad de los mensajes que recibe el que cobra.</p>
+
+  <h3>5. Protege el número del club</h3>
+  <p>Si automatizas el envío, hazlo con moderación: mensajes espaciados, solo a familias del club, y de preferencia con confirmación humana antes del envío masivo. No mandes ráfagas.</p>
+
+  <div class="card card--zs">
+    <h2 style="margin-top:0"><svg class="ico"><use href="#i-sparkle"/></svg>Cómo lo resuelve ZenSports</h2>
     <p><a href="/">ZenSports</a> es un software de gestión para clubes deportivos que automatiza este proceso:</p>
-    <ul>
-      <li>Lleva el <strong>estado de cuenta por jugador</strong> mes a mes, con los meses en mora marcados según la fecha de corte del club.</li>
-      <li>El asistente <strong>"Zen" responde por WhatsApp</strong> las consultas de estado de cuenta de las familias, y <strong>lee automáticamente cada comprobante</strong> de pago que le mandan, dejándolo listo para que el administrador lo confirme con un clic.</li>
-      <li>Prepara <strong>cada recordatorio de cobro individual</strong> con el monto y los datos correctos; el administrador da el envío final, para proteger el número del club.</li>
-      <li>Cada familia tiene un <strong>enlace propio</strong> para ver su estado de cuenta sin escribirle a nadie.</li>
-    </ul>
-    <p class="note">Hay una prueba gratis de 5 días sin tarjeta, y un plan gratuito permanente para clubes pequeños. <a href="/registro">Registrar un club</a> · <a href="/faq">Preguntas frecuentes</a>.</p>
+    <div class="feats">
+      <div class="feat"><span class="badge"><svg class="ico"><use href="#i-calendar"/></svg></span><div><p class="ft-title">Estado de cuenta por jugador</p><p>Lleva mes a mes lo pagado y lo pendiente, con los meses en mora marcados según la fecha de corte del club.</p></div></div>
+      <div class="feat"><span class="badge"><svg class="ico"><use href="#i-receipt"/></svg></span><div><p class="ft-title">El asistente lee los comprobantes</p><p>"Zen" responde por WhatsApp las consultas de estado de cuenta y lee automáticamente cada comprobante, dejándolo listo para que lo confirmes con un clic.</p></div></div>
+      <div class="feat"><span class="badge"><svg class="ico"><use href="#i-bell"/></svg></span><div><p class="ft-title">Recordatorios individuales listos</p><p>Prepara cada mensaje con el monto y los datos correctos; tú das el envío final, para proteger el número del club.</p></div></div>
+      <div class="feat"><span class="badge"><svg class="ico"><use href="#i-link"/></svg></span><div><p class="ft-title">Un enlace por familia</p><p>Cada familia consulta su estado de cuenta sin escribirle a nadie.</p></div></div>
+    </div>
+    <p class="cta">Prueba gratis de 5 días sin tarjeta · plan gratuito permanente para clubes pequeños. <a href="/registro">Registrar un club</a> · <a href="/faq">Preguntas frecuentes</a></p>
+  </div>
 
-    <h2>Errores comunes al automatizar el cobro</h2>
-    <ul>
-      <li><strong>Cobrar en el grupo "porque es más rápido".</strong> Es más rápido de mandar y más lento de cobrar.</li>
-      <li><strong>Automatizar el envío masivo sin control.</strong> Termina en bloqueo del número.</li>
-      <li><strong>No registrar los comprobantes el mismo día.</strong> La deuda "fantasma" es la principal causa de roces con las familias.</li>
-      <li><strong>No tener período de gracia.</strong> Marcar en mora el día 6 genera reclamos; un margen de unos días es más justo y reduce fricción.</li>
-    </ul>
+  <h2><svg class="ico"><use href="#i-alert"/></svg>Errores comunes al automatizar el cobro</h2>
+  <ul>
+    <li><strong>Cobrar en el grupo "porque es más rápido".</strong> Es más rápido de mandar y más lento de cobrar.</li>
+    <li><strong>Automatizar el envío masivo sin control.</strong> Termina en bloqueo del número.</li>
+    <li><strong>No registrar los comprobantes el mismo día.</strong> La deuda "fantasma" es la principal causa de roces con las familias.</li>
+    <li><strong>No tener período de gracia.</strong> Marcar en mora el día 6 genera reclamos; un margen de unos días es más justo y reduce fricción.</li>
+  </ul>
 
-    <nav class="crumbs">
-      <a href="/guias">← Todas las guías</a>
-      <a href="/guias/carnet-de-jugador-club-de-futbol">Carnet de jugador</a>
-      <a href="/">Inicio</a>
-      <a href="/contacto">Contacto</a>
-    </nav>
-  </main>
+  <nav class="crumbs">
+    <a href="/guias">← Todas las guías</a>
+    <a href="/guias/carnet-de-jugador-club-de-futbol">Carnet de jugador</a>
+    <a href="/">Inicio</a>
+    <a href="/contacto">Contacto</a>
+  </nav>
+</div>
 </body>
 </html>

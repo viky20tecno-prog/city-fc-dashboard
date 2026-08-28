@@ -22,7 +22,11 @@
     { "source": "/app/:path*", "destination": "/index.html" },
     { "source": "/nosotros", "destination": "/nosotros.html" },
     { "source": "/contacto", "destination": "/contacto.html" },
-    { "source": "/privacidad", "destination": "/privacidad.html" }
+    { "source": "/privacidad", "destination": "/privacidad.html" },
+    { "source": "/about", "destination": "/nosotros.html" },
+    { "source": "/contact", "destination": "/contacto.html" },
+    { "source": "/privacy", "destination": "/privacidad.html" },
+    { "source": "/privacy-policy", "destination": "/privacidad.html" }
   ],
   "headers": [
     {

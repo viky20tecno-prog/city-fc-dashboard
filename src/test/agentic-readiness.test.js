@@ -73,8 +73,9 @@ describe('index.html — contenido sin JavaScript', () => {
   const html = read('index.html');
   const rootBlock = html.slice(html.indexOf('<div id="root">'), html.indexOf('<script type="module"'));
 
-  it('tiene un <h1> dentro de #root', () => {
+  it('tiene un <h1> y al menos un <h2> dentro de #root (jerarquía, no plana)', () => {
     expect(rootBlock).toMatch(/<h1[ >]/);
+    expect(rootBlock).toMatch(/<h2[ >]/);
   });
 
   it('tiene 500+ caracteres de texto visible dentro de #root', () => {
@@ -124,10 +125,26 @@ describe('archivos machine-readable y páginas de confianza', () => {
     expect(llms).toMatch(/zensports\.zenpra\.ai\/registro/);
   });
 
-  it('404.html apunta a sitemap y llms.txt', () => {
+  it('404.html trae un cuerpo en Markdown con links de recuperación', () => {
     const notFound = read('public/404.html');
     expect(notFound).toMatch(/sitemap\.xml/);
     expect(notFound).toMatch(/llms\.txt/);
+    // sintaxis Markdown literal: encabezado # y links [texto](url)
+    expect(notFound).toMatch(/^#\s+404/m);
+    expect(notFound).toMatch(/\[[^\]]+\]\(https:\/\/zensports\.zenpra\.ai\/[^)]*\)/);
+  });
+
+  it('llms.txt tiene una sección "when to use" en inglés para agentes', () => {
+    const llms = read('public/llms.txt');
+    expect(llms).toMatch(/##\s+When to use/i);
+  });
+
+  it('las páginas de confianza responden también en rutas convencionales EN', () => {
+    const vercel = JSON.parse(read('vercel.json'));
+    const dest = (src) => vercel.rewrites.find((r) => r.source === src)?.destination;
+    expect(dest('/about')).toBe('/nosotros.html');
+    expect(dest('/contact')).toBe('/contacto.html');
+    expect(dest('/privacy')).toBe('/privacidad.html');
   });
 
   it('cada página de confianza tiene <h1> y 500+ caracteres de texto', () => {

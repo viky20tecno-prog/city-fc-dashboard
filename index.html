@@ -12,6 +12,7 @@
     <meta name="keywords" content="software deportivo, gestión de club, cobro WhatsApp, inscripciones deportivas, club de fútbol Colombia, ZenSports" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://zensports.zenpra.ai" />
+    <link rel="alternate" type="text/markdown" href="/index.md" />
 
     <!-- Open Graph -->
     <meta property="og:title" content="ZenSports — El OS para tu club deportivo" />
@@ -35,45 +36,76 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "ZenSports",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web",
-      "url": "https://zensports.zenpra.ai",
-      "description": "Software de gestión deportiva con cobro automático por WhatsApp, inscripciones digitales y control de asistencia para clubs en Colombia y Latam.",
-      "offers": [
+      "@graph": [
         {
-          "@type": "Offer",
-          "name": "Starter",
-          "price": "149000",
-          "priceCurrency": "COP",
-          "description": "Hasta 120 jugadores. Jugadores + uniformes + cobro automático."
+          "@type": "Organization",
+          "@id": "https://zensports.zenpra.ai/#organization",
+          "name": "ZenSports",
+          "legalName": "Zenpra",
+          "url": "https://zensports.zenpra.ai",
+          "logo": "https://zensports.zenpra.ai/favicon.png",
+          "email": "hola@zenpra.ai",
+          "description": "Software de gestión para clubes deportivos amateur en Colombia y Latinoamérica: cobro automático por WhatsApp, inscripciones digitales, carnets con QR, uniformes, torneos y reportes financieros.",
+          "areaServed": ["CO", "MX", "AR", "CL", "PE", "EC"],
+          "knowsLanguage": "es",
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "contactType": "sales",
+              "email": "hola@zenpra.ai",
+              "telephone": "+57-302-390-3192",
+              "availableLanguage": "Spanish",
+              "areaServed": "Latam"
+            },
+            {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "email": "hola@zenpra.ai",
+              "availableLanguage": "Spanish"
+            }
+          ]
         },
         {
-          "@type": "Offer",
-          "name": "Pro",
-          "price": "399000",
-          "priceCurrency": "COP",
-          "description": "Hasta 350 jugadores. + torneos + arbitraje + WhatsApp."
-        },
-        {
-          "@type": "Offer",
-          "name": "Scale",
-          "price": "799000",
-          "priceCurrency": "COP",
-          "description": "Hasta 1.000 jugadores. + conciliación + finanzas avanzadas."
+          "@type": "SoftwareApplication",
+          "@id": "https://zensports.zenpra.ai/#software",
+          "name": "ZenSports",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "url": "https://zensports.zenpra.ai",
+          "description": "Software de gestión deportiva con cobro automático por WhatsApp, inscripciones digitales y control de asistencia para clubs en Colombia y Latam.",
+          "publisher": { "@id": "https://zensports.zenpra.ai/#organization" },
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Free",
+              "price": "0",
+              "priceCurrency": "COP",
+              "description": "Gratis permanente. Hasta 20 jugadores."
+            },
+            {
+              "@type": "Offer",
+              "name": "Starter",
+              "price": "149000",
+              "priceCurrency": "COP",
+              "description": "Hasta 120 jugadores. Jugadores + uniformes + cobro automático."
+            },
+            {
+              "@type": "Offer",
+              "name": "Pro",
+              "price": "399000",
+              "priceCurrency": "COP",
+              "description": "Hasta 350 jugadores. + torneos + arbitraje + WhatsApp."
+            },
+            {
+              "@type": "Offer",
+              "name": "Scale",
+              "price": "799000",
+              "priceCurrency": "COP",
+              "description": "Hasta 1.000 jugadores. + conciliación + finanzas avanzadas."
+            }
+          ]
         }
-      ],
-      "provider": {
-        "@type": "Organization",
-        "name": "Zenpra",
-        "url": "https://zensports.zenpra.ai",
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "sales",
-          "availableLanguage": "Spanish"
-        }
-      }
+      ]
     }
     </script>
 
@@ -113,7 +145,37 @@
     </noscript>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!--
+        Contenido base para crawlers y agentes sin JavaScript (y como pantalla
+        de carga con enlaces reales si el bundle tarda). React lo reemplaza
+        al montar — ver src/main.jsx (createRoot().render vacía #root).
+        Mantener el texto alineado con /index.md, /llms.txt y la landing.
+      -->
+      <div id="pre-render-fallback" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#060810;color:#E7E9F0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.7;padding:48px 20px">
+        <main style="max-width:620px;width:100%">
+          <p style="font-size:12px;font-weight:800;letter-spacing:4px;color:#8b5cf6;margin:0">ZENSPORTS</p>
+          <h1 style="font-size:clamp(26px,5vw,36px);font-weight:800;letter-spacing:-0.6px;margin:14px 0 16px">Software de gestión para clubes deportivos</h1>
+          <p style="color:rgba(231,233,240,0.72);margin:0 0 14px">ZenSports digitaliza la administración de un club deportivo amateur: inscripciones, mensualidades y pagos, carnets con código QR, uniformes, torneos, control de asistencia y reportes financieros — con cobro y recordatorios automáticos por WhatsApp, todo en un solo panel.</p>
+          <p style="color:rgba(231,233,240,0.72);margin:0 0 14px">Está pensado para presidentes y administradores de clubes, academias y escuelas deportivas en Colombia y Latinoamérica que hoy manejan todo con hojas de cálculo y grupos de WhatsApp. Un club queda digitalizado en menos de 20 minutos. Prueba gratis de 5 días, sin tarjeta; además hay un plan gratuito permanente para clubes pequeños.</p>
+          <ul style="color:rgba(231,233,240,0.72);margin:0 0 20px 20px">
+            <li>Cobro de mensualidades y control de morosidad por jugador</li>
+            <li>Recordatorios y consultas de pago automáticos por WhatsApp</li>
+            <li>Inscripciones digitales y hoja de vida del jugador</li>
+            <li>Carnets digitales con QR verificable públicamente</li>
+            <li>Uniformes, torneos, asistencia y calendario del club</li>
+            <li>Reportes financieros y conciliación bancaria</li>
+          </ul>
+          <p style="margin:0">
+            <a href="/registro" style="color:#a78bfa;text-decoration:none;font-weight:600">Registrar un club (prueba gratis)</a>
+            &nbsp;·&nbsp;
+            <a href="/login" style="color:#a78bfa;text-decoration:none;font-weight:600">Iniciar sesión</a>
+            &nbsp;·&nbsp;
+            <a href="/nosotros" style="color:#a78bfa;text-decoration:none;font-weight:600">Nosotros</a>
+          </p>
+        </main>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

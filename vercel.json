@@ -1,6 +1,28 @@
 {
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "header", "key": "accept", "value": "(.*text/markdown.*)" }],
+      "destination": "/index.md",
+      "permanent": false
+    },
+    { "source": "/inscripcion/:slug", "destination": "/inscripcion?club_id=:slug", "permanent": false }
+  ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/registro", "destination": "/index.html" },
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/auth/callback", "destination": "/index.html" },
+    { "source": "/inscripcion", "destination": "/index.html" },
+    { "source": "/verificar/:clubSlug/:cedula", "destination": "/index.html" },
+    { "source": "/p/:clubSlug", "destination": "/index.html" },
+    { "source": "/p/:clubSlug/:token", "destination": "/index.html" },
+    { "source": "/asistencia/:clubSlug/:eventoId", "destination": "/index.html" },
+    { "source": "/app", "destination": "/index.html" },
+    { "source": "/app/:path*", "destination": "/index.html" },
+    { "source": "/nosotros", "destination": "/nosotros.html" },
+    { "source": "/contacto", "destination": "/contacto.html" },
+    { "source": "/privacidad", "destination": "/privacidad.html" }
   ],
   "headers": [
     {
@@ -16,6 +38,25 @@
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://olcevdnhmexaahymfzii.supabase.co; connect-src 'self' https://olcevdnhmexaahymfzii.supabase.co wss://olcevdnhmexaahymfzii.supabase.co https://city-fc-api-v2.vercel.app https://api.zensports.zenpra.ai https://admin-zensports.zenpra.ai https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         }
+      ]
+    },
+    {
+      "source": "/",
+      "headers": [
+        { "key": "Vary", "value": "Accept" }
+      ]
+    },
+    {
+      "source": "/index.md",
+      "headers": [
+        { "key": "Content-Type", "value": "text/markdown; charset=utf-8" },
+        { "key": "Vary", "value": "Accept" }
+      ]
+    },
+    {
+      "source": "/llms.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
       ]
     }
   ]

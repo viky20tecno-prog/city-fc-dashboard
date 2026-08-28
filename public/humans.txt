@@ -1,0 +1,15 @@
+/* EQUIPO */
+  ZenSports — un producto de Zenpra
+  Contacto: hola@zenpra.ai
+  Ubicación: Colombia
+  Atención: 🇨🇴 🇲🇽 🇦🇷 🇨🇱 🇵🇪 🇪🇨 y más
+
+/* GRACIAS */
+  A los clubes deportivos que dejaron el Excel y los grupos de WhatsApp
+  para probar algo nuevo.
+
+/* SITIO */
+  Idioma: Español
+  Estándares: HTML5, CSS3, JSON-LD
+  Stack: React, Vite, Vercel
+  Guía para agentes: /llms.txt

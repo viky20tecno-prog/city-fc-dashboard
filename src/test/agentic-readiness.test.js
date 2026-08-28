@@ -112,9 +112,47 @@ describe('archivos machine-readable y páginas de confianza', () => {
       'public/nosotros.html',
       'public/contacto.html',
       'public/privacidad.html',
+      'public/faq.html',
+      'public/humans.txt',
+      'public/.well-known/security.txt',
     ]) {
       expect(existsSync(root + f), `falta ${f}`).toBe(true);
     }
+  });
+
+  it('faq.html: FAQPage en JSON-LD + preguntas visibles en HTML crudo', () => {
+    const faq = read('public/faq.html');
+    const m = faq.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    const data = JSON.parse(m[1]);
+    expect(data['@type']).toBe('FAQPage');
+    expect(data.mainEntity.length).toBeGreaterThanOrEqual(6);
+    // cada pregunta del schema debe aparecer como texto visible (requisito de Google)
+    for (const q of data.mainEntity) {
+      expect(faq).toContain(q.name);
+      expect(faq).toContain(q.acceptedAnswer.text.slice(0, 40));
+    }
+    const h2s = faq.match(/<h2[ >]/g) || [];
+    expect(h2s.length).toBeGreaterThanOrEqual(6);
+  });
+
+  it('security.txt cumple RFC 9116 (Contact + Expires)', () => {
+    const sec = read('public/.well-known/security.txt');
+    expect(sec).toMatch(/^Contact:\s*mailto:/m);
+    expect(sec).toMatch(/^Expires:\s*20\d\d-/m);
+  });
+
+  it('robots.txt da la bienvenida explícita a los crawlers de IA', () => {
+    const robots = read('public/robots.txt');
+    for (const bot of ['GPTBot', 'ClaudeBot', 'PerplexityBot', 'Google-Extended']) {
+      expect(robots).toMatch(new RegExp(`^User-agent:\\s*${bot}`, 'm'));
+    }
+  });
+
+  it('index.html JSON-LD incluye un nodo WebSite', () => {
+    const html = read('index.html');
+    const m = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    const nodes = JSON.parse(m[1])['@graph'];
+    expect(nodes.some((n) => n['@type'] === 'WebSite')).toBe(true);
   });
 
   it('llms.txt sigue el formato llmstxt.org + sección "cuándo usar"', () => {
@@ -148,7 +186,7 @@ describe('archivos machine-readable y páginas de confianza', () => {
   });
 
   it('cada página de confianza tiene <h1> y 500+ caracteres de texto', () => {
-    for (const f of ['public/nosotros.html', 'public/contacto.html', 'public/privacidad.html']) {
+    for (const f of ['public/nosotros.html', 'public/contacto.html', 'public/privacidad.html', 'public/faq.html']) {
       const page = read(f);
       expect(page, f).toMatch(/<h1[ >]/);
       const text = page.replace(/<(script|style)[\s\S]*?<\/\1>/g, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -158,7 +196,7 @@ describe('archivos machine-readable y páginas de confianza', () => {
 
   it('el sitemap incluye las páginas nuevas', () => {
     const sitemap = read('public/sitemap.xml');
-    for (const path of ['/nosotros', '/contacto', '/privacidad']) {
+    for (const path of ['/nosotros', '/contacto', '/privacidad', '/faq']) {
       expect(sitemap).toContain(`https://zensports.zenpra.ai${path}`);
     }
   });

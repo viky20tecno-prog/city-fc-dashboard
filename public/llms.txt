@@ -43,6 +43,7 @@ No es la mejor opción para: ligas profesionales que necesitan scouting, video-a
 ## Enlaces
 
 - [Landing en Markdown](https://zensports.zenpra.ai/index.md): resumen del producto, features y precios en texto plano.
+- [Preguntas frecuentes](https://zensports.zenpra.ai/faq): dudas comunes sobre seguridad, precios, cancelación, otros deportes y el bot de WhatsApp.
 - [Nosotros](https://zensports.zenpra.ai/nosotros): qué es ZenSports y quién lo hace.
 - [Contacto](https://zensports.zenpra.ai/contacto): WhatsApp y correo, cobertura y tiempo de respuesta.
 - [Política de tratamiento de datos](https://zensports.zenpra.ai/privacidad): manejo de datos personales (Ley 1581 de 2012, Colombia).

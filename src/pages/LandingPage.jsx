@@ -1572,6 +1572,7 @@ export default function LandingPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
               {[
                 { label: 'Nosotros', href: '/nosotros' },
+                { label: 'FAQ', href: '/faq' },
                 { label: 'Contacto', href: '/contacto' },
                 { label: 'Privacidad', href: '/privacidad' },
               ].map(({ label, href }) => (

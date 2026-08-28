@@ -1,4 +1,26 @@
+# ZenSports — https://zensports.zenpra.ai
+# Guía para agentes: /llms.txt
+
 User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /auth/
+Disallow: /p/
+Disallow: /verificar/
+Disallow: /asistencia/
+
+# Crawlers de IA / asistentes — bienvenidos al contenido público,
+# mismas rutas privadas excluidas.
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-Web
+User-agent: anthropic-ai
+User-agent: PerplexityBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: CCBot
 Allow: /
 Disallow: /app/
 Disallow: /auth/

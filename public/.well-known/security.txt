@@ -1,0 +1,9 @@
+Contact: mailto:hola@zenpra.ai
+Expires: 2027-08-28T00:00:00.000Z
+Preferred-Languages: es, en
+Canonical: https://zensports.zenpra.ai/.well-known/security.txt
+
+# ZenSports (Zenpra) — reporte de vulnerabilidades.
+# Si encuentras un problema de seguridad, escríbenos a hola@zenpra.ai
+# con "SEGURIDAD" en el asunto. Respondemos en menos de 72 horas.
+# No realices pruebas que degraden el servicio o accedan a datos de terceros.

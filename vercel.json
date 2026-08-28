@@ -7,7 +7,8 @@
       "destination": "/index.md",
       "permanent": false
     },
-    { "source": "/inscripcion/:slug", "destination": "/inscripcion?club_id=:slug", "permanent": false }
+    { "source": "/inscripcion/:slug", "destination": "/inscripcion?club_id=:slug", "permanent": false },
+    { "source": "/security.txt", "destination": "/.well-known/security.txt", "permanent": false }
   ],
   "rewrites": [
     { "source": "/registro", "destination": "/index.html" },
@@ -23,6 +24,8 @@
     { "source": "/nosotros", "destination": "/nosotros.html" },
     { "source": "/contacto", "destination": "/contacto.html" },
     { "source": "/privacidad", "destination": "/privacidad.html" },
+    { "source": "/faq", "destination": "/faq.html" },
+    { "source": "/preguntas-frecuentes", "destination": "/faq.html" },
     { "source": "/about", "destination": "/nosotros.html" },
     { "source": "/contact", "destination": "/contacto.html" },
     { "source": "/privacy", "destination": "/privacidad.html" },
@@ -59,6 +62,12 @@
     },
     {
       "source": "/llms.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/.well-known/security.txt",
       "headers": [
         { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
       ]

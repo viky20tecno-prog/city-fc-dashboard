@@ -203,7 +203,7 @@ describe('archivos machine-readable y páginas de confianza', () => {
 
   it('el sitemap incluye las páginas nuevas', () => {
     const sitemap = read('public/sitemap.xml');
-    for (const path of ['/nosotros', '/contacto', '/privacidad', '/faq']) {
+    for (const path of ['/nosotros', '/contacto', '/privacidad', '/faq', '/guias', '/guias/cobro-de-mensualidades-por-whatsapp']) {
       expect(sitemap).toContain(`https://zensports.zenpra.ai${path}`);
     }
   });
@@ -221,5 +221,48 @@ describe('archivos machine-readable y páginas de confianza', () => {
     const llms = read('public/llms.txt');
     expect(llms).not.toMatch(/\/p\/\{/);
     expect(llms).not.toMatch(/portal_token|:token/);
+  });
+});
+
+describe('guías (contenido citable por agentes)', () => {
+  const vercel = JSON.parse(read('vercel.json'));
+  const articles = [
+    { url: '/guias/cobro-de-mensualidades-por-whatsapp', file: 'public/guia-cobro-mensualidades-whatsapp.html' },
+    { url: '/guias/carnet-de-jugador-club-de-futbol', file: 'public/guia-carnet-club-futbol.html' },
+  ];
+
+  it('el índice /guias existe y enlaza cada artículo', () => {
+    expect(existsSync(root + 'public/guias.html')).toBe(true);
+    const idx = read('public/guias.html');
+    for (const a of articles) expect(idx).toContain(`href="${a.url}"`);
+  });
+
+  it('cada artículo: rewrite en vercel.json, canonical propio, Article + BreadcrumbList, jerarquía y largo', () => {
+    for (const { url, file } of articles) {
+      expect(existsSync(root + file), `falta ${file}`).toBe(true);
+      const html = read(file);
+
+      // el rewrite de URL limpia apunta a este archivo
+      const rw = vercel.rewrites.find((r) => r.source === url);
+      expect(rw, `sin rewrite para ${url}`).toBeTruthy();
+      expect(rw.destination).toBe('/' + file.replace('public/', ''));
+
+      // canonical coincide con la URL limpia (no con el .html)
+      expect(html).toContain(`<link rel="canonical" href="https://zensports.zenpra.ai${url}">`);
+
+      // structured data
+      const m = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+      const nodes = JSON.parse(m[1])['@graph'];
+      expect(nodes.some((n) => n['@type'] === 'Article')).toBe(true);
+      expect(nodes.some((n) => n['@type'] === 'BreadcrumbList')).toBe(true);
+
+      // jerarquía y sustancia
+      expect((html.match(/<h2[ >]/g) || []).length).toBeGreaterThanOrEqual(4);
+      const text = html.replace(/<(script|style)[\s\S]*?<\/\1>/g, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      expect(text.length, `${file} corto`).toBeGreaterThan(2000);
+
+      // no promete features que el producto no tiene (ver PRODUCT.md)
+      expect(html).not.toMatch(/inteligencia artificial|analítica de rendimiento|machine learning/i);
+    }
   });
 });

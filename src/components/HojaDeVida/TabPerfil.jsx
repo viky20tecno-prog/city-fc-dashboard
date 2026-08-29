@@ -8,6 +8,8 @@ import { supabase } from '../../lib/supabase';
 import { authFetch } from '../../lib/authFetch';
 import { API_BASE_URL } from '../../config';
 import { getClubId } from '../../services/api';
+import { useRole } from '../../hooks/useRole';
+import CorregirCedulaModal from './CorregirCedulaModal';
 import { PAISES_NACIMIENTO, PAISES_TEL } from '../../lib/paises';
 import { normalizarCategorias } from '../../lib/categorias';
 
@@ -138,7 +140,9 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
   const [error,     setError]     = useState('');
   const [addingCat, setAddingCat] = useState(false);
   const [newCat,    setNewCat]    = useState({ categoria: '', equipo: '' });
+  const [corrigiendoCedula, setCorrigiendoCedula] = useState(false);
 
+  const { isAdmin } = useRole();
   const isPend = String(jugador.cedula).startsWith('PEND_');
 
   const [form, setForm] = useState({
@@ -480,7 +484,18 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
                 className={INPUT_CLS + ' border-amber-500/50 focus:border-amber-400'}
               />
             ) : (
-              <p className="text-sm text-[var(--text-pri)] font-medium px-3 py-2">{jugador.cedula}</p>
+              <div className="flex items-center justify-between gap-2 px-3 py-2">
+                <span className="text-sm text-[var(--text-pri)] font-medium">{jugador.cedula}</span>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setCorrigiendoCedula(true)}
+                    className="text-[11px] text-[var(--cc)] hover:underline flex-shrink-0"
+                  >
+                    Corregir
+                  </button>
+                )}
+              </div>
             )}
           </div>
           <CampoEdit label="Nombre(s)"   value={form.nombre}    onChange={set('nombre')}    placeholder="Nombre(s)" />
@@ -567,6 +582,15 @@ export default function TabPerfil({ jugador, onFotoUpdate, onUpdate, categoriasJ
       </div>
 
       <SaveBtn />
+
+      {corrigiendoCedula && (
+        <CorregirCedulaModal
+          jugador={jugador}
+          clubId={getClubId()}
+          onClose={() => setCorrigiendoCedula(false)}
+          onDone={({ cedula }) => onUpdate?.({ cedula })}
+        />
+      )}
     </div>
   );
 }

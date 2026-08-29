@@ -368,7 +368,7 @@ export default function Hero({ previewColor, openLead }) {
             <div className="hero-kenburns" style={{ position: 'absolute', inset: 0 }}>
               {HERO_USAR_VIDEO ? (
                 <video
-                  src="/Hero_toma_4.mp4"
+                  src="/hero-athletes.mp4"
                   poster="/hero-athletes.png"
                   autoPlay
                   muted

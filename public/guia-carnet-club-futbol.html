@@ -53,6 +53,8 @@
   <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
   <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9Z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9Z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.6-4 14.4-4 16 0"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
 </svg>
 
 <div class="wrap">
@@ -66,39 +68,24 @@
     <h1>Qué debe tener el carnet de un jugador de un club de fútbol amateur</h1>
     <p class="lead">El carnet cumple dos funciones: identifica al jugador ante un árbitro, un organizador de torneo o un rival, y sirve como constancia de que está inscrito y al día con el club. Un carnet sin foto, sin vigencia o imposible de verificar no cumple ninguna de las dos.</p>
 
-    <div class="hero-art">
-      <svg viewBox="0 0 720 250" role="img" aria-label="Anatomía de un carnet de jugador: foto reciente, nombre y número de documento, club y categoría, vigencia visible y código QR de verificación.">
-        <g font-family="Inter,sans-serif" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <!-- tarjeta, centrada -->
-          <rect x="270" y="42" width="230" height="166" rx="16" fill="#0d0d18" stroke="#3b3b52" stroke-width="2"/>
-          <path d="M270 74h230" stroke="#2a2a3d"/>
-          <text x="385" y="63" text-anchor="middle" font-size="10" fill="#c4b5fd" stroke="none" letter-spacing="2">CLUB DEPORTIVO · SUB-15</text>
-          <rect x="288" y="90" width="62" height="78" rx="8" fill="#1c1c2b" stroke="#8b5cf6"/>
-          <circle cx="319" cy="120" r="13" stroke="#5b5b78"/><path d="M303 158c3-11 29-11 32 0" stroke="#5b5b78"/>
-          <rect x="366" y="94" width="106" height="11" rx="4" fill="#e7e9f0" fill-opacity=".85" stroke="none"/>
-          <rect x="366" y="113" width="78" height="8" rx="3" fill="#9a9ab0" stroke="none"/>
-          <text x="366" y="140" font-size="9" fill="#7a7a92" stroke="none">CC 1.032.401.947</text>
-          <text x="366" y="156" font-size="9" fill="#34d399" stroke="none">Vigente · Temporada 2026</text>
-          <rect x="366" y="164" width="34" height="34" rx="4" fill="#0d0d18" stroke="#8b5cf6"/>
-          <g stroke="none" fill="#8b5cf6"><rect x="371" y="169" width="7" height="7"/><rect x="389" y="169" width="7" height="7"/><rect x="371" y="187" width="7" height="7"/><rect x="382" y="180" width="5" height="5"/></g>
-
-          <!-- callouts: solo izquierda y derecha, sin cruces -->
-          <g stroke="#8b5cf6" stroke-opacity=".5">
-            <path d="M288 116H190"/>
-            <path d="M288 150H150l0 30"/>
-            <path d="M472 100h70"/>
-            <path d="M472 150h50"/>
-            <path d="M400 181h60"/>
-          </g>
-          <g font-size="11" stroke="none" fill="#b9b9cc">
-            <text x="184" y="119" text-anchor="end">Foto reciente</text>
-            <text x="146" y="185" text-anchor="end">Vigencia visible</text>
-            <text x="548" y="103">Nombre + documento</text>
-            <text x="528" y="153">Club y categoría</text>
-            <text x="466" y="196" fill="#c4b5fd">QR de verificación</text>
-          </g>
-        </g>
-      </svg>
+    <div class="diagram">
+      <div class="card-mock">
+        <div class="cm-top">CLUB DEPORTIVO · SUB-15</div>
+        <div class="cm-body">
+          <div class="cm-photo"><svg class="ico"><use href="#i-user"/></svg></div>
+          <div class="cm-lines">
+            <i class="w1"></i>
+            <i class="w2"></i>
+            <i class="ok"></i>
+            <div class="cm-qr">
+              <span></span><span></span><span></span>
+              <span></span><span class="o"></span><span></span>
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="cap">Foto + nombre + documento + categoría + vigencia + QR de verificación.</p>
     </div>
   </header>
 
@@ -151,31 +138,25 @@
   <p>Lo ideal es tener los dos: el digital para verificación confiable y el impreso como respaldo.</p>
 
   <div class="diagram">
-    <svg viewBox="0 0 720 170" role="img" aria-label="Flujo de verificación: se escanea el QR del carnet, se abre una página que confirma si el jugador es miembro activo y muestra su nombre, foto y categoría.">
-      <g font-family="Inter,sans-serif" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="40" y="45" width="80" height="80" rx="10" fill="#0d0d18" stroke="#8b5cf6"/>
-        <g stroke="none" fill="#8b5cf6"><rect x="52" y="57" width="16" height="16"/><rect x="92" y="57" width="16" height="16"/><rect x="52" y="97" width="16" height="16"/><rect x="76" y="80" width="10" height="10"/></g>
-        <text x="80" y="142" text-anchor="middle" font-size="11" fill="#9a9ab0" stroke="none">Escanea el QR</text>
-
-        <path d="M130 85h60" stroke="#8b5cf6"/><path d="m184 79 8 6-8 6" stroke="#8b5cf6"/>
-
-        <rect x="205" y="34" width="70" height="102" rx="12" fill="#0d0d18" stroke="#3b3b52"/>
-        <circle cx="240" cy="70" r="14" fill="#34d399" fill-opacity=".15" stroke="#34d399"/>
-        <path d="M233 70l5 5 9-10" stroke="#34d399"/>
-        <rect x="216" y="94" width="48" height="7" rx="3" fill="#e7e9f0" fill-opacity=".8" stroke="none"/>
-        <rect x="216" y="106" width="34" height="6" rx="3" fill="#9a9ab0" stroke="none"/>
-        <text x="240" y="152" text-anchor="middle" font-size="11" fill="#9a9ab0" stroke="none">Página de verificación</text>
-
-        <path d="M285 85h60" stroke="#8b5cf6"/><path d="m339 79 8 6-8 6" stroke="#8b5cf6"/>
-
-        <g stroke="none" font-size="12">
-          <rect x="365" y="40" width="300" height="40" rx="10" fill="#34d399" fill-opacity=".12" stroke="#34d399" stroke-width="1.4"/>
-          <text x="384" y="64" fill="#34d399">✓ Miembro activo · Juan Pérez · Sub-15</text>
-          <rect x="365" y="92" width="300" height="40" rx="10" fill="#fbbf24" fill-opacity=".1" stroke="#fbbf24" stroke-width="1.4"/>
-          <text x="384" y="116" fill="#fbbf24">✕ No es miembro activo de este club</text>
-        </g>
-      </g>
-    </svg>
+    <div class="flow">
+      <div class="flow-step">
+        <span class="flow-badge"><svg class="ico"><use href="#i-qr"/></svg></span>
+        <p class="flow-t">Escanea el QR</p>
+        <p class="flow-d">Con la cámara del celular, sin instalar nada</p>
+      </div>
+      <div class="flow-conn"><svg class="ico"><use href="#i-chevron"/></svg></div>
+      <div class="flow-step">
+        <span class="flow-badge"><svg class="ico"><use href="#i-phone"/></svg></span>
+        <p class="flow-t">Se abre la verificación</p>
+        <p class="flow-d">Una página del club consulta el registro en vivo</p>
+      </div>
+      <div class="flow-conn"><svg class="ico"><use href="#i-chevron"/></svg></div>
+      <div class="flow-step">
+        <span class="flow-badge done"><svg class="ico"><use href="#i-shield"/></svg></span>
+        <p class="flow-t">Muestra el resultado</p>
+        <p class="flow-d">"Miembro activo" con foto y categoría, o "no activo"</p>
+      </div>
+    </div>
     <p class="cap">Cualquiera puede verificar el carnet — no hace falta ser del club.</p>
   </div>
 

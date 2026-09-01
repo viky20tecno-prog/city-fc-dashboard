@@ -646,24 +646,34 @@ export default function LandingPage() {
           .hero-scrim-x{background:linear-gradient(180deg, rgba(6,8,20,0.70) 0%, rgba(6,8,20,0.90) 40%, rgba(6,8,20,0.96) 100%)!important;}
         }
         @media(max-width:640px){
-          .hero-h1{font-size:32px!important;letter-spacing:-1px!important;}
           .hide-mobile{display:none!important;}
           .show-mobile{display:flex!important;}
           .pricing-grid{grid-template-columns:1fr!important;}
           .bento-wide,.bento-narrow{grid-column:span 6!important;}
           .mobile-menu{display:flex!important;}
-          /* Marca del hero: el logo (76px) + wordmark (40px) no caben en un
-             teléfono — el wordmark se montaba sobre el logo y el subtítulo
-             partía en dos líneas. Se achican a escala móvil. */
+          /* En teléfono el nav sticky ya lleva el logo + "ZENSPORTS"; la fila
+             de marca del hero sobra. Se esconde y en su lugar aparece el H1
+             real (oculto a la vista en desktop, aquí se des-oculta). */
+          .hero-brandrow{display:none!important;}
+          .hero-h1{
+            position:static!important;width:auto!important;height:auto!important;margin:0!important;
+            overflow:visible!important;clip:auto!important;clip-path:none!important;white-space:normal!important;
+            font-size:28px!important;line-height:1.16!important;letter-spacing:-0.8px!important;
+          }
+          /* Badge a una sola línea en móvil. */
+          .hero-badge{font-size:9px!important;padding:5px 12px!important;letter-spacing:0!important;}
           .hero-photo-stage{min-height:clamp(400px,68vh,560px)!important;}
-          .hero-content-wrap{padding-top:92px!important;padding-bottom:52px!important;}
+          .hero-content-wrap{padding-top:92px!important;padding-bottom:28px!important;}
           .hero-content{gap:20px!important;}
-          .hero-brandrow{gap:15px!important;}
-          .hero-brandrow img{height:46px!important;width:46px!important;max-height:46px!important;}
-          .hero-wordmark{font-size:26px!important;letter-spacing:0.5px!important;}
-          .hero-tagline{font-size:9px!important;letter-spacing:2px!important;margin-top:5px!important;}
           .hero-stats{gap:0!important;justify-content:space-between!important;width:100%;}
-          .hero-cta-btn{font-size:13px!important;padding:12px 18px!important;border-radius:10px!important;gap:5px!important;}
+          /* "Descubre el futuro…" deja de ser botón-pill y pasa a link de texto. */
+          .hero-discover{
+            background:none!important;border:none!important;padding:4px 0!important;
+            color:rgba(255,255,255,0.5)!important;font-size:11px!important;letter-spacing:1px!important;
+          }
+          /* CTAs primarios apilados a todo el ancho. */
+          .hero-cta-wrap{flex-direction:column!important;width:100%;}
+          .hero-cta-btn{width:100%!important;justify-content:center!important;font-size:14px!important;padding:14px 18px!important;border-radius:12px!important;gap:6px!important;}
           .footer-grid{grid-template-columns:1fr!important;gap:32px!important;}
           .site-footer{padding-bottom:100px!important;}
           .wa-float{bottom:92px!important;right:16px!important;}

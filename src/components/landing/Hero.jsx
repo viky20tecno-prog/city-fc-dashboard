@@ -422,7 +422,7 @@ export default function Hero({ previewColor, openLead }) {
           <div className="hero-content" style={{ maxWidth: 540, display: 'flex', flexDirection: 'column', gap: 28 }}>
             {/* Badge */}
             <motion.div variants={staggerItem}>
-              <span style={{
+              <span className="hero-badge" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 background: 'linear-gradient(90deg, rgba(106,0,255,0.14), rgba(6,182,212,0.08), rgba(106,0,255,0.14))',
                 border: '1px solid rgba(106,0,255,0.30)',
@@ -434,6 +434,20 @@ export default function Hero({ previewColor, openLead }) {
                 Plataforma líder en gestión deportiva digital · 5 días gratis
               </span>
             </motion.div>
+
+            {/* Titular real de la landing. En desktop el arte + la fila de marca
+                hacen de título visible, así que aquí queda oculto a la vista
+                pero presente en el DOM (SEO / lectores de pantalla); en móvil la
+                media query lo muestra y esconde la fila de marca. */}
+            <motion.h1 variants={staggerItem} className="hero-h1" style={{
+              margin: -1, fontWeight: 800, fontSize: 34, lineHeight: 1.12,
+              letterSpacing: -0.8, color: '#fff', textWrap: 'balance',
+              position: 'absolute', width: 1, height: 1, padding: 0,
+              overflow: 'hidden', clip: 'rect(0 0 0 0)', clipPath: 'inset(50%)',
+              whiteSpace: 'nowrap', border: 0,
+            }}>
+              Todo tu club en <span style={{ color: previewColor }}>un solo panel</span>
+            </motion.h1>
 
             <motion.div variants={staggerItem} className="hero-brandrow" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <ZenSportsLogo variant="icon" size={76} />
@@ -470,6 +484,7 @@ export default function Hero({ previewColor, openLead }) {
 
             <motion.button
               variants={staggerItem}
+              className="hero-discover"
               onClick={() => document.getElementById('producto')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8, alignSelf: 'flex-start',

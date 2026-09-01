@@ -1052,8 +1052,8 @@ export default function LandingPage() {
             </div>
           </Reveal>
 
-          <div style={{ display: 'flex', gap: 56, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Reveal delay={0} style={{ display: 'flex', flexDirection: 'column', gap: 20, flexShrink: 0, maxWidth: 290 }}>
+          <div style={{ display: 'flex', gap: 'clamp(28px, 5vw, 56px)', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Reveal delay={0} style={{ display: 'flex', flexDirection: 'column', gap: 20, flex: '0 1 290px', minWidth: 0 }}>
               {/* Indicador color activo */}
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 12,

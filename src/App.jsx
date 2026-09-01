@@ -18,10 +18,14 @@ const PortalAtleta       = lazy(() => import('./pages/PortalAtleta'));
 const AsistenciaPublica  = lazy(() => import('./pages/AsistenciaPublica'));
 
 function PageLoader() {
+  // Fondo transparente a propósito: en `/` deja ver el #lcp-hero del index.html
+  // (el fondo del hero pintado en HTML estático) mientras carga el chunk de la
+  // ruta, en vez de taparlo con una pantalla negra. En el resto de rutas el
+  // spinner queda sobre el fondo #060810 del <body>.
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'var(--bg-base, #0d0d0d)',
+      background: 'transparent',
     }}>
       <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid #6366f133', borderTopColor: '#6366f1', animation: 'spin 0.7s linear infinite' }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>

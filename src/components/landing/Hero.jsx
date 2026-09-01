@@ -529,7 +529,12 @@ export default function Hero({ previewColor, openLead }) {
                   boxShadow: `0 8px 32px ${previewColor}60`,
                 }}
               >
-                Comenzar prueba gratis de 5 días <ArrowRight size={16} />
+                {/* En móvil "5 días gratis" ya está 3 veces en pantalla (badge,
+                    línea de abajo, barra sticky) — acá el botón pasa a acción
+                    directa, alineado con "Registrar club" del nav. */}
+                <span className="hero-cta-long">Comenzar prueba gratis de 5 días</span>
+                <span className="hero-cta-short">Registra tu club</span>
+                <ArrowRight size={16} />
               </button>
               <button
                 className="btn-ghost hero-cta-btn"

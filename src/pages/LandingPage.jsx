@@ -629,6 +629,8 @@ export default function LandingPage() {
         .color-swatch:hover { transform:scale(1.18) !important; box-shadow: 0 0 0 3px rgba(255,255,255,0.2) !important; }
         .color-swatch { transition:all 0.2s var(--ease-out) !important; }
         .float-badge { display:flex; }
+        /* Botón primario del hero: texto largo en desktop, "Registra tu club" en móvil */
+        .hero-cta-short { display:none; }
         .bento-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:16px; }
         .bento-wide { grid-column:span 4; }
         .bento-narrow { grid-column:span 2; }
@@ -662,6 +664,8 @@ export default function LandingPage() {
           .hero-badge{font-size:9px!important;padding:5px 12px!important;letter-spacing:0!important;}
           /* El H1 ya dice "un solo panel" — no repetirlo en el párrafo. */
           .hero-p-tail{display:none!important;}
+          .hero-cta-long{display:none!important;}
+          .hero-cta-short{display:inline!important;}
           .hero-photo-stage{min-height:clamp(400px,68vh,560px)!important;}
           .hero-content-wrap{padding-top:92px!important;padding-bottom:28px!important;}
           .hero-content{gap:20px!important;}

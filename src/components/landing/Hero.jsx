@@ -538,7 +538,7 @@ export default function Hero({ previewColor, openLead }) {
               </button>
               <button
                 className="btn-ghost hero-cta-btn"
-                onClick={() => document.getElementById('automatizacion')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                onClick={() => document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 8,
                   background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.18)',

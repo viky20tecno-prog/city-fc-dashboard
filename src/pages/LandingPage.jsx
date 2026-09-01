@@ -236,7 +236,7 @@ function FlowDiagram() {
     { Icon: QrCode,        color: '#F5A623', num: '04', title: 'Carnet QR en cancha',  sub: 'Se verifica en segundos en la entrada, sin carnet físico que alguien "olvidó en la casa".' },
   ];
   return (
-    <section style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
+    <section id="como-funciona" style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto', scrollMarginTop: 88 }}>
       <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
         <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Cómo funciona · de principio a fin</p>
         <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>
@@ -888,7 +888,7 @@ export default function LandingPage() {
       </Reveal>
 
       {/* ── FEATURES ─────────────────────────────────────────────────────── */}
-      <section id="producto" style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto' }}>
+      <section id="producto" style={{ padding: '0 24px 88px', maxWidth: 1100, margin: '0 auto', scrollMarginTop: 88 }}>
         <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Producto</p>
           <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>
@@ -949,7 +949,7 @@ export default function LandingPage() {
       <FlowDiagram />
 
       {/* ── IA / WHATSAPP ─────────────────────────────────────────────────── */}
-      <section id="automatizacion" style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto' }}>
+      <section id="automatizacion" style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto', scrollMarginTop: 88 }}>
         <div style={{ display: 'flex', gap: 56, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
           <Reveal delay={0}>
             <WhatsAppMockup />
@@ -1221,7 +1221,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────────────────── */}
-      <section id="precios" style={{ padding: '0 24px 88px', maxWidth: 1200, margin: '0 auto' }}>
+      <section id="precios" style={{ padding: '0 24px 88px', maxWidth: 1200, margin: '0 auto', scrollMarginTop: 88 }}>
         <Reveal style={{ textAlign: 'center', marginBottom: 52 }}>
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>Planes</p>
           <h2 style={{ fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 800, marginBottom: 12, letterSpacing: '-0.8px' }}>Un plan para cada etapa.</h2>

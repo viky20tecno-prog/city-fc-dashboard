@@ -660,6 +660,8 @@ export default function LandingPage() {
           }
           /* Badge a una sola línea en móvil. */
           .hero-badge{font-size:9px!important;padding:5px 12px!important;letter-spacing:0!important;}
+          /* El H1 ya dice "un solo panel" — no repetirlo en el párrafo. */
+          .hero-p-tail{display:none!important;}
           .hero-photo-stage{min-height:clamp(400px,68vh,560px)!important;}
           .hero-content-wrap{padding-top:92px!important;padding-bottom:28px!important;}
           .hero-content{gap:20px!important;}

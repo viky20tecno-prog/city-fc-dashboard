@@ -462,7 +462,9 @@ export default function Hero({ previewColor, openLead }) {
             </motion.div>
 
             <motion.p variants={staggerItem} style={{ fontSize: 16, lineHeight: 1.7, color: 'rgba(255,255,255,0.6)', margin: 0 }}>
-              Digitalizamos la gestión de tu club: inscripciones, pagos, carnets con QR, uniformes y automatización por WhatsApp — todo en un solo panel, sin hojas de cálculo.
+              Digitalizamos la gestión de tu club: inscripciones, pagos, carnets con QR, uniformes y automatización por WhatsApp —{' '}
+              {/* En móvil el H1 ya dice "un solo panel"; se omite acá para no repetirlo. */}
+              <span className="hero-p-tail">todo en un solo panel, </span>sin hojas de cálculo.
             </motion.p>
 
             <motion.div variants={staggerItem} className="hero-stats" style={{ display: 'flex', gap: 20 }}>

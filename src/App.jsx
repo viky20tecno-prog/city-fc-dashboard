@@ -1,6 +1,11 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import ProtectedRoute from './components/ProtectedRoute';
+
+// ProtectedRoute arrastra `lib/supabase` (createClient) — 194 KB. Antes se
+// importaba de forma estática acá y Vite lo metía en el grafo del entry,
+// así que TODA visita (landing incluida) descargaba + modulepreload-eaba
+// el chunk de Supabase sin usarlo. Ahora es lazy: solo entra en /app/*.
+const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
 
 const Dashboard      = lazy(() => import('./pages/Dashboard'));
 const Login          = lazy(() => import('./pages/Login'));

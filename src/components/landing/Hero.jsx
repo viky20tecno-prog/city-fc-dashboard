@@ -369,7 +369,7 @@ export default function Hero({ previewColor, openLead }) {
               {HERO_USAR_VIDEO ? (
                 <video
                   src="/hero-athletes.mp4"
-                  poster="/hero-athletes.png"
+                  poster="/hero-poster.jpg"
                   autoPlay
                   muted
                   loop
@@ -416,6 +416,7 @@ export default function Hero({ previewColor, openLead }) {
           variants={staggerContainer}
           initial="hidden"
           animate="show"
+          className="hero-content-wrap"
           style={{ position: 'relative', zIndex: 2, maxWidth: 1100, margin: '0 auto', width: '100%', padding: '128px 24px 90px' }}
         >
           <div className="hero-content" style={{ maxWidth: 540, display: 'flex', flexDirection: 'column', gap: 28 }}>
@@ -434,13 +435,13 @@ export default function Hero({ previewColor, openLead }) {
               </span>
             </motion.div>
 
-            <motion.div variants={staggerItem} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <motion.div variants={staggerItem} className="hero-brandrow" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <ZenSportsLogo variant="icon" size={76} />
-              <div>
-                <div style={{ fontFamily: 'var(--font-brand)', fontSize: 40, letterSpacing: 1, color: '#fff', lineHeight: 1 }}>
+              <div style={{ minWidth: 0 }}>
+                <div className="hero-wordmark" style={{ fontFamily: 'var(--font-brand)', fontSize: 40, letterSpacing: 1, color: '#fff', lineHeight: 1 }}>
                   <span style={{ opacity: 0.82 }}>ZEN</span><span style={{ color: previewColor }}>SPORTS</span>
                 </div>
-                <div style={{ fontSize: 11.5, letterSpacing: 3, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
+                <div className="hero-tagline" style={{ fontSize: 11.5, letterSpacing: 3, color: 'rgba(255,255,255,0.4)', marginTop: 6, whiteSpace: 'nowrap' }}>
                   — GESTIÓN DEPORTIVA DIGITAL —
                 </div>
               </div>
@@ -450,7 +451,7 @@ export default function Hero({ previewColor, openLead }) {
               Digitalizamos la gestión de tu club: inscripciones, pagos, carnets con QR, uniformes y automatización por WhatsApp — todo en un solo panel, sin hojas de cálculo.
             </motion.p>
 
-            <motion.div variants={staggerItem} style={{ display: 'flex', gap: 20 }}>
+            <motion.div variants={staggerItem} className="hero-stats" style={{ display: 'flex', gap: 20 }}>
               {HERO_STATS.map(({ Icon, label }) => (
                 <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7 }}>
                   <div style={{

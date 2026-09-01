@@ -640,7 +640,10 @@ export default function LandingPage() {
         @media(max-width:820px){
           .hero-photo-stage{min-height:clamp(460px,74vh,620px)!important;}
           .hero-content{max-width:100%!important;}
-          .hero-scrim-x{background:linear-gradient(180deg, rgba(6,8,20,0.85) 0%, rgba(6,8,20,0.68) 45%, rgba(6,8,20,0.9) 100%)!important;}
+          /* En móvil/tablet el video queda detrás del texto: se deja asomar
+             arriba (solo el badge) y se oscurece fuerte donde caen wordmark,
+             párrafo y botones, para que las letras no se mezclen con la imagen. */
+          .hero-scrim-x{background:linear-gradient(180deg, rgba(6,8,20,0.70) 0%, rgba(6,8,20,0.90) 40%, rgba(6,8,20,0.96) 100%)!important;}
         }
         @media(max-width:640px){
           .hero-h1{font-size:32px!important;letter-spacing:-1px!important;}
@@ -649,6 +652,17 @@ export default function LandingPage() {
           .pricing-grid{grid-template-columns:1fr!important;}
           .bento-wide,.bento-narrow{grid-column:span 6!important;}
           .mobile-menu{display:flex!important;}
+          /* Marca del hero: el logo (76px) + wordmark (40px) no caben en un
+             teléfono — el wordmark se montaba sobre el logo y el subtítulo
+             partía en dos líneas. Se achican a escala móvil. */
+          .hero-photo-stage{min-height:clamp(400px,68vh,560px)!important;}
+          .hero-content-wrap{padding-top:92px!important;padding-bottom:52px!important;}
+          .hero-content{gap:20px!important;}
+          .hero-brandrow{gap:15px!important;}
+          .hero-brandrow img{height:46px!important;width:46px!important;max-height:46px!important;}
+          .hero-wordmark{font-size:26px!important;letter-spacing:0.5px!important;}
+          .hero-tagline{font-size:9px!important;letter-spacing:2px!important;margin-top:5px!important;}
+          .hero-stats{gap:0!important;justify-content:space-between!important;width:100%;}
           .hero-cta-btn{font-size:13px!important;padding:12px 18px!important;border-radius:10px!important;gap:5px!important;}
           .footer-grid{grid-template-columns:1fr!important;gap:32px!important;}
           .site-footer{padding-bottom:100px!important;}

@@ -119,8 +119,11 @@
 
     <title>ZenSports — Gestión deportiva con cobro automático por WhatsApp</title>
 
-    <!-- Preload hero image (LCP candidate) -->
-    <link rel="preload" as="image" href="/og-image.jpg" fetchpriority="high" />
+    <!-- Preload del poster del hero — es el elemento LCP de la landing (el
+         <video>/<img> de fondo vive dentro del chunk JS de LandingPage, así
+         que sin esto el navegador lo descubre tardísimo). og-image.jpg NO se
+         renderiza en ninguna página; solo es la tarjeta de redes sociales. -->
+    <link rel="preload" as="image" href="/hero-poster.jpg" fetchpriority="high" />
 
     <!-- Sport Event: solo para el wordmark "ZenSports" — no usar como heading genérico -->
     <style>

@@ -647,10 +647,8 @@ export default function LandingPage() {
         }
         @media(max-width:640px){
           .hide-mobile{display:none!important;}
-          .show-mobile{display:flex!important;}
           .pricing-grid{grid-template-columns:1fr!important;}
           .bento-wide,.bento-narrow{grid-column:span 6!important;}
-          .mobile-menu{display:flex!important;}
           /* En teléfono el nav sticky ya lleva el logo + "ZENSPORTS"; la fila
              de marca del hero sobra. Se esconde y en su lugar aparece el H1
              real (oculto a la vista en desktop, aquí se des-oculta). */
@@ -678,8 +676,16 @@ export default function LandingPage() {
           .site-footer{padding-bottom:100px!important;}
           .wa-float{bottom:92px!important;right:16px!important;}
         }
-        .show-mobile{display:none;}
+        .nav-burger{display:none;}
         .mobile-menu{display:none;}
+        /* El nav completo (wordmark + 4 links + 2 botones) no cabe en la barra
+           hasta ~1000px de ancho — abajo de eso pasa a hamburguesa. Breakpoint
+           propio, independiente del resto de la página (que corta en 640). */
+        @media(max-width:1000px){
+          .nav-desktop{display:none!important;}
+          .nav-burger{display:flex!important;}
+          .mobile-menu{display:flex!important;}
+        }
       `}</style>
 
       {/* ── NAVBAR ──────────────────────────────────────────────────────── */}
@@ -700,7 +706,7 @@ export default function LandingPage() {
             <ZenSportsLogo variant="icon" size={32} />
             <span style={{ fontFamily: 'var(--font-brand)', fontSize: 20, letterSpacing: 3, color: '#fff', lineHeight: 1 }}>ZENSPORTS</span>
           </button>
-          <div className="hide-mobile" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          <div className="nav-desktop" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {[
               { label: 'Inicio',         anchor: null             },
               { label: 'Producto',       anchor: 'producto'       },
@@ -718,15 +724,16 @@ export default function LandingPage() {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button className="btn-ghost hide-mobile" onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 14, cursor: 'pointer', padding: '10px 16px', borderRadius: 8, minHeight: 44 }}>
+            <button className="btn-ghost nav-desktop" onClick={() => navigate('/login')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 14, cursor: 'pointer', padding: '10px 16px', borderRadius: 8, minHeight: 44 }}>
               Iniciar sesión
             </button>
-            <button className="btn-primary hide-mobile" onClick={() => openLead('free')} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 9, padding: '10px 20px', cursor: 'pointer', boxShadow: `0 0 20px ${previewColor}40`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s', minHeight: 44 }}>
+            <button className="btn-primary nav-desktop" onClick={() => openLead('free')} style={{ background: previewColor, border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, borderRadius: 9, padding: '10px 20px', cursor: 'pointer', boxShadow: `0 0 20px ${previewColor}40`, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s', minHeight: 44 }}>
               Registrar club
             </button>
-            {/* Hamburger — solo visible en móvil */}
+            {/* Hamburger — visible en móvil y tablet (el nav completo no cabe
+                en la barra hasta ~1000px de ancho). */}
             <button
-              className="show-mobile btn-ghost"
+              className="nav-burger btn-ghost"
               onClick={() => setMobileMenuOpen(v => !v)}
               style={{ background: 'none', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '8px', cursor: 'pointer', color: '#fff', alignItems: 'center', justifyContent: 'center', minHeight: 40, minWidth: 40 }}
               aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}

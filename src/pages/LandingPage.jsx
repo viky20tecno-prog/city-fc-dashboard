@@ -90,7 +90,7 @@ function WhatsAppMockup() {
   ];
   return (
     <div style={{
-      width: '100%', maxWidth: 310, flexShrink: 0,
+      width: '100%', maxWidth: 310, minWidth: 0,
       borderRadius: 20, overflow: 'hidden',
       border: '1px solid rgba(37,211,102,0.22)',
       boxShadow: '0 32px 80px rgba(0,0,0,0.55), 0 0 60px rgba(37,211,102,0.06)',
@@ -273,7 +273,7 @@ function FlowDiagram() {
 function TechTrust() {
   return (
     <Reveal delay={150} style={{ marginTop: 40 }}>
-      <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '28px 36px', maxWidth: 760, margin: '0 auto' }}>
+      <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '24px clamp(18px, 5vw, 36px)', maxWidth: 760, margin: '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
           <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(0,170,255,0.12)', border: '1px solid rgba(0,170,255,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Shield size={15} color="#00AAFF" />
@@ -950,11 +950,11 @@ export default function LandingPage() {
 
       {/* ── IA / WHATSAPP ─────────────────────────────────────────────────── */}
       <section id="automatizacion" style={{ padding: '0 24px 96px', maxWidth: 1100, margin: '0 auto', scrollMarginTop: 88 }}>
-        <div style={{ display: 'flex', gap: 56, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Reveal delay={0}>
+        <div style={{ display: 'flex', gap: 'clamp(32px, 5vw, 56px)', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Reveal delay={0} style={{ minWidth: 0, maxWidth: '100%' }}>
             <WhatsAppMockup />
           </Reveal>
-          <Reveal delay={100} style={{ maxWidth: 460, flexShrink: 0 }}>
+          <Reveal delay={100} style={{ maxWidth: 460, flex: '1 1 300px', minWidth: 0 }}>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: 'uppercase', marginBottom: 14 }}>IA + Automatización</p>
             <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, lineHeight: 1.15, marginBottom: 10, letterSpacing: '-0.8px' }}>
               Tu asistente virtual trabaja 24/7 por ti.

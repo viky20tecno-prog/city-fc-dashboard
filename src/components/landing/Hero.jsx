@@ -16,6 +16,13 @@ import ZenSportsLogo from '../brand/ZenSportsLogo';
    imagen estática. Poné en false para volver a hero-athletes.png sin más. */
 const HERO_USAR_VIDEO = true;
 
+/* El video del hero (~1.4 MB, autoplay) solo se sirve en pantallas anchas.
+   En móvil queda tapado casi por completo por el scrim (rgba 0.96) y en 4G
+   compite con el render de todo lo demás — ahí se muestra el poster estático
+   (hero-poster.jpg, que además es el elemento LCP y va precargado en el
+   <head>). Umbral alineado con la media query .hero-photo-stage (820px). */
+const HERO_VIDEO_MIN_WIDTH = 821;
+
 /* ── Iconos "Jugadores / Pagos / Carnets / WhatsApp / Reportes" ──────────────
    Mapeados 1:1 a features que existen de verdad en el producto (mismas
    4 que aparecen en ACTIVITY más abajo, + Reportes de Finanzas.jsx) — antes
@@ -316,6 +323,15 @@ export default function Hero({ previewColor, openLead }) {
   const photoRef = useRef(null);
   const reduceMotionRef = useRef(false);
 
+  // Solo montar el <video> del fondo en pantallas anchas. Se decide en el
+  // initializer (no en un useEffect) para que el primer render ya sea el
+  // correcto y no haya flash img→video. App es 100% client-side, así que
+  // window siempre existe acá.
+  const [usarVideo] = useState(
+    () => HERO_USAR_VIDEO && typeof window !== 'undefined'
+      && window.innerWidth >= HERO_VIDEO_MIN_WIDTH,
+  );
+
   // Parallax de scroll: acotado al alto de la propia foto (no de todo el
   // hero) para que el desplazamiento se sienta mientras la foto está en
   // pantalla, no diluido a lo largo de todo el scroll de la sección.
@@ -366,7 +382,7 @@ export default function Hero({ previewColor, openLead }) {
         <motion.div style={{ y: scrollShiftY, position: 'absolute', inset: 0 }}>
           <motion.div style={{ x: mouseShiftX, y: mouseShiftY, position: 'absolute', inset: 0 }}>
             <div className="hero-kenburns" style={{ position: 'absolute', inset: 0 }}>
-              {HERO_USAR_VIDEO ? (
+              {usarVideo ? (
                 <video
                   src="/hero-athletes.mp4"
                   poster="/hero-poster.jpg"
@@ -379,14 +395,15 @@ export default function Hero({ previewColor, openLead }) {
                 />
               ) : (
                 <img
-                  src="/hero-athletes.png"
+                  src={HERO_USAR_VIDEO ? '/hero-poster.jpg' : '/hero-athletes.png'}
                   alt="ZenSports — atletas de fútbol, básquet, ciclismo, natación, tenis y voleibol con energía morada"
                   fetchpriority="high"
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '58% center' }}
                 />
               )}
               {/* Los rayos/chispas dibujados encima solo tienen sentido sobre
-                  la imagen estática — el video ya trae su propia energía. */}
+                  la imagen estática grande — el video / poster ya traen su
+                  propia energía. */}
               {!HERO_USAR_VIDEO && (
                 <>
                   <HeroLightning />

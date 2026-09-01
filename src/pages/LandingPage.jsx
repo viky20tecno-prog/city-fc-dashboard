@@ -1638,7 +1638,7 @@ export default function LandingPage() {
           onClick={() => navigate(`/registro?color=${encodeURIComponent(previewColor)}`)}
           style={{ width: '100%', background: previewColor, border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, borderRadius: 12, padding: '15px', cursor: 'pointer', boxShadow: `0 4px 20px ${previewColor}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, transition: 'background-color 0.3s, border-color 0.3s, box-shadow 0.3s' }}
         >
-          Probar gratis · 5 días <ArrowRight size={16} />
+          Registra tu club <ArrowRight size={16} />
         </button>
       </div>
 

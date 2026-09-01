@@ -395,7 +395,7 @@ export default function Hero({ previewColor, openLead }) {
                 />
               ) : (
                 <img
-                  src={HERO_USAR_VIDEO ? '/hero-poster.jpg' : '/hero-athletes.png'}
+                  src={HERO_USAR_VIDEO ? '/hero-poster.webp' : '/hero-athletes.png'}
                   alt="ZenSports — atletas de fútbol, básquet, ciclismo, natación, tenis y voleibol con energía morada"
                   fetchpriority="high"
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '58% center' }}

@@ -123,7 +123,7 @@
          <video>/<img> de fondo vive dentro del chunk JS de LandingPage, así
          que sin esto el navegador lo descubre tardísimo). og-image.jpg NO se
          renderiza en ninguna página; solo es la tarjeta de redes sociales. -->
-    <link rel="preload" as="image" href="/hero-poster.jpg" fetchpriority="high" />
+    <link rel="preload" as="image" href="/hero-poster.webp" fetchpriority="high" />
 
     <!-- Sport Event: solo para el wordmark "ZenSports" — no usar como heading genérico -->
     <style>
@@ -174,7 +174,7 @@
            fuera más grande, el LCP saltaría a él (a los ~3s). 82vh deja margen.
          position:absolute detrás de #root (z-index) — cuando la landing real
          monta (fondo opaco) lo tapa; el LCP ya quedó registrado. -->
-    <img id="lcp-hero" src="/hero-poster.jpg" fetchpriority="high"
+    <img id="lcp-hero" src="/hero-poster.webp" fetchpriority="high"
          alt="ZenSports — plataforma de gestión para clubes deportivos"
          style="position:absolute;top:0;left:0;width:100%;height:82vh;object-fit:cover;object-position:58% center;z-index:0" />
     <div style="position:absolute;top:0;left:0;right:0;height:82vh;z-index:0;pointer-events:none;background:linear-gradient(180deg,rgba(6,8,20,0.72) 0%,rgba(6,8,20,0.9) 45%,rgba(6,8,20,0.97) 100%)"></div>

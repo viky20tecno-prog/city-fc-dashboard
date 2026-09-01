@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 // ProtectedRoute arrastra `lib/supabase` (createClient) — 194 KB. Antes se
 // importaba de forma estática acá y Vite lo metía en el grafo del entry,
@@ -33,9 +33,25 @@ function PageLoader() {
   );
 }
 
+// El #lcp-hero / #lcp-hero-scrim del index.html se quedan en el DOM en `/`
+// (quitarlos rompe el LCP). Al navegar a otra ruta sin recargar hay que
+// sacarlos o asoman por detrás. main.jsx cubre las cargas directas; esto
+// cubre la navegación cliente.
+function RouteHeroCleanup() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (pathname !== '/') {
+      document.getElementById('lcp-hero')?.remove();
+      document.getElementById('lcp-hero-scrim')?.remove();
+    }
+  }, [pathname]);
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
+      <RouteHeroCleanup />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Rutas públicas */}

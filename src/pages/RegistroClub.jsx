@@ -593,30 +593,11 @@ export default function RegistroClub() {
         </div>
       </div>
 
+      {/* Las @keyframes (blob-drift-*, blob-morph, spin) viven en index.css.
+          Este <style> se re-renderiza cada 18s al ciclar el color del club, así
+          que solo debe tener reglas dependientes del color — nada de keyframes,
+          o las animaciones se reinician en cada re-parseo (bug de WebView Android). */}
       <style>{`
-        @keyframes blob-drift-1 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33%       { transform: translate(4%, 6%) scale(1.06); }
-          66%       { transform: translate(-3%, -4%) scale(0.96); }
-        }
-        @keyframes blob-drift-2 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33%       { transform: translate(-5%, -4%) scale(1.08); }
-          66%       { transform: translate(3%, 5%) scale(0.94); }
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes blob-morph {
-          0%   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-          16%  { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-          33%  { border-radius: 50% 60% 30% 40% / 40% 30% 70% 60%; }
-          50%  { border-radius: 40% 60% 50% 70% / 60% 50% 40% 30%; }
-          66%  { border-radius: 70% 30% 50% 50% / 30% 50% 60% 70%; }
-          83%  { border-radius: 45% 55% 65% 35% / 55% 45% 35% 65%; }
-          100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-        }
         input::placeholder { color: #374151; }
         input:focus {
           outline: none;

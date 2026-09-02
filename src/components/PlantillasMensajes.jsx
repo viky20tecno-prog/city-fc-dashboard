@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { MessageSquarePlus, Pencil, Trash2, ToggleLeft, ToggleRight, Plus, X, QrCode, Send, Check, Search, Copy } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { MessageSquarePlus, Pencil, Trash2, ToggleLeft, ToggleRight, Plus, X, QrCode, Send, Check, Search, Copy, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getClubId } from '../services/api';
 
@@ -47,6 +47,8 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
   const [ecToast, setEcToast] = useState('');
   const [limpiandoEc, setLimpiandoEc] = useState(false);
   const [plantillaToast, setPlantillaToast] = useState('');
+  const [ecRefrescando, setEcRefrescando] = useState(false);
+  const ecLastLoad = useRef(0);
 
   const authHeaders = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -66,24 +68,59 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
     } finally { setLoading(false); }
   }, []);
 
-  const loadEstadoCuenta = useCallback(async () => {
-    setEcLoading(true);
+  // El estado de cuenta se calcula en vivo en el servidor a partir de los pagos ya
+  // registrados — no hay caché ni demora del lado del backend. El único riesgo de ver
+  // datos viejos es que esta vista (SPA) mantenga en memoria la lista de una carga
+  // anterior: por eso se recarga al montar, al volver a la pestaña y con el botón
+  // "Actualizar". Con `silent` refrescamos en segundo plano sin parpadear la lista
+  // ni perder los checks locales de "ya_enviado" que el admin acaba de tocar.
+  const loadEstadoCuenta = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setEcLoading(true);
     setEcError('');
     try {
       const hdrs = await authHeaders();
       const r = await fetch(`${API}/players/estado-cuenta-lista?club_id=${clubId()}`, { headers: hdrs });
       const d = await r.json();
-      if (!d.success) { setEcError(d.error || 'No se pudo cargar la lista'); setEcLista([]); return; }
-      setEcLista(
-        (d.data || []).sort((a, b) => `${a.nombre} ${a.apellidos}`.localeCompare(`${b.nombre} ${b.apellidos}`, 'es'))
-      );
+      if (!d.success) {
+        if (!silent) { setEcError(d.error || 'No se pudo cargar la lista'); setEcLista([]); }
+        return false;
+      }
+      const ordenar = arr => [...arr].sort((a, b) => `${a.nombre} ${a.apellidos}`.localeCompare(`${b.nombre} ${b.apellidos}`, 'es'));
+      setEcLista(prev => {
+        if (!silent) return ordenar(d.data || []);
+        const enviadoPrev = new Map(prev.map(j => [String(j.cedula), j.ya_enviado]));
+        return ordenar((d.data || []).map(j =>
+          enviadoPrev.has(String(j.cedula)) ? { ...j, ya_enviado: enviadoPrev.get(String(j.cedula)) } : j
+        ));
+      });
+      ecLastLoad.current = Date.now();
+      return true;
     } catch (e) {
-      setEcError(e.message);
-      setEcLista([]);
-    } finally { setEcLoading(false); }
+      if (!silent) { setEcError(e.message); setEcLista([]); }
+      return false;
+    } finally {
+      if (!silent) setEcLoading(false);
+    }
   }, []);
 
   useEffect(() => { load(); loadEstadoCuenta(); }, [load, loadEstadoCuenta]);
+
+  // Al volver a esta pestaña (p. ej. tras registrar un pago en Financiero, en otra
+  // pestaña del navegador o en el celular) recargamos la lista en segundo plano.
+  // Guarda de 10s para no repetir la consulta en cada alt-tab.
+  useEffect(() => {
+    const refrescar = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (Date.now() - ecLastLoad.current < 10_000) return;
+      loadEstadoCuenta({ silent: true });
+    };
+    window.addEventListener('focus', refrescar);
+    document.addEventListener('visibilitychange', refrescar);
+    return () => {
+      window.removeEventListener('focus', refrescar);
+      document.removeEventListener('visibilitychange', refrescar);
+    };
+  }, [loadEstadoCuenta]);
 
   const openNew  = () => { setForm(EMPTY); setError(''); setModal({ mode: 'new' }); };
   const openEdit = p  => { setForm({ ...p }); setError(''); setModal({ mode: 'edit', id: p.id }); };
@@ -243,11 +280,28 @@ export default function PlantillasMensajes({ color = '#6A00FF', clubConfig }) {
 
       {/* Card — Estado de cuenta, envío manual jugador por jugador */}
       <div className="mb-5 bg-[var(--bg-card)] border border-[rgba(37,211,102,0.25)] rounded-2xl p-5 space-y-3">
-        <p className="text-sm font-bold text-[var(--text-pri)] flex items-center gap-2">
-          <span>💬</span> Estado de cuenta
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm font-bold text-[var(--text-pri)] flex items-center gap-2">
+            <span>💬</span> Estado de cuenta
+          </p>
+          <button
+            onClick={async () => {
+              setEcRefrescando(true);
+              const ok = await loadEstadoCuenta({ silent: true });
+              setEcRefrescando(false);
+              setEcToast(ok ? 'Lista actualizada con los pagos más recientes' : 'No se pudo actualizar la lista — revisá la conexión');
+              setTimeout(() => setEcToast(''), 4000);
+            }}
+            disabled={ecRefrescando || ecLoading}
+            title="Volver a cargar la lista con los pagos registrados más recientes"
+            className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-[var(--text-sec)] border border-[var(--cc20)] hover:text-[var(--text-pri)] hover:border-[var(--cc30)] disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            <RefreshCw size={12} className={ecRefrescando ? 'animate-spin' : ''} />
+            {ecRefrescando ? 'Actualizando…' : 'Actualizar'}
+          </button>
+        </div>
         <p className="text-xs text-[var(--text-sec)]">
-          El mensaje ya viene armado (mensualidades, uniformes, torneos + portal). Al hacer clic en "Enviar" se copia al portapapeles y se abre el chat del jugador — pegalo con <strong>Ctrl+V</strong> y confirmá el envío desde tu WhatsApp. El check queda a tu criterio, para llevar la cuenta de a quién ya le escribiste este mes.
+          El mensaje ya viene armado (mensualidades, uniformes, torneos + portal) y se calcula al momento con los pagos ya registrados. Al hacer clic en "Enviar" se copia al portapapeles y se abre el chat del jugador — pegalo con <strong>Ctrl+V</strong> y confirmá el envío desde tu WhatsApp. El check queda a tu criterio, para llevar la cuenta de a quién ya le escribiste este mes.
         </p>
 
         {ecToast && (

@@ -143,6 +143,17 @@
       }
       /* #root por encima del #lcp-hero (fondo estático del hero, ver <body>) */
       #root { position: relative; z-index: 1; }
+
+      /* #pre-render-fallback (ver <body>) es contenido para crawlers y clientes
+         sin JS. Con JS activo lo ocultamos ANTES del primer paint para que esa
+         "pantalla de texto" no parpadee en cada carga mientras el bundle baja y
+         React monta. React igual vacía #root al montar — esto sólo mata el flash.
+         Navegadores sin @media(scripting) caen a la limpieza de main.jsx. */
+      @media (scripting: enabled) {
+        /* !important: el div trae `display:flex` en su style inline (así renderiza
+           sin CSS externo para crawlers no-JS) y eso gana a un selector normal. */
+        #pre-render-fallback { display: none !important; }
+      }
     </style>
 
     <!-- Fuentes — non-blocking (media print trick) -->

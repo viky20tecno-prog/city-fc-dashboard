@@ -12,6 +12,11 @@ import App from './App.jsx'
 //     lo descarte y el LCP salte al <img> del Hero de React (~6s). Se queda;
 //     cuando la landing real monta (fondo opaco) lo tapa.
 //   - Navegación cliente `/` → otra ruta → los quita <RouteHeroCleanup> en App.
+// Fallback SEO/no-JS de index.html: lo quitamos antes de montar React para que
+// no parpadee esa pantalla de texto en navegadores que no soportan
+// @media (scripting: enabled) (ver index.html). React igual vaciaría #root.
+document.getElementById('pre-render-fallback')?.remove();
+
 if (window.location.pathname !== '/') {
   document.getElementById('lcp-hero')?.remove();
   document.getElementById('lcp-hero-scrim')?.remove();

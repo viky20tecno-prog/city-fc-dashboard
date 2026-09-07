@@ -435,12 +435,12 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       { h: 'DIRECCIÓN',       get: j => (j.direccion || '').toUpperCase(),               req: false },
       { h: 'CONTACTO EMERG.', get: j => (j.familiar_emergencia || '').toUpperCase(),     req: false },
       { h: 'CEL. CONTACTO',   get: j => String(j.celular_contacto || ''),               req: false },
+      { h: 'ESTADO',          get: j => j.activo ? 'ACTIVO' : 'INACTIVO',               req: true  },
       { h: 'OBSERVACIONES',   get: j => j.notas || '',                                   req: false },
       { h: 'CATEGORÍA',       get: j => (j.categoria || '').toUpperCase(),               req: true  },
       { h: 'EQUIPO',          get: j => (j.equipo || '').toUpperCase(),                  req: false },
       { h: 'POSICIÓN',        get: j => (j.posicion || '').toUpperCase(),                req: false },
       { h: 'N° CAMISETA',     get: j => String(j.numero_camiseta || ''),                req: false },
-      { h: 'ESTADO',          get: j => j.activo ? 'ACTIVO' : 'INACTIVO',               req: true  },
     ];
 
     const esPend    = (j) => String(j.cedula).startsWith('PEND_');
@@ -486,6 +486,10 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     hRow.height = 22;
     ws.autoFilter = { from: { row: 2, column: 1 }, to: { row: 2, column: 1 + CAMPOS.length } };
 
+    // Columna ESTADO (ACTIVO/INACTIVO) — ya no es la última, se ubica dinámicamente
+    // para el coloreado especial.
+    const COL_ESTADO = CAMPOS.findIndex(c => c.h === 'ESTADO') + 2; // +1 por la col '#', +1 por 0-based→1-based
+
     // Filas de datos
     todos.forEach((j, idx) => {
       const isPend     = esPend(j);
@@ -515,11 +519,11 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
         } else {
           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colNum === 1 ? 'FFF1F5F9' : zebra } };
           cell.font = { size: 10, name: 'Calibri', color: { argb: 'FF1E293B' },
-            bold: colNum === 1 + CAMPOS.length && j.activo };  // ESTADO en negrita si activo
+            bold: colNum === COL_ESTADO && j.activo };  // ESTADO en negrita si activo
         }
 
         // Color especial para celda ESTADO
-        if (!isPend && colNum === 1 + CAMPOS.length) {
+        if (!isPend && colNum === COL_ESTADO) {
           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: j.activo ? 'FFD1FAE5' : 'FFF3F4F6' } };
           cell.font = { size: 10, name: 'Calibri', bold: true, color: { argb: j.activo ? 'FF166534' : 'FF9CA3AF' } };
         }

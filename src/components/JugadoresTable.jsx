@@ -216,6 +216,51 @@ function EstadoBadge({ estado }) {
   );
 }
 
+/* ── menú de acciones (Descargar / Importar) — cada opción con su descripción ── */
+function AccionesMenu({ label, icon: Icon, tint, items }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+  return (
+    <div ref={ref} className="relative" style={{ flexShrink: 0 }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
+        style={{ background: `${tint}14`, border: `1px solid ${tint}40`, color: tint, whiteSpace: 'nowrap' }}
+      >
+        <Icon className="w-3.5 h-3.5" />
+        <span>{label}</span>
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 rounded-xl overflow-hidden z-40 shadow-2xl"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-sub)', width: 300, maxWidth: '90vw' }}
+        >
+          {items.map((it, i) => (
+            <button
+              key={i}
+              onClick={() => { setOpen(false); it.onClick(); }}
+              className="w-full flex items-start gap-3 px-4 py-3 text-left transition hover:bg-[var(--bg-card)]"
+              style={{ borderTop: i ? '1px solid var(--border-sub)' : 'none' }}
+            >
+              <it.icon className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: it.danger ? '#EF4444' : 'var(--text-sec)' }} />
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-semibold" style={{ color: it.danger ? '#EF4444' : 'var(--text-pri)' }}>{it.label}</span>
+                <span className="block text-xs mt-0.5" style={{ color: 'var(--text-mut)', lineHeight: 1.4 }}>{it.desc}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── componente principal ── */
 export default function JugadoresTable({ jugadores, mensualidades, uniformes, torneos, suspensiones = [], onRefresh, categoriasJugadores = [], clubConfig, color }) {
   const [search, setSearch]               = useState('');
@@ -926,6 +971,14 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     const torneoNombres = [...new Set((torneos || []).map(t => t.nombre_torneo).filter(Boolean))]
       .sort((a, b) => a.localeCompare(b, 'es'));
 
+    // Precio de inscripción que puso el admin por torneo (el mayor valor_inscrito
+    // visto — los descuentos solo lo bajan). Se muestra en el encabezado de la columna.
+    const torneoValores = {};
+    (torneos || []).forEach(t => {
+      const v = parseFloat(t.valor_inscrito) || parseFloat(t.valor_oficial) || 0;
+      if (v > (torneoValores[t.nombre_torneo] || 0)) torneoValores[t.nombre_torneo] = v;
+    });
+
     const torneosPorCedula = {};
     (torneos || []).forEach(t => {
       const ced = String(t.cedula || t.player_id || '');
@@ -962,7 +1015,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       };
     });
 
-    return { filas, torneoNombres, mesesLabels, anio };
+    return { filas, torneoNombres, torneoValores, mesesLabels, anio };
   }
 
   async function exportarBalancePDF() {
@@ -970,7 +1023,8 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     setBalanceLoading(true);
     try {
       const pedidos = await cargarPedidoUniformes();
-      const { filas, torneoNombres, mesesLabels, anio } = construirBalanceCompleto(pedidos);
+      const { filas, torneoNombres, torneoValores, mesesLabels, anio } = construirBalanceCompleto(pedidos);
+      const fmtMiles = (v) => v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${v}`;
 
       const { default: jsPDF } = await import('jspdf');
       // A3 apaisado — el grid de meses + columnas por torneo no cabe cómodo en A4.
@@ -992,7 +1046,11 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       cols.push({ label: 'CÉDULA',  x, w: CED_W,    align: 'left'   }); x += CED_W;
       cols.push({ label: 'ESTADO',  x, w: EST_W,    align: 'center' }); x += EST_W;
       mesesLabels.forEach(m => { cols.push({ label: m, x, w: colW, align: 'center' }); x += colW; });
-      torneoNombres.forEach(t => { cols.push({ label: t.toUpperCase().slice(0, 16), x, w: colW, align: 'center' }); x += colW; });
+      torneoNombres.forEach(t => {
+        const val = torneoValores[t] ? ` (${fmtMiles(torneoValores[t])})` : '';
+        cols.push({ label: `${t.toUpperCase().slice(0, 14)}${val}`, x, w: colW, align: 'center' });
+        x += colW;
+      });
       cols.push({ label: 'U.PAGADO',     x, w: UNI_W,   align: 'right' }); x += UNI_W;
       cols.push({ label: 'U.DEUDA',      x, w: UNI_W,   align: 'right' }); x += UNI_W;
       cols.push({ label: 'DEUDA TOTAL',  x, w: TOTAL_W, align: 'right' });
@@ -1109,8 +1167,11 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
     setBalanceLoading(true);
     try {
       const pedidos = await cargarPedidoUniformes();
-      const { filas, torneoNombres, mesesLabels, anio } = construirBalanceCompleto(pedidos);
+      const { filas, torneoNombres, torneoValores, mesesLabels, anio } = construirBalanceCompleto(pedidos);
       const fecha = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+      const tHeader = (t) => torneoValores[t]
+        ? `${t.toUpperCase()} (INSCRIPCIÓN ${formatCOP(torneoValores[t])})`
+        : t.toUpperCase();
 
       const ExcelJS = (await import('exceljs')).default ?? (await import('exceljs'));
       const ESTADO_STYLE = {
@@ -1126,7 +1187,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       wb.creator = 'ZenSports';
       const ws = wb.addWorksheet(`BALANCE ${anio}`, { views: [{ state: 'frozen', ySplit: 2 }] });
 
-      const HEADERS = ['JUGADOR', 'CÉDULA', 'ESTADO', ...mesesLabels, ...torneoNombres.map(t => t.toUpperCase()), 'UNIF. PAGADO', 'UNIF. DEUDA', 'DEUDA TOTAL'];
+      const HEADERS = ['JUGADOR', 'CÉDULA', 'ESTADO', ...mesesLabels, ...torneoNombres.map(tHeader), 'UNIF. PAGADO', 'UNIF. DEUDA', 'DEUDA TOTAL'];
       const TOTAL_COLS = HEADERS.length;
 
       ws.columns = [
@@ -1300,94 +1361,39 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
                   />
                 )}
 
-                {/* Exportar Excel */}
-                <button
-                  onClick={exportarCSV}
-                  title="Exportar ficha completa de los jugadores filtrados — resalta datos faltantes"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                  style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', color: '#22C55E', whiteSpace: 'nowrap', flexShrink: 0 }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.18)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,197,94,0.08)'}
-                >
-                  <Upload className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Excel</span>
-                </button>
-
-                {/* Estado Actual — Excel 12 meses */}
-                <button
-                  onClick={exportarEstadoActual}
-                  title={`Descargar estado de los 12 meses de ${new Date().getFullYear()} para todos los jugadores`}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                  style={{ background: 'rgba(56,189,248,0.08)', border: '1px solid rgba(56,189,248,0.28)', color: '#38bdf8', whiteSpace: 'nowrap', flexShrink: 0 }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(56,189,248,0.18)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(56,189,248,0.08)'}
-                >
-                  <ClipboardList className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Estado Actual</span>
-                </button>
-
-                {/* Exportar PDF */}
-                <button
-                  onClick={exportarPDF}
-                  title={`Reporte PDF de jugadores con estado y deuda — ${filtered.length} jugadores`}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                  style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.25)', color: '#A855F7', whiteSpace: 'nowrap', flexShrink: 0 }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(168,85,247,0.18)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(168,85,247,0.08)'}
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Reporte</span>
-                </button>
-
-                {/* Balance general: mensualidades + torneos + uniformes */}
-                <button
-                  onClick={() => setShowBalance(true)}
-                  title="Balance general por jugador — mensualidades, torneos y uniformes (PDF o Excel)"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                  style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.28)', color: '#FBBF24', whiteSpace: 'nowrap', flexShrink: 0 }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(251,191,36,0.18)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(251,191,36,0.08)'}
-                >
-                  <DollarSign className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Balance</span>
-                </button>
-
-                {/* Importar jugadores Excel */}
-                <button
-                  onClick={() => setShowImportar(true)}
-                  title="Importar jugadores desde Excel"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                  style={{ background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.25)', color: '#60A5FA', whiteSpace: 'nowrap', flexShrink: 0 }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(96,165,250,0.18)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(96,165,250,0.08)'}
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Importar</span>
-                </button>
-
-                {/* Toggle inactivos */}
+                {/* Ver activos / inactivos — es un filtro más de la lista */}
                 <button
                   onClick={() => { setVerArchivados(v => !v); setFiltroEstado('TODOS'); setSearch(''); }}
-                  title={verArchivados ? 'Ver jugadores activos' : 'Ver jugadores inactivos'}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                  style={{ background: verArchivados ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.05)', border: `1px solid ${verArchivados ? 'rgba(239,68,68,0.35)' : 'rgba(255,255,255,0.12)'}`, color: verArchivados ? '#EF4444' : 'var(--text-mut)', whiteSpace: 'nowrap', flexShrink: 0 }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition"
+                  style={{ background: verArchivados ? 'rgba(239,68,68,0.12)' : 'var(--bg-surface)', border: `1px solid ${verArchivados ? 'rgba(239,68,68,0.35)' : 'var(--border-sub)'}`, color: verArchivados ? '#EF4444' : 'var(--text-pri)', whiteSpace: 'nowrap', flexShrink: 0 }}
                 >
                   <Archive className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{verArchivados ? 'Activos' : 'Inactivos'}</span>
+                  {verArchivados ? 'Viendo inactivos' : 'Ver inactivos'}
                 </button>
 
-                {/* Importar estados mensualidades */}
-                <button
-                  onClick={() => setShowImportarMensualidades(true)}
-                  title="Actualizar estados de mensualidades desde Excel"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition"
-                  style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)', color: '#34D399', whiteSpace: 'nowrap', flexShrink: 0 }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(52,211,153,0.18)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(52,211,153,0.08)'}
-                >
-                  <Upload className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Estados</span>
-                </button>
+                {/* Descargar — reportes y planillas */}
+                <AccionesMenu
+                  label="Descargar"
+                  icon={Download}
+                  tint="#22C55E"
+                  items={[
+                    { icon: FileText,      label: 'Reporte de estado y deuda (PDF)', desc: `Lista con estado, meses en mora y deuda de cada jugador — ${filtered.length} en pantalla.`, onClick: exportarPDF },
+                    { icon: Users,         label: 'Ficha de datos de los jugadores (Excel)', desc: 'Contacto, documento, EPS, categoría… Resalta en amarillo lo que falta cargar.', onClick: exportarCSV },
+                    { icon: ClipboardList, label: 'Mensualidades — 12 meses (Excel)', desc: `Qué pagó cada jugador mes por mes en ${new Date().getFullYear()}.`, onClick: exportarEstadoActual },
+                    { icon: DollarSign,    label: 'Balance completo', desc: 'Mensualidades + torneos + uniformes por jugador, en PDF o Excel.', onClick: () => setShowBalance(true) },
+                  ]}
+                />
+
+                {/* Importar — cargar datos desde Excel */}
+                <AccionesMenu
+                  label="Importar"
+                  icon={Upload}
+                  tint="#60A5FA"
+                  items={[
+                    { icon: Users,     label: 'Jugadores nuevos', desc: 'Subí una lista de jugadores desde un Excel para darlos de alta de una.', onClick: () => setShowImportar(true) },
+                    { icon: RotateCcw, label: 'Estados de pago de mensualidades', desc: 'Solo para poner al día un club recién creado. SOBRESCRIBE los estados actuales — no usar si ya está todo cargado.', danger: true, onClick: () => setShowImportarMensualidades(true) },
+                  ]}
+                />
               </div>
             </div>
 
@@ -1771,7 +1777,7 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
             </div>
             <div className="p-6 space-y-4">
               <p className="text-xs text-[var(--text-sec)] leading-relaxed">
-                Igual que <strong>Estado Actual</strong> (grid de 12 meses), pero en la misma tabla se agrega una columna por cada torneo del club y el total de uniformes. Elige el formato:
+                La grilla de los 12 meses de mensualidades, más una columna por cada torneo del club (con el precio de inscripción) y el total de uniformes por jugador. Elegí el formato:
               </p>
               <button onClick={exportarBalancePDF} disabled={balanceLoading}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-60"

@@ -368,17 +368,25 @@ export default function FormInscripcion() {
   <p style="font-size:10px;color:#9ca3af">zensports.zenpra.ai</p>
 </div>
 </div>
-<div class="no-print" style="padding:0 28px 24px;text-align:center">
-  <button onclick="window.print()" style="background:${c};color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
-    Imprimir / Guardar PDF
-  </button>
+<div class="no-print" style="padding:0 28px 24px;text-align:center;color:#9ca3af;font-size:12px">
+  Si no se abrió el diálogo de impresión, usá Ctrl+P (⌘+P en Mac) y elegí "Guardar como PDF".
 </div>
 </body></html>`;
 
     const ventana = window.open('', '_blank');
+    if (!ventana) {
+      alert('El navegador bloqueó la ventana de la ficha. Permití las ventanas emergentes para este sitio y volvé a intentar.');
+      return;
+    }
     ventana.document.write(html);
     ventana.document.close();
     ventana.focus();
+    // El botón "Imprimir" usaba un onclick inline que el CSP del sitio bloquea;
+    // abrimos el diálogo de impresión desde acá, que es contexto permitido.
+    let impreso = false;
+    const imprimir = () => { if (impreso) return; impreso = true; try { ventana.print(); } catch { /* el usuario puede usar Ctrl+P */ } };
+    ventana.onload = imprimir;
+    setTimeout(imprimir, 800);
   };
 
   /* ── ÉXITO ─────────────────────────────────────────────────────────── */

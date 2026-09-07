@@ -1156,7 +1156,6 @@ export default function Dashboard() {
                 torneos={torneos}
                 registroPagos={registroPagos}
                 suspensiones={suspensiones}
-                morosos={morosos}
                 onRefresh={handleRefresh}
                 categoriasJugadores={clubConfig?.categorias_jugadores || []}
                 clubConfig={clubConfig}

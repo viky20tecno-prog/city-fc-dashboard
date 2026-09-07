@@ -8,6 +8,8 @@ import MensualidadesImportModal from './MensualidadesImportModal';
 import { deletePlayer, archivePlayer, getClubId } from '../services/api';
 import { authFetch } from '../lib/authFetch';
 import { listarEquipos } from '../lib/categorias';
+import { construirIndiceCuenta, estadoCuenta } from '../lib/estadoCuenta';
+import { reportarDrift, VERIFICAR_PARIDAD } from '../lib/estadoCuentaParidad';
 
 // Peor estado local (para PENDIENTE / PARCIAL / AL_DIA)
 const PRIORIDAD = { MORA: 4, PENDIENTE: 3, PARCIAL: 2, AL_DIA: 1, NO_APLICA: 0, SIN_DATOS: 0 };
@@ -371,6 +373,66 @@ export default function JugadoresTable({ jugadores, mensualidades, uniformes, to
       };
     });
   }, [jugadores, mensualidades, cedulasMorosos, suspensiones, anioActualTabla, mesActualTabla]);
+
+  // ── Verificación temporal (Fase B): corre el módulo estadoCuenta en paralelo al
+  // cálculo de la tabla (estadoPago / saldoPendiente) y loguea las divergencias en
+  // window.__ecDrift. No cambia nada de lo que se ve. Ver src/lib/estadoCuentaParidad.js
+  // y docs/adr/0001-modulo-estado-de-cuenta.md. Aquí está el bug conocido: la celda
+  // en pantalla (saldoPendiente, ignora gracia) y el PDF (calcularDeuda, excluye
+  // meses PENDIENTE en gracia) dan números distintos — el módulo unifica en "ignora
+  // gracia" (Fork C del ADR).
+  useEffect(() => {
+    if (!VERIFICAR_PARIDAD) return;
+    try {
+      const indice = construirIndiceCuenta({ mensualidades, suspensiones });
+      const ahora  = { anio: anioActualTabla, mesActual: mesActualTabla, diaHoy: new Date().getDate() };
+      const clubCfg = { dias_gracia_mora: clubConfig?.dias_gracia_mora ?? 0 };
+      const diasGracia = clubCfg.dias_gracia_mora;
+
+      // Réplica de calcularDeuda() del PDF, para medir el gap pantalla vs PDF de hoy.
+      const deudaPdf = (j) => {
+        const susp = indice.suspIdx[String(j.cedula)];
+        return (mensualidades || [])
+          .filter(m => String(m.cedula || m.player_id || '') === String(j.cedula) &&
+                       parseInt(m.anio) === anioActualTabla && parseInt(m.numero_mes) <= mesActualTabla)
+          .reduce((deuda, m) => {
+            const numMes = parseInt(m.numero_mes);
+            if (susp?.has(`${anioActualTabla}:${numMes}`)) return deuda;
+            const saldo = parseFloat(m.saldo_pendiente) || 0;
+            if (m.estado === 'MORA' || m.estado === 'PARCIAL') return deuda + saldo;
+            if (m.estado === 'PENDIENTE' && (numMes < mesActualTabla || (numMes === mesActualTabla && ahora.diaHoy > diasGracia))) return deuda + saldo;
+            return deuda;
+          }, 0);
+      };
+
+      const movers = [];
+      for (const j of jugadoresConPago) {
+        const r = estadoCuenta(j, indice, clubCfg, ahora);
+        const estadoNuevo = r.estado;
+        const saldoNuevo  = r.saldoMensualidades;
+        const saldoPdf    = deudaPdf(j);
+        const difEstado   = j.estadoPago !== estadoNuevo;
+        const difSaldoPantalla = Math.abs((j.saldoPendiente || 0) - saldoNuevo) > 0.5;
+        const difPdf       = Math.abs(saldoPdf - saldoNuevo) > 0.5;
+        if (difEstado || difSaldoPantalla || difPdf) {
+          movers.push({
+            cedula: j.cedula,
+            nombre: j.nombreCompleto,
+            activo: j.activo,
+            estadoViejo: j.estadoPago, estadoNuevo,
+            saldoPantalla: j.saldoPendiente || 0,
+            saldoPdf,
+            saldoNuevo,
+            mesesEnMora: r.mesesEnMora.join(','),
+            enMorososBackend: cedulasMorosos.has(String(j.cedula)),
+          });
+        }
+      }
+      reportarDrift('JugadoresTable', movers);
+    } catch (e) {
+      reportarDrift('JugadoresTable', [{ error: String(e && e.message || e) }]);
+    }
+  }, [jugadoresConPago, mensualidades, suspensiones, clubConfig, cedulasMorosos, anioActualTabla, mesActualTabla]);
 
   const opcionesCategoria = useMemo(() => {
     const equipos = listarEquipos(categoriasJugadores);

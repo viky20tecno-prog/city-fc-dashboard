@@ -32,18 +32,21 @@ export function construirIndiceCuenta({ mensualidades = [], suspensiones = [] } 
     if (!mensIdx[ced]) mensIdx[ced] = [];
     mensIdx[ced].push(m);
   });
+  // Clave `anio:mes` — una suspensión de 2025 no debe excusar el mismo mes de 2026.
+  // Mismo criterio que api/services/mora.js (isSuspendido cruza también el año).
   const suspIdx = {};
   suspensiones.forEach(s => {
     if (!s.activa) return;
     const ced = String(s.cedula || '');
+    const anioS = parseInt(s.anio);
     if (!suspIdx[ced]) suspIdx[ced] = new Set();
-    for (let m = s.mes_inicio; m <= s.mes_fin; m++) suspIdx[ced].add(m);
+    for (let m = s.mes_inicio; m <= s.mes_fin; m++) suspIdx[ced].add(`${anioS}:${m}`);
   });
   return { mensIdx, suspIdx };
 }
 
-function estaSuspendido(suspIdx, cedula, mesNum) {
-  return suspIdx[String(cedula)]?.has(mesNum) || false;
+function estaSuspendido(suspIdx, cedula, mesNum, anio) {
+  return suspIdx[String(cedula)]?.has(`${anio}:${mesNum}`) || false;
 }
 
 // Un mes cuenta como "causado" (ya facturable) solo si es del año actual o anterior,
@@ -86,7 +89,7 @@ export function estadoCuenta(jugador, indice, clubConfig = {}, ahora = {}) {
         numeroMes,
         estado: m.estado,
         saldo: parseFloat(m.saldo_pendiente) || 0,
-        suspendido: estaSuspendido(suspIdx, cedula, numeroMes),
+        suspendido: estaSuspendido(suspIdx, cedula, numeroMes, anio),
         causado: yaCausado(m, anio, mesActual),
       };
     })

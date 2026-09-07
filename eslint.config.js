@@ -32,4 +32,11 @@ export default defineConfig([
       globals: { ...globals.browser, ...globals.vitest, ...globals.node },
     },
   },
+  {
+    // Archivos de configuración / plugins de build: corren en Node, no en el browser
+    files: ['**/*.config.{js,jsx}'],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+  },
 ])

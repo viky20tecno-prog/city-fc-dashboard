@@ -21,6 +21,11 @@ supabase/.temp/
 # Archivos locales varios
 documentacion_plataforma.md
 plan_tecnico_clubcontable.md
+
+# Docs de diseño con detalle de cálculo financiero/bugs conocidos — repo público,
+# no exponer la receta antes de que el fix esté en producción (respaldo fuera del repo)
+CONTEXT.md
+docs/adr/
 "public/Tony tech.jpg"
 .vercel
 .env*.local

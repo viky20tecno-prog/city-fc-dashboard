@@ -36,8 +36,13 @@ function inlineBundleCss() {
         )
         // Inyecta el CSS justo antes de </head> (después de los <style> propios)
         out = out.replace('</head>', `<style>${css}</style>\n  </head>`)
-        // No emitir el .css suelto (ya no lo referencia nadie)
-        delete ctx.bundle[fileName]
+        // NO borramos el .css del bundle: los chunks lazy de Vite (jspdf, exceljs,
+        // la landing) igual lo listan en su `__vitePreload([...])`. Si el archivo no
+        // existe → 404 → Vite rechaza el import() ("Unable to preload CSS for …") y
+        // se rompe, p. ej., "Balance → Descargar PDF". El <link> de index.html sí se
+        // saca (arriba), así que la carga inicial no hace ningún request de CSS —
+        // el archivo solo se pide si un chunk lazy lo referencia, ya después del
+        // primer render, y como el CSS ya está inline es un no-op visual.
       }
       return out
     },

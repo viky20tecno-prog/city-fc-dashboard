@@ -322,10 +322,20 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
         const viejo = bucketViejo(j);
         const nuevo = bucketNuevo(j);
         if (viejo !== nuevo) {
+          const r = estadoCuenta(j, indice, clubCfg, ahora);
+          const invMesActual = mensualidades.find(
+            m => String(m.cedula) === String(j.cedula) &&
+                 parseInt(m.numero_mes) === mesActual &&
+                 parseInt(m.anio) === anioActual,
+          );
           movers.push({
             cedula: j.cedula,
             nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim(),
             viejo, nuevo,
+            saldoNuevo: r.saldoMensualidades,
+            mesesEnMora: r.mesesEnMora.join(','),
+            estadoMesActual: invMesActual ? invMesActual.estado : '(sin mensualidad)',
+            enListaMorososBackend: morososSet.has(String(j.cedula)),
           });
         }
       }

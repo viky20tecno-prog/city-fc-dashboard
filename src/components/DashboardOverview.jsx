@@ -213,12 +213,16 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
     }
     activos.forEach(j => {
       const ced = String(j.cedula);
+      // La mora se evalúa PRIMERO: el backend ya cruza todo el año, y un mes actual
+      // suspendido ("retiro temporal", "viaje") no borra la deuda de meses anteriores.
+      // Antes este chequeo iba después del atajo de suspensión → 7 jugadores de City FC
+      // con abril/mayo en mora y septiembre suspendido se contaban como "Al Día".
+      if (morososSet.has(ced)) { mora++; return; }
       if (esSuspendido(ced, mesActual)) {
         alDia++;
         alDiaArr.push({ nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim().toUpperCase(), cedula: j.cedula });
         return;
       }
-      if (morososSet.has(ced)) { mora++; return; }
       const inv = mensualidades.find(
         m => String(m.cedula) === ced &&
              parseInt(m.numero_mes) === mesActual &&
@@ -293,8 +297,8 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
 
       const bucketViejo = (j) => {
         const ced = String(j.cedula);
-        if (esSuspendido(ced, mesActual)) return 'alDia';
         if (morososSet.has(ced)) return 'mora';
+        if (esSuspendido(ced, mesActual)) return 'alDia';
         const inv = mensualidades.find(
           m => String(m.cedula) === ced &&
                parseInt(m.numero_mes) === mesActual &&

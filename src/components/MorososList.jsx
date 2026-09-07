@@ -53,7 +53,7 @@ function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoU
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: Arial, sans-serif; color: #111; background: #fff; }
-    @media print { .no-print { display: none !important; } }
+    @media print { .no-print { display: none !important; } tr { page-break-inside: avoid; } thead { display: table-header-group; } }
   </style>
 </head>
 <body>
@@ -104,13 +104,13 @@ function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoU
         </tr>
       </thead>
       <tbody>${filas}</tbody>
-      <tfoot>
-        <tr style="background:#f9fafb">
-          <td colspan="6" style="padding:12px;font-size:13px;font-weight:700;text-align:right;border-top:2px solid #e5e7eb;color:#374151">Total a cobrar</td>
-          <td style="padding:12px;font-size:14px;font-weight:800;color:#dc2626;text-align:right;border-top:2px solid #e5e7eb">${formatCOP(totalSaldo)}</td>
-        </tr>
-      </tfoot>
     </table>
+    <!-- Total como bloque aparte, NO <tfoot> — el navegador repite el tfoot en cada
+         página impresa; así sale una sola vez, al final de la lista. -->
+    <div style="display:flex;justify-content:flex-end;align-items:baseline;gap:16px;background:#f9fafb;border:1px solid #e5e7eb;border-top:none;padding:12px 12px">
+      <span style="font-size:13px;font-weight:700;color:#374151">Total a cobrar</span>
+      <span style="font-size:14px;font-weight:800;color:#dc2626">${formatCOP(totalSaldo)}</span>
+    </div>
 
     <!-- Footer -->
     <div style="margin-top:20px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
@@ -119,18 +119,26 @@ function exportarPDF(morosos, clubNombre = 'Mi Club', color = 'var(--cc)', logoU
     </div>
   </div>
 
-  <div class="no-print" style="padding:0 32px 28px;text-align:center">
-    <button onclick="window.print()" style="background:${c};color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
-      Imprimir / Guardar PDF
-    </button>
+  <div class="no-print" style="padding:0 32px 28px;text-align:center;color:#9ca3af;font-size:12px">
+    Si no se abrió el diálogo de impresión, usá Ctrl+P (⌘+P en Mac) y elegí "Guardar como PDF".
   </div>
 </body>
 </html>`;
 
   const ventana = window.open('', '_blank');
+  if (!ventana) {
+    alert('El navegador bloqueó la ventana del reporte. Permití las ventanas emergentes para este sitio y volvé a intentar.');
+    return;
+  }
   ventana.document.write(html);
   ventana.document.close();
   ventana.focus();
+  // El botón "Imprimir" del reporte usaba un onclick inline que el CSP del sitio
+  // bloquea; abrimos el diálogo de impresión desde acá, que es contexto permitido.
+  let impreso = false;
+  const imprimir = () => { if (impreso) return; impreso = true; try { ventana.print(); } catch { /* el usuario puede usar Ctrl+P */ } };
+  ventana.onload = imprimir;
+  setTimeout(imprimir, 800);
 }
 
 const ORDEN_OPCIONES = [

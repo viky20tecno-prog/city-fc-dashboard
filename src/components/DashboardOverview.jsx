@@ -6,6 +6,8 @@ import RecaudacionChart from './RecaudacionChart';
 import MorososList from './MorososList';
 import PagosPendientesList from './PagosPendientesList';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
+import { construirIndiceCuenta, estadoCuenta } from '../lib/estadoCuenta';
+import { reportarDrift, VERIFICAR_PARIDAD } from '../lib/estadoCuentaParidad';
 
 /* ── formateo ── */
 const formatCOP = (n) => formatMoney(n, getCodigoPais());
@@ -153,7 +155,7 @@ function EmptyDashboard() {
 }
 
 /* ── componente principal ── */
-export default function DashboardOverview({ jugadores, mensualidades, morosos, suspensiones = [], valorMensualidad = 0, codigoPais = '57', color = '#60A5FA', clubNombre = 'Mi Club', logoUrl = '' }) {
+export default function DashboardOverview({ jugadores, mensualidades, morosos, suspensiones = [], valorMensualidad = 0, diasGraciaMora = 0, codigoPais = '57', color = '#60A5FA', clubNombre = 'Mi Club', logoUrl = '' }) {
   const mensualidadConfigurada = Number(valorMensualidad) > 0;
   const mesActual  = new Date().getMonth() + 1;
   const anioActual = new Date().getFullYear();
@@ -277,6 +279,61 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
       return mens && !['AL_DIA'].includes(mens.estado);
     }).length;
   }, [morosos, mensualidades, mesActual, anioActual]);
+
+  // ── Verificación temporal (Fase B): corre el módulo estadoCuenta en paralelo y
+  // loguea en qué jugadores el bucket (al día / pendiente / parcial / mora) sale
+  // distinto al cálculo viejo. No cambia nada de lo que se ve. Ver
+  // src/lib/estadoCuentaParidad.js y docs/adr/0001-modulo-estado-de-cuenta.md.
+  useEffect(() => {
+    if (!VERIFICAR_PARIDAD || !mensualidadConfigurada || activos.length === 0) return;
+    try {
+      const indice = construirIndiceCuenta({ mensualidades, suspensiones });
+      const ahora  = { anio: anioActual, mesActual, diaHoy: new Date().getDate() };
+      const clubCfg = { dias_gracia_mora: diasGraciaMora };
+
+      const bucketViejo = (j) => {
+        const ced = String(j.cedula);
+        if (esSuspendido(ced, mesActual)) return 'alDia';
+        if (morososSet.has(ced)) return 'mora';
+        const inv = mensualidades.find(
+          m => String(m.cedula) === ced &&
+               parseInt(m.numero_mes) === mesActual &&
+               parseInt(m.anio) === anioActual,
+        );
+        if (!inv || inv.estado === 'AL_DIA') return 'alDia';
+        if (inv.estado === 'PARCIAL')   return 'parciales';
+        if (inv.estado === 'PENDIENTE') return 'pendientes';
+        return 'alDia';
+      };
+
+      const bucketNuevo = (j) => {
+        const r = estadoCuenta(j, indice, clubCfg, ahora);
+        if (r.exento) return 'alDia';
+        if (r.estado === 'MORA') return 'mora';
+        const mesAct = r.meses.find(m => m.numeroMes === mesActual);
+        if (!mesAct || !mesAct.causado || mesAct.suspendido) return 'alDia';
+        if (mesAct.estado === 'PARCIAL')   return 'parciales';
+        if (mesAct.estado === 'PENDIENTE') return 'pendientes';
+        return 'alDia';
+      };
+
+      const movers = [];
+      for (const j of activos) {
+        const viejo = bucketViejo(j);
+        const nuevo = bucketNuevo(j);
+        if (viejo !== nuevo) {
+          movers.push({
+            cedula: j.cedula,
+            nombre: `${j.nombre || ''} ${j.apellidos || ''}`.trim(),
+            viejo, nuevo,
+          });
+        }
+      }
+      reportarDrift('DashboardOverview.buckets', movers);
+    } catch (e) {
+      reportarDrift('DashboardOverview.buckets', [{ error: String(e && e.message || e) }]);
+    }
+  }, [activos, mensualidades, suspensiones, morososSet, esSuspendido, mesActual, anioActual, diasGraciaMora, mensualidadConfigurada]);
 
   const pendientesFiltered = useMemo(() => {
     if (activeKpi === 'parciales')   return pendientesList.filter(p => p.estado === 'PARCIAL');

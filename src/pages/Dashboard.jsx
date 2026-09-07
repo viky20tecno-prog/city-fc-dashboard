@@ -1141,6 +1141,7 @@ export default function Dashboard() {
                   morosos={morosos}
                   suspensiones={suspensiones}
                   valorMensualidad={clubConfig?.valor_mensualidad}
+                  diasGraciaMora={clubConfig?.dias_gracia_mora ?? 0}
                   codigoPais={clubConfig?.codigo_pais || '57'}
                   color={c}
                   clubNombre={clubConfig?.nombre}

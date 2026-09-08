@@ -9,6 +9,8 @@ import { authFetch } from '../lib/authFetch';
 import { getClubId } from '../services/api';
 import SuspensionModal from './SuspensionModal';
 import ComprobanteLink from './ComprobanteLink';
+import { construirIndiceCuenta, estadoCuenta } from '../lib/estadoCuenta';
+import { reportarDrift } from '../lib/estadoCuentaParidad';
 
 const formatCOP = (n) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
@@ -300,7 +302,7 @@ function ordenarMensualidades(datos) {
     .sort((a, b) => parseInt(a.numero_mes) - parseInt(b.numero_mes));
 }
 
-function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, esExentoGlobal = false, cuotaClub = 0, jugador }) {
+function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, esExentoGlobal = false, cuotaClub = 0, jugador, diasGraciaMora = 0 }) {
   const [items, setItems] = useState(() => ordenarMensualidades(datos));
   const [gestionandoSuspension, setGestionandoSuspension] = useState(false);
 
@@ -311,6 +313,38 @@ function SeccionMensualidades({ datos, suspensiones = [], onMensualidadUpdated, 
     setPrevDatos(datos);
     setItems(ordenarMensualidades(datos));
   }
+
+  // Verificación de paridad (Fase B / Capa 2) — corre el módulo canónico
+  // src/lib/estadoCuenta.js en paralelo al total viejo y loguea diferencias en
+  // `window.__ecDrift`, sin cambiar NADA de lo que ve el usuario. Divergencia
+  // esperada: el total viejo suma meses de años anteriores, el módulo se limita
+  // al año en curso. Se corta al módulo en un commit posterior tras revisar prod.
+  // Ver docs/adr/0001-modulo-estado-de-cuenta.md.
+  useEffect(() => {
+    try {
+      const anioActual = new Date().getFullYear();
+      const mesActual  = new Date().getMonth() + 1;
+      const isSusp = (n) => suspensiones.some(s =>
+        s.activa && s.anio === anioActual && s.mes_inicio <= parseInt(n) && parseInt(n) <= s.mes_fin);
+      const yaCausado = (m) => {
+        const a = parseInt(m.anio) || anioActual;
+        return a < anioActual || (a === anioActual && parseInt(m.numero_mes) <= mesActual);
+      };
+      const viejo = (datos || []).reduce((s, m) =>
+        s + (!yaCausado(m) || isSusp(m.numero_mes) ? 0 : (parseFloat(m.saldo_pendiente) || 0)), 0);
+      const idx = construirIndiceCuenta({ mensualidades: datos, suspensiones });
+      const r = estadoCuenta(jugador, idx, { dias_gracia_mora: diasGraciaMora });
+      if (Math.abs(r.saldoMensualidades - viejo) > 1) {
+        reportarDrift('FinancieroContent.totalPendiente', [{
+          cedula: jugador?.cedula,
+          saldoViejo: viejo,
+          saldoNuevo: r.saldoMensualidades,
+          estado: r.estado,
+          mesesEnMora: r.mesesEnMora,
+        }]);
+      }
+    } catch { /* la verificación nunca debe afectar al cliente */ }
+  }, [datos, suspensiones, jugador, diasGraciaMora]);
 
   if (!items.length) return <EmptySection texto="Sin datos de mensualidades" />;
 
@@ -1000,6 +1034,7 @@ export default function FinancieroContent({ cedula, jugador, mensualidades = [],
         esExentoGlobal={esExento}
         cuotaClub={cuotaClub}
         jugador={jugador}
+        diasGraciaMora={parseFloat(clubConfig?.dias_gracia_mora) || 0}
       />
       <SeccionPedidoUniforme cedula={cedula} />
       <SeccionTorneos datos={misTorneos} />

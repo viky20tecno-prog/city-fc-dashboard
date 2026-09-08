@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
-import { construirIndiceCuenta, estadoCuenta, badgeEstado } from '../../lib/estadoCuenta';
+import { construirIndiceCuenta, estadoCuenta, saldoTotal, badgeEstado } from '../../lib/estadoCuenta';
 import moraVectors from '../fixtures/mora-vectors.json';
 
 const CEDULA = '1001';
@@ -127,6 +127,79 @@ describe('mora-vectors.json (espejo de api/services/mora.js)', () => {
       });
       expect(r.mesesEnMora).toEqual(v.esperado);
     });
+  });
+});
+
+describe('saldoTotal (capa 2 — mensualidades + torneos + uniformes)', () => {
+  function idx2({ mensualidades = [], suspensiones = [], torneos = [], pedidosUniformes = [] }) {
+    return construirIndiceCuenta({ mensualidades, suspensiones, torneos, pedidosUniformes });
+  }
+
+  it('suma mensualidades + torneos + uniformes', () => {
+    const idx = idx2({
+      mensualidades: [mens(1, 'MORA', 50000)],
+      torneos: [{ cedula: CEDULA, nombre_torneo: 'Copa', estado: 'PENDIENTE', saldo_pendiente: 20000 }],
+      pedidosUniformes: [{ cedula: CEDULA, total: 90000, valor_pagado: 30000 }],
+    });
+    const r = saldoTotal(jugador, idx, {}, { anio: 2026, mesActual: 2, diaHoy: 15 });
+    expect(r.saldoMensualidades).toBe(50000);
+    expect(r.saldoTorneos).toBe(20000);
+    expect(r.saldoUniformes).toBe(60000);
+    expect(r.uniformesPagado).toBe(30000);
+    expect(r.saldoTotal).toBe(130000);
+  });
+
+  it('sin torneos ni uniformes, saldoTotal == saldoMensualidades', () => {
+    const idx = idx2({ mensualidades: [mens(1, 'PENDIENTE', 30000)] });
+    const r = saldoTotal(jugador, idx, {}, { anio: 2026, mesActual: 2, diaHoy: 15 });
+    expect(r.saldoTorneos).toBe(0);
+    expect(r.saldoUniformes).toBe(0);
+    expect(r.saldoTotal).toBe(30000);
+  });
+
+  it('un pedido de uniformes ya pagado no suma saldo (nunca negativo)', () => {
+    const idx = idx2({ pedidosUniformes: [{ cedula: CEDULA, total: 50000, valor_pagado: 80000 }] });
+    const r = saldoTotal(jugador, idx, {}, { anio: 2026, mesActual: 2, diaHoy: 15 });
+    expect(r.saldoUniformes).toBe(0);
+  });
+
+  it('acumula varios pedidos de uniformes de la misma cédula', () => {
+    const idx = idx2({
+      pedidosUniformes: [
+        { cedula: CEDULA, total: 40000, valor_pagado: 10000 },
+        { cedula: CEDULA, total: 30000, valor_pagado: 0 },
+      ],
+    });
+    const r = saldoTotal(jugador, idx, {}, { anio: 2026, mesActual: 2, diaHoy: 15 });
+    expect(r.saldoUniformes).toBe(60000);
+    expect(r.uniformesPagado).toBe(10000);
+  });
+
+  it('el exento (100% descuento) sigue debiendo torneos/uniformes (cargos aparte)', () => {
+    // El backend deja las mensualidades del exento en EXENTO / saldo 0; torneos y
+    // uniformes son cargos independientes y no los condona el descuento.
+    const idx = idx2({
+      mensualidades: [mens(1, 'EXENTO', 0)],
+      torneos: [{ cedula: CEDULA, nombre_torneo: 'Copa', estado: 'MORA', saldo_pendiente: 20000 }],
+      pedidosUniformes: [{ cedula: CEDULA, total: 90000, valor_pagado: 0 }],
+    });
+    const r = saldoTotal({ cedula: CEDULA, descuento_pct: 100 }, idx, {}, { anio: 2026, mesActual: 2, diaHoy: 15 });
+    expect(r.exento).toBe(true);
+    expect(r.saldoMensualidades).toBe(0);
+    expect(r.saldoTorneos).toBe(20000);
+    expect(r.saldoUniformes).toBe(90000);
+    expect(r.saldoTotal).toBe(110000);
+  });
+
+  it('varias filas del mismo torneo: la última gana (no se suman duplicados)', () => {
+    const idx = idx2({
+      torneos: [
+        { cedula: CEDULA, nombre_torneo: 'Copa', estado: 'PENDIENTE', saldo_pendiente: 20000 },
+        { cedula: CEDULA, nombre_torneo: 'Copa', estado: 'AL_DIA', saldo_pendiente: 0 },
+      ],
+    });
+    const r = saldoTotal(jugador, idx, {}, { anio: 2026, mesActual: 2, diaHoy: 15 });
+    expect(r.saldoTorneos).toBe(0);
   });
 });
 

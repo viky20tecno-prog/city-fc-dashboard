@@ -24,8 +24,14 @@ export function badgeEstado(estado) {
   return BADGES[estado] || { label: estado || 'Sin datos', bg: 'bg-white/5', text: 'text-[var(--text-sec)]', dot: 'bg-[var(--text-sec)]' };
 }
 
-// Agrupa mensualidades/suspensiones por cédula, una vez, para consultarlas O(1) por jugador.
-export function construirIndiceCuenta({ mensualidades = [], suspensiones = [] } = {}) {
+// Agrupa mensualidades/suspensiones (y, para la capa 2, torneos/uniformes) por
+// cédula, una vez, para consultarlas O(1) por jugador.
+export function construirIndiceCuenta({
+  mensualidades = [],
+  suspensiones = [],
+  torneos = [],
+  pedidosUniformes = [],
+} = {}) {
   const mensIdx = {};
   mensualidades.forEach(m => {
     const ced = String(m.cedula || m.player_id || '');
@@ -42,7 +48,32 @@ export function construirIndiceCuenta({ mensualidades = [], suspensiones = [] } 
     if (!suspIdx[ced]) suspIdx[ced] = new Set();
     for (let m = s.mes_inicio; m <= s.mes_fin; m++) suspIdx[ced].add(`${anioS}:${m}`);
   });
-  return { mensIdx, suspIdx };
+
+  // Capa 2 — torneos inscritos por cédula, deduplicados por nombre (última fila gana,
+  // mismo criterio que la tabla de Balance previa).
+  const torneoIdx = {};
+  torneos.forEach(t => {
+    const ced = String(t.cedula || t.player_id || '');
+    if (!torneoIdx[ced]) torneoIdx[ced] = {};
+    torneoIdx[ced][t.nombre_torneo] = {
+      nombre: t.nombre_torneo,
+      estado: t.estado,
+      saldo: parseFloat(t.saldo_pendiente) || 0,
+    };
+  });
+
+  // Capa 2 — pedidos de uniformes por cédula, acumulados (pagado / saldo).
+  const uniformeIdx = {};
+  pedidosUniformes.forEach(p => {
+    const ced = String(p.cedula || '');
+    if (!uniformeIdx[ced]) uniformeIdx[ced] = { pagado: 0, saldo: 0 };
+    const total  = parseFloat(p.total)        || 0;
+    const pagado = parseFloat(p.valor_pagado) || 0;
+    uniformeIdx[ced].pagado += pagado;
+    uniformeIdx[ced].saldo  += Math.max(0, total - pagado);
+  });
+
+  return { mensIdx, suspIdx, torneoIdx, uniformeIdx };
 }
 
 function estaSuspendido(suspIdx, cedula, mesNum, anio) {
@@ -127,4 +158,37 @@ export function estadoCuenta(jugador, indice, clubConfig = {}, ahora = {}) {
         );
 
   return { estado, saldoMensualidades, mesesEnMora, exento, meses };
+}
+
+/**
+ * Rollup completo del estado de cuenta — Capa 2: mensualidades + torneos + uniformes.
+ * Reemplaza `construirBalanceCompleto` de JugadoresTable.
+ *
+ * El saldo de torneos y uniformes es el `saldo_pendiente` crudo que ya trae cada
+ * fila (mismo criterio Fork C que las mensualidades: la fuente de verdad del monto
+ * por ítem es el backend, este módulo solo suma). El descuento del 100% (`exento`)
+ * NO condona torneos ni uniformes — son cargos aparte de la mensualidad.
+ *
+ * @param {object} jugador - registro del jugador (usa cedula, descuento_pct).
+ * @param {object} indice - salida de construirIndiceCuenta (con torneos/pedidosUniformes).
+ * @param {object} clubConfig - { dias_gracia_mora }.
+ * @param {object} [ahora] - { anio, mesActual, diaHoy } inyectables para tests.
+ */
+export function saldoTotal(jugador, indice, clubConfig = {}, ahora = {}) {
+  const base   = estadoCuenta(jugador, indice, clubConfig, ahora);
+  const cedula = String(jugador?.cedula || '');
+
+  const torneos = Object.values(indice?.torneoIdx?.[cedula] || {});
+  const saldoTorneos = torneos.reduce((s, t) => s + (t.saldo || 0), 0);
+
+  const uni = indice?.uniformeIdx?.[cedula] || { pagado: 0, saldo: 0 };
+
+  return {
+    ...base,
+    torneos,
+    saldoTorneos,
+    saldoUniformes:  uni.saldo,
+    uniformesPagado: uni.pagado,
+    saldoTotal: base.saldoMensualidades + saldoTorneos + uni.saldo,
+  };
 }

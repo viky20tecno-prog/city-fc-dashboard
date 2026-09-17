@@ -10,6 +10,7 @@ import { API_BASE_URL } from '../config';
 import ZenSportsLogo from '../components/brand/ZenSportsLogo';
 import Hero from '../components/landing/Hero';
 import DashboardMockup from '../components/landing/DashboardMockup';
+import PdfMockup from '../components/landing/PdfMockup';
 import AliadosSection from '../components/landing/AliadosSection';
 import { CLUB_LOGOS } from '../components/landing/clubLogos';
 
@@ -529,6 +530,7 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [leadModal, setLeadModal]       = useState({ open: false, plan: 'free' });
   const [publicStats, setPublicStats]   = useState({ jugadores: 2500, clubs: 11 });
+  const [coloresProbados, setColoresProbados] = useState(false); // hint de "tocá para cambiar" hasta el primer clic
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/publico/stats`)
@@ -632,6 +634,16 @@ export default function LandingPage() {
         .card-hover { transition:all 0.3s var(--ease-out); }
         .color-swatch:hover { transform:scale(1.18) !important; box-shadow: 0 0 0 3px rgba(255,255,255,0.2) !important; }
         .color-swatch { transition:all 0.2s var(--ease-out) !important; }
+        @keyframes swatches-pulse-ring {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.16); }
+          50%      { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
+        }
+        .swatches-hint-pulse { animation: swatches-pulse-ring 1.8s ease-out infinite; border-radius: 16px; }
+        @keyframes tap-hint-bounce {
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(-4px); }
+        }
+        .tap-hint { animation: tap-hint-bounce 1.4s ease-in-out infinite; }
         .float-badge { display:flex; }
         /* Botón primario del hero: texto largo en desktop, "Registra tu club" en móvil */
         .hero-cta-short { display:none; }
@@ -1021,13 +1033,22 @@ export default function LandingPage() {
 
           {/* Botones de color */}
           <Reveal style={{ marginBottom: 40 }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+            {!coloresProbados && (
+              <div className="tap-hint" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 12, fontSize: 12.5, fontWeight: 700, color: previewColor, transition: 'color 0.35s' }}>
+                👆 Tocá un color para probarlo
+              </div>
+            )}
+            <div
+              className={!coloresProbados ? 'swatches-hint-pulse' : ''}
+              style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', padding: 6 }}
+            >
               {PALETA.map(p => {
                 const active = previewColor === p.hex;
                 return (
                   <button
                     key={p.hex}
-                    onClick={() => setPreviewColor(p.hex)}
+                    className="color-swatch"
+                    onClick={() => { setPreviewColor(p.hex); setColoresProbados(true); }}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 8,
                       background: active ? `${p.hex}1E` : 'rgba(255,255,255,0.04)',
@@ -1035,7 +1056,6 @@ export default function LandingPage() {
                       borderRadius: 10, padding: '8px 14px', cursor: 'pointer',
                       transform: active ? 'scale(1.06)' : 'scale(1)',
                       boxShadow: active ? `0 0 18px ${p.hex}30` : 'none',
-                      transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1)',
                     }}
                   >
                     <div style={{
@@ -1102,6 +1122,12 @@ export default function LandingPage() {
                 </div>
                 <DashboardMockup color={previewColor} modo={previewModo} />
               </div>
+            </Reveal>
+            <Reveal delay={160} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: 1.5, textTransform: 'uppercase', margin: 0 }}>
+                Tus reportes en PDF, con tu escudo
+              </p>
+              <PdfMockup color={previewColor} clubName="Tu Club" />
             </Reveal>
           </div>
         </div>

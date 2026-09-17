@@ -97,11 +97,15 @@ function WhatsAppMockup() {
       background: '#0A0A0A',
     }}>
       <div style={{ background: '#111', borderBottom: '1px solid rgba(37,211,102,0.15)', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Bot size={17} color="#25D366" />
-        </div>
+        <img
+          src="/zen-avatar-whatsapp.png"
+          alt="Zen"
+          width={36}
+          height={36}
+          style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(37,211,102,0.3)', flexShrink: 0, objectFit: 'cover' }}
+        />
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>ZenSports IA</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Zen · ZenSports IA</div>
           <div style={{ fontSize: 10, color: '#25D366', letterSpacing: 0.5 }}>● en línea · responde en segundos</div>
         </div>
       </div>

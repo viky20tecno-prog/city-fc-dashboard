@@ -798,14 +798,14 @@ export default function LandingPage() {
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
             {[
-              { emoji: '⚽', label: 'Fútbol' },       { emoji: '🏀', label: 'Basketball' },
-              { emoji: '🏐', label: 'Voleibol' },      { emoji: '🎾', label: 'Pádel' },
+              { emoji: '⚽', label: 'Fútbol' },       { emoji: '🏀', label: 'Baloncesto' },
+              { emoji: '🏐', label: 'Voleibol' },      { emoji: '🏓', label: 'Pádel' },
               { emoji: '🏊', label: 'Natación' },      { emoji: '🚴', label: 'Ciclismo' },
               { emoji: '🥊', label: 'Boxeo' },         { emoji: '🥋', label: 'Artes Marciales' },
               { emoji: '🏋️', label: 'Fitness' },      { emoji: '🤸', label: 'Gimnasia' },
-              { emoji: '🏑', label: 'Hockey' },        { emoji: '🏒', label: 'Hockey hielo' },
+              { emoji: '🏑', label: 'Hockey' },        { emoji: '🏃', label: 'Atletismo' },
               { emoji: '🏈', label: 'Fútbol Americano' }, { emoji: '⚾', label: 'Béisbol' },
-              { emoji: '🎿', label: 'Esquí' },         { emoji: '🏄', label: 'Surf' },
+              { emoji: '🎾', label: 'Tenis' },         { emoji: '🏄', label: 'Surf' },
               { emoji: '🏇', label: 'Equitación' },    { emoji: '🤼', label: 'Lucha' },
               { emoji: '🏸', label: 'Bádminton' },     { emoji: '🥏', label: 'Ultimate' },
             ].map(d => (

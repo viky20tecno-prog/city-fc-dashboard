@@ -375,11 +375,11 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       // Si el pedido no trae `prendas_detalle` (legacy sin desglose), cae al string plano.
       const getItemLines = (p) => {
         const detalle = Array.isArray(p.prendas_detalle) ? p.prendas_detalle : [];
-        if (detalle.length === 0) return [trunc(getPrendas(p), 70)];
+        if (detalle.length === 0) return [trunc(getPrendas(p), 90)];
         return detalle.map(it => {
           const cant = Number(it.cantidad) || 1;
           const unit = Number(it.precio_unitario) || 0;
-          const nombreIt = trunc(String(it.nombre || '—'), 34);
+          const nombreIt = trunc(String(it.nombre || '—'), 46);
           const cantStr   = cant > 1 ? ` x${cant}` : '';
           const precioStr = unit > 0 ? `  ${fmtCOP(unit)} c/u` : '';
           return `${nombreIt}${cantStr}${precioStr}`;
@@ -387,17 +387,18 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       };
 
       const C = {
-        cedula: M, nombre: M + 22,
+        cedula: M, nombre: M + 22, descripcion: M + 62,
         talla: M + 154, numero: M + 168, estampa: M + 186, total: M + 216,
       };
 
       const cols = [
-        { label: 'Cédula',   x: C.cedula },
-        { label: 'Jugador',  x: C.nombre },
-        { label: 'Talla',    x: C.talla },
-        { label: 'Núm.',     x: C.numero },
-        { label: 'Estampa',  x: C.estampa },
-        { label: 'Total',    x: C.total },
+        { label: 'Cédula',       x: C.cedula },
+        { label: 'Jugador',      x: C.nombre },
+        { label: 'Descripción',  x: C.descripcion },
+        { label: 'Talla',        x: C.talla },
+        { label: 'Núm.',         x: C.numero },
+        { label: 'Estampa',      x: C.estampa },
+        { label: 'Total',        x: C.total },
       ];
 
       const drawPageHeader = () =>
@@ -414,11 +415,12 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
       const drawTableHead = (y) => drawPdfTableHead(doc, { W, M, y, columns: cols, accentRgb });
 
-      // Alto: línea de cabecera (cédula/nombre/talla/núm./estampa/total) + una
-      // línea por cada prenda del discriminado, más el tag de "familiar" si aplica.
+      // Alto: línea de cabecera (cédula/nombre/talla/núm./estampa/total) + el
+      // mayor entre las líneas bajo "Jugador" (tag de familiar) y las líneas
+      // del discriminado en "Descripción" — van en columnas paralelas, no se suman.
       const rowHeight = (p) => {
         const esFamiliar = p.tipo && p.tipo !== 'Jugador';
-        const nLineas = getItemLines(p).length + (esFamiliar ? 1 : 0);
+        const nLineas = Math.max(esFamiliar ? 1 : 0, getItemLines(p).length);
         return 6 + nLineas * 4 + 2;
       };
 
@@ -432,7 +434,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(30, 40, 50);
         doc.text(trunc(String(p.cedula || ''), 14), C.cedula, headMid);
         doc.setFont('helvetica', 'bold');
-        doc.text(trunc(String(p.nombre || '—').toUpperCase(), 30), C.nombre, headMid);
+        doc.text(trunc(String(p.nombre || '—').toUpperCase(), 26), C.nombre, headMid);
         doc.setFont('helvetica', 'normal');
         doc.text(String(p.talla || '—'), C.talla, headMid);
         doc.text(String(p.numero_estampar || '—'), C.numero, headMid);
@@ -440,15 +442,15 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         doc.setTextColor(...accentRgb); doc.setFont('helvetica', 'bold');
         doc.text(fmtCOP(p.total), C.total, headMid);
 
-        let ly = y + 9.4;
         if (esFamiliar) {
           doc.setTextColor(147, 51, 234); doc.setFontSize(6.5); doc.setFont('helvetica', 'bold');
-          doc.text(trunc(String(p.tipo || '').toUpperCase(), 30), C.nombre, ly);
-          ly += 4;
+          doc.text(trunc(String(p.tipo || '').toUpperCase(), 26), C.nombre, y + 9.4);
         }
+
+        let ly = y + 9.4;
         doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(90, 100, 110);
         itemLines.forEach(line => {
-          doc.text(`• ${line}`, C.nombre + 1.5, ly);
+          doc.text(`• ${line}`, C.descripcion, ly);
           ly += 4;
         });
 

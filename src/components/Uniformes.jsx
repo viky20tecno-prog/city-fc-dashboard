@@ -371,16 +371,29 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
       const pagados    = sortByName(lista.filter(p => p.estado === 'PAGADO'));
       const entregados = sortByName(lista.filter(p => p.estado === 'ENTREGADO'));
       const getPrendas = (p) => String(p.prendas || p.prenda || p.tipo_uniforme || p.tipo || '—');
+      // Líneas del discriminado: una por prenda (nombre, cantidad, precio unitario).
+      // Si el pedido no trae `prendas_detalle` (legacy sin desglose), cae al string plano.
+      const getItemLines = (p) => {
+        const detalle = Array.isArray(p.prendas_detalle) ? p.prendas_detalle : [];
+        if (detalle.length === 0) return [trunc(getPrendas(p), 70)];
+        return detalle.map(it => {
+          const cant = Number(it.cantidad) || 1;
+          const unit = Number(it.precio_unitario) || 0;
+          const nombreIt = trunc(String(it.nombre || '—'), 34);
+          const cantStr   = cant > 1 ? ` x${cant}` : '';
+          const precioStr = unit > 0 ? `  ${fmtCOP(unit)} c/u` : '';
+          return `${nombreIt}${cantStr}${precioStr}`;
+        });
+      };
 
       const C = {
-        cedula: M, nombre: M + 22, prendas: M + 72,
+        cedula: M, nombre: M + 22,
         talla: M + 154, numero: M + 168, estampa: M + 186, total: M + 216,
       };
 
       const cols = [
         { label: 'Cédula',   x: C.cedula },
-        { label: 'Nombre',   x: C.nombre },
-        { label: 'Prendas',  x: C.prendas },
+        { label: 'Jugador',  x: C.nombre },
         { label: 'Talla',    x: C.talla },
         { label: 'Núm.',     x: C.numero },
         { label: 'Estampa',  x: C.estampa },
@@ -401,28 +414,44 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
 
       const drawTableHead = (y) => drawPdfTableHead(doc, { W, M, y, columns: cols, accentRgb });
 
-      const drawRow = (p, y, odd) => {
-        const rH = 8.5;
-        if (odd) { doc.setFillColor(248, 249, 250); doc.rect(M, y, W - M * 2, rH, 'F'); }
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(30, 40, 50);
-        const mid = y + 5.8;
-        doc.text(trunc(String(p.cedula || ''), 14), C.cedula, mid);
+      // Alto: línea de cabecera (cédula/nombre/talla/núm./estampa/total) + una
+      // línea por cada prenda del discriminado, más el tag de "familiar" si aplica.
+      const rowHeight = (p) => {
         const esFamiliar = p.tipo && p.tipo !== 'Jugador';
-        const nombrePDF  = trunc(String(p.nombre || '—').toUpperCase(), 26);
-        if (esFamiliar) {
-          doc.text(nombrePDF, C.nombre, y + 4);
-          doc.setTextColor(147, 51, 234); doc.setFontSize(6.3);
-          doc.text(trunc(String(p.tipo || '').toUpperCase(), 22), C.nombre, y + 7.6);
-          doc.setFontSize(7.8); doc.setTextColor(30, 40, 50);
-        } else {
-          doc.text(nombrePDF, C.nombre, mid);
-        }
-        doc.text(trunc(getPrendas(p).toUpperCase(), 44), C.prendas, mid);
-        doc.text(String(p.talla || '—'), C.talla, mid);
-        doc.text(String(p.numero_estampar || '—'), C.numero, mid);
-        doc.text(trunc(String(p.nombre_estampar || '—').toUpperCase(), 16), C.estampa, mid);
+        const nLineas = getItemLines(p).length + (esFamiliar ? 1 : 0);
+        return 6 + nLineas * 4 + 2;
+      };
+
+      const drawRow = (p, y, odd) => {
+        const esFamiliar = p.tipo && p.tipo !== 'Jugador';
+        const itemLines  = getItemLines(p);
+        const rH = rowHeight(p);
+        if (odd) { doc.setFillColor(248, 249, 250); doc.rect(M, y, W - M * 2, rH, 'F'); }
+
+        const headMid = y + 4.6;
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7.8); doc.setTextColor(30, 40, 50);
+        doc.text(trunc(String(p.cedula || ''), 14), C.cedula, headMid);
+        doc.setFont('helvetica', 'bold');
+        doc.text(trunc(String(p.nombre || '—').toUpperCase(), 30), C.nombre, headMid);
+        doc.setFont('helvetica', 'normal');
+        doc.text(String(p.talla || '—'), C.talla, headMid);
+        doc.text(String(p.numero_estampar || '—'), C.numero, headMid);
+        doc.text(trunc(String(p.nombre_estampar || '—').toUpperCase(), 16), C.estampa, headMid);
         doc.setTextColor(...accentRgb); doc.setFont('helvetica', 'bold');
-        doc.text(fmtCOP(p.total), C.total, mid);
+        doc.text(fmtCOP(p.total), C.total, headMid);
+
+        let ly = y + 9.4;
+        if (esFamiliar) {
+          doc.setTextColor(147, 51, 234); doc.setFontSize(6.5); doc.setFont('helvetica', 'bold');
+          doc.text(trunc(String(p.tipo || '').toUpperCase(), 30), C.nombre, ly);
+          ly += 4;
+        }
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(90, 100, 110);
+        itemLines.forEach(line => {
+          doc.text(`• ${line}`, C.nombre + 1.5, ly);
+          ly += 4;
+        });
+
         return y + rH;
       };
 
@@ -441,7 +470,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
         y = drawSectionHead(lista, titulo, y);
         y = drawTableHead(y);
         lista.forEach((p, i) => {
-          if (y > H - 20) { doc.addPage(); y = drawPageHeader(); y = drawTableHead(y); }
+          if (y + rowHeight(p) > H - 12) { doc.addPage(); y = drawPageHeader(); y = drawTableHead(y); }
           y = drawRow(p, y, i % 2 === 0);
         });
         y = drawSubtotal(lista, y);

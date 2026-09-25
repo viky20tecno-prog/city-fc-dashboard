@@ -12,6 +12,8 @@ import { authFetch } from '../lib/authFetch';
 import { useAppData } from '../hooks/useAppData';
 import { useClubConfig } from '../hooks/useClubConfig';
 import { useRole } from '../hooks/useRole';
+import { useConciliacionPendientes } from '../hooks/useConciliacionPendientes';
+import { colorAlerta, TEXTO_SOBRE_ALERTA } from '../lib/colorAlerta';
 import { getClubId, generarLinkBoldClub } from '../services/api';
 import { API_BASE_URL, OFERTA_ANUAL_LANZAMIENTO, PLANES_PRECIO_ANUAL } from '../config';
 import DashboardOverview from '../components/DashboardOverview';
@@ -45,7 +47,23 @@ const NAV = [
   { id: 'documentos',   Icon: FolderOpen,       title: 'Documentos'    },
 ];
 
-function NavBtn({ id, Icon, title, active, color, onClick, collapsed }) {
+// Punto ámbar sobre un ícono del menú móvil (hay algo por revisar en esa sección)
+function PuntoAlerta({ n, color }) {
+  if (!n) return null;
+  return (
+    <span style={{
+      position: 'absolute', top: '6px', left: 'calc(50% + 6px)',
+      minWidth: '14px', height: '14px', padding: '0 3px', borderRadius: '99px',
+      background: color, color: TEXTO_SOBRE_ALERTA, fontSize: '9px', fontWeight: 700, lineHeight: 1,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      {n > 9 ? '9+' : n}
+    </span>
+  );
+}
+
+function NavBtn({ id, Icon, title, active, color, onClick, collapsed, alerta = 0, avisoKey, alertColor }) {
+  const enAlerta = alerta > 0 && !active;
   return (
     <button
       style={{
@@ -67,7 +85,7 @@ function NavBtn({ id, Icon, title, active, color, onClick, collapsed }) {
         overflow: 'hidden',
       }}
       onClick={() => onClick(id)}
-      title={collapsed ? title : undefined}
+      title={collapsed ? (alerta > 0 ? `${title} · ${alerta} por revisar` : title) : undefined}
     >
       {active && (
         <div style={{
@@ -80,21 +98,45 @@ function NavBtn({ id, Icon, title, active, color, onClick, collapsed }) {
         }} />
       )}
       <Icon
+        key={enAlerta ? avisoKey : undefined}
+        className={enAlerta ? 'animate-conc-aviso' : undefined}
         size={18}
-        color={active ? color : 'var(--text-mut)'}
-        style={{ flexShrink: 0, ...(active ? { filter: `drop-shadow(0 0 5px ${color}E6)`, transition: 'filter 0.3s' } : {}) }}
-        strokeWidth={1.7}
+        color={active ? color : enAlerta ? alertColor : 'var(--text-mut)'}
+        style={{
+          flexShrink: 0,
+          ...(active ? { filter: `drop-shadow(0 0 5px ${color}E6)`, transition: 'filter 0.3s' } : {}),
+          ...(enAlerta ? { filter: `drop-shadow(0 0 5px ${alertColor}99)` } : {}),
+        }}
+        strokeWidth={enAlerta ? 2 : 1.7}
       />
       {!collapsed && (
         <span style={{
           fontSize: '13px',
-          fontWeight: active ? 600 : 400,
-          color: active ? color : 'var(--text-sec)',
+          fontWeight: active || enAlerta ? 600 : 400,
+          color: active ? color : enAlerta ? alertColor : 'var(--text-sec)',
           letterSpacing: '0.2px',
           transition: 'color 0.2s',
         }}>
           {title}
         </span>
+      )}
+      {alerta > 0 && (
+        collapsed ? (
+          <span style={{
+            position: 'absolute', top: '6px', right: '6px',
+            width: '8px', height: '8px', borderRadius: '50%',
+            background: alertColor, boxShadow: `0 0 6px ${alertColor}`,
+          }} />
+        ) : (
+          <span style={{
+            marginLeft: 'auto', minWidth: '20px', height: '18px', padding: '0 6px',
+            borderRadius: '99px', background: alertColor, color: TEXTO_SOBRE_ALERTA,
+            fontSize: '11px', fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {alerta > 99 ? '99+' : alerta}
+          </span>
+        )
       )}
     </button>
   );
@@ -202,6 +244,8 @@ export default function Dashboard() {
     || (!!clubConfig && !clubConfig.onboarding_completed && !onboardingClosed);
 
   const c = colorOverride || clubConfig?.color || '#E14924';
+  // Tono de alerta que contraste con el color del club (ámbar salvo que choque)
+  const ac = colorAlerta(c);
 
   // Cambia el color del club: aplica CSS vars inmediatamente y persiste en API
   const handleColorChange = async (newColor) => {
@@ -250,13 +294,23 @@ export default function Dashboard() {
     ? clubConfig.nombre.split(' ').slice(0, 3).map(w => w[0]).join('').toUpperCase().slice(0, 3)
     : '?';
 
+  const { isAdmin } = useRole();
+
+  // Comprobantes esperando revisión en Conciliación (p. ej. los que llegan por el
+  // bot de WhatsApp) → alerta en el menú, la campana y el título de la pestaña.
+  // Re-consulta al cambiar de pestaña para que baje apenas se aprueba/rechaza.
+  const { count: pendConc, avisoKey } = useConciliacionPendientes({
+    enabled: isAdmin && clubConfig?.modulos?.conciliacion !== false,
+    refreshTrigger: `${lastUpdated}|${activeTab}`,
+  });
+  const alertasNav = { conciliacion: pendConc };
+
   useEffect(() => {
-    document.title = clubConfig?.nombre
+    const base = clubConfig?.nombre
       ? `${clubConfig.nombre} — ZenSports`
       : 'ZenSports — App';
-  }, [clubConfig?.nombre]);
-
-  const { isAdmin } = useRole();
+    document.title = pendConc > 0 ? `(${pendConc}) ${base}` : base;
+  }, [clubConfig?.nombre, pendConc]);
 
   // Filtra el nav según los módulos habilitados en el plan del club y el rol del usuario.
   const ADMIN_ONLY_TABS = new Set(['conciliacion', 'finanzas']);
@@ -274,6 +328,7 @@ export default function Dashboard() {
   const navPrincipal = navVisible.slice(0, 5);
   const navMas       = navVisible.slice(5);
   const masActivo     = showMasMenu || navMas.some(({ id }) => id === activeTab);
+  const masAlerta     = navMas.reduce((n, { id }) => n + (alertasNav[id] || 0), 0);
 
   const S = {
     shell: {
@@ -584,27 +639,40 @@ export default function Dashboard() {
           {isMobile && <span style={{ fontSize: '8px', color: 'var(--text-mut)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>Sync</span>}
         </div>
 
-        {/* Notificaciones cumpleaños */}
+        {/* Notificaciones: comprobantes por conciliar + cumpleaños */}
         <div ref={bellRef} style={{ position: 'relative', flexShrink: 0 }}>
           <div
             style={{ ...S.roundBtn, background: showBell ? `${c}1F` : S.roundBtn.background, ...(isMobile && { flexDirection: 'column', gap: '2px', height: 'auto', width: 'auto', padding: '4px 7px' }) }}
             onClick={() => setShowBell(v => !v)}
-            title={`Notificaciones${cumpleaniosList.length ? ` · ${cumpleaniosList.length} cumpleaños` : ''}`}
+            title={[
+              'Notificaciones',
+              pendConc > 0 && `${pendConc} por conciliar`,
+              cumpleaniosList.length > 0 && `${cumpleaniosList.length} cumpleaños`,
+            ].filter(Boolean).join(' · ')}
           >
-            <Bell size={14} color={showBell ? c : 'var(--text-sec)'} />
+            <Bell
+              key={pendConc > 0 ? avisoKey : undefined}
+              className={pendConc > 0 ? 'animate-conc-aviso' : undefined}
+              size={14}
+              color={showBell ? c : pendConc > 0 ? ac : 'var(--text-sec)'}
+            />
             {isMobile && <span style={{ fontSize: '8px', color: 'var(--text-mut)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>Alertas</span>}
-            {cumpleaniosList.length > 0 && (
-              <span style={{
-                position: 'absolute', top: '5px', right: '5px',
-                width: cumpleaniosList.length > 9 ? '14px' : '10px', height: '10px',
-                background: '#EF4444', borderRadius: '99px',
-                fontSize: '8px', color: '#fff', fontWeight: 700,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                lineHeight: 1,
-              }}>
-                {cumpleaniosList.length > 9 ? '9+' : cumpleaniosList.length}
-              </span>
-            )}
+            {(() => {
+              const total = pendConc + cumpleaniosList.length;
+              if (total === 0) return null;
+              return (
+                <span style={{
+                  position: 'absolute', top: '5px', right: '5px',
+                  width: total > 9 ? '14px' : '10px', height: '10px',
+                  background: pendConc > 0 ? ac : '#EF4444', borderRadius: '99px',
+                  fontSize: '8px', color: pendConc > 0 ? TEXTO_SOBRE_ALERTA : '#fff', fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  lineHeight: 1,
+                }}>
+                  {total > 9 ? '9+' : total}
+                </span>
+              );
+            })()}
           </div>
           {showBell && (
             <div style={{
@@ -615,7 +683,31 @@ export default function Dashboard() {
             }}>
               <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid var(--border-sub)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Bell size={13} color={c} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-pri)' }}>Cumpleaños próximos</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-pri)' }}>Notificaciones</span>
+              </div>
+              {pendConc > 0 && (
+                <button
+                  onClick={() => { setActiveTab('conciliacion'); setShowBell(false); }}
+                  style={{
+                    width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px',
+                    border: 'none', borderBottom: '1px solid var(--border-sub)', cursor: 'pointer', textAlign: 'left',
+                    background: `${ac}14`,
+                  }}
+                >
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: `${ac}26`, border: `1px solid ${ac}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ClipboardCheck size={15} color={ac} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-pri)' }}>
+                      {pendConc === 1 ? '1 comprobante por conciliar' : `${pendConc} comprobantes por conciliar`}
+                    </div>
+                    <div style={{ fontSize: '11px', color: ac, fontWeight: 500 }}>Toca para revisarlos en Conciliación</div>
+                  </div>
+                  <ChevronRight size={14} color={ac} />
+                </button>
+              )}
+              <div style={{ padding: '10px 16px 6px', fontSize: '11px', fontWeight: 600, color: 'var(--text-mut)', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+                Cumpleaños próximos
               </div>
               {cumpleaniosList.length === 0 ? (
                 <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--text-mut)', fontSize: '13px' }}>
@@ -714,7 +806,7 @@ export default function Dashboard() {
         </button>
 
         {navVisible.map(({ id, Icon, title }) => (
-          <NavBtn key={id} id={id} Icon={Icon} title={title} active={activeTab === id} color={c} onClick={setActiveTab} collapsed={sidebarCollapsed} />
+          <NavBtn key={id} id={id} Icon={Icon} title={title} active={activeTab === id} color={c} onClick={setActiveTab} collapsed={sidebarCollapsed} alerta={alertasNav[id]} avisoKey={avisoKey} alertColor={ac} />
         ))}
 
         <div style={{ flex: 1 }} />
@@ -774,6 +866,7 @@ export default function Dashboard() {
             <nav style={S.bottomNav}>
               {navPrincipal.map(({ id, Icon, title }) => {
                 const isActive = activeTab === id;
+                const alerta   = !isActive ? alertasNav[id] || 0 : 0;
                 return (
                   <button
                     key={id}
@@ -782,14 +875,20 @@ export default function Dashboard() {
                       flex: 1, height: '56px',
                       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                       gap: '3px', border: 'none', background: 'transparent', cursor: 'pointer',
-                      color: isActive ? c : 'var(--text-mut)',
+                      color: isActive ? c : alerta ? ac : 'var(--text-mut)',
                       position: 'relative',
                     }}
                   >
                     {isActive && (
                       <div style={{ position: 'absolute', top: 0, left: '20%', right: '20%', height: '2px', background: c, borderRadius: '0 0 2px 2px' }} />
                     )}
-                    <Icon size={20} strokeWidth={isActive ? 2 : 1.6} style={isActive ? { filter: `drop-shadow(0 0 4px ${c}AA)` } : {}} />
+                    <Icon
+                      key={alerta ? avisoKey : undefined}
+                      className={alerta ? 'animate-conc-aviso' : undefined}
+                      size={20} strokeWidth={isActive || alerta ? 2 : 1.6}
+                      style={isActive ? { filter: `drop-shadow(0 0 4px ${c}AA)` } : {}}
+                    />
+                    <PuntoAlerta n={alerta} color={ac} />
                     <span style={{ fontSize: '9px', letterSpacing: '0.5px', fontWeight: isActive ? 600 : 400 }}>{title.split(' ')[0]}</span>
                   </button>
                 );
@@ -801,14 +900,20 @@ export default function Dashboard() {
                   flex: 1, height: '56px',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   gap: '3px', border: 'none', background: 'transparent', cursor: 'pointer',
-                  color: masActivo ? c : 'var(--text-mut)',
+                  color: masActivo ? c : masAlerta ? ac : 'var(--text-mut)',
                   position: 'relative',
                 }}
               >
                 {masActivo && (
                   <div style={{ position: 'absolute', top: 0, left: '20%', right: '20%', height: '2px', background: c, borderRadius: '0 0 2px 2px' }} />
                 )}
-                <MoreHorizontal size={20} strokeWidth={masActivo ? 2 : 1.6} style={masActivo ? { filter: `drop-shadow(0 0 4px ${c}AA)` } : {}} />
+                <MoreHorizontal
+                  key={masAlerta ? avisoKey : undefined}
+                  className={masAlerta ? 'animate-conc-aviso' : undefined}
+                  size={20} strokeWidth={masActivo || masAlerta ? 2 : 1.6}
+                  style={masActivo ? { filter: `drop-shadow(0 0 4px ${c}AA)` } : {}}
+                />
+                <PuntoAlerta n={showMasMenu ? 0 : masAlerta} color={ac} />
                 <span style={{ fontSize: '9px', letterSpacing: '0.5px', fontWeight: masActivo ? 600 : 400 }}>Más</span>
               </button>
             </nav>
@@ -828,6 +933,7 @@ export default function Dashboard() {
                 }}>
                   {navMas.map(({ id, Icon, title }) => {
                     const isActive = activeTab === id;
+                    const alerta   = !isActive ? alertasNav[id] || 0 : 0;
                     return (
                       <button
                         key={id}
@@ -836,12 +942,22 @@ export default function Dashboard() {
                           width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
                           padding: '13px 12px', borderRadius: '10px', border: 'none',
                           background: isActive ? `${c}14` : 'transparent',
-                          color: isActive ? c : 'var(--text-pri)',
-                          fontSize: '14px', fontWeight: isActive ? 600 : 500, textAlign: 'left', cursor: 'pointer',
+                          color: isActive ? c : alerta ? ac : 'var(--text-pri)',
+                          fontSize: '14px', fontWeight: isActive || alerta ? 600 : 500, textAlign: 'left', cursor: 'pointer',
                         }}
                       >
                         <Icon size={18} strokeWidth={1.8} />
                         {title}
+                        {alerta > 0 && (
+                          <span style={{
+                            marginLeft: 'auto', minWidth: '22px', height: '20px', padding: '0 7px',
+                            borderRadius: '99px', background: ac, color: TEXTO_SOBRE_ALERTA,
+                            fontSize: '12px', fontWeight: 700,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            {alerta > 99 ? '99+' : alerta}
+                          </span>
+                        )}
                       </button>
                     );
                   })}

@@ -467,6 +467,18 @@ select {
 }
 .animate-check-pop { animation: check-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
 
+/* Aviso de comprobante nuevo en la cola de conciliación: sacudida corta que se
+   repite 3 veces y para — el color ámbar + contador quedan fijos (ver
+   useConciliacionPendientes). Nada de loop infinito: el ojo lo termina ignorando. */
+@keyframes conc-aviso {
+  0%, 100% { transform: rotate(0) scale(1); }
+  15%      { transform: rotate(-12deg) scale(1.15); }
+  30%      { transform: rotate(10deg) scale(1.15); }
+  45%      { transform: rotate(-6deg) scale(1.08); }
+  60%      { transform: rotate(0) scale(1); }
+}
+.animate-conc-aviso { animation: conc-aviso 0.9s ease-in-out 3; }
+
 /* ── Accessibility ──────────────────────────────────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--brand-primary, #6A00FF);

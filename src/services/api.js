@@ -90,6 +90,14 @@ export async function fetchAllData() {
   return { jugadores, mensualidades, uniformes, torneos, registroPagos, morosos, suspensiones, reporteSummary: reportsRes };
 }
 
+// Evolución de la mora (% al cierre de cada mes). null si falla — la gráfica no se muestra.
+export async function fetchEvolucionMora(anio = new Date().getFullYear()) {
+  const clubId = getClubId();
+  if (!clubId) return null;
+  const res = await apiCallSafe(`/reports/evolucion-mora?club_id=${clubId}&anio=${anio}`, {});
+  return res.data || null;
+}
+
 export async function deletePlayer(cedula) {
   const clubId = getClubId();
   if (!clubId) throw new Error('No hay club activo en sesión.');

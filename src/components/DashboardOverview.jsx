@@ -3,6 +3,7 @@ import {
   Users, CheckCircle, Clock, XCircle, AlertTriangle, DollarSign, ChevronDown,
 } from 'lucide-react';
 import RecaudacionChart from './RecaudacionChart';
+import EvolucionMoraChart from './EvolucionMoraChart';
 import MorososList from './MorososList';
 import PagosPendientesList from './PagosPendientesList';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
@@ -354,6 +355,11 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
         }}>
           <MorososList morosos={morosos} codigoPais={codigoPais} clubNombre={clubNombre} color={color} logoUrl={logoUrl} />
         </div>
+      </div>
+
+      {/* ── EVOLUCIÓN DE LA MORA (se oculta sola si no hay historia confiable) ── */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <EvolucionMoraChart />
       </div>
 
       {/* ── PAGOS PENDIENTES ── */}

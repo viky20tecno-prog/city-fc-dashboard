@@ -3,7 +3,8 @@ import {
   Users, CheckCircle, Clock, XCircle, AlertTriangle, DollarSign, ChevronDown,
 } from 'lucide-react';
 import RecaudacionChart from './RecaudacionChart';
-import EvolucionMoraChart from './EvolucionMoraChart';
+import { EvolucionMoraView } from './EvolucionMoraChart';
+import { useEvolucionMora } from '../hooks/useEvolucionMora';
 import MorososList from './MorososList';
 import PagosPendientesList from './PagosPendientesList';
 import { formatMoney, getCodigoPais } from '../lib/formatMoney';
@@ -160,6 +161,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
   const anioActual = new Date().getFullYear();
 
   const [activeKpi, setActiveKpi] = useState(null);
+  const evolucion = useEvolucionMora();
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   // Nivel intermedio para laptop (768–1399px) — sin esto, las 6 tarjetas de KPI se
   // apretaban en una sola fila en cualquier pantalla no-mobile, incluidas laptops.
@@ -346,7 +348,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
         gap: '16px',
         alignItems: 'start',
       }}>
-        <RecaudacionChart mensualidades={mensualidades} suspensiones={suspensiones} />
+        <RecaudacionChart mensualidades={mensualidades} suspensiones={suspensiones} evolucion={evolucion} />
         <div style={{
           borderRadius: '16px',
           outline: activeKpi === 'mora' ? `2px solid rgba(239,68,68,0.5)` : 'none',
@@ -359,7 +361,7 @@ export default function DashboardOverview({ jugadores, mensualidades, morosos, s
 
       {/* ── EVOLUCIÓN DE LA MORA (se oculta sola si no hay historia confiable) ── */}
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <EvolucionMoraChart />
+        <EvolucionMoraView evolucion={evolucion} />
       </div>
 
       {/* ── PAGOS PENDIENTES ── */}

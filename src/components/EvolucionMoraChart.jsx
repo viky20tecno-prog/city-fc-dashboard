@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { fetchEvolucionMora } from '../services/api';
 
 // % de jugadores en mora al cierre de cada mes, reconstruido en la API con la fecha real
 // de los pagos (GET /reports/evolucion-mora). Si la API dice que la reconstrucción no es
@@ -85,14 +83,4 @@ export function EvolucionMoraView({ evolucion }) {
       </div>
     </div>
   );
-}
-
-export default function EvolucionMoraChart() {
-  const [evolucion, setEvolucion] = useState(null);
-  useEffect(() => {
-    let vivo = true;
-    fetchEvolucionMora().then(r => { if (vivo) setEvolucion(r); });
-    return () => { vivo = false; };
-  }, []);
-  return <EvolucionMoraView evolucion={evolucion} />;
 }

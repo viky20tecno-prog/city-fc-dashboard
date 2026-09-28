@@ -9,6 +9,9 @@ const MESES_ORDEN = [
   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
 ];
 
+// Pagado fuera del mes (recuperado después) — solo cuando hay historial de pagos confiable
+const COLOR_TARDE = '#F5A623';
+
 const fmtCOP = (v) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
 
@@ -39,10 +42,21 @@ function CustomTooltip({ active, payload, cc }) {
         {d?.mesCompleto}
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12 }}>
-          <span style={{ color: cc }}>Pagado</span>
-          <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d?.pagado || 0)}</span>
-        </div>
+        {d?.aTiempo != null ? (<>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12 }}>
+            <span style={{ color: cc }}>Pagado a tiempo</span>
+            <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d.aTiempo)}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12 }}>
+            <span style={{ color: COLOR_TARDE }}>Pagado tarde</span>
+            <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d.tarde)}</span>
+          </div>
+        </>) : (
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12 }}>
+            <span style={{ color: cc }}>Pagado</span>
+            <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d?.pagado || 0)}</span>
+          </div>
+        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12 }}>
           <span style={{ color: 'var(--text-sec)' }}>Pendiente</span>
           <span style={{ color: 'var(--text-pri)', fontWeight: 600 }}>{fmtCOP(d?.pendiente || 0)}</span>
@@ -51,7 +65,7 @@ function CustomTooltip({ active, payload, cc }) {
           borderTop: `1px solid ${cc}20`, paddingTop: 6, marginTop: 2,
           display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: 12,
         }}>
-          <span style={{ color: 'var(--text-mut)' }}>% cobrado</span>
+          <span style={{ color: 'var(--text-mut)' }}>{d?.aTiempo != null ? '% pagado a tiempo' : '% cobrado'}</span>
           <span style={{
             fontWeight: 700,
             color: d?.pct >= 80 ? '#22C55E' : d?.pct >= 50 ? cc : '#EF4444',
@@ -69,7 +83,7 @@ function PctLabel({ x, y, width, index, data, cc }) {
   const labelColor = d.pct >= 80 ? '#22C55E' : d.pct >= 50 ? cc : '#EF4444';
   return (
     <text
-      x={x + width / 2} y={y - 5}
+      x={width != null ? x + width / 2 : x} y={y - 5}
       fill={labelColor}
       textAnchor="middle" fontSize={10} fontWeight="600"
     >
@@ -78,7 +92,7 @@ function PctLabel({ x, y, width, index, data, cc }) {
   );
 }
 
-export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
+export default function RecaudacionChart({ mensualidades, suspensiones = [], evolucion = null }) {
   const mesActualIdx = new Date().getMonth();
   const anioActual   = new Date().getFullYear();
   const cc = getCC();
@@ -94,6 +108,11 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
     });
     return (cedula, mesNum) => idx[String(cedula)]?.has(mesNum) || false;
   }, [suspensiones, anioActual]);
+
+  const porMes = useMemo(() => {
+    if (!evolucion?.confiable) return {};
+    return Object.fromEntries((evolucion.meses || []).map(m => [m.numero_mes, m]));
+  }, [evolucion]);
 
   const data = useMemo(() => {
     const meses = {};
@@ -118,8 +137,19 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
           ? Math.round((m.pagado / (m.pagado + m.pendiente)) * 100)
           : 0,
         esActual: m.idx === mesActualIdx,
-      }));
-  }, [mensualidades, mesActualIdx, esSuspendido]);
+      }))
+      .map(m => {
+        // Con historial de pagos confiable, la barra de pagado se parte en lo pagado dentro
+        // del mismo mes (a tiempo) y lo recuperado después, y el % pasa a ser "a tiempo":
+        // así se ve cómo mejora la cultura de pago aunque los meses viejos ya estén saldados.
+        const ev = porMes[m.idx + 1];
+        if (!ev || !ev.causado) return m;
+        const aTiempo = Math.min(m.pagado, ev.a_tiempo);
+        const tarde = m.pagado - aTiempo;
+        return { ...m, aTiempo, tarde, tardeBarra: tarde || 0.01, pct: ev.pct_a_tiempo };
+      });
+  }, [mensualidades, mesActualIdx, esSuspendido, porMes]);
+  const conPagoATiempo = data.some(d => d.aTiempo != null);
 
   const totalPagado    = data.reduce((s, d) => s + d.pagado,    0);
   const totalPendiente = data.reduce((s, d) => s + d.pendiente, 0);
@@ -157,7 +187,7 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
             Recaudación por Mes
           </h2>
           <p style={{ fontSize: 11, color: 'var(--text-mut)', marginTop: 2 }}>
-            Pagado vs pendiente · {new Date().getFullYear()}
+            {conPagoATiempo ? 'Pagado a tiempo vs tarde vs pendiente' : 'Pagado vs pendiente'} · {new Date().getFullYear()}
           </p>
         </div>
         <div style={{
@@ -234,8 +264,9 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
             {/* Barras pendiente — fondo gris neutro */}
             <Bar dataKey="pendiente" name="Pendiente" fill="url(#gradPendiente)" radius={[4, 4, 0, 0]} maxBarSize={32} />
 
-            {/* Barras pagado — color del club */}
-            <Bar dataKey="pagado" name="Pagado" radius={[5, 5, 0, 0]} maxBarSize={32}>
+            {/* Barras pagado — color del club (con historial: a tiempo + tarde apiladas) */}
+            <Bar dataKey={conPagoATiempo ? 'aTiempo' : 'pagado'} stackId="pagado" name="Pagado"
+              radius={conPagoATiempo ? [0, 0, 0, 0] : [5, 5, 0, 0]} maxBarSize={32}>
               {data.map((entry, i) => (
                 <Cell
                   key={i}
@@ -243,8 +274,16 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
                   style={entry.esActual ? { filter: `drop-shadow(0 0 6px ${cc}80)` } : {}}
                 />
               ))}
-              <LabelList content={<PctLabel data={data} cc={cc} />} />
+              {!conPagoATiempo && <LabelList content={<PctLabel data={data} cc={cc} />} />}
             </Bar>
+            {conPagoATiempo && (
+              <Bar dataKey="tardeBarra" stackId="pagado" name="Pagado tarde" fill={COLOR_TARDE} fillOpacity={0.75}
+                radius={[5, 5, 0, 0]} maxBarSize={32}>
+                {/* El % va en el segmento de arriba; en un mes sin "pagado tarde" ese segmento
+                    mide 0 y Recharts no dibuja la etiqueta — de ahí el epsilon en `tardeBarra` */}
+                <LabelList content={<PctLabel data={data} cc={cc} />} />
+              </Bar>
+            )}
 
             {/* Línea de tendencia — color del club, punteada */}
             <Line
@@ -257,9 +296,12 @@ export default function RecaudacionChart({ mensualidades, suspensiones = [] }) {
       </div>
 
       {/* Leyenda */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 16, justifyContent: 'center' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', columnGap: 20, rowGap: 8, marginTop: 16, justifyContent: 'center' }}>
         {[
-          { color: cc,                   label: 'Pagado',     dash: false, glow: false },
+          ...(conPagoATiempo
+            ? [{ color: cc, label: 'A tiempo', dash: false, glow: false },
+               { color: COLOR_TARDE, label: 'Pagado tarde', dash: false, glow: false, opacity: 0.75 }]
+            : [{ color: cc, label: 'Pagado', dash: false, glow: false }]),
           { color: 'var(--text-mut)',     label: 'Pendiente',  dash: false, glow: false, opacity: 0.4 },
           { color: cc,                   label: 'Tendencia',  dash: true,  glow: false },
           { color: cc,                   label: 'Mes actual', dash: false, glow: true  },

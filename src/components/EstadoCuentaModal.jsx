@@ -10,9 +10,15 @@ const fmt = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency:
 const normalizar = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const CONCEPTO = { mensualidad: 'Mensualidad', mensualidad_wa: 'Mensualidad', uniforme: 'Uniforme', uniformes_wa: 'Uniforme', torneo: 'Torneo', torneo_wa: 'Torneo', otro: 'Otro' };
 const REVISION = { aprobado_manual: 'Aprobado', pendiente: 'Por revisar', excedente_pendiente: 'Saldo a favor', rechazado: 'Rechazado' };
-// Meses que todavía no se causan (futuros del año): el Portal les pone saldo = cuota, pero
-// no son deuda — se muestran con su valor en gris, nunca como "debe".
-const esFuturo = (m) => m.anio === new Date().getFullYear() && m.numero_mes > new Date().getMonth() + 1;
+// Lo que el jugador debe HOY: mensualidades ya causadas + torneos iniciados + uniformes.
+// Mismo criterio que el Portal (los meses futuros no suman, los torneos que no han empezado
+// ya vienen filtrados desde la API).
+function desgloseSaldo(data) {
+  const mensualidades = data.esExento ? 0 : data.saldo_pendiente || 0;
+  const torneos = (data.torneos || []).reduce((s, t) => s + Math.max(0, t.saldo_pendiente), 0);
+  const uniformes = (data.uniformes || []).reduce((s, u) => s + Math.max(0, u.saldo_pendiente), 0);
+  return { mensualidades, torneos, uniformes, total: mensualidades + torneos + uniformes };
+}
 const fechaCorta = (iso) => new Date(iso).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
 
 // Estado de cuenta de un jugador para el admin (botón de la barra superior): buscar por
@@ -94,8 +100,9 @@ export default function EstadoCuentaModal({ jugadores = [], clubConfig, color = 
     finally { setGenerandoPdf(false); }
   };
 
-  const saldoTorneos = (data?.torneos || []).reduce((s, t) => s + t.saldo_pendiente, 0);
-  const saldoUniformes = (data?.uniformes || []).reduce((s, u) => s + Math.max(0, u.saldo_pendiente), 0);
+  const saldo = data ? desgloseSaldo(data) : null;
+  const saldoTorneos = saldo?.torneos || 0;
+  const saldoUniformes = saldo?.uniformes || 0;
 
   return (
     <div className="fixed inset-0 z-[80] flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4" onClick={onClose}>
@@ -204,7 +211,7 @@ export default function EstadoCuentaModal({ jugadores = [], clubConfig, color = 
                         <span className="text-sm text-[var(--text-pri)] w-24 shrink-0">{m.mes}</span>
                         <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color }}>{cfg.label}</span>
                         <span className="text-xs font-mono text-[var(--text-sec)] text-right ml-auto whitespace-nowrap">
-                          {esFuturo(m) && m.valor_pagado === 0 ? fmt(m.valor_oficial)
+                          {m.estado === 'proximo' || m.estado === 'no_aplica' ? '—'
                             : m.saldo > 0 ? <span className="text-[#EF4444]">debe {fmt(m.saldo)}</span> : fmt(m.valor_pagado)}
                         </span>
                       </div>
@@ -241,6 +248,25 @@ export default function EstadoCuentaModal({ jugadores = [], clubConfig, color = 
                       sub={[p.banco, REVISION[p.estado_revision] || p.estado_revision, p.referencia].filter(Boolean).join(' · ')} />
                   ))}
               </Seccion>
+
+              {/* Total pendiente por pagar */}
+              <div className="rounded-xl p-4 border" style={{
+                background: saldo.total > 0 ? 'rgba(239,68,68,0.06)' : 'rgba(34,197,94,0.06)',
+                borderColor: saldo.total > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.3)',
+              }}>
+                {[['Mensualidades vencidas', saldo.mensualidades], ['Torneos', saldo.torneos], ['Uniformes', saldo.uniformes]].map(([label, v]) => (
+                  <div key={label} className="flex justify-between gap-3 text-sm py-0.5">
+                    <span className="text-[var(--text-sec)]">{label}</span>
+                    <span className="font-mono text-[var(--text-pri)]">{fmt(v)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between items-center gap-3 mt-2 pt-2 border-t" style={{ borderColor: saldo.total > 0 ? 'rgba(239,68,68,0.25)' : 'rgba(34,197,94,0.25)' }}>
+                  <span className="text-sm font-bold text-[var(--text-pri)]">Total pendiente por pagar</span>
+                  <span className="text-lg font-bold font-mono whitespace-nowrap" style={{ color: saldo.total > 0 ? '#EF4444' : '#22C55E' }}>
+                    {saldo.total > 0 ? fmt(saldo.total) : 'Al día'}
+                  </span>
+                </div>
+              </div>
             </>
           )}
         </div>
@@ -297,8 +323,9 @@ async function generarPdfEstadoCuenta(data, clubConfig) {
   y += 12;
 
   // Resumen
-  const saldoTorneos = data.torneos.reduce((s, t) => s + t.saldo_pendiente, 0);
-  const saldoUnif = data.uniformes.reduce((s, u) => s + Math.max(0, u.saldo_pendiente), 0);
+  const saldo = desgloseSaldo(data);
+  const saldoTorneos = saldo.torneos;
+  const saldoUnif = saldo.uniformes;
   const cajas = [
     ['Mensualidades', data.esExento ? 'Exento' : data.saldo_pendiente > 0 ? pesos(data.saldo_pendiente) : 'Al día', data.saldo_pendiente > 0],
     ['Pagado en el año', pesos(data.total_pagado), false],
@@ -326,16 +353,16 @@ async function generarPdfEstadoCuenta(data, clubConfig) {
   doc.setFontSize(8);
   data.mensualidades.forEach(m => {
     const cfg = ESTADO_CFG[m.estado] || ESTADO_CFG.pendiente;
+    const sinDato = m.estado === 'proximo' || m.estado === 'no_aplica';
     doc.setFont('helvetica', 'normal'); doc.setTextColor(40, 40, 40);
     doc.text(m.mes, M + 2, y);
     doc.setTextColor(...hexToRgb(cfg.color)); doc.setFont('helvetica', 'bold');
     doc.text(cfg.label, M + 40, y);
     doc.setFont('helvetica', 'normal'); doc.setTextColor(40, 40, 40);
     doc.text(m.estado === 'no_aplica' || m.estado === 'exento' ? '—' : pesos(m.valor_oficial), W - M - 60, y, { align: 'right' });
-    doc.text(pesos(m.valor_pagado), W - M - 32, y, { align: 'right' });
-    const debe = m.saldo > 0 && !esFuturo(m);
-    if (debe) doc.setTextColor(220, 38, 38);
-    doc.text(debe ? pesos(m.saldo) : '—', W - M - 2, y, { align: 'right' });
+    doc.text(sinDato ? '—' : pesos(m.valor_pagado), W - M - 32, y, { align: 'right' });
+    if (m.saldo > 0) doc.setTextColor(220, 38, 38);
+    doc.text(m.saldo > 0 ? pesos(m.saldo) : '—', W - M - 2, y, { align: 'right' });
     y += 5.2;
   });
   y += 3;
@@ -359,6 +386,23 @@ async function generarPdfEstadoCuenta(data, clubConfig) {
   lista('UNIFORMES', data.uniformes.map(u => [u.descripcion, u.saldo_pendiente > 0 ? `Debe ${pesos(u.saldo_pendiente)}` : u.estado === 'ENTREGADO' ? 'Entregado' : 'Pagado', u.saldo_pendiente > 0]));
   lista('ÚLTIMOS PAGOS', data.pagos.filter(p => p.estado_revision === 'aprobado_manual').slice(0, 8)
     .map(p => [`${fechaCorta(p.fecha)} · ${CONCEPTO[p.concepto] || 'Pago'}${p.banco ? ` · ${p.banco}` : ''}`, pesos(p.monto), false]));
+
+  // Total pendiente por pagar
+  if (y < H - 45) {
+    const alto = 26;
+    doc.setFillColor(...(saldo.total > 0 ? [254, 242, 242] : [240, 253, 244]));
+    doc.roundedRect(M, y, W - M * 2, alto, 2, 2, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(90, 90, 90);
+    [['Mensualidades vencidas', saldo.mensualidades], ['Torneos', saldo.torneos], ['Uniformes', saldo.uniformes]].forEach(([label, v], i) => {
+      doc.text(label, M + 4, y + 6 + i * 4.5);
+      doc.text(pesos(v), W - M - 4, y + 6 + i * 4.5, { align: 'right' });
+    });
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5);
+    doc.setTextColor(30, 30, 30); doc.text('TOTAL PENDIENTE POR PAGAR', M + 4, y + alto - 4);
+    doc.setTextColor(...(saldo.total > 0 ? [220, 38, 38] : [22, 163, 74]));
+    doc.text(saldo.total > 0 ? pesos(saldo.total) : 'Al día', W - M - 4, y + alto - 4, { align: 'right' });
+    y += alto + 6;
+  }
 
   if (data.portal_url && y < H - 22) {
     doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(100, 100, 100);

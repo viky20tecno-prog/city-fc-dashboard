@@ -18,8 +18,10 @@ const respuesta = {
   mensualidades: [
     { mes: 'Agosto', numero_mes: 8, anio: 2026, estado: 'vencido', valor_oficial: 80000, valor_pagado: 0, saldo: 80000 },
     { mes: 'Enero', numero_mes: 1, anio: 2026, estado: 'no_aplica', valor_oficial: 0, valor_pagado: 0, saldo: 0 },
+    { mes: 'Octubre', numero_mes: 10, anio: 2026, estado: 'proximo', valor_oficial: 80000, valor_pagado: 0, saldo: 0 },
   ],
-  torneos: [], uniformes: [], pagos: [],
+  torneos: [{ id: 't1', nombre_torneo: 'Copa', estado: 'ABONO', valor_inscrito: 90000, valor_pagado: 45000, saldo_pendiente: 45000 }],
+  uniformes: [], pagos: [],
   portal_url: 'https://zensports.zenpra.ai/p/demo/abc',
   wa: { wa_link: 'https://wa.me/573001112233', texto: 'Hola', ya_enviado: false },
 };
@@ -46,6 +48,10 @@ describe('EstadoCuentaModal', () => {
     expect(authFetch.mock.calls[0][0]).toContain('/players/1026740247/estado-cuenta');
     expect(screen.getByText('Vencido')).toBeInTheDocument();
     expect(screen.getByText('No aplica')).toBeInTheDocument();
+    expect(screen.getByText('Próximo')).toBeInTheDocument();
+    // Total = mensualidades vencidas (160.000) + torneos (45.000); el mes próximo no suma
+    const total = screen.getByText('Total pendiente por pagar').nextSibling;
+    expect(total.textContent.replace(/\s/g, '')).toBe('$205.000');
     expect(screen.getByText('WhatsApp')).toBeInTheDocument();
   });
 });

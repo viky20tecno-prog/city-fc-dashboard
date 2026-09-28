@@ -10,4 +10,6 @@ export const ESTADO_CFG = {
   exento:      { bg: 'rgba(56,189,248,0.10)',  border: 'rgba(56,189,248,0.28)',  color: '#38bdf8', label: 'Exento'      },
   suspendido:  { bg: 'rgba(156,163,175,0.10)', border: 'rgba(156,163,175,0.25)', color: '#9CA3AF', label: 'Suspendido'  },
   no_aplica:   { bg: 'rgba(156,163,175,0.06)', border: 'rgba(156,163,175,0.18)', color: '#6B7280', label: 'No aplica'   },
+  // Mes del año que todavía no llega (sin pagos): no es deuda ni pendiente
+  proximo:     { bg: 'rgba(156,163,175,0.04)', border: 'rgba(156,163,175,0.14)', color: '#6B7280', label: 'Próximo'     },
 };

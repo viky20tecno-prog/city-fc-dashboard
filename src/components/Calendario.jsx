@@ -3,11 +3,13 @@ import {
   ChevronLeft, ChevronRight, Plus, Edit2, Trash2,
   X, Loader2, MapPin, Clock, CalendarDays, List, Users,
   CheckCircle2, XCircle, AlertCircle, ChevronDown, PauseCircle, PlayCircle,
-  DollarSign, Check, Trophy, Download,
+  DollarSign, Check, Trophy, Download, UserPlus,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { authFetch } from '../lib/authFetch';
 import { useClubConfig } from '../hooks/useClubConfig';
+import ClasesIngresoModal from './ClasesIngresoModal';
+import { jugadoresSinIngreso } from '../lib/clasesIngreso';
 import {
   drawPdfHeader, drawPdfFooter, drawPdfTableHead, drawPdfSectionLabel,
   hexToRgb, loadLogoDataUrl,
@@ -23,6 +25,8 @@ const TIPOS = {
   PARTIDO:       { label: 'Partido',       color: '#FCA5A5',  bg: '#DC262650'  },
   ENTRENAMIENTO: { label: 'Entrenamiento', color: '#93C5FD',  bg: '#2563EB55'  },
   EVENTO:        { label: 'Evento',        color: '#FCD34D',  bg: '#D9770650'  },
+  // Las 2 primeras clases de un jugador nuevo (se crean desde el botón "Ingresos")
+  CLASE_INGRESO: { label: 'Clase de ingreso', color: '#86EFAC', bg: '#16A34A50' },
 };
 
 const ESTADOS = {
@@ -228,7 +232,7 @@ function EventCard({ ev, onEdit, onDelete, onAsistencia, onToggleSuspend, deleti
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export default function Calendario({ color, clubId }) {
+export default function Calendario({ color, clubId, jugadores = [] }) {
   const today    = new Date();
   const todayStr = localDateStr(today);
 
@@ -263,6 +267,7 @@ export default function Calendario({ color, clubId }) {
   const [asistCache,     setAsistCache]     = useState({});
 
   // Jugadores para selector de convocados en el formulario
+  const [showIngresos,       setShowIngresos]       = useState(false);
   const [formPlayers,        setFormPlayers]        = useState([]);
   const [formTorneos,        setFormTorneos]        = useState({});
   const [formPlayersLoading, setFormPlayersLoading] = useState(false);
@@ -429,7 +434,7 @@ export default function Calendario({ color, clubId }) {
           monto_arbitraje: (form.tipo === 'PARTIDO' && form.monto_arbitraje)
             ? parseInt(form.monto_arbitraje)
             : null,
-          convocados: (form.tipo === 'PARTIDO' && form.convocados.length > 0)
+          convocados: ((form.tipo === 'PARTIDO' || form.tipo === 'CLASE_INGRESO') && form.convocados.length > 0)
             ? form.convocados
             : null,
         };
@@ -898,7 +903,7 @@ export default function Calendario({ color, clubId }) {
 
           {/* Tipo */}
           <div className="flex gap-2">
-            {Object.entries(TIPOS).map(([key, t]) => (
+            {Object.entries(TIPOS).filter(([key]) => key !== 'CLASE_INGRESO' || form.tipo === 'CLASE_INGRESO').map(([key, t]) => (
               <button key={key} onClick={() => { setForm(f => ({ ...f, tipo: key, recurrencia: null })); if (key === 'PARTIDO') cargarFormPlayers(); }}
                 style={form.tipo === key ? { background: t.bg, color: t.color, borderColor: t.color } : {}}
                 className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-all
@@ -1430,6 +1435,7 @@ export default function Calendario({ color, clubId }) {
   };
 
   // ── Render principal ──────────────────────────────────────────────────────
+  const ingresosPendientes = jugadoresSinIngreso(jugadores, events).length;
 
   return (
     <div className="h-full overflow-y-auto bg-[var(--bg-app)]">
@@ -1453,6 +1459,13 @@ export default function Calendario({ color, clubId }) {
                 </button>
               ))}
             </div>
+            <button onClick={() => setShowIngresos(true)} title="Clases de ingreso de jugadores nuevos"
+              className="relative shrink-0 flex items-center gap-1.5 p-2 sm:px-3 rounded-xl border border-[var(--cc30)] text-[var(--text-sec)] hover:text-[var(--text-pri)] hover:border-[var(--cc)] transition-colors">
+              <UserPlus size={16} /><span className="hidden sm:inline text-xs font-semibold">Ingresos</span>
+              {ingresosPendientes > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#16A34A] text-white text-[10px] font-bold flex items-center justify-center">{ingresosPendientes}</span>
+              )}
+            </button>
             <button onClick={() => setReporteModal(true)} title="Reporte de asistencia"
               className="shrink-0 p-2 rounded-xl border border-[var(--cc30)] text-[var(--text-sec)] hover:text-[var(--text-pri)] hover:border-[var(--cc)] transition-colors">
               <Trophy size={16} />
@@ -1495,6 +1508,11 @@ export default function Calendario({ color, clubId }) {
       {showForm && EventForm()}
       {asistEvento && AsistenciaPanel()}
       {reporteModal && ReporteModal()}
+      {showIngresos && (
+        <ClasesIngresoModal jugadores={jugadores} eventos={events} clubId={clubId} color={color}
+          onClose={() => setShowIngresos(false)}
+          onAgendado={() => fetchEvents()} />
+      )}
     </div>
   );
 }

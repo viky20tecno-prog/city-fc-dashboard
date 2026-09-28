@@ -5,7 +5,7 @@ import {
   Clock, ClipboardCheck, Settings, AlertTriangle,
   Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays, Shield,
   ChevronLeft, ChevronRight, MessageSquare, Link2, Globe, FolderOpen, Send,
-  MoreHorizontal, Receipt,
+  MoreHorizontal, Receipt, UserPlus,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -13,6 +13,7 @@ import { useAppData } from '../hooks/useAppData';
 import { useClubConfig } from '../hooks/useClubConfig';
 import { useRole } from '../hooks/useRole';
 import { useConciliacionPendientes } from '../hooks/useConciliacionPendientes';
+import { useRecordatoriosIngreso } from '../hooks/useRecordatoriosIngreso';
 import { colorAlerta, TEXTO_SOBRE_ALERTA } from '../lib/colorAlerta';
 import { getClubId, generarLinkBoldClub } from '../services/api';
 import { API_BASE_URL, OFERTA_ANUAL_LANZAMIENTO, PLANES_PRECIO_ANUAL } from '../config';
@@ -304,6 +305,9 @@ export default function Dashboard() {
   const { count: pendConc, avisoKey } = useConciliacionPendientes({
     enabled: isAdmin && clubConfig?.modulos?.conciliacion !== false,
     refreshTrigger: `${lastUpdated}|${activeTab}`,
+  });
+  const recIngreso = useRecordatoriosIngreso({
+    clubId: getClubId(), jugadores, enabled: clubConfig?.modulos?.calendario !== false,
   });
   const alertasNav = { conciliacion: pendConc };
 
@@ -666,6 +670,7 @@ export default function Dashboard() {
               'Notificaciones',
               pendConc > 0 && `${pendConc} por conciliar`,
               cumpleaniosList.length > 0 && `${cumpleaniosList.length} cumpleaños`,
+              recIngreso.length > 0 && `${recIngreso.length} clases de ingreso`,
             ].filter(Boolean).join(' · ')}
           >
             <Bell
@@ -676,7 +681,7 @@ export default function Dashboard() {
             />
             {isMobile && <span style={{ fontSize: '8px', color: 'var(--text-mut)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>Alertas</span>}
             {(() => {
-              const total = pendConc + cumpleaniosList.length;
+              const total = pendConc + cumpleaniosList.length + recIngreso.length;
               if (total === 0) return null;
               return (
                 <span style={{
@@ -723,6 +728,39 @@ export default function Dashboard() {
                   </div>
                   <ChevronRight size={14} color={ac} />
                 </button>
+              )}
+              {recIngreso.length > 0 && (
+                <>
+                  <div style={{ padding: '10px 16px 6px', fontSize: '11px', fontWeight: 600, color: 'var(--text-mut)', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+                    Clases de ingreso
+                  </div>
+                  {recIngreso.map(r => {
+                    const hora = r.inicio.toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit' });
+                    const nombre = `${r.jugador.nombre || ''} ${r.jugador.apellidos || ''}`.trim();
+                    const detalle = r.cuando === 'hoy' ? `Hoy ${hora}` : r.cuando === 'manana' ? `Mañana ${hora}` : 'Falta marcar si asistió';
+                    return (
+                      <button key={r.id} onClick={() => { setActiveTab('calendario'); setShowBell(false); }}
+                        style={{
+                          width: '100%', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '10px',
+                          border: 'none', borderBottom: '1px solid var(--border-sub)', cursor: 'pointer', textAlign: 'left',
+                          background: r.cuando === 'hoy' ? 'rgba(22,163,74,0.08)' : 'transparent',
+                        }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(22,163,74,0.15)', border: '1px solid rgba(34,197,94,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <UserPlus size={14} color="#22C55E" />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-pri)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {r.numero}ª clase · {nombre}
+                          </div>
+                          <div style={{ fontSize: '11px', color: r.cuando === 'asistencia' ? '#F59E0B' : r.cuando === 'hoy' ? '#22C55E' : 'var(--text-mut)', fontWeight: r.cuando === 'manana' ? 400 : 600 }}>
+                            {detalle}{r.jugador.equipo ? ` · ${r.jugador.equipo}` : ''}
+                          </div>
+                        </div>
+                        <ChevronRight size={14} color="var(--text-mut)" />
+                      </button>
+                    );
+                  })}
+                </>
               )}
               <div style={{ padding: '10px 16px 6px', fontSize: '11px', fontWeight: 600, color: 'var(--text-mut)', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
                 Cumpleaños próximos
@@ -1296,7 +1334,7 @@ export default function Dashboard() {
                 color={c}
               />
             )}
-            {activeTab === 'calendario'   && <Calendario    color={c} clubId={getClubId()} />}
+            {activeTab === 'calendario'   && <Calendario    color={c} clubId={getClubId()} jugadores={jugadores} />}
             {activeTab === 'equipos'      && <EquiposPage  color={c} clubConfig={clubConfig} onConfigSaved={() => refetchConfig()} />}
             {activeTab === 'uniformes'    && <Uniformes    color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}
             {activeTab === 'torneos'      && <TorneosPage  color={c} clubNombre={clubConfig?.nombre} clubConfig={clubConfig} />}

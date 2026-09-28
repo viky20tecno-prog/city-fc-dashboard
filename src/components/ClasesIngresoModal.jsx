@@ -52,7 +52,12 @@ function TarjetaJugador({ jugador, agendadas, eventos, clubId, color, onAgendado
   }, [jugador, eventos, yaAgendadas]);
   const manual = opciones.length === 0;
 
-  const [elegidas, setElegidas] = useState(() => opciones.slice(0, faltan).map(e => e.id));
+  // `null` = sin tocar: se usa la sugerencia calculada con los eventos ACTUALES (el modal
+  // puede abrirse antes de que termine de cargar el calendario y la sugerencia inicial
+  // saldría vacía). Al primer cambio del admin queda su elección.
+  const [elegidasManual, setElegidasManual] = useState(null);
+  const elegidas = elegidasManual ?? opciones.slice(0, faltan).map(e => e.id);
+  const setElegidas = (fn) => setElegidasManual(fn(elegidas));
   const [manuales, setManuales] = useState(() => Array.from({ length: faltan }, () => ({ fecha: '', hora: '16:00' })));
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState('');

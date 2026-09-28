@@ -1154,7 +1154,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                   onClick={() => togglePrendaPersona(persona.key, p)}
                                   role="button"
                                   tabIndex={0}
-                                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors cursor-pointer ${
+                                  className={`flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors cursor-pointer ${
                                     seleccionada
                                       ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
                                       : 'bg-[var(--bg-surface)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
@@ -1167,12 +1167,12 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                                       <Package className="w-3.5 h-3.5 opacity-30" />
                                     </div>
                                   )}
-                                  <span className="flex-1 text-left">
+                                  <span className="flex-1 min-w-[140px] text-left break-words">
                                     {p.nombre}
                                     {p.descripcion && <span className="block text-xs font-normal opacity-60">{p.descripcion}</span>}
                                   </span>
                                   {seleccionada ? (
-                                    <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                    <div className="flex items-center gap-2 shrink-0 ml-auto" onClick={e => e.stopPropagation()}>
                                       <button
                                         onClick={() => cambiarCantidadPersona(persona.key, p.nombre, -1)}
                                         disabled={cantidad <= 1}
@@ -1731,7 +1731,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 onChange={e => setNuevaPrenda(f => ({ ...f, nombre: e.target.value }))}
                 onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
                 placeholder="Nombre de la prenda"
-                className="flex-1 min-w-[140px] bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                className="flex-1 min-w-[200px] bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
               />
               <input
                 type="text"
@@ -1740,7 +1740,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 onChange={e => setNuevaPrenda(f => ({ ...f, precio_proveedor: e.target.value.replace(/\D/g, '') }))}
                 onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
                 placeholder="P. proveedor"
-                className="w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                className="flex-1 min-w-[110px] sm:flex-none sm:w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
               />
               <input
                 type="text"
@@ -1749,12 +1749,12 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                 onChange={e => setNuevaPrenda(f => ({ ...f, precio: e.target.value.replace(/\D/g, '') }))}
                 onKeyDown={e => e.key === 'Enter' && agregarPrenda()}
                 placeholder="P. público"
-                className="w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
+                className="flex-1 min-w-[110px] sm:flex-none sm:w-28 bg-[var(--bg-app)] border border-[var(--cc20)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-pri)] placeholder-[var(--text-mut)] focus:outline-none focus:border-[var(--cc)] transition-colors"
               />
               <button
                 onClick={agregarPrenda}
                 disabled={!nuevaPrenda.nombre.trim() || catalogo.length >= MAX_PRENDAS || uploadingImg}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--cc)] text-white text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--cc)]/80 transition-colors"
+                className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--cc)] text-white text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--cc)]/80 transition-colors"
               >
                 {guardandoCatalogo ? <Loader className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                 Agregar
@@ -1790,7 +1790,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
               <div className="space-y-2">
                 {catalogo.map((p, idx) => (
                   <div key={idx} className="px-4 py-3 rounded-xl bg-[var(--bg-app)] border border-[var(--cc20)] space-y-2">
-                  <div className="flex items-center gap-2">
+                  <div className={`flex gap-2 ${editandoIdx === idx ? 'items-center flex-wrap' : 'items-start'}`}>
                     {editandoIdx === idx ? (
                       <>
                         {/* Imagen editable */}
@@ -1808,7 +1808,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                           type="text"
                           value={editandoPrenda.nombre}
                           onChange={e => setEditandoPrenda(f => ({ ...f, nombre: e.target.value }))}
-                          className="flex-1 min-w-0 bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
+                          className="flex-1 min-w-[160px] bg-[var(--bg-surface)] border border-[var(--cc20)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-pri)] focus:outline-none focus:border-[var(--cc)]"
                         />
                         <input
                           type="text"
@@ -1852,20 +1852,27 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                             ? <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-cover" />
                             : <Package className="w-4 h-4 text-[var(--text-mut)] opacity-40" />}
                         </div>
-                        <span className="flex-1 text-sm text-[var(--text-pri)]">{p.nombre}</span>
-                        {p.precio_proveedor > 0 && (
-                          <span className="text-xs text-[var(--text-sec)] font-mono">
-                            Prov: ${p.precio_proveedor.toLocaleString('es-CO')}
-                          </span>
-                        )}
-                        <span className="text-sm font-mono text-[var(--cc)] font-semibold">
-                          ${p.precio.toLocaleString('es-CO')}
-                        </span>
-                        {p.precio_proveedor > 0 && p.precio > p.precio_proveedor && (
-                          <span className="text-xs font-mono text-green-400 bg-green-400/10 px-2 py-0.5 rounded-lg">
-                            +${(p.precio - p.precio_proveedor).toLocaleString('es-CO')}
-                          </span>
-                        )}
+                        {/* Nombre arriba y precios debajo (bajan de línea si no caben): en
+                            celular un nombre largo + 3 montos en una sola fila se salía de la tarjeta */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-[var(--text-pri)] leading-snug break-words">{p.nombre}</p>
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+                            <span className="text-sm font-mono text-[var(--cc)] font-semibold whitespace-nowrap">
+                              ${p.precio.toLocaleString('es-CO')}
+                            </span>
+                            {p.precio_proveedor > 0 && (
+                              <span className="text-xs text-[var(--text-sec)] font-mono whitespace-nowrap">
+                                Prov: ${p.precio_proveedor.toLocaleString('es-CO')}
+                              </span>
+                            )}
+                            {p.precio_proveedor > 0 && p.precio > p.precio_proveedor && (
+                              <span className="text-xs font-mono text-green-400 bg-green-400/10 px-2 py-0.5 rounded-lg whitespace-nowrap">
+                                +${(p.precio - p.precio_proveedor).toLocaleString('es-CO')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex shrink-0">
                         <button onClick={() => iniciarEditarPrenda(idx)}
                           className="p-1.5 rounded-lg text-[var(--text-sec)] hover:text-[var(--cc)] hover:bg-[var(--cc12)] transition-colors"
                         >
@@ -1876,6 +1883,7 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
+                        </div>
                       </>
                     )}
                   </div>
@@ -2252,15 +2260,15 @@ export default function Uniformes({ color = 'var(--cc)', clubNombre = 'Mi Club',
                     return (
                       <div key={p.nombre} onClick={() => toggleEditPrenda(p)}
                         role="button" tabIndex={0}
-                        className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors cursor-pointer ${
+                        className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors cursor-pointer ${
                           sel
                             ? 'bg-[var(--cc12)] border-[var(--cc)]/50 text-[var(--cc)]'
                             : 'bg-[var(--bg-app)] border-[var(--cc20)] text-[var(--text-sec)] hover:text-[var(--text-pri)]'
                         }`}
                       >
-                        <span>{p.nombre}</span>
+                        <span className="flex-1 min-w-[140px] break-words">{p.nombre}</span>
                         {sel ? (
-                          <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                          <div className="flex items-center gap-2 shrink-0 ml-auto" onClick={e => e.stopPropagation()}>
                             <button
                               onClick={() => cambiarCantidadEdit(p.nombre, -1)}
                               disabled={cantidad <= 1}

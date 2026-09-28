@@ -146,11 +146,11 @@ function PedidoUniformeCard({ color, clubSlug, cedula, catalogo, onPedidoCreado 
                   border: `1px solid ${cant > 0 ? color + '40' : 'rgba(255,255,255,0.08)'}`,
                 }}>
                   <div onClick={() => toggle(p.nombre)} style={{ flex: 1, cursor: 'pointer', minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>{p.nombre}</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.85)', overflowWrap: 'anywhere' }}>{p.nombre}</div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{fmt(p.precio)}</div>
                   </div>
                   {cant > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                       <button onClick={() => cambiarCantidad(p.nombre, -1)} style={{ width: 24, height: 24, borderRadius: 6, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer' }}>−</button>
                       <span style={{ fontSize: 12, fontWeight: 700, minWidth: 14, textAlign: 'center' }}>{cant}</span>
                       <button onClick={() => cambiarCantidad(p.nombre, 1)} style={{ width: 24, height: 24, borderRadius: 6, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer' }}>+</button>

@@ -5,7 +5,7 @@ import {
   Clock, ClipboardCheck, Settings, AlertTriangle,
   Copy, Check, Bell, LogOut, TrendingUp, Trophy, CalendarDays, Shield,
   ChevronLeft, ChevronRight, MessageSquare, Link2, Globe, FolderOpen, Send,
-  MoreHorizontal,
+  MoreHorizontal, Receipt,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { authFetch } from '../lib/authFetch';
@@ -23,6 +23,7 @@ import Conciliacion from '../components/Conciliacion';
 import Finanzas from '../components/Finanzas';
 import TorneosPage from '../components/TorneosPage';
 import PagoManualModal from '../components/PagoManualModal';
+import EstadoCuentaModal from '../components/EstadoCuentaModal';
 import OnboardingWizard from '../components/OnboardingWizard';
 import ThemeSelector from '../components/ThemeSelector';
 import { applyTheme, getStoredTheme } from '../lib/themes';
@@ -156,6 +157,7 @@ export default function Dashboard() {
   const [linkCopied,      setLinkCopied]      = useState(false);
   const [portalCopied,    setPortalCopied]    = useState(false);
   const [showPagoModal,   setShowPagoModal]   = useState(false);
+  const [showEstadoCuenta, setShowEstadoCuenta] = useState(false);
   const [onboardingClosed,     setOnboardingClosed]     = useState(false);
   const [onboardingManualOpen, setOnboardingManualOpen] = useState(false);
   const [showTheme,        setShowTheme]        = useState(false);
@@ -606,6 +608,22 @@ export default function Dashboard() {
         <button style={S.actionBtn(true)} onClick={() => setShowPagoModal(true)}>
           {isMobile ? '+PAGO' : 'PAGO MANUAL'}
         </button>
+
+        {/* Estado de cuenta de un jugador (solo admin) — buscar y enviar/descargar */}
+        {isAdmin && (isMobile ? (
+          <div
+            style={{ ...S.roundBtn, flexDirection: 'column', gap: '2px', height: 'auto', width: 'auto', padding: '4px 7px' }}
+            onClick={() => setShowEstadoCuenta(true)}
+            title="Estado de cuenta de un jugador"
+          >
+            <Receipt size={14} color="var(--text-sec)" />
+            <span style={{ fontSize: '8px', color: 'var(--text-mut)', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>Cuenta</span>
+          </div>
+        ) : (
+          <button style={S.actionBtn(false)} onClick={() => setShowEstadoCuenta(true)} title="Buscar el estado de cuenta de un jugador">
+            ESTADO DE CUENTA
+          </button>
+        ))}
 
         {/* Inscripción y Portal — desktop: texto completo; mobile: íconos en topbar */}
         {!isMobile && (
@@ -1298,6 +1316,15 @@ export default function Dashboard() {
           valorMensualidad={clubConfig?.valor_mensualidad || 0}
           onClose={() => setShowPagoModal(false)}
           onSuccess={handleRefresh}
+        />
+      )}
+
+      {showEstadoCuenta && (
+        <EstadoCuentaModal
+          jugadores={jugadores}
+          clubConfig={clubConfig}
+          color={c}
+          onClose={() => setShowEstadoCuenta(false)}
         />
       )}
 

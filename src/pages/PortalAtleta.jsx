@@ -1,23 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { ESTADO_CFG } from '../lib/estadosMensualidad';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.zensports.zenpra.ai/api';
 const SESSION_TTL_MS = 10 * 60 * 1000; // 10 minutos
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(parseFloat(n) || 0);
-
-// ── Constantes de estados ─────────────────────────────────────────────────────
-const ESTADO_CFG = {
-  pagado:      { bg: 'rgba(0,208,132,0.12)',   border: 'rgba(0,208,132,0.28)',   color: '#00D084', label: 'Al día'      },
-  pendiente:   { bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.28)',  color: '#F59E0B', label: 'Pendiente'   },
-  vencido:     { bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.28)',   color: '#EF4444', label: 'Vencido'     },
-  parcial:     { bg: 'rgba(74,158,255,0.12)',  border: 'rgba(74,158,255,0.28)',  color: '#4A9EFF', label: 'Parcial'     },
-  por_validar: { bg: 'rgba(192,120,255,0.12)', border: 'rgba(192,120,255,0.28)', color: '#C678FF', label: 'Por validar' },
-  exento:      { bg: 'rgba(56,189,248,0.10)',  border: 'rgba(56,189,248,0.28)',  color: '#38bdf8', label: 'Exento'      },
-  suspendido:  { bg: 'rgba(156,163,175,0.10)', border: 'rgba(156,163,175,0.25)', color: '#9CA3AF', label: 'Suspendido'  },
-};
 
 // ── Sub-componentes ───────────────────────────────────────────────────────────
 function EstadoBadge({ estado }) {

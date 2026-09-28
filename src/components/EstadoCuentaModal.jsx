@@ -203,7 +203,7 @@ export default function EstadoCuentaModal({ jugadores = [], clubConfig, color = 
 
               {/* Mensualidades */}
               <Seccion titulo={`Mensualidades ${data.mensualidades[0]?.anio || ''}`}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+                <div>
                   {data.mensualidades.map(m => {
                     const cfg = ESTADO_CFG[m.estado] || ESTADO_CFG.pendiente;
                     return (

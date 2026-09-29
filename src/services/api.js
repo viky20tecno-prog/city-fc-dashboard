@@ -144,6 +144,12 @@ export async function fetchClubConfig() {
   const url = `${API_BASE_URL}/config?club_id=${clubId}`;
   const headers = await getAuthHeaders();
   const res = await fetch(url, { headers });
+  // Club suspendido (clubs.is_active = false): la API responde 403 "Club inactivo" en todo.
+  // Se reporta aparte para mostrar la pantalla de club pausado en vez de un dashboard vacío.
+  if (res.status === 403) {
+    const body = await res.json().catch(() => ({}));
+    if (body.error === 'Club inactivo') return { success: false, suspendido: true };
+  }
   if (!res.ok) throw new Error(`API Error: ${res.status}`);
   return await res.json();
 }

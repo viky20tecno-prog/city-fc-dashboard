@@ -146,7 +146,7 @@ function NavBtn({ id, Icon, title, active, color, onClick, collapsed, alerta = 0
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { config: clubConfig, refetch: refetchConfig } = useClubConfig();
+  const { config: clubConfig, refetch: refetchConfig, suspendido: clubSuspendido } = useClubConfig();
   const {
     jugadores, mensualidades, uniformes, torneos,
     registroPagos, morosos, suspensiones,
@@ -1048,8 +1048,10 @@ export default function Dashboard() {
           </>
       )}
 
-      {/* ───── TRIAL EXPIRADO — overlay bloqueante ───── */}
-      {trialExpirado && (
+      {/* ───── TRIAL EXPIRADO o CLUB SUSPENDIDO — overlay bloqueante ─────
+          Suspendido = el admin de ZenSports lo pausó (ej. plan Free sin uso). Los datos siguen
+          guardados; pagar un plan por Bold lo reactiva solo (webhook → is_active = true). */}
+      {(trialExpirado || clubSuspendido) && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 500,
           background: 'rgba(0,0,0,0.92)',
@@ -1068,12 +1070,19 @@ export default function Dashboard() {
             <div style={{ lineHeight: 1 }}><Clock size={48} color="#EF4444" strokeWidth={1.5} /></div>
             <div>
               <div style={{ fontFamily: "'Exo 2', sans-serif", fontWeight: 700, fontSize: '28px', letterSpacing: '-0.3px', color: 'var(--text-pri)', marginBottom: '8px' }}>
-                Tu período de prueba terminó
+                {clubSuspendido ? 'Tu club está pausado' : 'Tu período de prueba terminó'}
               </div>
-              <div style={{ color: 'var(--text-sec)', fontSize: '14px', lineHeight: 1.6 }}>
-                El trial de <strong style={{ color: 'var(--text-pri)' }}>{clubConfig?.nombre}</strong> venció.
-                Activa un plan para seguir usando la plataforma.
-              </div>
+              {clubSuspendido ? (
+                <div style={{ color: 'var(--text-sec)', fontSize: '14px', lineHeight: 1.6 }}>
+                  Pausamos la cuenta por falta de uso. <strong style={{ color: 'var(--text-pri)' }}>Tus jugadores y datos siguen guardados.</strong>{' '}
+                  Activa un plan para reactivarla al instante, o escríbenos.
+                </div>
+              ) : (
+                <div style={{ color: 'var(--text-sec)', fontSize: '14px', lineHeight: 1.6 }}>
+                  El trial de <strong style={{ color: 'var(--text-pri)' }}>{clubConfig?.nombre}</strong> venció.
+                  Activa un plan para seguir usando la plataforma.
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
               {PLANES_AUTOSERVICIO.map(p => (
@@ -1154,7 +1163,7 @@ export default function Dashboard() {
                 Cerrar sesión
               </button>
               <a
-                href="https://wa.me/573023903192?text=Quiero%20activar%20mi%20plan%20de%20ZenSports"
+                href={`https://wa.me/573023903192?text=${encodeURIComponent(clubSuspendido ? `Hola, quiero reactivar mi club en ZenSports (${sessionStorage.getItem('clubId') || ''})` : 'Quiero activar mi plan de ZenSports')}`}
                 target="_blank"
                 rel="noreferrer"
                 style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid rgba(34,197,94,0.35)', background: 'rgba(34,197,94,0.12)', color: '#22C55E', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}

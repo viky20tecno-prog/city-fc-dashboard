@@ -4,10 +4,11 @@ import { fetchClubConfig } from '../services/api';
 export function useClubConfig() {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [suspendido, setSuspendido] = useState(false);
 
   const fetchAndSet = useCallback(() => {
     return fetchClubConfig()
-      .then(data => { if (data.success) setConfig(data); })
+      .then(data => { if (data.success) setConfig(data); setSuspendido(!!data.suspendido); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -21,5 +22,5 @@ export function useClubConfig() {
   // Carga inicial — loading ya arranca en true, no hace falta volver a marcarlo.
   useEffect(() => { fetchAndSet(); }, [fetchAndSet]);
 
-  return { config, loading, refetch: load };
+  return { config, loading, refetch: load, suspendido };
 }

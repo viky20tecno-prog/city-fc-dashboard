@@ -157,7 +157,7 @@ export default function EstadoCuentaModal({ jugadores = [], clubConfig, color = 
           {data && !cargando && (
             <>
               {/* Jugador */}
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 {data.atleta.foto_url
                   ? <img src={data.atleta.foto_url} alt="" className="w-14 h-14 rounded-xl object-cover border border-[var(--cc20)] shrink-0" />
                   : <div className="w-14 h-14 rounded-xl bg-[var(--bg-app)] border border-[var(--cc20)] shrink-0" />}
@@ -165,6 +165,17 @@ export default function EstadoCuentaModal({ jugadores = [], clubConfig, color = 
                   <p className="text-base font-bold text-[var(--text-pri)] break-words">{data.atleta.nombre} {data.atleta.apellidos}</p>
                   <p className="text-xs text-[var(--text-sec)]">CC {data.atleta.cedula}{data.atleta.equipo || data.atleta.categoria ? ` · ${data.atleta.equipo || data.atleta.categoria}` : ''}{data.atleta.activo === false ? ' · Archivado' : ''}</p>
                   {data.atleta.familiar_emergencia && <p className="text-xs text-[var(--text-mut)] break-words">Acudiente: {data.atleta.familiar_emergencia}{data.atleta.celular ? ` · ${data.atleta.celular}` : ''}</p>}
+                </div>
+                {/* Gran total de la deuda, al lado del nombre */}
+                <div className="w-full sm:w-auto sm:ml-auto rounded-xl px-5 py-3 border text-center shrink-0" style={{
+                  background: saldo.total > 0 ? 'rgba(239,68,68,0.10)' : 'rgba(34,197,94,0.10)',
+                  borderColor: saldo.total > 0 ? 'rgba(239,68,68,0.45)' : 'rgba(34,197,94,0.45)',
+                }}>
+                  <p className="text-[10px] uppercase tracking-wide text-[var(--text-sec)]">Total pendiente por pagar</p>
+                  <p className="text-2xl font-bold font-mono whitespace-nowrap leading-tight" style={{ color: saldo.total > 0 ? '#EF4444' : '#22C55E' }}>
+                    {saldo.total > 0 ? fmt(saldo.total) : 'Al día'}
+                  </p>
+                  <p className="text-[10px] text-[var(--text-mut)]">Mensualidades + torneos + uniformes</p>
                 </div>
               </div>
 
@@ -199,20 +210,6 @@ export default function EstadoCuentaModal({ jugadores = [], clubConfig, color = 
                     <p className="text-[11px] text-[var(--text-mut)]">{sub}</p>
                   </div>
                 ))}
-              </div>
-
-              {/* Total arriba — para no tener que bajar hasta el final */}
-              <div className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 border" style={{
-                background: saldo.total > 0 ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
-                borderColor: saldo.total > 0 ? 'rgba(239,68,68,0.35)' : 'rgba(34,197,94,0.35)',
-              }}>
-                <div className="min-w-0">
-                  <p className="text-[10px] uppercase tracking-wide text-[var(--text-mut)]">Total pendiente por pagar</p>
-                  <p className="text-[11px] text-[var(--text-mut)]">Mensualidades + torneos + uniformes</p>
-                </div>
-                <span className="text-xl font-bold font-mono whitespace-nowrap" style={{ color: saldo.total > 0 ? '#EF4444' : '#22C55E' }}>
-                  {saldo.total > 0 ? fmt(saldo.total) : 'Al día'}
-                </span>
               </div>
 
               {/* Mensualidades */}

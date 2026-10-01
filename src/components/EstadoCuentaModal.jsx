@@ -201,6 +201,20 @@ export default function EstadoCuentaModal({ jugadores = [], clubConfig, color = 
                 ))}
               </div>
 
+              {/* Total arriba — para no tener que bajar hasta el final */}
+              <div className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 border" style={{
+                background: saldo.total > 0 ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+                borderColor: saldo.total > 0 ? 'rgba(239,68,68,0.35)' : 'rgba(34,197,94,0.35)',
+              }}>
+                <div className="min-w-0">
+                  <p className="text-[10px] uppercase tracking-wide text-[var(--text-mut)]">Total pendiente por pagar</p>
+                  <p className="text-[11px] text-[var(--text-mut)]">Mensualidades + torneos + uniformes</p>
+                </div>
+                <span className="text-xl font-bold font-mono whitespace-nowrap" style={{ color: saldo.total > 0 ? '#EF4444' : '#22C55E' }}>
+                  {saldo.total > 0 ? fmt(saldo.total) : 'Al día'}
+                </span>
+              </div>
+
               {/* Mensualidades */}
               <Seccion titulo={`Mensualidades ${data.mensualidades[0]?.anio || ''}`}>
                 <div>
@@ -343,7 +357,16 @@ async function generarPdfEstadoCuenta(data, clubConfig) {
     if (label === 'Pagado en el año') doc.setTextColor(30, 30, 30);
     doc.text(valor, x + 3, y + 11.5);
   });
-  y += 21;
+  y += 18;
+
+  // Total pendiente arriba (además del recuadro final con el desglose)
+  doc.setFillColor(...(saldo.total > 0 ? [254, 242, 242] : [240, 253, 244]));
+  doc.roundedRect(M, y, W - M * 2, 11, 2, 2, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(30, 30, 30);
+  doc.text('TOTAL PENDIENTE POR PAGAR', M + 3, y + 7);
+  doc.setFontSize(12); doc.setTextColor(...(saldo.total > 0 ? [220, 38, 38] : [22, 163, 74]));
+  doc.text(saldo.total > 0 ? pesos(saldo.total) : 'Al día', W - M - 3, y + 7.5, { align: 'right' });
+  y += 17;
 
   // Mensualidades
   y = drawPdfSectionLabel(doc, { W, M, y, label: `MENSUALIDADES ${data.mensualidades[0]?.anio || ''}`, accentRgb: accent });

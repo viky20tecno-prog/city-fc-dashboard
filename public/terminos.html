@@ -10,96 +10,389 @@
   <meta property="og:description" content="Planes, pagos, cancelación sin permanencia y propiedad de los datos del club.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://zensports.zenpra.ai/terminos">
+  <meta name="theme-color" content="#060810">
   <title>Términos del servicio · ZenSports</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <style>
-    :root { color-scheme: dark; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #060810; color: #E7E9F0; padding: 56px 20px 80px;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.7;
+    @font-face {
+      font-family: 'Sport Event';
+      src: url('/fonts/sportevent-display.otf') format('opentype');
+      font-weight: 400; font-style: normal; font-display: swap;
     }
-    main { max-width: 680px; margin: 0 auto; }
-    .wordmark { font-size: 12px; font-weight: 800; letter-spacing: 4px; color: #8b5cf6; }
-    h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 800; margin: 14px 0 6px; letter-spacing: -0.5px; }
-    .sub { color: rgba(231,233,240,0.45); font-size: 13px; margin-bottom: 26px; }
-    h2 { font-size: 17px; font-weight: 700; margin: 30px 0 8px; }
-    p { color: rgba(231,233,240,0.72); margin-bottom: 12px; }
-    a { color: #a78bfa; text-decoration: none; }
-    a:hover { color: #c4b5fd; }
-    ul { margin: 0 0 12px 20px; color: rgba(231,233,240,0.72); }
-    li { margin-bottom: 6px; }
-    nav.crumbs { margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 14px; display: flex; gap: 18px; flex-wrap: wrap; }
+    :root {
+      color-scheme: dark;
+      --bg: #060810;
+      --card: #0F1219;
+      --border: rgba(255,255,255,0.08);
+      --border-violet: rgba(174,104,255,0.28);
+      --text: #E7E9F0;
+      --text-2: rgba(231,233,240,0.74);
+      --text-3: rgba(231,233,240,0.5);
+      --violet: #6A00FF;
+      --violet-2: #AE68FF;
+      --violet-3: #CDA6FF;
+      --green: #00D084;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.75; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    }
+    a { color: var(--violet-2); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--violet-3); }
+    a:focus-visible, summary:focus-visible { outline: 2px solid var(--violet-2); outline-offset: 3px; border-radius: 6px; }
+
+    /* ── Barra superior ───────────────────────────── */
+    .topbar {
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(6,8,16,0.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-in { max-width: 1120px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; color: #fff; }
+    .brand img { width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(106,0,255,0.55)); }
+    .brand span { font-family: 'Sport Event', Inter, sans-serif; font-size: 22px; letter-spacing: .5px; line-height: 1; color: #EFFFFF; }
+    .brand span b { font-weight: 400; opacity: .85; }
+    .brand:hover { color: #fff; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px; min-height: 40px;
+      padding: 0 18px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #fff; white-space: nowrap;
+      background: linear-gradient(135deg, var(--violet), var(--violet-2));
+      box-shadow: 0 6px 24px rgba(106,0,255,0.35); transition: transform .2s, box-shadow .2s;
+    }
+    .btn:hover { color: #fff; transform: translateY(-1px); box-shadow: 0 8px 30px rgba(106,0,255,0.5); }
+
+    /* ── Hero ─────────────────────────────────────── */
+    .hero { position: relative; padding: 64px 20px 44px; text-align: center; overflow: hidden; }
+    .hero::before {
+      content: ""; position: absolute; left: 50%; top: -220px; width: 900px; height: 520px; transform: translateX(-50%);
+      background: radial-gradient(closest-side, rgba(106,0,255,0.32), rgba(174,104,255,0.08) 55%, transparent);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 20%, transparent 70%);
+              mask-image: radial-gradient(ellipse at 50% 0%, #000 20%, transparent 70%);
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .kicker {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase;
+      color: var(--violet-3); background: rgba(106,0,255,0.14); border: 1px solid var(--border-violet);
+      border-radius: 999px; padding: 6px 14px; margin-bottom: 20px;
+    }
+    .hero h1 { font-size: clamp(30px, 5.4vw, 52px); font-weight: 800; letter-spacing: -1.2px; line-height: 1.1; max-width: 760px; margin: 0 auto 16px; }
+    .hero h1 em { display: block; font-style: normal; background: linear-gradient(135deg, #fff 10%, var(--violet-2) 60%, var(--violet) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero .lead { color: var(--text-2); font-size: 17px; max-width: 620px; margin: 0 auto 26px; }
+    .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; color: var(--text-2);
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px;
+    }
+    .chip svg { width: 15px; height: 15px; color: var(--violet-2); }
+
+    /* ── Layout: índice + contenido ───────────────── */
+    .layout { max-width: 1120px; margin: 0 auto; padding: 8px 20px 40px; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 48px; align-items: start; }
+    .toc { position: sticky; top: 92px; }
+    .toc-title { font-size: 11px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
+    .toc ol { list-style: none; border-left: 1px solid var(--border); }
+    .toc a { display: block; padding: 6px 0 6px 16px; margin-left: -1px; border-left: 2px solid transparent; font-size: 13.5px; line-height: 1.45; color: var(--text-3); }
+    .toc a:hover { color: var(--text); }
+    .toc a.on { color: #fff; border-left-color: var(--violet-2); }
+    .toc a .n { color: var(--violet-2); font-weight: 700; margin-right: 6px; font-variant-numeric: tabular-nums; }
+    .toc-mobile { display: none; }
+
+    .content { max-width: 760px; }
+    .sec {
+      background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)), var(--card);
+      border: 1px solid var(--border); border-radius: 18px; padding: 28px 30px; margin-bottom: 16px;
+      transition: border-color .25s;
+    }
+    .sec:hover { border-color: rgba(174,104,255,0.2); }
+    .sec h2 { display: flex; align-items: center; gap: 14px; font-size: 19px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.3; margin-bottom: 14px; }
+    .num {
+      flex-shrink: 0; width: 34px; height: 34px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums;
+      background: linear-gradient(135deg, var(--violet), var(--violet-2)); box-shadow: 0 4px 16px rgba(106,0,255,0.35);
+    }
+    .sec p, .sec li { color: var(--text-2); font-size: 15.5px; text-align: justify; text-justify: inter-word; -webkit-hyphens: auto; hyphens: auto; }
+    .sec p + p { margin-top: 12px; }
+    .sec ul { list-style: none; display: grid; gap: 10px; }
+    .sec li { position: relative; padding-left: 26px; }
+    .sec li::before {
+      content: ""; position: absolute; left: 6px; top: 11px; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--violet-2); box-shadow: 0 0 10px rgba(174,104,255,0.8);
+    }
+    .sec strong { color: var(--text); font-weight: 600; }
+    .note {
+      margin-top: 16px; padding: 14px 16px; border-radius: 12px; font-size: 14px; color: var(--text-2);
+      background: rgba(106,0,255,0.08); border: 1px solid var(--border-violet);
+      text-align: justify; hyphens: auto;
+    }
+
+    .contact {
+      margin-top: 28px; border-radius: 20px; padding: 30px; text-align: center; position: relative; overflow: hidden;
+      border: 1px solid var(--border-violet);
+      background: radial-gradient(120% 140% at 50% 0%, rgba(106,0,255,0.28), rgba(106,0,255,0.05) 60%), var(--card);
+    }
+    .contact h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .contact p { color: var(--text-2); margin-bottom: 18px; }
+    .contact .row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 12px;
+      font-size: 14px; font-weight: 600; color: var(--text); background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: #fff; border-color: var(--border-violet); }
+    .btn-ghost svg, .btn svg { width: 17px; height: 17px; }
+
+    /* ── Pie ──────────────────────────────────────── */
+    footer { border-top: 1px solid var(--border); margin-top: 24px; }
+    .foot { max-width: 1120px; margin: 0 auto; padding: 28px 20px 40px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
+    .foot nav { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 14px; }
+    .foot nav a { color: var(--text-3); }
+    .foot nav a:hover, .foot nav a[aria-current] { color: var(--text); }
+    .foot small { display: block; width: 100%; color: var(--text-3); font-size: 12.5px; }
+
+    /* ── Responsive ───────────────────────────────── */
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; gap: 0; }
+      .toc { display: none; }
+      .toc-mobile { display: block; margin-bottom: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
+      .toc-mobile summary { cursor: pointer; list-style: none; padding: 14px 18px; font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; min-height: 48px; }
+      .toc-mobile summary::-webkit-details-marker { display: none; }
+      .toc-mobile summary svg { width: 18px; height: 18px; color: var(--violet-2); transition: transform .2s; }
+      .toc-mobile[open] summary svg { transform: rotate(180deg); }
+      .toc-mobile ol { list-style: none; padding: 0 18px 14px; display: grid; gap: 2px; }
+      .toc-mobile a { display: block; padding: 7px 0; font-size: 14px; color: var(--text-2); }
+      .toc-mobile a .n { color: var(--violet-2); font-weight: 700; margin-right: 8px; }
+    }
+    @media (max-width: 560px) {
+      .topbar-in { padding: 12px 16px; }
+      .brand img { width: 30px; height: 30px; }
+      .brand span { font-size: 19px; }
+      .btn { padding: 0 14px; font-size: 13px; }
+      .hero { padding: 44px 16px 32px; }
+      .hero .lead { font-size: 16px; }
+      .layout { padding: 4px 16px 32px; }
+      .sec { padding: 22px 18px; border-radius: 16px; }
+      .sec h2 { font-size: 17px; gap: 12px; }
+      .num { width: 30px; height: 30px; font-size: 12px; }
+      .sec p, .sec li { font-size: 15px; }
+      .contact { padding: 24px 18px; }
+      .foot { padding: 24px 16px 32px; }
+    }
+    @media (max-width: 360px) {
+      .topbar .btn { padding: 0 12px; }
+      .topbar .btn svg { display: none; }
+      .brand { gap: 8px; }
+      .brand span { font-size: 17px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+
+    /* ── Impresión ────────────────────────────────── */
     @media print {
       :root { color-scheme: light; }
-      body { background: #fff; color: #14141F; padding: 0; }
-      p, ul { color: #33334A; }
-      .sub { color: #6B6B80; }
-      .wordmark, a { color: #6A00FF; }
-      nav.crumbs { display: none; }
-      h2 { break-after: avoid; }
+      body { background: #fff; color: #14141F; }
+      .topbar { position: static; background: none; border: 0; backdrop-filter: none; }
+      .topbar .btn, .toc, .toc-mobile, .contact, footer nav { display: none; }
+      .brand span { color: #14141F; }
+      .hero { padding: 16px 0; text-align: left; }
+      .hero::before, .hero::after { display: none; }
+      .hero h1 em { color: #6A00FF; background: none; }
+      .hero h1, .hero .lead { margin-left: 0; }
+      .hero .lead, .chip { color: #33334A; }
+      .kicker { color: #6A00FF; background: #F4F0FF; border-color: #D9C8FF; }
+      .chips { justify-content: flex-start; }
+      .layout { display: block; padding: 0; }
+      .sec { background: none; border: 0; border-bottom: 1px solid #E4E4EC; border-radius: 0; padding: 14px 0; break-inside: avoid; }
+      .sec p, .sec li, .note { color: #33334A; }
+      .note { background: #F4F0FF; border-color: #D9C8FF; }
+      .num { box-shadow: none; }
+      a { color: #6A00FF; }
     }
   </style>
 </head>
 <body>
-  <main>
-    <div class="wordmark">ZENSPORTS</div>
-    <h1>Términos y condiciones del servicio</h1>
-    <p class="sub">Vigentes desde el 1 de octubre de 2026 · Colombia</p>
+  <header class="topbar">
+    <div class="topbar-in">
+      <a class="brand" href="/" aria-label="ZenSports — inicio">
+        <img src="/brand/zensports-z.webp" alt="" width="34" height="34">
+        <span><b>ZEN</b>SPORTS</span>
+      </a>
+      <a class="btn" href="/">
+        Ir a ZenSports
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </header>
 
-    <h2>1. Quién presta el servicio</h2>
-    <p>ZenSports es una plataforma de software para la gestión de clubes deportivos, operada por Zenpra. Mientras Zenpra no esté constituida como sociedad, el servicio lo presta y lo cobra su titular como persona natural, mediante cuenta de cobro. Contacto: <a href="mailto:hola@zenpra.ai">hola@zenpra.ai</a>.</p>
+  <section class="hero">
+    <div class="kicker">Documento legal</div>
+    <h1>Términos y condiciones <em>del servicio</em></h1>
+    <p class="lead">Las reglas claras con las que tu club usa ZenSports: planes, pagos, cancelación y quién es dueño de la información.</p>
+    <div class="chips">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Vigentes desde el 1 de octubre de 2026</span>
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-6.5 8-13a8 8 0 0 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="9" r="3"/></svg>Colombia</span>
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Sin permanencia</span>
+    </div>
+  </section>
 
-    <h2>2. Qué incluye el servicio</h2>
-    <p>El club obtiene acceso a la plataforma web de ZenSports y a sus herramientas (registro de jugadores, mensualidades, pagos, carnets, calendario, reportes y el asistente de WhatsApp, entre otras), según el plan contratado. Las funciones disponibles en cada plan son las publicadas en <a href="/#precios">zensports.zenpra.ai</a> al momento de la contratación. ZenSports es una herramienta de apoyo: la administración del club, sus cobros y sus comunicaciones siguen siendo decisión y responsabilidad del club.</p>
+  <div class="layout">
+    <aside class="toc" aria-label="Contenido">
+      <div class="toc-title">Contenido</div>
+      <ol id="toc-list"></ol>
+    </aside>
 
-    <h2>3. Prueba gratis</h2>
-    <p>Todo club nuevo puede usar la plataforma gratis durante el período de prueba indicado al registrarse, sin ingresar medios de pago. Al terminar, el club decide si contrata un plan; si no lo hace, el acceso queda en pausa y sus datos se conservan según el punto 7.</p>
+    <main class="content">
+      <details class="toc-mobile">
+        <summary>Contenido <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+        <ol id="toc-list-m"></ol>
+      </details>
 
-    <h2>4. Planes, precios y pago</h2>
-    <ul>
-      <li>Los precios están en pesos colombianos y se pagan por anticipado, de forma mensual o anual.</li>
-      <li>El pago se hace en línea a través de Bold (pasarela de pagos) o por transferencia a la cuenta que indiquemos.</li>
-      <li>Por cada cobro enviamos al correo del administrador del club una cuenta de cobro, y una constancia cuando el pago queda registrado.</li>
-      <li>El titular del servicio es persona natural no responsable de IVA; los valores publicados son el total a pagar.</li>
-      <li>Si cambiamos los precios, avisamos con al menos 30 días de anticipación. El cambio nunca afecta un período ya pagado.</li>
-    </ul>
+      <section class="sec" id="quien">
+        <h2><span class="num">01</span>Quién presta el servicio</h2>
+        <p>ZenSports es una plataforma de software para la gestión de clubes deportivos, desarrollada y operada por Zenpra en Colombia. Para cualquier asunto relacionado con el servicio puedes escribirnos a <a href="mailto:hola@zenpra.ai">hola@zenpra.ai</a>.</p>
+      </section>
 
-    <h2>5. Sin permanencia: cancelación</h2>
-    <p>No hay contrato de permanencia mínima. El club puede cancelar cuando quiera escribiendo a <a href="mailto:hola@zenpra.ai">hola@zenpra.ai</a> o por WhatsApp. La cancelación aplica al final del período ya pagado: el club conserva el acceso hasta esa fecha y no se le vuelve a cobrar. No se hacen reembolsos proporcionales de un período ya iniciado.</p>
+      <section class="sec" id="incluye">
+        <h2><span class="num">02</span>Qué incluye el servicio</h2>
+        <p>El club obtiene acceso a la plataforma web de ZenSports y a sus herramientas (registro de jugadores, mensualidades, pagos, carnets, calendario, reportes y el asistente de WhatsApp, entre otras), según el plan contratado. Las funciones disponibles en cada plan son las publicadas en <a href="/#precios">zensports.zenpra.ai</a> al momento de la contratación.</p>
+        <p>ZenSports es una herramienta de apoyo: la administración del club, sus cobros y sus comunicaciones siguen siendo decisión y responsabilidad del club.</p>
+      </section>
 
-    <h2>6. Si un pago no llega</h2>
-    <p>Si el pago del período no se recibe, podemos pausar el acceso a la plataforma hasta que se ponga al día. Pausar el acceso no borra ninguna información del club.</p>
+      <section class="sec" id="prueba">
+        <h2><span class="num">03</span>Prueba gratis</h2>
+        <p>Todo club nuevo puede usar la plataforma gratis durante el período de prueba indicado al registrarse, sin ingresar medios de pago. Al terminar, el club decide si contrata un plan; si no lo hace, el acceso queda en pausa y sus datos se conservan según el punto 7.</p>
+      </section>
 
-    <h2>7. Los datos son del club</h2>
-    <p>Toda la información que el club registra (jugadores, pagos, documentos, reportes) pertenece al club. ZenSports actúa como encargado del tratamiento: la usa solo para prestar el servicio y no la vende ni la comparte con terceros. El club puede exportar sus listados desde la plataforma o pedirnos una copia completa en Excel en cualquier momento, incluso después de cancelar. Tras una cancelación o una pausa por falta de pago, conservamos los datos al menos 90 días para que el club pueda volver o llevárselos; después de ese plazo, y previo aviso al correo del club, pueden eliminarse. El detalle está en la <a href="/privacidad">política de tratamiento de datos</a>.</p>
+      <section class="sec" id="pagos">
+        <h2><span class="num">04</span>Planes, precios y pago</h2>
+        <ul>
+          <li>Los precios están en pesos colombianos y se pagan por anticipado, de forma mensual o anual.</li>
+          <li>El pago se hace en línea a través de las pasarelas de pago habilitadas en la plataforma (actualmente Bold) o por transferencia bancaria a la cuenta que indiquemos. Iremos incorporando nuevas pasarelas y medios de pago, que se informarán en la plataforma al momento de pagar.</li>
+          <li>Por cada cobro enviamos al correo del administrador del club el documento de cobro correspondiente, y una constancia cuando el pago queda registrado.</li>
+          <li>Los valores publicados son el total a pagar: no hay cargos ocultos ni costos de activación.</li>
+          <li>Si cambiamos los precios, avisamos con al menos 30 días de anticipación. El cambio nunca afecta un período ya pagado.</li>
+        </ul>
+      </section>
 
-    <h2>8. Responsabilidades del club</h2>
-    <ul>
-      <li>Contar con la autorización de sus jugadores (o de sus acudientes, si son menores de edad) para registrar sus datos, como exige la Ley 1581 de 2012.</li>
-      <li>Mantener la confidencialidad de sus usuarios y contraseñas y dar acceso solo a personas autorizadas.</li>
-      <li>Usar los mensajes y enlaces de WhatsApp conforme a las políticas de WhatsApp, sin envíos masivos no solicitados.</li>
-      <li>Verificar la información financiera antes de tomar decisiones con base en ella.</li>
-    </ul>
+      <section class="sec" id="cancelacion">
+        <h2><span class="num">05</span>Sin permanencia: cancelación</h2>
+        <p>No hay contrato de permanencia mínima. El club puede cancelar cuando quiera escribiendo a <a href="mailto:hola@zenpra.ai">hola@zenpra.ai</a> o por WhatsApp. La cancelación aplica al final del período ya pagado: el club conserva el acceso hasta esa fecha y no se le vuelve a cobrar. No se hacen reembolsos proporcionales de un período ya iniciado.</p>
+      </section>
 
-    <h2>9. Disponibilidad y soporte</h2>
-    <p>Trabajamos para que la plataforma esté disponible todo el tiempo, con copias de seguridad de la información. Pueden ocurrir interrupciones por mantenimiento o por fallas de proveedores externos (alojamiento, WhatsApp, pasarela de pagos); cuando dependa de nosotros, las resolvemos lo antes posible. El soporte se presta por WhatsApp y correo en horario hábil, con prioridad para los planes que la incluyen.</p>
+      <section class="sec" id="mora">
+        <h2><span class="num">06</span>Si un pago no llega</h2>
+        <p>Si el pago del período no se recibe, podemos pausar el acceso a la plataforma hasta que se ponga al día. Pausar el acceso no borra ninguna información del club.</p>
+      </section>
 
-    <h2>10. Límite de responsabilidad</h2>
-    <p>ZenSports responde por la correcta prestación del servicio de software. En ningún caso la responsabilidad total de ZenSports frente al club supera el valor pagado por el club en los últimos tres meses de servicio. ZenSports no responde por decisiones del club, por el uso indebido de la plataforma ni por bloqueos de cuentas de WhatsApp derivados de un uso contrario a sus políticas.</p>
+      <section class="sec" id="datos">
+        <h2><span class="num">07</span>Los datos son del club</h2>
+        <p>Toda la información que el club registra (jugadores, pagos, documentos, reportes) pertenece al club. ZenSports actúa como encargado del tratamiento: la usa solo para prestar el servicio y no la vende ni la comparte con terceros.</p>
+        <p>El club puede exportar sus listados desde la plataforma o pedirnos una copia completa en Excel en cualquier momento, incluso después de cancelar. Tras una cancelación o una pausa por falta de pago, conservamos los datos al menos 90 días para que el club pueda volver o llevárselos; después de ese plazo, y previo aviso al correo del club, pueden eliminarse.</p>
+        <div class="note">El detalle del manejo de datos personales está en la <a href="/privacidad">política de tratamiento de datos</a> (Ley 1581 de 2012).</div>
+      </section>
 
-    <h2>11. Cambios a estos términos</h2>
-    <p>Si actualizamos estos términos, publicamos la nueva versión en esta página y avisamos al correo del administrador del club con al menos 15 días de anticipación cuando el cambio sea relevante.</p>
+      <section class="sec" id="club">
+        <h2><span class="num">08</span>Responsabilidades del club</h2>
+        <ul>
+          <li>Contar con la autorización de sus jugadores (o de sus acudientes, si son menores de edad) para registrar sus datos, como exige la Ley 1581 de 2012.</li>
+          <li>Mantener la confidencialidad de sus usuarios y contraseñas y dar acceso solo a personas autorizadas.</li>
+          <li>Usar los mensajes y enlaces de WhatsApp conforme a las políticas de WhatsApp, sin envíos masivos no solicitados.</li>
+          <li>Verificar la información financiera antes de tomar decisiones con base en ella.</li>
+        </ul>
+      </section>
 
-    <h2>12. Aceptación y ley aplicable</h2>
-    <p>Al registrarse, usar la plataforma o pagar un plan, el club acepta estos términos. Se rigen por la ley colombiana. Cualquier diferencia se intentará resolver primero de forma directa y amistosa escribiendo a <a href="mailto:hola@zenpra.ai">hola@zenpra.ai</a>.</p>
+      <section class="sec" id="soporte">
+        <h2><span class="num">09</span>Disponibilidad y soporte</h2>
+        <p>Trabajamos para que la plataforma esté disponible todo el tiempo, con copias de seguridad de la información. Pueden ocurrir interrupciones por mantenimiento o por fallas de proveedores externos (alojamiento, WhatsApp, pasarelas de pago); cuando dependa de nosotros, las resolvemos lo antes posible. El soporte se presta por WhatsApp y correo en horario hábil, con prioridad para los planes que la incluyen.</p>
+      </section>
 
-    <nav class="crumbs">
-      <a href="/">Inicio</a>
-      <a href="/nosotros">Nosotros</a>
-      <a href="/contacto">Contacto</a>
-      <a href="/privacidad">Privacidad</a>
-    </nav>
-  </main>
+      <section class="sec" id="responsabilidad">
+        <h2><span class="num">10</span>Límite de responsabilidad</h2>
+        <p>ZenSports responde por la correcta prestación del servicio de software. En ningún caso la responsabilidad total de ZenSports frente al club supera el valor pagado por el club en los últimos tres meses de servicio. ZenSports no responde por decisiones del club, por el uso indebido de la plataforma ni por bloqueos de cuentas de WhatsApp derivados de un uso contrario a sus políticas.</p>
+      </section>
+
+      <section class="sec" id="cambios">
+        <h2><span class="num">11</span>Cambios a estos términos</h2>
+        <p>Si actualizamos estos términos, publicamos la nueva versión en esta página y avisamos al correo del administrador del club con al menos 15 días de anticipación cuando el cambio sea relevante.</p>
+      </section>
+
+      <section class="sec" id="aceptacion">
+        <h2><span class="num">12</span>Aceptación y ley aplicable</h2>
+        <p>Al registrarse, usar la plataforma o pagar un plan, el club acepta estos términos. Se rigen por la ley colombiana. Cualquier diferencia se intentará resolver primero de forma directa y amistosa escribiendo a <a href="mailto:hola@zenpra.ai">hola@zenpra.ai</a>.</p>
+      </section>
+
+      <div class="contact">
+        <h3>¿Tienes preguntas sobre estos términos?</h3>
+        <p>Escríbenos y te respondemos en horario hábil.</p>
+        <div class="row">
+          <a class="btn" href="mailto:hola@zenpra.ai">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+            hola@zenpra.ai
+          </a>
+          <a class="btn-ghost" href="/contacto">Otros canales de contacto</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    <div class="foot">
+      <a class="brand" href="/" aria-label="ZenSports — inicio">
+        <img src="/brand/zensports-z.webp" alt="" width="34" height="34">
+        <span><b>ZEN</b>SPORTS</span>
+      </a>
+      <nav aria-label="Páginas">
+        <a href="/">Inicio</a>
+        <a href="/nosotros">Nosotros</a>
+        <a href="/faq">FAQ</a>
+        <a href="/contacto">Contacto</a>
+        <a href="/privacidad">Privacidad</a>
+        <a href="/terminos" aria-current="page">Términos</a>
+      </nav>
+      <small>© 2026 ZenSports · una plataforma de Zenpra</small>
+    </div>
+  </footer>
+
+  <script>
+    // Índice generado desde los títulos, y resaltado de la sección visible.
+    (function () {
+      var secs = document.querySelectorAll('.sec');
+      var lists = [document.getElementById('toc-list'), document.getElementById('toc-list-m')];
+      var links = [];
+      secs.forEach(function (s) {
+        var n = s.querySelector('.num').textContent;
+        var t = s.querySelector('h2').lastChild.textContent;
+        lists.forEach(function (ol, i) {
+          var li = document.createElement('li');
+          var a = document.createElement('a');
+          a.href = '#' + s.id;
+          a.innerHTML = '<span class="n">' + n + '</span>';
+          a.appendChild(document.createTextNode(t));
+          if (i === 1) a.addEventListener('click', function () { ol.closest('details').open = false; });
+          else links.push(a);
+          li.appendChild(a); ol.appendChild(li);
+        });
+      });
+      if (!('IntersectionObserver' in window)) return;
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          links.forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); });
+        });
+      }, { rootMargin: '-30% 0px -60% 0px' });
+      secs.forEach(function (s) { io.observe(s); });
+    })();
+  </script>
 </body>
 </html>

@@ -59,6 +59,7 @@ const INITIAL = {
   email:         '',
   password:      '',
   confirmacion:  '',
+  recomendado_por: '',
 };
 
 export default function RegistroClub() {
@@ -81,6 +82,8 @@ export default function RegistroClub() {
   const adminFromLanding    = dec('admin');
   const emailFromLanding    = dec('email');
   const ciudadFromLanding   = dec('ciudad');
+  // Plan de referidos: el club que refiere comparte /registro?ref=<su club>
+  const refFromLink         = dec('ref');
   const planFromLanding     = dec('plan');
   const esFree              = planFromLanding === 'free';
   const planPago            = PLANES_PAGOS[planFromLanding]; // undefined si es free/demo/sin plan
@@ -92,6 +95,7 @@ export default function RegistroClub() {
     nombre_admin:  adminFromLanding,
     email:         emailFromLanding,
     ciudad:        ciudadFromLanding,
+    recomendado_por: refFromLink,
   });
   const [color, setColor]       = useState(initialColor);
   const [pais, setPais]         = useState(PAISES[0]);
@@ -144,6 +148,7 @@ export default function RegistroClub() {
           color,
           codigo_pais:   pais.codigo,
           plan:          planFromLanding || undefined,
+          recomendado_por: form.recomendado_por.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -460,6 +465,9 @@ export default function RegistroClub() {
 
                 <Campo label="Email" icon={<Mail size={15} color="rgba(255,255,255,0.3)" />}
                   type="email" value={form.email} onChange={v => set('email', v)} placeholder="correo@tuclub.com" required />
+
+                <Campo label="¿Quién te recomendó? (opcional)" icon={<Gift size={15} color="rgba(255,255,255,0.3)" />}
+                  value={form.recomendado_por} onChange={v => set('recomendado_por', v)} placeholder="Nombre del club que te habló de ZenSports" />
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   {/* Contraseña con ojito */}

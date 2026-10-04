@@ -1643,6 +1643,7 @@ export default function LandingPage() {
                 { label: 'FAQ', href: '/faq' },
                 { label: 'Contacto', href: '/contacto' },
                 { label: 'Privacidad', href: '/privacidad' },
+                { label: 'Términos', href: '/terminos' },
               ].map(({ label, href }) => (
                 <a key={href} href={href} style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, textDecoration: 'none' }}
                   onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}

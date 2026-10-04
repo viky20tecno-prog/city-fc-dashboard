@@ -24,6 +24,7 @@
     { "source": "/nosotros", "destination": "/nosotros.html" },
     { "source": "/contacto", "destination": "/contacto.html" },
     { "source": "/privacidad", "destination": "/privacidad.html" },
+    { "source": "/terminos", "destination": "/terminos.html" },
     { "source": "/faq", "destination": "/faq.html" },
     { "source": "/preguntas-frecuentes", "destination": "/faq.html" },
     { "source": "/guias", "destination": "/guias.html" },
@@ -32,7 +33,8 @@
     { "source": "/about", "destination": "/nosotros.html" },
     { "source": "/contact", "destination": "/contacto.html" },
     { "source": "/privacy", "destination": "/privacidad.html" },
-    { "source": "/privacy-policy", "destination": "/privacidad.html" }
+    { "source": "/privacy-policy", "destination": "/privacidad.html" },
+    { "source": "/terms", "destination": "/terminos.html" }
   ],
   "headers": [
     {

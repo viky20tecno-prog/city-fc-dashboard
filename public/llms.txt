@@ -48,6 +48,7 @@ No es la mejor opción para: ligas profesionales que necesitan scouting, video-a
 - [Nosotros](https://zensports.zenpra.ai/nosotros): qué es ZenSports y quién lo hace.
 - [Contacto](https://zensports.zenpra.ai/contacto): WhatsApp y correo, cobertura y tiempo de respuesta.
 - [Política de tratamiento de datos](https://zensports.zenpra.ai/privacidad): manejo de datos personales (Ley 1581 de 2012, Colombia).
+- [Términos del servicio](https://zensports.zenpra.ai/terminos): planes, pagos, cancelación sin permanencia y propiedad de los datos del club.
 - [Sitemap](https://zensports.zenpra.ai/sitemap.xml)
 
 ## Planes

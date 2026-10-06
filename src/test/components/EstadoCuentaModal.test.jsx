@@ -50,8 +50,10 @@ describe('EstadoCuentaModal', () => {
     expect(screen.getByText('No aplica')).toBeInTheDocument();
     expect(screen.getByText('Próximo')).toBeInTheDocument();
     // Total = mensualidades vencidas (160.000) + torneos (45.000); el mes próximo no suma
-    const total = screen.getByText('Total pendiente por pagar').nextSibling;
-    expect(total.textContent.replace(/\s/g, '')).toBe('$205.000');
+    // El total aparece dos veces (arriba junto al nombre y al pie): ambos deben coincidir.
+    const totales = screen.getAllByText('Total pendiente por pagar');
+    expect(totales).toHaveLength(2);
+    for (const t of totales) expect(t.nextSibling.textContent.replace(/\s/g, '')).toBe('$205.000');
     expect(screen.getByText('WhatsApp')).toBeInTheDocument();
   });
 });

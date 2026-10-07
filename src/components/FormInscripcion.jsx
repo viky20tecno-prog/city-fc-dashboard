@@ -222,7 +222,9 @@ export default function FormInscripcion() {
         const path = `${clubId}/${form.cedula.trim()}_${Date.now()}.${ext}`;
         const { error: upErr } = await supabase.storage
           .from('player-photos')
-          .upload(path, photoFile, { upsert: true, contentType: photoFile.type });
+          // Sin upsert: la ruta es única (lleva la hora) y upsert exige permiso de
+          // lectura en storage, que la clave pública ya no tiene (no puede listar archivos).
+          .upload(path, photoFile, { upsert: false, contentType: photoFile.type });
         if (!upErr) {
           const { data: urlData } = supabase.storage.from('player-photos').getPublicUrl(path);
           foto_url = urlData?.publicUrl || null;

@@ -75,7 +75,8 @@ export default function MensualidadesImportModal({ onClose, onSuccess, color = '
       const data = await file.arrayBuffer();
       const wb   = XLSX.read(data, { type: 'array' });
       const ws   = wb.Sheets[wb.SheetNames[0]];
-      const raw  = XLSX.utils.sheet_to_aoa(ws, { defval: '' });
+      // sheet_to_aoa no existe en SheetJS (el import siempre fallaba); header: 1 da filas como arrays.
+      const raw  = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
       const parsed = parseExcelRows(raw);
       if (!parsed.length) { setErrMsg('No se encontraron filas válidas. Verifica que usaste la plantilla correcta.'); setStep('error'); return; }
       setFilas(parsed);
